@@ -20,27 +20,27 @@ import org.eclipse.swt.widgets.Control;
  * @since 3.0
  */
 public class DefaultTextMeasurement implements ITextMeasurement {
-
-    /** Control */
-    private Control fControl;
-
-    /**
-     * Initialize with the given control.
-     * 
-     * @param control The control
-     */
-    public DefaultTextMeasurement(Control control) {
-        fControl = control;
-    }
-
-    /*
-     * @see org.eclipse.jdt.internal.ui.text.comment.ITextMeasurement#computeWidth(java.lang.String)
-     */
-    public int computeWidth(String string) {
-        GC graphics = new GC(fControl);
-        graphics.setFont(fControl.getFont());
-        int width = graphics.stringExtent(string).x;
-        graphics.dispose();
-        return width;
-    }
+	
+	/** Control */
+	private Control fControl;
+	
+	/**
+	 * Initialize with the given control.
+	 * 
+	 * @param control The control
+	 */
+	public DefaultTextMeasurement(Control control) {
+		fControl= control;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.comment.ITextMeasurement#computeWidth(java.lang.String)
+	 */
+	public int computeWidth(String string) {
+		GC graphics= new GC(fControl);
+		graphics.setFont(fControl.getFont());
+		int width= graphics.stringExtent(string).x;
+		graphics.dispose();
+		return width;
+	}
 }

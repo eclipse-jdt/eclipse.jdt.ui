@@ -11,17 +11,36 @@
 package org.eclipse.jdt.internal.ui.text.comment;
 
 /**
- * TODO add Javadoc
+ * The measurements can be used to compute how many times a first string has to
+ * be concatenated to reach the same width as a second string. This is usually
+ * with respect to a given font.
+ * <p>
+ * E.g., given a <code>firstString</code> and a <code>secondString</code>,
+ * with the following code:
+ * </p>
+ * 
+ * <pre>
+ * int numberOfConcat= computeWidth(secondString) / computeWidth(firstString);
+ * String thirdString= &quot;&quot;;
+ * for (int i= 0; i &lt; numberOfConcat; i++)
+ * 	thirdString += firstString;
+ * </pre>
+ * 
+ * <p>
+ * <code>computeWidth(thirdString) == computeWidth(secondString)</code> will
+ * be <code>true</code> (disregarding rounding errors due to integer
+ * arithmetic).
+ * </p>
  * 
  * @since 3.0
  */
 public interface ITextMeasurement {
 
-    /**
-     * Width of the given string.
-     * 
-     * @param string The considered string
-     * @return The measured width
-     */
-    public int computeWidth(String string);
+	/**
+	 * Width of the given string.
+	 * 
+	 * @param string The considered string
+	 * @return The measured width
+	 */
+	public int computeWidth(String string);
 }
