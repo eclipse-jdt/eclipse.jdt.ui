@@ -38,6 +38,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -70,7 +72,6 @@ import org.eclipse.jdt.internal.ui.util.ViewerPane;
 
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class RefactoringStatusViewer extends SashForm {
 
@@ -127,6 +128,19 @@ class RefactoringStatusViewer extends SashForm {
 			}
 			setEnabled(enabled);
 		}
+	}
+	
+	private class RefactoringStatusSorter extends ViewerSorter {
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			int r1= ((RefactoringStatusEntry)e1).getSeverity();
+			int r2= ((RefactoringStatusEntry)e2).getSeverity();
+			if (r1 < r2)
+				return 1;
+			if (r2 < r1)
+				return -1;
+			return 0;
+		}
+
 	}
 	
 	private RefactoringStatus fStatus;
@@ -310,7 +324,8 @@ class RefactoringStatusViewer extends SashForm {
 				fNextProblem.update();
 				fPreviousProblem.update();
 			}
-		});	
+		});
+		fTableViewer.setSorter(new RefactoringStatusSorter());	
 		Table tableControl= fTableViewer.getTable();
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		tableControl.setLayoutData(gd);
