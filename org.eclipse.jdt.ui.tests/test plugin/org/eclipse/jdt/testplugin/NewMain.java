@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.testplugin;
 
-import org.eclipse.core.launcher.Main;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
