@@ -529,6 +529,7 @@
 	  	labelProvider="org.eclipse.jdt.internal.ui.launcher.LauncherLabelProvider"
 		description="%launcher.description"
 	  	wizard="org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard"
+	  	icon = "icons/full/ctool16/java_app.gif"
  	  	label= "%launcher.label"/>
    <launcher
 		id="org.eclipse.jdt.ui.launcher.JDIAttachLauncher"
@@ -536,6 +537,7 @@
 		label="%remoteLauncher.label"
 		description="%remoteLauncher.description"
 		wizard="org.eclipse.jdt.internal.debug.ui.JDIAttachLauncherWizard"
+		icon = "icons/full/ctool16/java_attach.gif"
    		modes="debug" />
    	<launcher
 		id="org.eclipse.jdt.ui.launcher.ScrapbookLauncher"
