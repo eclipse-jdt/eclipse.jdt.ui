@@ -16,13 +16,12 @@ import junit.framework.TestSuite;
 
 
 /**
- * 
  * @since 3.0
  */
 public class CommentsTestSuite {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("Test Suite org.eclipse.jdt.text.tests.comments"); //$NON-NLS-1$
+		TestSuite suite= new TestSuite("Test Suite org.eclipse.jdt.text.tests.comments"); //$NON-NLS-1$
 		//$JUnit-BEGIN$
 		suite.addTest(MultiLineTestCase.suite());
 		suite.addTest(SingleLineTestCase.suite());

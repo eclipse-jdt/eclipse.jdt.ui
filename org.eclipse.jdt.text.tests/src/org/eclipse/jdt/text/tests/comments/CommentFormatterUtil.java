@@ -35,24 +35,19 @@ public class CommentFormatterUtil {
 	/**
 	 * Formats the source string as a comment region of the specified type.
 	 * <p>
-	 * Both offset and length must denote a valid comment partition, that is to
-	 * say a substring that starts and ends with the corresponding comment
-	 * delimiter tokens.
+	 * Both offset and length must denote a valid comment partition, that is
+	 * to say a substring that starts and ends with the corresponding
+	 * comment delimiter tokens.
 	 * 
-	 * @param type
-	 *                   The type of the comment. Must be one of the constants of
-	 *                   <code>IJavaPartitions</code>
-	 * @param source
-	 *                   The source string to format
-	 * @param offset
-	 *                   The offset relative to the source string where to format
-	 * @param length
-	 *                   The length of the region in the source string to format
-	 * @param preferences
-	 *                   Preferences for the comment formatter
-	 * @param textMeasurement
-	 *                   Optional text measurement for font specific formatting. Can be
-	 *                   <code>null</code>.
+	 * @param type the type of the comment, must be one of the constants of
+	 *                <code>IJavaPartitions</code>
+	 * @param source the source string to format
+	 * @param offset the offset relative to the source string where to
+	 *                format
+	 * @param length the length of the region in the source string to format
+	 * @param preferences preferences for the comment formatter
+	 * @param textMeasurement optional text measurement for font specific
+	 *                formatting, can be <code>null</code>
 	 * @return the formatted source string
 	 */
 	public static String format(String type, String source, int offset, int length, Map preferences, ITextMeasurement textMeasurement) {
