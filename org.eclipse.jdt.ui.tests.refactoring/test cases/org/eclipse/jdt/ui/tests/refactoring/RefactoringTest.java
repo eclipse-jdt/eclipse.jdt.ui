@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -22,6 +23,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
@@ -65,8 +69,22 @@ public abstract class RefactoringTest extends TestCase {
 		Refactoring.getUndoManager().flush();
 	}
 
+	private void performDummySearch() throws Exception{
+		new SearchEngine().searchAllTypeNames(
+		 	ResourcesPlugin.getWorkspace(),
+			null,
+			null,
+			IJavaSearchConstants.EXACT_MATCH,
+			IJavaSearchConstants.CASE_SENSITIVE,
+			IJavaSearchConstants.CLASS,
+			SearchEngine.createJavaSearchScope(new IJavaElement[]{fPackageP}),
+			new Requestor(),
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+			null);
+	}
+	
 	protected void tearDown() throws Exception {
-		//JavaProjectHelper.removeSourceContainer(fJavaProject, CONTAINER);
+		performDummySearch();
 		if (fPackageP.exists()){	
 			IJavaElement[] kids= fPackageP.getChildren();
 			for (int i= 0; i < kids.length; i++){
@@ -249,6 +267,15 @@ public abstract class RefactoringTest extends TestCase {
 	
 	protected void printTestDisabledMessage(String explanation){
 		System.out.println("\n" +getClass().getName() + "::"+ getName() + " disabled (" + explanation + ")");
+	}
+	
+	private static class Requestor implements ITypeNameRequestor{
+		
+		public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+		}
+
+		public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+		}
 	}
 }
 
