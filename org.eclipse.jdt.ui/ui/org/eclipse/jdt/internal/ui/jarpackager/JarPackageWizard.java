@@ -43,9 +43,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
-
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -72,7 +70,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	
 	private static String DIALOG_SETTINGS_KEY= "JarPackageWizard"; //$NON-NLS-1$
 	
-	private IWorkbench fWorkbench;
 	private IStructuredSelection fSelection;
 	private JarPackageData fJarPackage;
 	private JarPackageWizardPage fJarPackageWizardPage;
@@ -110,7 +107,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 * Method declared on IWorkbenchWizard.
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		fWorkbench= workbench;
 		// ignore the selection argument since the main export wizard changed it
 		fSelection= getValidSelection();
 		fJarPackage= new JarPackageData();
@@ -129,7 +125,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	public void init(IWorkbench workbench, JarPackageData jarPackage) {
 		Assert.isNotNull(workbench);
 		Assert.isNotNull(jarPackage);		
-		fWorkbench= workbench;
 		fJarPackage= jarPackage;
 		setInitializeFromJarPackage(true);
 		fSelection= new StructuredSelection(fJarPackage.getElements());
