@@ -1991,6 +1991,20 @@
 		command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Alt+Shift+Z"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Command+Alt+Z"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
@@ -2000,6 +2014,20 @@
 	</command>
 	<keyBinding
 		string="Alt+Shift+Y"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Alt+Shift+Y"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Command+Alt+Y"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
@@ -2017,6 +2045,20 @@
 		command="org.eclipse.jdt.ui.edit.text.java.rename.element"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Alt+Shift+R"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Command+Alt+R"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.rename.element"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.move.element"
@@ -2026,6 +2068,20 @@
 	</command>
 	<keyBinding
 		string="Alt+Shift+V"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.move.element"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Alt+Shift+V"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Command+Alt+V"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.move.element"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
@@ -2134,6 +2190,20 @@
 		command="org.eclipse.jdt.ui.edit.text.java.inline"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
+ 	<keyBinding
+		platform="carbon"
+		string="Alt+Shift+I"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+ 	<keyBinding
+		platform="carbon"
+		string="Command+Alt+I"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.inline"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.extract.method"
@@ -2147,6 +2217,20 @@
 		command="org.eclipse.jdt.ui.edit.text.java.extract.method"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
+ 	<keyBinding
+		platform="carbon"
+		string="Alt+Shift+M"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+ 	<keyBinding
+		platform="carbon"
+		string="Command+Alt+M"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.method"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
 	
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
@@ -2156,6 +2240,20 @@
 	</command>
  	<keyBinding
 		string="Alt+Shift+L"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+ 	<keyBinding
+		platform="carbon"
+		string="Alt+Shift+L"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+ 	<keyBinding
+		platform="carbon"
+		string="Command+Alt+L"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
@@ -2302,6 +2400,20 @@
 		command="org.eclipse.jdt.ui.edit.text.java.show.outline"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Ctrl+O"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Command+O"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command="org.eclipse.jdt.ui.edit.text.java.show.outline"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
 
 	<command
 		category="org.eclipse.ui.category.navigate"
@@ -2311,6 +2423,20 @@
 	</command>
 	<keyBinding
 		string="Ctrl+T"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command="org.eclipse.jdt.ui.edit.text.java.open.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Ctrl+T"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Command+T"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.open.hierarchy"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
