@@ -579,11 +579,6 @@
 			label="%Refactoring.moveAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate">
 		</action>
-		<action id="RenameParametersAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
-			label="%Refactoring.renameParametersAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameParametersActionDelegate">
-		</action>
 		<action id="ReorderParametersAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.reorderParametersAction.label"

@@ -17,18 +17,15 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameParametersRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ReorderParametersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ReorderRenameParameterWrapperRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RenameParametersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ReorderParametersWizard;
 
 /**
@@ -57,7 +54,6 @@ public class RefactoringGroup extends ContextMenuGroup {
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(p);	
 		
 		fRefactoringActions= new RefactoringAction[]{
-			createRenameParametersAction(provider),
 			createReorderParametersAction(provider),
 			createPullUpAction(provider),
 			new SelfEncapsulateFieldAction(provider)
@@ -68,50 +64,32 @@ public class RefactoringGroup extends ContextMenuGroup {
 		
 	// -------------------- method refactorings ----------------------
 	
-	static OpenRefactoringWizardAction createRenameParametersAction(StructuredSelectionProvider selectionProvider) {
-		String label= RefactoringMessages.getString("RefactoringGroup.rename_parameters"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, selectionProvider, IMethod.class) {
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new RenameParametersRefactoring((IMethod)obj);
-			}
-			boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
-				return ((RenameParametersRefactoring)refactoring).checkPreactivation().isOK();
-			}
-			protected RefactoringWizard createWizard(Refactoring ref){
-				String title= "Rename Method Parameters";
-				String msg= "Enter the new names for the parameters. You can rename one or more parameters. All references to the renamed parameters will be updated.";
-				String helpId= IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE;
-				return new RenameParametersWizard((RenameParametersRefactoring)ref, helpId, title, msg);
-			}
-		};
-	}
-	
 	static OpenRefactoringWizardAction createReorderParametersAction(StructuredSelectionProvider selectionProvider) {
-		String label= "Reorder Parameters...";
+		String label= "M&odify Parameters...";
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMethod.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new ReorderParametersRefactoring((IMethod)obj);
+				return new ReorderRenameParameterWrapperRefactoring((IMethod)obj);
 			}
 			boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
-				return ((ReorderParametersRefactoring)refactoring).checkPreactivation().isOK();
+				return ((ReorderRenameParameterWrapperRefactoring)refactoring).checkPreactivation().isOK();
 			}
 			protected RefactoringWizard createWizard(Refactoring ref){
-				String title= "Reorder Method Parameters";
+				String title= "Modify Method Parameters";
 				//FIX ME: wrong
 				String helpId= IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE;
-				return new ReorderParametersWizard((ReorderParametersRefactoring)ref, title, helpId);
+				return new ReorderParametersWizard((ReorderRenameParameterWrapperRefactoring)ref, title, helpId);
 			}
 		};
 	}
 	
 	static OpenRefactoringWizardAction createPullUpAction(StructuredSelectionProvider selectionProvider) {
-		String label= "Pull Up ...";
+		String label= "Pull Up...";
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMember.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				Set memberSet= new HashSet();
 				memberSet.addAll(Arrays.asList((Object[])obj));
-				IMember[] methods= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-				return new PullUpRefactoring(methods, JavaPreferencesSettings.getCodeGenerationSettings());
+				IMember[] members= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+				return new PullUpRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings());
 			}
 			boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
 				return ((PullUpRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
@@ -126,5 +104,5 @@ public class RefactoringGroup extends ContextMenuGroup {
 				return new PullUpWizard((PullUpRefactoring)ref, title, helpId);
 			}
 		};
-	}	
+	}
 }
