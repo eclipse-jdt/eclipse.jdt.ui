@@ -51,10 +51,7 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 		setNeedsProgressMonitor(true);
 	}
 	
-	/*
-	 * @see BasicNewResourceWizard#initializeDefaultPageImageDescriptor
-	 */
-	protected void initializeDefaultPageImageDescriptor() {
+	private void initializeDefaultPageImageDescriptor() {
 		if (fConfigElement != null) {
 			String banner= fConfigElement.getAttribute("banner"); //$NON-NLS-1$
 			if (banner != null) {
@@ -150,6 +147,8 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 	 */
 	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
 		fConfigElement= cfig;
+		
+		initializeDefaultPageImageDescriptor();
 	}
 	
 	// overwrite dialog
