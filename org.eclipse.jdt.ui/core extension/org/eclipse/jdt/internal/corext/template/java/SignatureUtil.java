@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.internal.core.util.Util;
 
@@ -23,6 +24,8 @@ import org.eclipse.jdt.internal.core.util.Util;
  * @since 3.1
  */
 public final class SignatureUtil {
+	
+	private static final String NULL_TYPE_SIGNATURE= "TNULL;"; //$NON-NLS-1$
 	private static final String OBJECT_SIGNATURE= "Ljava.lang.Object;"; //$NON-NLS-1$
 
 	private SignatureUtil() {
@@ -126,7 +129,7 @@ public final class SignatureUtil {
 	}
 	
 	/**
-	 * Takes a method signature <code>(paramTypeSig1;paramTypeSig2)</code> and
+	 * Takes a method signature <code>[&lt; typeVariableName : formalTypeDecl &gt;] ( paramTypeSig1* ) retTypeSig</code> and
 	 * returns it with any type signature that is a bounded type converted using
 	 * <code>getUpperBound</code>.
 	 * <p>
@@ -141,11 +144,16 @@ public final class SignatureUtil {
 		if (signature == null || signature.length < 2)
 			return signature;
 		
-		// XXX the signature somehow contains double '+'
+		// XXX the signatures from CompletionRequestor contain a superfluous '+'
+		// before type parameters to parameter types
 		StringBuffer sig= new StringBuffer();
 		sig.append(signature);
 		do {
 			int pos= sig.indexOf("++"); //$NON-NLS-1$
+			if (pos == -1)
+				pos= sig.indexOf("+*"); //$NON-NLS-1$
+			if (pos == -1)
+				pos= sig.indexOf("+-"); //$NON-NLS-1$
 			if (pos == -1)
 				break;
 			sig.deleteCharAt(pos);
@@ -155,10 +163,14 @@ public final class SignatureUtil {
 		int pos= 0;
 		// skip type declaration
 		if (signature[pos] == Signature.C_GENERIC_START) {
-			pos= Util.scanIdentifier(signature, pos + 1);
-			if (signature[pos + 1] != Signature.C_COLON)
-				throw new IllegalArgumentException(String.valueOf(signature));
-			pos= Util.scanTypeArgumentSignature(signature, pos + 2) + 1;
+			int colonPos;
+			do {
+				colonPos= CharOperation.indexOf(Signature.C_COLON, signature, pos + 1);
+				if (colonPos == -1)
+					break;
+				pos= Util.scanTypeArgumentSignature(signature, colonPos + 1);
+			} while (true);
+			pos++;
 			if (signature[pos] != Signature.C_GENERIC_END)
 				throw new IllegalArgumentException(String.valueOf(signature));
 			pos++;
@@ -175,7 +187,10 @@ public final class SignatureUtil {
 			switch (ch) {
 				case Signature.C_STAR:
 					pos++;
-					res.append(OBJECT_SIGNATURE);
+					if (isReturnType)
+						res.append(OBJECT_SIGNATURE); // return type is at least Object
+					else
+						res.append(NULL_TYPE_SIGNATURE); // no lower bound! return void type for now //$NON-NLS-1$
 					break;
 				case Signature.C_SUPER:
 					int end= Util.scanTypeSignature(signature, pos + 1);
@@ -190,8 +205,7 @@ public final class SignatureUtil {
 					if (isReturnType)
 						res.append(signature, pos + 1, end - pos);
 					else
-//						res.append(OBJECT_SIGNATURE); // XXX wrong - should be the null type!
-						res.append("V"); // no lower bound! return void type for now //$NON-NLS-1$
+						res.append(NULL_TYPE_SIGNATURE);
 					pos= end + 1;
 					break;
 				case Signature.C_PARAM_END:
