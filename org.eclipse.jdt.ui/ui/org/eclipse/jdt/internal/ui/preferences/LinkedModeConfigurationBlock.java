@@ -486,6 +486,10 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 	public void performDefaults() {
 		getPreferenceStore().loadDefaults();
 		
+		/*
+		 * Only call super after updating fShowInTextCheckBox, so that
+		 * the master-slave dependencies get properly updated.
+		 */
 		handleAnnotationListSelection();
 		super.performDefaults();
 	}
