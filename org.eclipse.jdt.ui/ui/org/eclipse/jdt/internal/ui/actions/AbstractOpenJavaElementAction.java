@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  * Opens a Java element in the specified editor. Subclasses must overwrite
  * <code>IAction.run</code> and knit the methods together.
  * 
- * @depreacted Use org.eclipse.jdt.ui.actions.OpenAction or SelectionDispatchAction instead
+ * @deprecated Use org.eclipse.jdt.ui.actions.OpenAction or SelectionDispatchAction instead
  */
 public abstract class AbstractOpenJavaElementAction extends Action {
 	
