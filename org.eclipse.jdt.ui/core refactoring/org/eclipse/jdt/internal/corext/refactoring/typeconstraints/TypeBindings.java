@@ -47,7 +47,7 @@ public final class TypeBindings {
 			return true;
 		else if (b1.isPrimitive() || b2.isPrimitive()) //cannot compare these
 			return false;
-		else if (isThisType(b2, "java.lang.Object"))
+		else if (isThisType(b2, "java.lang.Object")) //$NON-NLS-1$
 			return true;
 		else if (Modifier.isFinal(b2.getModifiers()))
 			return false;
@@ -55,8 +55,8 @@ public final class TypeBindings {
 			if (b2.isArray())
 				return isSubtypeOf(b1.getElementType(), b2.getElementType());
 			else{
-				return 	   isThisType(b2, "java.lang.Cloneable")
-						|| isThisType(b2, "java.io.Serializable");
+				return 	   isThisType(b2, "java.lang.Cloneable") //$NON-NLS-1$
+						|| isThisType(b2, "java.io.Serializable"); //$NON-NLS-1$
 			}
 		} else if (b2.isArray())                       
 			return false;
@@ -89,7 +89,7 @@ public final class TypeBindings {
 	
 	public static String toString(ITypeBinding binding){
 		if (isNullBinding(binding))
-			return "<NULL BINDING>";
+			return "<NULL BINDING>"; //$NON-NLS-1$
 		return Bindings.asString(binding);
 	}
 

@@ -361,7 +361,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			if (change.getNewTextRange(edit).equals(newRange))
 				return edit.getTextRange();
 		}
-		Assert.isTrue(false, "original text range not found");
+		Assert.isTrue(false, "original text range not found"); //$NON-NLS-1$
 		return newRange;
 	}
 

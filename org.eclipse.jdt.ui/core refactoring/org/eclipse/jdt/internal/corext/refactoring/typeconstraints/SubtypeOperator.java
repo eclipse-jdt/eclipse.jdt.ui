@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 public final class SubtypeOperator extends ConstraintOperator{
 	
-	public static final String OPERATOR_STRING= "<=";
+	public static final String OPERATOR_STRING= "<="; //$NON-NLS-1$
 
 	private static final SubtypeOperator fgInstance= new SubtypeOperator(); 
 	

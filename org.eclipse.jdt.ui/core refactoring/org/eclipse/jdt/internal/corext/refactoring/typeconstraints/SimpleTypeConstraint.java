@@ -60,14 +60,14 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 	 * @see java.lang.Object#toString()
 	 */
 	public  String toString(){
-		return getLeft().toString() + " " + fOperator.toString() + " " + getRight().toString();
+		return getLeft().toString() + " " + fOperator.toString() + " " + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.experiments.TypeConstraint#toResolvedString()
 	 */
 	public  String toResolvedString() {
-		return getLeft().toResolvedString() + " " + fOperator.toString() + " " + getRight().toResolvedString();
+		return getLeft().toResolvedString() + " " + fOperator.toString() + " " + getRight().toResolvedString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/* (non-Javadoc)
