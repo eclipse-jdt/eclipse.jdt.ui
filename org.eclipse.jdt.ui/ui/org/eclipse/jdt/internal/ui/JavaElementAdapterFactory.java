@@ -9,8 +9,11 @@ package org.eclipse.jdt.internal.ui;
 import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdapterFactory;
 
+import org.eclipse.ui.IContributorResourceAdapter;
 import org.eclipse.ui.IPersistableElement;import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.views.properties.IPropertySource;
+
+import org.eclipse.ui.views.tasklist.ITaskListResourceAdapter;
 
 import org.eclipse.search.ui.ISearchPageScoreComputer;
 
@@ -32,12 +35,16 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 		IWorkbenchAdapter.class,
 		IResourceLocator.class,
 		IPersistableElement.class,
-		IProject.class
+		IProject.class,
+		IContributorResourceAdapter.class,
+		ITaskListResourceAdapter.class
 	};
 	
 	private ISearchPageScoreComputer fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
 	private static IResourceLocator fgResourceLocator= new ResourceLocator();
 	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter= new JavaWorkbenchAdapter();
+	private static IContributorResourceAdapter fgContributorResourceAdapter= new JavaContributorResourceAdapter();
+	private static ITaskListResourceAdapter fgTaskListAdapter= new JavaTaskListAdapter();
 	
 	public Class[] getAdapterList() {
 		return PROPERTIES;
@@ -49,41 +56,34 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 		
 		if (IPropertySource.class.equals(key)) {
 			return getProperties(java);
-		} else if (IResource.class.equals(key)) {
+		} if (IResource.class.equals(key)) {
 			return getResource(java);
-		} else if (IProject.class.equals(key)) {
+		} if (IProject.class.equals(key)) {
 			return getProject(java);
-		} else if (ISearchPageScoreComputer.class.equals(key)) {
+		} if (ISearchPageScoreComputer.class.equals(key)) {
 			return fSearchPageScoreComputer;
-		} else if (IWorkbenchAdapter.class.equals(key)) {
+		} if (IWorkbenchAdapter.class.equals(key)) {
 			return fgJavaWorkbenchAdapter;
-		} else if (IResourceLocator.class.equals(key)) {
+		} if (IResourceLocator.class.equals(key)) {
 			return fgResourceLocator;
-		} else if (IPersistableElement.class.equals(key)) 
+		} if (IPersistableElement.class.equals(key)) {
 			return new PersistableJavaElementFactory(java);
+		} if (IContributorResourceAdapter.class.equals(key)) {
+			return fgContributorResourceAdapter;
+		} if (ITaskListResourceAdapter.class.equals(key)) {
+			return fgTaskListAdapter;
+		}
 		return null; 
 	}
 	
 	private IResource getResource(IJavaElement element) {
 		try {
-			IResource r= element.getCorrespondingResource();
-			if (r != null)
-				return r;
-			//1GE8SR2: ITPUI:WIN98 - Task List does not show problems for selection in Hierarchy View
-			// check whether the resource is inside a CU. If yes
-			// return the CU as the resource
-			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findParentOfKind(element, IJavaElement.COMPILATION_UNIT);
-			if (cu != null) {
-				if (cu.isWorkingCopy())
-					return cu.getOriginalElement().getUnderlyingResource();
-				return cu.getUnderlyingResource();
-			}
-			return null;
+			return element.getCorrespondingResource();
 		} catch (JavaModelException e) {
 			return null;	
 		}
 	}
-		
+	
 	private IResource getProject(IJavaElement element) {
 		return element.getJavaProject().getProject();
 	}
