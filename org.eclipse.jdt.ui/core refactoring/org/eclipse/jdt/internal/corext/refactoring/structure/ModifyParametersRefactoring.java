@@ -37,13 +37,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -51,9 +49,6 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -85,14 +80,25 @@ public class ModifyParametersRefactoring extends Refactoring {
 	private TextChangeManager fChangeManager;
 	private IMethod fMethod;
 	private IMethod[] fRippleMethods;
-	private SearchResultGroup[] fOccurrences;
-	private static final String CONST_CLASS_DECL = "class A{";
-	private static final String CONST_ASSIGN = " i=";
-	private static final String CONST_CLOSE = ";}";
+	private ASTNodeMappingManager fAstManager;
+	private static final String CONST_CLASS_DECL = "class A{";//$NON-NLS-1$
+	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
+	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
+	private static final Collection KEYWORD_TYPE_NAMES= Arrays.asList(new String[]{
+                                                           	"boolean",  //$NON-NLS-1$
+                                                           	"byte",		//$NON-NLS-1$
+															"char", 	//$NON-NLS-1$
+															"double", 	//$NON-NLS-1$
+															"float",	//$NON-NLS-1$
+															"int", 		//$NON-NLS-1$
+															"long", 	//$NON-NLS-1$
+															"short"});	//$NON-NLS-1$
+	private ASTNode[] fOccurrenceNodes;
 
 	public ModifyParametersRefactoring(IMethod method){
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
+		fAstManager= new ASTNodeMappingManager();
 	}
 
 	private static List createParameterInfoList(IMethod method) {
@@ -176,20 +182,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 			return false;
 		if (! Checks.checkTypeName(string).hasFatalError())
 			return true;
-		StringBuffer cuBuff= new StringBuffer();
-		cuBuff.append(CONST_CLASS_DECL);
-		int offset= cuBuff.length();
-		cuBuff.append(string)
-			  .append(CONST_ASSIGN)
-			  .append("null")
-			  .append(CONST_CLOSE);
-		CompilationUnit cu= AST.parseCompilationUnit(cuBuff.toString().toCharArray());
-		Selection selection= Selection.createFromStartLength(offset, string.length());
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
-		cu.accept(analyzer);
-		ASTNode selected= analyzer.getFirstSelectedNode();
-		return (selected instanceof Type) && 
-				string.equals(cuBuff.substring(selected.getStartPosition(), ASTNodes.getExclusiveEnd(selected)));
+		return KEYWORD_TYPE_NAMES.contains(string);	
 	}
 	
 	private static boolean isValidExpression(String string){
@@ -430,12 +423,10 @@ public class ModifyParametersRefactoring extends Refactoring {
 
 			RefactoringStatus result= new RefactoringStatus();
 			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
-			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 1));			
-			fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
+			fOccurrenceNodes= getOccurrenceNodes(new SubProgressMonitor(pm, 1));
 			if (result.hasFatalError())
 				return result;
 				
-			result.merge(Checks.checkCompileErrorsInAffectedFiles(fOccurrences));
 			result.merge(checkNativeMethods());
 			result.merge(checkParameterNamesInRippleMethods());
 			return result;
@@ -507,7 +498,6 @@ public class ModifyParametersRefactoring extends Refactoring {
 
 		//the sequence here is critical 
 		addReorderings(new SubProgressMonitor(pm, 1), manager);
-
 		addNewParameters(new SubProgressMonitor(pm, 1), manager);
 
 		if (! areNamesSameAsInitial())
@@ -579,14 +569,10 @@ public class ModifyParametersRefactoring extends Refactoring {
 		return SearchEngine.createWorkspaceScope();
 	}
 	
-	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{
-		return RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());	
+	private ASTNode[] getOccurrenceNodes(IProgressMonitor pm) throws JavaModelException{
+		return ASTNodeSearchUtil.findOccurrenceNodes(fRippleMethods, fAstManager, pm, createRefactoringScope());
 	}
 	
-	private ISearchPattern createSearchPattern() throws JavaModelException{
-		return RefactoringSearchEngine.createSearchPattern(fRippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
-	}
-
 	private void addRenamings(IProgressMonitor pm, TextChangeManager manager) throws JavaModelException {
 		try{
 			TextChange change= manager.get(WorkingCopyUtil.getWorkingCopyIfExists(getCu()));
@@ -603,20 +589,17 @@ public class ModifyParametersRefactoring extends Refactoring {
 	}
 		
 	private void addReorderings(IProgressMonitor pm, TextChangeManager manager) throws JavaModelException {
-		if (fOccurrences == null)
+		if (fOccurrenceNodes == null)
 			return;
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("ReorderParametersRefactoring.preview"), fOccurrences.length); //$NON-NLS-1$
-			for (int i= 0; i < fOccurrences.length ; i++){
-				SearchResultGroup group= fOccurrences[i]; 
-				List regionArrays= getParameterOccurrenceSourceRangeArrays(group);
-				for (Iterator iter= regionArrays.iterator(); iter.hasNext();) {
-					ISourceRange[] sourceRanges= (ISourceRange[]) iter.next();
-					ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(group.getCompilationUnit());
-					if (cu == null)
-						continue;
-					addMoveEdits(manager.get(cu), sourceRanges);
-				}
+			pm.beginTask(RefactoringCoreMessages.getString("ReorderParametersRefactoring.preview"), fOccurrenceNodes.length); //$NON-NLS-1$
+			for (int i= 0; i < fOccurrenceNodes.length ; i++){
+				ASTNode node= fOccurrenceNodes[i];
+				ISourceRange[] sourceRanges= getParameterOccurrenceSourceRanges(node);
+				ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fAstManager.getCompilationUnit(node));
+				if (cu == null)
+					continue;
+				addMoveEdits(manager.get(cu), sourceRanges);
 				pm.worked(1);
 			}
 		} catch (CoreException e){
@@ -627,30 +610,31 @@ public class ModifyParametersRefactoring extends Refactoring {
 	}
 	
 	private void addNewParameters(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
-		ASTNodeMappingManager astmappingManager= new ASTNodeMappingManager();
 		int i= 0;
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			if (! info.isAdded())
 				continue;
-			for (int j= 0; j < fOccurrences.length; j++) {
-				SearchResultGroup group= fOccurrences[j];
-				ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(group.getCompilationUnit());
+			for (int j= 0; j < fOccurrenceNodes.length; j++) {
+				ASTNode node= fOccurrenceNodes[j];
+				ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fAstManager.getCompilationUnit(node));
 				if (cu == null)
 					continue;
 				
 				if (fMethod.getNumberOfParameters() == 0){
-					addParameterToEmptyLists(group, i == 0, info, manager.get(cu), astmappingManager);
+					addParameterToEmptyLists(node, i == 0, info, manager.get(cu), fAstManager);
 				} else {
-					List declarationRegionArrays= getParameterDeclarationSourceRangeArrays(group);
-					String declarationText= createDeclarationString(info);
-					addParameter(declarationRegionArrays, i, manager.get(cu), declarationText);
-	
-					List referenceRegionArrays= getParameterReferenceSourceRangeArrays(group);
-					String referenceText= info.getDefaultValue();
-					addParameter(referenceRegionArrays, i, manager.get(cu), referenceText);
+					if (isReferenceNode(node)){
+						ISourceRange[] referenceRegionArrays= getParameterReferenceSourceRanges(node);
+						String referenceText= info.getDefaultValue();
+						addParameter(referenceRegionArrays, i, manager.get(cu), referenceText);
+					} else {
+						ISourceRange[] declarationRegionArrays= getParameterDeclarationSourceRanges(node);
+						String declarationText= createDeclarationString(info);
+						addParameter(declarationRegionArrays, i, manager.get(cu), declarationText);
+					}	
 				}	
-			}	
+			}
 		}
 	}
 
@@ -662,29 +646,22 @@ public class ModifyParametersRefactoring extends Refactoring {
 		return info.getDefaultValue();
 	}
 
-	private void addParameterToEmptyLists(SearchResultGroup group, boolean isFirst, ParameterInfo info, TextChange change, ASTNodeMappingManager astmappingManager) throws JavaModelException {
-		CompilationUnit cuNode= astmappingManager.getAST(group.getCompilationUnit());
-		SearchResult[] results= group.getSearchResults();
-		for (int i= 0; i < results.length; i++) {
-			SearchResult result= results[i];
-			Selection selection= Selection.createFromStartEnd(result.getStart(), result.getEnd()); 
-			SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, true);
-			cuNode.accept(analyzer);
-			ASTNode node= analyzer.getFirstSelectedNode();
-			String text;
-			if (isReferenceNode(node))
-				text= createReferenceString(info);
-			else 
-				text= createDeclarationString(info);
-			if (! isFirst)
-				text= ", " + text;
-			int offset= skipFirstOpeningBracket(group.getCompilationUnit(), node);
-			change.addTextEdit("add param", SimpleTextEdit.createInsert(offset, text));
-		}
+	private void addParameterToEmptyLists(ASTNode node, boolean isFirst, ParameterInfo info, TextChange change, ASTNodeMappingManager astmappingManager) throws JavaModelException {
+		String text;
+		if (isReferenceNode(node))
+			text= createReferenceString(info);
+		else 
+			text= createDeclarationString(info);
+		if (! isFirst)
+			text= ", " + text;
+		int offset= skipFirstOpeningBracket(fAstManager.getCompilationUnit(node), node);
+		change.addTextEdit("add param", SimpleTextEdit.createInsert(offset, text));
 	}
-	
+
 	private static boolean isReferenceNode(ASTNode node){
 		if (node instanceof SimpleName && node.getParent() instanceof MethodInvocation)
+			return true;
+		if (node instanceof SimpleName && node.getParent() instanceof SuperMethodInvocation)
 			return true;
 		if (node instanceof ExpressionStatement)	
 			return true;
@@ -719,38 +696,91 @@ public class ModifyParametersRefactoring extends Refactoring {
 	}
 
 
-	private void addParameter(List parameterOccurrenceList, int paramIndex, TextChange change, String infoText){
-		for (Iterator regionIter= parameterOccurrenceList.iterator(); regionIter.hasNext();) {
-			ISourceRange[] sourceRanges= (ISourceRange[]) regionIter.next();
-			int offset= paramIndex == 0 ? sourceRanges[0].getOffset(): sourceRanges[paramIndex-1].getOffset() + sourceRanges[paramIndex-1].getLength() ;
-			String text= infoText;
-			if (paramIndex == 0)
-				text= text + ", ";
-			else
-				text= ", " + text;
-			change.addTextEdit("add param", SimpleTextEdit.createInsert(offset, text));
-		}
+	private void addParameter(ISourceRange[] sourceRanges, int paramIndex, TextChange change, String infoText){
+		int offset= paramIndex == 0 ? sourceRanges[0].getOffset(): sourceRanges[paramIndex-1].getOffset() + sourceRanges[paramIndex-1].getLength() ;
+		String text= infoText;
+		if (paramIndex == 0)
+			text= text + ", ";
+		else
+			text= ", " + text;
+		change.addTextEdit("add param", SimpleTextEdit.createInsert(offset, text));
 	}
 
-	/**
-	 * returns a List of ISourceRange[]
-	 */
-	private List getParameterReferenceSourceRangeArrays(SearchResultGroup group) throws JavaModelException{
-		return ReorderParameterMoveFinder.findParameterReferenceSourceRanges(group);
+	private static ISourceRange[] getParameterReferenceSourceRanges(ASTNode node) throws JavaModelException{
+		ASTNode parent= node.getParent();
+		
+		if (node instanceof MethodInvocation)	
+			return createRegionsArray((MethodInvocation)node);
+
+		else if (node instanceof SimpleName && parent instanceof MethodInvocation && ((MethodInvocation)parent).getName() == node)
+			return createRegionsArray((MethodInvocation)parent);
+			
+		else if (node instanceof SimpleName && parent instanceof SuperMethodInvocation && ((SuperMethodInvocation)parent).getName() == node)
+			return createRegionsArray((SuperMethodInvocation)parent);
+			
+		else if (node instanceof ConstructorInvocation)	
+			return createRegionsArray((ConstructorInvocation)node);
+			
+		else if (node instanceof SuperConstructorInvocation)	
+			return createRegionsArray((SuperConstructorInvocation)node);
+			
+		else if (node instanceof ClassInstanceCreation)	
+			return createRegionsArray((ClassInstanceCreation)node);
+		
+		return null;
+	}
+	private static ISourceRange[] getParameterDeclarationSourceRanges(ASTNode node) throws JavaModelException{
+		ASTNode parent= node.getParent();
+		
+		if (node instanceof SimpleName && parent instanceof MethodDeclaration && ((MethodDeclaration)parent).getName() == node)
+			return createRegionsArray((MethodDeclaration)parent);
+		return null;
 	}
 
-	/**
-	 * returns a List of ISourceRange[]
-	 */
-	private List getParameterDeclarationSourceRangeArrays(SearchResultGroup group) throws JavaModelException{
-		return ReorderParameterMoveFinder.findParameterDeclarationSourceRanges(group);
+	private static ISourceRange[] getParameterOccurrenceSourceRanges(ASTNode node) throws JavaModelException{
+		ISourceRange[] result;
+		if (isReferenceNode(node))
+			result= getParameterReferenceSourceRanges(node);
+		else
+			result= getParameterDeclarationSourceRanges(node);	
+		Assert.isNotNull(result);
+		return result;
 	}
 
-	/**
-	 * returns a List of ISourceRange[]
-	 */
-	private List getParameterOccurrenceSourceRangeArrays(SearchResultGroup group) throws JavaModelException{
-		return ReorderParameterMoveFinder.findParameterSourceRanges(group);
+	private static ISourceRange[] createRegionsArray(MethodDeclaration methodDeclaration){
+		return createNodeRegionArray(methodDeclaration.parameters());
+	}
+
+	private static ISourceRange[] createRegionsArray(MethodInvocation methodInvocation){
+		return createNodeRegionArray(methodInvocation.arguments());
+	}
+	
+	private static ISourceRange[] createRegionsArray(SuperMethodInvocation superMethodInvocation){
+		return createNodeRegionArray(superMethodInvocation.arguments());
+	}
+
+	private static ISourceRange[] createRegionsArray(ConstructorInvocation node) {
+		return createNodeRegionArray(node.arguments());
+	}
+	
+	private static ISourceRange[] createRegionsArray(SuperConstructorInvocation node) {
+		return createNodeRegionArray(node.arguments());
+	}
+
+	private static ISourceRange[] createRegionsArray(ClassInstanceCreation node) {
+		return createNodeRegionArray(node.arguments());
+	}
+
+	private static ISourceRange[] createNodeRegionArray(List args) {
+		return createRegionsArray((ASTNode[]) args.toArray(new ASTNode[args.size()]));
+	}
+					
+	private static ISourceRange[] createRegionsArray(ASTNode[] nodes){
+		ISourceRange[] result= new ISourceRange[nodes.length];
+		for (int i= 0; i < result.length; i++){
+			result[i]= new SourceRange(nodes[i]);
+		}	
+		return result;
 	}
 
 	private void addMoveEdits(TextChange change, ISourceRange[] ranges) {
