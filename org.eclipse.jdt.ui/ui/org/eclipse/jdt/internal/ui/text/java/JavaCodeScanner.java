@@ -295,6 +295,13 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		token= getToken(IJavaColorConstants.JAVA_OPERATOR);
 		rules.add(new OperatorRule(token));
 		
+		
+		// Add word rule for keyword 'return'.
+		WordRule returnWordRule= new WordRule(new JavaWordDetector(), Token.UNDEFINED);
+		token= getToken(IJavaColorConstants.JAVA_KEYWORD_RETURN);
+		returnWordRule.addWord("return", token);  //$NON-NLS-1$
+		rules.add(returnWordRule);
+
 		// Add word rule for method names.
 		token= getToken(IJavaColorConstants.JAVA_METHOD_NAME);
 		rules.add(new MethodNameRule(new JavaWordDetector(), token));
@@ -302,11 +309,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add word rule for keywords, types, and constants.
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
 		WordRule wordRule= new WordRule(new JavaWordDetector(), token);
-		
-		// Add word rule for keyword 'return'.
-		token= getToken(IJavaColorConstants.JAVA_KEYWORD_RETURN);
-		wordRule.addWord("return", token);  //$NON-NLS-1$
-		
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i=0; i<fgKeywords.length; i++)
 			wordRule.addWord(fgKeywords[i], token);
