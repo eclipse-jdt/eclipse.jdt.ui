@@ -57,7 +57,13 @@ public abstract class OpenRefactoringWizardAction extends SelectionDispatchActio
 
 	protected void selectionChanged(ITextSelection selection) {
 		//resolving is too expensive to do on selection changes in the editor - just enable here, we'll check it later
-		setEnabled(fEditor != null);
+		setEnabled(checkEnabled(selection));
+	}
+	
+	private boolean checkEnabled(ITextSelection selection) {
+		if (fEditor == null)
+			return false;
+		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 
 	/*

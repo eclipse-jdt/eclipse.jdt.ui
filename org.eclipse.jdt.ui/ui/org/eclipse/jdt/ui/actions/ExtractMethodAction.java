@@ -50,7 +50,12 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 	}
 
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(selection.getLength() > 0);
+		setEnabled(checkEnabled(selection));
 	}
 	
+	private boolean checkEnabled(ITextSelection selection) {
+		if (selection.getLength() == 0 || fEditor == null)
+			return false;
+		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
 }
