@@ -287,23 +287,15 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		
 		
 		// Add word rule for new keywords, 4077
-		Object version= null;
-		try {
-			version= JavaCore.getOptions().get(SOURCE_VERSION);
-		} catch (NullPointerException x) {
-			// plugin not initialized - happens in test code
-		}
+		String version= getPreferenceStore().getString(SOURCE_VERSION);
+		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
+		fVersionedWordRule= new VersionedWordRule(new JavaWordDetector(), token, "1.4", true, version); //$NON-NLS-1$
 		
-		if (version instanceof String) {
-			token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-			fVersionedWordRule= new VersionedWordRule(new JavaWordDetector(), token, "1.4", true, (String) version); //$NON-NLS-1$
-			
-			token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-			for (int i=0; i<fgNewKeywords.length; i++)
-				fVersionedWordRule.addWord(fgNewKeywords[i], token);
+		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
+		for (int i=0; i<fgNewKeywords.length; i++)
+			fVersionedWordRule.addWord(fgNewKeywords[i], token);
 
-			rules.add(fVersionedWordRule);
-		}
+		rules.add(fVersionedWordRule);
 
 		// Add rule for operators and brackets
 		token= getToken(IJavaColorConstants.JAVA_OPERATOR);
