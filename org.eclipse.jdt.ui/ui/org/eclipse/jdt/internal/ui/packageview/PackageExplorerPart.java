@@ -947,17 +947,19 @@ public class PackageExplorerPart extends ViewPart
 				
 		if (element != null) {
 			ISelection newSelection= new StructuredSelection(element);
-			if (!fViewer.getSelection().equals(newSelection)) {
+			if (fViewer.getSelection().equals(newSelection)) {
+				fViewer.reveal(element);
+			} else {
 				try {
 					fViewer.removeSelectionChangedListener(fSelectionListener);						
-					fViewer.setSelection(newSelection);
+					fViewer.setSelection(newSelection, true);
 	
 					while (element != null && fViewer.getSelection().isEmpty()) {
 						// Try to select parent in case element is filtered
 						element= getParent(element);
 						if (element != null) {
 							newSelection= new StructuredSelection(element);
-							fViewer.setSelection(newSelection);
+							fViewer.setSelection(newSelection, true);
 						}
 					}
 				} finally {
