@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.text.reconcilerpipe;
+package org.eclipse.jface.text.source;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +25,6 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.jdt.internal.ui.examples.jspeditor.IAnnotationExtension;
 
 /**
  * Determines all annotations for the given line and collects, concatenates, and formats

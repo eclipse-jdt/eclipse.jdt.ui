@@ -23,6 +23,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 
 import org.eclipse.jsp.JspTranslator;
+import org.eclipse.text.reconcilerpipe.*;
 import org.eclipse.text.reconcilerpipe.AbstractReconcilePipeParticipant;
 import org.eclipse.text.reconcilerpipe.IReconcilePipeParticipant;
 import org.eclipse.text.reconcilerpipe.IReconcileResult;

@@ -11,6 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
+import org.eclipse.jface.text.source.*;
+import org.eclipse.jface.text.source.IAnnotationAccess;
+
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
 
@@ -22,12 +25,19 @@ import org.eclipse.ui.editors.text.TextEditor;
  */
 public class JspEditor extends TextEditor {
 
+	/**
+	 * Creates a new JSP editor.
+	 */
 	public JspEditor() {
 		super();
 		setSourceViewerConfiguration(new JspSourceViewerConfiguration(this));
 		setDocumentProvider(new FileDocumentProvider());
 	}
-	public void dispose() {
-		super.dispose();
+
+	/*
+	 * @see TextEditor#createAnnotationAccess()
+	 */
+	protected IAnnotationAccess createAnnotationAccess() {
+		return new DefaultAnnotationAccess(fAnnotationPreferences);
 	}
 }

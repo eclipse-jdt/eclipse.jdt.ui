@@ -30,6 +30,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
+import org.eclipse.jface.text.source.*;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -40,6 +41,7 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
+import org.eclipse.text.reconcilerpipe.*;
 import org.eclipse.text.reconcilerpipe.IReconcilePipeParticipant;
 import org.eclipse.text.reconcilerpipe.IReconcileResult;
 import org.eclipse.text.reconcilerpipe.TextModelAdapter;
@@ -51,11 +53,17 @@ import org.eclipse.text.reconcilerpipe.TextModelAdapter;
  */
 public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
+	/**
+	 * Allows to toggle the example between using markers
+	 * or annotations.
+	 */
+	public static final boolean USE_MARKERS= false;
+
+
 	private IReconcilePipeParticipant fFirstParticipant;
 	private HashMap fOffsetToMarkerMap;
 	private ITextEditor fTextEditor;
 	private IProgressMonitor fProgressMonitor;
-	private static final boolean USE_MARKERS= false;
 	
 	public JspReconcilingStrategy(ISourceViewer sourceViewer, ITextEditor textEditor) {
 		fTextEditor= textEditor;

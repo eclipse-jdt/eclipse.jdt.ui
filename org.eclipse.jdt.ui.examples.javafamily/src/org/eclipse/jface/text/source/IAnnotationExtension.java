@@ -9,17 +9,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.examples.jspeditor;
+package org.eclipse.jface.text.source;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 /**
- * Interface of annotations representing markers
- * and problems.
+ * Interface for marker and temporary annotations.
  * 
  * @see org.eclipse.core.resources.IMarker
- * @see org.eclipse.jdt.core.compiler.IProblem
+ * @see java.text.Annotation
  * @since 3.0
  */
 public interface IAnnotationExtension {

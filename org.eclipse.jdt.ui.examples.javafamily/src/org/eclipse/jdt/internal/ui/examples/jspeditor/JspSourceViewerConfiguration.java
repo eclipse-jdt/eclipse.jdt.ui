@@ -16,13 +16,13 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
+import org.eclipse.jface.text.source.DefaultAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.text.reconcilerpipe.DefaultAnnotationHover;
 
 /**
  * Configuration information for a simple JSP source viewer.
