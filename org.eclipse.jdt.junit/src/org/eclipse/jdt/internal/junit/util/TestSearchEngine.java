@@ -155,12 +155,6 @@ public class TestSearchEngine {
 	}
 
 	private static Object computeScope(Object element) throws JavaModelException {
-		if (element instanceof IProcess) 
-			element= ((IProcess)element).getLaunch();
-		if (element instanceof IDebugTarget)
-			element= ((IDebugTarget)element).getLaunch();
-		if (element instanceof ILaunch) 
-			element= ((ILaunch)element).getElement();
 		if (element instanceof IFileEditorInput)
 			element= ((IFileEditorInput)element).getFile();
 		if (element instanceof IResource)

@@ -6,11 +6,8 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.AbstractSet;
 import java.util.HashSet;
-
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
-import org.eclipse.jdt.internal.junit.oldlauncher.*;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
@@ -19,29 +16,21 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.ILauncher;
-
-import org.eclipse.debug.ui.actions.RunAction;
-
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 
 /**
  * The plug-in runtime class for the JUnit plug-in.
@@ -170,35 +159,23 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * @see ILaunchListener#launchChanged(ILaunch)
 	 */
 	public void launchChanged(final ILaunch launch) {
-		ILauncher launcher= launch.getLauncher();
-		IType launchedType= null;
-		int port= -1;
-
-		boolean oldLaunch= (launcher != null) && (launcher.getDelegate() instanceof IJUnitLauncherDelegate); 
-			
-		if (!oldLaunch && !fTrackedLaunches.contains(launch))
+		if (!fTrackedLaunches.contains(launch))
 			return;
 			
-		if (launcher != null && launcher.getDelegate() instanceof IJUnitLauncherDelegate) {
-			// old launchers
-			IJUnitLauncherDelegate launcherDelegate= (IJUnitLauncherDelegate)launch.getLauncher().getDelegate();
-			launchedType= launcherDelegate.getLaunchedType();
-			port= launcherDelegate.getPort();
-		} else {
-			// new launch configs
-			ILaunchConfiguration config= launch.getLaunchConfiguration();
-			if (config != null) {
-				// test whether the launch defines the JUnit attributes
-				String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
-				String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
-				if (portStr != null && typeStr != null) {
-					port= Integer.parseInt(portStr);
-					IJavaElement element= JavaCore.create(typeStr);
-					if (element instanceof IType) 
-						launchedType= (IType)element; 
-				}
-			}	
-		}
+		ILaunchConfiguration config= launch.getLaunchConfiguration();
+		IType launchedType= null;
+		int port= -1;
+		if (config != null) {
+			// test whether the launch defines the JUnit attributes
+			String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
+			String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
+			if (portStr != null && typeStr != null) {
+				port= Integer.parseInt(portStr);
+				IJavaElement element= JavaCore.create(typeStr);
+				if (element instanceof IType) 
+					launchedType= (IType)element; 
+			}
+		}	
 		if (launchedType != null) {
 			fTrackedLaunches.remove(launch);
 			final int finalPort= port;

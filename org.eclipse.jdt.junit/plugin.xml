@@ -39,19 +39,6 @@
 			id="org.eclipse.jdt.junit.viewpart">
 		</view>
 	</extension>
-
-	<extension 
-		point = "org.eclipse.debug.core.launchers"> 
-		<launcher 
-			id = "org.eclipse.jdt.junit.launcher"
-			class = "org.eclipse.jdt.internal.junit.oldlauncher.JUnitLauncher" 
-			modes = "run, debug"
-			label = "%JUnitLauncher.label"
-			wizard = "org.eclipse.jdt.internal.junit.oldlauncher.JUnitLaunchWizard"     
-	  		icon = "icons/smalllogo.gif"
-			public = "true"
-			description = "%JUnitLauncher.description"/>
-	</extension> 
    	
 	<extension
 		point="org.eclipse.ui.preferencePages">
