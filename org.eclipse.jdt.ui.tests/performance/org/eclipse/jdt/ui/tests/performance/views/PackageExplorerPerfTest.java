@@ -52,7 +52,8 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		}
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("Testing", "bin");
-			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+			// we must make sure that the performance test are compatible to 2.1.3 & 3.0
+			assertTrue("rt not found", JavaProjectHelper.addRTJar13(fJProject1) != null);
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}

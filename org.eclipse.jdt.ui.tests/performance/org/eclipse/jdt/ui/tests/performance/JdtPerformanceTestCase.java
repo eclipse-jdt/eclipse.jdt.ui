@@ -19,8 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
@@ -47,11 +45,11 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 	}
 	
 	protected void joinBackgroudActivities() throws CoreException {
-		// Join Building
+		// Join all background activities
 		boolean interrupted= true;
 		while (interrupted) {
 			try {
-				Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+				Platform.getJobManager().join(null, null);
 				interrupted= false;
 			} catch (InterruptedException e) {
 				interrupted= true;
