@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -167,9 +168,14 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		if (!ActionUtil.isProcessable(getShell(), type)) {
 			return;		
 		}
-			
+
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, false);
+
+		IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
+		if (target != null) {
+			target.beginCompoundChange();
+		}
 		try {
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 			dialog.run(false, true, new WorkbenchRunnableAdapter(op));
@@ -183,6 +189,10 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null);
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
+		} finally {
+			if (target != null) {
+				target.endCompoundChange();
+			}
 		}
 	}
 		

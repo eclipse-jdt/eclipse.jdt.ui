@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -46,20 +47,18 @@ import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.*;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -72,14 +71,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * Creates delegate methods for a type's fields. Opens a dialog with a list of
@@ -97,8 +88,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
  * </p>
  * 
  * Contributors:
- *   Sebastian Davids: m.moebius@gmx.de - bug: 28793 
-
+ *   Martin Moebius: m.moebius@gmx.de - bug: 28793 
  * @since 2.1
  */
 public class AddDelegateMethodsAction extends SelectionDispatchAction {
@@ -365,8 +355,23 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 				IEditorPart part = EditorUtility.openInEditor(type);
 				type = (IType) JavaModelUtil.toWorkingCopy(type);
-				IMethod[] createdMethods = processResults(methods, type);
+				
+				
+				IRewriteTarget target= (IRewriteTarget) part.getAdapter(IRewriteTarget.class);
+				IMethod[] createdMethods= null;
+				try {
+					if (target != null) {
+						target.beginCompoundChange();
+					}
+					createdMethods= processResults(methods, type);
+				} finally {
+					if (target != null) {
+						target.endCompoundChange();
+					}
+				}
+				
 				if (createdMethods != null && createdMethods.length > 0) {
+					type.getCompilationUnit().reconcile();
 					EditorUtility.revealInEditor(part, createdMethods[0]);
 				}
 			}

@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -360,7 +361,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	//---- Helpers -------------------------------------------------------------------
 	
 	private void run(IField[] getterFields, IField[] setterFields, IEditorPart editor) {
-		try{
+		IRewriteTarget target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
+		if (target != null) {
+			target.beginCompoundChange();
+		}
+		try {
 			AddGetterSetterOperation op= createAddGetterSetterOperation(getterFields, setterFields);
 			new ProgressMonitorDialog(getShell()).run(false, true, new WorkbenchRunnableAdapter(op));
 		
@@ -373,6 +378,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, getShell(), dialogTitle, message);
 		} catch (InterruptedException e) {
 			// operation cancelled
+		} finally {
+			if (target != null) {
+				target.endCompoundChange();
+			}
 		}
 	}
 

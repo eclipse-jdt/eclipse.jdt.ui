@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -172,6 +173,11 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		OverrideMethodQuery selectionQuery= new OverrideMethodQuery(shell, false);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selectionQuery, false);
+		
+		IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
+		if (target != null) {
+			target.beginCompoundChange();		
+		}
 		try {
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 			context.run(false, true, new WorkbenchRunnableAdapter(op));
@@ -185,6 +191,10 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
+		} finally {
+			if (target != null) {
+				target.endCompoundChange();		
+			}
 		}
 	}
 		
