@@ -26,10 +26,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -54,8 +54,10 @@ public class AugmentRawContainerClientsAnalyzer {
 	private AugmentRawContainerClientsTCModel fTypeConstraintFactory;
 	private HashMap fDeclarationsToUpdate;
 	private HashMap fCastsToRemove;
+	private final boolean DEBUG;
 
 	public AugmentRawContainerClientsAnalyzer(IJavaElement[] elements) {
+		DEBUG= false;
 		fElements= elements;
 		fProcessedCus= new HashSet();
 	}
@@ -74,9 +76,22 @@ public class AugmentRawContainerClientsAnalyzer {
 		// -> still misses calls of kind myObj.takeList(myObj.getList()) in CU that doesn't import List
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(fElements, IJavaSearchScope.SOURCES);
 
-if (false) { //TODO: doesn't work yet.
-		analyzeInCompilerLoop(project, searchScope, pattern, new SubProgressMonitor(pm, 3), result);
-} else {
+		SubProgressMonitor subPm= new SubProgressMonitor(pm, 3);
+		if (true) {
+			analyzeInCompilerLoop(project, searchScope, pattern, subPm, result);
+		} else {
+			analyzeInSearchLoop(searchScope, pattern, subPm);
+		}
+		
+		fTypeConstraintFactory.newCu();
+		AugmentRawContClConstraintsSolver solver= new AugmentRawContClConstraintsSolver(fTypeConstraintFactory);
+		solver.solveConstraints();
+		fDeclarationsToUpdate= solver.getDeclarationsToUpdate();
+		fCastsToRemove= solver.getCastsToRemove();
+		solver= null; //free caches
+	}
+
+	private void analyzeInSearchLoop(IJavaSearchScope searchScope, SearchPattern pattern, SubProgressMonitor subPm) throws CoreException {
 		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
 		SearchRequestor requestor= new SearchRequestor() {
 			IResource fLastResource;
@@ -104,45 +119,79 @@ if (false) { //TODO: doesn't work yet.
 				fProcessedCus.add(cu);
 			}
 		};
-		new SearchEngine().search(pattern, participants, searchScope, requestor, new SubProgressMonitor(pm, 3));
-}
-		
-		fTypeConstraintFactory.newCu();
-		AugmentRawContClConstraintsSolver solver= new AugmentRawContClConstraintsSolver(fTypeConstraintFactory);
-		solver.solveConstraints();
-		fDeclarationsToUpdate= solver.getDeclarationsToUpdate();
-		fCastsToRemove= solver.getCastsToRemove();
-		solver= null; //free caches
+		new SearchEngine().search(pattern, participants, searchScope, requestor, subPm);
 	}
 
 	private void analyzeInCompilerLoop(IJavaProject project, IJavaSearchScope searchScope, SearchPattern pattern, IProgressMonitor pm, RefactoringStatus result) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		final ICompilationUnit[] cus= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, searchScope, new SubProgressMonitor(pm, 1), result);
-		//TODO: creation of bindings in ContainerMethods should be in loop! 
+		//TODO: creation of bindings in ContainerMethods should be in loop.
+		//Problem: must be completed before loop starts.
 		final AugmentRawContClConstraintCreator unitCollector= new AugmentRawContClConstraintCreator(fTypeConstraintFactory);
+		String[] containerKeys= getContainerKeys(unitCollector.getTCModel());
+		
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 		parser.setResolveBindings(true);
 		parser.setProject(project);
-		parser.createASTs(new ASTRequestor() {
-
-			public void acceptAST(ASTNode node) {
-				CompilationUnit unitAST= (CompilationUnit) node;
-				//TODO: Hack only works for single CU:
-				ICompilationUnit cu= cus[0]; unitAST.setProperty(RefactoringASTParser.SOURCE_PROPERTY, cu);
-				unitAST.accept(unitCollector);
-//				ITypeConstraint2[] unitConstraints= fTypeConstraintFactory.getNewTypeConstraints();
+		parser.createASTs(cus, containerKeys, new ASTRequestor() {
+			public void acceptAST(CompilationUnit ast, ICompilationUnit source) {
+				if (DEBUG)
+					System.out.println("ASTRequestor#acceptAST(" + source.getElementName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
+				ast.accept(unitCollector);
 				//TODO: add required methods/cus to "toscan" list
-				fProcessedCus.add(cu);
-
+				fTypeConstraintFactory.newCu();
+				fProcessedCus.add(source);
 			}
-
-			public ICompilationUnit[] getSources() {
-				//TODO: Hack only works for single CU:
-				return new ICompilationUnit[] { cus[0] };
+			public void acceptBinding(IBinding binding, String bindingKey) {
+				if (DEBUG)
+					System.out.println("ASTRequestor#acceptBinding(" + binding.getName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}, new SubProgressMonitor(pm, 1));
+//		parser.createASTs(new ASTRequestor() {
+//
+//			public void acceptAST(ASTNode node) {
+//				CompilationUnit unitAST= (CompilationUnit) node;
+//				//TODO: Hack only works for single CU:
+//				ICompilationUnit cu= cus[0]; unitAST.setProperty(RefactoringASTParser.SOURCE_PROPERTY, cu);
+//				unitAST.accept(unitCollector);
+////				ITypeConstraint2[] unitConstraints= fTypeConstraintFactory.getNewTypeConstraints();
+//				//TODO: add required methods/cus to "toscan" list
+//				fProcessedCus.add(cu);
+//
+//			}
+//
+//			public ICompilationUnit[] getSources() {
+//				//TODO: Hack only works for single CU:
+//				return new ICompilationUnit[] { cus[0] };
+//			}
+//
+//			public void acceptBinding(IBinding binding, String bindingKey) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		}, new SubProgressMonitor(pm, 1));
 		pm.done();
+	}
+
+	private String[] getContainerKeys(AugmentRawContainerClientsTCModel model) {
+		String[] keys= new String[] {
+				model.getPrimitiveBooleanType().getKey(),
+				model.getPrimitiveIntType().getKey(),
+				model.getVoidType().getKey(),
+				model.getObjectType().getKey(),
+				model.getStringType().getKey(),
+				model.getCollectionType().getKey(),
+				model.getListType().getKey(),
+				model.getLinkedListType().getKey(),
+				model.getVectorType().getKey(),
+				model.getIteratorType().getKey(),
+				model.getListIteratorType().getKey(),
+				model.getEnumerationType().getKey(),
+				model.getCollectionsType().getKey()
+		};
+		return keys;
 	}
 
 	public HashMap getDeclarationsToUpdate() {
