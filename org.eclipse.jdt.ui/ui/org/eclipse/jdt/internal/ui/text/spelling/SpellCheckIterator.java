@@ -69,17 +69,25 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	/**
 	 * Creates a new spell check iterator.
 	 * 
-	 * @param document
-	 *                   The document containing the specified partition
-	 * @param region
-	 *                   The region to spell-check
-	 * @param locale
-	 *                   The locale to use for spell-checking
+	 * @param document the document containing the specified partition
+	 * @param region the region to spell-check
+	 * @param locale the locale to use for spell-checking
 	 */
-	public SpellCheckIterator(final IDocument document, final IRegion region, final Locale locale) {
+	public SpellCheckIterator(IDocument document, IRegion region, Locale locale) {
+		this(document, region, locale, BreakIterator.getWordInstance(locale));
+	}
 
+	/**
+	 * Creates a new spell check iterator.
+	 * 
+	 * @param document the document containing the specified partition
+	 * @param region the region to spell-check
+	 * @param locale the locale to use for spell-checking
+	 * @param breakIterator the break-iterator
+	 */
+	public SpellCheckIterator(IDocument document, IRegion region, Locale locale, BreakIterator breakIterator) {
 		fOffset= region.getOffset();
-		fWordIterator= BreakIterator.getWordInstance(locale);
+		fWordIterator= breakIterator;
 		fDelimiter= TextUtilities.getDefaultLineDelimiter(document);
 
 		String content;
@@ -131,14 +139,13 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	}
 
 	/**
-	 * Does the specified token consist of at least one letter and digits only?
+	 * Does the specified token consist of at least one letter and digits
+	 * only?
 	 * 
-	 * @param begin
-	 *                   The begin index
-	 * @param end
-	 *                   The end index
+	 * @param begin the begin index
+	 * @param end the end index
 	 * @return <code>true</code> iff the token consists of digits and at
-	 *               least one letter only, <code>false</code> otherwise
+	 *         least one letter only, <code>false</code> otherwise
 	 */
 	protected final boolean isAlphaNumeric(final int begin, final int end) {
 
@@ -160,10 +167,9 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	/**
 	 * Was the last token a Javadoc tag tag?
 	 * 
-	 * @param tags
-	 *                   The javadoc tags to check
-	 * @return <code>true</code> iff the last token was a Javadoc tag, <code>false</code>
-	 *               otherwise
+	 * @param tags the javadoc tags to check
+	 * @return <code>true</code> iff the last token was a Javadoc tag,
+	 *         <code>false</code> otherwise
 	 */
 	protected final boolean isJavadocToken(final String[] tags) {
 
@@ -179,13 +185,12 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	}
 
 	/**
-	 * Is the current token a single letter token surrounded by non-whitespace
-	 * characters?
+	 * Is the current token a single letter token surrounded by
+	 * non-whitespace characters?
 	 * 
-	 * @param begin
-	 *                   The begin index
+	 * @param begin the begin index
 	 * @return <code>true</code> iff the token is a single letter token,
-	 *               <code>false</code> otherwise
+	 *         <code>false</code> otherwise
 	 */
 	protected final boolean isSingleLetter(final int begin) {
 
@@ -198,10 +203,9 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	/**
 	 * Does the specified token look like an URL?
 	 * 
-	 * @param begin
-	 *                   The begin index
-	 * @return <code>true</code> iff this token look like an URL, <code>false</code>
-	 *               otherwise
+	 * @param begin the begin index
+	 * @return <code>true</code> iff this token look like an URL,
+	 *         <code>false</code> otherwise
 	 */
 	protected final boolean isUrlToken(final int begin) {
 
@@ -216,12 +220,10 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	/**
 	 * Does the specified token consist of whitespace only?
 	 * 
-	 * @param begin
-	 *                   The begin index
-	 * @param end
-	 *                   The end index
-	 * @return <code>true</code> iff the token consists of whitespace only,
-	 *               <code>false</code> otherwise
+	 * @param begin the begin index
+	 * @param end the end index
+	 * @return <code>true</code> iff the token consists of whitespace
+	 *         only, <code>false</code> otherwise
 	 */
 	protected final boolean isWhitespace(final int begin, final int end) {
 
@@ -261,7 +263,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	/**
 	 * Returns the next sentence break.
 	 * 
-	 * @return The next sentence break
+	 * @return the next sentence break
 	 */
 	protected final int nextSentence() {
 		return ((Integer) fSentenceBreaks.getFirst()).intValue();
@@ -270,8 +272,8 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	/**
 	 * Determines the next token to be spell-checked.
 	 * 
-	 * @return The next token to be spell-checked, or <code>null</code> iff
-	 *               the next token is not a candidate for spell-checking.
+	 * @return the next token to be spell-checked, or <code>null</code>
+	 *         iff the next token is not a candidate for spell-checking.
 	 */
 	protected String nextToken() {
 
@@ -348,10 +350,8 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 	/**
 	 * Skip the tokens until the stop character is reached.
 	 * 
-	 * @param begin
-	 *                   The begin index
-	 * @param stop
-	 *                   The stop character
+	 * @param begin the begin index
+	 * @param stop the stop character
 	 */
 	protected final void skipTokens(final int begin, final char stop) {
 

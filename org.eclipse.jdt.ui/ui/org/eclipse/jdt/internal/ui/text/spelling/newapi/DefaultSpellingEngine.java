@@ -39,7 +39,7 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 	private static final IContentType JAVA_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaSource"); //$NON-NLS-1$
 	
 	/** Java properties content type */
-//	private static final IContentType PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
+	private static final IContentType PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
 	
 	/** Available spelling engines by content type */
 	private Map fEngines= new HashMap();
@@ -47,8 +47,8 @@ public class DefaultSpellingEngine implements ISpellingEngine {
 	public DefaultSpellingEngine() {
 		if (JAVA_CONTENT_TYPE != null)
 			fEngines.put(JAVA_CONTENT_TYPE, new JavaSpellingEngine());
-//		if (PROPERTIES_CONTENT_TYPE != null)
-//			fEngines.put(PROPERTIES_CONTENT_TYPE, new PropertiesFileSpellingEngine());
+		if (PROPERTIES_CONTENT_TYPE != null)
+			fEngines.put(PROPERTIES_CONTENT_TYPE, new PropertiesFileSpellingEngine());
 		if (TEXT_CONTENT_TYPE != null)
 			fEngines.put(TEXT_CONTENT_TYPE, new TextSpellingEngine());
 	}
