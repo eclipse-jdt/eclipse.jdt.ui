@@ -61,8 +61,6 @@ public class DeleteFileChange extends JDTChange {
 	}
 	
 	private String getSource(IFile file) throws CoreException {
-		InputStream in= file.getContents();
-		
 		String encoding= null;
 		try {
 			encoding= file.getCharset();
@@ -72,7 +70,9 @@ public class DeleteFileChange extends JDTChange {
 		
 		StringBuffer sb= new StringBuffer();
 		BufferedReader br= null;
+		InputStream in= null;
 		try {
+			in= file.getContents();
 		    if (encoding != null)
 		        br= new BufferedReader(new InputStreamReader(in, encoding));	
 		    else
