@@ -2,7 +2,7 @@
  * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v0.5 
- * which accompanies this distribution, and is available at
+ * which accompanies this distribution, and is available at	
  * http://www.eclipse.org/legal/cpl-v05.html
  * 
  * Contributors:
@@ -17,13 +17,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -46,12 +49,16 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeMappingManager;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 
@@ -79,8 +86,9 @@ public final class ExtractInterfaceUtil {
 
 	private static ConstraintVariable[] getUpdatableVariables(IType theClass, IType theInterface, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
 		ITypeBinding classBinding= getTypeBinding(theClass, astManager);
-		ITypeBinding interfaceBinding= getTypeBinding(theInterface, astManager);
-		ICompilationUnit[] referringCus= getCusToParse(theClass, pm, astManager);
+		ITypeBinding interfaceBinding= getSuperTypeBinding(classBinding, theInterface);
+//		ITypeBinding interfaceBinding= getTypeBinding(theInterface, astManager);
+		ICompilationUnit[] referringCus= getCusToParse(theClass, theInterface, pm, astManager);
 		ITypeConstraint[] constraints= getConstraints(referringCus, astManager);
 		return getUpdatableVariables(constraints, classBinding, interfaceBinding);
 	}
@@ -91,6 +99,51 @@ public final class ExtractInterfaceUtil {
 //		System.out.println("resolved:   " + constraints[i].toResolvedString());
 //		System.out.println("satisfied:  " + constraints[i].isSatisfied());
 //	}
+	
+	//TODO move to TypeBindings
+	private static ITypeBinding getSuperTypeBinding(ITypeBinding typeBinding, IType superType) {
+		Set setOfAll= TypeBindings.getSuperTypes(typeBinding);
+		ITypeBinding[] all= (ITypeBinding[]) setOfAll.toArray(new ITypeBinding[setOfAll.size()]);
+		for (int i= 0; i < all.length; i++) {
+			ITypeBinding superTypeBinding= all[i];
+			if (isBindingForType(superTypeBinding, superType))
+				return superTypeBinding;
+		}
+		return null;
+	}
+
+	//TODO move to TypeBindings
+	private static boolean isBindingForType(ITypeBinding typeBinding, IType type) {
+		if (! typeBinding.getName().equals(type.getElementName()))
+			return false;
+		if (! typeBinding.getPackage().getName().equals(type.getPackageFragment().getElementName()))
+			return false;
+		return true;
+	}
+
+	//TODO to be deleted
+	public 	static Set updateReferences(TextChangeManager manager, IType theClass, IType theInterface, ASTNodeMappingManager astManager, IProgressMonitor pm) throws CoreException{
+		ConstraintVariable[] updatableVars= getUpdatableVariables(theClass, theInterface, astManager, pm);
+		ASTNode[] nodes= getNodes(updatableVars, theClass.getJavaProject(), astManager);//XXX scope is bogus
+		Set updatedCus= new HashSet(0);
+		for (int i= 0; i < nodes.length; i++) {
+			ASTNode node= nodes[i];
+			ICompilationUnit cu= astManager.getCompilationUnit(node);
+			manager.get(cu).addTextEdit("update", createTypeUpdateEdit(new SourceRange(node), theClass.getElementName(), theInterface.getElementName()));	 //$NON-NLS-1$
+			updatedCus.add(cu);
+		}
+//		for (Iterator iter= updatedCus.iterator(); iter.hasNext();) {
+//			ICompilationUnit cu= (ICompilationUnit) iter.next();
+//			if (needsImport(cu))
+//				addSupertypeImport(manager, cu);			
+//		}
+		return new HashSet(Arrays.asList(nodes));
+	}
+
+	//TODO to be deleted
+	private static TextEdit createTypeUpdateEdit(ISourceRange sourceRange, String className, String interfaceName) {
+		return new UpdateTypeReferenceEdit(sourceRange.getOffset(), sourceRange.getLength(), interfaceName, className);
+	}
 	
 	public static ASTNode[] getUpdatableNodes(IType theClass, IType theInterface, IProgressMonitor pm) throws JavaModelException{
 		ASTNodeMappingManager astManager= new ASTNodeMappingManager();
@@ -109,8 +162,11 @@ public final class ExtractInterfaceUtil {
 		ConstraintVariable[] initialBad= getInitialBad(setOfAll, constraints, interfaceBinding);
 		Set bad= new HashSet();
 		bad.addAll(Arrays.asList(initialBad));
+		if (bad.isEmpty())//TODO to be removed after it's optimized
+			return (ConstraintVariable[]) setOfAll.toArray(new ConstraintVariable[setOfAll.size()]);
 		boolean repeat= false;
 		do{
+			//TODO can optimize here - don't have to walk the whole constraints array, bad would be enough
 			int sizeOfBad= bad.size();
 			for (int i= 0; i < constraints.length; i++) {
 				ITypeConstraint constraint= constraints[i];
@@ -128,11 +184,8 @@ public final class ExtractInterfaceUtil {
 			}
 			repeat= sizeOfBad < bad.size();
 		} while(repeat);
-		System.out.println("\nall:" + setOfAll);
-		System.out.println("bad:" + bad);
 		Set updatable= new HashSet(setOfAll);
 		updatable.removeAll(bad);
-//		System.out.println("good:"+ updatable);
 		return (ConstraintVariable[]) updatable.toArray(new ConstraintVariable[updatable.size()]);
 	}
 	
@@ -166,7 +219,7 @@ public final class ExtractInterfaceUtil {
 		else if ((right instanceof ExpressionVariable || right instanceof TypeVariable) && setOfAll.contains(right))
 			return false;
 		else if (! (right instanceof RawBindingVariable) && !( right instanceof DeclaringTypeVariable))
-			return false;//TODO this case is strange
+			return false;//TODO this case is very strange and thus probably bogus
 		else
 			return true;
 	}
@@ -228,19 +281,21 @@ public final class ExtractInterfaceUtil {
 		Set result= new HashSet();
 		for (int i= 0; i < referringCus.length; i++) {
 			ICompilationUnit unit= referringCus[i];
-			ConstraintCollector collector= new ConstraintCollector(new ExtractInterfaceConstraintCreator());
+			ConstraintCollector collector= new ConstraintCollector();
 			astManager.getAST(unit).accept(collector);
 			result.addAll(Arrays.asList(collector.getConstraints()));
 		}
 		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
 	}
 	
-	private static ICompilationUnit[] getCusToParse(IType theClass, IProgressMonitor pm, ASTNodeMappingManager astManager) throws JavaModelException{
+	private static ICompilationUnit[] getCusToParse(IType theClass, IType theInterface, IProgressMonitor pm, ASTNodeMappingManager astManager) throws JavaModelException{
 		try{
 			pm.beginTask("", 2);
 			ISearchPattern pattern= SearchEngine.createSearchPattern(theClass, IJavaSearchConstants.REFERENCES);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(theClass);
-			ICompilationUnit[] workingCopies= getWorkingCopies();
+			ICompilationUnit[] workingCopies= getWorkingCopies(theClass.getCompilationUnit(), theInterface.getCompilationUnit());
+			if (workingCopies.length == 0)
+				workingCopies= null;
 			SearchResultGroup[] groups= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern, workingCopies);
 			ASTNode[] typeReferenceNodes= ASTNodeSearchUtil.getAstNodes(groups, astManager);
 			ICompilationUnit[] typeReferecingCus= getCus(groups);
@@ -360,14 +415,23 @@ public final class ExtractInterfaceUtil {
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	private static ICompilationUnit[] getWorkingCopies() {
+	private static ICompilationUnit[] getWorkingCopies(ICompilationUnit precedingWC1, ICompilationUnit precedingWC2) {
 		// XXX: This is a layer breaker - should not access jdt.ui
 		IWorkingCopy[] copies= JavaUI.getSharedWorkingCopiesOnClasspath();
-		List result= new ArrayList(copies.length);
+		Set result= new HashSet(copies.length);
+		if (precedingWC1 != null && precedingWC1.isWorkingCopy())
+			result.add(precedingWC1);
+		if (precedingWC2 != null && precedingWC2.isWorkingCopy())
+			result.add(precedingWC2);
+		ICompilationUnit original1= WorkingCopyUtil.getOriginal(precedingWC1);
+		ICompilationUnit original2= WorkingCopyUtil.getOriginal(precedingWC2);
 		for (int i= 0; i < copies.length; i++) {
 			IWorkingCopy copy= copies[i];
-			if (copy instanceof ICompilationUnit)
-				result.add(copy);
+			if (copy.isWorkingCopy() && copy instanceof ICompilationUnit){
+				IJavaElement original= copy.getOriginalElement();
+				if (!original.equals(original1) && !original.equals(original2))
+					result.add(copy);
+			}
 		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
