@@ -92,7 +92,7 @@ public class JarPackageWriter extends Object {
 		xmlJarDesc.appendChild(options);
 		options.setAttribute("overwrite", "" + jarPackage.allowOverwrite()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("compress", "" + jarPackage.isCompressed()); //$NON-NLS-2$ //$NON-NLS-1$
-		options.setAttribute("exportErrors", "" + jarPackage.exportWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
+		options.setAttribute("exportErrors", "" + jarPackage.exportErrors()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("exportWarnings", "" + jarPackage.exportWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("logErrors", "" + jarPackage.logErrors()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("logWarnings", "" + jarPackage.logWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
