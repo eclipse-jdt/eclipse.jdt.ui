@@ -32,8 +32,10 @@ public class PackagesView extends JavaBrowsingPart {
 		getViewer().addFilter(new EmptyInnerPackageFilter());
 		getViewer().addFilter(new NonJavaElementFilter());
 		getViewer().addFilter(new LibraryFilter());
+
+		// XXX: This can be removed when the cvs elements are private
 		JavaElementPatternFilter patternFilter= new JavaElementPatternFilter();
-		patternFilter.setPatterns(new String[] {"CVS", "*.CVS"});
+		patternFilter.setPatterns(new String[] {"CVS", "*.CVS"}); //$NON-NLS-1$ //$NON-NLS-2$
 		getViewer().addFilter(patternFilter);
 	}
 
@@ -51,7 +53,7 @@ public class PackagesView extends JavaBrowsingPart {
 	 * @return	the string used as ID for the Help context
 	 */
 	protected String getHelpContextId() {
-		return IJavaHelpContextIds.PACKAGES_VIEW;
+		return IJavaHelpContextIds.PACKAGES_BROWSING_VIEW;
 	}
 
 	/**
