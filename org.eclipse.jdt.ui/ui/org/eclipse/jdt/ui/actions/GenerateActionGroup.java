@@ -36,6 +36,8 @@ import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -43,8 +45,6 @@ import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the source and generate actions to a part's context
@@ -150,7 +150,7 @@ public class GenerateActionGroup extends ActionGroup {
 	
 		fConvertToMac= new ConvertLineDelimitersAction(editor, "\r"); //$NON-NLS-1$
 		fConvertToMac.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_MAC);
-		editor.setAction("ConvertLineDelimitersToMac", fConvertToMac); //$NON-NLS-1$		
+		editor.setAction("ConvertLineDelimitersToMac", fConvertToMac); //$NON-NLS-1$
 	}
 	
 	/**
@@ -293,6 +293,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(result, fAddDelegateMethods);
 		added+= addAction(result, fAddUnimplementedConstructors);
 		added+= addAction(result, fAddJavaDocStub);
+		added+= addEditorAction(result, "Format"); //$NON-NLS-1$
 		added+= addAction(result, fSortMembers);
 		added+= addAction(result, fAddBookmark);
 		result.add(new Separator());		
