@@ -670,7 +670,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		context.getASTRoot().accept(new ASTVisitor() {
 			public void postVisit(ASTNode node) {
 				if (isCovered(node)) {
-					if (!isCovered(node.getParent())) {
+					ASTNode parent= node.getParent();
+					if (parent != null && !isCovered(parent)) {
 						coveredNodes.add(node);
 					}
 				}
