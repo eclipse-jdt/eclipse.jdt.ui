@@ -1634,6 +1634,14 @@ JavaStructureDiffViewerCreator
 		class= "org.eclipse.jdt.internal.ui.filters.PackageDeclarationFilter"
 		enabled= "true">
 	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.ImportDeclarationFilter"
+		name= "%HideImportDeclaration.label"
+		description= "%HideImportDeclaration.description"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
+		enabled= "false">
+	</filter>
 
 	<!-- Packages view -->
 	<filter
