@@ -86,16 +86,22 @@ public class ModifierCorrectionSubProcessor {
 		}
 		ITypeBinding typeBinding= null;
 		String name;
+		IBinding bindingDecl;
 		boolean isLocalVar= false;
 		if (binding instanceof IMethodBinding) {
-			typeBinding= ((IMethodBinding) binding).getDeclaringClass();
-			name= binding.getName() + "()"; //$NON-NLS-1$
+			IMethodBinding methodDecl= (IMethodBinding) binding;
+			bindingDecl= methodDecl.getMethodDeclaration();
+			typeBinding= methodDecl.getDeclaringClass();
+			name= methodDecl.getName() + "()"; //$NON-NLS-1$
 		} else if (binding instanceof IVariableBinding) {
-			typeBinding= ((IVariableBinding) binding).getDeclaringClass();
+			IVariableBinding varDecl= (IVariableBinding) binding;
+			typeBinding= varDecl.getDeclaringClass();
 			name= binding.getName();
-			isLocalVar= !((IVariableBinding) binding).isField();
+			isLocalVar= !varDecl.isField();
+			bindingDecl= Bindings.getVariableDeclaration(varDecl);
 		} else if (binding instanceof ITypeBinding) {
 			typeBinding= (ITypeBinding) binding;
+			bindingDecl= typeBinding.getTypeDeclaration();
 			name= binding.getName();
 		} else {
 			return;
@@ -130,13 +136,13 @@ public class ModifierCorrectionSubProcessor {
 					Assert.isTrue(false, "not supported"); //$NON-NLS-1$
 					return;
 			}
-			ICompilationUnit targetCU= isLocalVar ? cu : ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding);
+			ICompilationUnit targetCU= isLocalVar ? cu : ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding.getTypeDeclaration());
 			if (targetCU != null) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
+				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, bindingDecl, selectedNode, includedModifiers, excludedModifiers, relevance, image));
 			}
 		}
-		if (kind == TO_VISIBLE && binding.getKind() == IBinding.VARIABLE && Modifier.isPrivate(binding.getModifiers())) {
+		if (kind == TO_VISIBLE && bindingDecl.getKind() == IBinding.VARIABLE && Modifier.isPrivate(bindingDecl.getModifiers())) {
 			if (selectedNode instanceof SimpleName || selectedNode instanceof FieldAccess && ((FieldAccess) selectedNode).getExpression() instanceof ThisExpression) {
 				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, proposals);
 			}
@@ -153,7 +159,7 @@ public class ModifierCorrectionSubProcessor {
 		
 		IMethodBinding method= ((MethodDeclaration) selectedNode).resolveBinding();
 		ITypeBinding curr= method.getDeclaringClass();
-		IMethodBinding overriddenClass= null;
+
 		
 		if (kind == TO_VISIBLE && problem.getProblemId() != IProblem.OverridingNonVisibleMethod) {
 			IMethodBinding defining= Bindings.findMethodDefininition(method, false);
@@ -166,14 +172,16 @@ public class ModifierCorrectionSubProcessor {
 			}
 		}
 		
-		if (overriddenClass == null && curr.getSuperclass() != null) {
+		IMethodBinding overriddenInClass= null;
+		while (overriddenInClass == null && curr.getSuperclass() != null) {
 			curr= curr.getSuperclass();
-			overriddenClass= Bindings.findMethodInType(curr, method.getName(), method.getParameterTypes());
+			overriddenInClass= Bindings.findMethodInType(curr, method.getName(), method.getParameterTypes());
 		}
-		if (overriddenClass != null) {
-			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), curr);
+		if (overriddenInClass != null) {
+			IMethodBinding overriddenDecl= overriddenInClass.getMethodDeclaration();
+			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), overriddenDecl.getDeclaringClass());
 			if (targetCU != null) {
-				String methodName= curr.getName() + '.' + overriddenClass.getName();
+				String methodName= curr.getName() + '.' + overriddenInClass.getName();
 				String label;
 				int excludedModifiers;
 				int includedModifiers;			
@@ -198,7 +206,7 @@ public class ModifierCorrectionSubProcessor {
 						return;
 				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, overriddenClass, selectedNode, includedModifiers, excludedModifiers, 7, image));
+				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, overriddenDecl, selectedNode, includedModifiers, excludedModifiers, 7, image));
 			}
 		}
 	}
@@ -213,6 +221,7 @@ public class ModifierCorrectionSubProcessor {
 		
 		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
 		if (binding instanceof IVariableBinding) {
+			binding= Bindings.getVariableDeclaration((IVariableBinding) binding);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertofinal.description", binding.getName()); //$NON-NLS-1$
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
@@ -528,6 +537,7 @@ public class ModifierCorrectionSubProcessor {
 		
 		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
 		if (binding instanceof IVariableBinding) {
+			binding= Bindings.getVariableDeclaration((IVariableBinding) binding);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertofinal.description", binding.getName()); //$NON-NLS-1$
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));

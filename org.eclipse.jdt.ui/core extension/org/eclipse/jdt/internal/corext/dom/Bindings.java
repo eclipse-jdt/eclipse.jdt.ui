@@ -1214,19 +1214,23 @@ public class Bindings {
 	/**
 	 * Get field declaration. See bug 83100
 	 */
-	public static IBinding getFieldDeclaration(IVariableBinding field) {
-		ITypeBinding declaringClass= field.getDeclaringClass();
+	public static IBinding getVariableDeclaration(IVariableBinding var) {
+		if (!var.isField()) {
+			return var;
+		}
+		ITypeBinding declaringClass= var.getDeclaringClass();
 		if (declaringClass.getTypeDeclaration() == declaringClass) { // test if type is already declaration
-			return field;
+			return var;
 		}
 		IVariableBinding[] genericFields= declaringClass.getTypeDeclaration().getDeclaredFields();
-		String name= field.getName();
+		String name= var.getName();
 		for (int i= 0; i < genericFields.length; i++) {
 			if (name.equals(genericFields[i].getName())) {
 				return genericFields[i];
 			}
 		}
-		return null;
+		Assert.isTrue(false, "field does not exist in generic type"); //$NON-NLS-1$
+		return var;
 	}
 
 	/**

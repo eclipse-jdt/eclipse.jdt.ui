@@ -280,10 +280,7 @@ public class LinkedNodeFinder  {
 			} else if (binding instanceof IMethodBinding) {
 				return ((IMethodBinding) binding).getMethodDeclaration();
 			} else if (binding instanceof IVariableBinding) {
-				IVariableBinding varBinding= (IVariableBinding) binding;
-				if (varBinding.isField()) {
-					return Bindings.getFieldDeclaration(varBinding);
-				}
+				return Bindings.getVariableDeclaration((IVariableBinding) binding);
 			}
 			return binding;
 		}
