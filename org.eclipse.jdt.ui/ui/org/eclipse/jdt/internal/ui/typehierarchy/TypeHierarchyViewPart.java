@@ -379,6 +379,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 						return;
 					}
 				}
+			} else {
+				int kind= element.getElementType();
+				if (kind != IJavaElement.JAVA_PROJECT && kind != IJavaElement.PACKAGE_FRAGMENT_ROOT && kind != IJavaElement.PACKAGE_FRAGMENT) {
+					element= null;
+					JavaPlugin.logErrorMessage("Invalid type hierarchy input type.");//$NON-NLS-1$
+				}
 			}
 		}	
 		if (element != null && !element.equals(fInputElement)) {
@@ -1183,7 +1189,15 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private IJavaElement determineInputElement() {
 		Object input= getSite().getPage().getInput();
 		if (input instanceof IJavaElement) { 
-			return (IJavaElement) input;
+			IJavaElement elem= (IJavaElement) input;
+			if (elem instanceof IMember) {
+				return elem;
+			} else {
+				int kind= elem.getElementType();
+				if (kind == IJavaElement.JAVA_PROJECT || kind == IJavaElement.PACKAGE_FRAGMENT_ROOT || kind == IJavaElement.PACKAGE_FRAGMENT) {
+					return elem;
+				}
+			}
 		} 
 		return null;	
 	}
