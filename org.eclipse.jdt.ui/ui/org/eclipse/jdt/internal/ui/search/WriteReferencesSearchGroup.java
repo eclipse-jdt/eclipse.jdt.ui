@@ -27,32 +27,32 @@ public class WriteReferencesSearchGroup extends JavaSearchSubGroup  {
 		fEditor= editor;
 	}
 
-	protected JavaElementSearchAction[] getActions(IWorkbenchSite site) {
-		ArrayList actions= new ArrayList(JavaElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
+	protected FindAction[] getActions(IWorkbenchSite site) {
+		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindWriteReferencesAction(site));
 		actions.add(new FindWriteReferencesInHierarchyAction(site));
 		actions.add(new FindWriteReferencesInWorkingSetAction(site));
 
-		Iterator iter= JavaElementSearchAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
-			actions.add(new WorkingSetAction(site, new FindWriteReferencesInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
+			actions.add(new WorkingSetFindAction(site, new FindWriteReferencesInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
 		}
-		return (JavaElementSearchAction[])actions.toArray(new JavaElementSearchAction[actions.size()]);
+		return (FindAction[])actions.toArray(new FindAction[actions.size()]);
 	}
 
-	protected JavaElementSearchAction[] getActions(JavaEditor editor) {
-		ArrayList actions= new ArrayList(JavaElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
+	protected FindAction[] getActions(JavaEditor editor) {
+		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindWriteReferencesAction(editor));
 		actions.add(new FindWriteReferencesInHierarchyAction(editor));
 		actions.add(new FindWriteReferencesInWorkingSetAction(editor));
 
-		Iterator iter= JavaElementSearchAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
-			actions.add(new WorkingSetAction(editor, new FindWriteReferencesInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));
+			actions.add(new WorkingSetFindAction(editor, new FindWriteReferencesInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));
 		}
-		return (JavaElementSearchAction[])actions.toArray(new JavaElementSearchAction[actions.size()]);
+		return (FindAction[])actions.toArray(new FindAction[actions.size()]);
 	}
 	
 	protected String getName() {

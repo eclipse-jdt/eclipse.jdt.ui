@@ -23,15 +23,15 @@ public abstract class JavaSearchSubGroup extends ActionGroup  {
 
 	public static final String GROUP_ID= IContextMenuConstants.GROUP_SEARCH;
 
-	abstract protected JavaElementSearchAction[] getActions(IWorkbenchSite site);
-	abstract protected JavaElementSearchAction[] getActions(JavaEditor editor);
+	abstract protected FindAction[] getActions(IWorkbenchSite site);
+	abstract protected FindAction[] getActions(JavaEditor editor);
 
 	IWorkbenchSite fSite;
 	JavaEditor fEditor;
 	
 	abstract protected String getName();
 
-	protected final JavaElementSearchAction[] getActions() {
+	protected final FindAction[] getActions() {
 		if (fEditor != null)
 			return getActions(fEditor);
 		else if (fSite != null)
@@ -42,9 +42,9 @@ public abstract class JavaSearchSubGroup extends ActionGroup  {
 	public void fillContextMenu(IMenuManager manager) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID);
 		ISelection sel= getContext().getSelection();
-		JavaElementSearchAction[] actions= getActions();
+		FindAction[] actions= getActions();
 		for (int i= 0; i < actions.length; i++) {
-			JavaElementSearchAction action= actions[i];
+			FindAction action= actions[i];
 			if (action.isEnabled())
 				javaSearchMM.add(action);
 		}
@@ -54,7 +54,7 @@ public abstract class JavaSearchSubGroup extends ActionGroup  {
 	}
 	public IMenuManager getMenuManagerForGroup() {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID); //$NON-NLS-1$
-		JavaElementSearchAction[] actions= getActions();
+		FindAction[] actions= getActions();
 		ISelection selection= getContext().getSelection();
 		if (selection != null && !selection.isEmpty()) {
 			for (int i= 0; i < actions.length; i++) {

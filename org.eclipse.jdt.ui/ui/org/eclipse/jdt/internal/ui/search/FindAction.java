@@ -1,6 +1,12 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2002.
- * All Rights Reserved.
+ * Copyright (c) 2000, 2002 IBM Corp. and others..
+ * All rights reserved.   This program and the accompanying materials
+ * are made available under the terms of the Common Public License v0.5
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
  */
 package org.eclipse.jdt.internal.ui.search;
 
@@ -51,9 +57,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
- * Abstract class for all search actions which work on java elements.
+ * Abstract class for Java search actions.
+ * <p>
+ * Note: This class is for internal use only. Clients should not use this class.
+ * </p>
  */
-public abstract class JavaElementSearchAction extends SelectionDispatchAction {
+public abstract class FindAction extends SelectionDispatchAction {
 
 	// LRU working sets
 	static int LRU_WORKINGSET_LIST_SIZE= 3;
@@ -71,13 +80,13 @@ public abstract class JavaElementSearchAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;	
 
 
-	JavaElementSearchAction(IWorkbenchSite site, String label, Class[] validTypes) {
+	FindAction(IWorkbenchSite site, String label, Class[] validTypes) {
 		super(site);
 		setText(label);
 		fValidTypes= validTypes;
 	}
 
-	JavaElementSearchAction(JavaEditor editor, String label, Class[] validTypes) {
+	FindAction(JavaEditor editor, String label, Class[] validTypes) {
 		this (editor.getEditorSite(), label, validTypes);
 		fEditor= editor;
 	}
@@ -193,8 +202,8 @@ public abstract class JavaElementSearchAction extends SelectionDispatchAction {
 		return mainType;
 	}
 	
-	/**
-	 * @see SelectionDispatchAction#run(IStructuredSelection)
+	/* 
+	 * Method declared on SelectionChangedAction.
 	 */
 	protected void run(IStructuredSelection selection) {
 		IJavaElement element= getJavaElement(selection, false);
@@ -208,8 +217,8 @@ public abstract class JavaElementSearchAction extends SelectionDispatchAction {
 		run(element);
 	}
 
-	/**
-	 * @see SelectionDispatchAction#run(ITextSelection)
+	/* 
+	 * Method declared on SelectionChangedAction.
 	 */
 	protected void run(ITextSelection selection) {
 		try {
@@ -233,13 +242,16 @@ public abstract class JavaElementSearchAction extends SelectionDispatchAction {
 		}
 	}
 
-	/**
-	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+	/* 
+	 * Method declared on SelectionChangedAction.
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
 
+	/* 
+	 * Method declared on SelectionChangedAction.
+	 */
 	protected void selectionChanged(ITextSelection selection) {
 		setEnabled(fEditor != null);
 	}
@@ -328,7 +340,7 @@ public abstract class JavaElementSearchAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Tries to find the given element in a workingcopy.
+	 * Tries to find the given element in a working copy.
 	 */
 	private IJavaElement getWorkingCopy(IJavaElement input) {
 		try {
@@ -341,6 +353,11 @@ public abstract class JavaElementSearchAction extends SelectionDispatchAction {
 		return null;
 	}
 	
+	/**
+	 * Updates the LRU list of working sets.
+	 * 
+	 * @param workingSets	the workings sets to be added to the LRU list
+	 */
 	public static void updateLRUWorkingSets(IWorkingSet[] workingSets) {
 		if (workingSets == null || workingSets.length < 1)
 			return;

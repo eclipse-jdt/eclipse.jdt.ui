@@ -27,32 +27,32 @@ public class ReadReferencesSearchGroup extends JavaSearchSubGroup  {
 		fEditor= editor;
 	}
 
-	protected JavaElementSearchAction[] getActions(IWorkbenchSite site) {
-		ArrayList actions= new ArrayList(JavaElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
+	protected FindAction[] getActions(IWorkbenchSite site) {
+		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindReadReferencesAction(site));
 		actions.add(new FindReadReferencesInHierarchyAction(site));
 		actions.add(new FindReadReferencesInWorkingSetAction(site));
 
-		Iterator iter= JavaElementSearchAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
-			actions.add(new WorkingSetAction(site, new FindReadReferencesInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
+			actions.add(new WorkingSetFindAction(site, new FindReadReferencesInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
 		}
-		return (JavaElementSearchAction[])actions.toArray(new JavaElementSearchAction[actions.size()]);
+		return (FindAction[])actions.toArray(new FindAction[actions.size()]);
 	}
 
-	protected JavaElementSearchAction[] getActions(JavaEditor editor) {
-		ArrayList actions= new ArrayList(JavaElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
+	protected FindAction[] getActions(JavaEditor editor) {
+		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindReadReferencesAction(editor));
 		actions.add(new FindReadReferencesInHierarchyAction(editor));
 		actions.add(new FindReadReferencesInWorkingSetAction(editor));
 
-		Iterator iter= JavaElementSearchAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
-			actions.add(new WorkingSetAction(editor, new FindReadReferencesInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));
+			actions.add(new WorkingSetFindAction(editor, new FindReadReferencesInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));
 		}
-		return (JavaElementSearchAction[])actions.toArray(new JavaElementSearchAction[actions.size()]);
+		return (FindAction[])actions.toArray(new FindAction[actions.size()]);
 	}
 	
 	protected String getName() {
