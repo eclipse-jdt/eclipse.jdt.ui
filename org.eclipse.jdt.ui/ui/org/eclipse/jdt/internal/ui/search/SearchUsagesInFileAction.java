@@ -144,7 +144,10 @@ public class SearchUsagesInFileAction extends Action {
 		
 		private void match(Name node, List result) {
 			IBinding binding= node.resolveBinding();
-		
+			
+			if (binding == null)
+				return;
+				
 			if (binding.equals(fTarget)) {
 				result.add(node);
 				return;
