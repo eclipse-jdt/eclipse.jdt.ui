@@ -11,16 +11,18 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import org.eclipse.jdt.core.dom.ITypeBinding;
-
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 
+/**
+ * A TypeVariable is a ConstraintVariable which stands for a
+ * type reference (in source).
+ */
 public class TypeVariable2 extends ConstraintVariable2 {
 
 	private final CompilationUnitRange fRange;
 
-	protected TypeVariable2(TypeHandle typeHandle, ITypeBinding typeBinding, CompilationUnitRange range) {
-		super(typeHandle, typeBinding);
+	protected TypeVariable2(TypeHandle typeHandle, CompilationUnitRange range) {
+		super(typeHandle);
 		fRange= range;
 	}
 	
@@ -32,7 +34,7 @@ public class TypeVariable2 extends ConstraintVariable2 {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#getHash()
 	 */
 	public int getHash() {
-		return getRange().hashCode();
+		return getRange().hashCode() ^ getTypeHandle().hashCode();
 	}
 	
 	/*
@@ -44,7 +46,8 @@ public class TypeVariable2 extends ConstraintVariable2 {
 		if (other.getClass() != TypeVariable2.class)
 			return false;
 		
-		return getRange().equals(((TypeVariable2) other).getRange());
+		return getRange().equals(((TypeVariable2) other).getRange())
+				&& getTypeHandle() == other.getTypeHandle();
 	}
 	
 }

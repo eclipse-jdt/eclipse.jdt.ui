@@ -8,23 +8,32 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import java.util.List;
+import org.eclipse.jdt.core.dom.IBinding;
 
-import org.eclipse.jdt.core.dom.ASTVisitor;
+/**
+ * A DeclaringTypeVariable is a ConstraintVariable which stands for
+ * the declaring type of a member.
+ */
+public class DeclaringTypeVariable2 extends ConstraintVariable2 {
 
-public class ConstraintCreator2 extends ASTVisitor {
-	private List/*<ITypeConstraint2[]>*/ fConstraints;
-	
-	protected void addConstraints(ITypeConstraint2[] typeConstraints) {
-		for (int i= 0; i < typeConstraints.length; i++) {
-			fConstraints.add(typeConstraints[i]);
-		}
+	private String fBindingKey;
+
+	protected DeclaringTypeVariable2(TypeHandle declaringTypeHandle, IBinding memberBinding) {
+		super(declaringTypeHandle);
+		fBindingKey= memberBinding.getKey();
 	}
-	
-	public ITypeConstraint2[] getConstraints() {
-		return (ITypeConstraint2[]) fConstraints.toArray(new ITypeConstraint2[fConstraints.size()]);
+
+	protected int getHash() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	protected boolean isSameAs(ConstraintVariable2 other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

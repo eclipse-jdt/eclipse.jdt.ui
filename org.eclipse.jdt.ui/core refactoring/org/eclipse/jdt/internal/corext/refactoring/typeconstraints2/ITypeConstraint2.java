@@ -29,4 +29,6 @@ public interface ITypeConstraint2 {
 	public ConstraintVariable2[] getContainedConstraintVariables();
 	
 	public boolean isSameAs(ITypeConstraint2 other);
+	
+	public int getHash();
 }

@@ -13,31 +13,25 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 
+/**
+ * A ParameterTypeVariable is a ConstraintVariable which stands for
+ * the type of a method parameter.
+ */
 public class ParameterTypeVariable2 extends ConstraintVariable2 {
 
 	private final int fParameterIndex;
 	private final String fMethodBindingKey;
 	
 	public ParameterTypeVariable2(TypeHandle parameterTypeHandle, int parameterIndex, IMethodBinding methodBinding) {
-		super(parameterTypeHandle, methodBinding.getParameterTypes()[parameterIndex]);
+		super(parameterTypeHandle);
 		Assert.isNotNull(methodBinding);
 		Assert.isTrue(0 <= parameterIndex);
 		Assert.isTrue(parameterIndex < methodBinding.getParameterTypes().length);
 		fParameterIndex= parameterIndex;
 		fMethodBindingKey= methodBinding.getKey();
-		if (DEBUG)
-			setData(TO_STRING, "[Parameter(" + fParameterIndex + "," + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
-	public String toString() {
-		String toString= (String) getData(TO_STRING);
-		return toString == null
-			? "[Parameter(" + fParameterIndex + "," + fMethodBindingKey + ")]" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			: toString;
-	}
-
 	public int getParameterIndex() {
 		return fParameterIndex;
 	}
@@ -67,4 +61,11 @@ public class ParameterTypeVariable2 extends ConstraintVariable2 {
 				&& getMethodBindingKey().equals(other2.getMethodBindingKey());
 	}
 	
+	public String toString() {
+		String toString= (String) getData(TO_STRING);
+		return toString == null
+			? "[Parameter(" + fParameterIndex + "," + fMethodBindingKey + ")]" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			: toString;
+	}
+
 }

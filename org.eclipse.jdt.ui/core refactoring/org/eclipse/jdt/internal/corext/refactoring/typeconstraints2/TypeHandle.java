@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+//TODO: tell that TypeHandles are unique and can be compared by == or equals()
 public class TypeHandle {
 	
 	private String fTypeKey;
@@ -34,5 +35,10 @@ public class TypeHandle {
 	// isSupertype
 	// isProperSupertype
 	// isDirectSupertype
-
+	
+	
+	
+	public String toString() {
+		return fQualifiedName;
+	}
 }

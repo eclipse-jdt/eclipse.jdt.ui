@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintCollector2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintCreator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.FullConstraintCreator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintFactory2;
@@ -43,12 +43,11 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
-
 public class GenericizeContainerClientsAnalyzer {
 	
 	private final IJavaElement[] fElements;
 	private HashSet fProcessedCus;
-	private FullConstraintCreator2 fConstraintCreator;
+	private TypeConstraintFactory2 fTypeConstraintFactory;
 
 	public GenericizeContainerClientsAnalyzer(IJavaElement[] elements) {
 		fElements= elements;
@@ -58,7 +57,7 @@ public class GenericizeContainerClientsAnalyzer {
 	public void analyzeContainerReferences(IProgressMonitor pm, RefactoringStatus result) throws CoreException {
 		pm.beginTask("", 10); //$NON-NLS-1$
 		
-		fConstraintCreator= new FullConstraintCreator2(new TypeConstraintFactory2());
+		fTypeConstraintFactory= new TypeConstraintFactory2();
 		
 		GenericContainers genericContainers= GenericContainers.create(fElements[0].getJavaProject(), new SubProgressMonitor(pm, 1));
 		IType[] containerTypes= genericContainers.getContainerTypes();
@@ -91,16 +90,16 @@ public class GenericizeContainerClientsAnalyzer {
 
 	protected void analyzeCU(ICompilationUnit cu) {
 		
-		ConstraintCollector2 unitCollector= new ConstraintCollector2(fConstraintCreator);
-		CompilationUnit unitAST= new RefactoringASTParser(AST.JLS3).parse(cu, false);
-		
+		ConstraintCreator2 unitCollector= new FullConstraintCreator2(fTypeConstraintFactory);
+		CompilationUnit unitAST= new RefactoringASTParser(AST.JLS3).parse(cu, true);
+		unitAST.accept(unitCollector);
 		ITypeConstraint2[] unitConstraints= unitCollector.getConstraints();
 		//TODO: add required methods/cus to "toscan" list
 		
 		fProcessedCus.add(cu);
 		
 		
-		//from unitGranularityConstraintCollection():
+// -------------- from unitGranularityConstraintCollection(): -------------
 		
 //		GenericizeConstraintCreator gcc= new GenericizeConstraintCreator(gvf, fProject);
 //		Collection/*<ITypeConstraint>*/ constraints= new HashSet();

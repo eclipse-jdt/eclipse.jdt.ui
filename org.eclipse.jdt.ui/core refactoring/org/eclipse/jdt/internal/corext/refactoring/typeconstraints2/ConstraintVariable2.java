@@ -11,35 +11,29 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import org.eclipse.core.runtime.Platform;
-
-import org.eclipse.jdt.core.dom.ITypeBinding;
-
-import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.Assert;
 
 
+/**
+ * A ConstraintVariable stands for an AST entity which has a type. 
+ */
 public abstract class ConstraintVariable2 {
 	
-	protected static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/TypeConstraints")); //$NON-NLS-1$//$NON-NLS-2$
 	protected static final String TO_STRING= "toString"; //$NON-NLS-1$
 	
-	/**
-	 * The type handle, or <code>null</code>.
-	 */
 	private TypeHandle fTypeHandle;
 	
 	private Object[] fDatas;
 
 	
 	/**
-	 * @param typeHandle the type binding, or <code>null</code>
+	 * @param typeHandle the type binding TODO: allow null?
 	 */
-	protected ConstraintVariable2(TypeHandle typeHandle, ITypeBinding typeBinding) {
-		if (typeHandle != null) {
-			fTypeHandle= typeHandle;
-		}
-		if (DEBUG)
-			setData(TO_STRING, Bindings.asString(typeBinding));
+	protected ConstraintVariable2(TypeHandle typeHandle) {
+		Assert.isNotNull(typeHandle);
+		fTypeHandle= typeHandle;
+//		if (DEBUG)
+//			setData(TO_STRING, Bindings.asString(typeBinding));
 	}
 	
 	public TypeHandle getTypeHandle() {

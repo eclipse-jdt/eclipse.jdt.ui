@@ -8,23 +8,29 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import java.util.List;
+/**
+ * A ReturnTypeVariable is a ConstraintVariable which stands for
+ * the return type of a method.
+ */
 
-import org.eclipse.jdt.core.dom.ASTVisitor;
+public class ReturnTypeVariable2 extends ConstraintVariable2 {
 
-public class ConstraintCreator2 extends ASTVisitor {
-	private List/*<ITypeConstraint2[]>*/ fConstraints;
-	
-	protected void addConstraints(ITypeConstraint2[] typeConstraints) {
-		for (int i= 0; i < typeConstraints.length; i++) {
-			fConstraints.add(typeConstraints[i]);
-		}
+	protected ReturnTypeVariable2(TypeHandle returnTypeHandle) {
+		super(returnTypeHandle);
+		// TODO Auto-generated constructor stub
 	}
-	
-	public ITypeConstraint2[] getConstraints() {
-		return (ITypeConstraint2[]) fConstraints.toArray(new ITypeConstraint2[fConstraints.size()]);
+
+	protected int getHash() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	protected boolean isSameAs(ConstraintVariable2 other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

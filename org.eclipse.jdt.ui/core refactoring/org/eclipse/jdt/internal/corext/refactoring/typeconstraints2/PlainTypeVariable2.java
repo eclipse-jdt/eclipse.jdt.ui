@@ -8,23 +8,26 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import java.util.List;
+/**
+ * A PlainTypeVariable is a ConstraintVariable which stands for a
+ * plain type (without an updatable Source location)
+ */
 
-import org.eclipse.jdt.core.dom.ASTVisitor;
+public class PlainTypeVariable2 extends ConstraintVariable2 {
 
-public class ConstraintCreator2 extends ASTVisitor {
-	private List/*<ITypeConstraint2[]>*/ fConstraints;
-	
-	protected void addConstraints(ITypeConstraint2[] typeConstraints) {
-		for (int i= 0; i < typeConstraints.length; i++) {
-			fConstraints.add(typeConstraints[i]);
-		}
+	protected PlainTypeVariable2(TypeHandle typeHandle) {
+		super(typeHandle);
 	}
-	
-	public ITypeConstraint2[] getConstraints() {
-		return (ITypeConstraint2[]) fConstraints.toArray(new ITypeConstraint2[fConstraints.size()]);
+
+	protected int getHash() {
+		return getTypeHandle().hashCode();
+	}
+
+	protected boolean isSameAs(ConstraintVariable2 other) {
+		return getTypeHandle() == other.getTypeHandle();
 	}
 
 }

@@ -45,4 +45,9 @@ public class CompositeOrTypeConstraint2 implements ITypeConstraint2 {
 		CompositeOrTypeConstraint2 otherTC= (CompositeOrTypeConstraint2) other;
 		return false;
 	}
+
+	public int getHash() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
