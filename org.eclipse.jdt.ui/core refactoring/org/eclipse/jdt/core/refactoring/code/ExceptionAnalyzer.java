@@ -49,7 +49,10 @@ import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 	public void visitMessageSend(MessageSend statement, BlockScope scope, int mode) {
 		if (mode != StatementAnalyzer.SELECTED)
 			return;
-			
+		
+		if (statement.binding == null)
+			return;
+				
 		ReferenceBinding[] thrownExceptions= statement.binding.thrownExceptions;
 		if (thrownExceptions != null) {
 			for (int i= 0; i < thrownExceptions.length;i++) {

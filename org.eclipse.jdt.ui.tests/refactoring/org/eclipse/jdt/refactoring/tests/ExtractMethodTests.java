@@ -842,8 +842,7 @@ public class ExtractMethodTests extends RefactoringTest {
 	}	
 	
 	public void test405() throws Exception {
-		System.out.println("\n405 disabled since it fails. See 1GDGFR8");
-		// semicolonTest();
+		semicolonTest();
 	}	
 	
 	//---- Test Try / catch block
@@ -969,6 +968,10 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test607() throws Exception {
+		expressionTest();
+	}
+	
+	public void test608() throws Exception {
 		expressionTest();
 	}
 	

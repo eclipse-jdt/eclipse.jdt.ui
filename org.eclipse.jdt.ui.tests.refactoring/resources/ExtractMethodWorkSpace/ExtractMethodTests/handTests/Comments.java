@@ -1,4 +1,6 @@
-public class Test {
+package handTests;
+public class Comments {
+	/* comment */
 	public void foo() {
 		foo();
 		/* comment */
@@ -6,4 +8,5 @@ public class Test {
 		/** comment */
 		foo();
 	}
+	/* comment */
 }

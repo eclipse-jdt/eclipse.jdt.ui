@@ -95,25 +95,20 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @param pm a progress monitor to report progress during activation checking.
 	 * @return the refactoring status describing the result of the activation check.	 
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try {
 			pm.beginTask("Checking text selection", 1);
 			RefactoringStatus result= new RefactoringStatus();
 			
 			if (fSelectionStart < 0 || fSelectionLength == 0)
 				return mergeTextSelectionStatus(result);
-				
-			try {
-				if (!(fCUnit instanceof CompilationUnit)) {
-					result.addFatalError("Internal error: compilation unit has wrong type");
-					return result;
-				}
-				fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
-				((CompilationUnit)fCUnit).accept(createVisitor());
-			} catch (JavaModelException e) {
-				result.addFatalError(e.getStatus().getMessage());
+			
+			if (!(fCUnit instanceof CompilationUnit)) {
+				result.addFatalError("Internal error: compilation unit has wrong type.");
 				return result;
 			}
+			fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
+			((CompilationUnit)fCUnit).accept(createVisitor());
 			
 			fStatementAnalyzer.checkActivation(result);
 			return result;
@@ -429,8 +424,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 		int start= fStatementAnalyzer.getLastSelectedStatementEnd() + 1;
 		int length= fSelectionLength - (start - fSelectionStart);
 		
-		if (length <= 0)
-			return true;
+		if (length < 0) {
+			// Check if we have adjusted the selection end for the return statement.
+			if (fStatementAnalyzer.getAdjustedSelectionEnd() == -1)
+				return false;
+			else
+				return true;
+		}
 		
 		// Does the source have a semicolon	
 		if (fBuffer.indexOf(';', start, length) != -1)

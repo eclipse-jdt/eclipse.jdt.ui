@@ -111,9 +111,10 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	 */
 	public void checkActivation(RefactoringStatus status) {
 		if (fEnclosingMethod == null || fLastSelectedNode == null) {
-			if (fMessage == null)
-				fMessage= "Can create new method. Only statements from the body of a top level method can be extracted.";
-			status.addFatalError(fMessage);
+			if (fMessage == null && !fStatus.hasFatalError())
+				fMessage= "Can not create new method. Only statements from the body of a top level method can be extracted.";
+			if (fMessage != null)
+				status.addFatalError(fMessage);
 		}
 		status.merge(fStatus);
 		if (fFirstSelectedNode == fLastSelectedNodeWithSameParentAsFirst &&
@@ -283,6 +284,13 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		// Do a reset even if we are in BEFORE mode. We can extract a method defined
 		// inside a method.
 		if (enclosed && (fMode == UNDEFINED || fMode == BEFORE)) {
+			if (fMode == UNDEFINED) {
+				CommentAnalyzer commentAnalyzer= new CommentAnalyzer();
+				fStatus.merge(commentAnalyzer.check(fSelection, fBuffer.getCharacters(),
+					node.declarationSourceStart, node.declarationSourceEnd));
+				if (fStatus.hasFatalError())
+					return false;				
+			}
 			fExceptionAnalyzer.visitAbstractMethodDeclaration(node, scope);
 			reset();
 			fEnclosingMethod= node;
