@@ -9,8 +9,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.internal.ui.typehierarchy.ITypeHierarchyLifeCycleListener;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyLifeCycle;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 public class OverrideImageProvider extends ErrorTickImageProvider {
 	

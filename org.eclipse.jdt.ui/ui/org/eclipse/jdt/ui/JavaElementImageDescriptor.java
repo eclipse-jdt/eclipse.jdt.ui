@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.viewsupport;
+package org.eclipse.jdt.ui;
 
 
 import org.eclipse.swt.graphics.ImageData;
@@ -15,38 +15,57 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
- * A JavaImageDescriptor consists of a main icon and several adornments. The adornments
- * are computed according to Java element's modifiers (e.g. visibility, static, final, ...). 
+ * A JavaImageDescriptor consists of a base image and several adornments. The adornments
+ * are computed according to the flags either passed during creation or set via the method
+ * <code>setAdornments</code>. 
+ * </p>
+ * It is guaranteed that objects that conform to this interface are also instances of type
+ * <code>ImageDescriptor</code>
+ * </p>
+ * <b>Note:</b> This class/interface is part of an interim API that is still under development 
+ * and expected to change before reaching stability.
+ * </p>
+ * 
+ * @since 2.0 
  */
 public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	
 	/** Flag to render the abstract adornment */
 	public final static int ABSTRACT= 		0x001;
+	
 	/** Flag to render the final adornment */
 	public final static int FINAL=			0x002;
+	
 	/** Flag to render the synchronized adornment */
 	public final static int SYNCHRONIZED=	0x004;
+	
 	/** Flag to render the static adornment */
 	public final static int STATIC=			0x008;
+	
 	/** Flag to render the runnable adornment */
 	public final static int RUNNABLE= 		0x010;
+	
 	/** Flag to render the waring adornment */
-	public final static int WARNING=		0x020;
+	public final static int WARNING=			0x020;
+	
 	/** Flag to render the error adornment */
 	public final static int ERROR=			0x040;
-	/** Flag to render the error adornment */
-	public final static int OVERRIDDEN= 0x080;	
 	
+	/** Flag to render the error adornment */
+	public final static int OVERRIDDEN= 		0x080;	
+
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
 	private Point fSize;
-	
+
 	/**
 	 * Create a new JavaElementImageDescriptor.
 	 * 
 	 * @param baseImage an image descriptor used as the base image
-	 * @param flags flags indicating which adornments are to be rendered
+	 * @param flags flags indicating which adornments are to be rendered. See <code>setAdornments</code>
+	 * 	for valid values.
 	 * @param size the size of the resulting image
+	 * @see #setAdornments(int)
 	 */
 	public JavaElementImageDescriptor(ImageDescriptor baseImage, int flags, Point size) {
 		fBaseImage= baseImage;
@@ -55,6 +74,47 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		Assert.isTrue(fFlags >= 0);
 		fSize= size;
 		Assert.isNotNull(fSize);
+	}
+	
+	/**
+	 * Sets the descriptors adornments. Valid values are: <code>ABSTRACT</code>, <code>FINAL</code>,
+	 * <code>SYNCHRONIZED</code>, </code>STATIC<code>, </code>RUNNABLE<code>, </code>WARNING<code>, 
+	 * </code>ERROR<code>, </code>OVERRIDDEN<code>, or any combination of those.
+	 * 
+	 * @param adornments the image descritpors adornments
+	 */
+	public void setAdornments(int adornments) {
+		Assert.isTrue(adornments >= 0);
+		fFlags= adornments;
+	}
+
+	/**
+	 * Returns the current adornments.
+	 * 
+	 * @return the current adornments
+	 */
+	public int getAdronments() {
+		return fFlags;
+	}
+
+	/**
+	 * Sets the size of the image created by calling <code>createImage()</code>.
+	 * 
+	 * @param size the size of the image returned from calling <code>createImage()</code>
+	 */
+	public void setImageSize(Point size) {
+		Assert.isNotNull(size);
+		Assert.isTrue(size.x >= 0 && size.y >= 0);
+		fSize= size;
+	}
+	
+	/**
+	 * Returns the size of the image created by calling <code>createImage()</code>.
+	 * 
+	 * @return the size of the image created by calling <code>createImage</code>
+	 */
+	public Point getImageSize() {
+		return new Point(fSize.x, fSize.y);
 	}
 	
 	/* (non-Javadoc)

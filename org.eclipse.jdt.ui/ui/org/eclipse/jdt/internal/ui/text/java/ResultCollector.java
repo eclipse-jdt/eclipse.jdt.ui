@@ -10,15 +10,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-
-import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+
+import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -30,7 +27,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageDescriptor;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.

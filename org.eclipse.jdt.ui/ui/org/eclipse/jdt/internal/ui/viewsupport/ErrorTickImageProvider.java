@@ -2,14 +2,14 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.Iterator;
 
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.ISourceReference;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 public class ErrorTickImageProvider extends JavaElementImageProvider {
 	

@@ -13,37 +13,50 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 /**
  * An imlementation of the IWorkbenchAdapter for IJavaElements.
  */
-  
 public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
+	
 	protected static final Object[] NO_CHILDREN= new Object[0];
+	
+	private JavaElementImageProvider fImageProvider;
+	private JavaElementLabelProvider fLabelProvider;
 
-	public Object[] getChildren(Object o) {
-		if (o instanceof IParent) {
+	public JavaWorkbenchAdapter() {
+		fImageProvider= new JavaElementImageProvider();
+		fLabelProvider= new JavaElementLabelProvider();
+	}
+
+	public Object[] getChildren(Object element) {
+		if (element instanceof IParent) {
 			try {
-				return ((IParent)o).getChildren();
+				return ((IParent)element).getChildren();
 			} catch(JavaModelException e) {
-				JavaPlugin.logErrorMessage(getClass().getName() + ": Error getting children for: " + o); //$NON-NLS-1$
+				JavaPlugin.logErrorMessage(getClass().getName() + ": Error getting children for: " + element); //$NON-NLS-1$
 			}
 		}
 		return NO_CHILDREN;
 	}
 
-	public ImageDescriptor getImageDescriptor(Object object) {
-		return null;
+	public ImageDescriptor getImageDescriptor(Object element) {
+		return fImageProvider.getJavaImageDescriptor(
+			(IJavaElement)element, 
+			JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS);
 	}
 
-	public String getLabel(Object o) {
-		if (o instanceof IJavaElement)
-			return ((IJavaElement)o).getElementName();
-		return null;
+	public String getLabel(Object element) {
+		return JavaElementLabels.getTextLabel(element, JavaElementLabels.M_PARAMETER_TYPES);
 	}
 
-	public Object getParent(Object o) {
-		if (o instanceof IJavaElement)
-			return ((IJavaElement)o).getParent();
+	public Object getParent(Object element) {
+		if (element instanceof IJavaElement)
+			return ((IJavaElement)element).getParent();
 		return null;
 	}
 }
