@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.osgi.framework.BundleContext;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -44,8 +44,13 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
+
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
+import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -54,14 +59,10 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
-import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ConfigurationElementSorter;
-import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferFactory;
@@ -83,6 +84,7 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
@@ -93,13 +95,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
-import org.eclipse.jdt.internal.ui.text.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
-import org.osgi.framework.BundleContext;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 /**
  * Represents the java plug-in. It provides a series of convenience methods such as
@@ -719,7 +721,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
 		super.initializeDefaultPreferences(store);
-		MarkerAnnotationPreferences.ignoreValuesIncludedOnPreferencePage(store, true);
+		EditorsUI.useAnnotationsPreferencePage(store);
+		EditorsUI.useQuickDiffPreferencePage(store);
 		PreferenceConstants.initializeDefaultValues(store);
 	}
 	
