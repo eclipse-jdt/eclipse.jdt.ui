@@ -24,9 +24,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -424,52 +424,6 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	private static int getTypeOrder(Code type) {
-		if (type == PrimitiveType.BYTE) return 1;
-		if (type == PrimitiveType.CHAR) return 2;
-		if (type == PrimitiveType.SHORT) return 3;
-		if (type == PrimitiveType.INT) return 4;
-		if (type == PrimitiveType.LONG) return 5;
-		if (type == PrimitiveType.FLOAT) return 6;
-		if (type == PrimitiveType.DOUBLE) return 7;
-		return 0;
-	}
-
-	private static boolean canAssign(ITypeBinding typeToAssign, String definedType) {
-		int arrStart= definedType.indexOf('[');
-		if (arrStart != -1) {
-			if (!typeToAssign.isArray()) {
-				return false; // can not assign a non-array type 
-			}
-			definedType= definedType.substring(0, arrStart);
-			typeToAssign= typeToAssign.getElementType();
-			if (typeToAssign.isPrimitive() && !definedType.equals(typeToAssign.getName())) {
-				return false; // can't assign arrays of primitive types to each other
-			}
-		}
-		
-		Code definedTypeCode= PrimitiveType.toCode(definedType);
-		if (typeToAssign.isPrimitive()) {
-			if (definedTypeCode == null) {
-				return false;
-			}
-			
-			Code toAssignCode= PrimitiveType.toCode(typeToAssign.getName());
-			if (toAssignCode == definedTypeCode) {
-				return true;
-			}
-			if (definedTypeCode == null || definedTypeCode == PrimitiveType.BOOLEAN || toAssignCode == PrimitiveType.BOOLEAN) {
-				return false;
-			}
-			return getTypeOrder(definedTypeCode) <= getTypeOrder(toAssignCode);
-		} else {
-			if (definedTypeCode != null) {
-				return false;
-			}
-			return (Bindings.findTypeInHierarchy(typeToAssign, definedType) == null);
-		}
-	}
-	
 	private static void addParameterMissmatchProposals(ICorrectionContext context, SimilarElement elem, List arguments, List proposals) throws CoreException {
 		String[] paramTypes= elem.getParameterTypes();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
@@ -477,19 +431,41 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 		if (paramTypes.length == argTypes.length) {
+			int[] indexOfDiff= new int[paramTypes.length];
+			int nDiffs= 0;
 			for (int i= 0; i < argTypes.length; i++) {
-				if (!canAssign(argTypes[i], paramTypes[i])) {
-					// argument can not be assigned to paramtype
-					Expression nodeToCast= (Expression) arguments.get(i);
-					String castType= paramTypes[i];
+				if (!ASTResolving.canAssign(argTypes[i], paramTypes[i])) {
+					indexOfDiff[nDiffs++]= i;
+				}
+			}
+			for (int k= 0; k < nDiffs; k++) {
+				int idx= indexOfDiff[k];
+				Expression nodeToCast= (Expression) arguments.get(idx);
+				String castType= paramTypes[idx];
+				if (nodeToCast.getNodeType() != ASTNode.CAST_EXPRESSION) {
+					ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.getCastProposal(context, castType, nodeToCast);
+					if (proposal != null) {
+						proposals.add(proposal);	
+						proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparametercast.description", castType)); //$NON-NLS-1$
+					}
+				}					
+			}
+			if (nDiffs == 2) { // try to swap
+				int idx1= indexOfDiff[0];
+				int idx2= indexOfDiff[1];
+				if (ASTResolving.canAssign(argTypes[idx1], paramTypes[idx2]) && ASTResolving.canAssign(argTypes[idx2], paramTypes[idx1])) {
+					Expression arg1= (Expression) arguments.get(idx1);
+					Expression arg2= (Expression) arguments.get(idx2);
 					
-					if (nodeToCast.getNodeType() != ASTNode.CAST_EXPRESSION) {
-						ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.getCastProposal(context, castType, nodeToCast);
-						if (proposal != null) {
-							proposals.add(proposal);	
-							proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparametercast.description", castType)); //$NON-NLS-1$
-						}
-					}		
+					ASTRewrite rewrite= new ASTRewrite(arg1.getParent());
+					rewrite.markAsReplaced(arg1, rewrite.createCopy(arg2));
+					rewrite.markAsReplaced(arg2, rewrite.createCopy(arg1));
+			
+					String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.swapparameters.description"); //$NON-NLS-1$
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
+					proposal.ensureNoModifications();
+					proposals.add(proposal);		
 				}
 			}
 		}

@@ -18,9 +18,11 @@ import java.util.List;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class ASTResolving {
@@ -243,6 +245,96 @@ public class ASTResolving {
 		}
 		return null;
 	} 
+
+
+
+	private static int getTypeOrder(Code type) {
+		if (type == PrimitiveType.BYTE) return 2;
+		if (type == PrimitiveType.CHAR) return 3;
+		if (type == PrimitiveType.SHORT) return 3;
+		if (type == PrimitiveType.INT) return 4;
+		if (type == PrimitiveType.LONG) return 5;
+		if (type == PrimitiveType.FLOAT) return 6;
+		if (type == PrimitiveType.DOUBLE) return 7;
+		return 0;
+	}
+
+	/**
+	 * Tests if a two primitive types are assign compatible
+	 * @param typeToAssign The binding of the type to assign
+	 * @param definedType The type of the object that is assigned
+	 * @return boolean Returns true if definedType = typeToAssign is true
+	 */	
+	public static boolean canAssignPrimitive(Code toAssignCode, Code definedTypeCode) {
+		//	definedTypeCode = typeCodeToAssign;
+		if (toAssignCode == definedTypeCode) {
+			return true;
+		}
+		if (definedTypeCode == PrimitiveType.BOOLEAN || toAssignCode == PrimitiveType.BOOLEAN) {
+			return false;
+		}
+		if (definedTypeCode == PrimitiveType.CHAR && toAssignCode == PrimitiveType.BYTE) {
+			return false;
+		}
+		return getTypeOrder(definedTypeCode) > getTypeOrder(toAssignCode);		
+	}
+	
+
+	/**
+	 * Tests if a two types are assign compatible
+	 * @param typeToAssign The binding of the type to assign
+	 * @param definedType The type of the object that is assigned
+	 * @return boolean Returns true if definedType = typeToAssign is true
+	 */
+	public static boolean canAssign(ITypeBinding typeToAssign, String definedType) {
+		// definedType = typeToAssign;
+		
+		int arrStart= definedType.indexOf('[');
+		if (arrStart != -1) {
+			if (!typeToAssign.isArray()) {
+				return false; // can not assign a non-array type 
+			}
+			int definedDim= definedType.length() - arrStart;
+			int toAssignDim= typeToAssign.getDimensions() * 2;
+			if (definedDim == toAssignDim) {
+				definedType= definedType.substring(0, arrStart);
+				typeToAssign= typeToAssign.getElementType();
+				if (typeToAssign.isPrimitive() && !definedType.equals(typeToAssign.getName())) {
+					return false; // can't assign arrays of primitive types to each other
+				}
+				return canAssign(typeToAssign, definedType);				
+			} else if (definedDim < toAssignDim) {
+				return isArrayCompatible(definedType.substring(0, arrStart));
+			}
+			return false;
+		}
+		
+		Code definedTypeCode= PrimitiveType.toCode(definedType);
+		if (typeToAssign.isPrimitive()) {
+			if (definedTypeCode == null) {
+				return false;
+			}
+			Code toAssignCode= PrimitiveType.toCode(typeToAssign.getName());
+			return canAssignPrimitive(toAssignCode, definedTypeCode);
+		} else {
+			if (definedTypeCode != null) {
+				return false;
+			}
+			if (typeToAssign.isArray()) {
+				return isArrayCompatible(definedType);
+			}
+			if ("java.lang.Object".equals(definedType)) { //$NON-NLS-1$
+				return true;
+			}
+			return (Bindings.findTypeInHierarchy(typeToAssign, definedType) != null);
+		}
+	}
+	
+	private static boolean isArrayCompatible(String definedType) {
+		return "java.lang.Object".equals(definedType) || "java.io.Serializable".equals(definedType) || "java.lang.Cloneable".equals(definedType); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+
 	
 	
 	public static MethodDeclaration findParentMethodDeclaration(ASTNode node) {
