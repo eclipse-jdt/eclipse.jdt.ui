@@ -40,7 +40,7 @@
          	label="%JUnitProjectExampleCreationWizard.label"
         	name="JUnit">
            <nature id="org.eclipse.jdt.core.javanature"/>
-           <import dest="" src="archive/junit/junit38src.jar"/>
+           <import dest="" src="archive/junit/junit37src.jar"/>
         </projectsetup>
       </wizard>	
 </extension>  
