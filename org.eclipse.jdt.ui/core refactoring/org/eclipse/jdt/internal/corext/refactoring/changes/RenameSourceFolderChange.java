@@ -57,10 +57,17 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 			pm.beginTask(RefactoringCoreMessages.getString("RenameSourceFolderChange.renaming"), 2); //$NON-NLS-1$
 			modifyClassPath(new SubProgressMonitor(pm, 1));
 			IPath path= getResource().getFullPath().removeLastSegments(1).append(getNewName());
-			getResource().move(path, IResource.NONE, new SubProgressMonitor(pm, 1));
+			getResource().move(path, getCoreMoveFlags(), new SubProgressMonitor(pm, 1));
 		} finally{
 			pm.done();
 		}	
+	}
+
+	protected int getCoreMoveFlags() {
+		if (getResource().isLinked())
+			return IResource.SHALLOW;
+		else
+			return IResource.NONE;
 	}
 	
 	private void modifyClassPath(IProgressMonitor pm) throws JavaModelException{

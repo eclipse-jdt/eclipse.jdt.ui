@@ -57,13 +57,20 @@ public class RenameResourceChange extends Change {
 				pm.worked(1);
 				return;
 			} 
-			getResource().move(renamedResourcePath(fResourcePath, fNewName), IResource.NONE, pm);
+			getResource().move(renamedResourcePath(fResourcePath, fNewName), getCoreRenameFlags(), pm);
 		} catch(Exception e){
 			handleException(context, e);
 			setActive(false);
 		} finally {
 			pm.done();
 		}
+	}
+
+	private int getCoreRenameFlags() {
+		if (getResource().isLinked())
+			return IResource.SHALLOW;
+		else	
+			return IResource.NONE;
 	}
 	
 	public IChange getUndoChange() {
