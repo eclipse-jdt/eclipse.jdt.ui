@@ -21,7 +21,7 @@
   </target>
 
   <!-- This target defines the tests that need to be run. -->
-  <target name="suite" unless="performance">
+  <target name="suite">
     <property name="jdt-text-folder" 
               value="${eclipse-home}/jdt_text_folder"/>
     <delete dir="${jdt-text-folder}" quiet="true"/>
@@ -34,7 +34,7 @@
   </target>
 
   <!-- This target defines the performance tests that need to be run. -->
-  <target name="performance-suite" if="performance">
+  <target name="performance-suite">
     <property name="jdt-text-performance-folder" 
               value="${eclipse-home}/jdt_text_performance_folder"/>
     <delete dir="${jdt-text-performance-folder}" quiet="true"/>
@@ -70,7 +70,16 @@
 
   <!-- This target runs the test suite. Any actions that need to happen -->
   <!-- after all the tests have been run should go here. -->
-  <target name="run" depends="init,suite,performance-suite,cleanup">
+  <target name="run" depends="init,suite,cleanup">
+    <ant target="collect" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="includes" value="org*.xml"/>
+      <property name="output-file" value="${plugin-name}.xml"/>
+    </ant>
+  </target>
+
+  <!-- This target runs the performance test suite. Any actions that need to happen -->
+  <!-- after all the tests have been run should go here. -->
+  <target name="performance" depends="init,performance-suite,cleanup">
     <ant target="collect" antfile="${library-file}" dir="${eclipse-home}">
       <property name="includes" value="org*.xml"/>
       <property name="output-file" value="${plugin-name}.xml"/>
