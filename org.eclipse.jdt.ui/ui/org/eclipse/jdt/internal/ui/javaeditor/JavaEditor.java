@@ -122,6 +122,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	/** The outline page selection updater */
 	private OutlinePageSelectionUpdater fUpdater;
 	
+	/** Indicates whether the cursor change has been initiated by the outline page */
+	private boolean fOutlinePageInitiated= false;
+	
 	
 		
 	/**
@@ -286,6 +289,15 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		if (reference != null) {
 			
+			StyledText  textWidget= null;
+			
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer != null)
+				textWidget= sourceViewer.getTextWidget();
+			
+			if (textWidget == null)
+				return;
+				
 			try {
 				
 				ISourceRange range= reference.getSourceRange();
@@ -297,8 +309,14 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 				
 				if (offset < 0 || length < 0)
 					return;
+					
+				textWidget.setRedraw(false);
 				
-				setHighlightRange(offset, length, moveCursor);
+				/*
+				 * Use <code>false</code> to avoid multiple
+				 * selection changed events.
+				 */
+				setHighlightRange(offset, length, false);
 					
 				if (!moveCursor)
 					return;
@@ -329,21 +347,24 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 				}
 				
 				if (offset > -1 && length > 0) {
-					if (getSourceViewer() != null) {
-						getSourceViewer().revealRange(offset, length);
-						getSourceViewer().setSelectedRange(offset, length);
-					}
+					sourceViewer.revealRange(offset, length);
+					sourceViewer.setSelectedRange(offset, length);
+				} else {
+					offset= range.getOffset();
+					sourceViewer.setSelectedRange(offset, 0);
+					sourceViewer.revealRange(offset, range.getLength());
 				}
-				
-				return;
 				
 			} catch (JavaModelException x) {
 			} catch (IllegalArgumentException x) {
+			} finally {
+				if (textWidget != null)
+					textWidget.setRedraw(true);
 			}
-		}
-		
-		if (moveCursor)
+			
+		} else if (moveCursor) {
 			resetHighlightRange();
+		}
 	}
 		
 	public void setSelection(IJavaElement element) {
@@ -386,7 +407,13 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		}
 		if (!isActivePart() && JavaPlugin.getActivePage() != null)
 			JavaPlugin.getActivePage().bringToTop(this);
-		setSelection(reference, !isActivePart());
+			
+		try {
+			fOutlinePageInitiated= true;
+			setSelection(reference, !isActivePart());
+		} finally {
+			fOutlinePageInitiated= false;
+		}
 	}
 	
 	/**
@@ -558,7 +585,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	 */
 	protected void handleCursorPositionChanged() {
 		super.handleCursorPositionChanged();
-		if (fUpdater != null)
+		if (!fOutlinePageInitiated && fUpdater != null)
 			fUpdater.post();
 	}
 }
