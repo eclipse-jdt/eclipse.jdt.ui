@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.ASTWithExistingFlattener;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
@@ -120,8 +121,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			TypeDeclaration innerType= (TypeDeclaration) members.get(0);
 			
 			ASTRewriteAnalyzer.markAsReplaced(innerType, null);
-			
-			ASTNode movedNode= ASTRewriteAnalyzer.getInsertNodeForExisting(innerType);
+			ASTNode movedNode= ASTRewriteAnalyzer.getPlaceholderForExisting(innerType);
 			members.add(movedNode);
 			
 			Statement toMove;
@@ -147,8 +147,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				List statements= body.statements();
 				assertTrue("Has statements", statements.isEmpty());
 				
-				ASTNode insertNodeForMove= ASTRewriteAnalyzer.getInsertNodeForExisting(toMove);
-				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.getInsertNodeForExisting(toCopy);
+				ASTNode insertNodeForMove= ASTRewriteAnalyzer.getPlaceholderForExisting(toMove);
+				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.getPlaceholderForExisting(toCopy);
 				
 				statements.add(insertNodeForCopy);
 				statements.add(insertNodeForMove);
@@ -214,12 +214,12 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				
 				ASTRewriteAnalyzer.markAsReplaced(outerType, null);
 				
-				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.getInsertNodeForExisting(outerType);
+				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.getPlaceholderForExisting(outerType);
 				innerMembers.add(insertNodeForCopy);
 			}
 			{ // copy method of inner to main type
 				MethodDeclaration methodDecl= (MethodDeclaration) innerMembers.get(0);
-				ASTNode insertNodeForMove= ASTRewriteAnalyzer.getInsertNodeForExisting(methodDecl);
+				ASTNode insertNodeForMove= ASTRewriteAnalyzer.getPlaceholderForExisting(methodDecl);
 				members.add(insertNodeForMove);
 			}
 			{ // nest body of constructor in a while statement
@@ -231,7 +231,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				WhileStatement whileStatement= ast.newWhileStatement();
 				whileStatement.setExpression(ast.newBooleanLiteral(true));
 				
-				Statement insertNodeForCopy= (Statement) ASTRewriteAnalyzer.getInsertNodeForExisting(body);
+				Statement insertNodeForCopy= (Statement) ASTRewriteAnalyzer.getPlaceholderForExisting(body);
 				
 				whileStatement.setBody(insertNodeForCopy); // set existing body
 
@@ -279,6 +279,70 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testMoveStatements() throws Exception {
+		ICompilationUnit cu= fCU_E;
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		AST ast= astRoot.getAST();
+		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
+		
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		
+		{
+
+//			{ // nest body of constructor in a while statement
+//				MethodDeclaration methodDecl= findMethodDeclaration(type, "E");
+//				assertTrue("Cannot find Constructor E", methodDecl != null);
+//
+//				Block body= methodDecl.getBody();
+//
+//				WhileStatement whileStatement= ast.newWhileStatement();
+//				whileStatement.setExpression(ast.newBooleanLiteral(true));
+//				
+//				Statement insertNodeForCopy= (Statement) ASTRewriteAnalyzer.getInsertNodeForExisting(body);
+//				
+//				whileStatement.setBody(insertNodeForCopy); // set existing body
+//
+//				Block newBody= ast.newBlock();
+//				List newStatements= newBody.statements();				
+//				newStatements.add(whileStatement);
+//				
+//				ASTRewriteAnalyzer.markAsReplaced(body, newBody);
+//			}			
+		}	
+					
+
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends Exception implements Runnable, Serializable {\n");
+		buf.append("    public static class EInner {\n");
+		buf.append("        public void xee() {\n");
+		buf.append("            /* does nothing */\n");
+		buf.append("        }\n");
+		buf.append("    }\n");		
+		buf.append("    private /* inner comment */ int i;\n");
+		buf.append("    private int k;\n");
+		buf.append("    public E() {\n");
+		buf.append("        super();\n");
+		buf.append("        i= 0;\n");
+		buf.append("        k= 9;\n");
+		buf.append("        if (System.out == null) {\n");
+		buf.append("            gee(); // cool\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface G {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
 	
 	
 }

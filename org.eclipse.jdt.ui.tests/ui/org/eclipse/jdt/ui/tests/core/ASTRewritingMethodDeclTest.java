@@ -102,6 +102,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			methodDecl.setReturnType(newReturnType);
 			
 			ASTRewriteAnalyzer.markAsInserted(newReturnType);
+			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, methodDecl.getModifiers(), true);
 		}
 		{ // change return type
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
@@ -117,6 +118,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			
 			Type returnType= methodDecl.getReturnType();
 			ASTRewriteAnalyzer.markAsReplaced(returnType, null);
+			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, methodDecl.getModifiers(), true);
 		}
 		{ // rename method name
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "iee");

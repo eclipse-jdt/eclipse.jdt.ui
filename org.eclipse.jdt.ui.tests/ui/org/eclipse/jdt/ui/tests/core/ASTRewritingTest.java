@@ -46,7 +46,7 @@ public class ASTRewritingTest extends TestCase {
 				break;
 			}
 		}
-		if (str1.length() != str2.length()) {
+		if (diffPos == -1 && str1.length() != str2.length()) {
 			diffPos= len1;
 		}
 		if (diffPos != -1) {
