@@ -163,7 +163,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 	private TextEdit doTextCopy(ASTNode copiedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, String description) {
 		CopySourceEdit sourceEdit= fRewrite.getCopySourceEdit(copiedNode);
-		Assert.isTrue(sourceEdit != null, "Copy source not annotated" + copiedNode.toString());
+		if (sourceEdit == null) {
+			Assert.isTrue(false, "Copy source not annotated" + copiedNode.toString());
+		}
 		
 		CopyIndentedTargetEdit targetEdit= new CopyIndentedTargetEdit(destOffset, sourceIndentLevel, destIndentString, tabWidth);
 		targetEdit.setSourceEdit(sourceEdit);
@@ -197,19 +199,27 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}	
 	
 	private void checkNoModification(ASTNode node) {
-		Assert.isTrue(!isModified(node), "Can not modify " + node.getClass().getName());
+		if (isModified(node)) {
+			Assert.isTrue(false, "Can not modify " + node.getClass().getName());
+		}
 	}
 	
 	private void checkNoChange(ASTNode node) {
-		Assert.isTrue(!isChanged(node), "Can not insert or replace node in " + node.getParent().getClass().getName());
+		if (isChanged(node)) {
+			Assert.isTrue(false, "Can not insert or replace node in " + node.getParent().getClass().getName());
+		}
 	}
 	
 	private void checkNoInsertOrRemove(ASTNode node) {
-		Assert.isTrue(!isInserted(node) && !isRemoved(node), "Can not insert or remove node " + node + " in " + node.getParent().getClass().getName());
+		if (isInserted(node) || isRemoved(node)) {	
+			Assert.isTrue(false, "Can not insert or remove node " + node + " in " + node.getParent().getClass().getName());
+		}
 	}	
 	
 	private void checkNoInsert(ASTNode node) {
-		Assert.isTrue(!isInserted(node), "Can not insert node in " + node.getParent().getClass().getName());
+		if (isInserted(node)) {	
+			Assert.isTrue(false, "Can not insert node in " + node.getParent().getClass().getName());
+		}
 	}		
 	
 	
