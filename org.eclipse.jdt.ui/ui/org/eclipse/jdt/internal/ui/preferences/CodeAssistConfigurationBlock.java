@@ -71,9 +71,11 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 	
 	public CodeAssistConfigurationBlock(PreferencePage mainPreferencePage, OverlayPreferenceStore store) {
 		super(store, mainPreferencePage);
+		
+		store.addKeys(createOverlayStoreKeys());
 	}
 
-	protected OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
+	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 		
 		ArrayList overlayKeys= new ArrayList();
 	
@@ -113,7 +115,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		Composite contents= manager.createSectionComposite(parent);
 		Composite composite;
 		
-		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.insertionSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.insertionSection.title")); //$NON-NLS-1$
 		composite.setLayout(new GridLayout(2, false));
 		
 		addCompletionRadioButtons(composite);
@@ -125,7 +127,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.completePrefixes"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, 0);		
 		
-		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.sortingSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.sortingSection.title")); //$NON-NLS-1$
 		composite.setLayout(new GridLayout(2, false));
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
@@ -134,7 +136,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, 0);
 		
-		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.advancedSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.advancedSection.title")); //$NON-NLS-1$
 		composite.setLayout(new GridLayout(2, false));
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
@@ -147,7 +149,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		Button slave= addCheckBox(composite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
 		createDependency(master, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, slave);
 		
-		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.autoactivationSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.autoactivationSection.title")); //$NON-NLS-1$
 		composite.setLayout(new GridLayout(2, false));
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
@@ -174,7 +176,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		fAutoInsertJavaDocTriggerLabel= getLabelControl(labelledTextField);
 		fAutoInsertJavaDocTriggerText= getTextControl(labelledTextField);
 		
-		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.appearanceSection.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.appearanceSection.title")); //$NON-NLS-1$
 		composite.setLayout(new GridLayout(2, false));
 		
 		Label l= new Label(composite, SWT.LEFT);

@@ -57,9 +57,6 @@ public class SemanticHighlightingTest extends TestCase {
 			super.setUp();
 			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
 			
-			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			if (!store.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED))
-				store.setValue(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, true);
 			disableAllSemanticHighlightings();
 			
 			fEditor= (JavaEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile("/SHTest/src/SHTest.java"), true);
@@ -71,8 +68,6 @@ public class SemanticHighlightingTest extends TestCase {
 			EditorTestHelper.closeEditor(fEditor);
 			
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			if (!store.isDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED))
-				store.setToDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
 			
 			SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 			for (int i= 0, n= semanticHighlightings.length; i < n; i++) {

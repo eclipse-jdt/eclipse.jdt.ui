@@ -2366,7 +2366,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					fStickyOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
 				return;
 			}
-			if (PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED.equals(property)) {
+			if (SemanticHighlightings.affectsEnablement(getPreferenceStore(), event)) {
 				if (isSemanticHighlightingEnabled())
 					installSemanticHighlighting();
 				else
@@ -3101,7 +3101,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private boolean isSemanticHighlightingEnabled() {
-		return getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
+		return SemanticHighlightings.isEnabled(getPreferenceStore());
 	}
 	
 	/**

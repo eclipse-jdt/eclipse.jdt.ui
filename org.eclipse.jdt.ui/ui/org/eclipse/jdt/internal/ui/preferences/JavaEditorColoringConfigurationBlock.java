@@ -15,17 +15,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
@@ -40,11 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -54,7 +45,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -70,8 +60,6 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
@@ -86,7 +74,7 @@ import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
  * 
  * @since 2.1
  */
-class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBlock {
+class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	
 	/**
 	 * Item in the highlighting color list.
@@ -102,24 +90,18 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		private String fBoldKey;
 		/** Italic preference key */
 		private String fItalicKey;
-		/** Item color */
-		private Color fItemColor;
-		
 		/**
 		 * Initialize the item with the given values.
-		 * 
 		 * @param displayName the display name
 		 * @param colorKey the color preference key
 		 * @param boldKey the bold preference key
 		 * @param italicKey the italic preference key
-		 * @param itemColor the item color
 		 */
-		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, Color itemColor) {
+		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey) {
 			fDisplayName= displayName;
 			fColorKey= colorKey;
 			fBoldKey= boldKey;
 			fItalicKey= italicKey;
-			fItemColor= itemColor;
 		}
 		
 		/**
@@ -149,13 +131,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		public String getDisplayName() {
 			return fDisplayName;
 		}
-		
-		/**
-		 * @return the item color
-		 */
-		public Color getItemColor() {
-			return fItemColor;
-		}
 	}
 
 	private static class SemanticHighlightingColorListItem extends HighlightingColorListItem {
@@ -165,16 +140,14 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		
 		/**
 		 * Initialize the item with the given values.
-		 * 
 		 * @param displayName the display name
 		 * @param colorKey the color preference key
 		 * @param boldKey the bold preference key
 		 * @param italicKey the italic preference key
 		 * @param enableKey the enable preference key
-		 * @param itemColor the item color
 		 */
-		public SemanticHighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String enableKey, Color itemColor) {
-			super(displayName, colorKey, boldKey, italicKey, itemColor);
+		public SemanticHighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String enableKey) {
+			super(displayName, colorKey, boldKey, italicKey);
 			fEnableKey= enableKey;
 		}
 	
@@ -191,27 +164,12 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	 * 
 	 * @since 3.0
 	 */
-	private class ColorListLabelProvider extends LabelProvider implements IColorProvider {
-	
+	private class ColorListLabelProvider extends LabelProvider {
 		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 		 */
 		public String getText(Object element) {
 			return ((HighlightingColorListItem)element).getDisplayName();
-		}
-		
-		/*
-		 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-		 */
-		public Color getForeground(Object element) {
-			return ((HighlightingColorListItem)element).getItemColor();
-		}
-	
-		/*
-		 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-		 */
-		public Color getBackground(Object element) {
-			return null;
 		}
 	}
 
@@ -242,11 +200,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		}
 	}
 
-	private final OverlayPreferenceStore fStore;
-	private final PreferencePage fMainPreferencePage;
-
-	private StatusInfo fStatus;
-	
 	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
 	/**
 	 * Preference key suffix for italic preferences.
@@ -292,11 +245,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	 */
 	private TableViewer fHighlightingColorListViewer;
 	/**
-	 * Color of Semantic Highlighting items in color list (RGB)
-	 * @since  3.0
-	 */
-	private static final int[] SEMANTIC_HIGHLIGHTING_ITEM_COLOR= new int[] { 0, 0, 0x80 };
-	/**
 	 * Semantic Highlighting color list
 	 * @since  3.0
 	 */
@@ -307,44 +255,22 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	 */
 	private SemanticHighlightingManager fSemanticHighlightingManager;
 	/**
-	 * Is semantic highlighting enabled? (internal state)
-	 * @since  3.0
-	 */
-	private boolean fIsSemanticHighlightingEnabled;
-	/**
 	 * The color manager.
 	 * @since 3.1
 	 */
 	private IColorManager fColorManager;
-	private Map fColorButtons= new HashMap();
-	
-	private Map fCheckBoxes= new HashMap();
-	private SelectionListener fCheckBoxListener= new SelectionListener() {
-		public void widgetDefaultSelected(SelectionEvent e) {
-		}
-		public void widgetSelected(SelectionEvent e) {
-			Button button= (Button) e.widget;
-			fStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
-		}
-	};
-	
 	private FontMetrics fFontMetrics;
 
-	public JavaEditorColoringConfigurationBlock(PreferencePage mainPreferencePage, OverlayPreferenceStore store) {
-		Assert.isNotNull(mainPreferencePage);
-		Assert.isNotNull(store);
-		fMainPreferencePage= mainPreferencePage;
-		fStore= store;
+	public JavaEditorColoringConfigurationBlock(OverlayPreferenceStore store) {
+		super(store);
 		
 		fColorManager= new JavaColorManager(false);
-		Color itemColor= fColorManager.getColor(new RGB(SEMANTIC_HIGHLIGHTING_ITEM_COLOR[0], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[1], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[2]));
 		SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++)
-			fSemanticHighlightingColorList.add(new SemanticHighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i]), itemColor));
+			fSemanticHighlightingColorList.add(new SemanticHighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i])));
 
-		fStore.addKeys(createOverlayStoreKeys());
+		store.addKeys(createOverlayStoreKeys());
 	}
-
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 		
@@ -357,7 +283,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + ITALIC));
 		}
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED));
 		for (int i= 0, n= fSemanticHighlightingColorList.size(); i < n; i++) {
 			SemanticHighlightingColorListItem item= (SemanticHighlightingColorListItem) fSemanticHighlightingColorList.get(i);
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
@@ -397,7 +322,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
      *            the number of characters
      * @return the number of pixels
      */
-    protected int convertWidthInCharsToPixels(int chars) {
+    private int convertWidthInCharsToPixels(int chars) {
         // test for failure to initialize for backward compatibility
         if (fFontMetrics == null)
             return 0;
@@ -419,7 +344,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
      *            the number of characters
      * @return the number of pixels
      */
-    protected int convertHeightInCharsToPixels(int chars) {
+    private int convertHeightInCharsToPixels(int chars) {
         // test for failure to initialize for backward compatibility
         if (fFontMetrics == null)
             return 0;
@@ -427,105 +352,47 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
     }
     
 	public void initialize() {
-
-		initializeFields();
+		super.initialize();
 		
 		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
-			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, null));
-		if (fStore.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED)) {
-			fHighlightingColorList.addAll(fSemanticHighlightingColorList);
-			fIsSemanticHighlightingEnabled= true;
-		}
+			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC));
+		fHighlightingColorList.addAll(fSemanticHighlightingColorList);
 		fHighlightingColorListViewer.setInput(fHighlightingColorList);
 		fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(0)));
-		fStore.addPropertyChangeListener(new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				if (PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED.equals(event.getProperty()))
-					handleSemanticHighlightingEnabled();
-			}
-		});
-	}
-
-	void initializeFields() {
-		Iterator e= fColorButtons.keySet().iterator();
-		while (e.hasNext()) {
-			ColorEditor c= (ColorEditor) e.next();
-			String key= (String) fColorButtons.get(c);
-			RGB rgb= PreferenceConverter.getColor(fStore, key);
-			c.setColorValue(rgb);
-		}
-		
-		e= fCheckBoxes.keySet().iterator();
-		while (e.hasNext()) {
-			Button b= (Button) e.next();
-			String key= (String) fCheckBoxes.get(b);
-			b.setSelection(fStore.getBoolean(key));
-		}
-	}
-
-	public void performOk() {
 	}
 
 	public void performDefaults() {
-		restoreFromPreferences();
-		initializeFields();
-		updateStatus();
+		super.performDefaults();
 		
 		handleSyntaxColorListSelection();
+
+		uninstallSemanticHighlighting();
+		installSemanticHighlighting();
+
 		fPreviewViewer.invalidateTextPresentation();
-
 	}
 
-	private void restoreFromPreferences() {
-	}
-
-	IStatus getStatus() {
-		if (fStatus == null)
-			fStatus= new StatusInfo();
-		return fStatus;
-	}
-
-	private void updateStatus() {
-
-		fMainPreferencePage.setValid(fStatus.isOK());
-		StatusUtil.applyToStatusLine(fMainPreferencePage, fStatus);
-	}
-	
-	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
-		Button checkBox= new Button(parent, SWT.CHECK);
-		checkBox.setText(label);
-		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= indentation;
-		gd.horizontalSpan= 2;
-		checkBox.setLayoutData(gd);
-		checkBox.addSelectionListener(fCheckBoxListener);
-		
-		fCheckBoxes.put(checkBox, key);
-		
-		return checkBox;
-	}
-	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
 	 */
 	public void dispose() {
 		uninstallSemanticHighlighting();
 		fColorManager.dispose();
+		
+		super.dispose();
 	}
-
 
 	private void handleSyntaxColorListSelection() {
 		HighlightingColorListItem item= getHighlightingColorListItem();
 		if (item == null)
 			return;
-		RGB rgb= PreferenceConverter.getColor(fStore, item.getColorKey());
+		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), item.getColorKey());
 		fSyntaxForegroundColorEditor.setColorValue(rgb);		
-		fBoldCheckBox.setSelection(fStore.getBoolean(item.getBoldKey()));
-		fItalicCheckBox.setSelection(fStore.getBoolean(item.getItalicKey()));
+		fBoldCheckBox.setSelection(getPreferenceStore().getBoolean(item.getBoldKey()));
+		fItalicCheckBox.setSelection(getPreferenceStore().getBoolean(item.getItalicKey()));
 		if (item instanceof SemanticHighlightingColorListItem) {
 			fEnableCheckbox.setEnabled(true);
-			boolean enable= fStore.getBoolean(((SemanticHighlightingColorListItem) item).getEnableKey());
+			boolean enable= getPreferenceStore().getBoolean(((SemanticHighlightingColorListItem) item).getEnableKey());
 			fEnableCheckbox.setSelection(enable);
 			fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
 			fBoldCheckBox.setEnabled(enable);
@@ -539,41 +406,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		}
 	}
 
-
-	private void handleSemanticHighlightingEnabled() {
-		boolean shouldBeEnabled= fStore.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
-		if (shouldBeEnabled && !fIsSemanticHighlightingEnabled) {
-			fHighlightingColorListViewer.getControl().setRedraw(false);
-			fHighlightingColorList.addAll(fSemanticHighlightingColorList);
-			fHighlightingColorListViewer.add(fSemanticHighlightingColorList.toArray());
-			fHighlightingColorListViewer.getControl().setRedraw(true);
-			fHighlightingColorListViewer.reveal(getHighlightingColorListItem());
-			fIsSemanticHighlightingEnabled= true;
-		}
-		if (!shouldBeEnabled && fIsSemanticHighlightingEnabled) {
-			fHighlightingColorListViewer.getControl().setRedraw(false);
-			int fullSize= fHighlightingColorList.size();
-			fHighlightingColorList.removeAll(fSemanticHighlightingColorList);
-			HighlightingColorListItem item= getHighlightingColorListItem();
-			if (!fHighlightingColorList.contains(item)) {
-				int i= 0;
-				while (item != fHighlightingColorListViewer.getElementAt(i))
-					i++;
-				while (!fHighlightingColorList.contains(fHighlightingColorListViewer.getElementAt(i)) && i < fullSize)
-					i++;
-				while (!fHighlightingColorList.contains(fHighlightingColorListViewer.getElementAt(i)) && i >= 0)
-					i--;
-				// Assume non-empty list
-				fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(i)));
-			}
-			fHighlightingColorListViewer.remove(fSemanticHighlightingColorList.toArray());
-			fHighlightingColorListViewer.getControl().setRedraw(true);
-			fHighlightingColorListViewer.reveal(getHighlightingColorListItem());
-			fIsSemanticHighlightingEnabled= false;
-		}
-	}
-
-
 	private Control createSyntaxPage(Composite parent) {
 		
 		Composite colorComposite= new Composite(parent, SWT.NONE);
@@ -582,8 +414,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		layout.marginWidth= 0;
 		colorComposite.setLayout(layout);
 	
-		addCheckBox(colorComposite, PreferencesMessages.getString("JavaEditorPreferencePage.semanticHighlighting.option"), PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0); //$NON-NLS-1$
-		
 		Label label;
 		label= new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.coloring.element")); //$NON-NLS-1$
@@ -668,7 +498,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 			}
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
-				PreferenceConverter.setValue(fStore, item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
+				PreferenceConverter.setValue(getPreferenceStore(), item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
 			}
 		});
 	
@@ -678,7 +508,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 			}
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
-				fStore.setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
+				getPreferenceStore().setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
 			}
 		});
 				
@@ -688,7 +518,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 			}
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
-				fStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
+				getPreferenceStore().setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
 			}
 		});
 				
@@ -700,7 +530,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				if (item instanceof SemanticHighlightingColorListItem) {
 					boolean enable= fEnableCheckbox.getSelection();
-					fStore.setValue(((SemanticHighlightingColorListItem) item).getEnableKey(), enable);
+					getPreferenceStore().setValue(((SemanticHighlightingColorListItem) item).getEnableKey(), enable);
 					fEnableCheckbox.setSelection(enable);
 					fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
 					fBoldCheckBox.setEnabled(enable);
@@ -716,11 +546,10 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		return colorComposite;
 	}
 
-
 	private Control createPreviewer(Composite parent) {
 		
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
-		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fStore, new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
+		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
 		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(fColorManager, store, null, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewViewer.configure(configuration);
@@ -779,7 +608,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	private void installSemanticHighlighting() {
 		if (fSemanticHighlightingManager == null) {
 			fSemanticHighlightingManager= new SemanticHighlightingManager();
-			fSemanticHighlightingManager.install(fPreviewViewer, fColorManager, fStore, createPreviewerRanges());
+			fSemanticHighlightingManager.install(fPreviewViewer, fColorManager, getPreferenceStore(), createPreviewerRanges());
 		}
 	}
 
@@ -864,7 +693,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
      * @param testControl
      *            a control from which to obtain the current font
      */
-    protected void initializeDialogUnits(Control testControl) {
+    private void initializeDialogUnits(Control testControl) {
         // Compute and store a font metric
         GC gc = new GC(testControl);
         gc.setFont(JFaceResources.getDialogFont());

@@ -59,6 +59,22 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
  */
 abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlock {
 
+	/**
+	 * Use as follows:
+	 * 
+	 * <pre>
+	 * SectionManager manager= new SectionManager();
+	 * Composite composite= manager.createSectionComposite(parent);
+	 * 
+	 * Composite xSection= manager.createSection("section X"));
+	 * xSection.setLayout(new FillLayout());
+	 * new Button(xSection, SWT.PUSH); // add controls to section..
+	 * 
+	 * [...]
+	 * 
+	 * return composite; // return main composite
+	 * </pre>
+	 */
 	protected final class SectionManager {
 		private Set fSections= new HashSet();
 		private boolean fIsBeingManaged= false;
@@ -90,6 +106,9 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			}
 		};
 		private Composite fBody;
+		/**
+		 * Creates a new section manager.
+		 */
 		public SectionManager() {
 		}
 		private void manage(ExpandableComposite section) {
@@ -98,22 +117,23 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			if (fSections.add(section))
 				section.addExpansionListener(fListener);
 		}
-		public Composite createStyleSection(String label) {
-			Assert.isNotNull(fBody);
-			final ExpandableComposite excomposite= new ExpandableComposite(fBody, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
-			excomposite.setText(label);
-			excomposite.setExpanded(false);
-			excomposite.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
-			excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
-			
-			updateSectionStyle(excomposite);
-			manage(excomposite);
-			
-			Composite contents= new Composite(excomposite, SWT.NONE);
-			excomposite.setClient(contents);
-			
-			return contents;
-		}
+		
+		/**
+		 * Creates a new composite that can contain a set of expandable
+		 * sections. A <code>ScrolledPageComposite</code> is created and a new
+		 * composite within that, to ensure that expanding the sections will
+		 * always have enough space, unless there already is a
+		 * <code>ScrolledComposite</code> along the parent chaing of
+		 * <code>parent</code>, in which case a normal <code>Composite</code>
+		 * is created.
+		 * <p>
+		 * The receiver keeps a reference to the inner body composite, so that
+		 * new sections can be added via <code>createSection</code>.
+		 * </p>
+		 * 
+		 * @param parent the parent composite
+		 * @return the newly created composite
+		 */
 		public Composite createSectionComposite(Composite parent) {
 			Assert.isTrue(fBody == null);
 			boolean isNested= isNestedInScrolledComposite(parent);
@@ -129,6 +149,31 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			fBody.setLayout(new GridLayout());
 			
 			return composite;
+		}
+		
+		/**
+		 * Creates an expandable section within the parent created previously by
+		 * calling <code>createSectionComposite</code>. Controls can be added 
+		 * directly to the returned composite, which has no layout initially.
+		 * 
+		 * @param label the display name of the section
+		 * @return a composite within the expandable section
+		 */
+		public Composite createSection(String label) {
+			Assert.isNotNull(fBody);
+			final ExpandableComposite excomposite= new ExpandableComposite(fBody, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT | ExpandableComposite.COMPACT);
+			excomposite.setText(label);
+			excomposite.setExpanded(false);
+			excomposite.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
+			excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
+			
+			updateSectionStyle(excomposite);
+			manage(excomposite);
+			
+			Composite contents= new Composite(excomposite, SWT.NONE);
+			excomposite.setClient(contents);
+			
+			return contents;
 		}
 	}
 
@@ -176,8 +221,6 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		Assert.isNotNull(store);
 		fStore= store;
 		fMainPage= null;
-		
-		fStore.addKeys(createOverlayStoreKeys());
 	}
 	
 	public AbstractConfigurationBlock(OverlayPreferenceStore store, PreferencePage mainPreferencePage) {
@@ -185,11 +228,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		Assert.isNotNull(mainPreferencePage);
 		fStore= store;
 		fMainPage= mainPreferencePage;
-		
-		fStore.addKeys(createOverlayStoreKeys());
 	}
-
-	protected abstract OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys();
 
 	protected final ScrolledPageContent getParentScrolledComposite(Control control) {
 		Control parent= control.getParent();
@@ -227,8 +266,22 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		return getParentScrolledComposite(parent) != null;
 	}
 	
-	protected Control createLinkText(Composite contents, Object[] tokens) {
-		Composite description= new Composite(contents, SWT.NONE);
+	/**
+	 * Creates a widget containing text with links. The tokens may be either instances
+	 * of <code>String</code> for normal text, or <code>String[]</code> for links. A <code>String[] link</code>
+	 * defines a link as follows: 
+	 * <ul>
+	 * 	<li><code>link[0]</code> contains the text displayed as hyperlink</li>
+	 * 	<li><code>link[1]</code> contains the preference page id to link to</li>
+	 * 	<li><code>link[2]</code> (optional) contains the tooltip text</li>
+	 * </ul>
+	 * 
+	 * @param parent the parent composite
+	 * @param tokens the tokens to add to the text, either instances of <code>String</code> or <code>String[]</code>
+	 * @return the hyperlink control
+	 */
+	protected Control createLinkText(Composite parent, Object[] tokens) {
+		Composite description= new Composite(parent, SWT.NONE);
 		RowLayout rowLayout= new RowLayout(SWT.HORIZONTAL);
 		rowLayout.justify= false;
 		rowLayout.fill= true;

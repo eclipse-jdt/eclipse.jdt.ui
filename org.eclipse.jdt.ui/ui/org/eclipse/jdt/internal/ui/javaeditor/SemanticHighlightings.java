@@ -15,6 +15,7 @@ import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -304,7 +305,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -345,7 +346,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
 		public boolean isBoldByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -819,8 +820,6 @@ public class SemanticHighlightings {
 	 * @param store The preference store
 	 */
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, false);
-		
 		SemanticHighlighting[] semanticHighlightings= getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++) {
 			SemanticHighlighting semanticHighlighting= semanticHighlightings[i];
@@ -829,6 +828,62 @@ public class SemanticHighlightings {
 			store.setDefault(SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting), semanticHighlighting.isItalicByDefault());
 			store.setDefault(SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting), semanticHighlighting.isEnabledByDefault());
 		}
+	}
+	
+	/**
+	 * Tests whether <code>event</code> in <code>store</code> affects the
+	 * enablement of semantic highlighting.
+	 * 
+	 * @param store the preference store where <code>event</code> was observed
+	 * @param event the property change under examination
+	 * @return <code>true</code> if <code>event</code> changed semantic
+	 *         highlighting enablement, <code>false</code> if it did not
+	 * @since 3.1
+	 */
+	public static boolean affectsEnablement(IPreferenceStore store, PropertyChangeEvent event) {
+		String relevantKey= null;
+		SemanticHighlighting[] highlightings= getSemanticHighlightings();
+		for (int i= 0; i < highlightings.length; i++) {
+			if (event.getProperty().equals(getEnabledPreferenceKey(highlightings[i]))) {
+				relevantKey= event.getProperty();
+				break;
+			}
+		}
+		if (relevantKey == null)
+			return false;
+
+		for (int i= 0; i < highlightings.length; i++) {
+			String key= getEnabledPreferenceKey(highlightings[i]);
+			if (key.equals(relevantKey))
+				continue;
+			if (store.getBoolean(key))
+				return false; // another is still enabled or was enabled before
+		}
+		
+		// all others are disabled, so toggling relevantKey affects the enablement
+		return true;
+	}
+	
+	/**
+	 * Tests whether semantic highlighting is currently enabled.
+	 * 
+	 * @param store the preference store to consult
+	 * @return <code>true</code> if semantic highlighting is enabled,
+	 *         <code>false</code> if it is not
+	 * @since 3.1
+	 */
+	public static boolean isEnabled(IPreferenceStore store) {
+		SemanticHighlighting[] highlightings= getSemanticHighlightings();
+		boolean enable= false;
+		for (int i= 0; i < highlightings.length; i++) {
+			String enabledKey= getEnabledPreferenceKey(highlightings[i]);
+			if (store.getBoolean(enabledKey)) {
+				enable= true;
+				break;
+			}
+		}
+		
+		return enable;
 	}
 
 	/**

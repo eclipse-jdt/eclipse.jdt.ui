@@ -29,7 +29,6 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextAttribute;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IColorManagerExtension;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
@@ -131,34 +130,34 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/**
 		 * Uses reference equality for the highlighting.
 		 * 
-		 * @param offset The offset
-		 * @param length The length
+		 * @param off The offset
+		 * @param len The length
 		 * @param highlighting The highlighting
 		 * @return <code>true</code> iff the given offset, length and highlighting are equal to the internal ones.
 		 */
-		public boolean isEqual(int offset, int length, Highlighting highlighting) {
+		public boolean isEqual(int off, int len, Highlighting highlighting) {
 			synchronized (fLock) {
-				return !isDeleted() && getOffset() == offset && getLength() == length && fStyle == highlighting;
+				return !isDeleted() && getOffset() == off && getLength() == len && fStyle == highlighting;
 			}
 		}
 
 		/**
 		 * Is this position contained in the given range (inclusive)? Synchronizes on position updater.
 		 * 
-		 * @param offset The range offset
-		 * @param length The range length
+		 * @param off The range offset
+		 * @param len The range length
 		 * @return <code>true</code> iff this position is not delete and contained in the given range.
 		 */
-		public boolean isContained(int offset, int length) {
+		public boolean isContained(int off, int len) {
 			synchronized (fLock) {
-				return !isDeleted() && offset <= getOffset() && offset + length >= getOffset() + getLength();
+				return !isDeleted() && off <= getOffset() && off + len >= getOffset() + getLength();
 			}
 		}
 
-		public void update(int offset, int length) {
+		public void update(int off, int len) {
 			synchronized (fLock) {
-				super.setOffset(offset);
-				super.setLength(length);
+				super.setOffset(off);
+				super.setLength(len);
 			}
 		}
 		
@@ -410,7 +409,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @return <code>true</code> iff semantic highlighting is enabled in the preferences
 	 */
 	private boolean isEnabled() {
-		return fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
+		return SemanticHighlightings.isEnabled(fPreferenceStore);
 	}
 	
 	/**
@@ -468,12 +467,11 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		if (fConfiguration != null)
 			fConfiguration.handlePropertyChangeEvent(event);
 		
-		if (PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED.equals(event.getProperty())) {
+		if (SemanticHighlightings.affectsEnablement(fPreferenceStore, event)) {
 			if (isEnabled())
 				enable();
 			else
 				disable();
-			return;
 		}
 		
 		if (!isEnabled())

@@ -1918,10 +1918,12 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that controls if semantic highlighting is enabled.
 	 * <p>
-	 * Value is of type <code>Boolean</code>: <code>true</code> if enabled.
+	 * Value is of type <code>Boolean</code>:<code>true</code> if enabled.
 	 * </p>
 	 * 
 	 * @since 3.0
+	 * @deprecated As of 3.1, this preference is not used or set any longer; see
+	 *             {@link SemanticHighlightings#affectsEnablement(IPreferenceStore, org.eclipse.jface.util.PropertyChangeEvent)}
 	 */
 	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED=EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + "enabled"; //$NON-NLS-1$
 	
@@ -3088,6 +3090,8 @@ public class PreferenceConstants {
 		store.setToDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK); // global
 		store.setToDefault(PreferenceConstants.EDITOR_LINK_COLOR); // global
 		store.setToDefault(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE); // global
+		
+		store.setToDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED); // remoevd
 	}
 
 	/**

@@ -11,6 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -41,6 +44,11 @@ public class JavaEditorColoringPreferencePage extends AbstractConfigurationBlock
 		setDescription(description);
 	}
 	
+	
+	protected Label createDescriptionLabel(Composite parent) {
+		return null;
+	}
+	
 	/*
 	 * @see org.org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
 	 */
@@ -52,6 +60,6 @@ public class JavaEditorColoringPreferencePage extends AbstractConfigurationBlock
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#createConfigurationBlock(org.eclipse.ui.internal.editors.text.OverlayPreferenceStore)
 	 */
 	protected IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore) {
-		return new JavaEditorColoringConfigurationBlock(this, overlayPreferenceStore);
+		return new JavaEditorColoringConfigurationBlock(overlayPreferenceStore);
 	}
 }

@@ -38,9 +38,11 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 
 	public SmartTypingConfigurationBlock(OverlayPreferenceStore store) {
 		super(store);
+		
+		store.addKeys(createOverlayStoreKeys());
 	}
 	
-	protected OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
+	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 		
 		return new OverlayPreferenceStore.OverlayKey[] {
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS),
@@ -74,22 +76,22 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 
 		Composite composite;
 
-		composite= manager.createStyleSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.autoclose.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.autoclose.title")); //$NON-NLS-1$
 		addAutoclosingSection(composite);
 		
-		composite= manager.createStyleSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.automove.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.automove.title")); //$NON-NLS-1$
 		addAutopositionSection(composite);
 		
-		composite= manager.createStyleSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.tabs.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.tabs.title")); //$NON-NLS-1$
 		addTabSection(composite);
 
-		composite= manager.createStyleSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.pasting.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.pasting.title")); //$NON-NLS-1$
 		addPasteSection(composite);
 		
-		composite= manager.createStyleSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.strings.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.strings.title")); //$NON-NLS-1$
 		addStringsSection(composite);
 		
-		composite= manager.createStyleSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.other.title")); //$NON-NLS-1$
+		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.other.title")); //$NON-NLS-1$
 		addOthersSection(composite);
 		
 		return control;
