@@ -1205,11 +1205,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				&& (operator != InfixExpression.Operator.EQUALS) && (operator != InfixExpression.Operator.PLUS)
 				&& (operator != InfixExpression.Operator.TIMES) && (operator != InfixExpression.Operator.XOR)) {
 			return false;
-		}
-		if (!infixExpression.extendedOperands().isEmpty()) {
-			return false;
-		}
-		
+		}		
 		//
 		if (resultingCollections == null) {
 			return true;
