@@ -119,7 +119,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 						ITypeHierarchy th= SuperTypeHierarchyCache.getTypeHierarchy(type);
 						IType[] superTypes= th.getAllSupertypes(type);
 						
-						IMethodBinding definingMethodBinding= Bindings.findDefiningMethod(methodBinding);
+						IMethodBinding definingMethodBinding= Bindings.findMethodDefininition(methodBinding);
 						IType definingType= findType(superTypes, definingMethodBinding.getDeclaringClass().getQualifiedName());
 						
 						if (definingType != null) {
@@ -304,7 +304,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			public boolean visit(MethodDeclaration node) {
 				IMethodBinding binding= node.resolveBinding();
 				if (binding != null) {
-					IMethodBinding definingMethod= Bindings.findDefiningMethod(binding);
+					IMethodBinding definingMethod= Bindings.findMethodDefininition(binding);
 					if (definingMethod != null) {
 						
 						ITypeBinding definingType= definingMethod.getDeclaringClass();
