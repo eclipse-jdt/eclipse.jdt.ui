@@ -537,6 +537,13 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					while (expression instanceof ParenthesizedExpression) {
 						expression= ((ParenthesizedExpression) expression).getExpression();
 					}
+					// check case when this expression is cast expression and parent is method invocation with this expression as expression
+					if ((parenthesizedExpression.getExpression() instanceof CastExpression)
+						&& (parenthesizedExpression.getParent() instanceof MethodInvocation)) {
+						MethodInvocation parentMethodInvocation = (MethodInvocation) parenthesizedExpression.getParent();
+						if (parentMethodInvocation.getExpression() == parenthesizedExpression)
+							return;
+					}
 					// if this is part of another expression, check for this and parent precedences
 					if (parenthesizedExpression.getParent() instanceof Expression) {
 						Expression parentExpression= (Expression) parenthesizedExpression.getParent();
@@ -675,6 +682,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			ASTNode covered = (ASTNode) I.next();
 			covered.accept(new ASTVisitor() {
 				public void postVisit(ASTNode node) {
+					// check that parent is && or ||
+					if (!(node.getParent() instanceof InfixExpression))
+						return;
+					InfixExpression parentExpression = (InfixExpression) node.getParent();
+					InfixExpression.Operator parentOperator = parentExpression.getOperator();
+					if ((parentOperator != InfixExpression.Operator.CONDITIONAL_AND)
+							&& (parentOperator != InfixExpression.Operator.CONDITIONAL_OR)) {
+						return;
+					}
 					// we want to add parenthesis around arithmetic operators and instanceof
 					boolean needParenthesis = false;
 					if (node instanceof InfixExpression) {
@@ -691,15 +707,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						needParenthesis = true;
 					}
 					if (!needParenthesis) {
-						return;
-					}
-					// check that parent is && or ||
-					if (!(node.getParent() instanceof InfixExpression))
-						return;
-					InfixExpression parentExpression = (InfixExpression) node.getParent();
-					InfixExpression.Operator parentOperator = parentExpression.getOperator();
-					if ((parentOperator != InfixExpression.Operator.CONDITIONAL_AND)
-							&& (parentOperator != InfixExpression.Operator.CONDITIONAL_OR)) {
 						return;
 					}
 					// add parenthesis around expression
@@ -733,18 +740,20 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			protected boolean visitNode(ASTNode node) {
 				int nodeStart= node.getStartPosition();
 				int nodeEnd= nodeStart + node.getLength();
+				// if node does not intersects with selection, don't visit children
 				if (nodeEnd < selectionBegin || selectionEnd < nodeStart) {
 					return false;
 				}
-				return true;
-			}
-			public void postVisit(ASTNode node) {
+				// if node is fully covered, we don't need to visit children
 				if (isCovered(node)) {
 					ASTNode parent = node.getParent();
 					if ((parent == null) || !isCovered(parent)) {
 						coveredNodes.add(node);
+						return false;
 					}
 				}
+				// if node only partly intersects with selection, we try to find fully covered children 
+				return true;
 			}
 			private boolean isCovered(ASTNode node) {
 				int begin = node.getStartPosition();
