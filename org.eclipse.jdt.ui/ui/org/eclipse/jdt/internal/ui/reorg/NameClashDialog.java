@@ -2,16 +2,16 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
+
 package org.eclipse.jdt.internal.ui.reorg;
-
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-
+
 import org.eclipse.jface.dialogs.IInputValidator;
-
+
 import java.text.MessageFormat;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
-
+
 
 public class NameClashDialog extends StatusDialog {
 	
@@ -81,7 +81,7 @@ public class NameClashDialog extends StatusDialog {
 		layout.minimumWidth= convertWidthInCharsToPixels(80);
 		layout.numColumns= 1;
 		composite.setLayout(layout);
-
+
 		DialogField label= new DialogField();
 		label.setLabelText(fMessage);
 		label.doFillIntoGrid(composite, 1);

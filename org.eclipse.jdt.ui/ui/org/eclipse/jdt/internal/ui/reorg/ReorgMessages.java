@@ -8,11 +8,9 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public class ReorgMessages {
-
-	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.ui.reorg.ReorgMessages";//$NON-NLS-1$
-
+	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.ui.reorg.ReorgMessages";//$NON-NLS-1$
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
-
+	//no instances
 	private ReorgMessages() {
 	}
 

@@ -51,8 +51,6 @@ import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
-import org.eclipse.jdt.internal.ui.preferences.ZipContentProvider;
-import org.eclipse.jdt.internal.ui.preferences.ZipLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -621,7 +619,8 @@ public class SourceAttachmentBlock {
 			}
 			try {
 				ZipFile zipFile= new ZipFile(fResolvedFile);			
-				ZipContentProvider contentProvider= new ZipContentProvider(zipFile);
+				ZipContentProvider contentProvider= new ZipContentProvider();
+				contentProvider.setInitialInput(zipFile);
 				ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), new ZipLabelProvider(), contentProvider); 
 				dialog.setAllowMultiple(false);
 				dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.title")); //$NON-NLS-1$

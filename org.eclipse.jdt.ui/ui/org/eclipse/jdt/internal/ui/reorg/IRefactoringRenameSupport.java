@@ -3,9 +3,11 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.reorg;
+
+import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.JavaModelException;
-
+import org.eclipse.jdt.core.JavaModelException;
+
 /**
  * Abstraction layer for renaming using refactoring.
  */
