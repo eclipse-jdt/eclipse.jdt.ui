@@ -58,7 +58,7 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			if (relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName()))
 				result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined")); //$NON-NLS-1$
-			if (overridesAnotherMethod(new SubProgressMonitor(pm, 1)))
+			if (MethodChecks.overridesAnotherMethod(getMethod(), new SubProgressMonitor(pm, 1)))
 				result.addError("This method overrides another method from - please rename it in the base type.");
 			return result;
 		} finally {
@@ -115,21 +115,5 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 			result.add(((IMethod)iter.next()).getDeclaringType());
 		}
 		return result;
-	}
-
-	private boolean overridesAnotherMethod(IProgressMonitor pm) throws JavaModelException {
-		try{
-			pm.beginTask("", 1); //$NON-NLS-1$
-			ITypeHierarchy hierarchy= getMethod().getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(pm, 1));
-			IType[] supertypes= hierarchy.getAllSupertypes(getMethod().getDeclaringType());
-				for (int i= 0; i < supertypes.length; i++){
-					IMethod found= Checks.findMethod(getMethod(), supertypes[i]);
-					if (found != null) 
-						return true;
-				}
-			return false;
-		} finally{
-			pm.done();
-		}	
 	}
 }
