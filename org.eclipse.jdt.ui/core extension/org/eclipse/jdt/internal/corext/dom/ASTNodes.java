@@ -19,14 +19,50 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.dom.*;
-
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Message;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -349,36 +385,6 @@ public class ASTNodes {
 
 		Assert.isTrue(false, "Cannot convert assignment operator"); //$NON-NLS-1$
 		return null;			
-	}
-	
-	public static int getRewriteNodeType(IMember member) {
-		switch(member.getElementType()) {
-			case IJavaElement.TYPE:
-				return ASTRewrite.TYPE_DECLARATION;
-			case IJavaElement.METHOD:
-				return ASTRewrite.METHOD_DECLARATION;
-			case IJavaElement.FIELD:
-				return ASTRewrite.FIELD_DECLARATION;
-			case IJavaElement.INITIALIZER:
-				return ASTRewrite.INITIALIZER;
-		}
-		Assert.isTrue(false, "Cannot happen"); //$NON-NLS-1$
-		return -1;
-	}
-	
-	public static int getRewriteNodeType(BodyDeclaration member) {
-		switch(member.getNodeType()) {
-			case ASTNode.TYPE_DECLARATION:
-				return ASTRewrite.TYPE_DECLARATION;
-			case ASTNode.METHOD_DECLARATION:
-				return ASTRewrite.METHOD_DECLARATION;
-			case ASTNode.FIELD_DECLARATION:
-				return ASTRewrite.FIELD_DECLARATION;
-			case ASTNode.INITIALIZER:
-				return ASTRewrite.INITIALIZER;
-		}
-		Assert.isTrue(false, "Cannot happen"); //$NON-NLS-1$
-		return -1;
 	}
 	
 	public static boolean needsParentheses(Expression expression) {

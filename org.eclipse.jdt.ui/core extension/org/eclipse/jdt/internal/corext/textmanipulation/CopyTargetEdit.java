@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -56,6 +55,13 @@ public class CopyTargetEdit extends AbstractTransferEdit {
 		}
 	}
 	
+	protected void connect(TextBuffer buffer) throws TextEditException {
+		if (fSource == null)
+			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.no_source")); //$NON-NLS-1$
+		if (fSource.getTargetEdit() != this)
+			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.different_target")); //$NON-NLS-1$
+	}
+	
 	public void perform(TextBuffer buffer) throws CoreException {
 		if (++fSource.fCounter == 2 && !getTextRange().isDeleted()) {
 			try {
@@ -72,21 +78,7 @@ public class CopyTargetEdit extends AbstractTransferEdit {
 	protected String getSourceContent() {
 		return fSource.getContent();
 	}
-	
-	
-	/* package */ IStatus checkEdit(int bufferLength) {
-		IStatus s= super.checkEdit(bufferLength);
-		if (!s.isOK())
-			return s;
-		if (fSource == null)
-			return createErrorStatus(TextManipulationMessages.getString("CopyTargetEdit.no_source")); //$NON-NLS-1$
-		if (fSource.getTargetEdit() != this)
-			return createErrorStatus(TextManipulationMessages.getString("CopyTargetEdit.different_target")); //$NON-NLS-1$
-		if (getTextRange().getLength() != 0)
-			return createErrorStatus(TextManipulationMessages.getString("CopyTargetEdit.length")); //$NON-NLS-1$
-		return createOKStatus();
-	}
-	
+		
 	/* package */ CopySourceEdit getSourceEdit() {
 		return fSource;
 	}	

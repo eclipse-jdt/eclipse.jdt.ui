@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditException;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 
@@ -69,59 +70,99 @@ public class TextBufferTest extends TestCase {
 	public void testOverlap1() throws Exception {
 		// [ [ ] ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 2, "01"));
-		fEditor.add(SimpleTextEdit.createReplace(1, 2, "12"));
-		assertFalse(fEditor.canPerformEdits());
+		boolean exception= false;
+		try {
+			fEditor.add(SimpleTextEdit.createReplace(1, 2, "12"));
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
 	}	
 	
 	public void testOverlap2() throws Exception {
 		// [[ ] ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 2, "01"));
-		fEditor.add(SimpleTextEdit.createReplace(0, 1, "0"));
-		assertFalse(fEditor.canPerformEdits());
+		boolean exception= false;
+		try {
+			fEditor.add(SimpleTextEdit.createReplace(0, 1, "0"));
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
 	}	
 	
 	public void testOverlap3() throws Exception {
 		// [ [ ]]
 		fEditor.add(SimpleTextEdit.createReplace(0, 2, "01"));
-		fEditor.add(SimpleTextEdit.createReplace(1, 1, "1"));
-		assertFalse(fEditor.canPerformEdits());
+		boolean exception= false;
+		try {
+			fEditor.add(SimpleTextEdit.createReplace(1, 1, "1"));
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
 	}	
 	
 	public void testOverlap4() throws Exception {
 		// [ [ ] ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 3, "012"));
-		fEditor.add(SimpleTextEdit.createReplace(1, 1, "1"));
-		assertFalse(fEditor.canPerformEdits());
+		boolean exception= false;
+		try {
+			fEditor.add(SimpleTextEdit.createReplace(1, 1, "1"));
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
 	}
 	
 	public void testOverlap5() throws Exception {
 		// [ []  ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 3, "012"));
-		fEditor.add(SimpleTextEdit.createInsert(1, "xx"));
-		assertFalse(fEditor.canPerformEdits());
+		boolean exception= false;
+		try {
+			fEditor.add(SimpleTextEdit.createInsert(1, "xx"));
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
 	}
 	
 	public void testOverlap6() throws Exception {
 		// [  [] ]
 		fEditor.add(SimpleTextEdit.createReplace(0, 3, "012"));
-		fEditor.add(SimpleTextEdit.createInsert(2, "xx"));
-		assertFalse(fEditor.canPerformEdits());
+		boolean exception= false;
+		try {
+			fEditor.add(SimpleTextEdit.createInsert(2, "xx"));
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
 	}
 	
 	public void testOverlap7() throws Exception {
 		MoveSourceEdit source= new MoveSourceEdit(2, 5);
 		MoveTargetEdit target= new MoveTargetEdit(3, source);
 		fEditor.add(source);
-		fEditor.add(target);
-		assertFalse(fEditor.canPerformEdits());
+		boolean exception= false;
+		try {
+			fEditor.add(target);
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
 	}
 	
 	public void testOverlap8() throws Exception {
 		MoveSourceEdit source= new MoveSourceEdit(2, 5);
 		MoveTargetEdit target= new MoveTargetEdit(6, source);
 		fEditor.add(source);
-		fEditor.add(target);
-		assertFalse(fEditor.canPerformEdits());
+		boolean exception= false;
+		try {
+			fEditor.add(target);
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
 	}
 	
 	public void testOverlap9() throws Exception {
@@ -131,9 +172,25 @@ public class TextBufferTest extends TestCase {
 		MoveTargetEdit t2= new MoveTargetEdit(8, s2);
 		fEditor.add(s1);
 		fEditor.add(t1);
-		fEditor.add(s2);
-		fEditor.add(t2);
-		assertFalse(fEditor.canPerformEdits());
+		boolean exception= false;
+		try {
+			fEditor.add(s2);
+			fEditor.add(t2);
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
+	}
+	
+	public void testUnconnected1() throws Exception {
+		MoveSourceEdit s1= new MoveSourceEdit(3, 1);
+		boolean exception= false;
+		try {
+			fEditor.add(s1);
+		} catch (TextEditException e) {
+			exception= true;
+		}
+		assertTrue(exception);
 	}
 		
 	public void testInsert1() throws Exception {
@@ -257,7 +314,7 @@ public class TextBufferTest extends TestCase {
 	
 	public void testDeleteWithChildren() throws Exception {
 		SimpleTextEdit e1= SimpleTextEdit.createDelete(2, 6);
-		MultiTextEdit e2= new MultiTextEdit();
+		MultiTextEdit e2= new MultiTextEdit(3, 3);
 		e1.add(e2);
 		SimpleTextEdit e3= SimpleTextEdit.createReplace(3,1,"xx");
 		SimpleTextEdit e4= SimpleTextEdit.createReplace(5,1,"yy");

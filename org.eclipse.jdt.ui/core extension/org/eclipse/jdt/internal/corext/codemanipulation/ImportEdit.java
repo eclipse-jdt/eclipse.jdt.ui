@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
@@ -28,15 +27,18 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
  * A special edit that allows add imports to a import container in a structured way.
  * Additionally this edit honors the Organize Imports preferences
  */
-public final class ImportEdit extends SimpleTextEdit {
+public final class ImportEdit extends TextEdit {
 	
 	private ImportsStructure fImportsStructure;
+	private TextRange fRange;
 	
 	public ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings) throws JavaModelException {
 		Assert.isNotNull(cunit);
 		Assert.isNotNull(settings);
+		TextBuffer buffer= TextBuffer.create(cunit.getBuffer().getContents());
 		try {
-			fImportsStructure= new ImportsStructure(cunit, settings.importOrder, settings.importThreshold, true);
+			fImportsStructure= new ImportsStructure(cunit, settings.importOrder, settings.importThreshold, true, buffer);
+			fRange= fImportsStructure.getReplaceRange(buffer).copy();
 		} catch (JavaModelException e) {
 			throw e;
 		} catch (CoreException e) {
@@ -44,8 +46,25 @@ public final class ImportEdit extends SimpleTextEdit {
 		}
 	}
 	
-	private ImportEdit(ImportsStructure importsStructure) {
-		fImportsStructure= importsStructure;
+	private ImportEdit(ImportEdit other) {
+		fImportsStructure= other.fImportsStructure;
+		fRange= other.fRange.copy();
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#getTextRange
+	 */
+	public TextRange getTextRange() {
+		return fRange;
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#doPerform
+	 */
+	public void perform(TextBuffer buffer) throws CoreException {
+		String text= fImportsStructure.getReplaceString(buffer, fRange);
+		if (text != null)
+			buffer.replace(fRange, text);
 	}
 	
 	/**
@@ -120,24 +139,8 @@ public final class ImportEdit extends SimpleTextEdit {
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBuffer buffer) throws CoreException {
-		TextRange range= fImportsStructure.getReplaceRange(buffer);
-		String text= fImportsStructure.getReplaceString(buffer, range);
-		if (text != null) {
-			setText(text);
-			setTextRange(range);
-		} else {
-			setText(""); //$NON-NLS-1$
-			setTextRange(new TextRange(0,0));
-		}
-		super.connect(buffer);
-	}
-	
-	/* non Java-doc
-	 * @see TextEdit#connect
-	 */
 	protected TextEdit copy0(TextEditCopier copier) {
-		return new ImportEdit(fImportsStructure);
+		return new ImportEdit(this);
 	}
 	
 	/* non Java-doc

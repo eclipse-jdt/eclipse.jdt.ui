@@ -90,14 +90,6 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		return true;
 	}
 	
-	public static RenameMethodProcessor create(IMethod method, RenameMethodProcessor other) throws CoreException {
-//		RenameMethodProcessor result= RenameMethodProcessor.create(method);
-//		if (result != null)
-//			result.setData(other);
-//		return result;
-		return null;
-	}
-	
 	public String getProcessorName() {
 		return RefactoringCoreMessages.getFormattedString(
 			"RenameMethodRefactoring.name", //$NON-NLS-1$
@@ -257,7 +249,8 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2);	 //$NON-NLS-1$
 		ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
-		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), pattern);	
+		return RefactoringSearchEngine.search(createRefactoringScope(), pattern,
+			new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), fMethod.getElementName()));	
 	}
 
 	private static boolean isSpecialCase(IMethod method) throws CoreException {
@@ -324,7 +317,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 			pm.beginTask("", 3); //$NON-NLS-1$
 			
 			TextChangeManager manager= createChangeManager(new SubProgressMonitor(pm, 1));
-			SearchResultGroup[] oldOccurrences= getOldOccurrences(new SubProgressMonitor(pm, 1));
+			SearchResultGroup[] oldOccurrences= getOccurrences();
 			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), manager);
 			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
 			return result;
@@ -338,12 +331,6 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		}
 	}
 
-	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		ISearchPattern oldPattern= createSearchPattern(new SubProgressMonitor(pm, 1));
-		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), oldPattern);
-	}
-	
 	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
 		pm.beginTask("", 3); //$NON-NLS-1$
 		try{
@@ -354,12 +341,13 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 			if (declaringCuWorkingCopy == null)
 				return new SearchResultGroup[0];
 			
-			IMethod method= getNewMethod(declaringCuWorkingCopy);
+			IMethod method= getNewMethod(declaringCuWorkingCopy); 
 			if (method == null || ! method.exists())
 				return new SearchResultGroup[0];
 			
 			ISearchPattern newPattern= createSearchPattern(new SubProgressMonitor(pm, 1), method, fNewWorkingCopies);
-			return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), newPattern, fNewWorkingCopies);
+			return RefactoringSearchEngine.search(createRefactoringScope(), newPattern, 
+				new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), method.getElementName()),  fNewWorkingCopies);
 		} finally{
 			pm.done();
 		}	
@@ -471,10 +459,12 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	}
 	
 	final void addDeclarationUpdate(TextChange change) throws CoreException {
-		change.addTextEdit(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewElementName));  //$NON-NLS-1$
+		change.addTextEdit(
+			RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), 
+			SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewElementName));  //$NON-NLS-1$
 	}
 	
 	final TextEdit createTextChange(SearchResult searchResult) {
-		return new UpdateMethodReferenceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewElementName, fMethod.getElementName());		
+		return new SimpleTextEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewElementName);
 	}
 }	

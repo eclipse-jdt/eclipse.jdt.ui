@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 	 * @param range the text edit's range.
 	 */	
 	protected final void setTextRange(TextRange range) {
-		Assert.isTrue(range != null && !isConnected());
+		Assert.isTrue(range != null);
 		fRange= range;
 	}
 	
@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 			for (Iterator iter= children.iterator(); iter.hasNext();) {
 				TextEdit element= (TextEdit)iter.next();
 				element.adjustOffset(delta);
-				move(element.getChildren(), delta);
+				move(element.internalGetChildren(), delta);
 			}
 		}
 	}		

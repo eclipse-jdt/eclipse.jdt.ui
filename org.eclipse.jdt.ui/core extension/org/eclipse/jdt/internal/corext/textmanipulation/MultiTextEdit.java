@@ -14,16 +14,55 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public class MultiTextEdit extends TextEdit {
+public final class MultiTextEdit extends TextEdit {
+
+	private TextRange fRange;
+	
+	private static final TextRange MAX_RANGE= new TextRange(0, Integer.MAX_VALUE);
+
+	/**
+	 * Creates a new <code>MultiTextEdit</code>. The range
+	 * of the edit is determined by the range of its children.
+	 * 
+	 * Adding this edit to a parent edit sets its range to the
+	 * range covered by its children. If the edit doesn't have 
+	 * any children its offset is set to the parent's offset 
+	 * and its length is set to 0.
+	 */
+	public MultiTextEdit() {
+	}
+	
+	/**
+	 * Creates a new </code>MultiTextEdit</code> for the given
+	 * range. Adding a child to this edit which isn't covered 
+	 * by the given range will result in an exception.
+	 * 
+	 * @param offset the edit's offset
+	 * @param length the edit's length.
+	 * @see TextEdit#add(TextEdit)
+	 */
+	public MultiTextEdit(int offset, int length) {
+		fRange= new TextRange(offset, length);
+	}
+	
+	/**
+	 * Creates a copy of this given text edit.
+	 */
+	private MultiTextEdit(MultiTextEdit other) {
+		if (other.fRange != null) {
+			fRange= new TextRange(other.fRange);
+		}
+	}
 
 	/* non Java-doc
 	 * @see TextEdit#getTextRange
 	 */	
 	public final TextRange getTextRange() {
-		TextRange result= getChildrenTextRange();
-		if (result == null || result.isUndefined())
-			return new TextRange(0,0);
-		return result;
+		if (fRange != null)
+			return fRange;
+		if (getParent() == null) // not added yet
+			return MAX_RANGE;
+		return getChildrenTextRange();
 	}
 
 	/* non Java-doc
@@ -38,20 +77,31 @@ public class MultiTextEdit extends TextEdit {
 	 */	
 	protected TextEdit copy0(TextEditCopier copier) {
 		Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
-		return new MultiTextEdit();
+		return new MultiTextEdit(this);
 	}
 
 	/* non Java-doc
 	 * @see TextEdit#adjustOffset
 	 */	
 	public void adjustOffset(int delta) {
-		// do nothing since this edit doesn't manage its own TextRange
+		if (fRange != null)
+			fRange.addToOffset(delta);
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#adjustLength
 	 */	
 	public void adjustLength(int delta) {
-		// do nothing since this edit doesn't manage its own TextRange
+		if (fRange != null)
+			fRange.addToLength(delta);
 	}
+	
+	/* package */ void aboutToBeAdded(TextEdit parent) {
+		if (fRange == null) {
+			if (hasChildren())
+				fRange= getChildrenTextRange();
+			else
+				fRange= new TextRange(parent.getTextRange().getOffset(), 0);
+		}
+	}	
 }

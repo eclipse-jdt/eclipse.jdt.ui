@@ -200,8 +200,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {fImportEdit} ));
 			}
 			MultiTextEdit change= new MultiTextEdit();
-			root.add(change);
 			fRewriter.rewriteNode(buffer, change);
+			root.add(change);
 			result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {change} ));
 			return result;
 		} catch (JavaModelException e) {

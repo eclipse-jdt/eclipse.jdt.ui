@@ -20,8 +20,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.AutoOrganizingTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -152,13 +152,13 @@ public abstract class TextChange extends AbstractTextChange {
 		GroupDescription description= new GroupDescription(name, edits);
 		fTextEditChanges.add(new EditChange(description, this));
 		if (fEdit == null) {
-			fEdit= new AutoOrganizingTextEdit();
+			fEdit= new MultiTextEdit();
 			fAutoMode= true;
 		} else {
 			Assert.isTrue(fAutoMode, "Can only add edits when in auto organizing mode"); //$NON-NLS-1$
 		}
 		for (int i= 0; i < edits.length; i++) {
-			fEdit.add(edits[i]);
+			insert(fEdit, edits[i]);
 		}
 	}
 	
@@ -504,6 +504,32 @@ public abstract class TextChange extends AbstractTextChange {
 		TextRegion region= buffer.getLineInformation(endLine);
 		int length = region.getOffset() + region.getLength() - offset;
 		return buffer.getContent(offset, length);
+	}
+
+	private static void insert(TextEdit parent, TextEdit edit) {
+		if (!parent.hasChildren()) {
+			parent.add(edit);
+			return;
+		}
+		TextEdit[] children= parent.getChildren();
+		// First dive down to find the right parent.
+		for (int i= 0; i < children.length; i++) {
+			TextEdit child= children[i];
+			if (child.getTextRange().covers(edit.getTextRange())) {
+				insert(child, edit);
+				return;
+			}
+		}
+		// We have the right parent. Now check if some of the children have to
+		// be moved under the new edit since it is covering it.
+		for (int i= children.length - 1; i >= 0; i--) {
+			TextEdit child= children[i];
+			if (edit.getTextRange().covers(child.getTextRange())) {
+				parent.remove(i);
+				edit.add(child);
+			}
+		}
+		parent.add(edit);
 	}	
 }
 

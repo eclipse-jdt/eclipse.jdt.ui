@@ -47,6 +47,11 @@ public final class TextRange {
 		Assert.isTrue(fLength >= 0);
 	}
 	
+	public TextRange(TextRange other) {
+		fOffset= other.fOffset;
+		fLength= other.fLength;
+	}
+	
 	/**
 	 * Constructor for the undefined text range.
 	 */

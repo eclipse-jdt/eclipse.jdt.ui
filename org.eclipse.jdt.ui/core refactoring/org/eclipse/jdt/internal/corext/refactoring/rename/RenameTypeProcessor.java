@@ -751,9 +751,10 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 
 			for (int j= 0; j < results.length; j++){
 				SearchResult searchResult= results[j];
-				int offset= searchResult.getStart();
-				int length= searchResult.getEnd() - searchResult.getStart();
-				manager.get(wc).addTextEdit(name, new UpdateTypeReferenceEdit(offset, length, fNewElementName, fType.getElementName()));
+				String oldName= fType.getElementName();
+				int offset= searchResult.getEnd() - oldName.length();
+				manager.get(wc).addTextEdit(name, 
+					SimpleTextEdit.createReplace(offset, oldName.length(), fNewElementName));
 			}
 			pm.worked(1);
 		}

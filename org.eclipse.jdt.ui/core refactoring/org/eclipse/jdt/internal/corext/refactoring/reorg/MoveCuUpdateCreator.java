@@ -24,6 +24,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -40,15 +43,13 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
+import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class MoveCuUpdateCreator {
@@ -153,12 +154,11 @@ public class MoveCuUpdateCreator {
 			if (referencingCu == null)
 				continue;
 			SearchResult[] results= references[i].getSearchResults();
-			for (int j= 0; j < results.length; j++){
-				if (isQualifiedReference(results[j])){
-					TextEdit edit= new UpdateTypeReferenceEdit(results[j], getPackage(movedUnit), fDestination);
-					changeManager.get(referencingCu).addTextEdit(RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"), edit); //$NON-NLS-1$
-				}	
-				if (results[j].getEnclosingElement().getElementType() == IJavaElement.IMPORT_DECLARATION){
+			for (int j= 0; j < results.length; j++) {
+				TypeReference reference= (TypeReference)results[j];
+				if (!reference.isImportDeclaration()) {
+					reference.addEdit(changeManager.get(referencingCu), fDestination.getElementName());
+				} else {	
 					ImportEdit importEdit= getImportEdit(referencingCu);
 					IImportDeclaration importDecl= (IImportDeclaration)results[j].getEnclosingElement();
 					importEdit.removeImport(importDecl.getElementName());
@@ -287,7 +287,7 @@ public class MoveCuUpdateCreator {
 	private static boolean hasSimpleReference(SearchResultGroup searchResultGroup) throws JavaModelException{
 		SearchResult[] results= searchResultGroup.getSearchResults();
 		for (int i= 0; i < results.length; i++) {
-			if (! isQualifiedReference(results[i]))
+			if (! ((TypeReference)results[i]).isQualified())
 				return true;
 		}
 		return false;
@@ -296,27 +296,10 @@ public class MoveCuUpdateCreator {
 	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws org.eclipse.jdt.core.JavaModelException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(unit);
 		ISearchPattern pattern= createSearchPattern(unit);
-		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
+		return RefactoringSearchEngine.search(scope, pattern, 
+			new Collector(new SubProgressMonitor(pm, 1), getPackage(unit)));
 	}
 
-	private static boolean isQualifiedReference(SearchResult searchResult) throws JavaModelException{
-		if (searchResult.getEnclosingElement() instanceof IImportDeclaration)
-			return false;
-
-		//XXX needs improvement
-		ICompilationUnit cu= searchResult.getCompilationUnit();
-		if (cu == null)
-			return false;
-			
-		int offset= searchResult.getStart();
-		int end= searchResult.getEnd();
-		String source= cu.getBuffer().getText(offset, end - offset);
-		if (source.indexOf(".") != -1) //$NON-NLS-1$
-			return true;
-
-		return false;	
-	}
-	
 	private static IPackageFragment getPackage(ICompilationUnit cu){
 		return (IPackageFragment)cu.getParent();
 	}
@@ -325,42 +308,59 @@ public class MoveCuUpdateCreator {
 		return RefactoringSearchEngine.createSearchPattern(cu.getTypes(), IJavaSearchConstants.REFERENCES);
 	}
 
-	private final static class UpdateTypeReferenceEdit extends SimpleTextEdit {
-		
-		private SearchResult fSearchResult;
-		private IPackageFragment fDestination;
+	private final static class Collector extends SearchResultCollector {
 		private IPackageFragment fSource;
-		
-		UpdateTypeReferenceEdit(SearchResult searchResult, IPackageFragment source, IPackageFragment destination) {
-			fSearchResult= searchResult;
-			fDestination= destination;
+		public Collector(IProgressMonitor pm, IPackageFragment source) {
+			super(pm);
 			fSource= source;
 		}
-		
-		protected TextEdit copy0(TextEditCopier copier) {
-			return new UpdateTypeReferenceEdit(fSearchResult, fSource, fDestination);
-		}
-
-		public void connect(TextBuffer buffer) throws CoreException {
-			int length= fSearchResult.getEnd() - fSearchResult.getStart();
-			int offset= fSearchResult.getStart();
-			String newText= fDestination.getElementName();
-			String oldText= buffer.getContent(offset, length);
-			String currectPackageName= fSource.getElementName();
-			
-			if (fSource.isDefaultPackage()){
-				length= 0;
-			} else if (! oldText.startsWith(currectPackageName)){
-				//no action - simple reference
-				length= 0;
-				newText= ""; //$NON-NLS-1$
-			} else{
-				length= currectPackageName.length();
+		public void accept(IResource res, int start, int end, IJavaElement element, int accuracy) throws CoreException {
+			if (element.getAncestor(IJavaElement.IMPORT_DECLARATION) != null) {
+				getResults().add(new TypeReference(res, start, end, element, accuracy, true));
+			} else {
+				if (fSource.isDefaultPackage()) {
+					end= start + 1; // this means a length of zero which is an insert;
+					getResults().add(new TypeReference(res, start, end, element, accuracy, false));
+				} else {
+					ICompilationUnit unit= (ICompilationUnit)element.getAncestor(IJavaElement.COMPILATION_UNIT);
+					if (unit != null) {
+						IBuffer buffer= unit.getBuffer();
+						String currectPackageName= fSource.getElementName();
+						String match= buffer.getText(start, end - start);
+						if (match.startsWith(currectPackageName)) {
+							end= start + currectPackageName.length();
+							getResults().add(new TypeReference(res, start, end, element, accuracy, true));
+						} else {
+							getResults().add(new TypeReference(res, start, end, element, accuracy, false));
+						}
+					}
+				}
 			}
-			setText(newText);
-			setTextRange(new TextRange(offset, length));
-			super.connect(buffer);
 		}
 	}
+	
+	private final static class TypeReference extends SearchResult {
+		private boolean fQualified;
+		public TypeReference(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy, boolean qualified) {
+			super(resource, start, end, enclosingElement, accuracy);
+			fQualified= qualified;
+		}
+		
+		public boolean isImportDeclaration() {
+			return getEnclosingElement().getAncestor(IJavaElement.IMPORT_DECLARATION) != null;
+		}
+		
+		public void addEdit(TextChange change, String text) {
+			if (fQualified) {
+				change.addTextEdit(
+				RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"), //$NON-NLS-1$
+				new SimpleTextEdit(getStart(), getEnd() - getStart(), text));
+			}
+		}
+		public boolean isQualified() {
+			return fQualified;
+		}
+	}
+
 }
 

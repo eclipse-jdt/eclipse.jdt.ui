@@ -17,6 +17,8 @@ import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 /**
  * Helper class to provide String manipulation functions not available in standard JDK.
  */
@@ -215,17 +217,6 @@ public class Strings {
 	}
 	
 	/**
-	 * Removes all leading indents from the given line. If the line doesn't contain
-	 * any indents the line itself is returned.
-	 */
-	public static String trimIndents(String s, int tabWidth) {
-		int indent= computeIndent(s, tabWidth);
-		if (indent == 0)
-			return s;
-		return trimIndent(s, indent, tabWidth);
-	}
-	
-	/**
 	 * Removes the common number of indents from all lines. If a line
 	 * only consists out of white space it is ignored.
 	 */
@@ -350,7 +341,36 @@ public class Strings {
 			// can not happen
 			return code;
 		}
-	}	
+	}
+	
+	public static String trimIndentation(String source, int tabWidth, boolean considerFirstLine) {
+		try {
+			ILineTracker tracker= new DefaultLineTracker();
+			tracker.set(source);
+			int size= tracker.getNumberOfLines();
+			if (size == 1)
+				return source;
+			String lines[]= new String[size];
+			for (int i= 0; i < size; i++) {
+				IRegion region= tracker.getLineInformation(i);
+				int offset= region.getOffset();
+				lines[i]= source.substring(offset, offset + region.getLength());
+			}
+			Strings.trimIndentation(lines, tabWidth, considerFirstLine);
+			StringBuffer result= new StringBuffer();
+			int last= size - 1;
+			for (int i= 0; i < size; i++) {
+				result.append(lines[i]);
+				if (i < last)
+					result.append(tracker.getLineDelimiter(i));
+			}
+			return result.toString();
+		} catch (BadLocationException e) {
+			Assert.isTrue(false,"Can not happend"); //$NON-NLS-1$
+			return null;
+		}
+	}
+		
 	
 	/**
 	 * Concatenate the given strings into one strings using the passed line delimiter as a

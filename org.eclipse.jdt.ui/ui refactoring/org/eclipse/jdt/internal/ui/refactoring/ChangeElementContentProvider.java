@@ -131,7 +131,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 				EditChange tec= changes[i];
 				try {
 					IJavaElement element= getModifiedJavaElement(tec, cunit);
-					if (element == cunit) {
+					if (element.equals(cunit)) {
 						children.add(new TextEditChangeElement(changeElement, tec));
 					} else {
 						PseudoJavaChangeElement pjce= getChangeElement(map, element, children, changeElement);

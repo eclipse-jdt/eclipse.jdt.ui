@@ -11,19 +11,17 @@
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import org.eclipse.jface.text.DocumentEvent;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jface.text.DocumentEvent;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -39,33 +37,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * is allowed to do some adjustments of the text range it is going to manipulate while inside
  * the hook <code>connect</code>.
  * 
+ * @@ say something what happens if two insert are added at the same offset.
+ * 
  * @see TextBufferEditor
  */
 public abstract class TextEdit {
 
-	private static class Sorter implements Comparator {
-		public int compare(Object arg1, Object arg2) {
-			TextRange r1= ((TextEdit)arg1).getTextRange();
-			TextRange r2= ((TextEdit)arg2).getTextRange();
-			int o1= r1.getOffset();
-			int o2= r2.getOffset();
-			if (o1 < o2)
-				return -1;
-			if (o1 > o2)
-				return 1;
-			
-			int l1= r1.getLength();
-			int l2= r2.getLength();
-			
-			if (l1 < l2)
-				return -1;
-			if (l1 > l2)
-				return 1;
-				
-			return 0;
-		}
-	}
-	
 	private static class EmptyIterator implements Iterator {
 		public boolean hasNext() {
 			return false;
@@ -79,22 +56,17 @@ public abstract class TextEdit {
 	}
 	
 	private static final Iterator EMPTY_ITERATOR= new EmptyIterator();
+	private static final TextEdit[] EMPTY_ARRAY= new TextEdit[0];
 	
 	private TextEdit fParent;
 	private List fChildren;
-	private int fLifeCycle;
 	private int fActiveState;
 	
-	protected static final int UNCONNECTED= 0;
-	protected static final int ADDED= 1;
-	protected static final int CONNECTED= 2;
-
 	/* package */ static final int INACTIVE= 0;
 	/* package */ static final int ACTIVE= 1;
 	/* package */ static final int SAME_AS_PARENT= 2;
 
 	protected TextEdit() {
-		fLifeCycle= UNCONNECTED;
 		fActiveState= SAME_AS_PARENT;
 	}
 
@@ -108,11 +80,30 @@ public abstract class TextEdit {
 		return fChildren.size();
 	}
 	
-	public void add(TextEdit edit) {
+	/**
+	 * Adds the given text edit <code>edit</code> to this
+	 * edit.
+	 * 
+	 * @param edit the text edit to be added
+	 * @exception TextEditException is thrown if the given
+	 *  edit can't be added to this edit. This happens if the
+	 *  edit overlaps with one of its siblings or if the given
+	 *  edit isn't fully covered by this edit.
+	 */
+	public void add(TextEdit edit) throws TextEditException {
 		internalAdd(edit);
 	}
 	
-	public void addAll(TextEdit[] edits) {
+	/**
+	 * Adds all edits in <code>edits</code> to this edit.
+	 * 
+	 * @param edits the text edits to be added
+	 * @exception TextEditException is thrown if one of the given
+	 *  edits can't be added to this edit. This happens if one
+	 *  edit overlaps with one of its siblings or if one edit
+	 *  isn't fully covered by this edit.
+	 */
+	public void addAll(TextEdit[] edits) throws TextEditException {
 		for (int i= 0; i < edits.length; i++) {
 			internalAdd(edits[i]);
 		}
@@ -139,6 +130,12 @@ public abstract class TextEdit {
 		}
 		fChildren= null;
 		return result;
+	}
+	
+	public TextEdit[] getChildren() {
+		if (fChildren == null)
+			return EMPTY_ARRAY;
+		return (TextEdit[])fChildren.toArray(new TextEdit[fChildren.size()]);
 	}
 	
 	public boolean isActive() {
@@ -201,20 +198,21 @@ public abstract class TextEdit {
 	public abstract TextRange getTextRange();
 	
 	/**
-	 * Connects this text edit to the given <code>TextBufferEditor</code>. A text edit 
-	 * must not keep a reference to the passed text buffer editor. It is guaranteed that 
-	 * the buffer passed to <code>perform<code> is equal to the buffer managed by
-	 * the given text buffer editor. But they don't have to be identical.
+	 * Connects this text edit to the given <code>TextBuffer</code>. 
+	 * The passed buffer is the same instance passed to the perform 
+	 * method. But the content of the buffer may differ.
 	 * <p>
-	 * Note that this method <b>should only be called</b> by a <code>
-	 * TextBufferEditor</code>.
+	 * Note that this method <b>should only be called</b> by the text
+	 * edit framework and not by normal clients.
 	 *<p>
 	 * This default implementation does nothing. Subclasses may override
 	 * if needed.
 	 *  
 	 * @param buffer the text buffer this text edit will be applied to
+	 * @exception TextEditException if the edit isn't in a valid state
+	 *  and can therefore not be connected to the given buffer.
 	 */
-	public void connect(TextBuffer buffer) throws CoreException {
+	protected void connect(TextBuffer buffer) {
 		// does nothing
 	}
 	
@@ -251,10 +249,15 @@ public abstract class TextEdit {
 		copier.addCopy(this, result);
 		result.fActiveState= fActiveState;
 		if (fChildren != null) {
+			List children= new ArrayList(fChildren.size());
 			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
 				TextEdit element= (TextEdit)iter.next();
-				result.add(element.copy(copier));
+				TextEdit copy= element.copy(copier);
+				copy.fActiveState= element.fActiveState;
+				copy.setParent(result);
+				children.add(copy);
 			}
+			result.internalSetChildren(children);
 		}
 		executePostProcessCopy(copier);
 		return result;
@@ -359,7 +362,7 @@ public abstract class TextEdit {
 	}
 	
 	/* package */ int getNumberOfChildren() {
-		List children= getChildren();
+		List children= internalGetChildren();
 		if (children == null)
 			return 0;
 		int result= children.size();
@@ -373,55 +376,60 @@ public abstract class TextEdit {
 	
 	//---- Setter and Getters -------------------------------------------------------------------------------
 	
+	/* package */ void aboutToBeAdded(TextEdit parent) {
+	}
+	
 	/* package */ void setParent(TextEdit parent) {
 		if (parent != null)
 			Assert.isTrue(fParent == null);
 		fParent= parent;
 	}
 	
-	/* package */ List getChildren() {
+	/* package */ List internalGetChildren() {
 		return fChildren;
 	}
 	
-	/* package */ void setChildren(List children) {
+	/* package */ void internalSetChildren(List children) {
 		fChildren= children;
 	}
 	
-	/* package */ void setLifeCycle(int state) {
-		fLifeCycle= state;
-	}
-	
-	/* package */ boolean isUnconnected() {
-		return fLifeCycle == UNCONNECTED;
-	}
-	
-	/* package */ boolean isAdded() {
-		return fLifeCycle == ADDED;
-	}
-	
-	/* package */ boolean isConnected() {
-		return fLifeCycle == CONNECTED;
-	}
-	
-	/* package */ void internalAdd(TextEdit edit) {
-		Assert.isTrue(isUnconnected());
-		edit.setParent(this);
+	/* package */ void internalAdd(TextEdit edit) throws TextEditException {
+		edit.aboutToBeAdded(this);
+		TextRange eRange= edit.getTextRange();
+		if (eRange.isUndefined() || eRange.isDeleted())
+			throw new TextEditException(this, edit, "Can't add undefined or deleted edit");
+		TextRange range= getTextRange();
+		if (!covers(range, eRange))
+			throw new TextEditException(this, edit, TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
 		if (fChildren == null) {
 			fChildren= new ArrayList(2);
 		}
-		fChildren.add(edit);
+		int index= getInsertionIndex(edit);
+		fChildren.add(index, edit);
+		edit.setParent(this);
 	}
 	
-	/* package */ void setLifeCycleDeep(int state) {
-		setLifeCycle(state);
-		if (fChildren != null) {
-			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
-				((TextEdit)iter.next()).setLifeCycleDeep(state);
-				
-			}
+	/* package */ int getInsertionIndex(TextEdit edit) {
+		TextRange range= edit.getTextRange();
+		int size= fChildren.size();
+		if (size == 0)
+			return 0;
+		int rStart= range.getOffset();
+		int rEnd= range.getInclusiveEnd();
+		for (int i= 0; i < size; i++) {
+			TextRange other= ((TextEdit)fChildren.get(i)).getTextRange();
+			int oStart= other.getOffset();
+			int oEnd= other.getInclusiveEnd();
+			// make sure that a duplicate insertion point at the same offet is inserted last 
+			if (rStart > oEnd || (rStart == oStart && range.getLength() == 0 && other.getLength() == 0))
+				continue;
+			if (rEnd < oStart)
+				return i;
+			throw new TextEditException(this, edit, TextManipulationMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
 		}
+		return size;
 	}
-
+	
 	//---- Validation methods -------------------------------------------------------------------------------
 	
 	/* package */ void checkRange(DocumentEvent event) {
@@ -431,33 +439,6 @@ public abstract class TextEdit {
 		int eventEnd = eventOffset + eventLength - 1;
 		// "Edit changes text that lies outside its defined range"
 		Assert.isTrue(range.getOffset() <= eventOffset && eventEnd <= range.getInclusiveEnd());
-	}
-	
-	/* package */ IStatus checkEdit(int bufferLength) {
-		TextRange range= getTextRange();
-		if (range.getExclusiveEnd() > bufferLength)
-			return createErrorStatus(TextManipulationMessages.getString("TextEdit.offset_greater")); //$NON-NLS-1$
-		boolean isInsertionPoint= range.isInsertionPoint();
-		TextRange cRange= getChildrenTextRange();
-		if (!cRange.isUndefined() && (cRange.getOffset() < range.getOffset() || cRange.getExclusiveEnd() > range.getExclusiveEnd())) {
-			return createErrorStatus(TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
-		}
-		TextRange last= null;
-		if (fChildren != null) {
-			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
-				TextEdit element= (TextEdit)iter.next();
-				TextRange eRange= element.getTextRange();
-				
-				if (!(isInsertionPoint && eRange.isInsertionPoint()) && last != null && last.getInclusiveEnd() >= eRange.getOffset()) {
-					return createErrorStatus(TextManipulationMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
-				}
-				IStatus s= element.checkEdit(bufferLength);
-				if (!s.isOK())
-					return s;
-				last= eRange;
-			}
-		}
-		return createOKStatus();
 	}
 	
 	protected static IStatus createErrorStatus(String message) {
@@ -478,22 +459,8 @@ public abstract class TextEdit {
 		updateParents(delta);
 	}
 	
-	/* package */ void executeConnect(TextBuffer buffer) throws CoreException {
-		Assert.isTrue(isUnconnected());
-		fLifeCycle= ADDED;
-		List children= getChildren();
-		if (children != null) {
-			for (int i= children.size() - 1; i >= 0; i--) {
-				((TextEdit)children.get(i)).executeConnect(buffer);
-			}
-		}
-		connect(buffer);
-		fLifeCycle= CONNECTED;
-		sortChildren();
-	}
-	
 	/* package */ void execute(TextBuffer buffer, Updater updater, IProgressMonitor pm) throws CoreException {
-		List children= getChildren();
+		List children= internalGetChildren();
 		pm.beginTask("", children != null ? children.size() + 1 : 1); //$NON-NLS-1$
 		if (children != null) {
 			for (int i= children.size() - 1; i >= 0; i--) {
@@ -504,7 +471,6 @@ public abstract class TextEdit {
 			try {
 				updater.setActiveNode(this);
 				perform(buffer);
-				// System.out.println(toString());
 			} finally {
 				updater.setActiveNode(null);
 			}
@@ -538,9 +504,12 @@ public abstract class TextEdit {
 		}
 	}
 	
-	/* package */ void sortChildren() {
-		if (fChildren != null)
-			Collections.sort(fChildren, new Sorter());
+	private static boolean covers(TextRange thisRange, TextRange otherRange) {
+		if (thisRange.getLength() == 0) {	// an insertion point can't cover anything
+			return false;
+		} else {
+			return thisRange.getOffset() <= otherRange.getOffset() && otherRange.getExclusiveEnd() <= thisRange.getExclusiveEnd();
+		}		
 	}	
 }
 

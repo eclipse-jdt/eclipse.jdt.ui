@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.corext.refactoring;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
@@ -41,7 +43,7 @@ public class SearchResultCollector implements IJavaSearchResultCollector {
 	/**
 	 * @see IJavaSearchResultCollector#accept(org.eclipse.core.resources.IResource, int, int, org.eclipse.jdt.core.IJavaElement, int)
 	 */
-	public void accept(IResource res, int start, int end, IJavaElement element, int accuracy) {
+	public void accept(IResource res, int start, int end, IJavaElement element, int accuracy) throws CoreException {
 		fFound.add(new SearchResult(res, start, end, element, accuracy));
 	}
 	
@@ -65,7 +67,6 @@ public class SearchResultCollector implements IJavaSearchResultCollector {
 	public List getResults() {
 		return fFound;
 	}
-
 }
 
 

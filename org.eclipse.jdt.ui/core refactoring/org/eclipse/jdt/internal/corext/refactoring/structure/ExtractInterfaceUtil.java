@@ -57,8 +57,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -72,7 +70,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompositeOrTypeConstraint;
@@ -89,10 +86,13 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.SimpleTypeCon
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 class ExtractInterfaceUtil {
 
@@ -214,7 +214,8 @@ class ExtractInterfaceUtil {
 
 	//TODO to be deleted
 	private static TextEdit createTypeUpdateEdit(ISourceRange sourceRange, String className, String interfaceName) {
-		return new UpdateTypeReferenceEdit(sourceRange.getOffset(), sourceRange.getLength(), interfaceName, className);
+		int offset= sourceRange.getOffset() + sourceRange.getLength() - className.length();
+		return SimpleTextEdit.createReplace(offset, className.length(), interfaceName);
 	}
 	
 	private static ConstraintVariable[] getUpdatableVariables(ITypeConstraint[] constraints, ITypeBinding classBinding, ITypeBinding interfaceBinding){

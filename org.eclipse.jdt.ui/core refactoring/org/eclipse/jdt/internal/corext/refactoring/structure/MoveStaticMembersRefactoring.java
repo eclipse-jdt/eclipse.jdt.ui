@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class MoveStaticMembersRefactoring extends Refactoring {
@@ -676,7 +677,8 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			wc.getBuffer().setContents(buffer.getContent());
 			wc.reconcile();
 			for (int i= 0; i < fMembers.length; i++) {
-				result[i]= JavaModelUtil.getUnindentedSource(JavaModelUtil.findMemberInCompilationUnit(wc, fMembers[i]), fPrefernces.tabWidth);
+				IMember member= JavaModelUtil.findMemberInCompilationUnit(wc, fMembers[i]);
+				result[i]= Strings.trimIndentation(member.getSource(), fPrefernces.tabWidth, false);
 			}
 			
 		} finally {
@@ -698,7 +700,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			fSource.rewriter.markAsRemoved(declaration, delete);
 			ASTNode node= fTarget.rewriter.createPlaceholder(
 				sources[i],
-				ASTNodes.getRewriteNodeType(fMembers[i]));
+				ASTRewrite.getPlaceholderType(declaration));
 			fTarget.rewriter.markAsInserted(node, add);
 			container.add(ASTNodes.getInsertionIndex((BodyDeclaration)node, container), node);
 		}

@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -32,10 +33,10 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
-import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
@@ -93,9 +94,10 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		SearchResult[] results= refs.getSearchResults();
 		for (int j= 0; j < results.length; j++){
 			SearchResult searchResult= results[j];
-			int offset= searchResult.getStart();
+			String oldName= wc.findPrimaryType().getElementName();
+			int offset= searchResult.getEnd() - oldName.length();
 			int length= searchResult.getEnd() - searchResult.getStart();
-			manager.get(wc).addTextEdit(name, new UpdateTypeReferenceEdit(offset, length, newName, wc.findPrimaryType().getElementName()));
+			manager.get(wc).addTextEdit(name, SimpleTextEdit.createReplace(offset, oldName.length(), newName));
 		}
 		return manager;
 	}

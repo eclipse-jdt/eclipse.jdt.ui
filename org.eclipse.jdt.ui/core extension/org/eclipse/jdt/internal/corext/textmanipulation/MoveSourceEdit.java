@@ -12,10 +12,9 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.List;
 
-import org.eclipse.jface.text.DocumentEvent;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.text.DocumentEvent;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -53,6 +52,13 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 		return buffer.getContent(range.getOffset(), range.getLength());
 	}	
 	
+	protected void connect(TextBuffer buffer) throws TextEditException {
+		if (fTarget == null)
+			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
+		if (fTarget.getSourceEdit() != this)
+			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.different_source"));  //$NON-NLS-1$
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
@@ -65,12 +71,12 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 			case 1:
 				fContent= getContent(buffer);
 				fContentRange= getTextRange().copy();
-				fContentChildren= getChildren();
+				fContentChildren= internalGetChildren();
 				fMode= DELETE;
 				buffer.replace(fContentRange, ""); //$NON-NLS-1$
 				// do this after executing the replace to be able to
 				// compute the number of children.
-				setChildren(null);
+				internalSetChildren(null);
 				break;
 			// Position of move source < position of move target.
 			// Hence move source handles the delete and the 
@@ -159,11 +165,11 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 			
 			fTarget.markChildrenAsDeleted();
 			
-			List children= getChildren();
-			setChildren(null);
+			List children= internalGetChildren();
+			internalSetChildren(null);
 			int moveDelta= fTarget.getTextRange().getOffset() - getTextRange().getOffset();
 			move(children, moveDelta);
-			fTarget.setChildren(children);
+			fTarget.internalSetChildren(children);
 		} else {
 			Assert.isTrue(false);
 		}
@@ -175,17 +181,6 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 		} else  {
 			super.checkRange(event);
 		}
-	}
-	
-	/* package */ IStatus checkEdit(int bufferLength) {
-		IStatus s= super.checkEdit(bufferLength);
-		if (!s.isOK())
-			return s;
-		if (fTarget == null)
-			return createErrorStatus(TextManipulationMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
-		if (fTarget.getSourceEdit() != this)
-			return createErrorStatus(TextManipulationMessages.getString("MoveSourceEdit.different_source")); //$NON-NLS-1$
-		return createOKStatus();
 	}
 	
 	/* package */ MoveTargetEdit getTargetEdit() {

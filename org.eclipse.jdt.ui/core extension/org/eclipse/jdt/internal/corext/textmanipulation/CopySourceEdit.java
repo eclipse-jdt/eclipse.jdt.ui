@@ -13,10 +13,9 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.text.DocumentEvent;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.text.DocumentEvent;
 
 public class CopySourceEdit extends AbstractTransferEdit {
 
@@ -60,6 +59,13 @@ public class CopySourceEdit extends AbstractTransferEdit {
 		}
 	}
 	
+	protected void connect(TextBuffer buffer) throws TextEditException {
+		if (fTarget == null)
+			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.no_target")); //$NON-NLS-1$
+		if (fTarget.getSourceEdit() != this)
+			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.different_source")); //$NON-NLS-1$
+	}
+	
 	public void perform(TextBuffer buffer) throws CoreException {
 		fContent= computeContent(buffer);
 		TextRange targetRange= fTarget.getTextRange();
@@ -100,17 +106,6 @@ public class CopySourceEdit extends AbstractTransferEdit {
 	
 	/* package */ void checkRange(DocumentEvent event) {
 		fTarget.checkRange(event);
-	}
-	
-	/* package */ IStatus checkEdit(int bufferLength) {
-		IStatus s= super.checkEdit(bufferLength);
-		if (!s.isOK())
-			return s;
-		if (fTarget == null)
-			return createErrorStatus(TextManipulationMessages.getString("CopySourceEdit.no_target")); //$NON-NLS-1$
-		if (fTarget.getSourceEdit() != this)
-			return createErrorStatus(TextManipulationMessages.getString("CopySourceEdit.different_source")); //$NON-NLS-1$
-		return createOKStatus();
 	}
 	
 	/* package */ CopyTargetEdit getTargetEdit() {

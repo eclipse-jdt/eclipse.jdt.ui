@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * Represents a search result - exactly as found by SearchEngine
  */
-public final class SearchResult {
+public class SearchResult {
 	private final IResource fResource;
 	private final IJavaElement fEnclosingElement;
 	private final int fStart, fEnd;

@@ -10,15 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.Assert;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * A <code>TextBufferEditor</code> manages a set of <code>TextEdit</code>s and applies
@@ -66,17 +70,16 @@ public class TextBufferEditor {
 	 * modifing it.
 	 * 
 	 * @param edit the text edit to be added
-	 * @exception CoreException if the text edit can not be added
-	 * 	to this text buffer editor
+	 * @exception TextEditException if the text edit can not be added
+	 * 	to this text buffer editor.
 	 */
 	public void add(TextEdit edit) throws CoreException {
 		Assert.isTrue(fUndoMemento == null);
+		executeConnect(edit, fBuffer);
 		if (fRoot == null) {
-			fRoot= new MultiTextEdit();
+			fRoot= new MultiTextEdit(0, fBuffer.getLength());
 			fRoot.setActive(true);
 		}
-		edit.executeConnect(fBuffer);
-		fRoot.setLifeCycle(TextEdit.UNCONNECTED);
 		fRoot.add(edit);
 		fCheckStatus= null;
 	}
@@ -85,7 +88,7 @@ public class TextBufferEditor {
 	 * Adds a <code>UndoMemento</code> to this text editor. Adding a <code>UndoMemento</code>
 	 * to a <code>TextBufferEditor</code> transfers ownership of the memento to the editor. So
 	 * after a memento has been added to a editor the creator of that memento <b>must</b> not continue
-	 * modifing it.
+	 * modifying it.
 	 * 
 	 * @param undo the undo memento to be added
 	 * @exception CoreException if the undo memento can not be added
@@ -107,14 +110,12 @@ public class TextBufferEditor {
 	public IStatus canPerformEdits() {
 		if (fCheckStatus != null)
 			return fCheckStatus;
-		if (fRoot != null) {
-			fRoot.sortChildren();
-			fRoot.setLifeCycle(TextEdit.CONNECTED);
-			fCheckStatus= fRoot.checkEdit(fBuffer.getLength());
+		if (fRoot != null && !checkBufferLength(fRoot, fBuffer.getLength())) {
+			fCheckStatus= createErrorStatus(TextManipulationMessages.getString("TextEdit.offset_greater")); //$NON-NLS-1$
 		} else if (fUndoMemento != null) {
 			fCheckStatus= fUndoMemento.checkEdits(fBuffer.getLength());
 		} else {
-			fCheckStatus= TextEdit.createOKStatus();
+			fCheckStatus= createOKStatus();
 		}
 		return fCheckStatus;
 	}
@@ -159,6 +160,30 @@ public class TextBufferEditor {
 	
 	//---- Helper methods ------------------------------------------------------------------------
 		
+	private static boolean checkBufferLength(TextEdit root, int bufferLength) {
+		TextRange range= root.getTextRange();
+		if (range.getExclusiveEnd() > bufferLength)
+			return false;
+		for (Iterator iter= root.iterator(); iter.hasNext();) {
+			TextEdit edit= (TextEdit)iter.next();
+			if (!checkBufferLength(edit, bufferLength))
+				return false;
+		}
+		return true;
+	}
+	
+	private static void executeConnect(TextEdit root, TextBuffer buffer) {
+		TextRange oldRange= root.getTextRange();
+		root.connect(buffer);
+		TextRange newRange= root.getTextRange();
+		if (oldRange.getOffset() != newRange.getOffset() || oldRange.getLength() != newRange.getLength())
+			throw new TextEditException(root.getParent(), root, "Text edit changed during connect method");
+		for (Iterator iter= root.iterator(); iter.hasNext();) {
+			TextEdit edit= (TextEdit)iter.next();
+			executeConnect(edit, buffer);
+		}
+	}
+	
 	private UndoMemento executeDo(IProgressMonitor pm) throws CoreException {
 		Updater updater= null;
 		try {
@@ -194,5 +219,13 @@ public class TextBufferEditor {
 				fBuffer.unregisterUpdater(updater);
 		}
 	}
+	
+	private static IStatus createErrorStatus(String message) {
+		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, message, null);
+	}
+	
+	private static IStatus createOKStatus() {
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, TextManipulationMessages.getString("TextEdit.is_valid"), null); //$NON-NLS-1$
+	}	
 }
 

@@ -17,11 +17,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -44,8 +45,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -59,7 +58,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
-import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
@@ -67,6 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
@@ -75,6 +74,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 public class ExtractInterfaceRefactoring extends Refactoring {
 
@@ -316,7 +317,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 					continue;
 				TextRange oldRange= getOldRange(edits, new TextRange(cuRange.getSourceRange()), change);
 				String typeName= fInputType.getElementName();
-				TextEdit edit= new UpdateTypeReferenceEdit(oldRange.getOffset(), oldRange.getLength(), fNewInterfaceName, typeName);
+				int offset= oldRange.getExclusiveEnd() - typeName.length();
+				TextEdit edit= SimpleTextEdit.createReplace(offset, typeName.length(), fNewInterfaceName);
 				ExtractInterfaceUtil.getTextChange(manager, cu).addTextEdit(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update"), edit); //$NON-NLS-1$
 			}
 			fSource= ExtractInterfaceUtil.getTextChange(manager, newCuWC).getPreviewContent();
@@ -383,7 +385,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		rewrite.rewriteNode(textBuffer, resultingEdits);
 
 		TextChange textChange= manager.get(cu);
-		String message= RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update"); //$NON-NLS-1$
+		//TODO fix the descriptions
+		String message= "update";
 		textChange.addTextEdit(message, resultingEdits);
 		rewrite.removeModifications();
 		return textChange;

@@ -99,12 +99,19 @@ public class RefactoringSearchEngine {
 	 * @see SearchResult
 	 */			
 	public static SearchResultGroup[] search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
-		return search(pm, scope, pattern, null);
+		return search(scope, pattern, new SearchResultCollector(pm));
+	}
+	
+	public static SearchResultGroup[] search(IJavaSearchScope scope, ISearchPattern pattern, SearchResultCollector collector) throws JavaModelException {
+		return search(scope, pattern, collector, null);
 	}
 	
 	public static SearchResultGroup[] search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, ICompilationUnit[] workingCopies) throws JavaModelException {
-		SearchResultCollector collector= new SearchResultCollector(pm);
-		search(scope, pattern, collector, workingCopies);	
+		return search(scope, pattern, new SearchResultCollector(pm), workingCopies);
+	}
+	
+	public static SearchResultGroup[] search(IJavaSearchScope scope, ISearchPattern pattern, SearchResultCollector collector, ICompilationUnit[] workingCopies) throws JavaModelException {
+		internalSearch(scope, pattern, collector, workingCopies);	
 		return groupByResource(createSearchResultArray(collector.getResults()));
 	}
 	
@@ -137,7 +144,7 @@ public class RefactoringSearchEngine {
 		return grouped;
 	}
 	
-	private static void search(IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector, ICompilationUnit[] workingCopies) throws JavaModelException {
+	private static void internalSearch(IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector, ICompilationUnit[] workingCopies) throws JavaModelException {
 		if (pattern == null)
 			return;
 		Assert.isNotNull(scope, "scope"); //$NON-NLS-1$

@@ -64,7 +64,7 @@ public class SimpleTextEdit extends TextEdit {
 	 * @param text the text edit's text
 	 */	
 	protected final void setText(String text) {
-		Assert.isTrue(text != null && !isConnected());
+		Assert.isTrue(text != null);
 		fText= text;
 	}
 	
@@ -77,7 +77,7 @@ public class SimpleTextEdit extends TextEdit {
 	 * @param range the text edit's range.
 	 */	
 	protected final void setTextRange(TextRange range) {
-		Assert.isTrue(range != null && !isConnected());
+		Assert.isTrue(range != null);
 		fRange= range;
 	}
 	

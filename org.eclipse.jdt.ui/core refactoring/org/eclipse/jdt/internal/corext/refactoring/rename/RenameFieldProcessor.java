@@ -12,12 +12,13 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -49,10 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -572,7 +570,8 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		
 		IJavaSearchScope scope= RefactoringScopeFactory.create(accessor);
 		ISearchPattern pattern= SearchEngine.createSearchPattern(accessor, IJavaSearchConstants.ALL_OCCURRENCES);
-		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(pm, scope, pattern);
+		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(
+			scope, pattern, new MethodOccurenceCollector(pm, accessor.getElementName()));
 		
 		for (int i= 0; i < groupedResults.length; i++) {
 			ICompilationUnit cu= groupedResults[i].getCompilationUnit();
@@ -582,7 +581,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 			for (int j= 0; j < results.length; j++){
 				SearchResult searchResult= results[j];
 				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-				TextEdit edit= new UpdateMethodReferenceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), newAccessorName, accessor.getElementName());
+				TextEdit edit= new SimpleTextEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), newAccessorName);
 				manager.get(wc).addTextEdit(editName, edit);
 			}
 		}
@@ -628,42 +627,8 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	}
 	
 	private TextEdit createTextChange(SearchResult searchResult) {
-		int offset= searchResult.getStart();
-		int length= searchResult.getEnd() - searchResult.getStart();
-		return new UpdateFieldReference(offset, length, fNewElementName, fField.getElementName());
-	}
-
-	//-----------
-	private final static class UpdateFieldReference extends SimpleTextEdit {
-
-		private String fOldName;
-		
-		UpdateFieldReference(int offset, int length, String newName, String oldName){
-			super(offset, length, newName);
-			Assert.isNotNull(oldName);
-			fOldName= oldName;
-		}
-		
-		private UpdateFieldReference(TextRange range, String newName, String oldName) {
-			super(range, newName);
-			Assert.isNotNull(oldName);
-			fOldName= oldName;
-		}
-	
-		/* non Java-doc
-		 * @see TextEdit#copy0
-		 */
-		protected TextEdit copy0(TextEditCopier copier) {
-			return new UpdateFieldReference(getTextRange().copy(), getText(), fOldName);
-		}
-		
-		/* non java-doc
-		 * @see TextEdit#connect(TextBuffer)
-		 */
-		public void connect(TextBuffer buffer) throws CoreException {
-			TextRange oldRange= getTextRange();
-			int offset= oldRange.getOffset() + oldRange.getLength() - fOldName.length();
-			setTextRange(new TextRange(offset, fOldName.length()));
-		}
+		String oldName= fField.getElementName();
+		int offset= searchResult.getEnd() - oldName.length();
+		return SimpleTextEdit.createReplace(offset, oldName.length(), fNewElementName);
 	}
 }

@@ -103,6 +103,30 @@ public class ImportsStructure implements IImportsStructure {
 		fHasChanges= false;
 	}
 	
+	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports, TextBuffer buffer) throws CoreException {
+		fCompilationUnit= cu;
+		synchronized (fCompilationUnit) {
+			fCompilationUnit.reconcile();
+		}
+	
+		IImportContainer container= cu.getImportContainer();
+		
+		fImportOnDemandThreshold= importThreshold;
+		fFilterImplicitImports= true;
+		fFindAmbiguousImports= !restoreExistingImports;
+		
+		fPackageEntries= new ArrayList(20);
+		
+		if (restoreExistingImports && container.exists()) {
+			addExistingImports(buffer, cu.getImports());
+		}	
+		
+		addPreferenceOrderHolders(preferenceOrder);
+		
+		fNumberOfImportsCreated= 0;
+		fHasChanges= false;
+	}
+	
 	private void addPreferenceOrderHolders(String[] preferenceOrder) {
 		if (fPackageEntries.isEmpty()) {
 			// all new: copy the elements

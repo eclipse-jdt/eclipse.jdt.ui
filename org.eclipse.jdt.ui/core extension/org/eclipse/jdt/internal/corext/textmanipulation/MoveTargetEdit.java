@@ -12,10 +12,9 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.List;
 
-import org.eclipse.jface.text.DocumentEvent;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.text.DocumentEvent;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -41,6 +40,13 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 			fSource= edit;
 			fSource.setTargetEdit(this);
 		}
+	}
+	
+	protected void connect(TextBuffer buffer) {
+		if (fSource == null)
+			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.no_source")); //$NON-NLS-1$
+		if (fSource.getTargetEdit() != this)
+			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.different_target")); //$NON-NLS-1$
 	}
 	
 	/* non Java-doc
@@ -90,7 +96,7 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 
 			List sourceChildren= fSource.getContentChildren();
 			move(sourceChildren, moveDelta); 
-			setChildren(sourceChildren);
+			internalSetChildren(sourceChildren);
 			
 		} else {
 			Assert.isTrue(false);
@@ -103,19 +109,6 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		} else {
 			super.checkRange(event);
 		}
-	}
-	
-	/* package */ IStatus checkEdit(int bufferLength) {
-		IStatus s= super.checkEdit(bufferLength);
-		if (!s.isOK())
-			return s;
-		if (fSource == null)
-			return createErrorStatus(TextManipulationMessages.getString("MoveTargetEdit.no_source")); //$NON-NLS-1$
-		if (fSource.getTargetEdit() != this)
-			return createErrorStatus(TextManipulationMessages.getString("MoveTargetEdit.different_target")); //$NON-NLS-1$
-		if (getTextRange().getLength() != 0)
-			return createErrorStatus(TextManipulationMessages.getString("MoveTargetEdit.length")); //$NON-NLS-1$
-		return createOKStatus();
 	}
 	
 	/* package */ MoveSourceEdit getSourceEdit() {
