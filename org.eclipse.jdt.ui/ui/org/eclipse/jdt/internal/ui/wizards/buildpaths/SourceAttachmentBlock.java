@@ -15,8 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -64,7 +62,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
@@ -336,7 +333,7 @@ public class SourceAttachmentBlock {
 		if (field == fFileNameField) {
 			fNameStatus= updateFileNameStatus();
 		} else if (field == fWorkspaceButton) {
-			IPath jarFilePath= chooseInternalJarFile();
+			IPath jarFilePath= chooseInternal();
 			if (jarFilePath != null) {
 				fFileNameField.setText(jarFilePath.toString());
 			}
@@ -440,7 +437,12 @@ public class SourceAttachmentBlock {
 					String message= NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", resolvedPath.toOSString()); //$NON-NLS-1$
 					status.setWarning(message);
 					return status;
-				}						
+				}
+				if (!filePath.isAbsolute()) {
+					String message=  NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.notabsolute", filePath.toString()); //$NON-NLS-1$
+					status.setError(message);
+					return status;
+				}
 				
 			} else {
 				File file= filePath.toFile();
@@ -452,6 +454,13 @@ public class SourceAttachmentBlock {
 					String message=  NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", filePath.toString()); //$NON-NLS-1$
 					status.setError(message);
 					return status;
+				}
+				if (res == null) {
+					if (!filePath.isAbsolute()) {
+						String message=  NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.notabsolute", filePath.toString()); //$NON-NLS-1$
+						status.setError(message);
+						return status;
+					}
 				}
 			}
 			
@@ -530,12 +539,9 @@ public class SourceAttachmentBlock {
 	/*
 	 * Opens a dialog to choose an internal jar.
 	 */	
-	private IPath chooseInternalJarFile() {
+	private IPath chooseInternal() {
 		String initSelection= fFileNameField.getText();
 		
-		Class[] acceptedClasses= new Class[] { IFolder.class, IFile.class };
-		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
-	
 		ViewerFilter filter= new ArchiveFileFilter((List) null, false);
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
@@ -551,7 +557,6 @@ public class SourceAttachmentBlock {
 
 		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
 		dialog.setAllowMultiple(false);
-		dialog.setValidator(validator);
 		dialog.addFilter(filter);
 		dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.message")); //$NON-NLS-1$
