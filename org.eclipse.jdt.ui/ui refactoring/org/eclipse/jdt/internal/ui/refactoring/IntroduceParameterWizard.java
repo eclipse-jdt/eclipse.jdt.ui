@@ -120,10 +120,6 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			Label previewLabel= new Label(composite, SWT.NONE);
 			previewLabel.setText(RefactoringMessages.getString("ChangeSignatureInputPage.method_Signature_Preview")); //$NON-NLS-1$
 			
-//			//XXX: use ViewForm to draw a flat border. Beware of common problems with wrapping layouts
-//			//inside GridLayout. GridData must be constrained to force wrapping. See bug 9866 et al.
-//			ViewForm border= new ViewForm(composite, SWT.BORDER | SWT.FLAT);
-			
 			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
 			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
@@ -139,13 +135,6 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			gdata.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
 			gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
 			signaturePreviewControl.setLayoutData(gdata);
-			
-//			//XXX must force JavaSourceViewer text widget to wrap:
-//			border.setContent(signaturePreviewControl);
-//			GridData borderData= new GridData(GridData.FILL_BOTH);
-//			borderData.widthHint= gdata.widthHint;
-//			borderData.heightHint= gdata.heightHint;
-//			border.setLayoutData(borderData);
 		}
 		
 		private void update(boolean displayErrorMessage){
