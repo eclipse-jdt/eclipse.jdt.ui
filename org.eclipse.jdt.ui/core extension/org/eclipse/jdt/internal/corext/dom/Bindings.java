@@ -803,6 +803,11 @@ public class Bindings {
 		if (isPrimitiveType(candidate) || type.isPrimitive()) {
 			return type.getName().equals(Signature.toString(candidate));
 		} else {
+			// normalize (quick hack until binding.getJavaElement works)
+			candidate= Signature.getTypeErasure(candidate);
+			type= type.getErasure();
+			
+			
 			if (isResolvedType(candidate)) {
 				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
 			} else {
