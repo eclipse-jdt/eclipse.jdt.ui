@@ -209,11 +209,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 						case IJavaElement.IMPORT_CONTAINER:
 							return true;
 						case IJavaElement.PACKAGE_FRAGMENT:
-							IPackageFragment pack= (IPackageFragment) elem;
-							return pack.getCompilationUnits().length > 0;
 						case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-							IPackageFragmentRoot root= (IPackageFragmentRoot) elem;
-							return (root.getKind() == IPackageFragmentRoot.K_SOURCE) && root.hasChildren();
+							IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+							return (root.getKind() == IPackageFragmentRoot.K_SOURCE);
 						case IJavaElement.JAVA_PROJECT:
 							return hasSourceFolders((IJavaProject) elem);
 					}
@@ -229,7 +227,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
-			if ((root.getKind() == IPackageFragmentRoot.K_SOURCE) && root.hasChildren()) {
+			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 				return true;
 			}
 		}
