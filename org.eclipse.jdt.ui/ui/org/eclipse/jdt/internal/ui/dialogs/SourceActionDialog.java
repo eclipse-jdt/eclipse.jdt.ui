@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -59,7 +60,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.preferences.CHyperLink;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 
@@ -632,8 +632,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 				text= strings[0];
 				final String target= strings[1];
 				final String subTarget= strings[2];
-				final CHyperLink control= new CHyperLink(description, SWT.NONE);
-				control.setText(text);
+				final Link control= new Link(description, SWT.NONE);
+				control.setText("<a href=\"" + target + "\">" + text + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				control.addSelectionListener(new SelectionAdapter() {
 
 					public final void widgetSelected(final SelectionEvent event) {

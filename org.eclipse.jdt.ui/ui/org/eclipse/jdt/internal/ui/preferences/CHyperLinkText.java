@@ -31,8 +31,8 @@ import org.eclipse.jface.text.Assert;
 
 
 /**
- * TODO remove when platform widget becomes available
- * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=79419
+ * XXX Can be removed if the SWT Link widget supports wrapping
+ * 		see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=85235
  * @since 3.1
  */
 public class CHyperLinkText extends Composite {
@@ -125,21 +125,13 @@ public class CHyperLinkText extends Composite {
 				final LinkSpec spec= (LinkSpec) token;
 				Assert.isNotNull(spec.url);
 				Link link= new Link(this, SWT.NONE);
-				link.setText("<a href=\"" + spec.url + "\">" + (spec.text == null ? spec.url : spec.text) + "</a>");
+				link.setText("<a href=\"" + spec.url + "\">" + (spec.text == null ? spec.url : spec.text) + "</a>");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 				link.setToolTipText(spec.tooltip);
 				link.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
 						fireLinkSelected(spec.url);
 					}
 				});
-//				CHyperLink link= new CHyperLink(this, SWT.NONE);
-//				link.setText(spec.text == null ? spec.url : spec.text);
-//				link.setToolTipText(spec.tooltip);
-//				link.addSelectionListener(new SelectionAdapter() {
-//					public void widgetSelected(SelectionEvent e) {
-//						fireLinkSelected(spec.url);
-//					}
-//				});
 				continue;
 			}
 			
