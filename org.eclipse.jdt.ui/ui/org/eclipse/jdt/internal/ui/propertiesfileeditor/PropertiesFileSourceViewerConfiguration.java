@@ -26,7 +26,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
@@ -141,9 +140,9 @@ public class PropertiesFileSourceViewerConfiguration extends SourceViewerConfigu
 	 * Initializes the scanners.
 	 */
 	private void initializeScanners() {
-		fPropertyKeyScanner= new SingleTokenJavaScanner(getColorManager(), fPreferenceStore, IJavaColorConstants.PROPERTIES_FILE_KEY);
+		fPropertyKeyScanner= new SingleTokenJavaScanner(getColorManager(), fPreferenceStore, PreferenceConstants.PROPERTIES_FILE_COLORING_KEY);
 		fPropertyValueScanner= new PropertyValueScanner(getColorManager(), fPreferenceStore);
-		fCommentScanner= new SingleTokenJavaScanner(getColorManager(), fPreferenceStore, IJavaColorConstants.PROPERTIES_FILE_COMMENT);
+		fCommentScanner= new SingleTokenJavaScanner(getColorManager(), fPreferenceStore, PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT);
 	}
 
 	/*

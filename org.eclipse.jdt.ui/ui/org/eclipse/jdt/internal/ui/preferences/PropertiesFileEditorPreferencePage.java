@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.preferences;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,6 +19,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -33,11 +33,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IStatus;
@@ -48,6 +45,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -60,6 +60,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -73,27 +74,77 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
-import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 /**
- * The page for setting the editor options.
+ * The page for setting the properties file editor preferences.
+ * 
+ * @since 3.1
  */
 public class PropertiesFileEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
+	
+	private static class SourcePreviewerUpdater {
+		
+		/**
+		 * Creates a Java source preview updater for the given viewer, configuration and preference store.
+		 *
+		 * @param viewer the viewer
+		 * @param configuration the configuration
+		 * @param preferenceStore the preference store
+		 */
+		SourcePreviewerUpdater(final SourceViewer viewer, final PropertiesFileSourceViewerConfiguration configuration, final IPreferenceStore preferenceStore) {
+			Assert.isNotNull(viewer);
+			Assert.isNotNull(configuration);
+			Assert.isNotNull(preferenceStore);
+			final IPropertyChangeListener fontChangeListener= new IPropertyChangeListener() {
+				/*
+				 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+				 */
+				public void propertyChange(PropertyChangeEvent event) {
+					if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
+						Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
+						viewer.getTextWidget().setFont(font);
+					}
+				}
+			};
+			final IPropertyChangeListener propertyChangeListener= new IPropertyChangeListener() {
+				/*
+				 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+				 */
+				public void propertyChange(PropertyChangeEvent event) {
+					if (configuration.affectsTextPresentation(event)) {
+						configuration.handlePropertyChangeEvent(event);
+						viewer.invalidateTextPresentation();
+					}
+				}
+			};
+			viewer.getTextWidget().addDisposeListener(new DisposeListener() {
+				/*
+				 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+				 */
+				public void widgetDisposed(DisposeEvent e) {
+					preferenceStore.removePropertyChangeListener(propertyChangeListener);
+					JFaceResources.getFontRegistry().removeListener(fontChangeListener);
+				}
+			});
+			JFaceResources.getFontRegistry().addListener(fontChangeListener);
+			preferenceStore.addPropertyChangeListener(propertyChangeListener);
+		}
+	}
+	
+	
 	/**
 	 * Item in the highlighting color list.
-	 * 
-	 * @since 3.0
 	 */
 	private static class HighlightingColorListItem {
 		/** Display name */
@@ -190,8 +241,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	
 	/**
 	 * Color list label provider.
-	 * 
-	 * @since 3.0
 	 */
 	private class ColorListLabelProvider extends LabelProvider implements IColorProvider {
 
@@ -219,8 +268,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	
 	/**
 	 * Color list content provider.
-	 * 
-	 * @since 3.0
 	 */
 	private class ColorListContentProvider implements IStructuredContentProvider {
 
@@ -247,37 +294,28 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
 	/**
 	 * Preference key suffix for italic preferences.
-	 * @since 3.0
 	 */
 	private static final String ITALIC= PreferenceConstants.EDITOR_ITALIC_SUFFIX;
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;	
 
 	/** The keys of the overlay store. */
 	private final String[][] fSyntaxColorListModel= new String[][] {
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.singleLineComment"), PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.returnKeyword"), PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.keywords"), PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.strings"), PreferenceConstants.EDITOR_STRING_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.methodNames"), PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.operators"), PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.others"), PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaCommentTaskTags"), PreferenceConstants.EDITOR_TASK_TAG_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocKeywords"), PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocHtmlTags"), PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocLinks"), PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR }, //$NON-NLS-1$
-		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocOthers"), PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR } //$NON-NLS-1$
+		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.key"), PreferenceConstants.PROPERTIES_FILE_COLORING_KEY }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.value"), PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.assignment"), PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.argument"), PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("PropertiesFileEditorPreferencePage.comment"), PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT } //$NON-NLS-1$
 	};
 	
 	private final String[][] fAppearanceColorListModel= new String[][] {
-		{PreferencesMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR, null}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR, null}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColor2"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR, null}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, null}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR, null}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.selectionForegroundColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.selectionBackgroundColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("PropertiesFileEditorPreferencePage.lineNumberForegroundColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("PropertiesFileEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("PropertiesFileEditorPreferencePage.currentLineHighlighColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("PropertiesFileEditorPreferencePage.printMarginColor2"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("PropertiesFileEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("PropertiesFileEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("PropertiesFileEditorPreferencePage.selectionForegroundColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("PropertiesFileEditorPreferencePage.selectionBackgroundColor"), AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR}, //$NON-NLS-1$
 	};
 	
 	private OverlayPreferenceStore fOverlayStore;
@@ -321,15 +359,13 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	private Button fEnableCheckbox;
 	/**
 	 * Check box for italic preference.
-	 * @since 3.0
 	 */
 	private Button fItalicCheckBox;
-	private JavaSourceViewer fPreviewViewer;
+	private SourceViewer fPreviewViewer;
 	private Color fBackgroundColor;
 	
 	/**
 	 * Tells whether the fields are initialized.
-	 * @since 3.0
 	 */
 	private boolean fFieldsInitialized= false;
 	
@@ -337,18 +373,15 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 * List of master/slave listeners when there's a dependency.
 	 * 
 	 * @see #createDependency(Button, String, Control)
-	 * @since 3.0
 	 */
 	private ArrayList fMasterSlaveListeners= new ArrayList();
 
 	/**
 	 * Highlighting color list
-	 * @since 3.0
 	 */
 	private final java.util.List fHighlightingColorList= new ArrayList();
 	/**
 	 * Highlighting color list viewer
-	 * @since 3.0
 	 */
 	private TableViewer fHighlightingColorListViewer;
 
@@ -357,7 +390,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 * Creates a new preference page.
 	 */
 	public PropertiesFileEditorPreferencePage() {
-		setDescription(PreferencesMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
@@ -367,20 +400,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		
 		ArrayList overlayKeys= new ArrayList();
 
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FOREGROUND_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BACKGROUND_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH));
-		
 		for (int i= 0; i < fSyntaxColorListModel.length; i++) {
 			String colorKey= fSyntaxColorListModel[i][1];
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, colorKey));
@@ -388,60 +407,75 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + ITALIC));
 		}
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_WIDE_CARET));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINK_COLOR));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CORRECTION_INDICATION));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_OVERVIEW_RULER));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER));
-				
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SPACES_FOR_TABS));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_PASTE));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_STRINGS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACKETS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACES));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_JAVADOCS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_WRAP_STRINGS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ESCAPE_STRINGS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_SEMICOLON));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FOREGROUND_COLOR));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR));
+//
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BACKGROUND_COLOR));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR));
+//
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR));
+//
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR));
+//
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH));
+//		
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_WIDE_CARET));
+//
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB));
+//
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
+//
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINK_COLOR));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CORRECTION_INDICATION));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_OVERVIEW_RULER));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER));
+//				
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SPACES_FOR_TABS));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_PASTE));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE));
+//
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_STRINGS));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACKETS));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACES));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_JAVADOCS));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_WRAP_STRINGS));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ESCAPE_STRINGS));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE));
+//
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_SEMICOLON));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB));
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE));
+//		
+//		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED));
 		
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
@@ -510,40 +544,38 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		Composite colorComposite= new Composite(parent, SWT.NONE);
 		colorComposite.setLayout(new GridLayout());
 
-		Group backgroundComposite= new Group(colorComposite, SWT.SHADOW_ETCHED_IN);
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 3;
-		backgroundComposite.setLayout(layout);
-		backgroundComposite.setText(PreferencesMessages.getString("JavaEditorPreferencePage.backgroundColor"));//$NON-NLS-1$
-	
-		SelectionListener backgroundSelectionListener= new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {				
-				boolean custom= fBackgroundCustomRadioButton.getSelection();
-				fBackgroundColorButton.setEnabled(custom);
-				fOverlayStore.setValue(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR, !custom);
-			}
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		};
+//		Group backgroundComposite= new Group(colorComposite, SWT.SHADOW_ETCHED_IN);
+//		GridLayout layout= new GridLayout();
+//		layout.numColumns= 3;
+//		backgroundComposite.setLayout(layout);
+//		backgroundComposite.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.backgroundColor"));//$NON-NLS-1$
+//	
+//		SelectionListener backgroundSelectionListener= new SelectionListener() {
+//			public void widgetSelected(SelectionEvent e) {				
+//				boolean custom= fBackgroundCustomRadioButton.getSelection();
+//				fBackgroundColorButton.setEnabled(custom);
+//				fOverlayStore.setValue(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR, !custom);
+//			}
+//			public void widgetDefaultSelected(SelectionEvent e) {}
+//		};
+//
+//		fBackgroundDefaultRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
+//		fBackgroundDefaultRadioButton.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.systemDefault")); //$NON-NLS-1$
+//		fBackgroundDefaultRadioButton.addSelectionListener(backgroundSelectionListener);
+//
+//		fBackgroundCustomRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
+//		fBackgroundCustomRadioButton.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.custom")); //$NON-NLS-1$
+//		fBackgroundCustomRadioButton.addSelectionListener(backgroundSelectionListener);
+//		
+//		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
+//		fBackgroundColorButton= fBackgroundColorEditor.getButton();
 
-		fBackgroundDefaultRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
-		fBackgroundDefaultRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.systemDefault")); //$NON-NLS-1$
-		fBackgroundDefaultRadioButton.addSelectionListener(backgroundSelectionListener);
-
-		fBackgroundCustomRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
-		fBackgroundCustomRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.custom")); //$NON-NLS-1$
-		fBackgroundCustomRadioButton.addSelectionListener(backgroundSelectionListener);
-		
-		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
-		fBackgroundColorButton= fBackgroundColorEditor.getButton();
-
-		addCheckBox(colorComposite, PreferencesMessages.getString("JavaEditorPreferencePage.semanticHighlighting.option"), PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0); //$NON-NLS-1$
-		
 		Label label= new Label(colorComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.foreground")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.foreground")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
-		layout= new GridLayout();
+		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -568,14 +600,14 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		fEnableCheckbox= new Button(stylesComposite, SWT.CHECK);
-		fEnableCheckbox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.enable")); //$NON-NLS-1$
+		fEnableCheckbox.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.enable")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
 		fEnableCheckbox.setLayoutData(gd);
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.color")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		label.setLayoutData(gd);
@@ -586,21 +618,21 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		foregroundColorButton.setLayoutData(gd);
 		
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fBoldCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
+		fBoldCheckBox.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.bold")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
 		
 		fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
-		fItalicCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.italic")); //$NON-NLS-1$
+		fItalicCheckBox.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.italic")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
 		
 		label= new Label(colorComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.preview")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.preview")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Control previewer= createPreviewer(colorComposite);
@@ -626,14 +658,14 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			}
 		});
 
-		fBackgroundColorButton.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			public void widgetSelected(SelectionEvent e) {
-				PreferenceConverter.setValue(fOverlayStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR, fBackgroundColorEditor.getColorValue());					
-			}
-		});
+//		fBackgroundColorButton.addSelectionListener(new SelectionListener() {
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				// do nothing
+//			}
+//			public void widgetSelected(SelectionEvent e) {
+//				PreferenceConverter.setValue(fOverlayStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR, fBackgroundColorEditor.getColorValue());					
+//			}
+//		});
 
 		fBoldCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -679,18 +711,18 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
-		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
+		fPreviewViewer= new SourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(tools.getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING);
+		PropertiesFileSourceViewerConfiguration configuration= new PropertiesFileSourceViewerConfiguration(tools.getColorManager(), store, null, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
 		fPreviewViewer.configure(configuration);
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
-		new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, store);
+		new SourcePreviewerUpdater(fPreviewViewer, configuration, store);
 		fPreviewViewer.setEditable(false);
 		
-		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
+		String content= loadPreviewContentFromFile("PropertiesFileEditorColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
-		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
+		new PropertiesFileDocumentSetupParticipant().setup(document);
 		fPreviewViewer.setDocument(document);
 
 		return fPreviewViewer.getControl();
@@ -710,37 +742,37 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		appearanceComposite.setLayout(layout);
 
-		String label= PreferencesMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
 		addTextField(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 3, 0, true);
 
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
 		addTextField(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 3, 0, true);
 				
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_OVERVIEW_RULER, 0);
 				
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.showLineNumbers"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.showLineNumbers"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER, 0);
 
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE, 0);
 				
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN, 0);
 
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.quickassist.lightbulb"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.quickassist.lightbulb"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0); //$NON-NLS-1$
 
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_CORRECTION_INDICATION, 0);
 		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.disableCustomCarets"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.accessibility.disableCustomCarets"); //$NON-NLS-1$
 		Button master= addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, 0);
 
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.wideCaret"); //$NON-NLS-1$
+		label= PreferencesMessages.getString("PropertiesFileEditorPreferencePage.accessibility.wideCaret"); //$NON-NLS-1$
 		Button slave= addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_WIDE_CARET, 0);
 		createDependency(master, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, slave);
 
@@ -751,7 +783,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		l.setLayoutData(gd);
 		
 		l= new Label(appearanceComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.appearanceOptions")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.appearanceOptions")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
@@ -780,7 +812,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		l= new Label(stylesComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
+		l.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.color")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		l.setLayoutData(gd);
@@ -805,7 +837,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		};
 		
 		fAppearanceColorDefault= new Button(stylesComposite, SWT.CHECK);
-		fAppearanceColorDefault.setText(PreferencesMessages.getString("JavaEditorPreferencePage.systemDefault")); //$NON-NLS-1$
+		fAppearanceColorDefault.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.systemDefault")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
@@ -866,22 +898,24 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		fOverlayStore.load();
 		fOverlayStore.start();
 		
-		TabFolder folder= new TabFolder(parent, SWT.NONE);
-		folder.setLayout(new TabFolderLayout());	
-		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
+//		TabFolder folder= new TabFolder(parent, SWT.NONE);
+//		folder.setLayout(new TabFolderLayout());	
+//		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.general")); //$NON-NLS-1$
-		item.setControl(createAppearancePage(folder));
-		
-		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.colors")); //$NON-NLS-1$
-		item.setControl(createSyntaxPage(folder));
+//		TabItem item= new TabItem(folder, SWT.NONE);
+//		item.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.general")); //$NON-NLS-1$
+//		item.setControl(createAppearancePage(folder));
+	
+//		item= new TabItem(folder, SWT.NONE);
+//		item.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.colors")); //$NON-NLS-1$
+//		item.setControl(createSyntaxPage(folder));
+
+		Control control= createSyntaxPage(parent);
 
 		initialize();
 		
-		Dialog.applyDialogFont(folder);
-		return folder;
+		Dialog.applyDialogFont(control);
+		return control;
 	}
 	
 	private void initialize() {
@@ -893,17 +927,17 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 		fHighlightingColorListViewer.setInput(fHighlightingColorList);
 		fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(0)));
-		
-		for (int i= 0; i < fAppearanceColorListModel.length; i++)
-			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
-		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
-					fAppearanceColorList.select(0);
-					handleAppearanceColorListSelection();
-				}
-			}
-		});
+//		
+//		for (int i= 0; i < fAppearanceColorListModel.length; i++)
+//			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
+//		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
+//			public void run() {
+//				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
+//					fAppearanceColorList.select(0);
+//					handleAppearanceColorListSelection();
+//				}
+//			}
+//		});
 	}
 	
 	private void initializeFields() {
@@ -930,13 +964,13 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			t.setText(fOverlayStore.getString(key));
 		}
 		
-		RGB rgb= PreferenceConverter.getColor(fOverlayStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
-		fBackgroundColorEditor.setColorValue(rgb);		
-		
-		boolean default_= fOverlayStore.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR);
-		fBackgroundDefaultRadioButton.setSelection(default_);
-		fBackgroundCustomRadioButton.setSelection(!default_);
-		fBackgroundColorButton.setEnabled(!default_);
+//		RGB rgb= PreferenceConverter.getColor(fOverlayStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
+//		fBackgroundColorEditor.setColorValue(rgb);		
+//		
+//		boolean default_= fOverlayStore.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR);
+//		fBackgroundDefaultRadioButton.setSelection(default_);
+//		fBackgroundCustomRadioButton.setSelection(!default_);
+//		fBackgroundColorButton.setEnabled(!default_);
 
         fFieldsInitialized= true;
         updateStatus(validatePositiveNumber("0")); //$NON-NLS-1$
@@ -1105,14 +1139,14 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	private IStatus validatePositiveNumber(String number) {
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(PreferencesMessages.getString("JavaEditorPreferencePage.empty_input")); //$NON-NLS-1$
+			status.setError(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.empty_input")); //$NON-NLS-1$
 		} else {
 			try {
 				int value= Integer.parseInt(number);
 				if (value < 0)
-					status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
+					status.setError(PreferencesMessages.getFormattedString("PropertiesFileEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
 			} catch (NumberFormatException e) {
-				status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
+				status.setError(PreferencesMessages.getFormattedString("PropertiesFileEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
 			}
 		}
 		return status;
@@ -1137,7 +1171,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 * Returns the current highlighting color list item.
 	 * 
 	 * @return the current highlighting color list item
-	 * @since 3.0
 	 */
 	private HighlightingColorListItem getHighlightingColorListItem() {
 		IStructuredSelection selection= (IStructuredSelection) fHighlightingColorListViewer.getSelection();

@@ -2605,6 +2605,174 @@ public class PreferenceConstants {
 	public static final String EDITOR_FOLDING_IMPORTS= "editor_folding_default_imports"; //$NON-NLS-1$
 
 
+	//---------- Properties File Editor ----------
+
+	/**
+	 * A named preference that holds the color used to render keys in a properties file.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_KEY= "pf_coloring_key"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether keys in a properties file are rendered in bold.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_KEY_BOLD= PROPERTIES_FILE_COLORING_KEY + EDITOR_BOLD_SUFFIX;
+
+	/**
+	 * A named preference that controls whether keys in a properties file are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_KEY_ITALIC= PROPERTIES_FILE_COLORING_KEY + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that holds the color used to render comments in a properties file.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_COMMENT= "pf_coloring_comment"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether comments in a properties file are rendered in bold.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_COMMENT_BOLD= PROPERTIES_FILE_COLORING_COMMENT + EDITOR_BOLD_SUFFIX;
+
+	/**
+	 * A named preference that controls whether comments in a properties file are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_COMMENT_ITALIC= PROPERTIES_FILE_COLORING_COMMENT + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that holds the color used to render values in a properties file.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_VALUE= "pf_coloring_value"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether values in a properties file are rendered in bold.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_VALUE_BOLD= PROPERTIES_FILE_COLORING_VALUE + EDITOR_BOLD_SUFFIX;
+
+	/**
+	 * A named preference that controls whether values in a properties file are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_VALUE_ITALIC= PROPERTIES_FILE_COLORING_VALUE + EDITOR_ITALIC_SUFFIX;
+	
+	/**
+	 * A named preference that holds the color used to render assignments in a properties file.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ASSIGNMENT= "pf_coloring_assignment"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether assignments in a properties file are rendered in bold.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ASSIGNMENT_BOLD= PROPERTIES_FILE_COLORING_ASSIGNMENT + EDITOR_BOLD_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether assignments in a properties file are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ASSIGNMENT_ITALIC= PROPERTIES_FILE_COLORING_ASSIGNMENT + EDITOR_ITALIC_SUFFIX;
+
+	/**
+	 * A named preference that holds the color used to render arguments in a properties file.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ARGUMENT= "pf_coloring_argument"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether arguments in a properties file are rendered in bold.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ARGUMENT_BOLD= PROPERTIES_FILE_COLORING_ARGUMENT + EDITOR_BOLD_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether arguments in a properties file are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_COLORING_ARGUMENT_ITALIC= PROPERTIES_FILE_COLORING_ARGUMENT + EDITOR_ITALIC_SUFFIX;
+
+
 		
 	/**
 	 * Initializes the given preference store with the default values.

@@ -20,8 +20,8 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
@@ -35,9 +35,9 @@ import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 public final class PropertyValueScanner extends AbstractJavaScanner {
 
 	private static String[] fgTokenProperties= {
-		IJavaColorConstants.PROPERTIES_FILE_VALUE,
-		IJavaColorConstants.PROPERTIES_FILE_ARGUMENT,
-		IJavaColorConstants.PROPERTIES_FILE_ASSIGNMENT
+		PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE,
+		PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT,
+		PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT
 	};
 
 	
@@ -63,16 +63,16 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#createRules()
 	 */
 	protected List createRules() {
-		setDefaultReturnToken(getToken(IJavaColorConstants.PROPERTIES_FILE_VALUE));
+		setDefaultReturnToken(getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE));
 		List rules= new ArrayList();
 		
 		// Add rule for arguments.
-		IToken token= getToken(IJavaColorConstants.PROPERTIES_FILE_ARGUMENT);
+		IToken token= getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT);
 		rules.add(new ArgumentRule(token));
 		
 		// Add word rule for assignment operator.
 		// FIXME: allows more than one '=' per line
-		token= getToken(IJavaColorConstants.PROPERTIES_FILE_ASSIGNMENT);
+		token= getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT);
 		WordRule wordRule= new WordRule(new AssignmentDetector(), token);
 		rules.add(wordRule);
 
