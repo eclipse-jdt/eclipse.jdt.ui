@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
-
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -94,7 +94,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	public static int getImportNumberThreshold() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		int threshold= prefs.getInt(PREF_ONDEMANDTHRESHOLD);
-		if (threshold == 0) {
+		if (threshold < 0) {
 			threshold= Integer.MAX_VALUE;
 		}		
 		return threshold;
@@ -386,7 +386,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 			order= new String[0];
 		}
 		int threshold= prefs.getDefaultInt(PREF_ONDEMANDTHRESHOLD);
-		if (threshold == 0) {
+		if (threshold < 0) {
 			threshold= Integer.MAX_VALUE;
 		}
 		boolean ignoreLowerCase= prefs.getDefaultBoolean(PREF_IGNORELOWERCASE);
