@@ -11,6 +11,7 @@ Contributors:
 package org.eclipse.jdt.internal.ui.text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -74,17 +75,34 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		List including= new ArrayList();
 		
 		Iterator e= model.getAnnotationIterator();
+		HashMap positions= new HashMap();
 		while (e.hasNext()) {
 			Object o= e.next();
 			if (o instanceof IProblemAnnotation) {
 				IProblemAnnotation a= (IProblemAnnotation)o;
-				switch (compareRulerLine(model.getPosition((Annotation)a), document, line)) {
-					case 1:
-						exact.add(a);
-						break;
-					case 2:
-						including.add(a);
-						break;
+				if (a.isRelevant()) {
+					Position position= model.getPosition((Annotation)a);
+					if (position == null)
+						continue;
+					String message= a.getMessage();
+					if (positions.containsKey(position)) {
+						if (message.equals(positions.get(position)))
+							continue;
+						else {
+							// More than one different error message at position
+							// XXX: Need collision resolution here
+							//      For now the will show up as duplicates
+						}
+					}
+					positions.put(position, message);
+					switch (compareRulerLine(position, document, line)) {
+						case 1:
+							exact.add(a);
+							break;
+						case 2:
+							including.add(a);
+							break;
+					}
 				}
 			}
 		}
