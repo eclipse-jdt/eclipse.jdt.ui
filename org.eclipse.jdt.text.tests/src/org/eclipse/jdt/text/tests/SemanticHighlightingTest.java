@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.core.filebuffers.tests.TestHelper;
+import org.eclipse.core.filebuffers.tests.ResourceHelper;
 
 import org.eclipse.text.tests.Accessor;
 
@@ -65,7 +65,7 @@ public class SemanticHighlightingTest extends TestCase {
 			assertNotNull("JRE is null", JavaProjectHelper.addRTJar(fJavaProject));
 			
 			IProject project= (IProject) fJavaProject.getUnderlyingResource();
-			IFolder folder= TestHelper.createLinkedFolder(project, new Path("src"), JdtTextTestPlugin.getDefault(), new Path("testResources/semanticHighlightingTest1"));
+			IFolder folder= ResourceHelper.createLinkedFolder(project, new Path("src"), JdtTextTestPlugin.getDefault(), new Path("testResources/semanticHighlightingTest1"));
 			assertNotNull(folder);
 			assertTrue(folder.exists());
 			JavaProjectHelper.addSourceContainer(fJavaProject, "src");

@@ -20,7 +20,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.core.filebuffers.tests.TestHelper;
+import org.eclipse.core.filebuffers.tests.ResourceHelper;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
@@ -74,7 +74,7 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 			JavaProjectHelper.delete(fJavaProject);
 		
 		if (fLinkedProject != null)
-			TestHelper.delete(fLinkedProject, false);
+			ResourceHelper.delete(fLinkedProject, false);
 	}
 				
 	public void test1() throws Exception {
@@ -86,7 +86,7 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 	public void test2() throws Exception {
 		setupProject();
 		IProject project= (IProject) fJavaProject.getUnderlyingResource();
-		IFolder folder= TestHelper.createLinkedFolder(project, new Path("src2"), JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
+		IFolder folder= ResourceHelper.createLinkedFolder(project, new Path("src2"), JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
 		assertNotNull(folder);
 		assertTrue(folder.exists());
 
@@ -96,7 +96,7 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 	}
 	
 	public void test3() throws Exception {
-		fLinkedProject= TestHelper.createLinkedProject("P2", JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
+		fLinkedProject= ResourceHelper.createLinkedProject("P2", JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
 		assertNotNull(fLinkedProject);
 		assertTrue(fLinkedProject.exists());
 		
