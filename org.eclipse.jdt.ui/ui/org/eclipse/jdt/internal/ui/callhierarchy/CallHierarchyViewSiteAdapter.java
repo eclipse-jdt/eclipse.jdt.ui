@@ -11,6 +11,9 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.PlatformObject;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.MenuManager;
@@ -30,7 +33,7 @@ import org.eclipse.ui.IWorkbenchWindow;
  * be a selection of Java elements.
  * 
  */
-class CallHierarchyViewSiteAdapter implements IViewSite {
+class CallHierarchyViewSiteAdapter extends PlatformObject implements IViewSite, IAdaptable {
     
     private ISelectionProvider fProvider;
     private IWorkbenchSite fSite;
