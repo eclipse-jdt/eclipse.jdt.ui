@@ -40,7 +40,7 @@ public class Performance {
 		PerformanceMeterFactory instance= null;
 		if (className != null && className.length() > 0) {
 			try {
-				Class c= Class.forName(className);
+				Class c= JdtTextTestPlugin.getDefault().getBundle().loadClass(className);
 				instance= (PerformanceMeterFactory) c.newInstance();
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
