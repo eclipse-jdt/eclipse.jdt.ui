@@ -371,7 +371,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	//ASTNode -> ICompilationUnit	
-	private Collection computeNodesToRemove(Map mapping){
+	private Collection computeNodesToRemove(Map mapping) throws JavaModelException{
 		Collection nodesToRemove= new HashSet(0);
 		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
