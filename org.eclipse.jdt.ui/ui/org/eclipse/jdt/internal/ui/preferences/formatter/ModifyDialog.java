@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -39,6 +40,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.BuiltInProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public class ModifyDialog extends StatusDialog {
     
@@ -151,30 +153,30 @@ public class ModifyDialog extends StatusDialog {
 	    super.updateStatus(status != null ? status : fStandardStatus);    
 	}
 
-    protected void constrainShellSize() {
-        
-        final Shell shell= getShell();
-        
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.window.Window#getInitialSize()
+	 */
+	protected Point getInitialSize() {
         try {
-        	final int x= fDialogSettings.getInt(DS_KEY_PREFERRED_X);
-        	final int y= fDialogSettings.getInt(DS_KEY_PREFERRED_Y);
-        	final int width= fDialogSettings.getInt(DS_KEY_PREFERRED_WIDTH);
-            final int height= fDialogSettings.getInt(DS_KEY_PREFERRED_HEIGHT);
-            
-            shell.setLocation(x, y);
-            shell.setSize(width, height);
-            
+        	return new Point(fDialogSettings.getInt(DS_KEY_PREFERRED_WIDTH), fDialogSettings.getInt(DS_KEY_PREFERRED_HEIGHT));
         } catch (NumberFormatException ex) {
-        	// there are no values saved, so just leave the defaults
+        	PixelConverter converter= new PixelConverter(getShell());
+            return new Point(converter.convertWidthInCharsToPixels(160), converter.convertHeightInCharsToPixels(50));
         }
-
-        // make sure we're on the display:
-        super.constrainShellSize();
-    }
-    
-	public boolean close()
-	{
-		
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.window.Window#getInitialLocation(org.eclipse.swt.graphics.Point)
+	 */
+	protected Point getInitialLocation(Point initialSize) {
+        try {
+        	return new Point(fDialogSettings.getInt(DS_KEY_PREFERRED_X), fDialogSettings.getInt(DS_KEY_PREFERRED_Y));
+        } catch (NumberFormatException ex) {
+        	return super.getInitialLocation(initialSize);
+        }
+	}
+	    
+	public boolean close() {
 		final Rectangle shell= getShell().getBounds();
 		
 		fDialogSettings.put(DS_KEY_PREFERRED_WIDTH, shell.width);
