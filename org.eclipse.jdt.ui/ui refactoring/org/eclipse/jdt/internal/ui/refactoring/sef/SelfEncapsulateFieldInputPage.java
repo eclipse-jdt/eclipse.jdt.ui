@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
@@ -109,11 +109,10 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	private void fillWithPossibleInsertPositions(Combo combo, IField field) {
 		int select= 0;
 		combo.add("As first method");
-		JavaTextLabelProvider renderer= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
 		try {
 			IMethod[] methods= field.getDeclaringType().getMethods();
 			for (int i= 0; i < methods.length; i++) {
-				combo.add(renderer.getTextLabel(methods[i]));
+				combo.add(JavaElementLabels.getElementLabel(methods[i], JavaElementLabels.M_PARAMETER_TYPES));
 			}
 			if (methods.length > 0)
 				select= 1;

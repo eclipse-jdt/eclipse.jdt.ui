@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.core.JavaElement;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.*;
@@ -28,8 +28,6 @@ import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 
 public class JavaStructureCreator implements IStructureCreator {
 	
-	private static JavaTextLabelProvider fgLabelProvider= null;
-
 	/**
 	 * Used to bail out from ProblemFactory.
 	 */
@@ -461,9 +459,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			break;
 		case JavaElement.METHOD:
 			sb.append(JavaElement.JEM_METHOD);
-			if (fgLabelProvider == null)
-				fgLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
-			sb.append(fgLabelProvider.getTextLabel(je));
+			sb.append(JavaElementLabels.getElementLabel(je, JavaElementLabels.M_PARAMETER_TYPES));
 			break;
 		case JavaElement.INITIALIZER:
 			String id= je.getHandleIdentifier();

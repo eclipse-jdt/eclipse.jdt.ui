@@ -89,7 +89,7 @@ import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -928,8 +928,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		setTitle(getCurrentViewer().getTitle());
 		String tooltip;
 		if (fInputElement != null) {
-			JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_CONTAINER);
-			String[] args= new String[] { title, lprovider.getTextLabel(fInputElement) };
+			String[] args= new String[] { title, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT) };
 			tooltip= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.tooltip", args); //$NON-NLS-1$
 		} else {
 			tooltip= title;

@@ -28,8 +28,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -37,7 +35,7 @@ import org.eclipse.jdt.internal.ui.codemanipulation.AddGetterSetterOperation;
 import org.eclipse.jdt.internal.ui.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * Create Getter and Setter for selected fields.
@@ -121,8 +119,7 @@ public class AddGetterSetterAction extends Action {
 			public int doQuery(IMember field) {
 				int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
 				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
-				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
-				String fieldName= lprovider.getTextLabel(field);
+				String fieldName= JavaElementLabels.getElementLabel(field, 0);
 				String formattedMessage= JavaUIMessages.getFormattedString("AddGetterSetterAction.SkipSetterForFinalDialog.message", fieldName); //$NON-NLS-1$
 				return showQueryDialog(formattedMessage, options, returnCodes);	
 			}
@@ -137,8 +134,7 @@ public class AddGetterSetterAction extends Action {
 				String replaceLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.replace.label"); //$NON-NLS-1$
 				String skipAllLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.skipAll.label"); //$NON-NLS-1$
 				String[] options= { skipLabel, replaceLabel, skipAllLabel, IDialogConstants.CANCEL_LABEL};
-				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
-				String methodName= lprovider.getTextLabel(method);
+				String methodName= JavaElementLabels.getElementLabel(method, JavaElementLabels.M_PARAMETER_TYPES);
 				String formattedMessage= JavaUIMessages.getFormattedString("AddGetterSetterAction.SkipExistingDialog.message", methodName); //$NON-NLS-1$
 				return showQueryDialog(formattedMessage, options, returnCodes);		
 			}

@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Default strategy of the Java plugin for the construction of Java element UI labels.
+ * @deprecated
  */
 public class JavaTextLabelProvider {	
 	

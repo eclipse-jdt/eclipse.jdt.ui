@@ -25,18 +25,18 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
-
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class JavaTypeHover implements ITextHover {
 	
 	private IEditorPart fEditor;
-	private JavaTextLabelProvider fTextRenderer;
 	
+	private final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
+		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
+		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 	
 	public JavaTypeHover(IEditorPart editor) {
 		fEditor= editor;
-		fTextRenderer= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION | JavaElementLabelProvider.SHOW_PARAMETERS);
 	}
 	
 	private ICodeAssist getCodeAssist() {
@@ -55,15 +55,7 @@ public class JavaTypeHover implements ITextHover {
 	}
 	
 	private String getInfoText(IMember member) {
-		if (member.getElementType() != IJavaElement.TYPE) {
-			StringBuffer buffer= new StringBuffer();
-			buffer.append(fTextRenderer.getTextLabel(member.getDeclaringType()));
-			buffer.append('.');
-			buffer.append(fTextRenderer.getTextLabel(member));
-			return buffer.toString();
-		}
-		
-		return fTextRenderer.getTextLabel(member);
+		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
 	}
 		
 	/*

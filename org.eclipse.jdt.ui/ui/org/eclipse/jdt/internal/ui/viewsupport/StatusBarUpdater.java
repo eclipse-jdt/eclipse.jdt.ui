@@ -48,16 +48,14 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  */
 public class StatusBarUpdater implements ISelectionChangedListener {
 	
-	private JavaTextLabelProvider fJavaTextLabelProvider;
+	private final int LABEL_FLAGS= JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
+			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS | 
+		 	JavaElementLabels.F_APP_TYPE_SIGNATURE;
+		 	
 	private IStatusLineManager fStatusLineManager;
 	
 	public StatusBarUpdater(IStatusLineManager statusLineManager) {
 		fStatusLineManager= statusLineManager;
-		
-		int flags= JavaElementLabelProvider.SHOW_PARAMETERS
-		 				| JavaElementLabelProvider.SHOW_RETURN_TYPE
-		 				| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION;
-		fJavaTextLabelProvider= new JavaTextLabelProvider(flags);
 	}
 		
 	/*
@@ -89,79 +87,9 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 	}
 		
 	private String formatJavaElementMessage(IJavaElement element) {
-		int type= element.getElementType();
-		String name= fJavaTextLabelProvider.getTextLabel(element);
-		
-		if (type == IJavaElement.JAVA_MODEL || type == IJavaElement.JAVA_PROJECT) {
-			return name;
-		}
-		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
-		if (root == null) {
-			JavaPlugin.logErrorMessage("StatusBarUpdater: root can not be null"); //$NON-NLS-1$
-			return ""; //$NON-NLS-1$
-		}
-		
-		try {
-			String[] args;
-			switch (type) {
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-					return getRootPath(root);
-				case IJavaElement.PACKAGE_FRAGMENT:
-				case IJavaElement.CLASS_FILE:
-				case IJavaElement.COMPILATION_UNIT: 
-					args= new String[] { name, getRootPath(root) };
-					return JavaUIMessages.getFormattedString("StatusBarUpdater.twopart", args); //$NON-NLS-1$ 
-				case IJavaElement.TYPE:
-				case IJavaElement.IMPORT_CONTAINER:
-				case IJavaElement.IMPORT_DECLARATION:
-				case IJavaElement.PACKAGE_DECLARATION:
-					args= new String[] { name, getUnderlyingResourcePath(element, root) };
-					return JavaUIMessages.getFormattedString("StatusBarUpdater.twopart", args); //$NON-NLS-1$ 
-				case IJavaElement.FIELD:
-				case IJavaElement.METHOD:
-				case IJavaElement.INITIALIZER:
-					IType declType= ((IMember) element).getDeclaringType();
-					String declTypeName= fJavaTextLabelProvider.getTextLabel(declType);
-					args= new String[] { name, declTypeName, getUnderlyingResourcePath(element, root) };
-					return JavaUIMessages.getFormattedString("StatusBarUpdater.threepart", args); //$NON-NLS-1$
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
-		}		
-		return "";
+		return JavaElementLabels.getElementLabel(element, LABEL_FLAGS);
 	}
-	
-	private String getRootPath(IPackageFragmentRoot root) {
-		if (root.isExternal()) {
-			return root.getPath().toOSString();
-		}
-		return root.getPath().makeRelative().toString();		
-	}
-	
-	private String getUnderlyingResourcePath(IJavaElement elem, IPackageFragmentRoot root) throws JavaModelException {
-		if (root.isArchive()) {
-			return getRootPath(root);
-		}
 		
-		IOpenable openable= JavaModelUtil.getOpenable(elem);
-		IResource res= null;
-		if (openable instanceof ICompilationUnit) {
-			ICompilationUnit cu= (ICompilationUnit) openable;
-			if (cu.isWorkingCopy()) {
-				res= cu.getOriginalElement().getUnderlyingResource();
-			} else {
-				res= cu.getUnderlyingResource();
-			}
-		} else if (openable instanceof IClassFile) {
-			res= ((IClassFile)openable).getUnderlyingResource();
-		}
-		if (res != null) {
-			return res.getFullPath().makeRelative().toString();
-		}
-		
-		return "";
-	}
-	
 	private String formatResourceMessage(IResource element) {
 		return element.getFullPath().toString();
 	}	

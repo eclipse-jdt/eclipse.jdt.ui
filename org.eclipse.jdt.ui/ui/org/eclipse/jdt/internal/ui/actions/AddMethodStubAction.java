@@ -28,15 +28,13 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddMethodStubOperation;
 import org.eclipse.jdt.internal.ui.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 
 /**
@@ -114,9 +112,8 @@ public class AddMethodStubAction extends Action {
 	private IRequestQuery createOverrideQuery() {
 		return new IRequestQuery() {
 			public int doQuery(IMember method) {
-				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
-				String methodName= lprovider.getTextLabel(method);
-				String declTypeName= lprovider.getTextLabel(method.getDeclaringType());
+				String methodName= JavaElementLabels.getElementLabel(method, JavaElementLabels.M_PARAMETER_TYPES);
+				String declTypeName= JavaElementLabels.getElementLabel(method.getDeclaringType(), 0);
 				String formattedMessage;
 				try {
 					if (Flags.isFinal(method.getFlags())) {
@@ -136,8 +133,7 @@ public class AddMethodStubAction extends Action {
 	private IRequestQuery createReplaceQuery() {
 		return new IRequestQuery() {
 			public int doQuery(IMember method) {
-				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
-				String methodName= lprovider.getTextLabel(method);
+				String methodName= JavaElementLabels.getElementLabel(method, JavaElementLabels.M_PARAMETER_TYPES);
 				String formattedMessage= JavaUIMessages.getFormattedString("AddMethodStubAction.ReplaceExistingDialog.message", methodName); //$NON-NLS-1$
 				return showQueryDialog(formattedMessage);	
 			}

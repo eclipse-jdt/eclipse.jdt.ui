@@ -6,20 +6,15 @@ import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class HierarchyLabelProvider extends LabelProvider {
 
 	private TypeHierarchyViewPart fViewPart;
-	private JavaTextLabelProvider fTextLabelProvider;
 	private JavaElementImageProvider fImageLabelProvider;
 
 	/**
@@ -29,7 +24,6 @@ public class HierarchyLabelProvider extends LabelProvider {
 	public HierarchyLabelProvider(TypeHierarchyViewPart viewPart, IErrorTickProvider provider) {
 		super();
 		fViewPart= viewPart;
-		fTextLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		fImageLabelProvider= new JavaElementImageProvider();
 		fImageLabelProvider.setErrorTickProvider(provider);
 	}
@@ -59,7 +53,7 @@ public class HierarchyLabelProvider extends LabelProvider {
 	 */
 	public String getText(Object obj) {
 		if (obj instanceof IJavaElement) {
-			return fTextLabelProvider.getTextLabel((IJavaElement) obj);
+			return JavaElementLabels.getElementLabel((IJavaElement) obj, JavaElementLabels.M_PARAMETER_TYPES);
 		}
 		return super.getText(obj);
 	}

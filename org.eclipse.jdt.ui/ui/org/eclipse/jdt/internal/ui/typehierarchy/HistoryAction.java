@@ -9,10 +9,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * Action used for the type hierarchy forward / backward buttons
@@ -27,8 +25,7 @@ public class HistoryAction extends Action {
 		fViewPart= viewPart;
 		fElement= element;		
 		
-		JavaTextLabelProvider labelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
-		String elementName= labelProvider.getTextLabel(element);
+		String elementName= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES);
 		setText(elementName);
 		setImageDescriptor(getImageDescriptor(element));
 				
