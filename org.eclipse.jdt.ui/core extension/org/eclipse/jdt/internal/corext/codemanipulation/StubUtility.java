@@ -51,14 +51,13 @@ public class StubUtility {
 		public boolean callSuper;
 		public boolean methodOverwrites;
 		public boolean noBody;
+		public int methodModifiers;
 		
 		public GenStubSettings(CodeGenerationSettings settings) {
-			settings.setSettings(this);	
+			settings.setSettings(this);
+			methodModifiers= -1;	
 		}
 		
-		public GenStubSettings() {
-		}
-			
 	}
 	
 	/**
@@ -108,7 +107,12 @@ public class StubUtility {
 				bodyContent= ""; //$NON-NLS-1$
 			}
 		}
-		genMethodDeclaration(destTypeName, method, bodyContent, imports, buf);
+		int flags= settings.methodModifiers;
+		if (flags == -1) {
+			flags= method.getFlags();
+		}
+		
+		genMethodDeclaration(destTypeName, method, flags, bodyContent, imports, buf);
 		return buf.toString();
 	}
 
@@ -584,7 +588,7 @@ public class StubUtility {
 		String[] paramNames= new String[params.size()];
 		for (int i= 0; i < params.size(); i++) {
 			SingleVariableDeclaration elem= (SingleVariableDeclaration) params.get(i);
-			paramNames[i]= guessArgumentName(cu.getJavaProject(), elem.getName().getIdentifier(), null);
+			paramNames[i]= elem.getName().getIdentifier();
 		}
 		List exceptions= decl.thrownExceptions();
 		String[] exceptionNames= new String[exceptions.size()];
@@ -703,11 +707,13 @@ public class StubUtility {
 		IMethod[] methods= type.getMethods();
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		genStubSettings.callSuper= true;
+		
 		ArrayList newMethods= new ArrayList(superMethods.length);
 		for (int i= 0; i < superMethods.length; i++) {
 			IMethod curr= superMethods[i];
 			if (curr.isConstructor() && (JavaModelUtil.isVisibleInHierarchy(curr, type.getPackageFragment()))) {
 				if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null) {
+					genStubSettings.methodModifiers= Flags.AccPublic | JdtFlags.clearAccessModifiers(curr.getFlags());
 					String newStub= genStub(cu, typeName, curr, curr.getDeclaringType(), genStubSettings, imports);
 					newMethods.add(newStub);
 				}
@@ -843,6 +849,7 @@ public class StubUtility {
 				genStubSettings.callSuper= true;
 				curr= overrides;
 			}
+			genStubSettings.methodModifiers= curr.getFlags();
 			IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 			if (desc == null) {
 				desc= curr;
@@ -1006,14 +1013,19 @@ public class StubUtility {
 		return longest;
 	}
 	
-	private static String[] guessArgumentNames(IJavaProject project, String[] paramNames) {
-//		String[] newNames= new String[paramNames.length];
-//		// Ensure that the codegeneration preferences are respected
-//		for (int i= 0; i < paramNames.length; i++) {
-//			newNames[i]= StubUtility.guessArgumentName(project, paramNames[i], null);			
-//		}
-//		return newNames;
-		return paramNames;
+	public static String[] guessArgumentNames(IJavaProject project, String[] paramNames) {
+		String prefixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, true);
+		String suffixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, true);
+		if (prefixes.length() + suffixes.length() == 0) {
+			return paramNames;
+		}
+		
+		String[] newNames= new String[paramNames.length];
+		// Ensure that the codegeneration preferences are respected
+		for (int i= 0; i < paramNames.length; i++) {
+			newNames[i]= StubUtility.guessArgumentName(project, paramNames[i], null);			
+		}
+		return newNames;
 	}	
 
 }

@@ -26,7 +26,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * Evaluates all unimplemented methods and creates them.
@@ -81,7 +83,7 @@ public class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable
 				int indent= StubUtility.getIndentUsed(fType) + 1;
 				
 				for (int i= 0; i < nToImplement; i++) {
-					String formattedContent= StubUtility.codeFormat(toImplement[i], indent, lineDelim) + lineDelim;
+					String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, toImplement[i], indent, null, lineDelim, null) + lineDelim;
 					IMethod curr= fType.createMethod(formattedContent, fInsertPosition, true, null);
 					createdMethods.add(curr);
 				}
@@ -100,7 +102,7 @@ public class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable
 		}
 	}
 	
-	public String[] genOverrideStubs(IMethod[] methodsToImplement, IType type, ITypeHierarchy hierarchy, CodeGenerationSettings settings, IImportsStructure imports) throws CoreException {
+	private String[] genOverrideStubs(IMethod[] methodsToImplement, IType type, ITypeHierarchy hierarchy, CodeGenerationSettings settings, IImportsStructure imports) throws CoreException {
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		genStubSettings.methodOverwrites= true;
 		ICompilationUnit cu= type.getCompilationUnit();
@@ -116,52 +118,17 @@ public class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable
 				else
 					genStubSettings.callSuper= true;				
 			}
+			genStubSettings.methodModifiers= fVisibility | JdtFlags.clearAccessModifiers(curr.getFlags());
 
 			IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 			if (desc == null) {
 				desc= curr;
 			}
-			result[i]= genStub(cu, type.getElementName(), curr, desc.getDeclaringType(), genStubSettings, imports);
+			result[i]= StubUtility.genStub(cu, type.getElementName(), curr, desc.getDeclaringType(), genStubSettings, imports);
 		}
 		return result;
 	}
-	
-	public String genStub(ICompilationUnit cu, String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws CoreException {
-		String methName= method.getElementName();
-		String[] paramNames= method.getParameterNames();
-		String returnType= method.isConstructor() ? null : method.getReturnType();
-		String lineDelimiter= String.valueOf('\n'); // reformatting required
-			
-		StringBuffer buf= new StringBuffer();
-		// add method comment
-		if (settings.createComments && cu != null) {
-			IMethod overridden= null;
-			if (settings.methodOverwrites && returnType != null) {
-				overridden= JavaModelUtil.findMethod(methName, method.getParameterTypes(), false, definingType.getMethods());
-			}
-			String comment= StubUtility.getMethodComment(cu, destTypeName, methName, paramNames, method.getExceptionTypes(), returnType, overridden, lineDelimiter);
-			if (comment != null) {
-				buf.append(comment);
-			} else {
-				buf.append("/**").append(lineDelimiter); //$NON-NLS-1$
-				buf.append(" *").append(lineDelimiter); //$NON-NLS-1$
-				buf.append(" */").append(lineDelimiter); //$NON-NLS-1$							
-			}
-			buf.append(lineDelimiter);
-		}
-		// add method declaration
-		String bodyContent= null;
-		if (!settings.noBody) {
-			String bodyStatement= StubUtility.getDefaultMethodBodyStatement(methName, paramNames, returnType, settings.callSuper);
-			bodyContent= StubUtility.getMethodBodyContent(returnType == null, method.getJavaProject(), destTypeName, methName, bodyStatement, lineDelimiter);
-			if (bodyContent == null) {
-				bodyContent= ""; //$NON-NLS-1$
-			}
-		}
-		StubUtility.genMethodDeclaration(destTypeName, method, fVisibility, bodyContent, imports, buf);
-		return buf.toString();
-	}
-	
+		
 	/**
 	 * Returns the created accessors. To be called after a sucessful run.
 	 */	

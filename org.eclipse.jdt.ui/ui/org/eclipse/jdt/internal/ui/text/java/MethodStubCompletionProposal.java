@@ -69,10 +69,12 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 						definingType= (IType) currElem.getAncestor(IJavaElement.TYPE);
 					}
 				}
+				int flags= method.getFlags();
 
 				settings.noBody= (definingType != null) && definingType.isInterface();
-				settings.callSuper= declaringType.isClass() && !Flags.isAbstract(method.getFlags()) && !Flags.isStatic(method.getFlags());
-				settings.methodOverwrites= !Flags.isStatic(method.getFlags());
+				settings.callSuper= declaringType.isClass() && !Flags.isAbstract(flags) && !Flags.isStatic(flags);
+				settings.methodOverwrites= !Flags.isStatic(flags);
+				settings.methodModifiers= flags;
 				
 				String definingTypeName= (definingType != null) ? definingType.getElementName() : ""; //$NON-NLS-1$
 				

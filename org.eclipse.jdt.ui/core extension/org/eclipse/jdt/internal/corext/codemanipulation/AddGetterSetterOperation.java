@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -163,7 +162,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		String fieldName= field.getElementName();
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38879
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		GenStubSettings genStubSettings= new GenStubSettings(settings);
+
 		boolean isStatic= Flags.isStatic(field.getFlags());
 
 		String typeName= Signature.toString(field.getTypeSignature());
@@ -203,7 +202,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			buf.append(getterName);
 			buf.append("() {\n"); //$NON-NLS-1$
 			
-			if (genStubSettings.useKeywordThis && !isStatic) {
+			if (settings.useKeywordThis && !isStatic) {
 				fieldName= "this." + fieldName; //$NON-NLS-1$
 			}
 			
@@ -227,7 +226,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		
 		String fieldName= field.getElementName();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		GenStubSettings genStubSettings= new GenStubSettings(settings);
+
 		boolean isStatic= Flags.isStatic(field.getFlags());
 			
 		IJavaProject project= field.getJavaProject();
@@ -286,7 +285,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			buf.append(' '); 
 			buf.append(argname); 
 			buf.append(") {\n"); //$NON-NLS-1$
-			if (argname.equals(fieldName) || (genStubSettings.useKeywordThis && !isStatic)) {
+			if (argname.equals(fieldName) || (settings.useKeywordThis && !isStatic)) {
 				if (isStatic)
 					fieldName= parentType.getElementName() + '.' + fieldName;
 				else

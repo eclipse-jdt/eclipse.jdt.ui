@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -176,9 +178,10 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		int nParams= binding.getParameterTypes().length;
 		if (nParams > 0) {
 			try {
-				IMethod method= Bindings.findMethod(binding, getCompilationUnit().getJavaProject());
+				IJavaProject project= getCompilationUnit().getJavaProject();
+				IMethod method= Bindings.findMethod(binding, project);
 				if (method != null) {
-					return method.getParameterNames();
+					return StubUtility.guessArgumentNames(project, method.getParameterNames());
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);

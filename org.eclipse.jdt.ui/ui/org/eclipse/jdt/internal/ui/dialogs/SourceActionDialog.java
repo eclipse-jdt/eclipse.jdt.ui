@@ -86,8 +86,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		
 		// Take the default from the default for generating comments from the code gen prefs
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		GenStubSettings genStubSettings= new GenStubSettings(settings);
-		fGenerateComment= genStubSettings.createComments;		
+		fGenerateComment= settings.createComments;		
 
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		fSettings= dialogSettings.getSection(SETTINGS_SECTION);		

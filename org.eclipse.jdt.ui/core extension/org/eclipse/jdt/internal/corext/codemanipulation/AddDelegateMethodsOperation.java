@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -54,92 +55,98 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	}
 
 	public void run(IProgressMonitor monitor) throws CoreException {
-		int listSize= fList.size();
-		String message = ActionMessages.getFormattedString("AddDelegateMethodsOperation.monitor.message", String.valueOf(listSize)); //$NON-NLS-1$
-		monitor.setTaskName(message);
-		monitor.beginTask("", listSize); //$NON-NLS-1$
-		
-		boolean addComments = fCodeSettings.createComments;
-
-		// already existing methods
-		IMethod[] existingMethods = fType.getMethods();
-		//the delemiter used
-		String lineDelim = StubUtility.getLineDelimiterUsed(fType);
-		// the indent used + 1
-		int indent = StubUtility.getIndentUsed(fType) + 1;
-
-		// perhaps we have to add import statements
-		final ImportsStructure imports =
-			new ImportsStructure(fType.getCompilationUnit(), fCodeSettings.importOrder, fCodeSettings.importThreshold, true);
-
-		ITypeHierarchy typeHierarchy = fType.newSupertypeHierarchy(null);
-
-		for (int i = 0; i < listSize; i++) {
-			//check for cancel each iteration
-			if (monitor.isCanceled()) {
-				if (i > 0) {
-					imports.create(false, null);
-				}
-				return;
-			}
-
-			String content = null;
-			Methods2Field wrapper = (Methods2Field) fList.get(i);
-			IMethod curr = wrapper.fMethod;
-			IField field = wrapper.fField;
+		try {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}		
+			int listSize= fList.size();
+			String message = ActionMessages.getFormattedString("AddDelegateMethodsOperation.monitor.message", String.valueOf(listSize)); //$NON-NLS-1$
+			monitor.setTaskName(message);
+			monitor.beginTask("", listSize); //$NON-NLS-1$
+			monitor.worked(1);
 			
-			monitor.subTask(JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES));
+			boolean addComments = fCodeSettings.createComments;
+	
+			// already existing methods
+			IMethod[] existingMethods = fType.getMethods();
+			//the delemiter used
+			String lineDelim = StubUtility.getLineDelimiterUsed(fType);
+			// the indent used + 1
+			int indent = StubUtility.getIndentUsed(fType) + 1;
+	
+			// perhaps we have to add import statements
+			final ImportsStructure imports =
+				new ImportsStructure(fType.getCompilationUnit(), fCodeSettings.importOrder, fCodeSettings.importThreshold, true);
+	
+			ITypeHierarchy typeHierarchy = fType.newSupertypeHierarchy(null);
+	
+			for (int i = 0; i < listSize; i++) {
+				//check for cancel each iteration
+				if (monitor.isCanceled()) {
+					if (i > 0) {
+						imports.create(false, null);
+					}
+					return;
+				}
+	
+				String content = null;
+				Methods2Field wrapper = (Methods2Field) fList.get(i);
+				IMethod curr = wrapper.fMethod;
+				IField field = wrapper.fField;
 				
-			IMethod overwrittenMethod =
-				JavaModelUtil.findMethodImplementationInHierarchy(
-					typeHierarchy,
-					fType,
-					curr.getElementName(),
-					curr.getParameterTypes(),
-					curr.isConstructor());
-			if (overwrittenMethod == null) {
-				content = createStub(field, curr, addComments, overwrittenMethod, imports);
-			} else {
-				// we could ask before overwriting final methods
-
-				IMethod declaration =
-					JavaModelUtil.findMethodDeclarationInHierarchy(
+				monitor.subTask(JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES));
+					
+				IMethod overwrittenMethod =
+					JavaModelUtil.findMethodImplementationInHierarchy(
 						typeHierarchy,
 						fType,
 						curr.getElementName(),
 						curr.getParameterTypes(),
 						curr.isConstructor());
-				content = createStub(field, declaration, addComments, overwrittenMethod, imports);
+				if (overwrittenMethod == null) {
+					content = createStub(field, curr, addComments, overwrittenMethod, imports);
+				} else {
+					// we could ask before overwriting final methods
+	
+					IMethod declaration =
+						JavaModelUtil.findMethodDeclarationInHierarchy(
+							typeHierarchy,
+							fType,
+							curr.getElementName(),
+							curr.getParameterTypes(),
+							curr.isConstructor());
+					content = createStub(field, declaration, addComments, overwrittenMethod, imports);
+				}
+				IJavaElement sibling= fInsertPosition;
+				IMethod existing =
+					JavaModelUtil.findMethod(
+						curr.getElementName(),
+						curr.getParameterTypes(),
+						curr.isConstructor(),
+						existingMethods);
+				if (existing != null) {
+					// we could ask before replacing a method
+					continue;
+				} else if (curr.isConstructor() && existingMethods.length > 0) {
+					// add constructors at the beginning
+					sibling = existingMethods[0];
+				}
+	
+				String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim, null) + lineDelim;
+				IMethod created= fType.createMethod(formattedContent, sibling, true, null);
+				fCreatedMethods.add(created);
+					
+				monitor.worked(1);			
 			}
-			IJavaElement sibling= fInsertPosition;
-			IMethod existing =
-				JavaModelUtil.findMethod(
-					curr.getElementName(),
-					curr.getParameterTypes(),
-					curr.isConstructor(),
-					existingMethods);
-			if (existing != null) {
-				// we could ask before replacing a method
-				continue;
-			} else if (curr.isConstructor() && existingMethods.length > 0) {
-				// add constructors at the beginning
-				sibling = existingMethods[0];
-			}
-
-			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim, null) + lineDelim;
-			IMethod created= fType.createMethod(formattedContent, sibling, true, null);
-			fCreatedMethods.add(created);
-
-				
-			monitor.worked(1);
+			imports.create(false, null);
+		} finally {
+			monitor.done();
 		}
-
-		imports.create(false, null);
 	}
 
 	private String createStub(IField field, IMethod curr, boolean addComment, IMethod overridden, IImportsStructure imports) throws CoreException {
 		String methodName= curr.getElementName();
-		String[] paramNames= curr.getParameterNames();
+		String[] paramNames= StubUtility.guessArgumentNames(curr.getJavaProject(), curr.getParameterNames());
 		String returnTypSig= curr.getReturnType();
 
 		StringBuffer buf= new StringBuffer();

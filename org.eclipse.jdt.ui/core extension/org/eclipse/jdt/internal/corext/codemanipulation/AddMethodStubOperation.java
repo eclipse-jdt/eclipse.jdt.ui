@@ -137,6 +137,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						genStubSetting.callSuper= false;
 						genStubSetting.methodOverwrites= false;
 						genStubSetting.noBody= fType.isInterface();
+						genStubSetting.methodModifiers= curr.getFlags();
 						
 						content= StubUtility.genStub(cu, typeName, curr, fType, genStubSetting, imports);
 					} else {

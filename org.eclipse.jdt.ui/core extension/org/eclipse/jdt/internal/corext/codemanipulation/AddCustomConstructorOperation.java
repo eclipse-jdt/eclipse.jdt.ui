@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSetti
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * Creates a custom constructor with fields initialized.
@@ -82,8 +83,9 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
 			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			IJavaProject project= fType.getJavaProject();
-							
-			String defaultConstructor= genOverrideConstructorStub(fSuperConstructor, fType, hierarchy, fSettings, imports, fOmitSuper);					
+			String[] superConstructorParamNames= StubUtility.guessArgumentNames(project, fSuperConstructor.getParameterNames());
+
+			String defaultConstructor= genOverrideConstructorStub(fSuperConstructor, superConstructorParamNames, fType, hierarchy, fSettings, imports, fOmitSuper);					
 			int closingBraceIndex= defaultConstructor.lastIndexOf('}'); //$NON-NLS-1$
 
 			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
@@ -94,7 +96,6 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			monitor.worked(1);
 
 			String[] params= new String[fSelected.length];					
-			String[] superConstructorParamNames= fSuperConstructor.getParameterNames();
 			String[] excludedNames= new String[superConstructorParamNames.length + params.length];
 			
 			ArrayList superNames= new ArrayList(superConstructorParamNames.length);
@@ -153,10 +154,10 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			
 			// calculate the javadoc comment here now that we can be sure of the @param values
 			if (fSettings.createComments) {
-				String[] javadocParams= new String[fSuperConstructor.getNumberOfParameters() + params.length];
+				String[] javadocParams= new String[superConstructorParamNames.length + params.length];
 				int count= 0;
 				for (int i= 0; i < fSuperConstructor.getNumberOfParameters(); i++) {
-					javadocParams[count++]= fSuperConstructor.getParameterNames()[i];
+					javadocParams[count++]= superConstructorParamNames[i];
 				}
 				for (int i= 0; i < params.length; i++) {
 					javadocParams[count++]= params[i];
@@ -175,7 +176,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
 			int indent= StubUtility.getIndentUsed(fType) + 1;
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim) + lineDelim;
+			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
 			fConstructorCreated= fType.createMethod(formattedContent, fInsertPosition, true, null);
 
 			monitor.worked(1);		
@@ -186,9 +187,10 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		}
 	}
 
-	public String genOverrideConstructorStub(IMethod constructorToImplement, IType type, ITypeHierarchy hierarchy, CodeGenerationSettings settings, IImportsStructure imports, boolean omitSuper) throws CoreException {
+	private String genOverrideConstructorStub(IMethod constructorToImplement, String[] constructorParamNames, IType type, ITypeHierarchy hierarchy, CodeGenerationSettings settings, IImportsStructure imports, boolean omitSuper) throws CoreException {
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		genStubSettings.methodOverwrites= true;
+		genStubSettings.methodModifiers= fVisibility | JdtFlags.clearAccessModifiers(constructorToImplement.getFlags());
 		if (omitSuper)
 			genStubSettings.callSuper= false;
 		else
@@ -203,19 +205,14 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			desc= constructorToImplement;
 		}
 		
-		return genConstructorStub(type.getElementName(), constructorToImplement, genStubSettings, imports);
+		String methName= constructorToImplement.getElementName();
+		String bodyStatement= StubUtility.getDefaultMethodBodyStatement(methName, constructorParamNames, null, genStubSettings.callSuper);			
+
+		StringBuffer buf= new StringBuffer();
+		StubUtility.genMethodDeclaration(type.getElementName(), constructorToImplement, genStubSettings.methodModifiers, bodyStatement, imports, buf);
+		return buf.toString();
 	}
 	
-	public String genConstructorStub(String destTypeName, IMethod method, GenStubSettings settings, IImportsStructure imports) throws CoreException {
-		String methName= method.getElementName();
-		String paramNames[]= method.getParameterNames();
-		StringBuffer buf= new StringBuffer();
-
-		String bodyStatement= StubUtility.getDefaultMethodBodyStatement(methName, paramNames, null, settings.callSuper);			
-		StubUtility.genMethodDeclaration(destTypeName, method, fVisibility, bodyStatement, imports, buf);
-		return buf.toString();
-	}		
-
 	/**
 	 * Returns the created constructor. To be called after a sucessful run.
 	 */	
