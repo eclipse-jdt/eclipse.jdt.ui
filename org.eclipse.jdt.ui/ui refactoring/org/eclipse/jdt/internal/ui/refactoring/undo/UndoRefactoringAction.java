@@ -5,14 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.undo;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.Refactoring;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.Refactoring;
 
 public class UndoRefactoringAction extends UndoManagerAction {
 
@@ -38,11 +31,11 @@ public class UndoRefactoringAction extends UndoManagerAction {
 		setText(text);
 	}
 
-	public IRunnableWithProgress createOperation() {
+	public IRunnableWithProgress createOperation(final ChangeContext context) {
 		return new IRunnableWithProgress(){
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
-					Refactoring.getUndoManager().performUndo(pm);
+					Refactoring.getUndoManager().performUndo(context, pm);
 				} catch (JavaModelException e) {
 					throw new InvocationTargetException(e);			
 				}

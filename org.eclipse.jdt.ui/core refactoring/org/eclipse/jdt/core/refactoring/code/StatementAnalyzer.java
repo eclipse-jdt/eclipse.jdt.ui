@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	private AbstractMethodDeclaration fEnclosingMethod;
 	
 	private RefactoringStatus fStatus= new RefactoringStatus();
+	private String fMessage;
 	private LocalVariableAnalyzer fLocalVariableAnalyzer;
 	private LocalTypeAnalyzer fLocalTypeAnalyzer;
 	private ExceptionAnalyzer fExceptionAnalyzer;
@@ -82,7 +83,9 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	 */
 	public void checkActivation(RefactoringStatus status) {
 		if (fEnclosingMethod == null || fLastSelectedStatement == null) {
-			status.addFatalError("TextSelection doesn't mark a text range that can be extracted");
+			if (fMessage == null)
+				fMessage= "TextSelection doesn't mark a text range that can be extracted";
+			status.addFatalError(fMessage);
 		} else {
 			if (!fIsCompleteStatementRange)
 				status.addError("TextSelection doesn't completely cover a set of statements");
@@ -126,7 +129,11 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 	
 	public String getSignature(String methodName) {
-		return fLocalVariableAnalyzer.getCallSignature(methodName)
+		String modifier= "";
+		if ((fEnclosingMethod.modifiers & AstNode.AccStatic) != 0)
+			modifier= "static ";
+			
+		return modifier + fLocalVariableAnalyzer.getCallSignature(methodName)
 		       + fExceptionAnalyzer.getThrowSignature();
 	}
 	
@@ -145,8 +152,15 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		fLastSelectedStatement= null;
 		fEnclosingMethod= null;
 		fStatus= new RefactoringStatus();
+		fMessage= null;
 		fIsCompleteStatementRange= false;
 		fNeedsSemicolon= true;
+	}
+	
+	private void invalidSelection(String message) {
+		reset();
+		fMessage= message;
+		fLastEnd= Integer.MAX_VALUE;
 	}
 	
 	private boolean visitStatement(Statement statement, BlockScope scope) {
@@ -279,6 +293,11 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	//---- Problem management -----------------------------------------------------
 	
 	public void acceptProblem(IProblem problem) {
+		if (fMode != UNDEFINED) {
+			reset();
+			fLastEnd= Integer.MAX_VALUE;
+			fStatus.addFatalError("Compilation unit has compile error. " + problem.getMessage());
+		}
 	}
 	
 	//---- Compilation Unit -------------------------------------------------------
@@ -586,20 +605,21 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 	
 	public boolean visit(IfStatement ifStatement, BlockScope scope) {
-		int lastEnd= ifStatement.sourceEnd;
-		boolean result= false;
-		if (fSelection.covers(ifStatement) || (lastEnd= getIfElseBodyStart(ifStatement) - 1) >= 0) {
-			result= visitStatement(ifStatement, scope);
-			fLastEnd= lastEnd;
-			
-		} else {
-			reset();
-			fLastEnd= Integer.MAX_VALUE;
+		boolean result= visitStatement(ifStatement, scope);
+		int nextStart= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1);
+		if (fMode == BEFORE && fSelection.end <= nextStart) {
+			int lastEnd= getIfElseBodyStart(ifStatement, nextStart) - 1;
+			if (lastEnd < 0) {
+				invalidSelection("Selection must either cover whole if-then-else statement or statements of then or else block");
+				result= false;
+			} else {
+				fLastEnd= lastEnd;
+			}
 		}
-		return result;
+		return result;		
 	}
 
-	private int getIfElseBodyStart(IfStatement ifStatement) {
+	private int getIfElseBodyStart(IfStatement ifStatement, int nextStart) {
 		int sourceStart;
 		int sourceEnd;
 		if (ifStatement.thenStatement != null) {
@@ -607,14 +627,14 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			if (ifStatement.elseStatement != null) {
 				sourceEnd= ifStatement.elseStatement.sourceStart - 1;
 			} else {
-				sourceEnd= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1) - 1;
+				sourceEnd= nextStart - 1;
 			}
 			if (fSelection.coveredBy(sourceStart, sourceEnd))
 				return sourceStart;
 		}
 		if (ifStatement.elseStatement != null) {
 			sourceStart= fBuffer.indexOfStatementCharacter(ifStatement.thenStatement.sourceEnd + 1) + ELSE_LENGTH;
-			sourceEnd= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1) - 1;
+			sourceEnd= nextStart - 1;
 			if (fSelection.coveredBy(sourceStart, sourceEnd))
 				return sourceStart;
 		}

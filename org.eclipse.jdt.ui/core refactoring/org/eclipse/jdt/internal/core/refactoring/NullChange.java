@@ -5,11 +5,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.refactoring.Change;
-import org.eclipse.jdt.core.refactoring.IChange;
+import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.refactoring.Change;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.ChangeContext;
 
 public class NullChange extends Change {
 
@@ -23,7 +19,7 @@ public class NullChange extends Change {
 		this(null);
 	}
 		
-	public void perform(IProgressMonitor pm) {
+	public void perform(ChangeContext context, IProgressMonitor pm) {
 	}
 
 	public IChange getUndoChange() {

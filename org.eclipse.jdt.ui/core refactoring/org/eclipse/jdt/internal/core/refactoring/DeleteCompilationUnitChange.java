@@ -5,14 +5,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.IChange;
+import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.ChangeContext;
 
 public class DeleteCompilationUnitChange extends CompilationUnitChange {
 
@@ -31,17 +24,22 @@ public class DeleteCompilationUnitChange extends CompilationUnitChange {
 		return JavaCore.create(fCUHandle);
 	}
 	
-	public void perform(IProgressMonitor pm) throws JavaModelException {
-		if (!isActive())
-			return;
-		pm.beginTask("deleting resource:" + getCUName(), 1);
-		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(fCUHandle);
-		Assert.isNotNull(cu);
-		Assert.isTrue(cu.exists());
-		Assert.isTrue(!cu.isReadOnly());
-		setSource(cu.getSource());
-		cu.delete(true, pm);
-		pm.done();
+	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
+		try {
+			if (!isActive())
+				return;
+			pm.beginTask("deleting resource:" + getCUName(), 1);
+			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(fCUHandle);
+			Assert.isNotNull(cu);
+			Assert.isTrue(cu.exists());
+			Assert.isTrue(!cu.isReadOnly());
+			setSource(cu.getSource());
+			cu.delete(true, pm);
+			pm.done();
+		} catch (Exception e) {
+			handleException(context, e);
+			setActive(false);
+		}
 	}
 
 	public IChange getUndoChange() {

@@ -5,10 +5,7 @@
  */
 package org.eclipse.jdt.core.refactoring.text;
 
-import org.eclipse.jdt.core.IJavaModelStatusConstants;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.Assert;
 
 /**
  * A simpel text change that replaces a text portion specified by start offset and length with 

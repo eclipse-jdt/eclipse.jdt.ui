@@ -5,19 +5,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.Change;
-import org.eclipse.jdt.core.refactoring.IChange;
-import org.eclipse.jdt.core.refactoring.ICompositeChange;
+import java.util.ArrayList;import java.util.Collections;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.Change;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.ICompositeChange;
 
 /**
  * Represents a composite change.
@@ -89,28 +77,41 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/**
 	 * to reverse a composite means reversing all changes in reverse order
 	 */ 
-	private List createUndoList(IProgressMonitor pm) throws JavaModelException{
-		List undoList= new ArrayList(fChanges.size());
-		Iterator iter= fChanges.iterator();
-		pm.beginTask("", fChanges.size());
-		while (iter.hasNext()){
-			IChange each= (IChange)iter.next();
-			each.perform(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-			undoList.add(each.getUndoChange());
-		};
-		pm.done();
-		Collections.reverse(undoList);
-		return undoList;
+	private List createUndoList(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
+		List undoList= null;
+		try {
+			undoList= new ArrayList(fChanges.size());
+			Iterator iter= fChanges.iterator();
+			pm.beginTask("", fChanges.size());
+			while (iter.hasNext()){
+				try {
+					IChange each= (IChange)iter.next();
+					each.perform(context, new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+					undoList.add(each.getUndoChange());
+					context.addPerformedChange(each);
+				} catch (Exception e) {
+					handleException(context, e);
+				}
+			};
+			pm.done();
+			Collections.reverse(undoList);
+			return undoList;
+		} catch (Exception e) {
+			handleException(context, e);
+		}
+		if (undoList == null)
+			undoList= new ArrayList(0);
+		return undoList;	
 	}
 
 	/**
 	 * @see IChange#perform
 	 */
-	public void perform(IProgressMonitor pm) throws JavaModelException{
+	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
 		if (!isActive()){
 			fUndoChange= new NullChange();
 		} else{
-			fUndoChange= new CompositeChange(createUndoList(pm));
+			fUndoChange= new CompositeChange(createUndoList(context, pm));
 		}	
 	}
 	

@@ -3,7 +3,7 @@
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 2000
  */
-package org.eclipse.jdt.core.refactoring;
+package org.eclipse.jdt.core.refactoring;import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * An abstract default implementation for a change object - suitable for subclassing. This class manages
@@ -45,4 +45,22 @@ public abstract class Change implements IChange {
 	public boolean isActive() {
 		return fIsActive;
 	}
+	
+	/**
+	 * Handles the given exception using the <code>IChangeExceptionHandler</code> provided by
+	 * the given change context. If the execution of the change is to be aborted than
+	 * this method throws a corresponding <code>JavaModelException</code>. The exception
+	 * is either the given exception if it is an instance of <code>JavaModelException</code> or
+	 * a new one created by calling <code>new JavaModelException(exception, code)</code>.
+	 * 
+	 * @param context the change context used to retrieve the exception handler
+	 * @param exception the exception caugth during change execution
+	 * @exception <code>ChangeAbortException</code> if the execution is to be aborted
+	 */
+	protected void handleException(ChangeContext context, Exception exception) throws ChangeAbortException {
+		if (exception instanceof ChangeAbortException)
+			throw (ChangeAbortException)exception;
+			
+		context.getExceptionHandler().handle(context, this, exception);
+	}	
 }

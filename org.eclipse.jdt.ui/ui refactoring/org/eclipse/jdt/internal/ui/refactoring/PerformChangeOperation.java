@@ -5,20 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.IChange;
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.refactoring.ChangeAbortException;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.internal.ui.refactoring.changes.ChangeExceptionHandler;
 
 /**
  * Operation that, when performed, performes a change to the workbench.
@@ -26,6 +13,7 @@ import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 public class PerformChangeOperation implements IRunnableWithProgress {
 
 	private IChange fChange;
+	private ChangeContext fChangeContext;
 	private CreateChangeOperation fCreateChangeOperation;
 	private int fCheckPassedSeverity;
 	private boolean fChangeExecuted;
@@ -91,6 +79,18 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 		Assert.isTrue (fCheckPassedSeverity < RefactoringStatus.FATAL);
 	}
 	
+	/**
+	 * Sets the change context used to execute the change. The given context is passed
+	 * to the method <code>IChange.perform</code>.
+	 * 
+	 * @param context the change context to use
+	 * @see IChange#perform(ChangeContext, IProgressMonitor)
+	 */
+	public void setChangeContext(ChangeContext context) {
+		fChangeContext= context;
+		Assert.isNotNull(fChangeContext);
+	}
+	
 	/* (non-Javadoc)
 	 * Method declard in IRunnableWithProgress
 	 */
@@ -118,14 +118,15 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 	}
 	
 	private void executeChange(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
+		Assert.isNotNull(fChangeContext);
 		try {
 			fChange.aboutToPerform();
 			(new WorkspaceModifyOperation() {
-				protected void execute(IProgressMonitor pm) throws CoreException, InterruptedException {
+				protected void execute(IProgressMonitor pm) throws CoreException, InvocationTargetException {
 					try {
-						fChange.perform(pm);
-					} catch (JavaModelException e) {
-						throw new CoreException(e.getStatus());
+						fChange.perform(fChangeContext, pm);
+					} catch (ChangeAbortException e) {
+						throw new InvocationTargetException(e);
 					}
 				}
 			}).run(pm);

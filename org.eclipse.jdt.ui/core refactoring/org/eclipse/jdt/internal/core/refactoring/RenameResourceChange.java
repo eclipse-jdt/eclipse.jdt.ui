@@ -5,17 +5,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.Change;
-import org.eclipse.jdt.core.refactoring.IChange;
+import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.Change;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.ChangeContext;
 
 /**
  * Represents a change that renames a given resource
@@ -48,20 +38,20 @@ public class RenameResourceChange extends Change {
 	/**
 	 * to avoid the exception senders should check if a resource with the new name already exists
 	 */
-	public void perform(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("rename resource", 1);
-		if (!isActive()){
-			pm.worked(1);
-			return;
-		} 
-		//force??
-		try{
+	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
+		try {
+			pm.beginTask("rename resource", 1);
+			if (!isActive()){
+				pm.worked(1);
+				return;
+			} 
 			getResource().move(renamedResourcePath(fResourcePath, fNewName), false, pm);
-		} catch(CoreException e){
-			throw new JavaModelException(e);
-		} finally{
+		} catch(Exception e){
+			handleException(context, e);
+			setActive(false);
+		} finally {
 			pm.done();
-		}	
+		}
 	}
 	
 	public IChange getUndoChange() {

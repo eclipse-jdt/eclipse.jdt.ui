@@ -5,21 +5,7 @@
  */
 package org.eclipse.jdt.core.refactoring.text;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.Change;
-import org.eclipse.jdt.core.refactoring.IChange;
-import org.eclipse.jdt.core.refactoring.ITextChange;
-
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.Change;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.ITextChange;import org.eclipse.jdt.internal.core.refactoring.Assert;
 
 /**
  * A simple text change that operates on an <code>ITextBuffer</code>. A <code>SimpleTextChange
@@ -163,7 +149,7 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
-	public void perform(IProgressMonitor pm) throws JavaModelException {
+	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
 		Assert.isTrue(false, "SimpleTextChange can only be executed from within a AbstractTextBufferChange");
 	}
 	

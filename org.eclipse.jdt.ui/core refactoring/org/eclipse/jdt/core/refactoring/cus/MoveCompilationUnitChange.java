@@ -5,18 +5,7 @@
  */
 package org.eclipse.jdt.core.refactoring.cus;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.IChange;
-
-import org.eclipse.jdt.internal.core.refactoring.CompilationUnitChange;
-import org.eclipse.jdt.internal.core.refactoring.NullChange;
+import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.CompilationUnitChange;import org.eclipse.jdt.internal.core.refactoring.NullChange;
 
 class MoveCompilationUnitChange extends CompilationUnitChange {
 
@@ -57,13 +46,18 @@ class MoveCompilationUnitChange extends CompilationUnitChange {
 			return new MoveCompilationUnitChange(getNewPackage(), getCUName(), getPackage());
 	}
 
-	public void perform(IProgressMonitor pm) throws JavaModelException {
-		if (!isActive())
-			return;
-		pm.beginTask("", 1);	
-		pm.subTask("moving the compilation unit");
-		ICompilationUnit cu= (ICompilationUnit)getCorrespondingJavaElement();
-		cu.move(getNewPackage(), null, null, false, new SubProgressMonitor(pm, 1));
-		pm.done();
+	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
+		try {
+			if (!isActive())
+				return;
+			pm.beginTask("", 1);	
+			pm.subTask("moving the compilation unit");
+			ICompilationUnit cu= (ICompilationUnit)getCorrespondingJavaElement();
+			cu.move(getNewPackage(), null, null, false, new SubProgressMonitor(pm, 1));
+			pm.done();
+		} catch (Exception e) {
+			handleException(context, e);
+			setActive(false);
+		}
 	}
 }

@@ -5,21 +5,7 @@
  */
 package org.eclipse.jdt.core.refactoring.packages;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.Change;
-import org.eclipse.jdt.core.refactoring.IChange;
-
-import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.NullChange;
+import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.Change;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.NullChange;
 
 /**
  * <p>
@@ -75,7 +61,7 @@ public class RenamePackageChange extends Change {
 		return fResourcePath.removeLastSegments(oldPackageName.segmentCount()).append(newPackageName);
 	}
 
-	public void perform(IProgressMonitor pm) throws JavaModelException {
+	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("Renaming package ...", 1);
 			if (isActive()){
@@ -85,6 +71,10 @@ public class RenamePackageChange extends Change {
 			} else{
 				fUndoChange= new NullChange();
 			}
+		} catch (Exception e) {
+			handleException(context, e);
+			fUndoChange= new NullChange();
+			setActive(false);
 		} finally {
 			pm.done();
 		}

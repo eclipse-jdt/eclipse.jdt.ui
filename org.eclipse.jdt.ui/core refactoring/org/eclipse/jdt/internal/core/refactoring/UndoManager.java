@@ -5,21 +5,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import java.util.Stack;
-
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.IChange;
-import org.eclipse.jdt.core.refactoring.IUndoManager;
-import org.eclipse.jdt.core.refactoring.IUndoManagerListener;
+import java.util.Stack;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRunnable;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.IUndoManager;import org.eclipse.jdt.core.refactoring.IUndoManagerListener;
 
 /**
  * Default implementation of IUndoManager.
@@ -87,7 +73,7 @@ public class UndoManager implements IUndoManager {
 		fireUndoAdded();
 	}
 	
-	public void performUndo(IProgressMonitor pm) throws JavaModelException{
+	public void performUndo(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
 		//maybe i should not check that and just let it fail
 		if (fUndoChanges.empty())
 			return;
@@ -97,13 +83,13 @@ public class UndoManager implements IUndoManager {
 			fireNoMoreUndos();
 		fRedoNames.push(fUndoNames.pop());
 		
-		executeChange(change, pm);
+		executeChange(context, change, pm);
 		
 		fRedoChanges.push(change.getUndoChange());
 		fireRedoAdded();
 	}
 
-	public void performRedo(IProgressMonitor pm) throws JavaModelException{
+	public void performRedo(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
 		//maybe i should not check that and just let it fail
 		if (fRedoChanges.empty())
 			return;
@@ -113,13 +99,13 @@ public class UndoManager implements IUndoManager {
 			fireNoMoreRedos();	
 		fUndoNames.push(fRedoNames.pop());
 		
-		executeChange(change, pm);
+		executeChange(context, change, pm);
 		
 		fUndoChanges.push(change.getUndoChange());
 		fireUndoAdded();
 	}
 
-	private void executeChange(final IChange change, IProgressMonitor pm) throws JavaModelException {
+	private void executeChange(final ChangeContext context, final IChange change, IProgressMonitor pm) throws JavaModelException {
 		JavaCore.removeElementChangedListener(fFlushListener);
 		try {
 			change.aboutToPerform();
@@ -127,11 +113,7 @@ public class UndoManager implements IUndoManager {
 			workspace.run(
 				new IWorkspaceRunnable() {
 					public void run(IProgressMonitor pm) throws CoreException {
-						try {
-							change.perform(pm);
-						} catch (JavaModelException e) {
-							throw new CoreException(e.getStatus());
-						}
+						change.perform(context, pm);
 					}
 				},
 				pm);

@@ -42,6 +42,8 @@ public interface IRefactoring {
 
 	/**
 	 * Returns the name of this refactoring.
+	 * 
+	 * @return the refactoring's name. Mainly used in the UI.
 	 */ 
 	public String getName();
 }

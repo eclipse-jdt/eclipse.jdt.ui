@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.JavaModelException;
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public interface IChange {
+	
+	public static final int REFACTORING_CHANGE_ABORTED= 900;
 
 	/**
 	 * The client is about to calling <code>perform</code> on this change. The client of this
@@ -53,7 +55,7 @@ public interface IChange {
 	 * <em>before</em> you call <code>getUndoChange</code>. In general, <code>IChange</code>
 	 * objects do not know what the reverse will be before they are performed.
 	 */
-	 public void perform(IProgressMonitor pm) throws JavaModelException;
+	 public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException;
 	
 	/**
 	 * The change has been performed. Clients must ensure that this method is called after all

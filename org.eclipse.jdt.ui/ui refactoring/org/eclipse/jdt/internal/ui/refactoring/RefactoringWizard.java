@@ -5,28 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
-
-import org.eclipse.core.runtime.Platform;
-
-import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.jdt.core.refactoring.IChange;
-import org.eclipse.jdt.core.refactoring.Refactoring;
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jface.util.Assert;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.Wizard;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.refactoring.ChangeAbortException;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;import org.eclipse.jdt.internal.ui.refactoring.changes.ChangeExceptionHandler;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 public class RefactoringWizard extends Wizard {
 
@@ -232,7 +211,7 @@ public class RefactoringWizard extends Wizard {
 	 * 
 	 * @param style the conditions to check before creating the change.
 	 * @param checkPassedSeverity the severity below which the conditions check
-	 *  is treated as 'passed'.
+	 *  is treated as 'passed'
 	 * @param updateStatus if <code>true</code> the wizard's status is updated
 	 *  with the status returned from the <code>CreateChangeOperation</code>.
 	 *  if <code>false</code> no status updating is performed.
@@ -267,22 +246,70 @@ public class RefactoringWizard extends Wizard {
 
 	public boolean performFinish(PerformChangeOperation op) {
 		saveOpenEditors();
+		ChangeContext context= new ChangeContext(new ChangeExceptionHandler());
 		try{
+			op.setChangeContext(context);
 			getContainer().run(false, false, op);	
 			JdtHackFinder.fixme("this should be done by someone else");
 			if (op.changeExecuted())
 				fRefactoring.getUndoManager().addUndo(fRefactoring.getName(), op.getChange().getUndoChange());
-		} catch(InvocationTargetException e){
-			JdtHackFinder.fixme("1GCZLPL: ITPJUI:WINNT - ExceptionHandler::handle - should accept null as message");
-			String msg= e.getMessage();
-			if (msg == null) msg= "";
-			ExceptionHandler.handle(e, "InvocationTargerException in finish()", msg);
+		} catch (InvocationTargetException e) {
+			Throwable t= e.getTargetException();
+			if (t instanceof ChangeAbortException) {
+				handleChangeAbortException(context, (ChangeAbortException)t);
+				return true;
+			} else {
+				handleUnexpectedException(e);
+			}	
 			return false;
 		} catch (InterruptedException e) {
 			return false;
+		} finally {
+			context.clearPerformedChanges();
 		}
 		
 		return true;
+	}
+	
+	private void handleChangeAbortException(final ChangeContext context, ChangeAbortException exception) {
+		if (!context.getTryToUndo())
+			return;
+			
+		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+			protected void execute(IProgressMonitor pm) throws CoreException, InvocationTargetException {
+				ChangeContext undoContext= new ChangeContext(new AbortChangeExceptionHandler());
+				try {
+					IChange[] changes= context.getPerformedChanges();
+					pm.beginTask("Undoing changes: ", changes.length);
+					IProgressMonitor sub= new NullProgressMonitor();
+					for (int i= changes.length - 1; i >= 0; i--) {
+						IChange change= changes[i];
+						pm.subTask(change.getName());
+						change.getUndoChange().perform(undoContext, sub);
+						pm.worked(1);
+					}
+				} catch (ChangeAbortException e) {
+					throw new InvocationTargetException(e.getThrowable());
+				} finally {
+					pm.done();
+				} 
+			}
+		};
+		
+		try {
+			getContainer().run(false, false, op);
+		} catch (InvocationTargetException e) {
+			handleUnexpectedException(e);
+		} catch (InterruptedException e) {
+			// not possible. Operation not cancelable.
+		}
+	}
+	
+	private void handleUnexpectedException(InvocationTargetException e) {
+		JdtHackFinder.fixme("1GCZLPL: ITPJUI:WINNT - ExceptionHandler::handle - should accept null as message");
+		String msg= e.getMessage();
+		if (msg == null) msg= "";
+		ExceptionHandler.handle(e, "InvocationTargerException in finish()", msg);
 	}
 
 	//---- Condition checking ------------------------------------------------------------

@@ -5,24 +5,7 @@
  */
 package org.eclipse.jdt.core.refactoring.text;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.Change;
-import org.eclipse.jdt.core.refactoring.IChange;
-import org.eclipse.jdt.core.refactoring.ICompositeChange;
-import org.eclipse.jdt.core.refactoring.ITextChange;
-
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import java.util.ArrayList;import java.util.Collections;import java.util.Comparator;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.Change;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.ICompositeChange;import org.eclipse.jdt.core.refactoring.ITextChange;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.NullChange;
 
 /**
  * A default implementation of <code>ITextBufferChange</code> and <code>ITextChange</code>.
@@ -203,20 +186,25 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
-	public void perform(IProgressMonitor pm) throws JavaModelException {
+	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
 		try {
-			connectTextBuffer();
-			ITextBuffer buffer= getTextBuffer();
-	
-			fUndoChange= null;
-			
-			List undos= internalPerform(fTextModifications, buffer, pm);
-			
-			saveTextBuffer(pm);
-			fUndoChange= createChange(undos, !fIsUndoChange);
-			
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+			if (isActive()) {				
+				connectTextBuffer();
+				ITextBuffer buffer= getTextBuffer();
+		
+				fUndoChange= null;
+				
+				List undos= internalPerform(fTextModifications, buffer, pm);
+				
+				saveTextBuffer(pm);
+				fUndoChange= createChange(undos, !fIsUndoChange);
+			} else {
+				fUndoChange= new NullChange();
+			}	
+		} catch (Exception e) {
+			handleException(context, e);
+			setActive(false);
+			fUndoChange= new NullChange();
 		} finally {
 			disconnectTextBuffer();
 		}

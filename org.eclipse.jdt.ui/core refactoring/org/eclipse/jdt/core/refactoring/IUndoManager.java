@@ -5,9 +5,7 @@
  */
 package org.eclipse.jdt.core.refactoring;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * An undo manager keeps track of changes performed by refactorings. Use <code>performUndo</code> 
@@ -69,7 +67,7 @@ public interface IUndoManager {
 	 * @param pm a progress monitor to report progress during performing
 	 *  the undo change. The progress monitor must not be <code>null</code>
 	 */	
-	public void performUndo(IProgressMonitor pm) throws JavaModelException;
+	public void performUndo(ChangeContext context, IProgressMonitor pm) throws JavaModelException;
 
 	/**
 	 * Redo the top most redo change.
@@ -77,7 +75,7 @@ public interface IUndoManager {
 	 * @param pm a progress monitor to report progress during performing
 	 *  the redo change. The progress monitor must not be <code>null</code>
 	 */	
-	public void performRedo(IProgressMonitor pm) throws JavaModelException;
+	public void performRedo(ChangeContext context, IProgressMonitor pm) throws JavaModelException;
 	
 	/**
 	 * Returns <code>true</code> if there is anything to redo, otherwise
