@@ -529,7 +529,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		for (int i= 0; i < fAllViewers.length; i++) {
 			TypeHierarchyViewer curr= fAllViewers[i];
-			curr.addDropSupport(ops, transfers, new TypeHierarchyTransferDropAdapter(curr));
+			curr.addDropSupport(ops, transfers, new TypeHierarchyTransferDropAdapter(this, curr));
 		}	
 	}
 	

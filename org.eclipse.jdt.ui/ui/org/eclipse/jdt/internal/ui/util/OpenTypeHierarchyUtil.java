@@ -228,7 +228,7 @@ public class OpenTypeHierarchyUtil {
 	/**
 	 * Converts the input to a possible input candidates
 	 */	
-	private static IJavaElement[] getCandidates(Object input) {
+	public static IJavaElement[] getCandidates(Object input) {
 		if (!(input instanceof IJavaElement)) {
 			return null;
 		}
