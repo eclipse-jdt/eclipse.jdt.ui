@@ -17,7 +17,6 @@ import java.util.Set;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
@@ -43,6 +42,9 @@ import org.eclipse.jdt.internal.ui.refactoring.ModifyParametersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.MoveAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.OpenRefactoringWizardAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameAction;
@@ -67,6 +69,10 @@ public class RefactorActionGroup extends ActionGroup {
 	private OpenRefactoringWizardAction fModifyParametersAction;
 	private OpenRefactoringWizardAction fPullUpAction;
 
+	private SelectionDispatchAction fInlineTempAction;
+	private SelectionDispatchAction fExtractTempAction;
+	private SelectionDispatchAction fExtractMethodAction;
+
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>.
 	 * 
@@ -86,35 +92,35 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	public RefactorActionGroup(CompilationUnitEditor editor) {
-		ISelectionProvider provider= editor.getSite().getSelectionProvider();
-		ISelection selection= provider.getSelection();
-		
 		fRenameAction= new RenameAction(editor);
-		fRenameAction.update(selection);
-		editor.getSelectionProvider().addSelectionChangedListener(fRenameAction);
+		initAction(fRenameAction, editor.getSelectionProvider());
 		
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(editor);
-		fSelfEncapsulateField.update();
-		editor.getSelectionProvider().addSelectionChangedListener(fSelfEncapsulateField);
+		initAction(fSelfEncapsulateField, editor.getSelectionProvider());
+		
+		fInlineTempAction= new InlineTempAction(editor);
+		initAction(fInlineTempAction, editor.getSelectionProvider());
+		
+		fExtractTempAction= new ExtractTempAction(editor);
+		initAction(fExtractTempAction, editor.getSelectionProvider());
+
+		fExtractMethodAction= new ExtractMethodAction(editor);
+		initAction(fExtractMethodAction, editor.getSelectionProvider());
 	}
 
 	private RefactorActionGroup(UnifiedSite site) {
 		fSite= site;
 		fMoveAction= new MoveAction(site);
-		fMoveAction.update();
-		fSite.getSelectionProvider().addSelectionChangedListener(fMoveAction);
+		initAction(fMoveAction, fSite.getSelectionProvider());
 		
 		fRenameAction= new RenameAction(site);
-		fRenameAction.update();
-		fSite.getSelectionProvider().addSelectionChangedListener(fRenameAction);		
+		initAction(fRenameAction, fSite.getSelectionProvider());
 		
 		fModifyParametersAction= RefactorActionGroup.createModifyParametersAction(fSite);
-		fModifyParametersAction.update();
-		fSite.getSelectionProvider().addSelectionChangedListener(fModifyParametersAction);
+		initAction(fModifyParametersAction, fSite.getSelectionProvider());
 		
 		fPullUpAction= RefactorActionGroup.createPullUpAction(fSite);
-		fPullUpAction.update();
-		fSite.getSelectionProvider().addSelectionChangedListener(fPullUpAction);
+		initAction(fPullUpAction, fSite.getSelectionProvider());
 		
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(fSite);
 		fSelfEncapsulateField.update();
@@ -123,6 +129,11 @@ public class RefactorActionGroup extends ActionGroup {
 		}
 	}
 
+	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider){
+		action.update();
+		provider.addSelectionChangedListener(action);
+	};
+	
 	private boolean isEditorOwner() {
 		return false;
 	}
@@ -137,6 +148,9 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(RetargetActionIDs.RENAME, fRenameAction);
 		actionBars.setGlobalActionHandler(RetargetActionIDs.MODIFY_PARAMETERS, fModifyParametersAction);
 		actionBars.setGlobalActionHandler(RetargetActionIDs.PULL_UP, fPullUpAction);
+		actionBars.setGlobalActionHandler(RetargetActionIDs.INLINE_TEMP, fInlineTempAction);
+		actionBars.setGlobalActionHandler(RetargetActionIDs.EXTRACT_TEMP, fExtractTempAction);
+		actionBars.setGlobalActionHandler(RetargetActionIDs.EXTRACT_METHOD, fExtractMethodAction);
 	}
 	
 	/* (non-Javadoc)
