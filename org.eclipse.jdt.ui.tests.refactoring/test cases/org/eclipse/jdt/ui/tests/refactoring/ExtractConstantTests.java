@@ -82,6 +82,16 @@ public class ExtractConstantTests extends RefactoringTest {
 		JavaCore.setOptions(options);	
 	}
 
+	private void guessHelper(int startLine, int startColumn, int endLine, int endColumn, String expectedGuessedName) throws Exception {
+		ICompilationUnit cu= createCU(getPackageP(), getName()+".java", getFileContents(TEST_PATH_PREFIX + getRefactoringPath() + "nameGuessing/" + getName()+".java"));
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
+																									JavaPreferencesSettings.getCodeGenerationSettings());		
+		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());
+		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
+		assertEquals("contant name not guessed", expectedGuessedName, ref.guessConstantName());
+	}
+
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, boolean qualifyReferencesWithConstantName, String constantName, String guessedConstantName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
@@ -288,6 +298,16 @@ public class ExtractConstantTests extends RefactoringTest {
 	
 	public void testFail15() throws Exception {
 		failHelper1(5, 10, 5, 13, true, true, "CONSTANT");	
+	}
+	
+	public void testGuessStringLiteral0() throws Exception {
+		//test for bug 37377
+		guessHelper(4, 19, 4, 32, "FOO_HASHMAP") ;
+	}
+
+	public void testGuessStringLiteral1() throws Exception {
+		//test for bug 37377
+		guessHelper(4, 19, 4, 33, "FOO_HASH_MAP") ;
 	}
 }
 
