@@ -65,22 +65,28 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 		
 		if (model != null) {
 			Iterator e= new JavaAnnotationIterator(model, true);
+			int layer= -1;
+			String message= null;
 			while (e.hasNext()) {
 				Annotation a= (Annotation) e.next();
 
 				if (a instanceof IAnnotationExtension) {
 					AnnotationPreference preference= getAnnotationPreference((IAnnotationExtension)a);
-					if (preference == null || !fStore.getBoolean(preference.getTextPreferenceKey()))
+					if (preference == null || !(fStore.getBoolean(preference.getTextPreferenceKey()) || (preference.getHighlightPreferenceKey() != null && fStore.getBoolean(preference.getHighlightPreferenceKey()))))
 						continue;
 				}
 
 				Position p= model.getPosition(a);
-				if (p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
+				if (a.getLayer() > layer && p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
 					String msg= ((IJavaAnnotation) a).getMessage();
-					if (msg != null && msg.trim().length() > 0)
-						return formatMessage(msg);
+					if (msg != null && msg.trim().length() > 0) {
+						message= msg;
+						layer= a.getLayer();
+					}
 				}
 			}
+			if (layer > -1)
+				return formatMessage(message);
 		}
 		
 		return null;
