@@ -112,10 +112,7 @@ public abstract class StructureSelectionAction extends Action {
 	//-- private helper methods
 	
 	private static ISourceRange createSourceRange(ITextSelection ts){
-		if (ts.getLength() == 0) //to allow 0-length selection
-			return new SourceRange(ts.getOffset(), 1);
-		else	
-			return new SourceRange(ts.getOffset(), ts.getLength());
+		return new SourceRange(ts.getOffset(), ts.getLength());
 	}
 	
 	//-- helper methods for this class and subclasses
