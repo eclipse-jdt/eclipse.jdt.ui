@@ -31,6 +31,7 @@
 		    <fileset dir="ui refactoring" />
 		    <fileset dir="ui debug" />
 		    <fileset dir="ui" />
+		    <fileset dir="core codemanipulaton" />
   		</zip>		
 	</target>
 </project>
