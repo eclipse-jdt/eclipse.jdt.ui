@@ -32,7 +32,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 		RowLayouter layouter= new RowLayouter(2);
 		
 		Label label= new Label(result, SWT.NONE);
-		label.setText("&Enter a name for the local variable:");
+		label.setText("&Variable name:");
 		
 		Text text= createTextInputField(result);
 		text.selectAll();
