@@ -335,7 +335,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 							return;
 						}
 					}
-					fRootStatus.setError(status.getString());
+					fRootStatus.setError(status.getMessage());
 				} else if (fIsProjectAsSourceFolder) {
 					fRootStatus.setWarning(NewWizardMessages.getString("NewSourceFolderWizardPage.warning.ReplaceSF")); //$NON-NLS-1$
 				}					

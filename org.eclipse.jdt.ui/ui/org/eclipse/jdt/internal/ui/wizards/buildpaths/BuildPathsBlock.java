@@ -523,7 +523,7 @@ public class BuildPathsBlock {
 		
 		IJavaModelStatus status= JavaConventions.validateClasspath(fCurrJProject, entries, fOutputLocationPath);
 		if (!status.isOK()) {
-			fBuildPathStatus.setError(status.getString());
+			fBuildPathStatus.setError(status.getMessage());
 			return;
 		}
 		fBuildPathStatus.setOK();
