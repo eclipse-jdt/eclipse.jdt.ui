@@ -104,20 +104,20 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			assertTrue("Has super type", superClass != null);
 			
 			SimpleName newSuperclass= ast.newSimpleName("Object");
-			rewrite.markAsReplaced(superClass, newSuperclass);
+			rewrite.markAsReplaced(superClass, newSuperclass, "Rename Superclass");
 
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
 			
 			SimpleName newSuperinterface= ast.newSimpleName("Cloneable");
-			rewrite.markAsReplaced((ASTNode) superInterfaces.get(0), newSuperinterface);
+			rewrite.markAsReplaced((ASTNode) superInterfaces.get(0), newSuperinterface, "Rename Interface");
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
 			
 			FieldDeclaration newFieldDecl= createNewField(ast, "fCount");
 			
-			rewrite.markAsReplaced((ASTNode) members.get(0), newFieldDecl);
+			rewrite.markAsReplaced((ASTNode) members.get(0), newFieldDecl, "Replace inner class with field");
 		}
 		{ // replace method in F, change to interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");

@@ -33,7 +33,6 @@ public class ImportOrganizeTest extends TestCase {
 	private static final Class THIS= ImportOrganizeTest.class;
 	
 	private IJavaProject fJProject1;
-	private IPackageFragmentRoot fSourceFolder;
 
 	public ImportOrganizeTest(String name) {
 		super(name);
@@ -43,21 +42,20 @@ public class ImportOrganizeTest extends TestCase {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
 	}
 
-
 	public static Test suite() {
-		return new TestSuite(THIS);
+		if (true) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new ImportOrganizeTest("testReplaceImports"));
+			return suite;
+		}	
 	}
 
 
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
-
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		fSourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
 	}
 
 
@@ -103,6 +101,12 @@ public class ImportOrganizeTest extends TestCase {
 	}
 	
 	public void test1() throws Exception {
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		ZipFile zipfile= new ZipFile(junitSrcArchive);
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
+
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/BaseTestRunner.java"));
 		assertNotNull("BaseTestRunner.java", cu);
 		
@@ -139,6 +143,12 @@ public class ImportOrganizeTest extends TestCase {
 	}
 		
 	public void test2() throws Exception {
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		ZipFile zipfile= new ZipFile(junitSrcArchive);
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
+
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/LoadingTestCollector.java"));
 		assertNotNull("LoadingTestCollector.java", cu);
 		
@@ -158,6 +168,11 @@ public class ImportOrganizeTest extends TestCase {
 	
 	
 	public void test3() throws Exception {
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		ZipFile zipfile= new ZipFile(junitSrcArchive);
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/TestCaseClassLoader.java"));
 		assertNotNull("TestCaseClassLoader.java", cu);
 		
@@ -177,6 +192,11 @@ public class ImportOrganizeTest extends TestCase {
 	}
 		
 	public void test4() throws Exception {
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		ZipFile zipfile= new ZipFile(junitSrcArchive);
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/textui/TestRunner.java"));
 		assertNotNull("TestRunner.java", cu);
 		
@@ -201,8 +221,10 @@ public class ImportOrganizeTest extends TestCase {
 		});		
 	}
 	
-	public void test5() throws Exception {
-		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+	public void testVariousTypeReferences() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack= sourceFolder.createPackageFragment("test", false, null);
 		for (int ch= 'A'; ch < 'M'; ch++) {
 			String name= String.valueOf((char) ch);
 			ICompilationUnit cu= pack.getCompilationUnit(name + ".java");
@@ -227,7 +249,7 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append("  }\n");
 		buf.append("}\n");
 		
-		pack= fSourceFolder.createPackageFragment("other", false, null);
+		pack= sourceFolder.createPackageFragment("other", false, null);
 		ICompilationUnit cu= pack.getCompilationUnit("ImportTest.java");
 		cu.createType(buf.toString(), null, false, null);
 
@@ -251,8 +273,10 @@ public class ImportOrganizeTest extends TestCase {
 		});		
 	}
 	
-	public void test6() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+	public void testInnerClassVisibility() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class C {\n");
@@ -264,7 +288,7 @@ public class ImportOrganizeTest extends TestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
 		
-		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
 				
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -320,6 +344,184 @@ public class ImportOrganizeTest extends TestCase {
 		});
 	}
 	
+	private static final int printRange= 6;
 	
+	public static void assertEqualString(String str1, String str2) {	
+		int len1= Math.min(str1.length(), str2.length());
+		
+		int diffPos= -1;
+		for (int i= 0; i < len1; i++) {
+			if (str1.charAt(i) != str2.charAt(i)) {
+				diffPos= i;
+				break;
+			}
+		}
+		if (diffPos == -1 && str1.length() != str2.length()) {
+			diffPos= len1;
+		}
+		if (diffPos != -1) {
+			int diffAhead= Math.max(0, diffPos - printRange);
+			int diffAfter= Math.min(str1.length(), diffPos + printRange);
+			
+			String diffStr= str1.substring(diffAhead, diffPos) + '^' + str1.substring(diffPos, diffAfter);
+			
+			assertTrue("Content not as expected: is\n" + str1 + "\nDiffers at pos " + diffPos + ": " + diffStr + "\nexpected:\n" + str2, false);
+		}
+	}	
+	
+	public void testClearImports() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");		
+		buf.append("public class C {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+	
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testNewImports() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+	
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");			
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");						
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testReplaceImports() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");			
+		buf.append("import java.util.Set;\n");
+		buf.append("\n");				
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+	
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");			
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");						
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}	
+	
+	public void testClearImportsNoPackage() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.getPackageFragment("");
+		StringBuffer buf= new StringBuffer();
+		buf.append("import java.util.Vector;\n");		
+		buf.append("public class C {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+	
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("public class C {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testNewImportsNoPackage() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.getPackageFragment("");
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+	
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");						
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testReplaceImportsNoPackage() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.getPackageFragment("");
+		StringBuffer buf= new StringBuffer();
+		buf.append("import java.util.Set;\n");
+		buf.append("\n");				
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+	
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");						
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}	
 	
 }
