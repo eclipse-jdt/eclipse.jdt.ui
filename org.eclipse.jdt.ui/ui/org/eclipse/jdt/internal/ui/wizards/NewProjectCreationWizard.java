@@ -53,6 +53,8 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+		if (fJavaPage.getJavaProject() == null)
+			fJavaPage.updateProject(monitor);
 		fJavaPage.configureJavaProject(monitor); // use the full progress monitor
 		BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 		selectAndReveal(fJavaPage.getJavaProject().getProject());
