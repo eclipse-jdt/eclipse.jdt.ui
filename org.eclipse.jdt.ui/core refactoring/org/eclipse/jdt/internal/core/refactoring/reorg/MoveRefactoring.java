@@ -83,6 +83,9 @@ public class MoveRefactoring extends ReorgRefactoring {
 	}
 	
 	public boolean canUpdateReferences() throws JavaModelException{
+		if (getDestination() == null)
+			return false;
+		
 		if (hasPackages())
 			return false;
 
