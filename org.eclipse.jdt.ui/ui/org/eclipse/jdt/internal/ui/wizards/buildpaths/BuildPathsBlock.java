@@ -621,6 +621,9 @@ public class BuildPathsBlock {
 	}
 
 	public static void addJavaNature(IProject project, IProgressMonitor monitor) throws CoreException {
+		if (monitor != null && monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
 		if (!project.hasNature(JavaCore.NATURE_ID)) {
 			IProjectDescription description = project.getDescription();
 			String[] prevNatures= description.getNatureIds();
@@ -640,7 +643,6 @@ public class BuildPathsBlock {
 		}
 		monitor.setTaskName(NewWizardMessages.getString("BuildPathsBlock.operationdesc_java")); //$NON-NLS-1$
 		monitor.beginTask("", 10); //$NON-NLS-1$
-
 		try {
 			internalConfigureJavaProject(fClassPathList.getElements(), getOutputLocation(), monitor);
 		} finally {
