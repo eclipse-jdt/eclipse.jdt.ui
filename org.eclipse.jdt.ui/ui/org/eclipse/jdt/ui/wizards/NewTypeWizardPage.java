@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -38,6 +39,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
@@ -53,7 +55,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
@@ -97,13 +98,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public static class ImportsManager {
 
-		private IImportsStructure fImportsStructure;
+		private ImportsStructure fImportsStructure;
+		private HashSet fAddedTypes;
 
-		/* package */ ImportsManager(IImportsStructure structure) {
-			fImportsStructure= structure;
+		/* package */ ImportsManager(ICompilationUnit createdWorkingCopy) throws CoreException {
+			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
+			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);			
+			fAddedTypes= new HashSet();
+			
+			fImportsStructure= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, true);
 		}
 
-		/* package */ IImportsStructure getImportsStructure() {
+		/* package */ ImportsStructure getImportsStructure() {
 			return fImportsStructure;
 		}
 				
@@ -118,8 +125,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 * fully qualified type name if an import conflict prevented the import
 		 */				
 		public String addImport(String qualifiedTypeName) {
+			fAddedTypes.add(qualifiedTypeName);
 			return fImportsStructure.addImport(qualifiedTypeName);
 		}
+		
+		/* package */ void create(boolean needsSave, SubProgressMonitor monitor) throws CoreException {
+			fImportsStructure.create(needsSave, monitor);
+		}
+		
+		/* package */ void removeImport(String qualifiedName) {
+			if (fAddedTypes.contains(qualifiedName)) {
+				fImportsStructure.removeImport(qualifiedName);
+			}
+		}
+		
 	}
 	
 	/** Public access flag. See The Java Virtual Machine Specification for more details. */
@@ -1325,12 +1344,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			boolean isInnerClass= isEnclosingTypeSelected();
 			
 			IType createdType;
-			ImportsStructure imports;
+			ImportsManager imports;
 			int indent= 0;
 	
-			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
-			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);			
+
 			
 			String lineDelimiter= null;	
 			if (!isInnerClass) {
@@ -1346,11 +1363,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					createdWorkingCopy.getBuffer().setContents(content);
 				}
 							
-				imports= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, true);
+				imports= new ImportsManager(createdWorkingCopy);
 				// add an import that will be removed again. Having this import solves 14661
-				imports.addImport(pack.getElementName(), getTypeName());
+				imports.addImport(JavaModelUtil.concatenateName(pack.getElementName(), getTypeName()));
 				
-				String typeContent= constructTypeStub(new ImportsManager(imports), lineDelimiter);
+				String typeContent= constructTypeStub(imports, lineDelimiter);
 				
 				String cuContent= constructCUContent(parentCU, typeContent, lineDelimiter);
 				
@@ -1368,7 +1385,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				}
 	
 				ICompilationUnit parentCU= enclosingType.getCompilationUnit();
-				imports= new ImportsStructure(parentCU, prefOrder, threshold, true);
+				imports= new ImportsManager(parentCU);
 	
 				// add imports that will be removed again. Having the imports solves 14661
 				IType[] topLevelTypes= parentCU.getTypes();
@@ -1386,7 +1403,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 						content.append(lineDelimiter);
 					}
 				}
-				content.append(constructTypeStub(new ImportsManager(imports), lineDelimiter));
+				content.append(constructTypeStub(imports, lineDelimiter));
 				IJavaElement[] elems= enclosingType.getChildren();
 				IJavaElement sibling= elems.length > 0 ? elems[0] : null;
 				
@@ -1396,17 +1413,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			
 			// add imports for superclass/interfaces, so types can be resolved correctly
-			boolean needsSave= !imports.getCompilationUnit().isWorkingCopy();
+			ICompilationUnit cu= createdType.getCompilationUnit();	
+			boolean needsSave= !cu.isWorkingCopy();
 			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
 	
-			ICompilationUnit cu= createdType.getCompilationUnit();	
 			synchronized(cu) {
 				cu.reconcile();
 			}			
-			createTypeMembers(createdType, new ImportsManager(imports), new SubProgressMonitor(monitor, 1));
+			createTypeMembers(createdType, imports, new SubProgressMonitor(monitor, 1));
 	
 			// add imports
 			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
+			
+			if (removeUnused(cu, imports)) {
+				imports.create(needsSave, null);
+			}
 			
 			synchronized(cu) {
 				cu.reconcile();
@@ -1442,6 +1463,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			monitor.done();
 		}
 	}	
+	
+	private boolean removeUnused(ICompilationUnit cu, ImportsManager imports) {
+		CompilationUnit root= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= root.getProblems();
+		boolean importRemoved= false;
+		for (int i= 0; i < problems.length; i++) {
+			if (problems[i].getID() == IProblem.UnusedImport) {
+				String imp= problems[i].getArguments()[0];
+				imports.removeImport(imp);
+				importRemoved=true;
+			}
+		}
+		return importRemoved;
+	}
 
 	/**
 	 * Uses the New Java file template from the code template page to generate a
@@ -1542,13 +1577,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		buf.append(lineDelimiter);
 		return buf.toString();
 	}
-
-	/**
-	 * @deprecated Overwrite createTypeMembers(IType, IImportsManager, IProgressMonitor) instead
-	 */		
-	protected void createTypeMembers(IType newType, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
-		//deprecated
-	}
 	
 	/**
 	 * Hook method that gets called from <code>createType</code> to support adding of 
@@ -1569,10 +1597,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * 
 	 * @see #createType(IProgressMonitor)
 	 */		
-	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
-		// call for compatibility
-		createTypeMembers(newType, imports.getImportsStructure(), monitor);
-		
+	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {	
 		// default implementation does nothing
 		// example would be
 		// String mainMathod= "public void foo(Vector vec) {}"
@@ -1670,14 +1695,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return null;
 	}	
 	
-
-	/**
-	 * @deprecated Use createInheritedMethods(IType,boolean,boolean,IImportsManager,IProgressMonitor)
-	 */
-	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
-		return createInheritedMethods(type, doConstructors, doUnimplementedMethods, new ImportsManager(imports), monitor);
-	}
-
 
 	/**
 	 * Creates the bodies of all unimplemented methods and constructors and adds them to the type.
