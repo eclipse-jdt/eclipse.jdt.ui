@@ -90,7 +90,7 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 		arguments.add("-Xdebug"); //$NON-NLS-1$
 		arguments.add("-Xnoagent"); //$NON-NLS-1$
 		arguments.add("-Djava.compiler=NONE"); //$NON-NLS-1$
-		arguments.add("-Xrunjdwp:transport=dt_socket,address=localhost:" + port); //$NON-NLS-1$
+		arguments.add("-Xrunjdwp:transport=dt_socket,address=127.0.0.1:" + port); //$NON-NLS-1$
 
 		arguments.add(config.getClassToLaunch());
 		addArguments(config.getProgramArguments(), arguments);
@@ -104,8 +104,10 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 			return null;
 		}
 		Map map= connector.defaultArguments();
-		specifyArguments(map, port);
-			Process p= null;
+		int timeout= fVMInstance.getDebuggerTimeout();
+		
+		specifyArguments(map, port, timeout);
+		Process p= null;
 		try {
 			try {
 				connector.startListening(map);
@@ -122,10 +124,10 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 		
 				IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
 				process.setAttribute(JavaRuntime.ATTR_CMDLINE, renderCommandLine(cmdLine));
-				try {
-					Thread.currentThread().sleep(5000);
-				} catch (InterruptedException e) {
-				}
+				//try {
+				//	Thread.currentThread().sleep(5000);
+				//} catch (InterruptedException e) {
+				//}
 				boolean retry= false;
 				do  {
 					try {
@@ -150,13 +152,13 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 		return null;
 	}
 	
-	protected void specifyArguments(Map map, int portNumber) {
+	protected void specifyArguments(Map map, int portNumber, int timeout) {
 		// XXX: Revisit - allows us to put a quote (") around the classpath
 		Connector.IntegerArgument port= (Connector.IntegerArgument) map.get("port"); //$NON-NLS-1$
 		port.setValue(portNumber);
 		
-		Connector.IntegerArgument timeout= (Connector.IntegerArgument) map.get("timeout"); //$NON-NLS-1$
-		timeout.setValue(3000);
+		Connector.IntegerArgument timeoutArg= (Connector.IntegerArgument) map.get("timeout"); //$NON-NLS-1$
+		timeoutArg.setValue(timeout);
 		
 		
 	}
