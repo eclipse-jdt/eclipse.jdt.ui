@@ -1,7 +1,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -25,7 +22,6 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
@@ -39,8 +35,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -48,11 +44,11 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class PullUpRefactoring extends Refactoring {
 
@@ -70,7 +66,7 @@ public class PullUpRefactoring extends Refactoring {
 	public PullUpRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
 		Assert.isTrue(elements.length > 0);
 		Assert.isNotNull(preferenceSettings);
-		fElementsToPullUp= sortByOffset(elements);
+		fElementsToPullUp= (IMember[])SourceReferenceUtil.sortByOffset(elements);
 		fMethodsToDelete= new IMethod[0];
 		fPreferenceSettings= preferenceSettings;
 	}
@@ -203,7 +199,7 @@ public class PullUpRefactoring extends Refactoring {
 		for (int i = 0; i < fElementsToPullUp.length; i++) {
 			if (fElementsToPullUp[i].getElementType() == IJavaElement.METHOD){
 				IMethod method= (IMethod)fElementsToPullUp[i];
-				IMethod found= findMethod(method, type.getMethods());
+				IMethod found= MemberCheckUtil.findMethod(method, type.getMethods());
 				if (found != null)
 					addToMapping(result, method, found);
 			} else if (fElementsToPullUp[i].getElementType() == IJavaElement.FIELD){
@@ -302,7 +298,7 @@ public class PullUpRefactoring extends Refactoring {
 			pm.beginTask("", 3);
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
-			result.merge(checkSuperclass());
+			result.merge(MemberCheckUtil.checkMembersInDestinationType(fElementsToPullUp, getSuperType(new SubProgressMonitor(pm, 1))));
 			pm.worked(1);
 			result.merge(checkMembersInSubclasses(new SubProgressMonitor(pm, 1)));
 			return result;
@@ -491,42 +487,6 @@ public class PullUpRefactoring extends Refactoring {
 		return (member.getDeclaringType().getPackageFragment().equals(newHome.getPackageFragment()));		
 	}
 	
-	private RefactoringStatus checkSuperclass() throws JavaModelException {	
-		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < fElementsToPullUp.length; i++) {
-			if (fElementsToPullUp[i].getElementType() == IJavaElement.METHOD)
-				checkMethodInSuperclass(getSuperType(new NullProgressMonitor()), result, (IMethod)fElementsToPullUp[i]);
-			else 
-				checkFieldInSuperclass(getSuperType(new NullProgressMonitor()), result, (IField)fElementsToPullUp[i]);
-		}
-		return result;	
-	}
-
-	private void checkMethodInSuperclass(IType superType, RefactoringStatus result, IMethod method) throws JavaModelException {
-		IMethod[] superTypeMethods= superType.getMethods();
-		IMethod found= findMethod(method, superTypeMethods);
-		if (found != null){
-			result.addError("Method '" + method.getElementName() + "' (with the same signature) already exists in superclass '" + superType.getFullyQualifiedName() 
-										+ "', which will result in compile errors if you proceed.",
-										createContext(Refactoring.getResource(superType), found.getSourceRange()));
-		} else {
-			IMethod similar= Checks.findMethod(method, superType);
-			if (similar != null)
-				result.addWarning("Method '" + method.getElementName() + "' (with the same number of parameters) already exists in type '" 
-													+ superType.getFullyQualifiedName() + "'",
-													createContext(Refactoring.getResource(superType), similar.getSourceRange()));
-		}	
-	}
-	
-	private void checkFieldInSuperclass(IType superType, RefactoringStatus result, IField field) throws JavaModelException {
-		IField superTypeField= superType.getField(field.getElementName());	
-		if (! superTypeField.exists())
-			return;
-		result.addError("Field '" + field.getElementName() + "' already exists in superclass '" + superType.getFullyQualifiedName() 
-									+ "', which will result in compile errors if you proceed.",
-									createContext(Refactoring.getResource(superType), superTypeField.getSourceRange()));
-	}
-			
 	private RefactoringStatus checkMembersInSubclasses(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		Set notDeletedMembers= getNotDeletedMembers();
@@ -553,7 +513,8 @@ public class PullUpRefactoring extends Refactoring {
 				String msg= "Method '" + JavaElementUtil.createMethodSignature(matchingMethod) + "' declared in type'"
 									 + matchingMethod.getDeclaringType().getFullyQualifiedName()
 									 + "' has a different return type than its pulled up counterpart, which will result in compile errors if you proceed." ;
-				result.addError(msg, createContext(Refactoring.getResource(matchingMethod), matchingMethod.getNameRange()));	
+				Context context= JavaSourceContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
+				result.addError(msg, context);	
 			}
 		}
 	}
@@ -573,7 +534,8 @@ public class PullUpRefactoring extends Refactoring {
 				String msg= "Field '" + matchingField.getElementName() + "' declared in type'"
 									 + matchingField.getDeclaringType().getFullyQualifiedName()
 									 + "' has a different type than its pulled up counterpart." ;
-				result.addError(msg, createContext(Refactoring.getResource(matchingField), matchingField.getSourceRange()));	
+				Context context= JavaSourceContext.create(matchingField.getCompilationUnit(), matchingField.getSourceRange());					 
+				result.addError(msg, context);	
 			}
 		}
 	}
@@ -588,7 +550,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private void checkMethodAccessModifiers(RefactoringStatus result, IMethod method) throws JavaModelException {
-		Context errorContext= createContext(method);
+		Context errorContext= JavaSourceContext.create(method);
 		
 		if (Flags.isStatic(method.getFlags())){
 				String msg= "Method '" + JavaElementUtil.createMethodSignature(method) + "' declared in type '" 
@@ -619,49 +581,9 @@ public class PullUpRefactoring extends Refactoring {
 		return matchingSet;
 	}
 	
-	private static IMember[] sortByOffset(IMember[] methods){
-		Comparator comparator= new Comparator(){
-			public int compare(Object o1, Object o2){
-				try{
-					return ((ISourceReference)o2).getSourceRange().getOffset() - ((ISourceReference)o1).getSourceRange().getOffset();
-				} catch (JavaModelException e){
-					return o2.hashCode() - o1.hashCode();
-				}	
-			}
-		};
-		Arrays.sort(methods, comparator);
-		return methods;
-	}
-	
-	/**
-	 * Finds a method in a list of methods.
-	 * @return The found method or null, if nothing found
-	 */
-	private static IMethod findMethod(IMethod method, IMethod[] allMethods) throws JavaModelException {
-		String name= method.getElementName();
-		String[] paramTypes= method.getParameterTypes();
-		boolean isConstructor= method.isConstructor();
-
-		for (int i= 0; i < allMethods.length; i++) {
-			if (JavaModelUtil.isSameMethodSignature(name, paramTypes, isConstructor, allMethods[i]))
-				return allMethods[i];
-		}
-		return null;
-	}
-	
 	private static boolean isVisibilityLowerThanProtected(IMember member)throws JavaModelException {
 		return ! (Flags.isPublic(member.getFlags()) || Flags.isProtected(member.getFlags()));
 	}
-	
-	private static Context createContext(IMember member) throws JavaModelException {
-		return createContext(Refactoring.getResource(member), member.getSourceRange());
-	}
-	
-	private static Context createContext(IResource resource, ISourceRange range){
-		Assert.isTrue(resource instanceof IFile);
-		return JavaSourceContext.create((ICompilationUnit)JavaCore.create(resource), range);
-	}
-
 	
 	//--- change creation
 	
@@ -789,7 +711,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 
 	private static String replaceSuperCalls(IMethod method) throws JavaModelException {
-		ISourceRange[] superRefOffsert= reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method));
+		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method));
 		
 		StringBuffer source= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(method));
 		ISourceRange originalMethodRange= SourceReferenceSourceRangeComputer.computeSourceRange(method, method.getCompilationUnit());
@@ -816,16 +738,6 @@ public class PullUpRefactoring extends Refactoring {
 		if (i == s.length())
 			return "";
 		return s.substring(i);
-	}
-	
-	private static ISourceRange[] reverseSortByOffset(ISourceRange[] refs){
-		Comparator comparator= new Comparator(){
-			public int compare(Object o1, Object o2){
-				return ((ISourceRange)o2).getOffset() - ((ISourceRange)o1).getOffset();
-			}
-		};
-		Arrays.sort(refs, comparator);
-		return refs;
 	}
 	
 	private static String substitutePrivateWithProtected(String methodSource) throws JavaModelException {
