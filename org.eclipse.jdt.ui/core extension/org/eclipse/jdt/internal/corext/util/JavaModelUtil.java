@@ -53,6 +53,28 @@ public final class JavaModelUtil {
 		return null;
 	}
 	
+	/** 
+	 * Finds a type by its qualified type name (dot separated).
+	 * @param jproject The java project to search in
+	 * @param fullyQualifiedName The fully qualified name (type name with enclosing type names and package (all separated by dots))
+	 * @param owner the workingcopy owner
+	 * @return The type found, or null if not existing
+	 */	
+	public static IType findType(IJavaProject jproject, String fullyQualifiedName, WorkingCopyOwner owner) throws JavaModelException {
+		//workaround for bug 22883
+		IType type= jproject.findType(fullyQualifiedName, owner);
+		if (type != null)
+			return type;
+		IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			IPackageFragmentRoot root= roots[i];
+			type= findType(root, fullyQualifiedName);
+			if (type != null && type.exists())
+				return type;
+		}	
+		return null;
+	}
+	
 	/**
 	 * Returns <code>true</code> if the given package fragment root is
 	 * referenced. This means it is own by a different project but is referenced
