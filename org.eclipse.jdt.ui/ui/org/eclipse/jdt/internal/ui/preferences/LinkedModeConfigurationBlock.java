@@ -264,6 +264,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		label.setText(PreferencesMessages.getString("LinkedModeConfigurationBlock.color")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
+		gd.horizontalIndent= 20;
 		label.setLayoutData(gd);
 
 		fAnnotationForegroundColorEditor= new ColorEditor(optionsComposite);
