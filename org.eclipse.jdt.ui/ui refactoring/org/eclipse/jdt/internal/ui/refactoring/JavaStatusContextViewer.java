@@ -77,7 +77,7 @@ public class JavaStatusContextViewer extends SourceContextViewer {
 	private IDocument newJavaDocument(String source) {
 		IDocument result= new Document(source);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		textTools.setupDocument(result);
+		textTools.setupJavaDocumentPartitioner(result);
 		return result;
 	}
 }

@@ -435,7 +435,7 @@ public class EditTemplateDialog extends StatusDialog {
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		IDocument document= new Document(fTemplate.getPattern());
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		tools.setupDocument(document);
+		tools.setupJavaDocumentPartitioner(document);
 		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null, fProcessor));
 		viewer.setEditable(true);
 		viewer.setDocument(document);

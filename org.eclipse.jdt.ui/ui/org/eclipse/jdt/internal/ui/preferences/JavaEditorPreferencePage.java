@@ -520,7 +520,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
-		fJavaTextTools.setupDocument(document);
+		fJavaTextTools.setupJavaDocumentPartitioner(document);
 		fPreviewViewer.setDocument(document);
 		
 		fOverlayStore.addPropertyChangeListener(new IPropertyChangeListener() {

@@ -250,7 +250,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		}
 				
 		IDocument doc= new Document(content);
-		JavaPlugin.getDefault().getJavaTextTools().setupDocument(doc);
+		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc);
 		fViewer.setInput(doc);
 	}
 	

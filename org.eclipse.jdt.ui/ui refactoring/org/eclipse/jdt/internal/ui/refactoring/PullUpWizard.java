@@ -1303,7 +1303,7 @@ public class PullUpWizard extends RefactoringWizard {
 	
 	  private void setSourceViewerContents(String contents) {
 		  IDocument document= (contents == null) ? new Document(): new Document(contents);
-		  getJavaTextTools().setupDocument(document);
+		  getJavaTextTools().setupJavaDocumentPartitioner(document);
 		  fSourceViewer.setDocument(document);
 	  }
 	

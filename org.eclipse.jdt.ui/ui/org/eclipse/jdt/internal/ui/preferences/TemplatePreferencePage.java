@@ -393,7 +393,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		IDocument document= new Document();
-		tools.setupDocument(document);
+		tools.setupJavaDocumentPartitioner(document);
 
 		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(false);

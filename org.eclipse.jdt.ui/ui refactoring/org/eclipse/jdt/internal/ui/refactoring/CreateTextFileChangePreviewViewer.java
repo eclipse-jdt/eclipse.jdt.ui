@@ -72,7 +72,7 @@ public class CreateTextFileChangePreviewViewer implements IChangePreviewViewer {
 		// source viewer registry.
 		if ("java".equals(change.getTextType())) { //$NON-NLS-1$
 			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-			textTools.setupDocument(document);
+			textTools.setupJavaDocumentPartitioner(document);
 			fSourceViewer.configure(new JavaSourceViewerConfiguration(textTools, null));
 		} else {
 			fSourceViewer.configure(new SourceViewerConfiguration());
