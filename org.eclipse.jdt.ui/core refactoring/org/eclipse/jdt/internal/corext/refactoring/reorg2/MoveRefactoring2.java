@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdatingRefactoring{
 
@@ -62,7 +63,11 @@ public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdat
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try {
-			return new RefactoringStatus();
+			RefactoringStatus result= new RefactoringStatus();
+			result.merge(RefactoringStatus.create(Resources.checkInSync(fMovePolicy.getResources())));
+			IResource[] javaResources= ReorgUtils2.getResources(fMovePolicy.getJavaElements());
+			result.merge(RefactoringStatus.create(Resources.checkInSync(javaResources)));
+			return result;
 		} finally {
 			pm.done();
 		}
@@ -165,5 +170,12 @@ public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdat
 	
 	public void setUpdateQualifiedNames(boolean update) {
 		fMovePolicy.setUpdateQualifiedNames(update);
+	}
+
+	public boolean hasAllInputSet() {
+		return fMovePolicy.hasAllInputSet();
+	}
+	public boolean hasDestinationSet() {
+		return fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null;
 	}
 }

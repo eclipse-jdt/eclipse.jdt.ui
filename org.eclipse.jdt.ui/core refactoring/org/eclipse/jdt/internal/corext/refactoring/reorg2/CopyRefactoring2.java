@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgPolicy.ICopyPolicy;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 public final class CopyRefactoring2 extends Refactoring{
 
@@ -64,7 +65,11 @@ public final class CopyRefactoring2 extends Refactoring{
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try {
-			return new RefactoringStatus();
+			RefactoringStatus result= new RefactoringStatus();
+			result.merge(RefactoringStatus.create(Resources.checkInSync(fCopyPolicy.getResources())));
+			IResource[] javaResources= ReorgUtils2.getResources(fCopyPolicy.getJavaElements());
+			result.merge(RefactoringStatus.create(Resources.checkInSync(javaResources)));
+			return result;
 		} finally {
 			pm.done();
 		}
