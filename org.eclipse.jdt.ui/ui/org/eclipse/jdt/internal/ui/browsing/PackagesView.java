@@ -534,9 +534,12 @@ public class PackagesView extends JavaBrowsingPart{
 				fLastInputWasProject= je.getElementType() == IJavaElement.JAVA_PROJECT;
 			return je;
 		} else if (fLastInputWasProject) {
-			return je.getJavaProject();
-		} else
-			return findInputForJavaElement(je.getParent(), canChangeInputType);
+			IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot)je.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			if (!packageFragmentRoot.isExternal())
+				return je.getJavaProject();
+		}
+		
+		return findInputForJavaElement(je.getParent(), canChangeInputType);
 	}
 		
 	/**
