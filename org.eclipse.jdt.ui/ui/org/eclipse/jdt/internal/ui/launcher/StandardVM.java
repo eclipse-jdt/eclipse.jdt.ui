@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.jdt.launching.AbstractVMInstall;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.IVMInstallType;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.jdt.launching.AbstractVMInstall;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.IVMInstallType;
 
 public class StandardVM extends AbstractVMInstall {
 	private IVMInstallType fType;

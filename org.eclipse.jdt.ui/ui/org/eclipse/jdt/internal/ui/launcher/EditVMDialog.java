@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.swt.widgets.Shell;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.swt.widgets.Shell;
 
 public class EditVMDialog extends AddVMDialog {
 	private IVMInstall fVM;
