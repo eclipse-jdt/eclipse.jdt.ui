@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
@@ -54,20 +55,22 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 
 		for (int i= 0; i < fInsertIndexes.length; i++) {
 			int idx= fInsertIndexes[i];
-			Expression newArg= getArgumentExpresion(ast, fParamTypes[idx]);
+			String key= "newarg_" + i; //$NON-NLS-1$
+			Expression newArg= evaluateArgumentExpressions(ast, fParamTypes[idx], key);
 			rewrite.markAsInserted(newArg);
 			fArguments.add(idx, newArg);
 			
-			markAsLinked(rewrite, newArg, i == 0, "newarg_" + i); //$NON-NLS-1$
+			markAsLinked(rewrite, newArg, i == 0, key); 
 		}
 		markAsSelection(rewrite, fNameNode.getParent());
 		return rewrite;
 	}
 	
-	private Expression getArgumentExpresion(AST ast, ITypeBinding requiredType) {
+	private Expression evaluateArgumentExpressions(AST ast, ITypeBinding requiredType, String key) {
 		CompilationUnit root= (CompilationUnit) fNameNode.getRoot();
 
 		int offset= fNameNode.getStartPosition();
+		Expression best= null;
 		
 		ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
 		IBinding[] bindings= analyzer.getDeclarationsInScope(offset, ScopeAnalyzer.VARIABLES);
@@ -75,10 +78,18 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 			IVariableBinding curr= (IVariableBinding) bindings[i];
 			ITypeBinding type= curr.getType();
 			if (type != null && TypeRules.canAssign(type, requiredType) && testModifier(curr)) {
-				return ast.newSimpleName(curr.getName());
+				if (best == null) {
+					best= ast.newSimpleName(curr.getName());
+				}
+				addLinkedModeProposal(key, curr.getName());
 			}
 		}
-		return ASTNodeFactory.newDefaultExpression(ast, requiredType);
+		Expression defaultExpression= ASTNodeFactory.newDefaultExpression(ast, requiredType);
+		if (best == null) {
+			best= defaultExpression;
+		}
+		addLinkedModeProposal(key, ASTNodes.asString(defaultExpression));
+		return best;
 	}
 	
 	private boolean testModifier(IVariableBinding curr) {

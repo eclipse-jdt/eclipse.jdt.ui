@@ -31,6 +31,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;
+	
+	private final String KEY_NAME= "name";  //$NON-NLS-1$
+	private final String KEY_TYPE= "type";  //$NON-NLS-1$
 
 	private int  fVariableKind;
 	private ExpressionStatement fExpressionStatement;
@@ -71,13 +74,14 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDeclFrag.setInitializer((Expression) rewrite.createCopy(expression));
 		
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
-		String typeName= addImport(fTypeBinding);
-		newDecl.setType(ASTNodeFactory.newType(ast, typeName));
+		
+		Type type= evaluateType(ast);
+		newDecl.setType(type);
 		
 		rewrite.markAsReplaced(fExpressionStatement, newDecl); 
 		
-		markAsLinked(rewrite, newDeclFrag.getName(), true, "name"); //$NON-NLS-1$
-		markAsLinked(rewrite, newDecl.getType(), false, "type"); //$NON-NLS-1$
+		markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME); //$NON-NLS-1$
+		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE); //$NON-NLS-1$
 		markAsSelection(rewrite, newDecl);
 
 		return rewrite;
@@ -98,8 +102,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDeclFrag.setName(ast.newSimpleName(varName));
 				
 		FieldDeclaration newDecl= ast.newFieldDeclaration(newDeclFrag);
-		String typeName= addImport(fTypeBinding);
-		newDecl.setType(ASTNodeFactory.newType(ast, typeName));
+		
+		Type type= evaluateType(ast);
+		newDecl.setType(type);
 		newDecl.setModifiers(Modifier.PRIVATE);
 		
 		Assignment assignment= ast.newAssignment();
@@ -116,9 +121,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 		rewrite.markAsReplaced(expression, assignment);
 		
-		markAsLinked(rewrite, newDeclFrag.getName(), false, "name"); //$NON-NLS-1$
-		markAsLinked(rewrite, newDecl.getType(), false, "type"); //$NON-NLS-1$
-		markAsLinked(rewrite, accessName, true, "name");  //$NON-NLS-1$
+		markAsLinked(rewrite, newDeclFrag.getName(), false, KEY_NAME);
+		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+		markAsLinked(rewrite, accessName, true, KEY_NAME);
 		markAsSelection(rewrite, fExpressionStatement);
 		
 		decls.add(findInsertIndex(decls, fExpressionStatement.getStartPosition()), newDecl);
@@ -126,6 +131,15 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		rewrite.markAsInserted(newDecl);
 		
 		return rewrite;		
+	}
+
+	private Type evaluateType(AST ast) throws CoreException {
+		ITypeBinding[] proposals= ASTResolving.getRelaxingTypes(ast, fTypeBinding);
+		for (int i= 0; i < proposals.length; i++) {
+			addLinkedModeProposal(KEY_TYPE, proposals[i]);
+		}
+		String typeName= addImport(fTypeBinding);
+		return ASTNodeFactory.newType(ast, typeName);
 	}
 	
 	private String suggestLocalVariableNames(ITypeBinding binding) {
@@ -139,6 +153,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
 		if (names.length == 0) {
 			return "class1"; // fix for pr, remoev after 20030127 //$NON-NLS-1$
+		}
+		for (int i= 0; i < names.length; i++) {
+			addLinkedModeProposal(KEY_NAME, names[i]);
 		}
 		return names[0]; 
 	}
@@ -154,6 +171,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		String[] names= NamingConventions.suggestFieldNames(project, packName, typeName, binding.getDimensions(), binding.getModifiers(), excludedNames);
 		if (names.length == 0) {
 			return "class1"; // fix for pr, remoev after 20030127 //$NON-NLS-1$
+		}
+		for (int i= 0; i < names.length; i++) {
+			addLinkedModeProposal(KEY_NAME, names[i]);
 		}
 		return names[0];		
 	}

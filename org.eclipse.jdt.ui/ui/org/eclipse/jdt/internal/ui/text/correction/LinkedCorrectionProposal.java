@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +22,19 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 
 /**
  *
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
-
+	
 	private GroupDescription fSelectionDescription;
 	private List fLinkedPositions;
 	private Map fLinkProposals;
@@ -73,7 +78,12 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		}
 		List proposals= (List) fLinkProposals.get(name);
 		if (proposals != null) {
-			return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+			ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+			if (res.length > 1) {
+				// keep first entry at first position
+				Arrays.sort(res, 0, res.length, new JavaCompletionProposalComparator());
+			}
+			return res;
 		}
 		return null;
 	}
@@ -82,7 +92,11 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		addLinkedModeProposal(name, new LinkedModeProposal(proposal));
 	}
 	
-	public void addLinkedModeProposal(String name, ICompletionProposal proposal) {
+	public void addLinkedModeProposal(String name, ITypeBinding proposal) {
+		addLinkedModeProposal(name, new LinkedModeProposal(proposal));
+	}	
+	
+	public void addLinkedModeProposal(String name, IJavaCompletionProposal proposal) {
 		if (fLinkProposals == null) {
 			fLinkProposals= new HashMap();
 		}

@@ -54,21 +54,26 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	public static class RemoveDescription implements ChangeDescription {
 	}
 	
-	public static class EditDescription implements ChangeDescription {
+	private static class ModifyDescription implements ChangeDescription {
 		String name;
 		ITypeBinding type;
-		public EditDescription(ITypeBinding type, String name) {
+		SingleVariableDeclaration resultingNode;
+		
+		public ModifyDescription(ITypeBinding type, String name) {
 			this.type= type;
 			this.name= name;
+		}		
+	}
+	
+	public static class EditDescription extends ModifyDescription {
+		public EditDescription(ITypeBinding type, String name) {
+			super(type, name);
 		}
 	}
 	
-	public static class InsertDescription implements ChangeDescription {
-		String name;
-		ITypeBinding type;
+	public static class InsertDescription extends ModifyDescription {
 		public InsertDescription(ITypeBinding type, String name) {
-			this.type= type;
-			this.name= name;
+			super(type, name);
 		}
 	}	
 		
@@ -105,9 +110,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		return null;
 	}
 	
-	private final String NAME_SUGGESTION= "name_suggestion"; //$NON-NLS-1$
-	
-	protected void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
+	private void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
 		GroupDescription selectionDescription= null;
 		if (isInDifferentCU) {
 			selectionDescription= new GroupDescription("selection"); //$NON-NLS-1$
@@ -119,8 +122,9 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		SingleVariableDeclaration[] oldParameters= (SingleVariableDeclaration[]) parameters.toArray(new SingleVariableDeclaration[parameters.size()]);
 		AST ast= methodDecl.getAST();
 		int k= 0; // index over the oldParameters
-		ArrayList createdVariables= new ArrayList();
 		ArrayList usedNames= new ArrayList();
+		boolean hasCreatedVariables= false;
+		
 		IVariableBinding[] declaredFields= fSenderBinding.getDeclaringClass().getDeclaredFields();
 		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
 			usedNames.add(declaredFields[i].getName());
@@ -137,10 +141,9 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				String type= addImport(desc.type);
 				newNode.setType(ASTNodeFactory.newType(ast, type));
 				
-				// set name later
-				newNode.setProperty(NAME_SUGGESTION, desc.name);
-
-				createdVariables.add(newNode);
+				// remember to set name later
+				desc.resultingNode= newNode;
+				hasCreatedVariables= true;
 				
 				rewrite.markAsInserted(newNode, selectionDescription);
 				parameters.add(i, newNode);
@@ -154,11 +157,12 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
 				String type= addImport(desc.type);
 				newNode.setType(ASTNodeFactory.newType(ast, type));
-				//	set name later
-				newNode.setProperty(NAME_SUGGESTION, desc.name);
+				
+				// remember to set name later
+				desc.resultingNode= newNode;
+				hasCreatedVariables= true;
 				
 				rewrite.markAsReplaced(oldParameters[k], newNode);
-				createdVariables.add(newNode);
 				
 				k++;
 			} else if (curr instanceof SwapDescription) {
@@ -172,8 +176,11 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				k++;	
 			}
 		}
+		if (!hasCreatedVariables) {
+			return;
+		}
 		
-		if (!createdVariables.isEmpty() && methodDecl.getBody() != null) {
+		if (methodDecl.getBody() != null) {
 			// avoid take a name of a local variable inside
 			CompilationUnit root= (CompilationUnit) methodDecl.getRoot();
 			IBinding[] bindings= (new ScopeAnalyzer(root)).getDeclarationsAfter(methodDecl.getBody().getStartPosition(), ScopeAnalyzer.VARIABLES);
@@ -182,32 +189,56 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			}
 		}
 		
-		// set names for new parameters
-		for (int i= 0; i < createdVariables.size(); i++) {
-			SingleVariableDeclaration var= (SingleVariableDeclaration) createdVariables.get(i);
-			String suggestedName= (String) var.getProperty(NAME_SUGGESTION);
+		fixupNames(rewrite, usedNames);
+	}
 
-			String name;
-			String[] excludedNames= (String[]) usedNames.toArray(new String[usedNames.size()]);
-			if (suggestedName == null) {
+	private void fixupNames(ASTRewrite rewrite, ArrayList usedNames) {
+		AST ast= rewrite.getRootNode().getAST();
+		// set names for new parameters
+		for (int i= 0; i < fParameterChanges.length; i++) {
+			ChangeDescription curr= fParameterChanges[i];
+			if (curr instanceof ModifyDescription) {
+				ModifyDescription desc= (ModifyDescription) curr;
+				SingleVariableDeclaration var= desc.resultingNode;
+				String suggestedName= desc.name;
+
+				String typeKey= "param_type_" + i; //$NON-NLS-1$
+				String nameKey= "param_name_" + i; //$NON-NLS-1$
+
+				// collect name suggestions
+				String favourite= null;
+				String[] excludedNames= (String[]) usedNames.toArray(new String[usedNames.size()]);
+				if (suggestedName != null) {
+					favourite= StubUtility.guessArgumentName(getCompilationUnit().getJavaProject(), suggestedName, excludedNames);
+					addLinkedModeProposal(nameKey, favourite);
+				}
 				Type type= var.getType();
 				int dim= 0;
 				if (type.isArrayType()) {
 					dim= ((ArrayType) type).getDimensions();
 					type= ((ArrayType) type).getElementType();
 				}
-				name= NamingConventions.suggestArgumentNames(getCompilationUnit().getJavaProject(), "", ASTNodes.asString(type), dim, excludedNames)[0]; //$NON-NLS-1$
-			} else {
-				name= StubUtility.guessArgumentName(getCompilationUnit().getJavaProject(), suggestedName, excludedNames);
-			}
-			var.setName(ast.newSimpleName(name));
-			usedNames.add(name);
+				String[] suggestedNames=  NamingConventions.suggestArgumentNames(getCompilationUnit().getJavaProject(), "", ASTNodes.asString(type), dim, excludedNames); //$NON-NLS-1$
+				for (int k= 0; k < suggestedNames.length; k++) {
+					addLinkedModeProposal(nameKey, suggestedNames[k]);
+				}
+				if (favourite == null) {
+					favourite= suggestedNames[0];
+				}
+
+				var.setName(ast.newSimpleName(favourite));
+				usedNames.add(favourite);
+
+				// collect type suggestions
+				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(ast, desc.type);
+				for (int k= 0; k < bindings.length; k++) {
+					addLinkedModeProposal(typeKey, bindings[k]);
+				}
 			
-			markAsLinked(rewrite, var.getType(), false, "param_type_" + i); //$NON-NLS-1$
-			markAsLinked(rewrite, var.getName(), false, "param_name_" + i); //$NON-NLS-1$
+				markAsLinked(rewrite, var.getType(), false, typeKey); //$NON-NLS-1$
+				markAsLinked(rewrite, var.getName(), false, nameKey); //$NON-NLS-1$			
+			}
 		}
-		if (!createdVariables.isEmpty()) {
-			markAsSelection(rewrite, fNameNode.getParent());
-		}
+		markAsSelection(rewrite, fNameNode.getParent());
 	}
 }

@@ -12,12 +12,15 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -375,7 +378,46 @@ public class ASTResolving {
 			return null;
 		}
 		return cu;
+	}
+	
+	
+	private static final Code[] CODE_ORDER= { PrimitiveType.CHAR, PrimitiveType.SHORT, PrimitiveType.INT, PrimitiveType.LONG, PrimitiveType.FLOAT, PrimitiveType.DOUBLE };
+	
+	public static ITypeBinding[] getRelaxingTypes(AST ast, ITypeBinding type) {
+		HashSet res= new HashSet();
+		res.add(type);
+		if (type.isArray()) {
+			res.add(ast.resolveWellKnownType("java.lang.Object")); //$NON-NLS-1$
+		} else if (type.isPrimitive()) {
+			Code code= PrimitiveType.toCode(type.getName());
+			boolean found= false;
+			for (int i= 0; i < CODE_ORDER.length; i++) {
+				if (found) {
+					String typeName= CODE_ORDER[i].toString();
+					res.add(ast.resolveWellKnownType(typeName));
+				}
+				if (code == CODE_ORDER[i]) {
+					found= true;
+				}
+			}
+		} else {
+			collectRelaxingTypes(res, type);
+		}
+		return (ITypeBinding[]) res.toArray(new ITypeBinding[res.size()]);;
+	}
+	
+	private static void collectRelaxingTypes(Set res, ITypeBinding type) {
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			ITypeBinding curr= interfaces[i];
+			res.add(curr);
+			collectRelaxingTypes(res, curr);
+		}
+		ITypeBinding binding= type.getSuperclass();
+		if (binding != null) {
+			res.add(binding);
+			collectRelaxingTypes(res, binding);			
+		}
 	}	
-	
-	
+
 }
