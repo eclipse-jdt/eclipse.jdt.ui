@@ -134,7 +134,8 @@ public class ControlContentAssistHelper {
 						e.doit= false;
 						String errorMessage= contentAssistant.showPossibleCompletions();
 						if (errorMessage != null) {
-							System.err.println(errorMessage);
+							// XXX: better error display to come.
+							// System.err.println(errorMessage);
 						}
 					}
 				}
