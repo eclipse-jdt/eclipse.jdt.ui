@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
 
-public class PushDownInputPage extends UserInputWizardPage {
+class PushDownInputPage extends UserInputWizardPage {
 	
 	private class PullUpCellModifier implements ICellModifier {
 		/*

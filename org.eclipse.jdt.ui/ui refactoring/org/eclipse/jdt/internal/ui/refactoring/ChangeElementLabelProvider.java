@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-public class ChangeElementLabelProvider extends LabelProvider {
+class ChangeElementLabelProvider extends LabelProvider {
 
 	private int fJavaElementFlags;
 	private JavaElementLabelProvider fJavaElementLabelProvider;

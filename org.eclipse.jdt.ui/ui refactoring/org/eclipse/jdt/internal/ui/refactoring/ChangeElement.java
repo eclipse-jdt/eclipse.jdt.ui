@@ -10,7 +10,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
  * Instances of <code>ChangeElement<code> are used to present <code>
  * IChange</code> object as nodes in a tree.
  */
-public abstract class ChangeElement {
+abstract class ChangeElement {
 	
 	/** Flag indicating that the change element isn't active */
 	public final static int INACTIVE=			0;

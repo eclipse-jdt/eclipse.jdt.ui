@@ -15,7 +15,7 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
-public abstract class TextInputWizardPage extends UserInputWizardPage{
+abstract class TextInputWizardPage extends UserInputWizardPage{
 
 	private String fInitialValue;
 	private Text fTextField;	

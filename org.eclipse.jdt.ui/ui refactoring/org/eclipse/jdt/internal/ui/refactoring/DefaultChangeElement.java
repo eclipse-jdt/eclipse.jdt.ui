@@ -11,7 +11,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 
-public class DefaultChangeElement extends ChangeElement {
+class DefaultChangeElement extends ChangeElement {
 	
 	private IChange fChange;
 	private ChangeElement[] fChildren;

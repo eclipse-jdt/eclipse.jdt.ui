@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-public class MemberMoveUtil {
+class MemberMoveUtil {
 
 	private final ImportEditManager fImportManager;
 	private final Set fMovedMembers;

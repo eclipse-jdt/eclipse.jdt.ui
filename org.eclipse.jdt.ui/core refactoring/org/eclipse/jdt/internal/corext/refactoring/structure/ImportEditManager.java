@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
-public class ImportEditManager {
+class ImportEditManager {
 	
 	private final Map fImportEdits; //ICompilationUnit -> ImportEdit
 	private final CodeGenerationSettings fPreferenceSettings;

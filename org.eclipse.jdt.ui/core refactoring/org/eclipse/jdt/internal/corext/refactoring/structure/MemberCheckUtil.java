@@ -14,7 +14,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-public class MemberCheckUtil {
+class MemberCheckUtil {
 	
 	private MemberCheckUtil(){
 	}

@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
  * A default content provider to present a hierarchy of <code>IChange</code>
  * objects in a tree viewer.
  */
-public class ChangeElementContentProvider  implements ITreeContentProvider {
+class ChangeElementContentProvider  implements ITreeContentProvider {
 	
 	private static final ChangeElement[] EMPTY_CHILDREN= new ChangeElement[0];
 	

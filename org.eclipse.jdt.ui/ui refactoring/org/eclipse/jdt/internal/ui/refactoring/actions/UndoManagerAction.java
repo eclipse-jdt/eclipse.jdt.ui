@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
+abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 
 	private static final int MAX_LENGTH= 30;
 

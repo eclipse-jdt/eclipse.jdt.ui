@@ -72,7 +72,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-public class RefactoringStatusViewer extends SashForm {
+class RefactoringStatusViewer extends SashForm {
 
 	private static class NullContextViewer implements IErrorContextViewer {
 		private Label fLabel;

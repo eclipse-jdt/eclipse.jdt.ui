@@ -29,7 +29,7 @@ import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-public class ComparePreviewer extends CompareViewerSwitchingPane implements IPreviewViewer {
+class ComparePreviewer extends CompareViewerSwitchingPane implements IPreviewViewer {
 	
 	/**
 	 * An input element for the <code>ComparePreviewer</code> class. It manages the left

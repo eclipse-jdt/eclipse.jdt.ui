@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 /**
  * Presents the list of failed preconditions to the user
  */
-public class ErrorWizardPage extends RefactoringWizardPage {
+class ErrorWizardPage extends RefactoringWizardPage {
 		
 	public static final String PAGE_NAME= "ErrorPage"; //$NON-NLS-1$
 	

@@ -13,7 +13,7 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.jdt.core.ISourceRange;
 
-public class SourceContextViewer  extends SourceViewer implements IErrorContextViewer {
+class SourceContextViewer  extends SourceViewer implements IErrorContextViewer {
 
 	public static class SourceContextInput {
 		public IDocument document;

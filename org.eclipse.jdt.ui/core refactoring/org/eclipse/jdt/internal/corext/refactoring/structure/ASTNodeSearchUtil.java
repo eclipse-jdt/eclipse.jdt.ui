@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 
-public class ASTNodeSearchUtil {
+class ASTNodeSearchUtil {
 
 	private ASTNodeSearchUtil() {
 	}

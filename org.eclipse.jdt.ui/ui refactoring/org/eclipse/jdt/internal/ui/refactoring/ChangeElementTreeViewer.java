@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-public class ChangeElementTreeViewer extends CheckboxTreeViewer {
+class ChangeElementTreeViewer extends CheckboxTreeViewer {
 	
 	public ChangeElementTreeViewer(Composite parent) {
 		super(parent, SWT.NONE);
