@@ -1,0 +1,26 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.jdt.junit.tests;
+
+import junit.framework.TestCase;
+
+public class TestPriorizationSuite1 extends TestCase {
+	public TestPriorizationSuite1(String name) {
+		super(name);
+	}
+	public void testA() {		
+	}
+	public void testB() {		
+	}
+	public void testC() {		
+	}
+}

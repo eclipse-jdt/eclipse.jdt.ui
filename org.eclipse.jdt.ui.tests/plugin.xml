@@ -28,6 +28,7 @@
       <import plugin="org.eclipse.search"/>
 	  <import plugin="org.eclipse.ltk.core.refactoring"/>
 	  <import plugin="org.eclipse.test.performance"/>
+   <import plugin="org.eclipse.jdt.junit.runtime"/>
    </requires>
 
 
