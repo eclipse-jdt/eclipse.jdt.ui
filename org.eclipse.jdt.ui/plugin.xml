@@ -537,7 +537,7 @@
 	<page
 		id = "org.eclipse.jdt.ui.preferences.VMPreferencePage"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPreferencePage"
-		name= "VM Definitions"
+		name= "Installed VMs"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
 	<page

@@ -6,7 +6,7 @@ public class EditVMDialog extends AddVMDialog {
 	 * Constructor for EditVMDialog
 	 */
 	public EditVMDialog(Shell shell, IVMInstall vm) {
-		super(shell, vm.getVMType());
+		super(shell, vm.getVMInstallType());
 		fVM= vm;
 	}
 

@@ -1,8 +1,8 @@
-package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.IVMInstall;
+package org.eclipse.jdt.internal.ui.launcher;import java.io.File;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.AbstractVMInstallType;import org.eclipse.jdt.launching.IVMInstall;
 
-public class J9VMType extends StandardVMType {
+public class J9VMType extends AbstractVMInstallType {
 
-	public IVMInstall doCreateVM(String id) {
+	public IVMInstall doCreateVMInstall(String id) {
 		return new J9VM(this, id);
 	}
 	
@@ -18,4 +18,14 @@ public class J9VMType extends StandardVMType {
 		}
 		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "ok", null);
 	}
+
+	/**
+	 * @see IVMInstallType#detectInstallLocation()
+	 */
+	public File detectInstallLocation() {
+		if (!"J9".equals(System.getProperty("java.vm.name")))
+			return null;	
+		return new File (System.getProperty("java.home"));
+	}
+
 }

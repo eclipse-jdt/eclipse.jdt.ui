@@ -36,7 +36,7 @@ public class VMContentProvider implements ITreeContentProvider {
 	 */
 	public Object getParent(Object element) {
 		if (element instanceof IVMInstall) 
-			return ((IVMInstall)element).getVMType();
+			return ((IVMInstall)element).getVMInstallType();
 		return null;
 	}
 
@@ -45,7 +45,7 @@ public class VMContentProvider implements ITreeContentProvider {
 	 */
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IVMInstallType) {
-			return ((IVMInstallType)parentElement).getVMs();
+			return ((IVMInstallType)parentElement).getVMInstalls();
 		}	
 		return new Object[0];
 	}

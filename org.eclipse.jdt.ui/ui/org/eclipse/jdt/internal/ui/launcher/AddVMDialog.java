@@ -74,7 +74,7 @@ public class AddVMDialog extends StatusDialog {
 	}
 
 	protected void validateVMName() {
-		IVMInstall[] vms= fVMType.getVMs();
+		IVMInstall[] vms= fVMType.getVMInstalls();
 		for (int i= 0; i < vms.length; i++) {
 			if (vms[i].getName().equals(fVMName.getText())) {
 				updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The name is already ussed", null));

@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.NewElementWizardPage;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.NewElementWizardPage;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 /*
  * The page for setting the default java runtime preference.
@@ -27,7 +27,12 @@ public class VMWizardPage extends NewElementWizardPage {
 	 */
 	public void createControl(Composite ancestor) {
 		Control vmSelector= fVMSelector.createContents(ancestor);
-		fVMSelector.selectVM(JavaRuntime.getDefaultVM());
+		fVMSelector.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				setPageComplete(fVMSelector.validateSelection(event.getSelection()));
+			}
+		});
+		fVMSelector.selectVM(JavaRuntime.getDefaultVMInstall());
 		setControl(vmSelector);
 	}
 
@@ -41,7 +46,7 @@ public class VMWizardPage extends NewElementWizardPage {
 		try {
 			IVMInstall vm= fVMSelector.getSelectedVM();
 			if (vm == null)
-				vm= JavaRuntime.getDefaultVM();
+				vm= JavaRuntime.getDefaultVMInstall();
 			if (vm != null)
 				JavaRuntime.setVM(JavaCore.create(fMainPage.getProjectHandle()), vm);
 		} catch (CoreException e) {
@@ -59,5 +64,6 @@ public class VMWizardPage extends NewElementWizardPage {
 	public IRunnableWithProgress getRunnable() {
 		return null;
 	}
+	
 
 }

@@ -198,7 +198,9 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	
 	protected IVMRunner getJavaLauncher(IJavaProject p, String mode) throws CoreException {
 		if (p != null) {
-			IVMInstall vm= JavaRuntime.getVM(p);
+			IVMInstall vm= JavaRuntime.getVMInstall(p);
+			if (vm == null)
+				vm= JavaRuntime.getDefaultVMInstall();
 			if (vm != null)
 				return vm.getVMRunner(mode);
 		}
@@ -212,13 +214,6 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 			o= elements.next();
 		return getJavaLauncher(getProjectFor(o), mode);
 	}
-
-	
-	
-	
-	
-	
-	
 	
 	/**
 	 * Returns a collection of elements this launcher is capable of launching
