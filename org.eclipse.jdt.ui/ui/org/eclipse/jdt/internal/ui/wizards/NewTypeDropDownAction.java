@@ -28,7 +28,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.IWorkbenchConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
@@ -56,6 +55,9 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	private final static String TAG_PARAMETER = "parameter";//$NON-NLS-1$
 	private final static String TAG_NAME = "name";//$NON-NLS-1$
 	private final static String TAG_VALUE = "value";//$NON-NLS-1$
+	
+	private static final String PL_NEW = "newWizards"; //$NON-NLS-1$
+	private static final String TAG_CLASS = "class"; //$NON-NLS-1$
 	
 	private Menu fMenu;
 	
@@ -97,7 +99,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	public static Action[] getActionFromDescriptors() {
 		ArrayList containers= new ArrayList();
 		
-		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(PlatformUI.PLUGIN_ID, IWorkbenchConstants.PL_NEW);
+		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(PlatformUI.PLUGIN_ID, PL_NEW);
 		if (extensionPoint != null) {
 			IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
 			for (int i = 0; i < elements.length; i++) {
@@ -111,7 +113,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	}
 		
 	private static boolean isJavaTypeWizard(IConfigurationElement element) {
-		IConfigurationElement[] classElements= element.getChildren(IWorkbenchConstants.TAG_CLASS);
+		IConfigurationElement[] classElements= element.getChildren(TAG_CLASS);
 		if (classElements.length > 0) {
 			for (int i= 0; i < classElements.length; i++) {
 				IConfigurationElement[] paramElements= classElements[i].getChildren(TAG_PARAMETER);
