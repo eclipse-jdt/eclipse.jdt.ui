@@ -506,7 +506,8 @@ class InstanceMethodMover {
 	
 	static class Method {
 		static class Delegation {
-			private final NewReceiver fNewReceiver2;
+			private final NewReceiver fNewReceiver2;//use name other than fNewReceiver to avoid hiding
+
 			private final Method fDelegatingMethod;
 			
 			private String fCalledMethodName;
