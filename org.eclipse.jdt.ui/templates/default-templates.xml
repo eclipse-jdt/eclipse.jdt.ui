@@ -124,11 +124,11 @@ return ${name};</template>
 
 <template name="&lt;code&gt;" description="%Templates.code_tag" id="org.eclipse.jdt.ui.templates.code_tag" context="javadoc" enabled="true">&lt;code&gt;${word_selection}${}&lt;/code&gt;${cursor}</template>
 
-<template name="&lt;code&gt;" description="%Templates.code_tag_null" id="org.eclipse.jdt.ui.templates.code_tag_null" context="javadoc" enabled="true">&lt;code&gt;null&lt;/code&gt;</template>
+<template name="null" description="%Templates.code_tag_null" id="org.eclipse.jdt.ui.templates.code_tag_null" context="javadoc" enabled="true">&lt;code&gt;null&lt;/code&gt;</template>
 
-<template name="&lt;code&gt;" description="%Templates.code_tag_true" id="org.eclipse.jdt.ui.templates.code_tag_true" context="javadoc" enabled="true">&lt;code&gt;true&lt;/code&gt;</template>
+<template name="true" description="%Templates.code_tag_true" id="org.eclipse.jdt.ui.templates.code_tag_true" context="javadoc" enabled="true">&lt;code&gt;true&lt;/code&gt;</template>
 
-<template name="&lt;code&gt;" description="%Templates.code_tag_false" id="org.eclipse.jdt.ui.templates.code_tag_false" context="javadoc" enabled="true">&lt;code&gt;false&lt;/code&gt;</template>
+<template name="false" description="%Templates.code_tag_false" id="org.eclipse.jdt.ui.templates.code_tag_false" context="javadoc" enabled="true">&lt;code&gt;false&lt;/code&gt;</template>
 
 <template name="&lt;pre&gt;" description="%Templates.pre_tag" id="org.eclipse.jdt.ui.templates.pre_tag" context="javadoc" enabled="true">&lt;pre&gt;${word_selection}${}&lt;/pre&gt;${cursor}</template>
 
