@@ -8,10 +8,11 @@ public class TestWrappedLocal2 {
 	public void foo() {
 		File file= null;
 		
-		/*]*/int i= 10;
-		try { int x; 
+		/*]*/int i;
+		try {
+			i = 10; int x; 
 			file.toURL();
-		} catch(MalformedURLException e) {
+		} catch (MalformedURLException e) {
 		}/*[*/
 		
 		i= 20;

@@ -10,7 +10,7 @@ public class TestMultiLine {
 			file.toURL();
 			file.toURL();
 			file.toURL();
-		} catch(MalformedURLException e) {
+		} catch (MalformedURLException e) {
 		}/*[*/foo();
 	}
 }

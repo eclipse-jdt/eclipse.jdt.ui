@@ -16,8 +16,8 @@ public class TestExceptionOrder {
 		/*]*/try {
 			throw1();
 			throw2();
-		} catch(Exception_2 e) {
-		} catch(Exception_1 e) {
+		} catch (Exception_2 e) {
+		} catch (Exception_1 e) {
 		}/*[*/
 	}	
 }

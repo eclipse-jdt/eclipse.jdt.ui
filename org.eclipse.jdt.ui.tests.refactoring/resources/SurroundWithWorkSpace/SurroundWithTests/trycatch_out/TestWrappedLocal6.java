@@ -3,15 +3,14 @@ package trycatch_out;
 import java.io.File;
 import java.net.MalformedURLException;
 
-public class TestWrappedLocal4 {
+public class TestWrappedLocal6 {
 
 	public void foo() {
 		File file= null;
 		
-		/*]*/int i, x;
+		/*]*/int a, i, x;
 		try {
-			i = 10;
-			x = 20; 
+			i = 10; 
 			file.toURL();
 		} catch (MalformedURLException e) {
 		}/*[*/

@@ -14,18 +14,35 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.ASTNodeCodeBlock;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlock;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlockEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.CompositeCodeBlock;
 import org.eclipse.jdt.internal.corext.codemanipulation.DeleteNodeEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.TryCatchBlock;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -41,56 +58,30 @@ import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 	private Selection fSelection;
-	private int fTabWidth;
 	private CodeGenerationSettings fSettings;
 	private SurroundWithTryCatchAnalyzer fAnalyzer;
 	private boolean fSaveChanges;
 
 	private ICompilationUnit fCUnit;
+	private AST fTargetAST;
 
-	private static final class LocalDeclarationEdit extends MultiTextEdit {
-		private int fOffset;
-		public LocalDeclarationEdit(int offset, ASTNode[] locals) {
-			for (int i= 0; i < locals.length; i++) {
-				add(new DeleteNodeEdit(locals[i], true));
-			}
-			fOffset= offset;
-		}
-		private LocalDeclarationEdit(int offset, List children, boolean copy) throws CoreException {
-			super(children);
-			fOffset= offset;
-		}
-		public void connect(TextBufferEditor editor) throws CoreException {
-			super.connect(editor);
-			for (Iterator iter= iterator(); iter.hasNext();) {
-				DeleteNodeEdit edit= (DeleteNodeEdit)iter.next();
-				if (edit.getTextRange().getOffset() == fOffset)
-					return;
-			}
-			editor.add(SimpleTextEdit.createInsert(fOffset, "\t")); //$NON-NLS-1$
-		}
-		public MultiTextEdit copy() throws CoreException {
-			return new LocalDeclarationEdit(fOffset, getChildren(), true);	
-		}
-	}
-
-	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, ITextSelection selection,  int tabWidth, CodeGenerationSettings settings) {
+	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, ITextSelection selection, CodeGenerationSettings settings) {
 		fCUnit= cu;
 		fSelection= Selection.createFromStartLength(selection.getOffset(), selection.getLength());
-		fTabWidth= tabWidth;
 		fSettings= settings;
 	}
 	
 	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, int offset, int length, CodeGenerationSettings settings) {
 		fCUnit= cu;
 		fSelection= Selection.createFromStartLength(offset, length);
-		fTabWidth= settings.tabWidth;
 		fSettings= settings;
 	}
 
@@ -145,113 +136,124 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		TextBuffer buffer= null;
 		try {
+			fTargetAST= new AST();
 			CompilationUnitChange result= new CompilationUnitChange(getName(), fCUnit);
 			result.setSave(fSaveChanges);
 			// We already have a text buffer since we start a surround with from the editor. So it is fast
 			// to acquire it here.
 			buffer= TextBuffer.acquire(getFile());
-			int start= buffer.getLineOfOffset(fAnalyzer.getFirstSelectedNode().getStartPosition());
-			String indent= CodeFormatterUtil.createIndentString(buffer.getLineIndent(start, fTabWidth));
-			String delimiter= buffer.getLineDelimiter(start);
-			addEdits(result, buffer, delimiter, indent);
+			addEdits(result, buffer);
 			return result;
+		} catch (JavaModelException e) {
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);
+			fTargetAST= null;
 		}
 	}
 	
-	private void addEdits(TextChange change, TextBuffer buffer, String delimiter, String indent) throws JavaModelException {
+	private void addEdits(TextChange change, TextBuffer buffer) throws CoreException {
 		final String NN= ""; //$NON-NLS-1$
 		final ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		final VariableDeclaration[] locals= fAnalyzer.getAffectedLocals();
-		int start= getStartOffset();
-		int end= getEndOffset();
-		int firstLine= buffer.getLineOfOffset(start);
-		int lastLine= buffer.getLineOfOffset(end);
-		int offset= buffer.getLineInformationOfOffset(start).getOffset();
-		for (int i= locals.length - 1; i >= 0; i--) {
-			change.addTextEdit(NN, SimpleTextEdit.createInsert(start, createLocal(buffer, locals[i], delimiter, indent)));
-		}
-		change.addTextEdit(NN, SimpleTextEdit.createInsert(start, "try {")); //$NON-NLS-1$
-		ASTNode[] affectedLocals= getAffectedLocals(buffer.getLineInformation(firstLine), locals);
-		if (affectedLocals.length == 0) {
-			change.addTextEdit(NN, SimpleTextEdit.createInsert(start, delimiter + indent + "\t")); //$NON-NLS-1$
-		} else {
-			for (int i= 0; i < affectedLocals.length; i++) {
-				change.addTextEdit(NN, new DeleteNodeEdit(affectedLocals[i], false));
-			}
-		}
-		for (int i= firstLine + 1; i <= lastLine; i++) {
-			processLine(change, buffer, i, locals);
-		}
-		offset= end;
-		ImportEdit importEdit= new ImportEdit(fCUnit, fSettings);
-		for (int i= 0; i < exceptions.length; i++) {
-			ITypeBinding exception= exceptions[i];
-			change.addTextEdit(NN, SimpleTextEdit.createInsert(offset, createCatchBlock(exception, delimiter, indent)));
-			importEdit.addImport(Bindings.getFullyQualifiedImportName(exception));
-		}
-		change.addTextEdit(NN, SimpleTextEdit.createInsert(offset, delimiter + indent + "}"));	 //$NON-NLS-1$
-		if (!importEdit.isEmpty())
-			change.addTextEdit(NN, importEdit);
-	}
-	
-	private int getStartOffset() throws JavaModelException {
-		return fAnalyzer.getFirstSelectedNode().getStartPosition();
-	}
-	
-	private int getEndOffset() throws JavaModelException {
-		return ASTNodes.getExclusiveEnd(fAnalyzer.getLastSelectedNode());
-	}
-	
-	private String createLocal(TextBuffer buffer, VariableDeclaration local, String delimiter, String indent) {
-		StringBuffer result= new StringBuffer();
-		if (local instanceof VariableDeclarationFragment) {
-			result.append(ASTNodes.asString(ASTNodes.getType(local)));
-			result.append(" "); //$NON-NLS-1$
-		}
-		result.append(buffer.getContent(local.getStartPosition(), local.getLength()));
-		result.append(';');
-		result.append(delimiter);
-		result.append(indent);
-		return result.toString();
-	}
-	
-	private void processLine(TextChange change, TextBuffer buffer, int line, VariableDeclaration[] locals) {
-		TextRegion region= buffer.getLineInformation(line);
-		ASTNode[] coveredLocals= getAffectedLocals(region, locals);
-		if (coveredLocals.length == 0) {
-			change.addTextEdit("", SimpleTextEdit.createInsert(region.getOffset(), "\t"));			 //$NON-NLS-1$ //$NON-NLS-2$
-		} else {
-			change.addTextEdit("", new LocalDeclarationEdit(region.getOffset(), coveredLocals)); //$NON-NLS-1$
-		}
-	}
-	
-	private ASTNode[] getAffectedLocals(TextRegion region, VariableDeclaration[] locals) {
-		List result= new ArrayList(1);
+		final int tabWidth= CodeFormatterUtil.getTabWidth();
+		
+		addImportEdit(change, exceptions);
+		
+		final int selectionStart= fSelection.getOffset();
+		TextBuffer.Block block= buffer.getBlockContent(selectionStart, fSelection.getLength(), tabWidth);
+		TextBufferEditor editor= new TextBufferEditor(TextBuffer.create(block.content));
+		int delta= selectionStart + block.offsetDelta;
+		
+		List handleDeclarationStatements= new ArrayList(3);
+		ASTNodeCodeBlock newLocals= new ASTNodeCodeBlock();
 		for (int i= 0; i < locals.length; i++) {
 			VariableDeclaration local= locals[i];
-			if (region.getOffset() <= local.getStartPosition() && ASTNodes.getInclusiveEnd(local) < region.getOffset() + region.getLength()) {
-				if (ASTNodes.isSingleDeclaration(local))
-					result.add(local.getParent());
-				else 
-					result.add(local);
+			if (local instanceof SingleVariableDeclaration) {
+				editor.add(handleLocal((SingleVariableDeclaration)local, newLocals, delta));
+			} else if (local.getParent() instanceof VariableDeclarationStatement) {
+				VariableDeclarationStatement ds= (VariableDeclarationStatement)local.getParent();
+				if (!handleDeclarationStatements.contains(ds)) {
+					editor.add(handleLocal(ds, buffer, newLocals, delta));
+					handleDeclarationStatements.add(ds);
+				}
+			} else {
+				Assert.isTrue(false, "Operation doesn't work for expressions. So should never happen");
 			}
 		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
+		editor.performEdits(null);
+		CompositeCodeBlock codeBlock= new CompositeCodeBlock();
+		codeBlock.add(newLocals);
+		codeBlock.add(new TryCatchBlock(exceptions, new CodeBlock(editor.getTextBuffer())));
+		change.addTextEdit(NN, CodeBlockEdit.createReplace(selectionStart, fSelection.getLength(), codeBlock));
 	}
 	
-	private String createCatchBlock(ITypeBinding exception, String delimiter, String indent) {
-		StringBuffer buffer= new StringBuffer();
-		buffer.append(delimiter);
-		buffer.append(indent);
-		buffer.append("} catch("); //$NON-NLS-1$
-		buffer.append(exception.getName());
-		buffer.append(" e) {"); //$NON-NLS-1$
-		return buffer.toString();
+	private void addImportEdit(TextChange change, ITypeBinding[] exceptions) {
+		ImportEdit edit= new ImportEdit(fCUnit, fSettings);
+		for (int i= 0; i < exceptions.length; i++) {
+			edit.addImport(Bindings.getFullyQualifiedImportName(exceptions[i]));
+		}
+		if (!edit.isEmpty())
+			change.addTextEdit("", edit); //$NON-NLS-1$
+	}
+	
+	private TextEdit handleLocal(SingleVariableDeclaration node, ASTNodeCodeBlock newLocals, int delta) {
+		SingleVariableDeclaration copy= (SingleVariableDeclaration)ASTNode.copySubtree(fTargetAST, node);
+		copy.setInitializer(null);
+		newLocals.add(copy);
+		
+		int start= node.getStartPosition();
+		if (node.getInitializer() != null) {
+			int end= node.getName().getStartPosition();
+			return SimpleTextEdit.createDelete(start - delta, end - start);
+		} else {
+			int length= node.getLength();
+			return new DeleteNodeEdit(start - delta, length, true, ASTNodes.getDelimiterToken(node));
+		}
+	}
+
+	private TextEdit handleLocal(VariableDeclarationStatement node, TextBuffer buffer, ASTNodeCodeBlock newLocals, int delta) throws CoreException {
+		int start= node.getStartPosition();
+		List fragments= node.fragments();
+		createNewDeclaration(node, newLocals);
+		if (allFragmentsUninitialized(fragments)) {
+			return new DeleteNodeEdit(node.getStartPosition() - delta, node.getLength(), true, ASTNodes.getDelimiterToken(node));
+		} else {
+			int size= fragments.size();
+			int lastElement= size - 1;
+			ASTNodeCodeBlock block= new ASTNodeCodeBlock();
+			for (int i= 0; i < size; i++) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i);
+				if (fragment.getInitializer() != null) {
+					Assignment ass= fTargetAST.newAssignment();
+					ass.setLeftHandSide((Expression)ASTNode.copySubtree(fTargetAST, fragment.getName()));
+					ass.setOperator(Assignment.Operator.ASSIGN);
+					ass.setRightHandSide((Expression)ASTNode.copySubtree(fTargetAST, fragment.getInitializer()));
+					block.add(fTargetAST.newExpressionStatement(ass));
+				}
+			}
+			return CodeBlockEdit.createReplace(node.getStartPosition() - delta, node.getLength(), block);
+		}
+	}
+	
+	private void createNewDeclaration(VariableDeclarationStatement node, ASTNodeCodeBlock newLocals) {
+		VariableDeclarationStatement copy= (VariableDeclarationStatement)ASTNode.copySubtree(fTargetAST, node);
+		for (Iterator iter= copy.fragments().iterator(); iter.hasNext();) {
+			((VariableDeclarationFragment)iter.next()).setInitializer(null);
+		}
+		newLocals.add(copy);
+	}
+	
+	private boolean allFragmentsUninitialized(List fragments) {
+		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
+			if (fragment.getInitializer() != null)
+				return false;
+		}
+		return true;
 	}
 	
 	private IFile getFile() throws JavaModelException {

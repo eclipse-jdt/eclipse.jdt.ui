@@ -12,7 +12,7 @@ public class TestWrappedLocal3 {
 		/*]*/try {
 			int x; 
 			file.toURL();
-		} catch(MalformedURLException e) {
+		} catch (MalformedURLException e) {
 		}/*[*/
 		
 		i= 20;

@@ -8,7 +8,7 @@ public class TestSimple {
 		File file= null;
 		/*]*/try {
 			file.toURL();
-		} catch(MalformedURLException e) {
+		} catch (MalformedURLException e) {
 		}/*[*/
 	}
 }

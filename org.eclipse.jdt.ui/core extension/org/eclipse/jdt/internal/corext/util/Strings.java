@@ -228,6 +228,33 @@ public class Strings {
 				}
 			}
 		}
-	}	
+	}
+	
+	public static String getIndentString(String line, int tabWidth) {
+		int size= line.length();
+		int end= 0;
+		int blanks= 0;
+		for (int i= 0; i < size; i++) {
+			char c= line.charAt(i);
+			if (c == '\t') {
+				end= i;
+				blanks= 0;
+			} else if (Character.isSpaceChar(c)) {
+				blanks++;
+				if (blanks == tabWidth) {
+					end= i;
+					blanks= 0;
+				}
+			} else {
+				break;
+			}
+		}
+		if (end == 0)
+			return "";
+		else if (end == size)
+			return line;
+		else
+			return line.substring(0, end + 1);
+	}
 }
 

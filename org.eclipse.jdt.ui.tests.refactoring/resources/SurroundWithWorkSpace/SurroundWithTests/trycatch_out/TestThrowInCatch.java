@@ -7,7 +7,7 @@ public class TestThrowInCatch {
 			} catch (Exception e){
 				throw new Exception();
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 		}/*[*/
 	}
 }

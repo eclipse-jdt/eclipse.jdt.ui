@@ -96,10 +96,5 @@ public abstract class TextEdit {
 	public Object getModifiedElement() {
 		return null;
 	}	
-	
-	/** @deprecated reimplement getModifiedElement */
-	public final Object getModifiedLanguageElement() {
-		return null;
-	}	
 }
 

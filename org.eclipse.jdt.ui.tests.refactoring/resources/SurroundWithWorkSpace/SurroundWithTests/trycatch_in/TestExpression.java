@@ -1,16 +1,13 @@
 package trycatch_in;
-
 import java.io.File;
 
-public class TestWrappedLocal4 {
-
-	public void foo() {
+class TestExpression{	
+	void fg(){
 		File file= null;
 		
-		/*]*/int i= 10, x= 20; 
+		/*]*/int i= 3 * (2 + 1);
 		file.toURL();/*[*/
 		
-		i= 20;
+		i++;
 	}
-
 }

@@ -42,8 +42,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 
 	protected void run(ITextSelection selection) {
 		SurroundWithTryCatchRefactoring refactoring= 
-			new SurroundWithTryCatchRefactoring(getCompilationUnit(), selection, CodeFormatterPreferencePage.getTabSize(),
-			JavaPreferencesSettings.getCodeGenerationSettings());
+			new SurroundWithTryCatchRefactoring(getCompilationUnit(), selection, JavaPreferencesSettings.getCodeGenerationSettings());
 		try {
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {

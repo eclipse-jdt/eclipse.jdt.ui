@@ -48,6 +48,11 @@ public class TextBuffer {
 		}
 	}
 	
+	public class Block {
+		public String content;
+		public int offsetDelta;
+	}
+	
 	private IDocument fDocument;
 	
 	private static final TextBufferFactory fgFactory= new TextBufferFactory();
@@ -112,6 +117,35 @@ public class TextBuffer {
 		} catch (BadLocationException e) {
 			return null;
 		}
+	}
+	
+	public Block getBlockContent(int start, int length, int tabWidth) {
+		Block result= new Block();
+		StringBuffer buffer= new StringBuffer();
+		int lineOffset= getLineInformationOfOffset(start).getOffset();
+		if (start > lineOffset) {
+			String line= getContent(lineOffset, start - lineOffset);
+			String indent= Strings.getIndentString(line, tabWidth);
+			result.offsetDelta= -indent.length();
+			buffer.append(indent);
+		}
+		final int end= start + length;
+		TextRegion region= getLineInformationOfOffset(end);
+		lineOffset= region.getOffset();
+		// Cursor is at beginning of next line
+		if (lineOffset == end) {
+			int lineNumber= getLineOfOffset(lineOffset);
+			if (lineNumber > 0) {
+				length= length - getLineDelimiter(lineNumber - 1).length();
+			}
+		}
+		if (buffer.length() == 0) {
+			result.content= getContent(start, length);
+		} else {
+			buffer.append(getContent(start, length));
+			result.content= buffer.toString();
+		}
+		return result;
 	}
 	
 	/**

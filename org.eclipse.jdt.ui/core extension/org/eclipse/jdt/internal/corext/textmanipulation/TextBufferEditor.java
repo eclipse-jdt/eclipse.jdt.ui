@@ -148,7 +148,8 @@ public class TextBufferEditor {
 	 * Executes the text edits added to this text buffer editor and clears all added
 	 * text edits.
 	 * 
-	 * @param pm a progress monitor to report progress
+	 * @param pm a progress monitor to report progress or <code>null</code> if
+	 * 	no progress is desired.
 	 * @return an object representing the undo of the executed <code>TextEdit</code>s
 	 * @exception CoreException if the edits cannot be executed
 	 */

@@ -2,12 +2,12 @@ package trycatch_in;
 
 import java.io.File;
 
-public class TestWrappedLocal4 {
+public class TestWrappedLocal6 {
 
 	public void foo() {
 		File file= null;
 		
-		/*]*/int i= 10, x= 20; 
+		/*]*/int a, i= 10, x; 
 		file.toURL();/*[*/
 		
 		i= 20;

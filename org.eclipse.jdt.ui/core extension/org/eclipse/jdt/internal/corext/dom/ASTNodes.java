@@ -7,12 +7,14 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -46,6 +48,35 @@ public class ASTNodes {
 		Modifier.FINAL, Modifier.TRANSIENT, Modifier.VOLATILE, Modifier.NATIVE, Modifier.SYNCHRONIZED, Modifier.STRICTFP };
 	private static final String[] MODIFIER_STRINGS= { "public", "protected", "private", "abstract", "static",  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		"final", "transient", "volatile", "native", "synchronized", "strictfp" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+
+	private static class NextSiblingVisitor extends GenericVisitor {
+		private ASTNode fNode;
+		private ASTNode fParent;
+		private ASTNode fResult;
+		private boolean fNodeFound;
+		public NextSiblingVisitor(ASTNode node) {
+			fNode= node;
+			fParent= node.getParent();
+		}
+		protected boolean visitNode(ASTNode node) {
+			if (node == fParent)
+				return true;
+			if (node == fNode) {
+				fNodeFound= true;
+			}
+			if (fNodeFound && node.getParent() == fParent)
+				fResult= node;
+			return false;
+		}
+		public static ASTNode perform(ASTNode node) {
+			ASTNode parent= node.getParent();
+			if (parent == null)
+				return null;
+			NextSiblingVisitor visitor= new NextSiblingVisitor(node);
+			parent.accept(visitor);
+			return visitor.fResult;
+		}
+	}
 
 	private ASTNodes() {
 		// no instance;
@@ -172,6 +203,10 @@ public class ASTNodes {
 		return false;
 	}
 	
+	public static ASTNode getNextSibling(ASTNode node) {
+		return NextSiblingVisitor.perform(node);
+	}
+	
 	public static int getExclusiveEnd(ASTNode node){
 		return node.getStartPosition() + node.getLength();
 	}
@@ -215,6 +250,20 @@ public class ASTNodes {
 		if (binding instanceof ITypeBinding)
 			return (ITypeBinding)binding;
 		return null;
+	}
+
+	public static int getDelimiterToken(ASTNode node) {
+		if (node instanceof VariableDeclarationFragment)
+			return ITerminalSymbols.TokenNameCOMMA;
+		if (node instanceof SingleVariableDeclaration)
+			return ITerminalSymbols.TokenNameCOMMA;
+		ASTNode parent= node.getParent();
+		if (node instanceof Expression && parent instanceof ForStatement) {
+			List updaters= ((ForStatement)parent).updaters();
+			if (updaters.contains(node))
+				return ITerminalSymbols.TokenNameCOMMA;
+		}
+		return -1;
 	}
 	
 	public static Message[] getMessages(ASTNode node, int flags) {

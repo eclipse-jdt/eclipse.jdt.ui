@@ -44,7 +44,7 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	protected void performTest(IPackageFragment packageFragment, String name, String outputFolder, int mode) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, name);
 		SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(unit, 
-			getTextSelection(unit.getSource()), 4, JavaPreferencesSettings.getCodeGenerationSettings());
+			getTextSelection(unit.getSource()), JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setSaveChanges(true);
 		String out= null;
 		if (mode == COMPARE_WITH_OUTPUT)
@@ -112,7 +112,27 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 		tryCatchTest();
 	}
 	
+	public void testWrappedLocal4() throws Exception {
+		tryCatchTest();
+	}
+	
+	public void testWrappedLocal5() throws Exception {
+		tryCatchTest();
+	}
+	
+	public void testWrappedLocal6() throws Exception {
+		tryCatchTest();
+	}
+	
+	public void testInitializerThrowsException() throws Exception {
+		tryCatchTest();
+	}
+	
 	public void testThrowInCatch() throws Exception {
+		tryCatchTest();
+	}
+	
+	public void testExpression() throws Exception {
 		tryCatchTest();
 	}
 	
