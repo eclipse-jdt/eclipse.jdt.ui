@@ -122,6 +122,8 @@ public class RenameSupport {
 				showInformation(parent, fPreCheckStatus);
 				return; 
 			}
+			if (fSupport.getRefactoring() == null)
+				return; 
 		} catch (CoreException e){
 			throw new InvocationTargetException(e);
 		}
@@ -171,8 +173,10 @@ public class RenameSupport {
 	public static RenameSupport create(IJavaProject project, String newName, int flags) throws CoreException {
 		RefactoringSupport.JavaProject support= new RefactoringSupport.JavaProject(project);
 		RenameJavaProjectRefactoring refactoring= support.getSpecificRefactoring();
-		setNewName(refactoring, newName);
-		refactoring.setUpdateReferences(updateReferences(flags));
+		if (refactoring != null){
+			setNewName(refactoring, newName);
+			refactoring.setUpdateReferences(updateReferences(flags));
+		}
 		return new RenameSupport(support, project);
 	}
 	
@@ -189,7 +193,9 @@ public class RenameSupport {
 	public static RenameSupport create(IPackageFragmentRoot root, String newName) throws CoreException {
 		RefactoringSupport.SourceFolder support= new RefactoringSupport.SourceFolder(root);
 		RenameSourceFolderRefactoring refactoring= support.getSpecificRefactoring();
-		setNewName(refactoring, newName);
+		if (refactoring != null){
+			setNewName(refactoring, newName);
+		}
 		return new RenameSupport(support, root);
 	}
 	
@@ -211,11 +217,13 @@ public class RenameSupport {
 	public static RenameSupport create(IPackageFragment fragment, String newName, int flags) throws CoreException {
 		RefactoringSupport.PackageFragment support= new RefactoringSupport.PackageFragment(fragment);
 		RenamePackageRefactoring refactoring= support.getSpecificRefactoring();
-		setNewName(refactoring, newName);
-		refactoring.setUpdateReferences(updateReferences(flags));
-		refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
-		refactoring.setUpdateComments(updateRegularComments(flags));
-		refactoring.setUpdateStrings(updateStringLiterals(flags));
+		if (refactoring != null){
+			setNewName(refactoring, newName);
+			refactoring.setUpdateReferences(updateReferences(flags));
+			refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
+			refactoring.setUpdateComments(updateRegularComments(flags));
+			refactoring.setUpdateStrings(updateStringLiterals(flags));
+		}
 		return new RenameSupport(support, fragment);
 	}
 	
@@ -237,11 +245,13 @@ public class RenameSupport {
 	public static RenameSupport create(ICompilationUnit unit, String newName, int flags) throws CoreException {
 		RefactoringSupport.CompilationUnit support= new RefactoringSupport.CompilationUnit(unit);
 		RenameCompilationUnitRefactoring refactoring= support.getSpecificRefactoring();
-		setNewName(refactoring, newName);
-		refactoring.setUpdateReferences(updateReferences(flags));
-		refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
-		refactoring.setUpdateComments(updateRegularComments(flags));
-		refactoring.setUpdateStrings(updateStringLiterals(flags));
+		if (refactoring != null){
+			setNewName(refactoring, newName);
+			refactoring.setUpdateReferences(updateReferences(flags));
+			refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
+			refactoring.setUpdateComments(updateRegularComments(flags));
+			refactoring.setUpdateStrings(updateStringLiterals(flags));
+		}
 		return new RenameSupport(support, unit);
 	}
 	
@@ -263,11 +273,13 @@ public class RenameSupport {
 	public static RenameSupport create(IType type, String newName, int flags) throws CoreException {
 		RefactoringSupport.Type support= new RefactoringSupport.Type(type);
 		RenameTypeRefactoring refactoring= support.getSpecificRefactoring();
-		setNewName(refactoring, newName);
-		refactoring.setUpdateReferences(updateReferences(flags));
-		refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
-		refactoring.setUpdateComments(updateRegularComments(flags));
-		refactoring.setUpdateStrings(updateStringLiterals(flags));
+		if (refactoring != null){
+			setNewName(refactoring, newName);
+			refactoring.setUpdateReferences(updateReferences(flags));
+			refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
+			refactoring.setUpdateComments(updateRegularComments(flags));
+			refactoring.setUpdateStrings(updateStringLiterals(flags));
+		}
 		return new RenameSupport(support, type);
 	}
 	
@@ -286,8 +298,10 @@ public class RenameSupport {
 	public static RenameSupport create(IMethod method, String newName, int flags) throws CoreException {
 		RefactoringSupport.Method support= new RefactoringSupport.Method(method);
 		RenameMethodRefactoring refactoring= support.getSpecificRefactoring();
-		setNewName(refactoring, newName);
-		refactoring.setUpdateReferences(updateReferences(flags));
+		if (refactoring != null){
+			setNewName(refactoring, newName);
+			refactoring.setUpdateReferences(updateReferences(flags));
+		}
 		return new RenameSupport(support, method);
 	}
 	
@@ -310,13 +324,15 @@ public class RenameSupport {
 	public static RenameSupport create(IField field, String newName, int flags) throws CoreException {
 		RefactoringSupport.Field support= new RefactoringSupport.Field(field);
 		RenameFieldRefactoring refactoring= support.getSpecificRefactoring();
-		setNewName(refactoring, newName);
-		refactoring.setUpdateReferences(updateReferences(flags));
-		refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
-		refactoring.setUpdateComments(updateRegularComments(flags));
-		refactoring.setUpdateStrings(updateStringLiterals(flags));
-		refactoring.setRenameGetter(updateGetterMethod(flags));
-		refactoring.setRenameSetter(updateSetterMethod(flags));
+		if (refactoring != null){
+			setNewName(refactoring, newName);
+			refactoring.setUpdateReferences(updateReferences(flags));
+			refactoring.setUpdateJavaDoc(updateJavadocComments(flags));
+			refactoring.setUpdateComments(updateRegularComments(flags));
+			refactoring.setUpdateStrings(updateStringLiterals(flags));
+			refactoring.setRenameGetter(updateGetterMethod(flags));
+			refactoring.setRenameSetter(updateSetterMethod(flags));
+		}
 		return new RenameSupport(support, field);
 	}
 	
@@ -356,6 +372,6 @@ public class RenameSupport {
 	
 	private void showInformation(Shell parent, RefactoringStatus status) {
 		String message= status.getFirstMessage(RefactoringStatus.FATAL);
-		MessageDialog.openInformation(parent, fSupport.getRefactoring().getName(), message);
+		MessageDialog.openInformation(parent, "Rename", message);
 	}
 }
