@@ -152,7 +152,7 @@ public class ContentProviderTests1 extends TestCase {
 	
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fArchiveFragmentRoot);
-		assertTrue("Wrong parent found for PackageFragmentRoot Archive", parent==null);//$NON-NLS-1$
+		assertTrue("Wrong parent found for PackageFragmentRoot Archive", parent==fJProject1);//$NON-NLS-1$
 	}
 
 	public void testGetParentMidLevelFragmentInArchive() throws Exception{
