@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.util.TypeRef;
+import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
@@ -80,7 +80,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	}
 		
 	private void addSelectedInterface(){
-		TypeRef ref= (TypeRef)getWidgetSelection();
+		TypeInfo ref= (TypeInfo)getWidgetSelection();
 		if (ref != null)
 			fList.addElement(ref.getFullyQualifiedName());
 	}
