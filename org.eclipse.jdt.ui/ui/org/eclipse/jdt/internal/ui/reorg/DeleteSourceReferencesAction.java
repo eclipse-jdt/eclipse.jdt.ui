@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -11,14 +12,19 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -28,8 +34,6 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -65,8 +69,32 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	protected void perform(IStructuredSelection selection) throws CoreException {
 		if (fAskForDeleteConfirmation && !confirmDelete())
 			return;
-
+			
+		try {
+            new ProgressMonitorDialog(getShell()).run(false, true, createDeleteOperation(selection));
+        } catch (InvocationTargetException e) {
+        	ExceptionHandler.handle(e, getShell(), "Delete", "An error occurred while performing this operation. See log for details.");
+        } catch (InterruptedException e) {
+        	//nothing. action interrupted
+        }
+	}
+	
+	private IRunnableWithProgress createDeleteOperation(final IStructuredSelection selection){
+		return new IRunnableWithProgress(){
+            public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
+            	try {
+                    performDeletion(selection, pm);
+                } catch (CoreException e) {
+                	throw new InvocationTargetException(e);
+                }
+            }
+		};
+	}
+	
+	private void performDeletion(IStructuredSelection selection, IProgressMonitor pm) throws CoreException{
 		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess(selection)); //IFile -> List of ISourceReference (elements from that file)
+		pm.beginTask("Deleting", 2 * mapping.keySet().size());
+		
 		if (areAllFilesReadOnly(mapping)){
 			String title= ReorgMessages.getString("DeleteSourceReferencesAction.title"); //$NON-NLS-1$
 			String label= ReorgMessages.getString("DeleteSourceReferencesAction.read_only");  //$NON-NLS-1$
@@ -82,7 +110,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 				continue;
 			if (isReadOnly(file))
 				continue;
-			deleteAll(mapping, file);
+			deleteAll(mapping, file, new SubProgressMonitor(pm, 1));
 		}
 		
 		ICompilationUnit[] notDeleted= deleteEmptyCus(mapping);
@@ -90,8 +118,8 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 			IFile file= (IFile)notDeleted[i].getUnderlyingResource();
 			if (isReadOnly(file))
 				continue;
-			deleteAll(mapping, file);
-		}
+			deleteAll(mapping, file, new SubProgressMonitor(pm, 1));
+		}		
 	}
 
 	private static boolean isReadOnly(IFile file){
@@ -110,35 +138,45 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		return true;
 	}
 	
-	private static void deleteAll(Map mapping, IFile file) throws CoreException {
+	private static void deleteAll(Map mapping, IFile file, IProgressMonitor pm) throws CoreException {
 		List l= (List)mapping.get(file);
 		ISourceReference[] refs= (ISourceReference[]) l.toArray(new ISourceReference[l.size()]);
-
-		delete(file, getNonFields(refs));
-		delete(getFields(refs));
+		pm.beginTask("", refs.length);
+		
+		ISourceReference[] nonFields= getNonFields(refs);
+		delete(file, nonFields, new SubProgressMonitor(pm, nonFields.length));
+		
+		IField[] fields= getFields(refs);
+		delete(fields, new SubProgressMonitor(pm, fields.length));
 	}
 
-	private static void delete(IFile file, ISourceReference[] nonFields) throws CoreException{
+	private static void delete(IFile file, ISourceReference[] nonFields, IProgressMonitor pm) throws CoreException{
+		pm.beginTask("", 2);
 		TextBuffer tb= TextBuffer.acquire(file);
 		try{
 			TextBufferEditor tbe= new TextBufferEditor(tb);
 			for (int i= 0; i < nonFields.length; i++) {
 				Assert.isTrue(! (nonFields[i] instanceof IField));
 				tbe.add(createDeleteEdit(nonFields[i]));
+				if (pm.isCanceled())
+					throw new OperationCanceledException();			
 			}
 			if (! tbe.canPerformEdits())
 				return; ///XXX can i assert here?
-			tbe.performEdits(new NullProgressMonitor());	
-			TextBuffer.commitChanges(tb, false, new NullProgressMonitor());
+			tbe.performEdits(new SubProgressMonitor(pm, 1));	
+			TextBuffer.commitChanges(tb, false, new SubProgressMonitor(pm, 1));
 		} finally{
 			if (tb != null)
 				TextBuffer.release(tb);
 		}	
 	}
 	
-	private static void delete(IField[] fields) throws JavaModelException{
+	private static void delete(IField[] fields, IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", fields.length);
 		for (int i= 0; i < fields.length; i++) {
-			fields[i].delete(false, new NullProgressMonitor());
+			fields[i].delete(false, new SubProgressMonitor(pm, 1));
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 		}
 	}
 			
