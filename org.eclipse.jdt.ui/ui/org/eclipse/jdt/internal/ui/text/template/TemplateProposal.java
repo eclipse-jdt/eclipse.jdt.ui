@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
+import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
@@ -63,7 +64,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		fRegion= region;
 	}
 
-	/**
+	/*
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
 	public void apply(IDocument document) {
@@ -122,14 +123,14 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		return buffer.getString().length();
 	}
 	
-	/**
+	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
 		return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
 	}
 
-	/**
+	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
@@ -147,21 +148,21 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	    }
 	}
 
-	/**
+	/*
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
 		return fTemplate.getName() + TemplateMessages.getString("TemplateProposal.delimiter") + fTemplate.getDescription(); // $NON-NLS-1$ //$NON-NLS-1$
 	}
 
-	/**
+	/*
 	 * @see ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
 		return fImage;
 	}
 
-	/**
+	/*
 	 * @see ICompletionProposal#getContextInformation()
 	 */
 	public IContextInformation getContextInformation() {
@@ -216,11 +217,23 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see IJavaCompletionProposal#getRelevance()
 	 */
 	public int getRelevance() {
-		return 90;
+
+		JavaContext context= (JavaContext) fContext;
+		switch (context.getCharacterBeforeStart()) {
+		// high relevance after whitespace
+		case ' ':
+		case '\r':
+		case '\n':
+		case '\t':
+			return 90;
+
+		default:
+			return 0;
+		}
 	}
 
 }

@@ -105,6 +105,17 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	/**
+	 * Returns the character before start position of completion.
+	 */
+	public char getCharacterBeforeStart() {
+		int start= getStart();
+		
+		return start == 0
+			? ' '
+			: getString().charAt(start - 1);
+	}
+
+	/**
 	 * Returns the indentation level at the position of code completion.
 	 */
 	public int getIndentationLevel() {
