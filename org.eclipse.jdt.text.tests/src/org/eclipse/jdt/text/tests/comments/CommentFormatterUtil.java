@@ -10,11 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.comments;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.formatter.FormattingContext;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
@@ -73,5 +78,37 @@ public class CommentFormatterUtil {
 		strategy.formatterStops();
 		
 		return document.get();
+	}
+
+	/**
+	 * Creates a formatting options with all default options and the given custom user options.
+	 * 
+	 * @param user the custom user options
+	 * @return the formatting options
+	 * @since 3.1
+	 */
+	public static Map createOptions(Map user) {
+		Map map= new HashMap();
+		FormattingContext context= new CommentFormattingContext();
+		String[] keys= context.getPreferenceKeys();
+	
+		for (int index= 0; index < keys.length; index++) {
+	
+			if (context.isBooleanPreference(keys[index]))
+				map.put(keys[index], IPreferenceStore.TRUE);
+			else if (context.isIntegerPreference(keys[index]))
+				map.put(keys[index], "80"); //$NON-NLS-1$
+		}
+	
+		if (user != null) {
+	
+			Object key= null;
+			for (final Iterator iterator= user.keySet().iterator(); iterator.hasNext();) {
+	
+				key= iterator.next();
+				map.put(key, user.get(key));
+			}
+		}
+		return map;
 	}
 }

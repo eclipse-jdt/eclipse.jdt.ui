@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.text.tests.comments;
+package org.eclipse.jdt.text.tests.formatter.comment;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -28,6 +28,5 @@ public class CommentsTestSuite extends TestSuite {
 		addTest(MultiLineTestCase.suite());
 		addTest(SingleLineTestCase.suite());
 		addTest(JavaDocTestCase.suite());
-		addTest(org.eclipse.jdt.text.tests.formatter.comment.CommentsTestSuite.suite());
 	}
 }

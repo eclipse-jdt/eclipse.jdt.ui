@@ -8,19 +8,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.text.tests.comments;
+package org.eclipse.jdt.text.tests.formatter.comment;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
-
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.TextUtilities;
 
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-
+import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
 
 public abstract class CommentTestCase extends TestCase {
 
@@ -39,7 +37,7 @@ public abstract class CommentTestCase extends TestCase {
 		fUserOptions= null;
 	}
 	
-	protected abstract String getCommentType();
+	protected abstract int getCommentKind();
 
 	protected Map getUserOptions() {
 		return fUserOptions;
@@ -57,19 +55,18 @@ public abstract class CommentTestCase extends TestCase {
 	}
 
 	protected String testFormat(String text, int offset, int length) {
-		return testFormat(text, offset, length, getCommentType());
+		return testFormat(text, offset, length, getCommentKind());
 	}
 
-	protected String testFormat(String text, int offset, int length, final String type) {
+	protected String testFormat(String text, int offset, int length, int kind) {
 		assertNotNull(text);
 		assertTrue(offset >= 0);
 		assertTrue(offset < text.length());
 		assertTrue(length >= 0);
 		assertTrue(offset + length <= text.length());
 
-		assertNotNull(type);
-		assertTrue(type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) || type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT));
+		assertTrue(kind == CommentObjectFactory.K_JAVA_DOC || kind == CommentObjectFactory.K_MULTI_LINE_COMMENT || kind == CommentObjectFactory.K_SINGLE_LINE_COMMENT);
 
-		return CommentFormatterUtil.format(type, text, offset, length, CommentFormatterUtil.createOptions(getUserOptions()), null);
+		return CommentFormatterUtil.format(kind, text, offset, length, CommentFormatterUtil.createOptions(getUserOptions()), null);
 	}
 }
