@@ -251,7 +251,6 @@ public final class MGridLayout extends Layout {
 			for (int column= 0; column < numColumns; column++) {
 				MGridData spec= ((MGridData[]) grid.elementAt(row))[column];
 				if (spec.isItemData()) {
-					Control child= children[spec.childIndex];
 					childHeight= childSizes[spec.childIndex].y;
 					if (spec.verticalSpan == 1) {
 						maxHeight= Math.max(maxHeight, childHeight);
@@ -388,7 +387,6 @@ public final class MGridLayout extends Layout {
 	}
 	void createGrid(Composite composite) {
 		int row, column, rowFill, columnFill;
-		Vector rows;
 		Control[] children;
 		MGridData spacerSpec;
 
@@ -489,7 +487,9 @@ public final class MGridLayout extends Layout {
 	protected void layout(Composite composite, boolean flushCache) {
 		int[] columnWidths;
 		int[] rowHeights;
-		int columnSize, rowSize, rowY, columnX;
+		int rowSize;
+		int rowY;
+		int columnX;
 		int compositeWidth, compositeHeight;
 		int excessHorizontal, excessVertical;
 		Control[] children;
@@ -513,7 +513,6 @@ public final class MGridLayout extends Layout {
 			rowHeights[i]= pixelRowHeights[i];
 		}
 		int columnWidth= 0;
-		columnSize= Math.max(1, numColumns);
 		rowSize= Math.max(1, grid.size());
 
 		// 

@@ -136,7 +136,6 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 
-		IColorManager manager= getColorManager();
 		PresentationReconciler reconciler= new PresentationReconciler();
 
 		RuleBasedDamagerRepairer dr= new RuleBasedDamagerRepairer(getCodeScanner());

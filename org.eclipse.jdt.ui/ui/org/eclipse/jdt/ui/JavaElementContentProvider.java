@@ -163,7 +163,6 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 		
 		if (delta.getResourceDeltas() != null) {
 			IResourceDelta[] rd= delta.getResourceDeltas();
-			IJavaProject project= element.getJavaProject();
 			for (int i= 0; i < rd.length; i++) {
 				processResourceDelta(rd[i], element);
 			}
@@ -233,7 +232,6 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 			else
 				postAdd(parent, resource);
 		}
-		int changeFlags= delta.getFlags();
 		IResourceDelta[] affectedChildren= delta.getAffectedChildren();
 		
 		if (affectedChildren.length > 1) {

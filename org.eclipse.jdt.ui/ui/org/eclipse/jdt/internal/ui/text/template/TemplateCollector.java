@@ -361,8 +361,6 @@ public class TemplateCollector implements ICodeCompletionRequestor {
 	}
 
 	private boolean existsLocalName(String name) {
-		Vector vector= new Vector();
-
 		for (Iterator iterator = fLocalVariables.iterator(); iterator.hasNext();) {
 			LocalVariable localVariable = (LocalVariable) iterator.next();
 

@@ -142,7 +142,6 @@ public class JavaTextLabelProvider {
 	}
 	
 	protected void renderPackageFragmentRoot(IPackageFragmentRoot root, StringBuffer buf) {
-		String name= root.getElementName();
 		if (showVariable() && root.isArchive()) {
 			try {
 				IClasspathEntry rawEntry= JavaModelUtil.getRawClasspathEntry(root);

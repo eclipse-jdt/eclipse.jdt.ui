@@ -518,7 +518,6 @@ public class JavaElementLabels {
 	 * Appends the label for a package fragment root to a StringBuffer. Considers the ROOT_* flags.
 	 */	
 	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
-		String name= root.getElementName();
 		if (root.isArchive() && getFlag(flags, ROOT_VARIABLE)) {
 			try {
 				IClasspathEntry rawEntry= JavaModelUtil.getRawClasspathEntry(root);

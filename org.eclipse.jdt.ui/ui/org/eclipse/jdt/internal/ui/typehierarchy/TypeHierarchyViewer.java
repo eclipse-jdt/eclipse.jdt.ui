@@ -58,7 +58,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 		
 			public int category(Object element) {
 				if (element instanceof IType) {
-					IType type= (IType)element;
 					try {
 						return (((IType)element).isInterface()) ? 2 : 1;
 					} catch (JavaModelException e) {

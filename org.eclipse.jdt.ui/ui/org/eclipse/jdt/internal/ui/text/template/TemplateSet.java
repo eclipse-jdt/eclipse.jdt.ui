@@ -98,8 +98,6 @@ public class TemplateSet {
 	 */	
 	public void addFromStream(InputStream stream) throws CoreException {
 		try {
-			TemplateSet templateSet= new TemplateSet();
-			
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			DocumentBuilder parser= factory.newDocumentBuilder();		
 			Document document= parser.parse(new InputSource(stream));

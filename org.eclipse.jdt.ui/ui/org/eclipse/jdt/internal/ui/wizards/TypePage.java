@@ -1054,7 +1054,6 @@ public abstract class TypePage extends ContainerPage {
 		IJavaElement[] elements= new IJavaElement[] { root.getJavaProject() };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
-		IProject project= root.getJavaProject().getProject();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.SuperClassDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.SuperClassDialog.message")); //$NON-NLS-1$
