@@ -209,7 +209,8 @@ public class RefactorActionGroup extends ActionGroup {
 		addAction(refactorSubmenu, fMoveAction);
 		addAction(refactorSubmenu, fPullUpAction);
 		addAction(refactorSubmenu, fModifyParametersAction);
-		refactorSubmenu.add(new Separator());
+		if (! refactorSubmenu.isEmpty())
+			refactorSubmenu.add(new Separator());
 		addAction(refactorSubmenu, fExtractMethodAction);
 		addAction(refactorSubmenu, fExtractTempAction);
 		addAction(refactorSubmenu, fInlineTempAction);
