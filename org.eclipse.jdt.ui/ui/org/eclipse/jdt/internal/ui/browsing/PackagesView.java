@@ -6,6 +6,9 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchActionConstants;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -15,7 +18,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.packageview.JavaElementPatternFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -110,4 +112,10 @@ public class PackagesView extends JavaBrowsingPart {
 				return findElementToSelect(je.getParent());
 		}
 	}
+	
+	protected void fillActionBars() {
+		super.fillActionBars();
+		IActionBars bars= getViewSite().getActionBars();
+		bars.setGlobalActionHandler(IWorkbenchActionConstants.PROPERTIES, fPropertyDialogAction);
+	}	
 }

@@ -64,4 +64,8 @@ public class CompositeActionGroup extends ActionGroup {
 			fGroups[i].updateActionBars();
 		}
 	}
+	
+	public ActionGroup get(int index) {
+		return fGroups[index];
+	}
 }

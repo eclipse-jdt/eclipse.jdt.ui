@@ -598,7 +598,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private GotoErrorAction fNextError;
 	private TextOperationAction fShowJavadoc;
 	
-	private ActionGroup fStandardActionGroups;
+	private CompositeActionGroup fStandardActionGroups;
 	
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
@@ -865,6 +865,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowInPackageView"); //$NON-NLS-1$
 				
 		ContextMenuGroup.add(menu, fActionGroups, fOutlineViewer);
+		// XXX fill the show menu. This is a workaround until we have converted all context menus to the
+		// new action groups.
+		fStandardActionGroups.get(1).fillContextMenu(menu);
 		
 		addRefactoring(menu);
 		addOpenPerspectiveItem(menu);	

@@ -36,13 +36,13 @@ public class ReorgGroup extends ContextMenuGroup {
 			return;
 			
 		fActions= new IRefactoringAction[] {	
-			new JdtMoveAction(provider),
 			createCutAction(p),
 			createCopyAction(p),
 			createPasteAction(p),
+			createDeleteAction(p),
 			//new DuplicateSourceReferenceAction(provider, p),
-			new RenameAction(p),
-			createDeleteAction(p)
+			new JdtMoveAction(provider),
+			new RenameAction(p)
 		};		
 	}	
 	

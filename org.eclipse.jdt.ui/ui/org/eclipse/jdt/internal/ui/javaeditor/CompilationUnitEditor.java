@@ -437,7 +437,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private SelectionHistory fSelectionHistory;
 	
 	/** The standard action groups added to the menu */
-	/* package */ ActionGroup fStandardActionGroups;
+	/* package */ CompositeActionGroup fStandardActionGroups;
 	
 	/**
 	 * Creates a new compilation unit editor.

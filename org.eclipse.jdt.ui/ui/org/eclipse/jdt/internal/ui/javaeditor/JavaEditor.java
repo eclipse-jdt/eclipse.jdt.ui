@@ -57,14 +57,14 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.OpenExternalJavadocAction;
+import org.eclipse.jdt.ui.actions.OpenSuperImplementationAction;
+import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
 import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
-import org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction;
-import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
@@ -485,10 +485,9 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		
 		setAction("ShowJavaDoc", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION));
 		
-		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(getSite().getWorkbenchWindow().getSelectionService());
-		setAction("OpenSuperImplementation", new OpenSuperImplementationAction(provider)); //$NON-NLS-1$
-		setAction("OpenExternalJavadoc", new OpenExternalJavadocAction(provider)); //$NON-NLS-1$
-		setAction("ShowInPackageView", new ShowInPackageViewAction(provider)); //$NON-NLS-1$
+		setAction("OpenSuperImplementation", new OpenSuperImplementationAction(this)); //$NON-NLS-1$
+		setAction("OpenExternalJavadoc", new OpenExternalJavadocAction(this)); //$NON-NLS-1$
+		setAction("ShowInPackageView", new ShowInPackageViewAction(this)); //$NON-NLS-1$
 	}
 	
 	private boolean isTextSelectionEmpty() {

@@ -176,6 +176,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private StandardJavaUILabelProvider fJavaElementLabelProvider;
 	private PackagesFrameSource fFrameSource;
 	private FrameList fFrameList;
+	private BuildGroup fBuildGroup;
 	private ContextMenuGroup[] fStandardGroups;
 	private Menu fContextMenu;		
 	private OpenResourceAction fOpenCUAction;
@@ -203,7 +204,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	
 	private ISelectionChangedListener fSelectionListener;
 	
-	private ActionGroup fStandardActionGroups;
+	private CompositeActionGroup fStandardActionGroups;
 	
 	private IPartListener fPartListener= new IPartListener() {
 		public void partActivated(IWorkbenchPart part) {
@@ -394,12 +395,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.REFRESH, fRefreshAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BOOKMARK, fAddBookmarkAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PROPERTIES, fPropertyDialogAction);
 		
 		// Navigate Go Into and Go To actions.
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_INTO, fZoomInAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BACK, fBackAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.FORWARD, fForwardAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.UP, fUpAction);
+		
+		// Retarget Build and Rebuild action
+		fBuildGroup.fillActionBars(actionBars);
 		
 		ReorgGroup.addGlobalReorgActions(actionBars, getSelectionProvider());
 	}
@@ -544,11 +549,17 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
 		
+		// XXX fill the show menu. This is a workaround until we have converted all context menus to the
+		// new action groups.
+		fStandardActionGroups.get(1).fillContextMenu(menu);
+		
 		if (onlyFilesSelected(selection)) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fAddBookmarkAction);
 		}
 		
-		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
+		fRefreshAction.selectionChanged(selection);
+		if (fRefreshAction.isEnabled())
+			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
 
 		menu.add(new Separator());
 		if (fPropertyDialogAction.isApplicableForSelection())
@@ -606,8 +617,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fAddBookmarkAction= new AddBookmarkAction(getShell());
 		provider.addSelectionChangedListener(fAddBookmarkAction);
 
+		fBuildGroup= new BuildGroup(this, true);
 		fStandardGroups= new ContextMenuGroup[] {
-			new BuildGroup(),
+			fBuildGroup,
 			new ReorgGroup(),
 			new GenerateGroup(),
 			new JavaSearchGroup()

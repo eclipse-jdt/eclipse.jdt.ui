@@ -4,66 +4,68 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.HashSet;import java.util.Iterator;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IStorage;import org.eclipse.core.resources.IncrementalProjectBuilder;import org.eclipse.core.runtime.IPath;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GroupContext;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.ui.actions.BuildAction;
+import java.util.HashSet;
+import java.util.Iterator;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.actions.BuildAction;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
+import org.eclipse.jdt.internal.ui.actions.GroupContext;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 public class BuildGroup extends ContextMenuGroup {
 
 	private BuildAction fBuildAction;
 	private BuildAction fFullBuildAction;
 
-	public void fill(IMenuManager manager, GroupContext context) {
-		if (!shouldContribute(context))
-			return;
-			
-		if (fBuildAction == null) {
-			fBuildAction= new BuildAction(JavaPlugin.getActiveWorkbenchShell(),
+	public BuildGroup(IViewPart part, boolean listenToSelectionChanges) {
+		Shell shell= part.getSite().getShell();
+		ISelectionProvider provider= part.getSite().getSelectionProvider();
+		
+		fBuildAction= new BuildAction(shell,
 				IncrementalProjectBuilder.INCREMENTAL_BUILD);
-			fBuildAction.setText(PackagesMessages.getString("BuildGroup.buildProject")); //$NON-NLS-1$
+		fBuildAction.setText(PackagesMessages.getString("BuildGroup.buildProject")); //$NON-NLS-1$
+		
+		fFullBuildAction= new BuildAction(shell,
+			IncrementalProjectBuilder.FULL_BUILD);
+		fFullBuildAction.setText(PackagesMessages.getString("BuildGroup.rebuildProject")); //$NON-NLS-1$
+		if (listenToSelectionChanges) {
+			provider.addSelectionChangedListener(fBuildAction);
+			provider.addSelectionChangedListener(fFullBuildAction);
 		}
+	}
+
+	public void fill(IMenuManager manager, GroupContext context) {
+		ISelection selection= context.getSelection();
+		if (!(selection instanceof IStructuredSelection))
+			return;
+		IStructuredSelection ss= (IStructuredSelection)selection;
 		
-		
-		fBuildAction.selectionChanged(convertSelectionToProjects((IStructuredSelection)context.getSelection()));
-		manager.appendToGroup(IContextMenuConstants.GROUP_BUILD, fBuildAction);
-		
-		if (fFullBuildAction == null) {
-			fFullBuildAction= new BuildAction(JavaPlugin.getActiveWorkbenchShell(),
-				IncrementalProjectBuilder.FULL_BUILD);
-			fFullBuildAction.setText(PackagesMessages.getString("BuildGroup.rebuildProject")); //$NON-NLS-1$
-		}
-		
-		fFullBuildAction.selectionChanged(convertSelectionToProjects((IStructuredSelection)context.getSelection()));
-		manager.appendToGroup(IContextMenuConstants.GROUP_BUILD, fFullBuildAction);
+		fFullBuildAction.selectionChanged(ss);
+		if (fFullBuildAction.isEnabled())
+			manager.appendToGroup(IContextMenuConstants.GROUP_BUILD, fFullBuildAction);
 	}
 	
-	private boolean shouldContribute(GroupContext context) {
-		ISelection s= context.getSelection();
-		if (! (s instanceof IStructuredSelection))
-			return false;
-			
-		IStructuredSelection selection= convertSelectionToProjects((IStructuredSelection)s);
-		return !(selection.isEmpty());
-	}
-	
-	private IStructuredSelection convertSelectionToProjects(IStructuredSelection selection) {
-		HashSet result= new HashSet();
-		Iterator elements= selection.iterator();
-		while (elements.hasNext()) {
-			IProject p= getProjectFor(elements.next());
-			if (p != null)
-				result.add(p);
-		}
-		Object[] projects= new Object[result.size()];
-		projects= result.toArray(projects);
-		return new StructuredSelection(projects);
-	}
-	
-	private IProject getProjectFor(Object element) {
-		if (element instanceof IJavaElement) {
-			return ((IJavaElement)element).getJavaProject().getProject();
-		} else if (element instanceof IResource) {
-			return ((IResource)element).getProject();
-		}
-		return null;
-	}
+	public void fillActionBars(IActionBars bars) {
+		bars.setGlobalActionHandler(IWorkbenchActionConstants.BUILD_PROJECT, fBuildAction);
+		bars.setGlobalActionHandler(IWorkbenchActionConstants.REBUILD_PROJECT, fFullBuildAction);
+	}	
 }

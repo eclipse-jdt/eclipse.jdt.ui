@@ -119,12 +119,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private JavaElementTypeComparator fTypeComparator;
 	
 	// Actions
+	private BuildGroup fBuildGroup;
 	private ContextMenuGroup[] fStandardGroups;
 	private Menu fContextMenu;		
 	private OpenResourceAction fOpenCUAction;
 	private Action fOpenToAction;
 	private Action fShowNavigatorAction;
-	private PropertyDialogAction fPropertyDialogAction;
+	protected PropertyDialogAction fPropertyDialogAction;
  	private IRefactoringAction fDeleteAction;
  	private RefreshAction fRefreshAction;
 	private IWorkbenchPart fPreviousSelectionProvider;
@@ -239,7 +240,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		setHelp();
 	}
 
-	private void fillActionBars() {
+	protected void fillActionBars() {
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		fillToolBar(toolBar);
@@ -261,6 +262,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.REFRESH, fRefreshAction);
 //		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BOOKMARK, fAddBookmarkAction);
+		
+		fBuildGroup.fillActionBars(actionBars);
 		
 		ReorgGroup.addGlobalReorgActions(actionBars, getSelectionProvider());
 	}
@@ -347,10 +350,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (size == 1)
 			addOpenNewWindowAction(menu, selection.getFirstElement());
 
-		addRefactoring(menu);
-
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
 		
+		addRefactoring(menu);
+
 		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
 		fRefreshAction.selectionChanged(selection);
 
@@ -385,8 +388,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fPropertyDialogAction= new PropertyDialogAction(getShell(), provider);
 		fShowNavigatorAction= new ShowInNavigatorAction(provider);
 		
+		fBuildGroup= new BuildGroup(this, true);
 		fStandardGroups= new ContextMenuGroup[] {
-			new BuildGroup(),
+			fBuildGroup,
 			new ReorgGroup(),
 			new GenerateGroup(),
 			new JavaSearchGroup()

@@ -9,6 +9,9 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.StructuredViewer;
 
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchActionConstants;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -115,4 +118,10 @@ public class ProjectsView extends JavaBrowsingPart {
 		else
 			getViewer().setSelection(null);
 	}
+	
+	protected void fillActionBars() {
+		super.fillActionBars();
+		IActionBars bars= getViewSite().getActionBars();
+		bars.setGlobalActionHandler(IWorkbenchActionConstants.PROPERTIES, fPropertyDialogAction);
+	}	
 }

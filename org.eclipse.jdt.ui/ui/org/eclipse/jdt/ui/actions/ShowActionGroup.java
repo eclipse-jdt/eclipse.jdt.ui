@@ -24,6 +24,8 @@ import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 /**
  * Action group that adds the show actions to a context menu and
  * the action bar's navigate menu.
@@ -102,6 +104,7 @@ public class ShowActionGroup extends ActionGroup {
 	 * Method declared in ActionGroup
 	 */
 	public void fillContextMenu(IMenuManager menu) {
-		Assert.isTrue(false, "Not yet implemented");
+		if (!fIsPackageExplorer)
+			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackagesViewAction);
 	}
 }
