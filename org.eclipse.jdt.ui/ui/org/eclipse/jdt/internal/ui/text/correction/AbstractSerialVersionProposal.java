@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -48,30 +49,27 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 	/** The long literal suffix */
 	protected static final String LONG_SUFFIX= "L"; //$NON-NLS-1$
 
+	/** The default serial value */
+	protected static final long SERIAL_VALUE= 1;
+
+	/** The default serial id expression */
+	protected static final String DEFAULT_EXPRESSION= SERIAL_VALUE + LONG_SUFFIX; //$NON-NLS-1$
+
 	/** The name of the serial version field */
 	protected static final String NAME_FIELD= "serialVersionUID"; //$NON-NLS-1$
 
 	/** The proposal relevance */
 	private static final int PROPOSAL_RELEVANCE= 9;
 
-	/** The default serial value */
-	protected static final long SERIAL_VALUE= 1;
-
 	/** The originally selected node */
 	private final ASTNode fNode;
-
-	/** The default serial id expression */
-	protected static final String DEFAULT_EXPRESSION= SERIAL_VALUE + LONG_SUFFIX; //$NON-NLS-1$
 
 	/**
 	 * Creates a new abstract serial version proposal.
 	 * 
-	 * @param label
-	 *        the label of this proposal
-	 * @param unit
-	 *        the compilation unit
-	 * @param node
-	 *        the originally selected node
+	 * @param label the label of this proposal
+	 * @param unit the compilation unit
+	 * @param node the originally selected node
 	 */
 	protected AbstractSerialVersionProposal(final String label, final ICompilationUnit unit, final ASTNode node) {
 		super(label, unit, null, PROPOSAL_RELEVANCE, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD));
@@ -84,26 +82,22 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 	/**
 	 * Adds an initializer to the specified variable declaration fragment.
 	 * 
-	 * @param fragment
-	 *        the variable declaration fragment to add an initializer
+	 * @param fragment the variable declaration fragment to add an initializer
 	 */
 	protected abstract void addInitializer(final VariableDeclarationFragment fragment);
 
 	/**
 	 * Adds the necessary linked positions for the specified fragment.
 	 * 
-	 * @param rewrite
-	 *        the ast rewrite to operate on
-	 * @param fragment
-	 *        the fragment to add linked positions to
+	 * @param rewrite the ast rewrite to operate on
+	 * @param fragment the fragment to add linked positions to
 	 */
 	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment);
 
 	/**
 	 * Computes the default expression to initialize the serial version id with.
 	 * 
-	 * @param monitor
-	 *        the progress monitor to use
+	 * @param monitor the progress monitor to use
 	 * 
 	 * @return the default expression for the serial version id
 	 */
@@ -126,7 +120,7 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 	protected final ASTNode getDeclarationNode() {
 
 		ASTNode parent= fNode.getParent();
-		if (!(parent instanceof TypeDeclaration)) {
+		if (!(parent instanceof AbstractTypeDeclaration)) {
 
 			parent= parent.getParent();
 			if (parent instanceof ParameterizedType || parent instanceof Type)

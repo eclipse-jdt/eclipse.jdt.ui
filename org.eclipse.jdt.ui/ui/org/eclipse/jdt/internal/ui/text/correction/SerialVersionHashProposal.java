@@ -41,11 +41,11 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -213,8 +213,8 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	protected String getQualifiedName() {
 		final ASTNode parent= getDeclarationNode();
 		ITypeBinding binding= null;
-		if (parent instanceof TypeDeclaration) {
-			final TypeDeclaration declaration= (TypeDeclaration) parent;
+		if (parent instanceof AbstractTypeDeclaration) {
+			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) parent;
 			binding= declaration.resolveBinding();
 		} else if (parent instanceof AnonymousClassDeclaration) {
 			final AnonymousClassDeclaration declaration= (AnonymousClassDeclaration) parent;
