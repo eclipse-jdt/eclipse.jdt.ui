@@ -95,8 +95,7 @@ public class TypeEnvironment {
 			TType type= types[i];
 			String bindingKey= type.getBindingKey();
 			mapping.put(bindingKey, type);
-			if (bindingKey != null)
-				keys.add(bindingKey);
+			keys.add(bindingKey);
 		}
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setProject(project);
@@ -107,23 +106,16 @@ public class TypeEnvironment {
 					mapping.put(bindingKey, binding);
 				}
 			}, null);
-		List result= new ArrayList();
+		ITypeBinding[] result= new ITypeBinding[types.length];
 		for (int i= 0; i < types.length; i++) {
 			TType type= types[i];
 			String bindingKey= type.getBindingKey();
-			if (bindingKey == null) {
-				result.add(null);
-			} else {
-				Object value= mapping.get(bindingKey);
-				if (value instanceof ITypeBinding) {
-					result.add(value);
-				} else {
-					result.add(null);
-				}
+			Object value= mapping.get(bindingKey);
+			if (value instanceof ITypeBinding) {
+				result[i]= (ITypeBinding)value;
 			}
-			
 		}
-		return (ITypeBinding[])result.toArray(new ITypeBinding[result.size()]);
+		return result;
 	}
 	
 	private boolean fIdentityTest;

@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 public abstract class TType {
 	
 	public static final int NULL_TYPE= 1;
@@ -64,6 +66,7 @@ public abstract class TType {
 	 */
 	protected TType(TypeEnvironment environment, String key) {
 		this(environment);
+		Assert.isNotNull(key);
 		fBindingKey= key;
 	}
 	
@@ -73,32 +76,31 @@ public abstract class TType {
 	 * @param binding the binding to initialize from
 	 */
 	protected void initialize(ITypeBinding binding) {
-		if (binding != null) {
-			fBindingKey= binding.getKey();
-			fModifiers= binding.getModifiers();
-			if (binding.isClass()) {
-				fFlags= F_IS_CLASS;
-			// the annotation test has to be done before test for interface
-			// since annotations are interfaces as well.
-			} else if (binding.isAnnotation()) { 
-				fFlags= F_IS_ANNOTATION | F_IS_INTERFACE;
-			} else if (binding.isInterface()) {
-				fFlags= F_IS_INTERFACE;
-			} else if (binding.isEnum()) {
-				fFlags= F_IS_ENUM;
-			}
+		fBindingKey= binding.getKey();
+		Assert.isNotNull(fBindingKey);
+		fModifiers= binding.getModifiers();
+		if (binding.isClass()) {
+			fFlags= F_IS_CLASS;
+		// the annotation test has to be done before test for interface
+		// since annotations are interfaces as well.
+		} else if (binding.isAnnotation()) { 
+			fFlags= F_IS_ANNOTATION | F_IS_INTERFACE;
+		} else if (binding.isInterface()) {
+			fFlags= F_IS_INTERFACE;
+		} else if (binding.isEnum()) {
+			fFlags= F_IS_ENUM;
+		}
 
-			if (binding.isTopLevel()) {
-				fFlags|= F_IS_TOP_LEVEL;
-			} else if (binding.isNested()) {
-				fFlags|= F_IS_NESTED;
-				if (binding.isMember()) {
-					fFlags|= F_IS_MEMBER;
-				} else if (binding.isLocal()) {
-					fFlags|= F_IS_LOCAL;
-				} else if (binding.isAnonymous()) {
-					fFlags|= F_IS_ANONYMOUS;
-				}
+		if (binding.isTopLevel()) {
+			fFlags|= F_IS_TOP_LEVEL;
+		} else if (binding.isNested()) {
+			fFlags|= F_IS_NESTED;
+			if (binding.isMember()) {
+				fFlags|= F_IS_MEMBER;
+			} else if (binding.isLocal()) {
+				fFlags|= F_IS_LOCAL;
+			} else if (binding.isAnonymous()) {
+				fFlags|= F_IS_ANONYMOUS;
 			}
 		}
 	}
