@@ -309,7 +309,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		final JavaModelException[] exception= new JavaModelException[1];
 		ProgressMonitorDialog monitor= new ProgressMonitorDialog(shell);
 		IRunnableWithProgress r= new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
+			public void run(IProgressMonitor pm) {
 				try {
 					Set packageNameSet= new HashSet();
 					pm.beginTask(JUnitMessages.getString("JUnitPlugin.searching"), projects.length); //$NON-NLS-1$
