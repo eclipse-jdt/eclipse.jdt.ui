@@ -399,16 +399,25 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 
 	void adjustInputAndSetSelection(Object o) {
-		if (!(o instanceof LogicalPackage)) {
-			super.adjustInputAndSetSelection(o);
-			return;
+		if (o instanceof IJavaElement) {
+			IJavaElement je= (IJavaElement)o;
+			IJavaProject jp= je.getJavaProject();
+			if (jp != null && jp.equals(getInput())) {
+				IJavaElement elementToSelect= findElementToSelect(je);
+				if (elementToSelect != null)
+					setSelection(new StructuredSelection(findElementToSelect(je)), true);
+				else
+					setSelection(StructuredSelection.EMPTY, true);
+				return;
+			}
+		} else if (o instanceof LogicalPackage) {
+			LogicalPackage lp= (LogicalPackage)o;
+			if (!lp.getJavaProject().equals(getInput()))
+				setInput(lp.getJavaProject());
+		
+			setSelection(new StructuredSelection(lp), true);
 		}
-
-		LogicalPackage lp= (LogicalPackage)o;
-		if (!lp.getJavaProject().equals(getInput()))
-			setInput(lp.getJavaProject());
-	
-		setSelection(new StructuredSelection(lp), true);
+		super.adjustInputAndSetSelection(o);		
 	}
 	
 	//do the same thing as the JavaBrowsingPart but with wrapper
