@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -79,7 +78,6 @@ import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
-import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -652,10 +650,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
 		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
-		
-		action= new JavaSelectMarkerRulerAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, getVerticalRuler()); //$NON-NLS-1$
-		setAction("CorrectionAssistProposal_RulerContext", action); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
 
 		action= new ContentAssistAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this); //$NON-NLS-1$
@@ -1352,19 +1346,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		// to disable the change bar for the class file (attached source) java editor.
 		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
-	}
-	
-	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#rulerContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
-	 */
-	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
-		super.rulerContextMenuAboutToShow(menu);
-		
-		IAction action= getAction("CorrectionAssistProposal_RulerContext"); //$NON-NLS-1$
-		if (action instanceof IUpdate)
-			((IUpdate)action).update();
-		if (action != null && action.isEnabled())
-			addAction(menu, ITextEditorActionConstants.MB_ADDITIONS, "CorrectionAssistProposal_RulerContext"); //$NON-NLS-1$
 	}
 
 }
