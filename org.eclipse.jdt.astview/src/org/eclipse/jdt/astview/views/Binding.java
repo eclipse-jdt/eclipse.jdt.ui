@@ -75,6 +75,7 @@ public class Binding extends ASTAttribute {
 				case IBinding.VARIABLE:
 					IVariableBinding variableBinding= (IVariableBinding) fBinding;
 					res.add(new BindingProperty(this, "IS FIELD", variableBinding.isField())); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "IS ENUM CONSTANT", variableBinding.isEnumConstant())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "VARIABLE ID", variableBinding.getVariableId())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()))); //$NON-NLS-1$
 					res.add(new Binding(this, "TYPE", variableBinding.getType(), false)); //$NON-NLS-1$
