@@ -87,7 +87,7 @@ public class ReorgUtils {
 		return false;
 	}
 	
-	private static boolean isClasspathDelete(IPackageFragmentRoot pkgRoot) throws JavaModelException {
+	static boolean isClasspathDelete(IPackageFragmentRoot pkgRoot) throws JavaModelException {
 		IResource res= pkgRoot.getUnderlyingResource();
 		if (res == null)
 			return true;
