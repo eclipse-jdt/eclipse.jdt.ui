@@ -1419,14 +1419,10 @@ JavaStructureDiffViewerCreator
 		<accelerator key="Alt+Shift+ARROW_RIGHT" id="org.eclipse.jdt.ui.edit.text.java.select.next" />
 		<accelerator key="Alt+Shift+ARROW_LEFT" id="org.eclipse.jdt.ui.edit.text.java.select.previous" />
 		<accelerator key="Alt+Shift+ARROW_DOWN" id="org.eclipse.jdt.ui.edit.text.java.select.last" />
-		<accelerator key="Ctrl+Space" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" />
-		<accelerator key="Ctrl+Shift+Space" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
+		<accelerator key="Alt+/" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" />
+		<accelerator key="Alt+?" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
 		<accelerator key="Ctrl+1" id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
 		<accelerator key="F2" id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
-
-		<!-- override accelerators for Chinese -->
-		<accelerator key="Ctrl+2" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" locale="zh_CN" />
-		<accelerator key="Ctrl+Shift+2" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" locale="zh_CN" />
 
 		<!-- source -->
 		<accelerator key="Ctrl+/" id="org.eclipse.jdt.ui.edit.text.java.comment" />
@@ -1493,10 +1489,6 @@ JavaStructureDiffViewerCreator
 		<accelerator key="Ctrl+Shift+Space" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
 		<accelerator key="Ctrl+1" id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
 		<accelerator key="F2" id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
-
-		<!-- override accelerators for Chinese -->
-		<accelerator key="Ctrl+2" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" locale="zh_CN" />
-		<accelerator key="Ctrl+Shift+2" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" locale="zh_CN" />
 
 		<!-- source -->
 		<accelerator key="Ctrl+/" id="org.eclipse.jdt.ui.edit.text.java.comment" />
