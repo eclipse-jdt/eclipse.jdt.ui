@@ -27,7 +27,9 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.views.contentoutline.ContentOutline;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -36,14 +38,14 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -109,20 +111,22 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 			initRoot= JavaModelUtil.getPackageFragmentRoot(elem);
 			if (initRoot == null || initRoot.isArchive()) {
 				IJavaProject jproject= elem.getJavaProject();
-				try {
-					initRoot= null;
-					IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
-					for (int i= 0; i < roots.length; i++) {
-						if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
-							initRoot= roots[i];
-							break;
+				if (jproject != null) {
+					try {
+						initRoot= null;
+						IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
+						for (int i= 0; i < roots.length; i++) {
+							if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
+								initRoot= roots[i];
+								break;
+							}
 						}
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e.getStatus());
 					}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e.getStatus());
-				}
-				if (initRoot == null) {
-					initRoot= jproject.getPackageFragmentRoot(""); //$NON-NLS-1$
+					if (initRoot == null) {
+						initRoot= jproject.getPackageFragmentRoot(""); //$NON-NLS-1$
+					}
 				}
 			}
 		}	
@@ -159,9 +163,20 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 			}
 		}
 		if (jelem == null) {
-			jelem= EditorUtility.getActiveEditorJavaInput();
+			IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
+			if (part instanceof ContentOutline) {
+				part= JavaPlugin.getActivePage().getActiveEditor();
+			}
+			
+			if (part instanceof IViewPartInputProvider) {
+				Object elem= ((IViewPartInputProvider)part).getViewPartInput();
+				if (elem instanceof IJavaElement) {
+					jelem= (IJavaElement) elem;
+				}
+			}
 		}
-		if (jelem == null) {
+
+		if (jelem == null || jelem.getElementType() == IJavaElement.JAVA_MODEL) {
 			IProject[] projects= getWorkspaceRoot().getProjects();
 			if (projects.length > 0) {
 				jelem= JavaCore.create(projects[0]);

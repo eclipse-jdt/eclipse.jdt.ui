@@ -88,17 +88,12 @@ import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
-
-
-
-
-
-
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
 /**
  * Java specific text editor.
  */
-public abstract class JavaEditor extends StatusTextEditor {
+public abstract class JavaEditor extends StatusTextEditor implements IViewPartInputProvider {
 		
 	/**
 	 * "Smart" runnable for updating the outline page's selection.
@@ -821,4 +816,12 @@ public abstract class JavaEditor extends StatusTextEditor {
 		if (fEncodingSupport != null)
 			fEncodingSupport.reset();
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider#getViewPartInput()
+	 */
+	public Object getViewPartInput() {
+		return getEditorInput().getAdapter(IJavaElement.class);
+	}	
+	
 }

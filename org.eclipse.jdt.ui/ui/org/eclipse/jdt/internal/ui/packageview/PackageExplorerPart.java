@@ -93,14 +93,12 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -108,12 +106,11 @@ import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-
-
 
 /**
  * The ViewPart for the ProjectExplorer. It listens to part activation events.
@@ -122,7 +119,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * view the corresponding editor is activated. 
  */
 
-public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget, IMenuListener, IPackagesViewPart,  IPropertyChangeListener {
+public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget, IMenuListener, IPackagesViewPart,  IPropertyChangeListener, IViewPartInputProvider {
 	
 	public final static String VIEW_ID= JavaUI.ID_PACKAGES;
 				
@@ -902,4 +899,15 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (refreshViewer)
 			fViewer.refresh();
 	}
+	
+	/* (non-Javadoc)
+	 * @see IViewPartInputProvider#getViewPartInput()
+	 */
+	public Object getViewPartInput() {
+		if (fViewer != null) {
+			return fViewer.getInput();
+		}
+		return null;
+	}
+
 }

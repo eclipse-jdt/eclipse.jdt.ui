@@ -97,6 +97,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -104,7 +105,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 /**
  * view showing the supertypes/subtypes of its input.
  */
-public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyViewPart {
+public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyViewPart, IViewPartInputProvider {
 	
 	public static final int VIEW_ID_TYPE= 2;
 	public static final int VIEW_ID_SUPER= 0;
@@ -1330,7 +1331,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			JavaPlugin.log(e.getStatus());
 		}
 		
-	}	
-	
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider#getViewPartInput()
+	 */
+	public Object getViewPartInput() {
+		return fInputElement;
+	}
 
 }

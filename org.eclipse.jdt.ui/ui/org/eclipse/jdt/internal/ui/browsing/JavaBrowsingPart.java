@@ -89,7 +89,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
@@ -102,7 +101,6 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
@@ -110,7 +108,6 @@ import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -121,6 +118,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
@@ -128,7 +126,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 
-abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener {
+abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener, IViewPartInputProvider {
 
 	private static final String TAG_SELECTED_ELEMENTS= "selectedElements"; //$NON-NLS-1$
 	private static final String TAG_SELECTED_ELEMENT= "selectedElement"; //$NON-NLS-1$
@@ -1168,4 +1166,15 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	void setProcessSelectionEvents(boolean state) {
 		fProcessSelectionEvents= state;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider#getViewPartInput()
+	 */
+	public Object getViewPartInput() {
+		if (fViewer != null) {
+			return fViewer.getInput();
+		}
+		return null;
+	}
+
 }
