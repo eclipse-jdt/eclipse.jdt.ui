@@ -34,7 +34,13 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  */
 public class JavaTextTools {
 	
+	/**
+	 * @since 2.0
+	 */
 	private class PreferenceListener implements IPropertyChangeListener {
+		/**
+		 * @since 2.0
+		 */
 		public void propertyChange(PropertyChangeEvent event) {
 			adaptToPreferenceChange(event);
 		}
@@ -44,25 +50,36 @@ public class JavaTextTools {
 	private JavaColorManager fColorManager;
 	/** The Java source code scanner */
 	private JavaCodeScanner fCodeScanner;
-	/** The Java multiline comment scanner */
+	/** The Java multiline comment scanner
+	 * @since 2.0
+	 */
 	private SingleTokenJavaScanner fMultilineCommentScanner;
-	/** The Java singleline comment scanner */
+	/** The Java singleline comment scanner
+	 * @since 2.0
+	 */
 	private SingleTokenJavaScanner fSinglelineCommentScanner;
-	/** The Java string scanner */
+	/** The Java string scanner
+	 * @since 2.0
+	 */
 	private SingleTokenJavaScanner fStringScanner;
 	/** The JavaDoc scanner */
 	private JavaDocScanner fJavaDocScanner;
 	/** The Java partitions scanner */
 	private FastJavaPartitionScanner fPartitionScanner;	
 	
-	/** The preference store */
+	/** The preference store
+	 * @since 2.0
+	 */
 	private IPreferenceStore fPreferenceStore;
-	/** The preference change listener */
+	/** The preference change listener
+	 * @since 2.0
+	 */
 	private PreferenceListener fPreferenceListener= new PreferenceListener();
 
 	
 	/**
 	 * Creates a new Java text tools collection.
+	 * @since 2.0
 	 */
 	public JavaTextTools(IPreferenceStore store) {
 		fPreferenceStore= store;
@@ -124,6 +141,7 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java multiline comments.
 	 *
 	 * @return a Java multiline comment scanner
+	 * @since 2.0
 	 */
 	public RuleBasedScanner getMultilineCommentScanner() {
 		return fMultilineCommentScanner;
@@ -133,6 +151,7 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java singleline comments.
 	 *
 	 * @return a Java singleline comment scanner
+	 * @since 2.0
 	 */
 	public RuleBasedScanner getSinglelineCommentScanner() {
 		return fSinglelineCommentScanner;
@@ -142,6 +161,7 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java strings.
 	 *
 	 * @return a Java string scanner
+	 * @since 2.0
 	 */
 	public RuleBasedScanner getStringScanner() {
 		return fStringScanner;
@@ -207,6 +227,7 @@ public class JavaTextTools {
 	 * 
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
+	 * @since 2.0
 	 */
 	public boolean affectsBehavior(PropertyChangeEvent event) {
 		return  fCodeScanner.affectsBehavior(event) ||
@@ -221,6 +242,7 @@ public class JavaTextTools {
 	 * encoded in the given event.
 	 * 
 	 * @param event the event to whch to adapt
+	 * @since 2.0
 	 */
 	protected void adaptToPreferenceChange(PropertyChangeEvent event) {
 		if (fCodeScanner.affectsBehavior(event))

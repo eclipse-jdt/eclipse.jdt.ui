@@ -1,10 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.text;
-
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
-
 
 import java.util.Vector;
 
@@ -72,9 +76,13 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
  */
 public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
-	/** Preference key used to look up display tab width */
+	/** Preference key used to look up display tab width
+	 * @since 2.0
+	 */
 	public final static String PREFERENCE_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
-	/** Preference key for inserting spaces rather than tabs */
+	/** Preference key for inserting spaces rather than tabs
+	 * @since 2.0
+	 */
 	public final static String SPACES_FOR_TABS= "spacesForTabs"; //$NON-NLS-1$
 
 	
@@ -106,6 +114,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the Java multiline comment scanner for this configuration.
 	 *
 	 * @return the Java multiline comment scanner
+	 * @since 2.0
 	 */
 	protected RuleBasedScanner getMultilineCommentScanner() {
 		return fJavaTextTools.getMultilineCommentScanner();
@@ -115,6 +124,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the Java singleline comment scanner for this configuration.
 	 *
 	 * @return the Java singleline comment scanner
+	 * @since 2.0
 	 */
 	protected RuleBasedScanner getSinglelineCommentScanner() {
 		return fJavaTextTools.getSinglelineCommentScanner();
@@ -124,6 +134,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the Java string scanner for this configuration.
 	 *
 	 * @return the Java string scanner
+	 * @since 2.0
 	 */
 	protected RuleBasedScanner getStringScanner() {
 		return fJavaTextTools.getStringScanner();
@@ -159,6 +170,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	/**
 	 * Returns the preference store used for by this configuration to initialize
 	 * the individula bits and pieces.
+	 * @since 2.0
 	 */
 	protected IPreferenceStore getPreferenceStore() {
 		return JavaPlugin.getDefault().getPreferenceStore();
@@ -262,6 +274,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 	/*
 	 * @see SourceViewerConfiguration#getDefaultPrefix(ISourceViewer, String)
+	 * @since 2.0
 	 */
 	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
 		return new String[] { "//", "" }; //$NON-NLS-1$ //$NON-NLS-2$
@@ -356,11 +369,15 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	/*
 	 * @see SourceViewerConfiguration#getHoverControlCreator(ISourceViewer)
+	 * @since 2.0
 	 */
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
 		return getInformationControlCreator(sourceViewer, true);
 	}
 	
+	/**
+	 * @since 2.0
+	 */
 	private IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer, final boolean cutDown) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -373,6 +390,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	/*
 	 * @see SourceViewerConfiguration#getInformationPresenter(ISourceViewer)
+	 * @since 2.0
 	 */
 	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
 		InformationPresenter presenter= new InformationPresenter(getInformationControlCreator(sourceViewer, false));
