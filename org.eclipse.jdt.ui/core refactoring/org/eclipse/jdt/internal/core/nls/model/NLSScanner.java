@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.nls.model;
+package org.eclipse.jdt.internal.core.nls.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
-import org.eclipse.jdt.internal.ui.nls.model.NLSElement;
-import org.eclipse.jdt.internal.ui.nls.model.NLSLine;
+import org.eclipse.jdt.internal.core.nls.model.NLSElement;
+import org.eclipse.jdt.internal.core.nls.model.NLSLine;
 
 public class NLSScanner {
 

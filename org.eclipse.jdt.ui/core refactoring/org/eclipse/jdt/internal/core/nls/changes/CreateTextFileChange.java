@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.nls.changes;
+package org.eclipse.jdt.internal.core.nls.changes;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -10,7 +10,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.ITextChange;
-import org.eclipse.jdt.internal.ui.nls.model.Utils;
+import org.eclipse.jdt.internal.core.nls.model.Utils;
 
 public class CreateTextFileChange extends CreateFileChange implements ITextChange {
 

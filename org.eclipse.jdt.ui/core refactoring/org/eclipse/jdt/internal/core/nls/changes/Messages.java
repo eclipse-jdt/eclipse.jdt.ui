@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.nls.changes;
+package org.eclipse.jdt.internal.core.nls.changes;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;

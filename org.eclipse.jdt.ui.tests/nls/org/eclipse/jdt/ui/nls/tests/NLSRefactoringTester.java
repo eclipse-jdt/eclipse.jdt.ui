@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.ui.nls.model.NLSRefactoring;
+import org.eclipse.jdt.internal.core.nls.model.NLSRefactoring;
 
 public class NLSRefactoringTester extends TestCase {
 

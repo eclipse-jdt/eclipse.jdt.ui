@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.nls.model;
+package org.eclipse.jdt.internal.core.nls.model;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.core.nls.changes.CreateTextFileChange;
 
 public class NLSRefactoring extends Refactoring {
 	

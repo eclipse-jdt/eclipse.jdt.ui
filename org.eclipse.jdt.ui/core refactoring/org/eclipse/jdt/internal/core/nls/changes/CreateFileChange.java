@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.nls.changes;
+package org.eclipse.jdt.internal.core.nls.changes;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -119,7 +119,8 @@ public class CreateFileChange extends Change {
 	protected String getSource() {
 		return fSource;
 	}
-
+
+
 	/*
 	 * Sets the name
 	 * @param name The name to set

@@ -5,9 +5,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
-import org.eclipse.jdt.internal.ui.nls.model.NLSElement;
-import org.eclipse.jdt.internal.ui.nls.model.NLSLine;
-import org.eclipse.jdt.internal.ui.nls.model.NLSScanner;
+import org.eclipse.jdt.internal.core.nls.model.NLSElement;
+import org.eclipse.jdt.internal.core.nls.model.NLSLine;
+import org.eclipse.jdt.internal.core.nls.model.NLSScanner;
 
 public class NLSScannerTester extends TestCase {
 

@@ -34,9 +34,9 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.nls.model.NLSElement;
-import org.eclipse.jdt.internal.ui.nls.model.NLSLine;
-import org.eclipse.jdt.internal.ui.nls.model.NLSScanner;
+import org.eclipse.jdt.internal.core.nls.model.NLSElement;
+import org.eclipse.jdt.internal.core.nls.model.NLSLine;
+import org.eclipse.jdt.internal.core.nls.model.NLSScanner;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 public class FindStringsAction implements IWorkbenchWindowActionDelegate {
