@@ -67,8 +67,8 @@ public class StructureSelectionAction extends TextSelectionAction {
 			if (! cu.isStructureKnown())
 				return oldSourceRange;
 			AST ast= new AST(cu);
-			if (ast.getProblems().length != 0)
-				return oldSourceRange;
+			if (ast.isMalformed())
+				return oldSourceRange;	
 			StructureSelectionAnalyzer selAnalyzer= new StructureSelectionAnalyzer(cu.getBuffer(), oldSourceRange.getOffset(), oldSourceRange.getLength());
 			ast.accept(selAnalyzer);
 			return internalGetNewSelectionRange(oldSourceRange, cu, selAnalyzer);
