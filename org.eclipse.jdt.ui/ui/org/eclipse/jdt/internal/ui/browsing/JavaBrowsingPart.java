@@ -681,7 +681,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * Creates the the content provider of this part.
 	 */
 	protected BaseJavaElementContentProvider createContentProvider() {
-		return new JavaElementContentProvider(true, this); //
+		return new JavaBrowsingContentProvider(true, this); //
 	}
 
 	protected void setInitialInput() {

@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-class ProjectAndSourceFolderContentProvider extends JavaElementContentProvider {
+class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider {
 
 	ProjectAndSourceFolderContentProvider(JavaBrowsingPart browsingPart) {
 		super(false, browsingPart);
