@@ -11,12 +11,8 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import java.io.IOException;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
