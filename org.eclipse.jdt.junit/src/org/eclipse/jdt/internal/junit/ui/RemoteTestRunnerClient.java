@@ -433,6 +433,8 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void notifyTestRunStopped(final long elapsedTime) {
+		if (JUnitPlugin.isStopped())
+			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
@@ -444,6 +446,8 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void testRunEnded(final long elapsedTime) {
+		if (JUnitPlugin.isStopped())
+			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
@@ -455,6 +459,8 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void notifyTestEnded(final String test) {
+		if (JUnitPlugin.isStopped())
+			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
@@ -467,6 +473,8 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void notifyTestStarted(final String test) {
+		if (JUnitPlugin.isStopped())
+			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
@@ -479,6 +487,8 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void notifyTestRunStarted(final int count) {
+		if (JUnitPlugin.isStopped())
+			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
@@ -490,6 +500,8 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void notifyTestFailed() {
+		if (JUnitPlugin.isStopped())
+			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
