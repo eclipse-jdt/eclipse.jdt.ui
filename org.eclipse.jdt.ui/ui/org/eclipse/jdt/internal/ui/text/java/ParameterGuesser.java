@@ -16,7 +16,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -24,10 +32,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  
 /**
  * This class triggers a code-completion that will track all local ane member variables for later
@@ -55,17 +68,19 @@ public class ParameterGuesser {
 		public final int positionScore;
 		public boolean alreadyMatched;
 		public char[] triggerChars;
+		public ImageDescriptor descriptor;
 		
 		/**
 		 * Creates a variable.
 		 */
-		public Variable(String typePackage, String typeName, String name, int variableType, int positionScore, char[] triggers) {
+		public Variable(String typePackage, String typeName, String name, int variableType, int positionScore, char[] triggers, ImageDescriptor descriptor) {
 			this.typePackage= typePackage;
 			this.typeName= typeName;
 			this.name= name;
 			this.variableType= variableType;
 			this.positionScore= positionScore;
 			triggerChars= triggers;
+			this.descriptor= descriptor;
 		}
 
 		/*
@@ -127,10 +142,9 @@ public class ParameterGuesser {
 				thisPkg= new String();
 				thisType= fEnclosingTypeName;
 			}
-			addVariable(Variable.FIELD, thisPkg.toCharArray(), thisType.toCharArray(), "this".toCharArray(), new char[] {'.'}); //$NON-NLS-1$
-			addVariable(Variable.FIELD, "java.lang".toCharArray(), "Object".toCharArray(), "null".toCharArray(), new char[0]); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "true".toCharArray(), new char[0]);  //$NON-NLS-1$//$NON-NLS-2$
-			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "false".toCharArray(), new char[0]);  //$NON-NLS-1$//$NON-NLS-2$
+			addVariable(Variable.FIELD, thisPkg.toCharArray(), thisType.toCharArray(), "this".toCharArray(), new char[] {'.'}, getFieldDescriptor(Flags.AccPublic | Flags.AccFinal)); //$NON-NLS-1$
+			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "true".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
+			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "false".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
 			
 			return fVariables;
 		}
@@ -150,7 +164,8 @@ public class ParameterGuesser {
 
 		private static int getCompletionOffset(String source, int start) {
 			int index= start;
-			while (index > 0 && !Character.isWhitespace(source.charAt(index - 1)))
+			char c;
+			while (index > 0 && (c= source.charAt(index - 1)) != '{' && c != ';')
 				index--;
 			return index;
 		}
@@ -162,8 +177,8 @@ public class ParameterGuesser {
 			return !declaringTypeName.equals(fEnclosingTypeName);
 		}
 
-		private void addVariable(int varType, char[] typePackageName, char[] typeName, char[] name, char[] triggers) {
-			fVariables.add(new Variable(new String(typePackageName), new String(typeName), new String(name), varType, fVariables.size(), triggers));
+		private void addVariable(int varType, char[] typePackageName, char[] typeName, char[] name, char[] triggers, ImageDescriptor descriptor) {
+			fVariables.add(new Variable(new String(typePackageName), new String(typeName), new String(name), varType, fVariables.size(), triggers, descriptor));
 		}
 
 		/*
@@ -175,22 +190,11 @@ public class ParameterGuesser {
 		{
 			char[] triggers= isPrimitive(typeName) ? new char[0] : new char[] {'.'};
 			if (!isInherited(new String(declaringTypeName)))
-				addVariable(Variable.FIELD, typePackageName, typeName, name, triggers);
+				addVariable(Variable.FIELD, typePackageName, typeName, name, triggers, getFieldDescriptor(modifiers));
 			else
-				addVariable(Variable.INHERITED_FIELD, typePackageName, typeName, name, triggers);
+				addVariable(Variable.INHERITED_FIELD, typePackageName, typeName, name, triggers, getFieldDescriptor(modifiers));
 		}
 	
-		/**
-		 * Returns <code>true</code> if <code>typeName</code> is the name of a primitive type.
-		 * 
-		 * @param typeName the type to check
-		 * @return <code>true</code> if <code>typeName</code> is the name of a primitive type
-		 */
-		private boolean isPrimitive(char[] typeName) {
-			String s= new String(typeName);
-			return "boolean".equals(s) || "byte".equals(s) || "short".equals(s) || "int".equals(s) || "long".equals(s) || "float".equals(s) || "double".equals(s) || "char".equals(s); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
-		}
-
 		/*
 		 * @see ICompletionRequestor#acceptLocalVariable(char[], char[], char[], int, int, int, int)
 		 */
@@ -198,7 +202,7 @@ public class ParameterGuesser {
 			int completionStart, int completionEnd, int relevance)
 		{
 			char[] triggers= isPrimitive(typeName) ? new char[0] : new char[] {'.'};
-			addVariable(Variable.LOCAL, typePackageName, typeName, name, triggers);
+			addVariable(Variable.LOCAL, typePackageName, typeName, name, triggers, JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
 		}
 		
 		/*
@@ -208,8 +212,42 @@ public class ParameterGuesser {
 			// TODO: for now: only add zero-arg methods.
 			if (parameterNames.length == 0) {
 				char[] triggers= isPrimitive(returnTypeName) ? new char[0] : new char[] {'.'};
-				addVariable(isInherited(new String(declaringTypeName)) ? Variable.INHERITED_METHOD : Variable.METHOD, returnTypePackageName, returnTypeName, completionName, triggers);
+				addVariable(isInherited(new String(declaringTypeName)) ? Variable.INHERITED_METHOD : Variable.METHOD, returnTypePackageName, returnTypeName, completionName, triggers, getMemberDescriptor(modifiers));
 			}
+		}
+
+		protected ImageDescriptor getMemberDescriptor(int modifiers) {
+			ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(false, modifiers);
+
+			if (Flags.isDeprecated(modifiers))
+				desc= getDeprecatedDescriptor(desc);
+
+			if (Flags.isStatic(modifiers))
+				desc= getStaticDescriptor(desc);
+		
+			return desc;
+		}
+	
+		protected ImageDescriptor getFieldDescriptor(int modifiers) {
+			ImageDescriptor desc= JavaElementImageProvider.getFieldImageDescriptor(false, modifiers);
+
+			if (Flags.isDeprecated(modifiers))
+				desc= getDeprecatedDescriptor(desc);
+		 	
+			if (Flags.isStatic(modifiers))
+				desc= getStaticDescriptor(desc);
+		
+			return desc;
+		}	
+	
+		protected ImageDescriptor getDeprecatedDescriptor(ImageDescriptor descriptor) {
+			Point size= new Point(16, 16);
+			return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.WARNING, size);	    
+		}
+	
+		protected ImageDescriptor getStaticDescriptor(ImageDescriptor descriptor) {
+			Point size= new Point(16, 16);
+			return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, size);
 		}
 	}
 	
@@ -219,6 +257,7 @@ public class ParameterGuesser {
 	private final int fCodeAssistOffset;
 	/** Local and member variables of the compilation unit */
 	private List fVariables;
+	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 
 	/**
 	 * Creates a parameter guesser for compilation unit and offset.
@@ -312,13 +351,19 @@ public class ParameterGuesser {
 		
 		List typeMatches= findFieldsMatchingType(fVariables, paramPackage, paramType);
 		orderMatches(typeMatches, paramName);
-		if (typeMatches == null) return new ICompletionProposal[0];
+		if (typeMatches == null)
+			return new ICompletionProposal[0];
+			
 		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size()];
-		int i= 0;
+		int i= 0; int replacementLength= 0;
 		for (Iterator it= typeMatches.iterator(); it.hasNext();) {
 			Variable v= (Variable)it.next();
-			if (i == 0) v.alreadyMatched= true;
-			JavaCompletionProposal proposal= new JavaCompletionProposal(v.name, offset, paramName.length(), null, null, ret.length - i);
+			if (i == 0) {
+				v.alreadyMatched= true;
+				replacementLength= v.name.length();
+			}
+			
+			JavaCompletionProposal proposal= new JavaCompletionProposal(v.name, offset, replacementLength, getImage(v.descriptor), v.name, ret.length - i);
 			char[] triggers= new char[v.triggerChars.length + 1];
 			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
 			triggers[triggers.length - 1]= ';';
@@ -461,6 +506,10 @@ public class ParameterGuesser {
 			if (isTypeMatch(variable, typePackage, typeName))
 				matches.add(variable);
 		}
+
+		// add null proposal
+		if (!isPrimitive(typeName.toCharArray()))
+			matches.add(new Variable(typePackage, typeName, "null", Variable.LOCAL, 2, new char[0], null)); //$NON-NLS-1$		
 				
 		return matches.isEmpty() ? null : matches;
 	}
@@ -558,6 +607,21 @@ public class ParameterGuesser {
 		}
 	
 		return longestCommonSubstring;
+	}
+
+	private Image getImage(ImageDescriptor descriptor) {
+		return (descriptor == null) ? null : fRegistry.get(descriptor);
+	}
+	
+	/**
+	 * Returns <code>true</code> if <code>typeName</code> is the name of a primitive type.
+	 * 
+	 * @param typeName the type to check
+	 * @return <code>true</code> if <code>typeName</code> is the name of a primitive type
+	 */
+	private static boolean isPrimitive(char[] typeName) {
+		String s= new String(typeName);
+		return "boolean".equals(s) || "byte".equals(s) || "short".equals(s) || "int".equals(s) || "long".equals(s) || "float".equals(s) || "double".equals(s) || "char".equals(s); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 	}
 
 }
