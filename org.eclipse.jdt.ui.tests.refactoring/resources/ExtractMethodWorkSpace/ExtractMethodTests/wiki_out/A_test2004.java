@@ -13,9 +13,9 @@ public class A_test2004 {
 	}
 
 	protected int extracted(int i) {
-		
+					
 		System.out.println("i, field == " + i++ +", " + field);
-		
+					
 		return i;
 	}
 

@@ -232,14 +232,31 @@ public class Checks {
 	 * 		super classes. </li>
 	 * </ul>
 	 */
-	public static RefactoringStatus checkMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding[] parameters, IJavaProject scope) {
+	public static RefactoringStatus checkMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding returnType, ITypeBinding[] parameters, IJavaProject scope) {
 		RefactoringStatus result= new RefactoringStatus();
 		IMethodBinding method= org.eclipse.jdt.internal.corext.dom.Bindings.findMethodInHierarchy(type, methodName, parameters);
 		if (method != null) {
+			boolean returnTypeClash= false;
+			ITypeBinding methodReturnType= method.getReturnType();
+			if (returnType != null && methodReturnType != null) {
+				String returnTypeKey= returnType.getKey();
+				String methodReturnTypeKey= methodReturnType.getKey();
+				if (returnTypeKey == null && methodReturnTypeKey == null) {
+					returnTypeClash= returnType != methodReturnType;	
+				} else if (returnTypeKey != null && methodReturnTypeKey != null) {
+					returnTypeClash= !returnTypeKey.equals(methodReturnTypeKey);
+				}
+			}
 			ITypeBinding dc= method.getDeclaringClass();
-			result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.overrides", //$NON-NLS-1$
-				new Object[] {methodName, dc.getName()}),
-				JavaSourceContext.create(method, scope));
+			if (returnTypeClash) {
+				result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.returnTypeClash", //$NON-NLS-1$
+					new Object[] {methodName, dc.getName()}),
+					JavaSourceContext.create(method, scope));
+			} else {
+				result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.overrides", //$NON-NLS-1$
+					new Object[] {methodName, dc.getName()}),
+					JavaSourceContext.create(method, scope));
+			}
 		}
 		return result;
 	}

@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -75,6 +76,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	private List fUsedReadNames;
 	private List fUsedModifyNames;
+	private TextEdit[] fNewMethods;
 	
 	private static final String NO_NAME= ""; //$NON-NLS-1$
 	
@@ -91,6 +93,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fEncapsulateDeclaringClass= true;
 		fArgName= proposer.proposeArgName(field);
 		checkArgName();
+		fNewMethods= new TextEdit[2];
 	}
 	
 	//---- Setter and Getter methdos ----------------------------------------------------------
@@ -230,10 +233,11 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				return result;
 			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.searching_for_cunits")); //$NON-NLS-1$
 			ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
-				new SubProgressMonitor(pm, 5), SearchEngine.createWorkspaceScope(),
+				new SubProgressMonitor(pm, 5), RefactoringScopeFactory.create(fField),
 				SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
 			
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(affectedCUs)));
+			checkInHierarchy(result);
 			if (result.hasFatalError())
 				return result;
 				
@@ -259,6 +263,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 					break;
 				sub.worked(1);
 			}
+			if (result.hasFatalError())
+				return result;
 			sub.done();
 			return result;
 		} catch (CoreException e) {
@@ -272,17 +278,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try {
 			CompositeChange result= new CompositeChange(getName());
-			pm.beginTask(NO_NAME, 10);
-			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.create_changes")); //$NON-NLS-1$
-			addChanges(result, new SubProgressMonitor(pm, 2));
+			addGetterSetterChanges();
 			TextChange[] changes= fChangeManager.getAllChanges();
-			SubProgressMonitor sub= new SubProgressMonitor(pm, 8);
-			sub.beginTask(NO_NAME, changes.length);
+			pm.beginTask(NO_NAME, changes.length);
+			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.create_changes")); //$NON-NLS-1$
 			for (int i= 0; i < changes.length; i++) {
 				result.add(changes[i]);
-				sub.worked(1);
+				pm.worked(1);
 			}
-			sub.done();
 			pm.done();
 			return result;
 		} catch (CoreException e) {
@@ -307,7 +310,19 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				element.getElementName()), JavaSourceContext.create(element));
 		}
 		return true;
-	} 
+	}
+	
+	private void checkInHierarchy(RefactoringStatus status)	throws CoreException {
+		TypeDeclaration declaration= (TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, ASTNode.TYPE_DECLARATION);
+		ITypeBinding type= declaration.resolveBinding();
+		if (type != null) {
+			ITypeBinding fieldType= fFieldDeclaration.resolveBinding().getType();
+			status.merge(Checks.checkMethodInHierarchy(type, fGetterName, fieldType, new ITypeBinding[0], fField.getJavaProject()));
+			status.merge(Checks.checkMethodInHierarchy(type, fSetterName, fFieldDeclaration.getAST().resolveWellKnownType("void"), //$NON-NLS-1$
+				new ITypeBinding[] {fieldType}, 
+				fField.getJavaProject()));
+		}
+	}
 	
 	private void computeUsedNames() {
 		fUsedReadNames= new ArrayList(0);
@@ -326,7 +341,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 	}
 	
-	private void addChanges(CompositeChange parent, IProgressMonitor pm) throws CoreException {
+	private void addGetterSetterChanges() throws CoreException {
 		int insertionKind= MemberEdit.INSERT_AFTER;
 		IMember sibling= null;
 		IMethod[] methods= fField.getDeclaringType().getMethods();
@@ -357,7 +372,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private TextEdit createSetterMethod(int insertionKind, IMember sibling, String modifiers, String type) throws JavaModelException {
 		String returnType= createSetterReturnType();
 		String returnStatement= fSetterMustReturnValue ? "return " : ""; //$NON-NLS-1$ //$NON-NLS-2$
-		return createMemberEdit(
+		return fNewMethods[1]= createMemberEdit(
 			sibling,
 			insertionKind,
 			new String[] {
@@ -368,7 +383,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 	
 	private TextEdit createGetterMethod(int insertionKind, IMember sibling, String modifiers, String type) {
-		return createMemberEdit(
+		return fNewMethods[0]= createMemberEdit(
 			sibling,
 			insertionKind,
 			new String[] {

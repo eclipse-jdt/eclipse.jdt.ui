@@ -231,7 +231,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		ITypeBinding[] arguments= getArgumentTypes();
 		ITypeBinding type= fEnclosingMethodBinding != null ? fEnclosingMethodBinding.getDeclaringClass() : ast.resolveWellKnownType("void"); //$NON-NLS-1$
 		status.merge(Checks.checkMethodInType(type, methodName, arguments, scope));
-		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, arguments, scope));
+		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, null, arguments, scope));
 	}
 	
 	private ITypeBinding[] getArgumentTypes() {

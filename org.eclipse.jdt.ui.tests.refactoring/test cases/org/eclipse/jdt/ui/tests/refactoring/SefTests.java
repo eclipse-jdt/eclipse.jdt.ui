@@ -128,6 +128,10 @@ public class SefTests extends AbstractSelectionTestCase {
 		invalidTest("field");
 	}
 	
+	public void testInvalidOverwrite() throws Exception {
+		invalidTest("field");
+	}
+	
 	//=====================================================================================
 	// Primitiv Data Test
 	//=====================================================================================

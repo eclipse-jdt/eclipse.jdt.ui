@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2001 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.ArrayList;
@@ -15,6 +21,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -28,13 +35,11 @@ public class RefactoringScopeFactory {
 	}
 	
 	private static IJavaSearchScope create(IJavaProject javaProject) throws JavaModelException {
-		List projects= new  ArrayList();
-		projects.add(javaProject);
-		addReferencingProjects(javaProject.getProject(), projects);
-		IJavaProject[] javaProjects= (IJavaProject[]) projects.toArray(new IJavaProject[projects.size()]);
-		return SearchEngine.createJavaSearchScope(javaProjects, false);
+		List elements= getSourceRoots(javaProject);
+		addReferencingProjects(javaProject.getProject(), elements);
+		return SearchEngine.createJavaSearchScope((IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]), false);
 	}
-	
+
 	public static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {
 		if (javaElement instanceof IMember) {
 			IMember member= (IMember)javaElement;
@@ -62,13 +67,25 @@ public class RefactoringScopeFactory {
 			for (int j= 0, length2= classpath.length; j < length2; j++) {
 				IClasspathEntry entry= classpath[j];
 				if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT && path.equals(entry.getPath())) {
-					list.add(javaProject);
+					list.add(getSourceRoots(javaProject));
 					if (entry.isExported())
 						addReferencingProjects(javaProject.getProject(), list);
 					break;
 				}
 			}
 		}
-	}	
+	}
+	
+	private static List getSourceRoots(IJavaProject javaProject) throws JavaModelException {
+		List elements= new  ArrayList();
+		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
+		// Add all package fragment roots except archives
+		for (int i= 0; i < roots.length; i++) {
+			IPackageFragmentRoot root= roots[i];
+			if (!root.isArchive())
+				elements.add(root);
+		}
+		return elements;
+	}		
 }
 

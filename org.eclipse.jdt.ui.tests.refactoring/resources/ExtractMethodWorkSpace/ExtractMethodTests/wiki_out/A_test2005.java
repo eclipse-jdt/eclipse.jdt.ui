@@ -15,9 +15,9 @@ public class A_test2005 {
 	}
 
 	protected static void extracted() throws IOException {
-		
+					
 		fun();
-		
+					
 	}
 
 }
