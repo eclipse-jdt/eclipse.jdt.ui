@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class ExpressionVariable extends ConstraintVariable {
 	
@@ -37,6 +39,16 @@ public class ExpressionVariable extends ConstraintVariable {
 		if (! (obj instanceof ExpressionVariable))
 			return false;
 		ExpressionVariable other= (ExpressionVariable)obj;
+
+		if (fExpression.equals(other.fExpression))
+			return true;
+			
+		IBinding binding= Expressions.resolveBinding(fExpression);
+		if (binding instanceof ITypeBinding){
+			//if the expression resolves to a type binding, then the expressions should be the same
+			//we checked already that they are not, so false
+			return false;
+		}
 		return Expressions.equalBindings(fExpression, other.fExpression);
 	}
 
@@ -45,5 +57,9 @@ public class ExpressionVariable extends ConstraintVariable {
 	 */
 	public int hashCode() {
 		return super.hashCode() ^ Expressions.hashCode(fExpression);
+	}
+	
+	public Expression getExpression(){
+		return fExpression;
 	}
 }
