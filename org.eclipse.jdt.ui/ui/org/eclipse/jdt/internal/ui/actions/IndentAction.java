@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
 
 /**
  * Indents a line or range of lines in a Java document to its correct position. No complete
- * AST must be present, the indentation is computed using heuristics. The algorith used is fast for
+ * AST must be present, the indentation is computed using heuristics. The algorithm used is fast for
  * single lines, but does not store any information and therefore not so efficient for large line
  * ranges.
  * 
