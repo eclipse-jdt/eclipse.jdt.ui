@@ -66,7 +66,7 @@ public class PropertyFileDocumentModell {
 		InsertEdit[] inserts= new InsertEdit[newKeyValuePairs.length];
 		int insertIndex= 0;
 		for (int i= 0; i < newKeyValuePairs.length; i++) {
-			KeyValuePairModell subsKeyValuePair= (KeyValuePairModell)newKeyValuePairModell[i];
+			KeyValuePairModell subsKeyValuePair= newKeyValuePairModell[i];
 			while (((KeyValuePairModell)fKeyValuePairs.get(insertIndex)).compareTo(subsKeyValuePair) < 0) {
 				insertIndex++;
 			}
