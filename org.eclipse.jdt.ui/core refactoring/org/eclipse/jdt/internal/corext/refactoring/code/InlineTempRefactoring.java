@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -33,7 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder2;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
@@ -102,7 +104,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkSelection() throws JavaModelException {
-		fTempDeclaration= TempDeclarationFinder2.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
+		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 		
 		if (fTempDeclaration == null)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
@@ -199,13 +201,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}	
 	
 	private static boolean needsBracketsAroundReferences(Expression expression){
-		if (expression instanceof InfixExpression)	
-			return true;	
-		if (expression instanceof PrefixExpression)	
-			return true;	
-		if (expression instanceof PostfixExpression)	
-			return true;	
-		if (expression instanceof ConditionalExpression)	
+		if (ASTNodes.needsParenthesis(expression))	
 			return true;	
 		if (expression instanceof Assignment)//for estetic reasons
 			return true;	
