@@ -29,7 +29,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -54,6 +53,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -355,10 +356,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	private SemanticHighlightingManager fSemanticHighlightingManager;
 	/**
-	 * Semantic highlighting check-box
+	 * Is semantic highlighting enabled? (internal state)
 	 * @since 3.0
 	 */
-	private Button fSemanticHighlightingEnabled;
+	private boolean fIsSemanticHighlightingEnabled;
 	
 	/**
 	 * Creates a new preference page.
@@ -488,6 +489,39 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fItalicCheckBox.setSelection(fOverlayStore.getBoolean(item.getItalicKey()));
 	}
 
+	private void handleSemanticHighlightingEnabled() {
+		boolean shouldBeEnabled= fOverlayStore.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
+		if (shouldBeEnabled && !fIsSemanticHighlightingEnabled) {
+			fHighlightingColorListViewer.getControl().setRedraw(false);
+			fHighlightingColorList.addAll(fSemanticHighlightingColorList);
+			fHighlightingColorListViewer.add(fSemanticHighlightingColorList.toArray());
+			fHighlightingColorListViewer.getControl().setRedraw(true);
+			fHighlightingColorListViewer.reveal(getHighlightingColorListItem());
+			fIsSemanticHighlightingEnabled= true;
+		}
+		if (!shouldBeEnabled && fIsSemanticHighlightingEnabled) {
+			fHighlightingColorListViewer.getControl().setRedraw(false);
+			int fullSize= fHighlightingColorList.size();
+			fHighlightingColorList.removeAll(fSemanticHighlightingColorList);
+			HighlightingColorListItem item= getHighlightingColorListItem();
+			if (!fHighlightingColorList.contains(item)) {
+				int i= 0;
+				while (item != fHighlightingColorListViewer.getElementAt(i))
+					i++;
+				while (!fHighlightingColorList.contains(fHighlightingColorListViewer.getElementAt(i)) && i < fullSize)
+					i++;
+				while (!fHighlightingColorList.contains(fHighlightingColorListViewer.getElementAt(i)) && i >= 0)
+					i--;
+				// Assume non-empty list
+				fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(i)));
+			}
+			fHighlightingColorListViewer.remove(fSemanticHighlightingColorList.toArray());
+			fHighlightingColorListViewer.getControl().setRedraw(true);
+			fHighlightingColorListViewer.reveal(getHighlightingColorListItem());
+			fIsSemanticHighlightingEnabled= false;
+		}
+	}
+	
 	private void handleAppearanceColorListSelection() {	
 		int i= fAppearanceColorList.getSelectionIndex();
 		String key= fAppearanceColorListModel[i][1];
@@ -540,34 +574,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
 		fBackgroundColorButton= fBackgroundColorEditor.getButton();
 
-		fSemanticHighlightingEnabled= addCheckBox(colorComposite, PreferencesMessages.getString("JavaEditorPreferencePage.semanticHighlighting.option"), PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0); //$NON-NLS-1$
-		fSemanticHighlightingEnabled.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e) {
-				fHighlightingColorListViewer.getControl().setRedraw(false);
-				if (fSemanticHighlightingEnabled.getSelection()) {
-					fHighlightingColorList.addAll(fSemanticHighlightingColorList);
-					fHighlightingColorListViewer.add(fSemanticHighlightingColorList.toArray());
-				} else {
-					int fullSize= fHighlightingColorList.size();
-					fHighlightingColorList.removeAll(fSemanticHighlightingColorList);
-					HighlightingColorListItem item= getHighlightingColorListItem();
-					if (!fHighlightingColorList.contains(item)) {
-						int i= 0;
-						while (item != fHighlightingColorListViewer.getElementAt(i))
-							i++;
-						while (!fHighlightingColorList.contains(fHighlightingColorListViewer.getElementAt(i)) && i < fullSize)
-							i++;
-						while (!fHighlightingColorList.contains(fHighlightingColorListViewer.getElementAt(i)) && i >= 0)
-							i--;
-						// Assume non-empty list
-						fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(i)));
-					}
-					fHighlightingColorListViewer.remove(fSemanticHighlightingColorList.toArray());
-				}
-				fHighlightingColorListViewer.getControl().setRedraw(true);
-				fHighlightingColorListViewer.reveal(getHighlightingColorListItem());
-			}
-		});		
+		addCheckBox(colorComposite, PreferencesMessages.getString("JavaEditorPreferencePage.semanticHighlighting.option"), PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0); //$NON-NLS-1$
 		
 		Label label= new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.foreground")); //$NON-NLS-1$
@@ -1129,10 +1136,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
 			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, null));
-		if (fSemanticHighlightingEnabled.getSelection())
+		if (fOverlayStore.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED)) {
 			fHighlightingColorList.addAll(fSemanticHighlightingColorList);
+			fIsSemanticHighlightingEnabled= true;
+		}
 		fHighlightingColorListViewer.setInput(fHighlightingColorList);
 		fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(0)));
+		fOverlayStore.addPropertyChangeListener(new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED.equals(event.getProperty()))
+					handleSemanticHighlightingEnabled();
+			}
+		});
 		
 		for (int i= 0; i < fAppearanceColorListModel.length; i++)
 			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
