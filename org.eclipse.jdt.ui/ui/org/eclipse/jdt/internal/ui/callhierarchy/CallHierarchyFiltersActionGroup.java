@@ -44,7 +44,6 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
     }
 
     private IViewPart fPart;
-    private StructuredViewer fViewer;
 
     /**
      * Creates a new <code>CustomFiltersActionGroup</code>.
@@ -56,7 +55,6 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
         Assert.isNotNull(part);
         Assert.isNotNull(viewer);
         fPart= part;
-        fViewer= viewer;
     }
 
     /* (non-Javadoc)

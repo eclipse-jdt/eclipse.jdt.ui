@@ -21,8 +21,14 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -238,5 +244,24 @@ public class CallHierarchy {
         }
 
         return (StringMatcher[]) list.toArray(new StringMatcher[list.size()]);
+    }
+    
+    static CompilationUnit getCompilationUnitNode(IMember member, boolean resolveBindings) {
+        if (member.isBinary()) {
+            IClassFile classFile= member.getClassFile();
+            try {
+                if (classFile != null && classFile.exists() && classFile.getSource() != null) {
+                    return AST.parseCompilationUnit(classFile, resolveBindings);
+                }
+            } catch (JavaModelException e) {
+                JavaPlugin.log(e);
+            }
+        } else {
+            ICompilationUnit icu= member.getCompilationUnit();
+            if (icu != null && icu.exists()) {
+                return AST.parseCompilationUnit(icu, resolveBindings);
+            }
+        }
+        return null;
     }
 }

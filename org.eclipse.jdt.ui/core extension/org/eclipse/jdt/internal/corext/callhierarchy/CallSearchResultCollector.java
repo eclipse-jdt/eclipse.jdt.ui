@@ -30,6 +30,10 @@ class CallSearchResultCollector {
     }
 
     protected void addMember(IMember member, IMember calledMember, int start, int end) {
+        addMember(member, calledMember, start, end, -1);
+    }
+
+    protected void addMember(IMember member, IMember calledMember, int start, int end, int lineNumber) {
         if ((member != null) && (calledMember != null)) {
             if (!isIgnored(calledMember)) {
                 MethodCall methodCall = (MethodCall) fCalledMembers.get(calledMember.getHandleIdentifier());
@@ -40,7 +44,7 @@ class CallSearchResultCollector {
                 }
 
                 methodCall.addCallLocation(new CallLocation(member, calledMember, start,
-                        end));
+                        end, lineNumber));
             }
         }
     }

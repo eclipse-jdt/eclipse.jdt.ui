@@ -18,12 +18,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 class CalleeMethodWrapper extends MethodWrapper {
@@ -91,14 +87,14 @@ class CalleeMethodWrapper extends MethodWrapper {
      */
     protected Map findChildren(IProgressMonitor progressMonitor) {
     	if (getMember().exists() && getMember().getElementType() == IJavaElement.METHOD) {
-        	CompilationUnit cu= createCompilationUnitNode(getMember());
+        	CompilationUnit cu= CallHierarchy.getCompilationUnitNode(getMember(), true);
             if (progressMonitor != null) {
                 progressMonitor.worked(5);
             }
 
         	if (cu != null) {
         		CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor((IMethod) getMember(),
-        				progressMonitor);
+        				cu, progressMonitor);
         
         		cu.accept(visitor);
         		return visitor.getCallees();
@@ -107,22 +103,7 @@ class CalleeMethodWrapper extends MethodWrapper {
         return new HashMap(0);
     }
     
-	private static CompilationUnit createCompilationUnitNode(IMember member) {
-		if (member.isBinary()) {
-			IClassFile classFile= member.getClassFile();
-			if (classFile != null && classFile.exists()) {
-				return AST.parseCompilationUnit(classFile, true);
-			}
-		} else {
-			ICompilationUnit icu= member.getCompilationUnit();
-			if (icu != null && icu.exists()) {
-				return AST.parseCompilationUnit(icu, true);
-			}
-		}
-		return null;
-	}
-
-    /* (non-Javadoc)
+	/* (non-Javadoc)
      * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getDirection()
      */
     public int getDirection() {

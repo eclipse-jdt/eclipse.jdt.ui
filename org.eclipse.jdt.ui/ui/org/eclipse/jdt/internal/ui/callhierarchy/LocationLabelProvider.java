@@ -13,14 +13,18 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 
-class LocationLabelProvider extends LabelProvider {
-    
+class LocationLabelProvider extends LabelProvider implements ITableLabelProvider {
+    private static final int COLUMN_ICON= 0;
+    private static final int COLUMN_LINE= 1;
+    private static final int COLUMN_INFO= 2;
+        
     LocationLabelProvider() {
     }
             
@@ -28,16 +32,11 @@ class LocationLabelProvider extends LabelProvider {
      * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
      */
     public String getText(Object element) {
-        String text= ""; //$NON-NLS-1$        
-        if (element instanceof CallLocation) {
-            text= removeWhitespaceOutsideStringLiterals((CallLocation) element);
-        }
-
-        return text;
+        return getColumnText(element, COLUMN_INFO);
     }
 
     public Image getImage(Object element) {
-        return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE);
+        return getColumnImage(element, COLUMN_ICON);
     }
     
     /**
@@ -48,7 +47,7 @@ class LocationLabelProvider extends LabelProvider {
         StringBuffer buf = new StringBuffer();
         boolean withinString = false;
 
-        String s= callLocation.toString();
+        String s= callLocation.getCallText();
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
 
@@ -73,5 +72,39 @@ class LocationLabelProvider extends LabelProvider {
         }
 
         return buf.toString();
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
+     */
+    public Image getColumnImage(Object element, int columnIndex) {
+        if (columnIndex == COLUMN_ICON) {
+            return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE);
+        }
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
+     */
+    public String getColumnText(Object element, int columnIndex) {
+        if (element instanceof CallLocation) {
+            CallLocation callLocation= (CallLocation) element;
+            
+            switch (columnIndex) {
+                case COLUMN_LINE:
+                    int lineNumber= callLocation.getLineNumber();
+                    if (lineNumber == CallLocation.UNKNOWN_LINE_NUMBER) {
+						return CallHierarchyMessages.getString("LocationLabelProvider.unknown");//$NON-NLS-1$
+                    } else {
+                    	String[] values= {String.valueOf(lineNumber)};
+                        return CallHierarchyMessages.getFormattedString("LocationLabelProvider.lineNumber", values);//$NON-NLS-1$
+                    }
+                case COLUMN_INFO:
+                    return removeWhitespaceOutsideStringLiterals(callLocation);
+            }
+        }
+
+        return ""; //$NON-NLS-1$        
     }
 }

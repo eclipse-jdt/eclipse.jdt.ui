@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -42,13 +43,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 class CalleeAnalyzerVisitor extends ASTVisitor {
     private CallSearchResultCollector fSearchResults;
     private IMethod fMethod;
+    private CompilationUnit fCompilationUnit;
     private IProgressMonitor fProgressMonitor;
     private int fMethodEndPosition;
     private int fMethodStartPosition;
 
-    CalleeAnalyzerVisitor(IMethod method, IProgressMonitor progressMonitor) {
+    CalleeAnalyzerVisitor(IMethod method, CompilationUnit compilationUnit, IProgressMonitor progressMonitor) {
         fSearchResults = new CallSearchResultCollector();
         this.fMethod = method;
+        this.fCompilationUnit= compilationUnit;
         this.fProgressMonitor = progressMonitor;
 
         try {
@@ -206,7 +209,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                 
                 fSearchResults.addMember(fMethod, referencedMember,
                     node.getStartPosition(),
-                    node.getStartPosition() + node.getLength());
+                    node.getStartPosition() + node.getLength(), fCompilationUnit.lineNumber(node.getStartPosition()));
             }
         } catch (JavaModelException jme) {
             JavaPlugin.log(jme);

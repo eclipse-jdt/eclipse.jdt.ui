@@ -25,16 +25,13 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IOpenListener;
@@ -44,7 +41,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IActionBars;
@@ -84,7 +80,6 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
@@ -130,8 +125,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private IMethod fShownMethod;
     private SelectionProviderMediator fSelectionProviderMediator;
     private List fMethodHistory;
-    private TableViewer fLocationViewer;
-    private Menu fLocationContextMenu;
+    private LocationViewer fLocationViewer;
     private SashForm fHierarchyLocationSplitter;
     private Clipboard fClipboard;
     private SearchScopeActionGroup fSearchScopeActions;
@@ -381,8 +375,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param b
      */
     private void enableActions(boolean enabled) {
-        fLocationContextMenu.setEnabled(enabled);
-
         // TODO: Is it possible to disable the actions on the toolbar and on the view menu? 
     }
 
@@ -498,8 +490,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      *
      */
     public void dispose() {
-        disposeMenu(fLocationContextMenu);
-
         if (fActionGroups != null)
             fActionGroups.dispose();
 		
@@ -686,9 +676,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         return getSite().getSelectionProvider().getSelection();
     }
 
-    protected void fillContextMenu(IMenuManager menu) {
+    protected void fillLocationViewerContextMenu(IMenuManager menu) {
         JavaPlugin.createStandardGroups(menu);
 
+        menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fOpenLocationAction);
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshAction);
     }
 
@@ -748,39 +739,15 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param parent
      */
     private void createLocationViewer(Composite parent) {
-        fLocationViewer = new TableViewer(parent, SWT.NONE);
+        fLocationViewer= new LocationViewer(parent);
 
-        fLocationViewer.setContentProvider(new ArrayContentProvider());
-        fLocationViewer.setLabelProvider(new LocationLabelProvider());
-        fLocationViewer.setInput(new ArrayList());
         fLocationViewer.getControl().addKeyListener(createKeyListener());
 
-        JavaUIHelp.setHelp(fLocationViewer, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
-
-        fOpenLocationAction = new OpenLocationAction(getSite());
-        fLocationViewer.addOpenListener(new IOpenListener() {
-                public void open(OpenEvent event) {
-                    fOpenLocationAction.run();
+        fLocationViewer.initContextMenu(new IMenuListener() {
+                public void menuAboutToShow(IMenuManager menu) {
+                    fillLocationViewerContextMenu(menu);
                 }
-            });
-
-        //        fListViewer.addDoubleClickListener(this);
-        MenuManager menuMgr = new MenuManager(); //$NON-NLS-1$
-        menuMgr.setRemoveAllWhenShown(true);
-        menuMgr.addMenuListener(new IMenuListener() {
-                /* (non-Javadoc)
-                 * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
-                 */
-                public void menuAboutToShow(IMenuManager manager) {
-                    fillContextMenu(manager);
-                }
-            });
-
-        fLocationContextMenu = menuMgr.createContextMenu(fLocationViewer.getControl());
-        fLocationViewer.getControl().setMenu(fLocationContextMenu);
-
-        // Register viewer with site. This must be done before making the actions.
-        getSite().registerContextMenu(menuMgr, fLocationViewer);
+            }, ID_CALL_HIERARCHY, getSite());
     }
 
     private void createHierarchyLocationSplitter(Composite parent) {
@@ -822,12 +789,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fActionGroups.setContext(null);
     }
 
-    private void disposeMenu(Menu contextMenu) {
-        if ((contextMenu != null) && !contextMenu.isDisposed()) {
-            contextMenu.dispose();
-        }
-    }
-
     private void fillActionBars() {
         IActionBars actionBars = getActionBars();
         IToolBarManager toolBar = actionBars.getToolBarManager();
@@ -855,6 +816,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      */
     private void makeActions() {
         fRefreshAction = new RefreshAction(this);
+
+        fOpenLocationAction = new OpenLocationAction(getSite());
+        fLocationViewer.addOpenListener(new IOpenListener() {
+                public void open(OpenEvent event) {
+                    fOpenLocationAction.run();
+                }
+            });
+        
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
         fCopyAction= new CopyCallHierarchyAction(this, fClipboard, fCallHierarchyViewer);
         fSearchScopeActions = new SearchScopeActionGroup(this, fDialogSettings);
@@ -910,7 +879,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     }
 
     private void updateLocationsView(MethodWrapper methodWrapper) {
-        if (methodWrapper != null) {
+        if (methodWrapper != null && methodWrapper.getMethodCall().hasCallLocations()) {
             fLocationViewer.setInput(methodWrapper.getMethodCall().getCallLocations());
         } else {
             fLocationViewer.setInput(""); //$NON-NLS-1$

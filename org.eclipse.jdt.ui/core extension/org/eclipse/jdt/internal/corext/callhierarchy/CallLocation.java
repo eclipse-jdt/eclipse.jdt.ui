@@ -12,20 +12,22 @@
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CallLocation implements IAdaptable {
+    public static final int UNKNOWN_LINE_NUMBER= -1;
     private IMember fCalledMember;
     private IMember fMember;
     private String fCallText;
     private int fEnd;
     private int fStart;
+    private int fLineNumber;
 
     /**
      * @param method
@@ -34,12 +36,21 @@ public class CallLocation implements IAdaptable {
      * @param end
      */
     public CallLocation(IMember member, IMember calledMember, int start, int end) {
+        this(member, calledMember, start, end, UNKNOWN_LINE_NUMBER);
+    }
+
+    /**
+     * @param method
+     * @param cu
+     * @param start
+     * @param end
+     */
+    public CallLocation(IMember member, IMember calledMember, int start, int end, int lineNumber) {
         this.fMember = member;
         this.fCalledMember = calledMember;
         this.fStart = start;
         this.fEnd = end;
-
-        fCallText = initializeCallText();
+        this.fLineNumber= lineNumber;
     }
 
     /**
@@ -67,26 +78,50 @@ public class CallLocation implements IAdaptable {
         return fStart;
     }
 
+    public int getLineNumber() {
+        if (fLineNumber == UNKNOWN_LINE_NUMBER) {
+            CompilationUnit unit= CallHierarchy.getCompilationUnitNode(fMember, false);
+            if (unit != null) {
+                fLineNumber= unit.lineNumber(fStart);
+            }
+        }
+        return fLineNumber;
+    }
+    
     public String toString() {
-        return fCallText;
+        return getCallText();
     }
 
-    private String initializeCallText() {
-        try {
-            ICompilationUnit compilationUnit = fMember.getCompilationUnit();
+    private ICompilationUnit getICompilationUnit() {
+        ICompilationUnit compilationUnit = fMember.getCompilationUnit();
 
-            if ((fMember != null) && (compilationUnit != null)) {
-                IBuffer buffer = compilationUnit.getBuffer();
-
-                return buffer.getText(fStart, (fEnd - fStart));
-            } else {
-                return fMember.getOpenable().getBuffer().getText(fStart, (fEnd - fStart));
-            }
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
-
-            return ""; //$NON-NLS-1$
+        if (compilationUnit != null) {
+            if (compilationUnit.isWorkingCopy()) {
+                compilationUnit= (ICompilationUnit) compilationUnit.getOriginalElement();
+            } 
         }
+        
+        return compilationUnit;
+    }
+    
+    public String getCallText() {
+        if (fCallText == null) {
+            try {
+                ICompilationUnit compilationUnit = getICompilationUnit();
+    
+                if (compilationUnit != null) {
+                    IBuffer buffer= compilationUnit.getBuffer();
+    
+                    fCallText= buffer.getText(fStart, (fEnd - fStart));
+                } else {
+                    fCallText= fMember.getOpenable().getBuffer().getText(fStart, (fEnd - fStart));
+                }
+            } catch (JavaModelException e) {
+                JavaPlugin.log(e);
+                return "";    //$NON-NLS-1$
+            }
+        }
+        return fCallText;
     }
 
     public Object getAdapter(Class adapter) {

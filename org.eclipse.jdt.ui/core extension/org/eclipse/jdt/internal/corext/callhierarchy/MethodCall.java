@@ -43,6 +43,10 @@ public class MethodCall {
         }
     }
 
+    public boolean hasCallLocations() {
+        return fCallLocations != null && fCallLocations.size() > 0;
+    }
+    
     /**
      * @return Object
      */

@@ -109,7 +109,6 @@ class CallHierarchyViewSiteAdapter implements IViewSite {
      * @see org.eclipse.ui.IViewSite#getActionBars()
      */
     public IActionBars getActionBars() {
-        // TODO Auto-generated method stub
         return null;
     }
 }

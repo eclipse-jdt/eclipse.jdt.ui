@@ -25,6 +25,8 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 class OpenLocationAction extends SelectionDispatchAction {
     public OpenLocationAction(IWorkbenchSite site) {
         super(site);
+        setText(CallHierarchyMessages.getString("OpenLocationAction.label")); //$NON-NLS-1$
+        setToolTipText(CallHierarchyMessages.getString("OpenLocationAction.tooltip")); //$NON-NLS-1$
     }
 
     private boolean checkEnabled(IStructuredSelection selection) {

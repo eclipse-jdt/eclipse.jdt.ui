@@ -36,16 +36,25 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         }
                 
         public void run(IProgressMonitor pm) throws InvocationTargetException {
-            fCalls= fMethodWrapper.getCalls(pm);
+            try {
+                fCalls= fMethodWrapper.getCalls(pm);
+            } catch (Exception e) {
+                // This is bad style, but the IRunnableContext instance "eats" the exception
+                // so it's better to catch and log Exception here.
+                JavaPlugin.log(e);
+            }
         }
         
         MethodWrapper[] getCalls() {
-            return fCalls;
+            if (fCalls != null) {
+                return fCalls;
+            }
+            return new MethodWrapper[0];
         }
     };
 
 
-    public CallHierarchyContentProvider(CallHierarchyViewPart part) {
+    public CallHierarchyContentProvider() {
         super();
     }
 
@@ -69,6 +78,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
                     context.run(true, true, runnable);
                 } catch (InvocationTargetException e) {
                     JavaPlugin.log(e);
+                    return EMPTY_ARRAY;
                 } catch (InterruptedException e) {
                     return EMPTY_ARRAY;
                 }
