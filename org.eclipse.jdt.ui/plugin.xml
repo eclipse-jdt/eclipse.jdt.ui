@@ -1676,6 +1676,9 @@
                id="org.eclipse.jdt.ui.ClassFileEditor">
          </part>
          <part
+               id="org.eclipse.jdt.ui.PropertiesFileEditor">
+         </part>
+         <part
                id="org.eclipse.jdt.ui.ProjectsView">
          </part>
          <part
