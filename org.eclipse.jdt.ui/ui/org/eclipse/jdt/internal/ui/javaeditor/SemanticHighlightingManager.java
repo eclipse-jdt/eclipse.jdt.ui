@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -535,15 +536,16 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		if (rgb != null) {
 			
 			String property= event.getProperty();
+			Color color= fColorManager.getColor(property);
 			
-			if (fColorManager instanceof IColorManagerExtension) {
+			if ((color == null || !rgb.equals(color.getRGB())) && fColorManager instanceof IColorManagerExtension) {
 				IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
 				ext.unbindColor(property);
 				ext.bindColor(property, rgb);
 			}
 			
 			TextAttribute oldAttr= highlighting.getTextAttribute();
-			highlighting.setTextAttribute(new TextAttribute(fColorManager.getColor(property), oldAttr.getBackground(), oldAttr.getStyle()));
+			highlighting.setTextAttribute(new TextAttribute(color, oldAttr.getBackground(), oldAttr.getStyle()));
 		}
 	}
 	
@@ -563,11 +565,13 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	}
 	
 	private void addColor(String colorKey) {
-		RGB rgb= PreferenceConverter.getColor(fPreferenceStore, colorKey);
-		if (fColorManager instanceof IColorManagerExtension) {
-			IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
-			ext.unbindColor(colorKey);
-			ext.bindColor(colorKey, rgb);
+		if (fColorManager != null && colorKey != null && fColorManager.getColor(colorKey) == null) {
+			RGB rgb= PreferenceConverter.getColor(fPreferenceStore, colorKey);
+			if (fColorManager instanceof IColorManagerExtension) {
+				IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
+				ext.unbindColor(colorKey);
+				ext.bindColor(colorKey, rgb);
+			}
 		}
 	}
 	

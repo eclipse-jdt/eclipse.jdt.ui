@@ -153,11 +153,13 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	}
 
 	private void addToken(String colorKey, String boldKey, String italicKey) {
-		RGB rgb= PreferenceConverter.getColor(fPreferenceStore, colorKey);
-		if (fColorManager instanceof IColorManagerExtension) {
-			IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
-			ext.unbindColor(colorKey);
-			ext.bindColor(colorKey, rgb);
+		if (fColorManager != null && colorKey != null && fColorManager.getColor(colorKey) == null) {
+			RGB rgb= PreferenceConverter.getColor(fPreferenceStore, colorKey);
+			if (fColorManager instanceof IColorManagerExtension) {
+				IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
+				ext.unbindColor(colorKey);
+				ext.bindColor(colorKey, rgb);
+			}
 		}
 		
 		if (!fNeedsLazyColorLoading)
@@ -244,17 +246,21 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		if (rgb != null) {
 			
 			String property= event.getProperty();
+			Color color= fColorManager.getColor(property);
 			
-			if (fColorManager instanceof IColorManagerExtension) {
+			if ((color == null || !rgb.equals(color.getRGB())) && fColorManager instanceof IColorManagerExtension) {
 				IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
-				ext.unbindColor(property);
-				ext.bindColor(property, rgb);
+				
+			 	ext.unbindColor(property);
+			 	ext.bindColor(property, rgb);
+			 	
+				color= fColorManager.getColor(property);
 			}
 			
 			Object data= token.getData();
 			if (data instanceof TextAttribute) {
 				TextAttribute oldAttr= (TextAttribute) data;
-				token.setData(new TextAttribute(fColorManager.getColor(property), oldAttr.getBackground(), oldAttr.getStyle()));
+				token.setData(new TextAttribute(color, oldAttr.getBackground(), oldAttr.getStyle()));
 			}
 		}
 	}

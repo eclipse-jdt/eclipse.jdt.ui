@@ -42,7 +42,6 @@ public class PropertiesFileEditor extends TextEditor {
 		setPreferenceStore(store);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
-//		setDocumentProvider(new FileDocumentProvider());
 	}
 
 	/*

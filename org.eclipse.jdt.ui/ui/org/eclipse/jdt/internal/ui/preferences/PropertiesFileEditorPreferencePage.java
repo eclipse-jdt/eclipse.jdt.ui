@@ -66,7 +66,7 @@ import org.eclipse.ui.model.WorkbenchViewerSorter;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.ui.text.IColorManager;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
+import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 
 /**
  * The page for setting the properties file editor preferences.
@@ -302,8 +303,13 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 * Highlighting color list viewer
 	 */
 	private TableViewer fHighlightingColorListViewer;
-
 	
+	/**
+	 * The color manager.
+	 */
+	private IColorManager fColorManager;
+	
+
 	/**
 	 * Creates a new preference page.
 	 */
@@ -474,8 +480,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, generalTextStore });
 		fPreviewViewer= new SourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		PropertiesFileSourceViewerConfiguration configuration= new PropertiesFileSourceViewerConfiguration(tools.getColorManager(), store, null, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
+		fColorManager= new JavaColorManager(false);
+		PropertiesFileSourceViewerConfiguration configuration= new PropertiesFileSourceViewerConfiguration(fColorManager, store, null, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
 		fPreviewViewer.configure(configuration);
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
@@ -592,6 +598,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			fOverlayStore.stop();
 			fOverlayStore= null;
 		}
+		
+		fColorManager.dispose();
 
 		super.dispose();
 	}

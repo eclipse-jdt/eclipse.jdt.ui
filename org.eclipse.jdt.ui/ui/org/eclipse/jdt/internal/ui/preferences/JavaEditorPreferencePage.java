@@ -21,9 +21,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Preferences;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -46,6 +43,9 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
@@ -81,8 +81,8 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedRange;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
@@ -393,13 +394,21 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private boolean fIsSemanticHighlightingEnabled;
 	
 	/**
+	 * The color manager.
+	 * @since 3.1
+	 */
+	private IColorManager fColorManager;
+	
+	
+	/**
 	 * Creates a new preference page.
 	 */
 	public JavaEditorPreferencePage() {
 		setDescription(PreferencesMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 
-		Color itemColor= JavaPlugin.getDefault().getJavaTextTools().getColorManager().getColor(new RGB(SEMANTIC_HIGHLIGHTING_ITEM_COLOR[0], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[1], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[2]));
+		fColorManager= new JavaColorManager(false);
+		Color itemColor= fColorManager.getColor(new RGB(SEMANTIC_HIGHLIGHTING_ITEM_COLOR[0], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[1], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[2]));
 		SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++)
 			fSemanticHighlightingColorList.add(new SemanticHighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i]), itemColor));
@@ -766,8 +775,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
-		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(tools.getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING);
+		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(fColorManager, store, null, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewViewer.configure(configuration);
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
@@ -776,7 +784,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
-		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
+		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewViewer.setDocument(document);
 
 		installSemanticHighlighting();
@@ -1343,6 +1351,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		uninstallSemanticHighlighting();
 		
 		fFoldingConfigurationBlock.dispose();
+		fColorManager.dispose();
 		
 		if (fOverlayStore != null) {
 			fOverlayStore.stop();
@@ -1484,7 +1493,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private void installSemanticHighlighting() {
 		if (fSemanticHighlightingManager == null) {
 			fSemanticHighlightingManager= new SemanticHighlightingManager();
-			fSemanticHighlightingManager.install(fPreviewViewer, JavaPlugin.getDefault().getJavaTextTools().getColorManager(), fOverlayStore, createPreviewerRanges());
+			fSemanticHighlightingManager.install(fPreviewViewer, fColorManager, fOverlayStore, createPreviewerRanges());
 		}
 	}
 	
