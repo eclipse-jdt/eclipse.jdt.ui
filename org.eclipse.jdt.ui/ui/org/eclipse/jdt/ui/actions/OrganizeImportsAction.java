@@ -302,7 +302,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
 			progressService.run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
 				public void run(IProgressMonitor monitor) {
+					long start= System.currentTimeMillis();
 					doRunOnMultiple(cus, status, monitor);
+					System.out.println("total time " + (System.currentTimeMillis() - start) + " ms, cus: " + cus.length); //$NON-NLS-1$ //$NON-NLS-2$
+
 				}
 			})); // workspace lock
 			if (!status.isOK()) {

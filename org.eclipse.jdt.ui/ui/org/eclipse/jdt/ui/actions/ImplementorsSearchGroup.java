@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -109,43 +110,44 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		action.update(selection);
 		provider.addSelectionChangedListener(action);
 	}
-
-	private FindAction[] getActions(ISelection sel) {
-		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 2);		
-		actions.add(fFindImplementorsAction);
-		actions.add(fFindImplementorsInProjectAction);
-		actions.add(fFindImplementorsInWorkingSetAction);
-			
-		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
-		while (iter.hasNext()) {
-			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
-			FindAction action;
-			if (fEditor != null)
-				action= new WorkingSetFindAction(fEditor, new FindImplementorsInWorkingSetAction(fEditor, workingSets), SearchUtil.toString(workingSets));
-			else
-				action= new WorkingSetFindAction(fSite, new FindImplementorsInWorkingSetAction(fSite, workingSets), SearchUtil.toString(workingSets));
-			action.update(sel);
-			actions.add(action);
+	
+	private void addAction(IAction action, IMenuManager manager) {
+		if (action.isEnabled()) {
+			manager.add(action);
 		}
-		return (FindAction[])actions.toArray(new FindAction[actions.size()]);
 	}
-
-	/* 
+	
+	private void addWorkingSetAction(IWorkingSet[] workingSets, IMenuManager manager) {
+		FindAction action;
+		if (fEditor != null)
+			action= new WorkingSetFindAction(fEditor, new FindImplementorsInWorkingSetAction(fEditor, workingSets), SearchUtil.toString(workingSets));
+		else
+			action= new WorkingSetFindAction(fSite, new FindImplementorsInWorkingSetAction(fSite, workingSets), SearchUtil.toString(workingSets));
+		action.update(getContext().getSelection());
+		addAction(action, manager);
+	}
+	
+	
+	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
 	public void fillContextMenu(IMenuManager manager) {
 		MenuManager javaSearchMM= new MenuManager(MENU_TEXT, IContextMenuConstants.GROUP_SEARCH);
-		ISelection sel= getContext().getSelection();
-		FindAction[] actions= getActions(sel);
-		for (int i= 0; i < actions.length; i++) {
-			FindAction action= actions[i];
-			if (action.isEnabled())
-				javaSearchMM.add(action);
-		}
+		addAction(fFindImplementorsAction, javaSearchMM);
+		addAction(fFindImplementorsInProjectAction, javaSearchMM);
 		
+		javaSearchMM.add(new Separator());
+		
+		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
+		while (iter.hasNext()) {
+			addWorkingSetAction((IWorkingSet[]) iter.next(), javaSearchMM);
+		}
+		addAction(fFindImplementorsInWorkingSetAction, javaSearchMM);
+
 		if (!javaSearchMM.isEmpty())
 			manager.appendToGroup(fGroupId, javaSearchMM);
 	}
+	
 
 	/* 
 	 * Method declared on ActionGroup.
