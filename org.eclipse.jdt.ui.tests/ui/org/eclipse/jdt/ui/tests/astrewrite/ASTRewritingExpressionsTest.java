@@ -39,7 +39,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingExpressionsTest("testMethodInvocation1"));
+			suite.addTest(new ASTRewritingExpressionsTest("testMethodParamsRenameReorder"));
 			return suite;
 		}		
 	}
@@ -973,6 +973,90 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("        goo(foo(1, 2));\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+
+	public void testMethodParamsRenameReorder() throws Exception {
+		if (true)
+			return;
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void m(boolean y, int a) {\n");
+		buf.append("        m(y, a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "m");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		{ 
+			//params 
+			List params= methodDecl.parameters();
+			SingleVariableDeclaration firstParam= (SingleVariableDeclaration) params.get(0);
+			SingleVariableDeclaration secondParam= (SingleVariableDeclaration) params.get(1);
+
+			//args
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			MethodInvocation invocation= (MethodInvocation) stmt.getExpression();
+			List arguments= invocation.arguments();
+			SimpleName first= (SimpleName) arguments.get(0);
+			SimpleName second= (SimpleName) arguments.get(1);
+			
+
+			//rename args
+			SimpleName newFirstArg= methodDecl.getAST().newSimpleName("yyy");
+			SimpleName newSecondArg= methodDecl.getAST().newSimpleName("bb");
+			rewrite.markAsReplaced(first, newFirstArg);
+			rewrite.markAsReplaced(second, newSecondArg);
+			
+
+			//rename params
+			SimpleName newFirstName= methodDecl.getAST().newSimpleName("yyy");
+			SimpleName newSecondName= methodDecl.getAST().newSimpleName("bb");
+			rewrite.markAsReplaced(firstParam.getName(), newFirstName);
+			rewrite.markAsReplaced(secondParam.getName(), newSecondName);
+			
+			//reoder params
+			ASTNode paramplaceholder1= rewrite.createCopy(firstParam);
+			ASTNode paramplaceholder2= rewrite.createCopy(secondParam);
+			
+			rewrite.markAsReplaced(firstParam, paramplaceholder2);
+			rewrite.markAsReplaced(secondParam, paramplaceholder1);
+			
+			//reorder args
+			ASTNode placeholder1= rewrite.createCopy(first);
+			ASTNode placeholder2= rewrite.createCopy(second);
+			
+			rewrite.markAsReplaced(first, placeholder2);
+			rewrite.markAsReplaced(second, placeholder1);
+
+			
+		}
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void m(int bb, boolean yyy) {\n");
+		buf.append("        m(bb, yyy);\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
