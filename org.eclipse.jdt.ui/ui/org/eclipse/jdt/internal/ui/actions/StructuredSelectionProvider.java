@@ -25,7 +25,6 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  */
@@ -61,16 +60,22 @@ public abstract class StructuredSelectionProvider {
 					try {
 						IJavaElement[] elements= ((ICodeAssist)assist).codeSelect(selection.getOffset(), selection.getLength());
 						result= new StructuredSelection(elements);
+						cacheResult(selection, result);
+						return result;						
 					} catch (JavaModelException e) {
-						ExceptionHandler.handle(e, "Selection Converter", "Unexpected exception while converting text selection.");
+						JavaPlugin.log(e);
 					}
-					cacheResult(selection, result);
-					return result;
 				}
 			} else if ((flags & FLAGS_DO_ELEMENT_AT_OFFSET) != 0) {
 				try {
 					IJavaElement assist= getEditorInput(editor);
 					if (assist instanceof ICompilationUnit) {
+						ICompilationUnit cu= (ICompilationUnit) assist;
+						if (cu.isWorkingCopy()) {
+							synchronized (cu) {
+								cu.reconcile();
+							}
+						}
 						IJavaElement ref= ((ICompilationUnit)assist).getElementAt(selection.getOffset());
 						if (ref != null) {
 							return new StructuredSelection(ref);
@@ -82,7 +87,7 @@ public abstract class StructuredSelectionProvider {
 						}
 					}
 				} catch (JavaModelException e) {
-					ExceptionHandler.handle(e, "Selection Converter", "Unexpected exception while converting text selection.");
+					JavaPlugin.log(e);
 				}
 			}
 			return StructuredSelection.EMPTY;
