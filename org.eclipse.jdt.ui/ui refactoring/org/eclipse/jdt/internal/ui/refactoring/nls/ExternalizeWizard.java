@@ -48,6 +48,6 @@ public class ExternalizeWizard extends RefactoringWizard {
 
 	public boolean canFinish() {
 		IWizardPage page= getContainer().getCurrentPage();
-		return !(page instanceof ExternalizeWizardPage);
+		return super.canFinish() && !(page instanceof ExternalizeWizardPage);
 	}
 }
