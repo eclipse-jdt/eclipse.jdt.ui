@@ -37,9 +37,9 @@ import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IActionBars;
@@ -117,7 +117,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private IMethod fShownMethod;
     private SelectionProviderMediator fSelectionProviderMediator;
     private List fMethodHistory;
-    private ListViewer fLocationViewer;
+    private TableViewer fLocationViewer;
     private Menu fLocationContextMenu;
     private Menu fTreeContextMenu;
     private SashForm fHierarchyLocationSplitter;
@@ -278,7 +278,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         // Page 1: Viewers
         createHierarchyLocationSplitter(fPagebook);
         createCallHierarchyViewer(fHierarchyLocationSplitter);
-        createLocationList(fHierarchyLocationSplitter);
+        createLocationViewer(fHierarchyLocationSplitter);
 
         // Page 2: Nothing selected
         fNoHierarchyShownLabel = new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
@@ -708,8 +708,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     /**
      * @param parent
      */
-    private void createLocationList(Composite parent) {
-        fLocationViewer = new ListViewer(parent, SWT.NONE);
+    private void createLocationViewer(Composite parent) {
+        fLocationViewer = new TableViewer(parent, SWT.NONE);
 
         fLocationViewer.setContentProvider(new ArrayContentProvider());
         fLocationViewer.setLabelProvider(new LocationLabelProvider());

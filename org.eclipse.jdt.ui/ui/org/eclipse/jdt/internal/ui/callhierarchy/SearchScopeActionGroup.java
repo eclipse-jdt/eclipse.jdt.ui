@@ -37,9 +37,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class SearchScopeActionGroup extends ActionGroup {
     private SearchScopeAction fSelectedAction = null;

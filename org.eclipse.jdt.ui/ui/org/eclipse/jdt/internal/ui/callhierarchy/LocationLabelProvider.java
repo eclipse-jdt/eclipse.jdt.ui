@@ -11,32 +11,44 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jface.viewers.LabelProvider;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 
 class LocationLabelProvider extends LabelProvider {
+    
+    LocationLabelProvider() {
+    }
+            
     /* (non-Javadoc)
      * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
      */
     public String getText(Object element) {
+        String text= ""; //$NON-NLS-1$        
         if (element instanceof CallLocation) {
-            CallLocation callLocation = (CallLocation) element;
-
-            return removeWhitespaceOutsideStringLiterals(callLocation.toString());
+            text= removeWhitespaceOutsideStringLiterals((CallLocation) element);
         }
 
-        return super.getText(element);
+        return text;
     }
 
+    public Image getImage(Object element) {
+        return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE);
+    }
+    
     /**
      * @param string
      * @return String
      */
-    private String removeWhitespaceOutsideStringLiterals(String s) {
+    private String removeWhitespaceOutsideStringLiterals(CallLocation callLocation) {
         StringBuffer buf = new StringBuffer();
         boolean withinString = false;
 
+        String s= callLocation.toString();
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
 
