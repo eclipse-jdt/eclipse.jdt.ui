@@ -284,6 +284,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		private void updateKeyModifierMask() {
 			String modifiers= getPreferenceStore().getString(BROWSER_LIKE_LINKS_KEY_MODIFIER);
 			fKeyModifierMask= computeStateMask(modifiers);
+			if (fKeyModifierMask == -1) {
+				// Fallback to stored state mask
+				fKeyModifierMask= getPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
+			};
 		}
 
 		private int computeStateMask(String modifiers) {
@@ -296,7 +300,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			int stateMask= 0;
 			StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
 			while (modifierTokenizer.hasMoreTokens()) {
-				int modifier= Action.findModifier(modifierTokenizer.nextToken());
+				int modifier= EditorUtility.findLocalizedModifier(modifierTokenizer.nextToken());
 				if (modifier == 0 || (stateMask & modifier) == modifier)
 					return -1;
 				stateMask= stateMask | modifier;
@@ -1092,6 +1096,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	private final static String BROWSER_LIKE_LINKS= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS;
 	/** Preference key for key modifier of browser like links */
 	private final static String BROWSER_LIKE_LINKS_KEY_MODIFIER= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER;
+	/**
+	 * Preference key for key modifier mask of browser like links.
+	 * The value is only used if the value of <code>EDITOR_BROWSER_LIKE_LINKS</code>
+	 * cannot be resolved to valid SWT modifier bits.
+	 * 
+	 * @since 2.1.1
+	 */
+	private final static String BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK;
 	
 	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
 

@@ -29,13 +29,13 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.Assert;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Describes a Java editor text hover.
@@ -90,7 +90,7 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 		int stateMask= 0;
 		StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
 		while (modifierTokenizer.hasMoreTokens()) {
-			int modifier= Action.findModifier(modifierTokenizer.nextToken());
+			int modifier= EditorUtility.findLocalizedModifier(modifierTokenizer.nextToken());
 			if (modifier == 0 || (stateMask & modifier) == modifier)
 				return -1;
 			stateMask= stateMask | modifier;
@@ -241,6 +241,17 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 				idToModifier.put(id, tokenizer.nextToken());
 		}
 
+		String compiledTextHoverModifierMasks= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS);
+
+		tokenizer= new StringTokenizer(compiledTextHoverModifierMasks, VALUE_SEPARATOR);
+		HashMap idToModifierMask= new HashMap(tokenizer.countTokens() / 2);
+
+		while (tokenizer.hasMoreTokens()) {
+			String id= tokenizer.nextToken();
+			if (tokenizer.hasMoreTokens())
+				idToModifierMask.put(id, tokenizer.nextToken());
+		}
+
 		for (int i= 0; i < hovers.length; i++) {
 			String modifierString= (String)idToModifier.get(hovers[i].getId());
 			boolean enabled= true;
@@ -258,9 +269,23 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 			hovers[i].fModifierString= modifierString;
 			hovers[i].fIsEnabled= enabled;
 			hovers[i].fStateMask= computeStateMask(modifierString);
+			if (hovers[i].fStateMask == -1) {
+				// Fallback: use stored modifier masks
+				try {
+					hovers[i].fStateMask= Integer.parseInt((String)idToModifierMask.get(hovers[i].getId()));
+				} catch (NumberFormatException ex) {
+					hovers[i].fStateMask= -1;
+				}
+				// Fix modifier string
+				int stateMask= hovers[i].fStateMask;
+				if (stateMask == -1)
+					hovers[i].fModifierString=""; //$NON-NLS-1$
+				else
+					hovers[i].fModifierString= EditorUtility.getModifierString(stateMask);
+			}
 		}
 	}
-
+	
 	/**
 	 * Returns the configured modifier getStateMask for this hover.
 	 * 
