@@ -422,10 +422,13 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private void addAllRequiredPullableFields(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
 		IField[] requiredFields= ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[]{member}, pm);
+		boolean isStatic= JdtFlags.isStatic(member);
 		for (int i= 0; i < requiredFields.length; i++) {
-			IField field= requiredFields[i];
-			if (isRequiredPullableMember(queue, field))
-				queue.add(field);
+			IField requiredField= requiredFields[i];
+			if (isStatic && ! JdtFlags.isStatic(requiredField))
+				continue;			
+			if (isRequiredPullableMember(queue, requiredField))
+				queue.add(requiredField);
 		}
 	}
 	
@@ -434,10 +437,13 @@ public class PullUpRefactoring extends Refactoring {
 		IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[]{member}, new SubProgressMonitor(pm, 1));
 		SubProgressMonitor sPm= new SubProgressMonitor(pm, 1);
 		sPm.beginTask("", requiredMethods.length); //$NON-NLS-1$
+		boolean isStatic= JdtFlags.isStatic(member);
 		for (int i= 0; i < requiredMethods.length; i++) {
-			IMethod method= requiredMethods[i];
-			if (isRequiredPullableMember(queue, method) && ! isVirtualAccessibleFromTargetClass(method, new SubProgressMonitor(sPm, 1)))
-				queue.add(method);
+			IMethod requiredMethod= requiredMethods[i];
+			if (isStatic && ! JdtFlags.isStatic(requiredMethod))
+				continue;
+			if (isRequiredPullableMember(queue, requiredMethod) && ! isVirtualAccessibleFromTargetClass(requiredMethod, new SubProgressMonitor(sPm, 1)))
+				queue.add(requiredMethod);
 		}
 		sPm.done();
 	}
@@ -805,9 +811,6 @@ public class PullUpRefactoring extends Refactoring {
 
 		if (! member.isStructureKnown())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_unknown_structure"));					 //$NON-NLS-1$
-
-		if (JdtFlags.isStatic(member))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_static_elements")); //$NON-NLS-1$
 			
 		if (member.getElementType() == IJavaElement.METHOD){
 			IMethod method= (IMethod) member;
@@ -861,8 +864,9 @@ public class PullUpRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("", fMembersToPullUp.length); //$NON-NLS-1$
 		for (int i= 0; i < fMembersToPullUp.length; i++) {
-			if (fMembersToPullUp[i].getElementType() == IJavaElement.FIELD && JdtFlags.isFinal(fMembersToPullUp[i])){
-				Context context= JavaSourceContext.create(fMembersToPullUp[i]);
+			IMember member= fMembersToPullUp[i];
+			if (member.getElementType() == IJavaElement.FIELD && ! JdtFlags.isStatic(member) && JdtFlags.isFinal(member)){
+				Context context= JavaSourceContext.create(member);
 				result.addWarning(RefactoringCoreMessages.getString("PullUpRefactoring.final_fields"), context); //$NON-NLS-1$
 			}
 			pm.worked(1);
@@ -1453,8 +1457,11 @@ public class PullUpRefactoring extends Refactoring {
 		Block newBody= (Block)targetRewrite.createPlaceholder(newBodySource, ASTRewrite.BLOCK);
 		newMethod.setBody(newBody);
 	}
+	
 	private static ISourceRange[] findSuperReferenceRanges(IMethod method, IType superType) throws JavaModelException{
 		Assert.isNotNull(method);
+		if (JdtFlags.isStatic(method))
+			return new ISourceRange[0];
 		SuperReferenceFinderVisitor visitor= new SuperReferenceFinderVisitor(method, superType);
 		AST.parseCompilationUnit(method.getCompilationUnit(), true).accept(visitor);
 		return visitor.getSuperReferenceRanges();

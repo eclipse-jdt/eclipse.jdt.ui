@@ -733,6 +733,24 @@ public class PullUpTests extends RefactoringTest {
 								true, true, 0);
 	}
 
+	public void test38() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {"A"};
+		String[] namesOfMethodsToPullUp= {"m"};
+		String[][] signaturesOfMethodsToPullUp= {new String[0]};
+		String[] namesOfFieldsToPullUp= {"A"};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures, 
+								selectedFieldNames,	
+								namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, 
+								namesOfFieldsToPullUp, 
+								namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, 
+								true, true, 0);
+	}
+
 	public void testFail0() throws Exception{
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
@@ -1082,6 +1100,72 @@ public class PullUpTests extends RefactoringTest {
 		String[] expectedFieldNames= fieldNames;
 		String[] expectedMethodNames= methodNames;
 		String[][] expectedMethodSignatures= methodSignatures;
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers7() throws Exception{
+		String[] fieldNames= {};
+		String[] methodNames= {"m"};
+		String[][] methodSignatures= {new String[0]};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= methodNames;
+		String[][] expectedMethodSignatures= methodSignatures;
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers8() throws Exception{
+		String[] fieldNames= {};
+		String[] methodNames= {"m"};
+		String[][] methodSignatures= {new String[0]};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= {"m", "foo"};
+		String[][] expectedMethodSignatures= {new String[0], new String[0]};
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers9() throws Exception{
+		String[] fieldNames= {"m"};
+		String[] methodNames= {};
+		String[][] methodSignatures= {};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= methodNames;
+		String[][] expectedMethodSignatures= methodSignatures;
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers10() throws Exception{
+		String[] fieldNames= {"m"};
+		String[] methodNames= {};
+		String[][] methodSignatures= {};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= {"foo"};
+		String[][] expectedMethodSignatures= {new String[0]};
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers11() throws Exception{
+		String[] fieldNames= {"m"};
+		String[] methodNames= {};
+		String[][] methodSignatures= {};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= {"foo"};
+		String[][] expectedMethodSignatures= {new String[0]};
+		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
+	}
+
+	public void testAddingRequiredMembers12() throws Exception{
+		String[] fieldNames= {};
+		String[] methodNames= {"m"};
+		String[][] methodSignatures= {new String[0]};
+		
+		String[] expectedFieldNames= fieldNames;
+		String[] expectedMethodNames= {"foo", "m"};
+		String[][] expectedMethodSignatures= {new String[0], new String[0]};
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 	
