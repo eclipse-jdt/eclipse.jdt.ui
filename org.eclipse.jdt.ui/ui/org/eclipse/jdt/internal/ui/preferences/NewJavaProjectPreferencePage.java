@@ -339,12 +339,12 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		indent= convertWidthInCharsToPixels(4);
 
 		fSrcFolderNameLabel= new Label(composite, SWT.NONE);
-		fSrcFolderNameLabel.setText(JavaUIMessages.getString("NewJavaProjectPreferencePage.folders.src"));
+		fSrcFolderNameLabel.setText(JavaUIMessages.getString("NewJavaProjectPreferencePage.folders.src")); //$NON-NLS-1$
 		fSrcFolderNameText= addTextControl(composite, fSrcFolderNameLabel, SRCBIN_SRCNAME, indent); //$NON-NLS-1$
 		fSrcFolderNameText.addModifyListener(fModifyListener);
 
 		fBinFolderNameLabel= new Label(composite, SWT.NONE);
-		fBinFolderNameLabel.setText(JavaUIMessages.getString("NewJavaProjectPreferencePage.folders.bin"));
+		fBinFolderNameLabel.setText(JavaUIMessages.getString("NewJavaProjectPreferencePage.folders.bin")); //$NON-NLS-1$
 		fBinFolderNameText= addTextControl(composite, fBinFolderNameLabel, SRCBIN_BINNAME, indent); //$NON-NLS-1$
 		fBinFolderNameText.addModifyListener(fModifyListener);
 
