@@ -490,7 +490,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
 	
 	private String format(String src, int indentationLevel){
-		return ToolFactory.createCodeFormatter(null).format(src, indentationLevel, null, getLineSeperator());
+		return ToolFactory.createDefaultCodeFormatter(null).format(src, indentationLevel, null, getLineSeperator());
 	}
 
 	private String getNewConstructorSource(TypeDeclaration typeDeclaration) throws CoreException {

@@ -1021,7 +1021,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	private String format(String src, int indentationLevel){
-		return ToolFactory.createCodeFormatter(null).format(src, indentationLevel, null, getLineSeperator());
+		return ToolFactory.createDefaultCodeFormatter(null).format(src, indentationLevel, null, getLineSeperator());
 	}
 
 	private static String getFullyQualifiedImportName(ITypeBinding type) {

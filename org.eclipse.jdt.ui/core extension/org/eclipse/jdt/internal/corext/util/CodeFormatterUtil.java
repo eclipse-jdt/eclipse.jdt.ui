@@ -39,7 +39,7 @@ public class CodeFormatterUtil {
 	 * Creates a string that represents the given number of indents.
 	 */
 	public static String createIndentString(int indent) {
-		ICodeFormatter formatter= ToolFactory.createCodeFormatter(null);
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
 		return formatter.format("", indent, null, ""); //$NON-NLS-1$ //$NON-NLS-2$
 	} 
 	

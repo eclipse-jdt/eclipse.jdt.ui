@@ -524,7 +524,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	//without the trailing indent
 	private String createTempDeclarationSource(String initializerSource, boolean addTrailingLineDelimiter) throws CoreException {
 		String modifier= fDeclareFinal ? "final ": ""; //$NON-NLS-1$ //$NON-NLS-2$
-		ICodeFormatter formatter= ToolFactory.createCodeFormatter(null);
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
 		String dummyInitializer= "0"; //$NON-NLS-1$
 		String semicolon= ";"; //$NON-NLS-1$
 		String dummyDeclaration= modifier + getTempTypeName() + " " + fTempName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$

@@ -47,7 +47,7 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 	 * @see IFormattingStrategy#format(String, boolean, String, int[])
 	 */
 	public String format(String content, boolean isLineStart, String indentation, int[] positions) {
-		ICodeFormatter formatter= ToolFactory.createCodeFormatter(null);
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
 		
 		IDocument doc= fViewer.getDocument();
 		String lineDelimiter= StubUtility.getLineDelimiterFor(doc);

@@ -380,7 +380,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String formatSource(String source) {
-		return ToolFactory.createCodeFormatter(null).format(source, 0, null, getLineSeperator());
+		return ToolFactory.createDefaultCodeFormatter(null).format(source, 0, null, getLineSeperator());
 	}
 	
 	private String getCuNameForNewInterface() {
