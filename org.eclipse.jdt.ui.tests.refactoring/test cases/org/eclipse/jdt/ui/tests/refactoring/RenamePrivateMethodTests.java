@@ -63,21 +63,21 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		processor.setUpdateReferences(updateReferences);
 		processor.setNewElementName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
-		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
 		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 		
 		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
 		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 		
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
@@ -158,8 +158,8 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		refactoring.setNewName("kk");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
-		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
 		
 	}
 

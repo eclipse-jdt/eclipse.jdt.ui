@@ -16,24 +16,19 @@ import java.io.InputStreamReader;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
+import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.core.boot.BootLoader;
-
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 public class RenameTypeTests extends RefactoringTest {
@@ -93,7 +88,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
 		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
-		assertEquals("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());	
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());	
 	}
 	
 	private void helper2_0(String oldName, String newName, String newCUName, boolean updateReferences) throws Exception{
@@ -719,7 +714,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
 		ICompilationUnit newcu= packageA.getCompilationUnit("B.java");
-		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), newcu.getSource());
 	}
 	
 	public void test21() throws Exception { 
@@ -767,8 +762,8 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
-		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEqualLines("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
 		
 	}
 	
@@ -788,8 +783,8 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuAA= getPackageP().getCompilationUnit("AA.java");
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
-		assertEquals("invalid renaming AA", getFileContents(getOutputTestFileName("AA")), newcuAA.getSource());		
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEqualLines("invalid renaming AA", getFileContents(getOutputTestFileName("AA")), newcuAA.getSource());		
 	}
 	public void test31() throws Exception {
 		createCUfromTestFile(getPackageP(), "AA");
@@ -803,8 +798,8 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuAA= getPackageP().getCompilationUnit("AA.java");
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
-		assertEquals("invalid renaming AA", getFileContents(getOutputTestFileName("AA")), newcuAA.getSource());		
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEqualLines("invalid renaming AA", getFileContents(getOutputTestFileName("AA")), newcuAA.getSource());		
 	}
 	public void test32() throws Exception { 
 		helper2("A", "B");		
@@ -880,8 +875,8 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
-		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEqualLines("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
 	}
 	
 	public void test47() throws Exception { 
@@ -913,8 +908,8 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
-		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEqualLines("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
 	}
 	
 	public void test52() throws Exception {
@@ -995,7 +990,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
 		InputStreamReader reader= new InputStreamReader(file.getContents(true));
 		StringBuffer newContent= new StringBuffer();
 		int ch;
@@ -1007,7 +1002,7 @@ public class RenameTypeTests extends RefactoringTest {
 				reader.close();
 		}
 		String definedContent= getFileContents(getTestPath() + "testQualifiedName1/out/build.xml");
-		assertEquals("invalid updating build.xml", newContent.toString(), definedContent);
+		assertEqualLines("invalid updating build.xml", newContent.toString(), definedContent);
 		
 	}
 }

@@ -14,20 +14,15 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 ;
 
 public class MultiMoveTest extends RefactoringTest {
@@ -104,13 +99,13 @@ public class MultiMoveTest extends RefactoringTest {
 			assertEquals("p2 files", 3, packP2.getChildren().length);
 
 			String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/A.java");
-			assertEquals("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());
+			assertEqualLines("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());
 
 			expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/B.java");
-			assertEquals("incorrect update of B", expectedSource, packP2.getCompilationUnit("B.java").getSource());
+			assertEqualLines("incorrect update of B", expectedSource, packP2.getCompilationUnit("B.java").getSource());
 
 			expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
-			assertEquals("incorrect update of C", expectedSource, p2C.getSource());
+			assertEqualLines("incorrect update of C", expectedSource, p2C.getSource());
 		} finally {
 			delete(packP1);
 			delete(packP2);		
@@ -153,16 +148,13 @@ public class MultiMoveTest extends RefactoringTest {
 			assertEquals("p2 files", 3, packP2.getChildren().length);
 
 			String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/A.java");
-//			assertEquals("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());
-			SourceCompareUtil.compare("incorrect update of A", packP2.getCompilationUnit("A.java").getSource(), expectedSource);
+			assertEqualLines("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());
 
 			expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/B.java");
-//			assertEquals("incorrect update of B", expectedSource, packP2.getCompilationUnit("B.java").getSource());
-			SourceCompareUtil.compare("incorrect update of B", packP2.getCompilationUnit("B.java").getSource(), expectedSource);
+			assertEqualLines("incorrect update of B", expectedSource, packP2.getCompilationUnit("B.java").getSource());
 
 			expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
-//			assertEquals("incorrect update of C", expectedSource, p2C.getSource());
-			SourceCompareUtil.compare("incorrect update of C", p2C.getSource(), expectedSource);
+			assertEqualLines("incorrect update of C", expectedSource, p2C.getSource());
 		} finally {
 			delete(packP1);
 			delete(packP2);
@@ -203,13 +195,13 @@ public class MultiMoveTest extends RefactoringTest {
 			assertEquals("p2 files", 2, packP2.getChildren().length);
 
 			String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/A.java");
-			assertEquals("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());
+			assertEqualLines("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());
 
 			expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p1Name + "/B.java");
-			assertEquals("incorrect update of B", expectedSource, packP1.getCompilationUnit("B.java").getSource());
+			assertEqualLines("incorrect update of B", expectedSource, packP1.getCompilationUnit("B.java").getSource());
 
 			expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
-			assertEquals("incorrect update of C", expectedSource, p2C.getSource());
+			assertEqualLines("incorrect update of C", expectedSource, p2C.getSource());
 
 		} finally {
 			delete(packP1);
@@ -254,10 +246,10 @@ public class MultiMoveTest extends RefactoringTest {
 			assertEquals("p1 files", 1, packP3.getChildren().length);
 
 			String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/Outer.java");
-			assertEquals("incorrect update of Outer", expectedSource, packP2.getCompilationUnit("Outer.java").getSource());
+			assertEqualLines("incorrect update of Outer", expectedSource, packP2.getCompilationUnit("Outer.java").getSource());
 
 			expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p3Name + "/Test.java");
-			assertEquals("incorrect update of Test", expectedSource, packP3.getCompilationUnit("Test.java").getSource());
+			assertEqualLines("incorrect update of Test", expectedSource, packP3.getCompilationUnit("Test.java").getSource());
 
 		} finally {
 			delete(packP1);

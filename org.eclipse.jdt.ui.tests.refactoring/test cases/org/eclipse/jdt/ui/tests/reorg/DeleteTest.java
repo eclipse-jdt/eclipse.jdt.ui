@@ -99,7 +99,7 @@ public class DeleteTest extends RefactoringTest{
 			newCuA= getPackageP().getCompilationUnit(CU_NAME + ".java");
 			assertTrue("A.java does not exist", newCuA.exists() == !deleteCu);
 			if (! deleteCu)
-				assertEquals("incorrect content of A.java", getFileContents(getOutputTestFileName(CU_NAME)), newCuA.getSource());
+				assertEqualLines("incorrect content of A.java", getFileContents(getOutputTestFileName(CU_NAME)), newCuA.getSource());
 		} finally {
 			performDummySearch();
 			if (newCuA != null && newCuA.exists())

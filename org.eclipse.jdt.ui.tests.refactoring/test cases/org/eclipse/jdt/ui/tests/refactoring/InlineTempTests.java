@@ -74,7 +74,7 @@ public class InlineTempTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		assertEquals("incorrect inlining", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		assertEqualLines("incorrect inlining", getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 	
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn) throws Exception{

@@ -19,7 +19,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
@@ -30,19 +29,14 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 
 public class MoveTest extends RefactoringTest {
@@ -943,7 +937,7 @@ public class MoveTest extends RefactoringTest {
 			assertTrue("source file exists after moving", ! cu1.exists());
 			ICompilationUnit newCu= otherPackage.getCompilationUnit(cu1.getElementName());
 			assertTrue("new file does not exist after moving", newCu.exists());
-			SourceCompareUtil.compare("source differs", newCu.getSource(), newSource);
+			assertEqualLines("source differs", newSource, newCu.getSource());
 		}finally{
 			performDummySearch();
 			otherPackage.delete(true, new NullProgressMonitor());
@@ -969,7 +963,7 @@ public class MoveTest extends RefactoringTest {
 			assertTrue("source file exists after moving", ! cu1.exists());
 			newCu= getRoot().getPackageFragment("").getCompilationUnit(cu1.getElementName());
 			assertTrue("new file does not exist after moving", newCu.exists());
-			SourceCompareUtil.compare("source differs", newCu.getSource(), newSource);
+			assertEqualLines("source differs", newSource, newCu.getSource());
 
 		}finally{
 			performDummySearch();
@@ -995,7 +989,7 @@ public class MoveTest extends RefactoringTest {
 			assertEquals(null, status);
 			assertTrue("source file exists after moving", ! cu1.exists());
 			newFile= MySetup.getProject().getProject().getFile(cu1.getElementName());
-			SourceCompareUtil.compare("source differs", getContents(newFile), newSource);
+			assertEqualLines("source differs", newSource, getContents(newFile));
 		}finally{
 			performDummySearch();
 			newFile.delete(true, false, null);
@@ -1023,7 +1017,7 @@ public class MoveTest extends RefactoringTest {
 			assertEquals(null, status);
 			assertTrue("source file exists after moving", ! cu1.exists());
 			newFile= simpleProject.getFile(cu1.getElementName());
-			SourceCompareUtil.compare("source differs", getContents(newFile), newSource);
+			assertEqualLines("source differs", newSource, getContents(newFile));
 		}finally{
 			performDummySearch();
 			simpleProject.delete(true, true, null);
@@ -1057,7 +1051,7 @@ public class MoveTest extends RefactoringTest {
 			assertTrue("new file does not exist after", newCu.exists());
 
 			String expectedSource= "package other;class A{void foo(){}class Inner{}}";
-			SourceCompareUtil.compare("source compare failed", newCu.getSource(), expectedSource);
+			assertEqualLines("source compare failed", expectedSource, newCu.getSource());
 		}finally{
 			performDummySearch();
 			otherPackage.delete(true, null);	
@@ -1093,7 +1087,7 @@ public class MoveTest extends RefactoringTest {
 			newFile= folder.getFile(cu1.getElementName());
 			assertTrue("new file does not exist after", newFile.exists());
 
-			SourceCompareUtil.compare("source compare failed", getContents(newFile), expectedSource);
+			assertEqualLines("source compare failed", expectedSource, getContents(newFile));
 		}finally{
 			performDummySearch();
 			newFile.delete(true, false, null);
@@ -1523,7 +1517,7 @@ public class MoveTest extends RefactoringTest {
 			assertEquals(null, status);
 
 			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
-			SourceCompareUtil.compare("source differs", cu.getSource(), expected);
+			assertEqualLines("source differs", expected, cu.getSource());
 		} finally {
 			performDummySearch();
 			if (cu != null)
@@ -1546,7 +1540,7 @@ public class MoveTest extends RefactoringTest {
 			assertEquals(null, status);
 			
 			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
-			SourceCompareUtil.compare("source differs", cu.getSource(), expected);
+			assertEqualLines("source differs", expected, cu.getSource());
 		} finally {
 			performDummySearch();
 			if (cu != null)
@@ -1569,7 +1563,7 @@ public class MoveTest extends RefactoringTest {
 			assertEquals(null, status);
 			
 			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
-			SourceCompareUtil.compare("source differs", cu.getSource(), expected);
+			assertEqualLines("source differs", expected, cu.getSource());
 		} finally {
 			performDummySearch();
 			if (cu != null)

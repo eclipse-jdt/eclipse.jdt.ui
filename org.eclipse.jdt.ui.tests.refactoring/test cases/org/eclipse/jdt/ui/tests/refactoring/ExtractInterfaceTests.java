@@ -21,14 +21,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ExtractInterfaceTests extends RefactoringTest {
 
@@ -109,11 +105,11 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		for (int i= 0; i < cus.length; i++) {
 			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
 			String actual= cus[i].getSource();
-			SourceCompareUtil.compare("(" + cus[i].getElementName() +")", actual, expected);
+			assertEqualLines("(" + cus[i].getElementName() +")", expected, actual);
 		}
 
 		ICompilationUnit interfaceCu= clas.getPackageFragment().getCompilationUnit(newInterfaceName + ".java");
-		SourceCompareUtil.compare("(interface cu)", interfaceCu.getSource(), getFileContents(getOutputTestFileName(newInterfaceName)));
+		assertEqualLines("(interface cu)", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
 	}
 	
 	private void validatePassingTest(String className, String newInterfaceName, boolean extractAll, boolean replaceOccurrences) throws Exception {
@@ -129,10 +125,14 @@ public class ExtractInterfaceTests extends RefactoringTest {
 			ref.setExtractedMembers(ref.getExtractableMembers());
 		ref.setReplaceOccurrences(replaceOccurrences);	
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
-		assertEquals("incorrect changes in " + className, getFileContents(getOutputTestFileName(className)), cu.getSource());
+		assertEqualLines("incorrect changes in " + className,
+			getFileContents(getOutputTestFileName(className)),
+			cu.getSource());
 
 		ICompilationUnit interfaceCu= pack.getCompilationUnit(newInterfaceName + ".java");
-		assertEquals("incorrect interface created", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
+		assertEqualLines("incorrect interface created",
+			getFileContents(getOutputTestFileName(newInterfaceName)),
+			interfaceCu.getSource());
 	}
 
 	private void validateFailingTest(String className, String newInterfaceName, boolean extractAll, int expectedSeverity) throws Exception {

@@ -112,7 +112,7 @@ public class InlineConstantTests extends RefactoringTest {
 
 		for(int i= 0; i < cus.length; i++){
 			String outputTestFileName= getOutputTestFileName(getSimpleName(cuQNames[i]));
-			assertEquals("Incorrect inline in " + outputTestFileName, getFileContents(outputTestFileName), cus[i].getSource());				
+			assertEqualLines("Incorrect inline in " + outputTestFileName, getFileContents(outputTestFileName), cus[i].getSource());				
 		}	
 	}
 

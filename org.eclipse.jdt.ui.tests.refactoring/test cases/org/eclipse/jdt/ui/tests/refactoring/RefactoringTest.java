@@ -22,13 +22,14 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -46,10 +47,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
@@ -57,6 +54,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public abstract class RefactoringTest extends TestCase {
 
@@ -365,7 +366,7 @@ public abstract class RefactoringTest extends TestCase {
 		Set fields= new HashSet();
 		for (int i = 0; i < names.length; i++) {
 			IField field= type.getField(names[i]);
-			Assert.isTrue(field.exists(), "field " + field.getElementName() + " does not exist");
+			assertTrue("field " + field.getElementName() + " does not exist", field.exists());
 			fields.add(field);
 		}
 		return (IField[]) fields.toArray(new IField[fields.size()]);	
@@ -377,7 +378,7 @@ public abstract class RefactoringTest extends TestCase {
 		Set memberTypes= new HashSet();
 		for (int i = 0; i < names.length; i++) {
 			IType memberType= type.getType(names[i]);
-			Assert.isTrue(memberType.exists(), "member type " + memberType.getElementName() + " does not exist");
+			assertTrue("member type " + memberType.getElementName() + " does not exist", memberType.exists());
 			memberTypes.add(memberType);
 		}
 		return (IType[]) memberTypes.toArray(new IType[memberTypes.size()]);	
@@ -389,7 +390,7 @@ public abstract class RefactoringTest extends TestCase {
 		List methods= new ArrayList(names.length);
 		for (int i = 0; i < names.length; i++) {
 			IMethod method= type.getMethod(names[i], signatures[i]);
-			Assert.isTrue(method.exists(), "method " + method.getElementName() + " does not exist");
+			assertTrue("method " + method.getElementName() + " does not exist", method.exists());
 			if (!methods.contains(method))
 				methods.add(method);
 		}
@@ -448,6 +449,45 @@ public abstract class RefactoringTest extends TestCase {
 				return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Line-based version of junit.framework.Assert.assertEquals(String, String)
+	 * without considering line delimiters and with useful error message.
+	 */
+	public static void assertEqualLines(String expected, String actual) {
+		assertEqualLines("", expected, actual);
+	}
+	
+	/**
+	 * Line-based version of junit.framework.Assert.assertEquals(String, String, String)
+	 * without considering line delimiters and with useful error message.
+	 */
+	public static void assertEqualLines(String message, String expected, String actual) {
+		String[] expectedLines= Strings.convertIntoLines(expected);
+		String[] actualLines= Strings.convertIntoLines(actual);
+		
+		StringBuffer diffs= new StringBuffer();
+		for (int i= 0; i < Math.max(actualLines.length, expectedLines.length); i++) {
+			String exp= i >= expectedLines.length ? "<no line>" : expectedLines[i];
+			String act= i >= actualLines.length ? "<no line>" : actualLines[i];
+			if (! exp.equals(act)) {
+				diffs.append("\n* " + (i+1) + "* expected: <" + exp + ">"
+				           + "\n_ " + (i+1) + "_ but was:  <" + act + ">");
+			}
+		}
+		
+		boolean hasDiffs= diffs.length() != 0;
+		boolean hasDiffLineCount= expectedLines.length != actualLines.length;
+		if (hasDiffs || hasDiffLineCount) {
+			message= (message == null || message.length() == 0 ? "" : message + ": ");
+			if (hasDiffLineCount) {
+				fail(message + "different number of lines (" + actualLines.length +
+					" not " + expectedLines.length + ")" + diffs);
+			} else {
+				fail(message + "differences in lines: " + diffs);
+			}
+		}
 	}
 	
 	private static class Requestor implements ITypeNameRequestor{

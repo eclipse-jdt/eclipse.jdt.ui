@@ -23,15 +23,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.Modifier;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ChangeSignatureTests extends RefactoringTest {
 	private static final Class clazz= ChangeSignatureTests.class;
@@ -106,8 +102,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
-//		assertEquals("invalid renaming", expectedFileContents, newcu.getSource());
-		SourceCompareUtil.compare(newcu.getSource(), expectedFileContents);
+		assertEqualLines("invalid renaming", expectedFileContents, newcu.getSource());
 	}
 
 	private void helperDoAll(String typeName, 
@@ -140,7 +135,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
-		SourceCompareUtil.compare(newcu.getSource(), expectedFileContents);
+		assertEqualLines(expectedFileContents, newcu.getSource());
 	}
 	
 	private void markAsDeleted(List list, int[] deleted) {
@@ -171,7 +166,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
 //		assertEquals("invalid renaming", expectedFileContents, newcu.getSource());
-		SourceCompareUtil.compare(newcu.getSource(), expectedFileContents);
+		assertEqualLines(expectedFileContents, newcu.getSource());
 	}
 
 	private void modifyInfos(List infos, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, String[] newParamTypeNames, int[] permutation) {

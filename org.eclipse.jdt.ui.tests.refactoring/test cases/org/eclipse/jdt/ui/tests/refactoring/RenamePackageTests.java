@@ -150,7 +150,7 @@ public class RenamePackageTests extends RefactoringTest {
 					
 					//DebugUtils.dump("expected:" + s1);
 					//DebugUtils.dump("was:" + s2);
-					assertEquals("invalid update in file " + cu.getElementName(), s1,	s2);
+					assertEqualLines("invalid update in file " + cu.getElementName(), s1,	s2);
 				}
 			}
 		} finally{

@@ -88,19 +88,19 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		processor.setUpdateReferences(updateReferences);
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
-		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
 		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		
 		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
 		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
 	private void helper2(String fieldName, String newFieldName) throws Exception{

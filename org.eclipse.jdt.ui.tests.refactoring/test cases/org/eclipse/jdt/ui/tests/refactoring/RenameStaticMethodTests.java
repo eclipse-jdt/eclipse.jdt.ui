@@ -14,20 +14,16 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public class RenameStaticMethodTests extends RefactoringTest {
 	private static final Class clazz= RenameStaticMethodTests.class;
@@ -72,21 +68,21 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			processor.setUpdateReferences(updateReferences);
 			processor.setNewElementName(newMethodName);
 			assertEquals("was supposed to pass", null, performRefactoring(refactoring));
-			assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 			
 			assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
 			assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 			//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 			
 			Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-			assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 	
 			assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
 			assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 			//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 			
 			Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-			assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		} finally{
 			performDummySearch();
 			cu.delete(true, null);
@@ -191,8 +187,8 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		processor.setUpdateReferences(true);
 		processor.setNewElementName("newmethod");
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
-		SourceCompareUtil.compare("invalid renaming in A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-		SourceCompareUtil.compare("invalid renaming in B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+		assertEqualLines("invalid renaming in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+		assertEqualLines("invalid renaming in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
 	}
 
 	public void test11() throws Exception{
@@ -210,8 +206,8 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			processor.setUpdateReferences(true);
 			processor.setNewElementName("fred");
 			assertEquals("was supposed to pass", null, performRefactoring(refactoring));
-			SourceCompareUtil.compare("invalid renaming in A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-			SourceCompareUtil.compare("invalid renaming in B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+			assertEqualLines("invalid renaming in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+			assertEqualLines("invalid renaming in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
 		} finally{
 			packageA.delete(true, new NullProgressMonitor());
 			packageB.delete(true, new NullProgressMonitor());

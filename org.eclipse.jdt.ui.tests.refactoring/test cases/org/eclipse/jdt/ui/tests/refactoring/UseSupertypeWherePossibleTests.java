@@ -16,15 +16,11 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
@@ -78,8 +74,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
 			String actual= cus[i].getSource();
 			String message= "incorrect changes in " + cus[i].getElementName();
-//			assertEquals("incorrect changes in " + cus[i].getElementName(), expected, actual);
-			SourceCompareUtil.compare(message, actual, expected);
+			assertEqualLines(message, expected, actual);
 		}
 	}
 

@@ -16,20 +16,15 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class ExtractConstantTests extends RefactoringTest {
 
@@ -118,7 +113,7 @@ public class ExtractConstantTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		SourceCompareUtil.compare(newcu.getSource(), getFileContents(getTestFileName(true, false)));
+		assertEqualLines(getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, String guessedConstantName) throws Exception{	

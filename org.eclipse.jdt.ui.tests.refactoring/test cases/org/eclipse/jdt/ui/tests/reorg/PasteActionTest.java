@@ -21,15 +21,6 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.swt.SWTError;
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.jface.viewers.IStructuredSelection;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportContainer;
@@ -37,18 +28,20 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
+import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
-
-import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Display;
 
 
 public class PasteActionTest extends RefactoringTest{
@@ -125,7 +118,7 @@ public class PasteActionTest extends RefactoringTest{
 	}
 
 	private void compareContents(String cuName) throws JavaModelException, IOException {
-		SourceCompareUtil.compare(cuName, getPackageP().getCompilationUnit(cuName + ".java").getSource(), getFileContents(getOutputTestFileName(cuName)));
+		assertEqualLines(cuName, getFileContents(getOutputTestFileName(cuName)), getPackageP().getCompilationUnit(cuName + ".java").getSource());
 	}
 	
 	private void delete(ICompilationUnit cu) throws Exception {

@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportContainer;
@@ -34,15 +33,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
@@ -50,6 +40,10 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 
 public class CopyTest extends RefactoringTest {
@@ -120,7 +114,7 @@ public class CopyTest extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(ref);
 		assertNull("failed precondition", status);
 		for (int i= 0; i < cus.length; i++) {
-			SourceCompareUtil.compare("different source in " + cus[i].getElementName(), cus[i].getSource(), getFileContents(getOutputTestFileName(removeExtension(cus[i].getElementName()))));
+			assertEqualLines("different source in " + cus[i].getElementName(), getFileContents(getOutputTestFileName(removeExtension(cus[i].getElementName()))), cus[i].getSource());
 		}
 	}
 
@@ -2356,7 +2350,7 @@ public class CopyTest extends RefactoringTest {
 			assertTrue("new file does not exist after copying", newCu.exists());
 			
 			String expectedSource= "package p;class "+ MockNewNameQueries.NEW_CU_NAME +"{void foo(){}class Inner{}}";
-			SourceCompareUtil.compare("source compare failed", newCu.getSource(), expectedSource);
+			assertEqualLines("source compare failed", expectedSource, newCu.getSource());
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());

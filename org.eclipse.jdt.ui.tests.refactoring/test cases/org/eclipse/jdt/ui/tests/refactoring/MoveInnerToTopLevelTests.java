@@ -16,20 +16,15 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveInnerToTopLevelTests extends RefactoringTest {
 
@@ -100,12 +95,12 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		for (int i= 0; i < cus.length; i++) {
 			String actual= cus[i].getSource();
 			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
-			SourceCompareUtil.compare(cus[i].getElementName(), actual, expected);
+			assertEqualLines(cus[i].getElementName(), expected, actual);
 		}
 		ICompilationUnit newCu= clas.getPackageFragment().getCompilationUnit(className + ".java");
 		String expected= getFileContents(getOutputTestFileName(className));
 		String actual= newCu.getSource();
-		SourceCompareUtil.compare("new Cu:", actual, expected);
+		assertEqualLines("new Cu:", expected, actual);
 	}
 	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean possible, boolean mandatory) throws Exception {
 		validatePassingTest(parentClassName, className, "p", cuNames, packageNames, enclosingInstanceName, false, possible, mandatory, true);

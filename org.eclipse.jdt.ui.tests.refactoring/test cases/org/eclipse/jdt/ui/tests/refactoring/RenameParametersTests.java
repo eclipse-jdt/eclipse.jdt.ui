@@ -80,7 +80,7 @@ public class RenameParametersTests extends RefactoringTest{
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)).length(), newcu.getSource().length());
-		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		assertEqualLines("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 	
 	private void helper2(String[] newNames, String[] signature) throws Exception{

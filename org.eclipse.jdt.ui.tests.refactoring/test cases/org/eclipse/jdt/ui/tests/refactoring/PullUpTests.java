@@ -19,7 +19,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,14 +26,10 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class PullUpTests extends RefactoringTest {
 
@@ -83,7 +78,7 @@ public class PullUpTests extends RefactoringTest {
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
-			SourceCompareUtil.compare(actual, expected);
+			assertEqualLines(expected, actual);
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -126,11 +121,11 @@ public class PullUpTests extends RefactoringTest {
 			List expected= Arrays.asList(merge(expectedFields, expectedMethods));
 			assertEquals("incorrect size", expected.size(), required.size());
 			for (Iterator iter= expected.iterator(); iter.hasNext();) {
-				Object each= (Object) iter.next();
+				Object each= iter.next();
 				assertTrue ("required does not contain " + each, required.contains(each));
 			}
 			for (Iterator iter= required.iterator(); iter.hasNext();) {
-				Object each= (Object) iter.next();
+				Object each= iter.next();
 				assertTrue ("expected does not contain " + each, expected.contains(each));
 			}
 		} finally{
@@ -155,7 +150,7 @@ public class PullUpTests extends RefactoringTest {
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
-			SourceCompareUtil.compare(actual, expected);
+			assertEqualLines(expected, actual);
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -254,7 +249,7 @@ public class PullUpTests extends RefactoringTest {
 
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
-			SourceCompareUtil.compare(actual, expected);
+			assertEqualLines(expected, actual);
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -282,7 +277,7 @@ public class PullUpTests extends RefactoringTest {
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
-			SourceCompareUtil.compare(actual, expected);
+			assertEqualLines(expected, actual);
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -374,8 +369,8 @@ public class PullUpTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("precondition was supposed to pass", null, result);
 			
-			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("A")), cuA.getSource());
-			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("B")), cuB.getSource());
+			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 		} finally{
 			performDummySearch();
 			cuA.delete(false, null);
@@ -402,8 +397,8 @@ public class PullUpTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("precondition was supposed to pass", null, result);
 			
-			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("A")), cuA.getSource());
-			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("B")), cuB.getSource());
+			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 		} finally{
 			performDummySearch();
 			cuA.delete(false, null);
@@ -454,8 +449,8 @@ public class PullUpTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("precondition was supposed to pass", null, result);
 			
-			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("A")), cuA.getSource());
-			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("B")), cuB.getSource());
+			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 		} finally{
 			performDummySearch();
 			cuA.delete(false, null);

@@ -14,19 +14,15 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
@@ -78,21 +74,21 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		}
 		String expectedRenaming= getFileContents(getOutputTestFileName("A"));
 		String actuaRenaming= cu.getSource();
-		SourceCompareUtil.compare("incorrect renaming", actuaRenaming, expectedRenaming);
+		assertEqualLines("incorrect renaming", expectedRenaming, actuaRenaming);
 		
 		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 		
 		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
 		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 		
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
@@ -315,8 +311,8 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		RenameRefactoring ref= new RenameRefactoring(classB.getMethod("m", new String[]{"I"}));
 		ref.setNewName("kk");
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
-		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
-		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
 		
 	}
 	

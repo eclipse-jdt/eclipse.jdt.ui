@@ -78,11 +78,11 @@ public class MoveMembersTests extends RefactoringTest {
 		
 			expected= getFileContents(getOutputTestFileName("A"));
 			actual= cuA.getSource();
-			assertEquals("incorrect modification of  A", expected, actual);
+			assertEqualLines("incorrect modification of  A", expected, actual);
 		
 			expected= getFileContents(getOutputTestFileName("B"));
 			actual= cuB.getSource();
-			assertEquals("incorrect modification of  B", expected, actual);
+			assertEqualLines("incorrect modification of  B", expected, actual);
 		
 		} finally{
 			performDummySearch();

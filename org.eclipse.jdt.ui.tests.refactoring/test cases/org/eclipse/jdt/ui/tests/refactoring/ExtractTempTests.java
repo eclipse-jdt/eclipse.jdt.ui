@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class ExtractTempTests extends RefactoringTest {
@@ -101,7 +100,7 @@ public class ExtractTempTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		SourceCompareUtil.compare(newcu.getSource(), getFileContents(getTestFileName(true, false)));
+		assertEqualLines(getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 	
 	private void warningHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, String guessedTempName, int expectedStatus) throws Exception{
@@ -128,7 +127,7 @@ public class ExtractTempTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		SourceCompareUtil.compare(newcu.getSource(), getFileContents(getTestFileName(true, false)));
+		assertEqualLines(getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, int expectedStatus) throws Exception{

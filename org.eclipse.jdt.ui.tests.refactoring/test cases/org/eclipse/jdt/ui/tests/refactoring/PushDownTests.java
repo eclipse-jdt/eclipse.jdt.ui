@@ -19,7 +19,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
@@ -27,14 +26,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class PushDownTests extends RefactoringTest {
 
@@ -116,13 +111,13 @@ public class PushDownTests extends RefactoringTest {
 
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cuA.getSource();
-			SourceCompareUtil.compare("A.java", actual, expected);
+			assertEqualLines("A.java", expected, actual);
 			
 			for (int i= 0; i < additonalCus.length; i++) {
 				ICompilationUnit unit= additonalCus[i];
 				String expectedS= getFileContents(getOutputTestFileName(additionalCuNames[i]));
 				String actualS= unit.getSource();
-				SourceCompareUtil.compare(unit.getElementName(), actualS, expectedS);
+				assertEqualLines(unit.getElementName(), expectedS, actualS);
 			}
 			
 		} finally{
@@ -222,11 +217,11 @@ public class PushDownTests extends RefactoringTest {
 			List expected= Arrays.asList(merge(expectedFields, expectedMethods));
 			assertEquals("incorrect size", expected.size(), required.size());
 			for (Iterator iter= expected.iterator(); iter.hasNext();) {
-				Object each= (Object) iter.next();
+				Object each= iter.next();
 				assertTrue ("required does not contain " + each, required.contains(each));
 			}
 			for (Iterator iter= required.iterator(); iter.hasNext();) {
-				Object each= (Object) iter.next();
+				Object each= iter.next();
 				assertTrue ("expected does not contain " + each, expected.contains(each));
 			}
 		} finally{

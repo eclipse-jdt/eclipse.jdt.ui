@@ -19,17 +19,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-
+import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.ui.tests.refactoring.AbstractSelectionTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
-
-import org.eclipse.jdt.internal.corext.SourceRange;
 
 public class StructureSelectionActionTests extends RefactoringTest{
 	
@@ -75,7 +72,7 @@ public class StructureSelectionActionTests extends RefactoringTest{
 		String expected= getFileContents(getTestFileName(false));
 		String actual= cu.getSource().substring(newRange.getOffset(), newRange.getOffset() + newRange.getLength());
 //		assertEquals("selection incorrect length", expected.length(), actual.length());
-		assertEquals("selection incorrect", expected, actual);
+		assertEqualLines("selection incorrect", expected, actual);
 	}	
 	
 	private void helperSelectUp() throws Exception{
@@ -331,8 +328,7 @@ public class StructureSelectionActionTests extends RefactoringTest{
 		
 		String expected= getFileContents(getTestFileName(false));
 		String actual= cu.getSource().substring(newRange.getOffset(), newRange.getOffset() + newRange.getLength());
-		assertEquals("selection incorrect length", expected.length(), actual.length());
-		assertEquals("selection incorrect", expected, actual);
+		assertEqualLines("selection incorrect", expected, actual);
 	}
 
 	//--- offset calculation tests

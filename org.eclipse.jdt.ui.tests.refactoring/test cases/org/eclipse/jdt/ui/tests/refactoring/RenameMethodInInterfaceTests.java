@@ -76,21 +76,21 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 			assertTrue("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
 			return;
 		}
-		assertEquals("incorrect renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEqualLines("incorrect renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
 		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 		
 		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
 		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 		
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
 	private void helper2(boolean updateReferences) throws Exception{

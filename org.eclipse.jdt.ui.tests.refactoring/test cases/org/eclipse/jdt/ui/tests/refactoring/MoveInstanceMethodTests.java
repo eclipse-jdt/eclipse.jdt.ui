@@ -14,24 +14,19 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class MoveInstanceMethodTests extends RefactoringTest {
 
@@ -149,10 +144,8 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		performChange(change);
 
 		for(int i= 0; i < cus.length; i++) {
-			//System.out.println(cus[i].getSource());
 			String outputTestFileName= getOutputTestFileName(getSimpleName(cuQNames[i]));
-//			assertEquals("Incorrect inline in " + outputTestFileName, getFileContents(outputTestFileName), cus[i].getSource());
-			SourceCompareUtil.compare(cus[i].getSource(), getFileContents(outputTestFileName));
+			assertEqualLines("Incorrect inline in " + outputTestFileName, getFileContents(outputTestFileName), cus[i].getSource());
 		}
 	}
 
