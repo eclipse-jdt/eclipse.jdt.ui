@@ -24,15 +24,12 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class MoveInnerToTopWizard extends RefactoringWizard {
 
@@ -44,17 +41,10 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		try{			
-			//no input page if the type is static
-			if (! JdtFlags.isStatic(getMoveRefactoring().getInputType()))
-				addPage(new MoveInnerToToplnputPage(getInitialNameForEnclosingInstance()));
-			else
-				setChangeCreationCancelable(false);
-		} catch (JavaModelException e){
-			//log and try anyway
-			JavaPlugin.log(e);
-			addPage(new MoveInnerToToplnputPage(getInitialNameForEnclosingInstance())); 
-		}		
+		if (getMoveRefactoring().isCreatingInstanceFieldPossible())
+			addPage(new MoveInnerToToplnputPage(getInitialNameForEnclosingInstance()));
+		else
+			setChangeCreationCancelable(false);
 	}
 
 	private String getInitialNameForEnclosingInstance() {
@@ -69,6 +59,10 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 
 		private final boolean fIsInitialInputValid;
 		private static final String DESCRIPTION = RefactoringMessages.getString("MoveInnerToToplnputPage.description"); //$NON-NLS-1$
+		private Button fCreateFieldCheckBox;
+		private Button fFinalCheckBox;
+		private Label fFieldNameLabel;
+		private Text fFieldNameEntryText;
 	
 		public MoveInnerToToplnputPage(String initialValue) {
 			super(DESCRIPTION, true, initialValue);
@@ -76,35 +70,76 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		}
 
 		public void createControl(Composite parent) {
+			initializeDialogUnits(parent);
 			Composite newControl= new Composite(parent, SWT.NONE);
 			setControl(newControl);
 			WorkbenchHelp.setHelp(newControl, IJavaHelpContextIds.MOVE_INNER_TO_TOP_WIZARD_PAGE);
 			newControl.setLayout(new GridLayout());
-		
+			Dialog.applyDialogFont(newControl);
+
 			GridLayout layout= new GridLayout();
 			layout.numColumns= 2;
 			layout.verticalSpacing= 8;
 			newControl.setLayout(layout);
-		
-			Label label= new Label(newControl, SWT.NONE);
-			label.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.enter_name")); //$NON-NLS-1$
-		
-			Text text= createTextInputField(newControl);
-			text.selectAll();
-			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
-			final Button finalCheckBox= new Button(newControl, SWT.CHECK);
-			finalCheckBox.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.instance_final")); //$NON-NLS-1$
-			finalCheckBox.setSelection(getMoveRefactoring().isInstanceFieldMarkedFinal());
-			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan= 2;
-			finalCheckBox.setLayoutData(gd);		
-			finalCheckBox.addSelectionListener(new SelectionAdapter(){
+
+			int indentSize= convertWidthInCharsToPixels(3);
+
+			addCreateFieldCheckBox(newControl);
+			addFinalCheckBox(newControl, indentSize);
+			addFieldNameEntry(newControl, indentSize);
+
+			fCreateFieldCheckBox.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					getMoveRefactoring().setMarkInstanceFieldAsFinal(finalCheckBox.getSelection());
+					updateControlEnablement(fCreateFieldCheckBox, fFinalCheckBox, fFieldNameLabel, fFieldNameEntryText);
+					getMoveRefactoring().setCreateInstanceField(fCreateFieldCheckBox.getSelection());
 				}
 			});
-			Dialog.applyDialogFont(newControl);
+			updateControlEnablement(fCreateFieldCheckBox, fFinalCheckBox, fFieldNameLabel, fFieldNameEntryText);
+		}
+
+		private void addFieldNameEntry(Composite newControl, int indentSize) {
+			fFieldNameLabel= new Label(newControl, SWT.NONE);
+			fFieldNameLabel.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.enter_name")); //$NON-NLS-1$
+			GridData gd1= new GridData();
+			gd1.horizontalIndent= indentSize;
+			fFieldNameLabel.setLayoutData(gd1);
+			
+			fFieldNameEntryText= createTextInputField(newControl);
+			fFieldNameEntryText.selectAll();
+			fFieldNameEntryText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		}
+
+		private void addFinalCheckBox(Composite newControl, int indentSize) {
+			fFinalCheckBox= new Button(newControl, SWT.CHECK);
+			fFinalCheckBox.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.instance_final")); //$NON-NLS-1$
+			fFinalCheckBox.setSelection(getMoveRefactoring().isInstanceFieldMarkedFinal());
+			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+			gd.horizontalSpan= 2;
+			gd.horizontalIndent= indentSize;
+			fFinalCheckBox.setLayoutData(gd);		
+			fFinalCheckBox.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					getMoveRefactoring().setMarkInstanceFieldAsFinal(fFinalCheckBox.getSelection());
+				}
+			});
+		}
+
+		private void addCreateFieldCheckBox(Composite newControl) {
+			fCreateFieldCheckBox= new Button(newControl, SWT.CHECK);
+			fCreateFieldCheckBox.setText("Create field for the enclosing instance");
+			Assert.isTrue(getMoveRefactoring().isCreatingInstanceFieldPossible());//checked before page got created
+			fCreateFieldCheckBox.setEnabled(! getMoveRefactoring().isCreatingInstanceFieldMandatory());
+			fCreateFieldCheckBox.setSelection(getMoveRefactoring().getCreateInstanceField());
+			GridData gd0= new GridData(GridData.FILL_HORIZONTAL);
+			gd0.horizontalSpan= 2;
+			fCreateFieldCheckBox.setLayoutData(gd0);
+		}
+
+		private void updateControlEnablement(final Button createFieldCheckBox, final Button finalCheckBox, final Label label, final Text text) {
+			boolean selected= createFieldCheckBox.getSelection();
+			finalCheckBox.setEnabled(selected);
+			label.setEnabled(selected);
+			text.setEnabled(selected);
 		}
 
 		/*
@@ -125,6 +160,5 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		private MoveInnerToTopRefactoring getMoveRefactoring() {
 			return (MoveInnerToTopRefactoring)getRefactoring();
 		}
-	
 	}
 }
