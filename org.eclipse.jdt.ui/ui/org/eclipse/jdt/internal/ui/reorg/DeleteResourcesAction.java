@@ -152,10 +152,8 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	protected void selectionChanged(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			setEnabled(false);
-		else{
-			DeleteRefactoring ref= DeleteRefactoring.create(selection.toList(), null);
-			setEnabled(ref != null && ClipboardActionUtil.canActivate(ref));
-		}
+		else
+			setEnabled(DeleteRefactoring.create(selection.toList(), null) != null);
 	}
 	
 	private static boolean confirmDelete(IStructuredSelection selection) throws JavaModelException {

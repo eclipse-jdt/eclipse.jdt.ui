@@ -65,7 +65,10 @@ public class DeleteRefactoring extends Refactoring {
 	}
 	
 	public static DeleteRefactoring create(List elements, IPackageFragmentRootManipulationQuery rootManipulationQuery){
-		return new DeleteRefactoring(elements, rootManipulationQuery);
+		DeleteRefactoring ref= new DeleteRefactoring(elements, rootManipulationQuery);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	private static List convertToInputElements(List elements){
@@ -94,21 +97,25 @@ public class DeleteRefactoring extends Refactoring {
 		fCheckIfUsed= check;
 	}
 
+	private RefactoringStatus checkPreactivation(){
+		if (fElements.isEmpty())
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
+			
+		if (hasProjects() && hasNonProjects())	
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
+			
+		if (! canDeleteAll())
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
+						
+		return new RefactoringStatus();
+	}
+	
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			if (fElements.isEmpty())
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-			if (hasProjects() && hasNonProjects())	
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-			if (! canDeleteAll())
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-						
 			return new RefactoringStatus();
 		} finally{
 			pm.done();
