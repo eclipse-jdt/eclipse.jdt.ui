@@ -679,7 +679,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 			if (!preconditionsOK())
 				throw new InvocationTargetException(null, JarPackagerMessages.getString("JarFileExportOperation.jarCreationFailedSeeDetails")); //$NON-NLS-1$
 			int totalWork= countSelectedElements();
-			if (!isAutoBuilding() && fJarPackage.isBuildingIfNeeded()) {
+			if (!isAutoBuilding() && fJarPackage.isBuildingIfNeeded() && fJarPackage.areClassFilesExported()) {
 				int subMonitorTicks= totalWork/10;
 				totalWork += subMonitorTicks;
 				progressMonitor.beginTask("", totalWork); //$NON-NLS-1$
