@@ -371,7 +371,7 @@ public class UnresolvedElementsSubProcessor {
 		for (int i= 0; i < elements.length; i++) {
 			String curr= elements[i].getName();
 			if (curr.equals(methodName) && needsNewName) {
-				//parameterMismatchs.add(elements[i]);
+				parameterMismatchs.add(elements[i]);
 				continue;
 			}
 			
@@ -380,11 +380,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		if (parameterMismatchs.size() == 1) {
-			SimilarElement elem= (SimilarElement) parameterMismatchs.get(0);
-			String[] paramTypes= elem.getParameterTypes();
-			ITypeBinding[] argTypes= getArgumentTypes(arguments);
-			if (paramTypes != null && argTypes != null) {
-			}
+			addParameterMissmatchProposals(context, (SimilarElement) parameterMismatchs.get(0), arguments, proposals);
 		}
 		
 		// new method
@@ -426,6 +422,31 @@ public class UnresolvedElementsSubProcessor {
 			}
 		}
 	}
+	
+	private static void addParameterMissmatchProposals(ICorrectionContext context, SimilarElement elem, List arguments, List proposals) throws CoreException {
+		String[] paramTypes= elem.getParameterTypes();
+		ITypeBinding[] argTypes= getArgumentTypes(arguments);
+		if (paramTypes == null || argTypes == null) {
+			return;
+		}
+		if (paramTypes.length == argTypes.length) {
+			for (int i= 0; i < argTypes.length; i++) {
+				if (Bindings.findTypeInHierarchy(argTypes[i], paramTypes[i]) == null) {
+					// argument can not be assigned to paramtype
+					Expression nodeToCast= (Expression) arguments.get(i);
+					String castType= paramTypes[i];
+					
+					if (nodeToCast.getNodeType() != ASTNode.CAST_EXPRESSION) {
+						ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.getCastProposal(context, castType, nodeToCast);
+						if (proposal != null) {
+							proposals.add(proposal);	
+							proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparametercast.description", castType)); //$NON-NLS-1$
+						}
+					}		
+				}
+			}
+		}
+	}	
 	
 	private static ITypeBinding[] getArgumentTypes(List arguments) {
 		ITypeBinding[] res= new ITypeBinding[arguments.size()];
