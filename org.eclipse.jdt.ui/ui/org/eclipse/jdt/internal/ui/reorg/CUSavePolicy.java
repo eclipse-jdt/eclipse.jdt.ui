@@ -259,7 +259,7 @@ public class CUSavePolicy implements ISavePolicy {
 	/**
 	 * update method comment.
 	 */
-	public void postSave(ICompilationUnit original) {
+	public ICompilationUnit postSave(ICompilationUnit original) {
 	
 		IPackageFragment oldPackage= (IPackageFragment) original.getParent();
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
@@ -277,7 +277,7 @@ public class CUSavePolicy implements ISavePolicy {
 					
 				fNewTypeName= checkOverwriteCU(shell, original, newPackage, fNewTypeName);
 				if (fNewTypeName == null)
-					return;
+					return null;
 				
 				original.move(newPackage, null, fNewTypeName, true, null);
 				newCU= newPackage.getCompilationUnit(fNewTypeName);
@@ -286,7 +286,7 @@ public class CUSavePolicy implements ISavePolicy {
 				
 				fNewTypeName= checkOverwriteCU(shell, original, oldPackage, fNewTypeName);
 				if (fNewTypeName == null)
-					return;
+					return null;
 				
 				original.rename(fNewTypeName, true, null);
 				newCU= oldPackage.getCompilationUnit(fNewTypeName);
@@ -303,8 +303,11 @@ public class CUSavePolicy implements ISavePolicy {
 				}
 			}
 			
+			return newCU;
+			
 		} catch (JavaModelException e) {
 			showErrorDialog(shell, e);
+			return null;
 		}
 	}
 

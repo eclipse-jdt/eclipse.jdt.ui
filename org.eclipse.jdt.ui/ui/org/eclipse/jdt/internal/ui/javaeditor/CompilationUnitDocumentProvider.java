@@ -8,6 +8,12 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
@@ -17,15 +23,10 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
@@ -281,15 +282,24 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				// commit working copy
 				info.fCopy.commit(overwrite, monitor);
 				
-				if (fSavePolicy != null)
-					fSavePolicy.postSave(original);
-				
 				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 				model.updateMarkers(info.fDocument);
 				
 				if (resource != null)
 					info.setModificationStamp(computeModificationStamp(resource));
-										
+				
+				if (fSavePolicy != null) {
+					ICompilationUnit unit= fSavePolicy.postSave(original);
+					if (unit != null) {
+						IResource r= unit.getUnderlyingResource();
+						IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
+						if (markers != null && markers.length > 0) {
+							for (int i= 0; i < markers.length; i++)
+								model.updateMarker(markers[i], info.fDocument, null);
+						}
+					}
+				}
+					
 			} catch (JavaModelException x) {
 				throw new CoreException(x.getStatus());
 			}
