@@ -373,7 +373,6 @@ public class PushDownRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 
-	//XXX copied form Pull UP
 	private RefactoringStatus checkIfMembersExist() {
 		for (int i= 0; i < fSelectedMembers.length; i++) {
 			IMember orig= fSelectedMembers[i];
@@ -385,7 +384,6 @@ public class PushDownRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 
-	//XXX copied form Pull UP
 	private RefactoringStatus checkDeclaringType() throws JavaModelException {
 		IType declaringType= getDeclaringClass();
 				
@@ -622,7 +620,6 @@ public class PushDownRefactoring extends Refactoring {
 		return result;
 	}
 	
-	//almost copied from pull up
 	private boolean canBeAccessedFrom(IMember member, IType newHome) throws JavaModelException{
 		Assert.isTrue(!(member instanceof IInitializer));
 		if (! member.exists())
@@ -685,7 +682,6 @@ public class PushDownRefactoring extends Refactoring {
 		return (IMember[]) fields.toArray(new IMember[fields.size()]);
 	}
 	
-	//copied from pull up
 	private RefactoringStatus checkCallsToDeclaringClassConstructors(IProgressMonitor pm) throws JavaModelException {
 		ASTNode[] refNodes= ConstructorReferenceFinder.getConstructorReferenceNodes(getDeclaringClass(), fAstManager, pm);
 		RefactoringStatus result= new RefactoringStatus();
@@ -926,7 +922,6 @@ public class PushDownRefactoring extends Refactoring {
 		return info.getNewModifiersForCopyInSubclass(oldMethod.getModifiers());
 	}
 
-	//copied from Pull up
 	private void copyThrownExceptions(MethodDeclaration oldMethod, MethodDeclaration newMethod) {
 		AST ast= newMethod.getAST();
 		for (int i= 0, n= oldMethod.thrownExceptions().size(); i < n; i++) {
@@ -942,7 +937,6 @@ public class PushDownRefactoring extends Refactoring {
 		}
 	}
 	
-	//copied from Pull up
 	private void copyParameters(ASTRewrite targetRewrite, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
 		for (int i= 0, n= oldMethod.parameters().size(); i < n; i++) {
 			SingleVariableDeclaration oldParam= (SingleVariableDeclaration)oldMethod.parameters().get(i);
@@ -951,7 +945,6 @@ public class PushDownRefactoring extends Refactoring {
 		}
 	}
 	
-	//copied from Pull up
 	private void copyReturnType(ASTRewrite targetRewrite, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
 		Type newReturnType= createPlaceholderForType(oldMethod.getReturnType(), targetRewrite);
 		newMethod.setReturnType(newReturnType);
@@ -1150,7 +1143,6 @@ public class PushDownRefactoring extends Refactoring {
 		return info.getNewModifiersForOriginal(oldModifiers);
 	}
 
-	//XXX copied from pull up
 	private void fillWithRewriteEdits(TextChangeManager manager) throws CoreException {
 		CompilationUnit[] cuNodes= fRewriteManager.getAllCompilationUnitNodes();
 		for (int i= 0; i < cuNodes.length; i++) {
