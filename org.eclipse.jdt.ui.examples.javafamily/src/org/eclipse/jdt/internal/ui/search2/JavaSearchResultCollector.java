@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.ActionGroup;
@@ -201,7 +202,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 					title,
 					null,
 					SearchMessages.getString("Search.potentialMatchDialog.message"), //$NON-NLS-1$,
-					OptionalMessageDialog.INFORMATION,
+					MessageDialog.INFORMATION,
 					new String[] { IDialogConstants.OK_LABEL },
 					0);
 			}
@@ -213,7 +214,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	 */
 	public IProgressMonitor getProgressMonitor() {
 		return fMonitor;
-	};
+	}
 	
 	void setProgressMonitor(IProgressMonitor pm) {
 		fMonitor= pm;

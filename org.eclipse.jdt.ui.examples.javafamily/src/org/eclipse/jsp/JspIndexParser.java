@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.core.index.IIndexerOutput;
  */
 public class JspIndexParser extends AbstractJspParser {
 	
-	public static final String JSP_TYPE_REF= "jsp_typeRef"; // "jsp_typeRef";
+	public static final String JSP_TYPE_REF= "jsp_typeRef";	//$NON-NLS-1$
 	
 	boolean fInUseBean;
 	String fId;
@@ -35,9 +35,9 @@ public class JspIndexParser extends AbstractJspParser {
 	
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
 		if (fInUseBean) {
-			if ("id".equals(attrName))
+			if ("id".equals(attrName)) //$NON-NLS-1$
 				fId= value;
-			else if ("class".equals(attrName))
+			else if ("class".equals(attrName)) //$NON-NLS-1$
 				fClass= value;
 		}
 	}
@@ -46,8 +46,8 @@ public class JspIndexParser extends AbstractJspParser {
 		if (fInUseBean) {
 			if (fId != null && fClass != null) {
 
-				String s= JSP_TYPE_REF + "/" + fClass;
-				System.out.println("  " + s);
+				String s= JSP_TYPE_REF + "/" + fClass; //$NON-NLS-1$
+				System.out.println("  " + s); //$NON-NLS-1$
 				fOutput.addRef(s);				
 
 				fId= fClass= null;

@@ -22,13 +22,13 @@ public class JspSearchEngine {
 
 	public static void search(final IJavaSearchResultCollector collector, final IIndexQuery query, IProgressMonitor pm) {
 		
-		System.out.println("JspSearchEngine.search: " + query);
+		System.out.println("JspSearchEngine.search: " + query); //$NON-NLS-1$
 									
 		JspUIPlugin.getDefault().search(
 			query,
 			new ISearchResultCollector() {
 				public void accept(IResource resource, int start, int length) throws CoreException {
-					System.out.println("  accept: " + resource);
+					System.out.println("  accept: " + resource); //$NON-NLS-1$
 					collector.accept(resource, start, start+length, null, 999);
 				}
 			},

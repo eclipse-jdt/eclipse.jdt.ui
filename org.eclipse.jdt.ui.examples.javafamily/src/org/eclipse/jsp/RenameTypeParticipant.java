@@ -82,14 +82,14 @@ public class RenameTypeParticipant extends RenameParticipant {
 					change= new TextFileChange(resource.getName(), (IFile)resource);
 					changes.put(resource, change);
 				}
-				change.addTextEdit("Update type reference", SimpleTextEdit.createReplace(start, length, newName));
+				change.addTextEdit("Update type reference", SimpleTextEdit.createReplace(start, length, newName)); //$NON-NLS-1$
 			}
 		};
 		JspUIPlugin.getDefault().search(new JspTypeQuery(fType), collector, pm);
 		
 		if (changes.size() == 0)
 			return null;
-		CompositeChange result= new CompositeChange("JSP updates");
+		CompositeChange result= new CompositeChange("JSP updates"); //$NON-NLS-1$
 		for (Iterator iter= changes.values().iterator(); iter.hasNext();) {
 			result.add((IChange)iter.next());
 		}

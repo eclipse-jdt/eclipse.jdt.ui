@@ -275,7 +275,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 			i++;
 			if (!pattern.equals(match.pattern))
 				match= null;
-		};
+		}
 		if (match == null) {
 			match= new SearchPatternData(
 							getSearchFor(),
@@ -294,7 +294,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 			match.javaElement= fJavaElement;
 			match.scope= getContainer().getSelectedScope();
 			match.workingSets= getContainer().getSelectedWorkingSets();
-		};
+		}
 		return match;
 	}
 
@@ -599,7 +599,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 				searchFor= TYPE;
 				element= mainType;
 				limitTo= REFERENCES;
-				pattern= JavaModelUtil.getFullyQualifiedName((IType)mainType);
+				pattern= JavaModelUtil.getFullyQualifiedName(mainType);
 				break;
 			case IJavaElement.CLASS_FILE:
 				IClassFile cf= (IClassFile)element;

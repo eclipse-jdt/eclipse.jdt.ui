@@ -64,7 +64,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	 * @see org.eclipse.core.runtime.Plugin#startup()
 	 */
 	public void startup() {
-		System.out.println("JspUIPlugin: startup");
+		System.out.println("JspUIPlugin: startup"); //$NON-NLS-1$
 		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		
@@ -119,14 +119,14 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	}
 	
 	void jspAdded(IFile jspFile) {
-		System.out.println("Added: " + jspFile);
+		System.out.println("Added: " + jspFile); //$NON-NLS-1$
 		AddJspFileToIndex job= new AddJspFileToIndex(jspFile, jspFile.getProject().getProject().getFullPath(), fSearchEngine.getIndexManager());
 		fSearchEngine.add(job);
 
 	}
 	
 	void jspRemoved(IFile jspFile) {
-		System.out.println("Removed: " + jspFile);
+		System.out.println("Removed: " + jspFile); //$NON-NLS-1$
 		fSearchEngine.remove(jspFile.getFullPath().toString(), jspFile.getProject().getProject().getFullPath());
 	}
 	
@@ -142,7 +142,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	 * @see org.eclipse.core.runtime.Plugin#shutdown()
 	 */
 	public void shutdown() {
-		System.out.println("JspCorePlugin: shutdown");
+		System.out.println("JspCorePlugin: shutdown"); //$NON-NLS-1$
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(this);
 	}

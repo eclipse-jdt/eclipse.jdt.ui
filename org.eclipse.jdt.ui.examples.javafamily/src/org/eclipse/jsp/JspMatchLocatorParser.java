@@ -37,7 +37,7 @@ public class JspMatchLocatorParser extends AbstractJspParser {
 	}
 
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
-		if (fInUseBean && "class".equals(attrName) && fMatchString.equals(value)) {
+		if (fInUseBean && "class".equals(attrName) && fMatchString.equals(value)) { //$NON-NLS-1$
 			try {
 				fCollector.accept(fResource, startValue, value.length());
 			} catch (CoreException e) {

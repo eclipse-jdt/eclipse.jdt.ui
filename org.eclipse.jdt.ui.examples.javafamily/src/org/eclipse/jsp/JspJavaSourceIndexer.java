@@ -87,13 +87,13 @@ public class JspJavaSourceIndexer extends SourceIndexer {
 		if (false) {
 			
 			if (true) {
-				System.out.println("============");
+				System.out.println("============"); //$NON-NLS-1$
 				System.out.println(java);
-				System.out.println("------------");
+				System.out.println("------------"); //$NON-NLS-1$
 			}
 
 			char[] source= Util.getChars(java);
-			char[] name= Util.getChars(n + ".java");	
+			char[] name= Util.getChars(n + ".java");	 //$NON-NLS-1$
 			
 			// Create a new Parser
 			SourceIndexerRequestor requestor = new SourceIndexerRequestor(this, document);

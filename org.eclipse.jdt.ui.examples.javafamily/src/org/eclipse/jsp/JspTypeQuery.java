@@ -66,7 +66,7 @@ public class JspTypeQuery implements IIndexQuery {
 	public void findIndexMatches(IIndex index, PathCollector pathCollector, IProgressMonitor progressMonitor) throws IOException {
 
 		String typeName= fType.getFullyQualifiedName();
-		String s= JspIndexParser.JSP_TYPE_REF + "/" + typeName;
+		String s= JspIndexParser.JSP_TYPE_REF + "/" + typeName; //$NON-NLS-1$
 
 		IQueryResult[] result= index.queryPrefix(s.toCharArray());
 		if (result != null)

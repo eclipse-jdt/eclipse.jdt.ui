@@ -31,7 +31,7 @@ class AddJspFileToIndex extends AddFileToIndex {
 	}
 		
 	protected boolean indexDocument(IIndex index) throws IOException {
-		System.out.println("AddFileToIndex.indexDocument: " + getResource());
+		System.out.println("AddFileToIndex.indexDocument: " + getResource()); //$NON-NLS-1$
 		if (! initializeContents() ) 
 			return false;
 		index.add(new IFileDocument(getResource(), fContents), new JspSourceIndexer());
