@@ -97,7 +97,8 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		List rules= new ArrayList();
 
 		// Add rule for leading white space.
-		rules.add(new WhitespacePredicateRule(key));
+		rules.add(new LeadingWhitespacePredicateRule(key, "\t")); //$NON-NLS-1$
+		rules.add(new LeadingWhitespacePredicateRule(key, " ")); //$NON-NLS-1$
 
 		// Add rules for comments.
 		rules.add(new EndOfLineRule("#", comment, (char) 0, true)); //$NON-NLS-1$

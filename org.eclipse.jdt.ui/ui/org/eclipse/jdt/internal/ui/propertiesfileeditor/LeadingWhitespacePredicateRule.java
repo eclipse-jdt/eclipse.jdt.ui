@@ -15,12 +15,14 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.WordPatternRule;
 
+
 /**
- * A white space predicate rule.
+ * A leading white space predicate rule.
  *
  * @since 3.1
  */
-public final class WhitespacePredicateRule extends WordPatternRule {
+public final class LeadingWhitespacePredicateRule extends WordPatternRule {
+	
 	
 	private static class DummyDetector implements IWordDetector {
 		
@@ -39,14 +41,15 @@ public final class WhitespacePredicateRule extends WordPatternRule {
 		}
 	}
 
-	
+
 	/**
 	 * Creates a white space rule for the given <code>token</code>.
 	 * 
 	 * @param token the token to be returned on success
 	 */
-	public WhitespacePredicateRule(IToken token) {
-		super(new DummyDetector(), "dummy", "dummy", token); //$NON-NLS-1$//$NON-NLS-2$
+	public LeadingWhitespacePredicateRule(IToken token, String whitespace) {
+		super(new DummyDetector(), whitespace, "dummy", token); //$NON-NLS-1$//$NON-NLS-2$
+		setColumnConstraint(0);
 	}
 	
 	/*
@@ -61,16 +64,5 @@ public final class WhitespacePredicateRule extends WordPatternRule {
 		scanner.unread();
 		
 		return true;
-	}
-	
-	/*
-	 * @see org.eclipse.jface.text.rules.PatternRule#sequenceDetected(org.eclipse.jface.text.rules.ICharacterScanner, char[], boolean)
-	 */
-	protected boolean sequenceDetected(ICharacterScanner scanner, char[] sequence, boolean eofAllowed) {
-		if (Character.isWhitespace((char)scanner.read()))
-			return true;
-		
-		scanner.unread();
-		return false;
 	}
 }
