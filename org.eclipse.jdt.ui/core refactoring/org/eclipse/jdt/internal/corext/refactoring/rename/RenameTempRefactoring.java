@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -52,7 +53,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
-		fNewName= "";//the only thing we can set
+		fNewName= "";//the only thing we can set //$NON-NLS-1$
 	}
 	
 	public Object getNewElement(){
@@ -63,7 +64,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Rename local variable";
+		return RefactoringCoreMessages.getString("RenameTempRefactoring.rename"); //$NON-NLS-1$
 	}
 
 	/*
@@ -117,9 +118,9 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		initAST();
 		if (fTempDeclarationNode == null)
-			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.must_select_local")); //$NON-NLS-1$
 		if (ASTNodes.getParent(fTempDeclarationNode, MethodDeclaration.class) == null)
-			return RefactoringStatus.createFatalErrorStatus("Currently, only local variables declared in methods can be renamed.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.only_in_methods")); //$NON-NLS-1$
 			
 		initNames();			
 		return new RefactoringStatus();
@@ -140,7 +141,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		if (! Checks.startsWithLowerCase(newName))
-			result.addWarning("By convention, all names of local variables start with lowercase letters.");
+			result.addWarning(RefactoringCoreMessages.getString("RenameTempRefactoring.lowercase")); //$NON-NLS-1$
 		return result;		
 	}
 		
@@ -149,7 +150,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm)	throws JavaModelException {
 		try{
-			pm.beginTask("", 1);	
+			pm.beginTask("", 1);	 //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();			
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu})));
 			if (result.hasFatalError())
@@ -172,7 +173,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			RefactoringStatus result= new RefactoringStatus();
 						
 			TextEdit[] edits= getAllRenameEdits();
-			TextChange change= new TextBufferChange("Rename Local Variable", TextBuffer.create(fCu.getSource()));
+			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
 			change.setTrackPositionChanges(true);
 		
 			ICompilationUnit wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
@@ -211,12 +212,13 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 2);
+			pm.beginTask("", 2); //$NON-NLS-1$
 			pm.worked(1);
 			
-			TextChange change= new CompilationUnitChange("Rename Local Variable", fCu);
+			TextChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), fCu); //$NON-NLS-1$
 			
-			String changeName= "Rename local variable:'" + fCurrentName + "' to: '" + fNewName + "'.";
+			String changeName= RefactoringCoreMessages.getFormattedString("RenameTempRefactoring.changeName", //$NON-NLS-1$
+						new String[]{fCurrentName, fNewName});
 			TextEdit[] edits= getAllRenameEdits();
 			for (int i= 0; i < edits.length; i++) {
 				change.addTextEdit(changeName, edits[i]);
