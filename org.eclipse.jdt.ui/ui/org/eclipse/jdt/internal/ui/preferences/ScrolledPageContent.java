@@ -11,44 +11,19 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.ui.forms.FormColors;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
-import org.eclipse.ui.internal.forms.widgets.FormUtil;
 
-/**
- * see bug 79141 
- */
+
 public class ScrolledPageContent extends SharedScrolledComposite {
 
-	private KeyboardHandler fKeyboardHandler;
-	private VisibilityHandler fVisibilityHandler;
-
-	private class VisibilityHandler extends FocusAdapter {
-		public void focusGained(FocusEvent e) {
-			Widget w = e.widget;
-			if (w instanceof Control) {
-				FormUtil.ensureVisible(ScrolledPageContent.this, (Control) w);
-			}
-		}
-	}
-	private class KeyboardHandler extends KeyAdapter {
-		public void keyPressed(KeyEvent e) {
-			Widget w = e.widget;
-			if (w instanceof Control) {
-				if (e.doit)
-					FormUtil.processKey(e.keyCode, ScrolledPageContent.this);
-			}
-		}
-	}
+	private FormToolkit fToolkit;
 	
 	public ScrolledPageContent(Composite parent) {
 		this(parent, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -56,11 +31,16 @@ public class ScrolledPageContent extends SharedScrolledComposite {
 	
 	public ScrolledPageContent(Composite parent, int style) {
 		super(parent, style);
+		
+		FormColors colors= new FormColors(parent.getDisplay());
+		colors.setBackground(null);
+		colors.setForeground(null);
+		
+		fToolkit= new FormToolkit(colors);
+		
 		setExpandHorizontal(true);
 		setExpandVertical(true);
 		setContent(new Composite(this, SWT.NONE));
-		fVisibilityHandler= new VisibilityHandler();
-		fKeyboardHandler= new KeyboardHandler();
 		addListener(SWT.Activate, new Listener() {
 			public void handleEvent(Event event) {
 				if (event.type == SWT.Activate) {
@@ -70,9 +50,16 @@ public class ScrolledPageContent extends SharedScrolledComposite {
 		});
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.swt.widgets.Widget#dispose()
+	 */
+	public void dispose() {
+		fToolkit.dispose();
+		super.dispose();
+	}
+	
 	public void adaptChild(Control childControl) {
-		childControl.addKeyListener(fKeyboardHandler);
-		childControl.addFocusListener(fVisibilityHandler);
+		fToolkit.adapt(childControl, true, true);
 	}
 	
 	public Composite getBody() {
