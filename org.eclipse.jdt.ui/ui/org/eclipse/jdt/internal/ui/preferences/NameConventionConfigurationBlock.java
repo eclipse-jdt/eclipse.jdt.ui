@@ -11,10 +11,12 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -32,7 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -302,7 +304,6 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	}	
 
 	protected Control createContents(Composite parent) {
-		PixelConverter converter= new PixelConverter(parent);
 		setShell(parent.getShell());
 		
 		GridLayout layout= new GridLayout();
@@ -311,12 +312,13 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(layout);
 
-		int heightHint= converter.convertHeightInCharsToPixels(7);
-
 		fNameConventionList.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalSpan(fNameConventionList.getLabelControl(null), 2);
-		LayoutUtil.setHorizontalGrabbing(fNameConventionList.getListControl(null));
-		LayoutUtil.setHeigthHint(fNameConventionList.getListControl(null), heightHint);
+		Table table= fNameConventionList.getTableViewer().getTable();
+		GridData data= (GridData)fNameConventionList.getListControl(null).getLayoutData();
+		data.grabExcessHorizontalSpace= true;
+		data.verticalAlignment= 0;
+		data.heightHint= SWTUtil.getTableHeightHint(table, 5);
 
 		return composite;
 	}

@@ -40,6 +40,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
@@ -139,8 +140,6 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	private void createSortOrderListDialogField(Composite composite, int span) {
-		PixelConverter pixelConverter= new PixelConverter(composite);
-		
 		fSortOrderList.doFillIntoGrid(composite, span);
 		
 		fSortOrderList.getLabelControl(null).dispose();
@@ -148,7 +147,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		GridData data= (GridData) fSortOrderList.getListControl(null).getLayoutData();
 		data.grabExcessHorizontalSpace= true;
 		data.verticalAlignment= 0;
-		data.heightHint= pixelConverter.convertHeightInCharsToPixels(11);
+		data.heightHint= SWTUtil.getTableHeightHint(fSortOrderList.getTableViewer().getTable(), 8);
 	}
 
 	/*

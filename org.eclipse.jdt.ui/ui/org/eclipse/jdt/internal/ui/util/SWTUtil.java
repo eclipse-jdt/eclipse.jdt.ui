@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -95,7 +96,14 @@ public class SWTUtil {
 			((GridData)gd).heightHint= getButtonHeigthHint(button);
 			((GridData)gd).widthHint= getButtonWidthHint(button);		 
 		}
-	}		
+	}
+	
+	public static int getTableHeightHint(Table table, int rows) {
+		int result= table.getItemHeight() * rows + table.getHeaderHeight();
+		if (table.getLinesVisible())
+			result+= table.getGridLineWidth() * (rows - 1);
+		return result;		
+	}
 	
 
 }
