@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -47,7 +48,7 @@ class OpenResourceAction extends SelectionProviderAction implements ISelectionCh
 			
 			try {	  
 				IEditorPart part= EditorUtility.openInEditor(element);
-				if (element instanceof ISourceReference) 	
+				if (element instanceof ISourceReference && !(element instanceof IOpenable)) 	
 					EditorUtility.revealInEditor(part, (ISourceReference)element);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
