@@ -11,30 +11,38 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.Map;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.swt.custom.BusyIndicator;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.ide.IDE;
+
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.SearchUI;
-import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.ui.ide.IDE;
+
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 public abstract class FindOccurrencesEngine {
 	
@@ -51,10 +59,7 @@ public abstract class FindOccurrencesEngine {
 			fClassFile= file;
 		}
 		protected CompilationUnit createAST() {
-			ASTParser p= ASTParser.newParser(AST.JLS2);
-			p.setSource(fClassFile);
-			p.setResolveBindings(true);
-			return (CompilationUnit) p.createAST(null);
+			return JavaPlugin.getDefault().getASTProvider().getAST(fClassFile, true, null);
 		}
 		protected IJavaElement getInput() {
 			return fClassFile;
@@ -80,10 +85,7 @@ public abstract class FindOccurrencesEngine {
 			fCUnit= unit;
 		}
 		protected CompilationUnit createAST() {
-			ASTParser p= ASTParser.newParser(AST.JLS2);
-			p.setSource(fCUnit);
-			p.setResolveBindings(true);
-			return (CompilationUnit) p.createAST(null);
+			return JavaPlugin.getDefault().getASTProvider().getAST(fCUnit, true, null);
 		}
 		protected IJavaElement getInput() {
 			return fCUnit;
@@ -220,5 +222,4 @@ public abstract class FindOccurrencesEngine {
 		NewSearchUI.activateSearchResultView();
 		NewSearchUI.runQuery(new OccurrencesSearchQuery(finder, document, element));
 	}
-
 }
