@@ -249,7 +249,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		}	
 		
 		IStatus status= JavaConventions.validateImportDeclaration(importName);
-		if (!status.isOK()){
+		if (status.getSeverity() == IStatus.ERROR){
 			setInvalid(fNewImport, status.getMessage());
 			return;
 		}
@@ -268,7 +268,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		}
 		
 		IStatus status= JavaConventions.validateJavaTypeName(className);
-		if (!status.isOK()) {
+		if (status.getSeverity() == IStatus.ERROR) {
 			setInvalid(fAccessorClassName, status.getMessage());
 			return;
 		}
