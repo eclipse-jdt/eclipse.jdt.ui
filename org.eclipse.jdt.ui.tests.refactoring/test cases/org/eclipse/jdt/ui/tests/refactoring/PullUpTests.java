@@ -413,13 +413,38 @@ public class PullUpTests extends RefactoringTest {
 //		boolean deleteAllMatchingMethods= false;
 //		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods);
 	}
-	
+
 	public void testFail13() throws Exception{
 		String[] methodNames= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
 		boolean deleteAllInSourceType= true;
 		boolean deleteAllMatchingMethods= false;
 		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods);
+	}
+	
+	public void testFail14() throws Exception{
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		boolean deleteAllInSourceType= true;
+		boolean deleteAllMatchingMethods= false;
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		try{
+			IType type= getType(cu, "A");
+			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
+			IMember[] members= TestUtil.merge(methods, new IMember[]{type.getType("Quux")});
+			PullUpRefactoring ref= createRefactoring(members);
+			if (deleteAllInSourceType)
+				ref.setMethodsToDelete(methods);
+			if (deleteAllMatchingMethods)
+				ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
+		
+			RefactoringStatus result= performRefactoring(ref);
+			assertTrue("precondition was supposed to fail", result != null && ! result.isOK());
+		} finally{
+			performDummySearch();
+			cu.delete(false, null);
+		}		
+
 	}
 
 	//----------------------------------------------------------
