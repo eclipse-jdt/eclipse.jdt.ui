@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
+import java.io.IOException;
+import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -53,8 +55,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
-
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * </p> 
  * <p>
  * FIXME: Work in progress
+ * 			- does not yet reveal the key in the opened editor
  * 			- only IFile's are currently supported
  * </p>
  * 
@@ -182,7 +183,8 @@ public class OpenAction extends SelectionDispatchAction {
 			String key= document.get(partition.getOffset(), partition.getLength()).trim();
 			
 			// Check whether the key is valid
-			Properties properties= NLSHintHelper.getProperties(storageEditorInput.getStorage());
+			Properties properties= new Properties();
+			properties.load(new StringBufferInputStream(document.get()));
 			if (properties.getProperty(key) == null) {
 				showNoKeyErrorInStatusLine();
 				return;
@@ -210,40 +212,14 @@ public class OpenAction extends SelectionDispatchAction {
 		} catch (BadPartitioningException ex) {
 			String message= PropertiesFileEditorMessages.getString("OpenAction.error.messageErrorResolvingSelection"); //$NON-NLS-1$
 			showError(new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex)));
-		} catch (CoreException ex) {
-			showError(ex);
-			return;
+		} catch (IOException ex) {
+			String message= PropertiesFileEditorMessages.getString("OpenAction.error.messageErrorResolvingSelection"); //$NON-NLS-1$
+			showError(new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex)));
 		}
 	}
 	
 	private void showNoKeyErrorInStatusLine() {
 		showErrorInStatusLine(PropertiesFileEditorMessages.getString("OpenAction.error.messageBadSelection")); //$NON-NLS-1$
-	}
-
-	// FIXME: does not handle complicated key with escapes
-	private String extractKey(String keyWithAssignment) {
-		keyWithAssignment= keyWithAssignment.trim();
-		if (keyWithAssignment == null)
-			return null;
-		
-		int length= keyWithAssignment.length();
-		if (length == 0)
-			return null;
-		
-		boolean hasAssignment= true;
-		do {
-			char ch= keyWithAssignment.charAt(length-1);
-			hasAssignment= ch == '='; // FIXME: there are other valid assignment characters
-			length--;
-			if (hasAssignment) {
-				if (length > 1)
-					keyWithAssignment= keyWithAssignment.substring(0, length - 1);
-				else
-					keyWithAssignment= keyWithAssignment.substring(0, 0);
-			} else if (length == -1)
-				keyWithAssignment= null;
-		} while (length > 0 && hasAssignment);
-		return keyWithAssignment;
 	}
 
 	private void open(KeyReference[] elements) {
@@ -325,6 +301,7 @@ public class OpenAction extends SelectionDispatchAction {
 		TextSearchScope result= new TextSearchScope(""); //$NON-NLS-1$
 		result.add(resource);
 		result.addExtension("*.java"); //$NON-NLS-1$
+		result.addExtension("*.xml"); //$NON-NLS-1$
 		return result;
 	}
 }
