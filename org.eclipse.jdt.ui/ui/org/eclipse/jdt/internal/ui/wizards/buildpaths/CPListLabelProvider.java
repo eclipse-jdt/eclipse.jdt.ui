@@ -253,9 +253,9 @@ class CPListLabelProvider extends LabelProvider {
 		} else if (element instanceof CPListElementAttribute) {
 			String key= ((CPListElementAttribute) element).getKey();
 			if (key.equals(CPListElement.SOURCEATTACHMENT)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_CUNIT); // todo: change image
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_SOURCE_ATTACH_ATTRIB); // todo: change image
 			} else if (key.equals(CPListElement.JAVADOC)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_HTMLTAG); // todo: change image
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB); // todo: change image
 			} else if (key.equals(CPListElement.OUTPUT)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB);
 			} else if (key.equals(CPListElement.EXCLUSION)) {
