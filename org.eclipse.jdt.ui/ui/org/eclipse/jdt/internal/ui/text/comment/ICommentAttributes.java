@@ -53,4 +53,7 @@ public interface ICommentAttributes {
 
 	/** Range has paragraph separator attribute */
 	public static final int COMMENT_SEPARATOR= 1 << 12;
+
+	/** Range is the first token on the line in the original source */
+	public static final int COMMENT_FIRST_TOKEN= 1 << 13;
 }

@@ -225,17 +225,17 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 
 			result= new CommentRange(begin, 0);
 			result.setAttribute(COMMENT_BLANKLINE);
+			result.setAttribute(COMMENT_FIRST_TOKEN);
 
 			parent.append(result);
 		}
 
-		int attribute= 0;
+		int attribute= COMMENT_FIRST_TOKEN;
 		while (offset < length) {
 
 			while (offset < length && Character.isWhitespace(content.charAt(offset)))
 				offset++;
 
-			attribute= 0;
 			index= offset;
 
 			if (index < length) {
@@ -248,7 +248,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 					if (index < length && content.charAt(index) == HTML_TAG_POSTFIX)
 						index++;
 
-					attribute= COMMENT_HTML;
+					attribute |= COMMENT_HTML;
 
 				} else if (content.startsWith(LINK_TAG_PREFIX, index)) {
 
@@ -258,7 +258,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 					if (index < length && content.charAt(index) == LINK_TAG_POSTFIX)
 						index++;
 
-					attribute= COMMENT_OPEN | COMMENT_CLOSE;
+					attribute |= COMMENT_OPEN | COMMENT_CLOSE;
 
 				} else {
 
@@ -275,6 +275,8 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 				parent.append(result);
 				offset= index;
 			}
+			
+			attribute= 0;
 		}
 	}
 

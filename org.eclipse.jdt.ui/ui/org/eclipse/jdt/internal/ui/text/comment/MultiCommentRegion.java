@@ -106,6 +106,10 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 
 			else if (previous.hasAttribute(COMMENT_CODE) && !next.hasAttribute(COMMENT_CODE))
 				return getDelimiter();
+			
+			// remove any asterix borders inside code sections
+			else if (previous.hasAttribute(COMMENT_CODE) && next.hasAttribute(COMMENT_CODE))
+				return getDelimiter();
 
 			else if ((next.hasAttribute(COMMENT_IMMUTABLE | COMMENT_SEPARATOR) || ((fSeparateRoots || !isClearLines()) && previous.hasAttribute(COMMENT_PARAGRAPH))) && !successor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;

@@ -60,6 +60,8 @@ import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
 import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.comment.JavaDocRegion;
+import org.eclipse.jdt.internal.ui.text.comment.JavaSnippetFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
@@ -470,6 +472,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_DOC);
 		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+		formatter.setFormattingStrategy(new JavaSnippetFormattingStrategy(sourceViewer), JavaDocRegion.JAVA_SNIPPET_PARTITION);
 
 		return formatter;
 	}

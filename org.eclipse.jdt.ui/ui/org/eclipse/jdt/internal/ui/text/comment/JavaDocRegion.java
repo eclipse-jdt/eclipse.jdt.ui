@@ -48,6 +48,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	/** Should source code regions be formatted? */
 	private final boolean fFormatSource;
 
+	/** Content type constant used for code snippets withing javadoc comments, value: {@value}. */
+	public static final String JAVA_SNIPPET_PARTITION= "__java_doc_snippet"; //$NON-NLS-1$
+
 	/**
 	 * Creates a new javadoc region.
 	 * 
@@ -97,7 +100,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 						begin= positions[position++].getOffset();
 						end= positions[position].getOffset();
 
-						context.setProperty(FormattingContextProperties.CONTEXT_PARTITION, new TypedPosition(begin, end - begin, IDocument.DEFAULT_CONTENT_TYPE));
+						context.setProperty(FormattingContextProperties.CONTEXT_PARTITION, new TypedPosition(begin, end - begin, JAVA_SNIPPET_PARTITION));
 						formatter.format(document, context);
 					}
 				}
@@ -271,12 +274,22 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 				current= (CommentRange)iterator.next();
 				count= current.getLength();
 
-				if (count > 0) {
+				if (count > 0 || level > 0) { // PR44035: when inside a tag, mark blank lines as well to get proper snippet formatting
 
 					token= getText(current.getOffset(), current.getLength());
 					level= current.markRange(token, tags[index], level, key, include);
 				}
 			}
 		}
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.comment.MultiCommentRegion#canAppend(org.eclipse.jdt.internal.ui.text.comment.CommentLine, org.eclipse.jdt.internal.ui.text.comment.CommentRange, org.eclipse.jdt.internal.ui.text.comment.CommentRange, int, int)
+	 */
+	protected boolean canAppend(CommentLine line, CommentRange previous, CommentRange next, int position, int count) {
+		// don't append code sections
+		if (next.hasAttribute(COMMENT_CODE | COMMENT_FIRST_TOKEN) && line.getSize() != 0)
+			return false;
+		return super.canAppend(line, previous, next, position, count);
 	}
 }

@@ -34,8 +34,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-
 /**
  * Formatting strategy for general source code comments.
  * <p>
@@ -116,7 +114,6 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		try {
 
 			final ITypedRegion partition= TextUtilities.getPartition(document, fFormatter.getDocumentPartitioning(), position.getOffset());
-			final String type= partition.getType();
 
 			position.offset= partition.getOffset();
 			position.length= partition.getLength();
@@ -125,7 +122,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			final boolean format= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMAT));
 			final boolean header= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER));
 
-			if (format && (header || position.getOffset() != 0 || !type.equals(IJavaPartitions.JAVA_DOC) && !type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))) {
+			if (format && (header || position.getOffset() != 0)) {
 
 				final CommentRegion region= CommentObjectFactory.createRegion(this, position, TextUtilities.getDefaultLineDelimiter(document));
 				final String indentation= getLineIndentation(document, region, position.getOffset());

@@ -80,7 +80,7 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	 */
 	protected final boolean isOpeningTag(final String token, final String tag) {
 
-		boolean result= token.charAt(0) == HTML_TAG_PREFIX && !token.startsWith(HTML_CLOSE_PREFIX) && token.charAt(token.length() - 1) == HTML_TAG_POSTFIX;
+		boolean result= token.length() > 0 && token.charAt(0) == HTML_TAG_PREFIX && !token.startsWith(HTML_CLOSE_PREFIX) && token.charAt(token.length() - 1) == HTML_TAG_POSTFIX;
 		if (result) {
 
 			setAttribute(COMMENT_OPEN);
