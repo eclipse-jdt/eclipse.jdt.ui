@@ -266,12 +266,13 @@ public class JdtActionConstants {
 	public static final String EXTRACT_INTERFACE= "org.eclipse.jdt.ui.actions.ExtractInterface"; //$NON-NLS-1$
 
 	/**
-	 * Refactor menu: name of standard Move Inner Type to Top Level global action
-	 * (value <code>"org.eclipse.jdt.ui.actions.MoveInnerToTop"</code>).
+	 * Refactor menu: name of standard global action to convert a nested
+	 * type to a top level type (value <code>"org. eclipse. jdt.ui.actions.
+	 * MoveInnerToTop"</code>).
 	 * 
 	 * @since 2.1
 	 */
-	public static final String MOVE_INNER_TO_TOP= "org.eclipse.jdt.ui.actions.MoveInnerToTop"; //$NON-NLS-1$
+	public static final String CONVERT_NESTED_TO_TOP= "org.eclipse.jdt.ui.actions.ConvertNestedToTop"; //$NON-NLS-1$
 	
 	/**
 	 * Refactor menu: name of standard Use Supertype global action
@@ -282,12 +283,12 @@ public class JdtActionConstants {
 	public static final String USE_SUPERTYPE= "org.eclipse.jdt.ui.actions.UseSupertype"; //$NON-NLS-1$
 
 	/**
-	 * Refactor menu: name of standard Promote Temp global action
-	 * (value <code>"org.eclipse.jdt.ui.actions.PromoteTemp"</code>).
+	 * Refactor menu: name of standard global action to convert a local
+	 * variable to a field (value <code>"org.eclipse.jdt.ui.actions.ConvertLocalToField"</code>).
 	 * 
 	 * @since 2.1
 	 */
-	public static final String PROMOTE_TEMP= "org.eclipse.jdt.ui.actions.PromoteTemp"; //$NON-NLS-1$
+	public static final String CONVERT_LOCAL_TO_FIELD= "org.eclipse.jdt.ui.actions.ConvertLocalToField"; //$NON-NLS-1$
 
 	/**
 	 * Refactor menu: name of standard Covert Anonymous to Nested global action

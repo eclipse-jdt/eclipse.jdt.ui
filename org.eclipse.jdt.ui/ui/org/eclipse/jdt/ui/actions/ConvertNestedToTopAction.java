@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -32,7 +42,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /** 
  * @since 2.1
  */
-public class MoveInnerToTopAction extends SelectionDispatchAction {
+public class ConvertNestedToTopAction extends SelectionDispatchAction {
 
 	private MoveInnerToTopRefactoring fRefactoring;
 	private CompilationUnitEditor fEditor;
@@ -40,7 +50,7 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
-	public MoveInnerToTopAction(CompilationUnitEditor editor) {
+	public ConvertNestedToTopAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
@@ -53,9 +63,9 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public MoveInnerToTopAction(IWorkbenchSite site) {
+	public ConvertNestedToTopAction(IWorkbenchSite site) {
 		super(site);
-		setText("Mov&e to Top Level...");
+		setText("Conv&ert Nested Type to Top Level...");
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_INNER_TO_TOP_ACTION);
 	}
 	
@@ -93,7 +103,7 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 		if (canRun(selection)){
 			startRefactoring();	
 		} else {
-			String unavailable= "To activate this refactoring, please select the name of an inner class";
+			String unavailable= "To activate this refactoring, please select the name of a nested type.";
 			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable);
 		}
 		fRefactoring= null;

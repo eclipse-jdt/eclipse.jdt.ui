@@ -37,17 +37,17 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * 
  * @since 2.1
  */
-public class PromoteTempToFieldAction extends SelectionDispatchAction {
+public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
-	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("PromoteTempAction.promote_temp"); //$NON-NLS-1$
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ConvertLocalToField.title"); //$NON-NLS-1$
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
-	public PromoteTempToFieldAction(CompilationUnitEditor editor) {
+	public ConvertLocalToFieldAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("PromoteTempAction.label")); //$NON-NLS-1$
+		setText(RefactoringMessages.getString("ConvertLocalToField.label")); //$NON-NLS-1$
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_ACTION);
@@ -59,7 +59,7 @@ public class PromoteTempToFieldAction extends SelectionDispatchAction {
 
 	private RefactoringWizard createWizard(Refactoring refactoring) {
 		String helpId= IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_ERROR_WIZARD_PAGE;
-		String pageTitle= RefactoringMessages.getString("PromoteTempAction.promote_temp"); //$NON-NLS-1$
+		String pageTitle= RefactoringMessages.getString("ConvertLocalToField.title"); //$NON-NLS-1$
 		return new PromoteTempWizard((PromoteTempToFieldRefactoring)refactoring, pageTitle, helpId);
 	}
 	

@@ -24,10 +24,10 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds refactor actions (e.g. Rename..., Move..., etc.)
@@ -40,25 +40,59 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
  * @since 2.0
  */
 public class RefactorActionGroup extends ActionGroup {
+	
+	/**
+	 * Pop-up menu: id of the refactor sub menu (value <code>org.eclipse.jdt.ui.
+	 * refactoring.menu</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String MENU_ID= "org.eclipse.jdt.ui.refactoring.menu"; //$NON-NLS-1$
+
+	/**
+	 * Pop-up menu: id of the reorg group of the refactor sub menu (value
+	 * <code>reorgGroup</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String GROUP_REORG= "reorgGroup"; //$NON-NLS-1$
+
+	/**
+	 * Pop-up menu: id of the type group of the refactor sub menu (value
+	 * <code>typeGroup</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String GROUP_TYPE= "typeGroup"; //$NON-NLS-1$
+
+	/**
+	 * Pop-up menu: id of the coding group of the refactor sub menu (value
+	 * <code>codingGroup</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String GROUP_CODING= "codingGroup"; //$NON-NLS-1$
 
 	private IWorkbenchSite fSite;
 	private boolean fIsEditorOwner;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
 
- 	private SelectionDispatchAction fSelfEncapsulateField;
  	private SelectionDispatchAction fMoveAction;
 	private SelectionDispatchAction fRenameAction;
 	private SelectionDispatchAction fModifyParametersAction;
+	private SelectionDispatchAction fConvertAnonymousToNestedAction;
+	private SelectionDispatchAction fConvertNestedToTopAction;
+	
 	private SelectionDispatchAction fPullUpAction;
-	private SelectionDispatchAction fExtractTempAction;
-	private SelectionDispatchAction fExtractMethodAction;
 	private SelectionDispatchAction fExtractInterfaceAction;
-	private SelectionDispatchAction fMoveInnerToTopAction;
 	private SelectionDispatchAction fUseSupertypeAction;
-	private SelectionDispatchAction fExtractConstantAction;
-    private SelectionDispatchAction fPromoteTempAction;
-    private SelectionDispatchAction fConvertAnonymousToNestedAction;
+	
 	private SelectionDispatchAction fInlineAction;
+	private SelectionDispatchAction fExtractMethodAction;
+	private SelectionDispatchAction fExtractTempAction;
+	private SelectionDispatchAction fExtractConstantAction;
+    private SelectionDispatchAction fConvertLocalToFieldAction;
+	private SelectionDispatchAction fSelfEncapsulateField;
 	
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -137,10 +171,10 @@ public class RefactorActionGroup extends ActionGroup {
 		initAction(fExtractMethodAction, provider, selection);
 		editor.setAction("ExtractMethod", fExtractMethodAction); //$NON-NLS-1$
 
-		fPromoteTempAction= new PromoteTempToFieldAction(editor);
-		fPromoteTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PROMOTE_LOCAL_VARIABLE);
-		initAction(fPromoteTempAction, provider, selection);
-		editor.setAction("PromoteTemp", fPromoteTempAction); //$NON-NLS-1$
+		fConvertLocalToFieldAction= new ConvertLocalToFieldAction(editor);
+		fConvertLocalToFieldAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PROMOTE_LOCAL_VARIABLE);
+		initAction(fConvertLocalToFieldAction, provider, selection);
+		editor.setAction("PromoteTemp", fConvertLocalToFieldAction); //$NON-NLS-1$
 
 		fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(editor);
 		fConvertAnonymousToNestedAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
@@ -152,10 +186,10 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractInterfaceAction.update(selection);
 		editor.setAction("ExtractInterface", fExtractInterfaceAction); //$NON-NLS-1$
 
-		fMoveInnerToTopAction= new MoveInnerToTopAction(editor);
-		fMoveInnerToTopAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
-		fMoveInnerToTopAction.update(selection);
-		editor.setAction("MoveInnerToTop", fMoveInnerToTopAction); //$NON-NLS-1$
+		fConvertNestedToTopAction= new ConvertNestedToTopAction(editor);
+		fConvertNestedToTopAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
+		fConvertNestedToTopAction.update(selection);
+		editor.setAction("MoveInnerToTop", fConvertNestedToTopAction); //$NON-NLS-1$
 		
 		fUseSupertypeAction= new UseSupertypeAction(editor);
 		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
@@ -187,8 +221,8 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractInterfaceAction= new ExtractInterfaceAction(fSite);
 		initAction(fExtractInterfaceAction, provider, selection);
 
-		fMoveInnerToTopAction= new MoveInnerToTopAction(fSite);
-		initAction(fMoveInnerToTopAction, provider, selection);
+		fConvertNestedToTopAction= new ConvertNestedToTopAction(fSite);
+		initAction(fConvertNestedToTopAction, provider, selection);
 
 		fUseSupertypeAction= new UseSupertypeAction(fSite);
 		initAction(fUseSupertypeAction, provider, selection);
@@ -221,9 +255,9 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
-		actionBars.setGlobalActionHandler(JdtActionConstants.MOVE_INNER_TO_TOP, fMoveInnerToTopAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_NESTED_TO_TOP, fConvertNestedToTopAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
-		actionBars.setGlobalActionHandler(JdtActionConstants.PROMOTE_TEMP, fPromoteTempAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_LOCAL_TO_FIELD, fConvertLocalToFieldAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_ANONYMOUS_TO_NESTED, fConvertAnonymousToNestedAction);
 	}
 	
@@ -250,9 +284,9 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fExtractMethodAction, provider);
 		disposeAction(fInlineAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
-		disposeAction(fMoveInnerToTopAction, provider);
+		disposeAction(fConvertNestedToTopAction, provider);
 		disposeAction(fUseSupertypeAction, provider);
-		disposeAction(fPromoteTempAction, provider);
+		disposeAction(fConvertLocalToFieldAction, provider);
 		disposeAction(fConvertAnonymousToNestedAction, provider);
 		super.dispose();
 	}
@@ -263,29 +297,34 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	private void addRefactorSubmenu(IMenuManager menu) {
-		IMenuManager refactorSubmenu= new MenuManager(ActionMessages.getString("RefactorMenu.label"));  //$NON-NLS-1$
-		addAction(refactorSubmenu, fRenameAction);
-		addAction(refactorSubmenu, fMoveAction);
-		addAction(refactorSubmenu, fPullUpAction);
-		addAction(refactorSubmenu, fModifyParametersAction);
-		addAction(refactorSubmenu, fExtractInterfaceAction);
-		addAction(refactorSubmenu, fUseSupertypeAction);
-		addAction(refactorSubmenu, fMoveInnerToTopAction);
-		if (! refactorSubmenu.isEmpty())
-			refactorSubmenu.add(new Separator());
-		addAction(refactorSubmenu, fExtractMethodAction);
-		addAction(refactorSubmenu, fExtractTempAction);
-		addAction(refactorSubmenu, fExtractConstantAction);
-		addAction(refactorSubmenu, fInlineAction);
-		addAction(refactorSubmenu, fPromoteTempAction);
-		addAction(refactorSubmenu, fConvertAnonymousToNestedAction);
-		addAction(refactorSubmenu, fSelfEncapsulateField);
-		if (!refactorSubmenu.isEmpty())
+		IMenuManager refactorSubmenu= new MenuManager(ActionMessages.getString("RefactorMenu.label"), MENU_ID);  //$NON-NLS-1$
+		int added= 0;
+		refactorSubmenu.add(new Separator(GROUP_REORG));
+		added+= addAction(refactorSubmenu, fRenameAction);
+		added+= addAction(refactorSubmenu, fMoveAction);
+		added+= addAction(refactorSubmenu, fModifyParametersAction);
+		added+= addAction(refactorSubmenu, fConvertAnonymousToNestedAction);
+		added+= addAction(refactorSubmenu, fConvertNestedToTopAction);
+		refactorSubmenu.add(new Separator(GROUP_TYPE));
+		added+= addAction(refactorSubmenu, fPullUpAction);
+		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
+		added+= addAction(refactorSubmenu, fUseSupertypeAction);
+		refactorSubmenu.add(new Separator(GROUP_CODING));
+		added+= addAction(refactorSubmenu, fInlineAction);
+		added+= addAction(refactorSubmenu, fExtractMethodAction);
+		added+= addAction(refactorSubmenu, fExtractTempAction);
+		added+= addAction(refactorSubmenu, fExtractConstantAction);
+		added+= addAction(refactorSubmenu, fConvertLocalToFieldAction);
+		added+= addAction(refactorSubmenu, fSelfEncapsulateField);
+		if (added > 0)
 			menu.appendToGroup(fGroupName, refactorSubmenu);
 	}
 	
-	private void addAction(IMenuManager menu, IAction action) {
-		if (action != null && action.isEnabled())
+	private int addAction(IMenuManager menu, IAction action) {
+		if (action != null && action.isEnabled()) {
 			menu.add(action);
+			return 1;
+		}
+		return 0;
 	}
 }

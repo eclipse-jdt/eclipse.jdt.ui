@@ -1006,6 +1006,7 @@
             path="edit">
          	<separator name="undoRedoGroup"/>
          	<separator name="reorgGroup"/>
+         	<separator name="typeGroup"/>
          	<separator name="codingGroup"/>
       	</menu>
       	
@@ -1024,36 +1025,24 @@
 				
 		<!-- reorg group  -->
 				
+		<action id="org.eclipse.jdt.ui.actions.ConvertNestedToTop"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+      		label="%Refactoring.convertNestedToTopAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
+			retarget="true" />
+		
+		<action id="org.eclipse.jdt.ui.actions.ConvertAnonymousToNested"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+      		label="%Refactoring.convertAnonymousToNestedAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
+			retarget="true" />
+			
 		<action id="org.eclipse.jdt.ui.actions.ModifyParameters"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.modifyParametersAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
 			retarget="true" />
 			
-		<action id="org.eclipse.jdt.ui.actions.PullUp"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
-      		label="%Refactoring.pullUpAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.pull.up"
-			retarget="true" />
-
-		<action id="org.eclipse.jdt.ui.actions.ExtractInterface"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
-      		label="%Refactoring.extractInterfaceAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.extract.interface"
-			retarget="true" />
-
-		<action id="org.eclipse.jdt.ui.actions.MoveInnerToTop"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
-      		label="%Refactoring.moveInnerToTopAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
-			retarget="true" />
-		
-		<action id="org.eclipse.jdt.ui.actions.UseSupertype"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
-      		label="%Refactoring.useSupertypeAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.use.supertype"
-			retarget="true" />
-		
 		<action id="org.eclipse.jdt.ui.actions.Move"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.moveAction.label"
@@ -1066,6 +1055,26 @@
 			definitionId="org.eclipse.jdt.ui.edit.text.java.rename.element"
 			retarget="true" />
 			
+		<!-- type group  -->
+			
+		<action id="org.eclipse.jdt.ui.actions.UseSupertype"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup"
+      		label="%Refactoring.useSupertypeAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.use.supertype"
+			retarget="true" />
+		
+		<action id="org.eclipse.jdt.ui.actions.ExtractInterface"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup"
+      		label="%Refactoring.extractInterfaceAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.extract.interface"
+			retarget="true" />
+
+		<action id="org.eclipse.jdt.ui.actions.PullUp"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup"
+      		label="%Refactoring.pullUpAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.pull.up"
+			retarget="true" />
+
 		<!-- coding group  -->
 			
 		<action id="org.eclipse.jdt.ui.actions.SelfEncapsulateField"
@@ -1073,29 +1082,11 @@
 			label="%Refactoring.selfEncapsulateFieldAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
 			retarget="true"/>
-        <action
-        	definitionId="org.eclipse.jdt.ui.edit.text.java.inline"
-            label="%Refactoring.inlineAction.label"
-            retarget="true"
-            menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
-            id="org.eclipse.jdt.ui.actions.Inline" />			
-
-		<action id="org.eclipse.jdt.ui.actions.PromoteTemp"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
-      		label="%Refactoring.promoteTempAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
-			retarget="true" />
-
-		<action id="org.eclipse.jdt.ui.actions.ConvertAnonymousToNested"
-      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
-      		label="%Refactoring.convertAnonymousToNestedAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
-			retarget="true" />
 			
-		<action id="org.eclipse.jdt.ui.actions.ExtractTemp"
+		<action id="org.eclipse.jdt.ui.actions.ConvertLocalToField"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
-      		label="%Refactoring.extractTempAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
+      		label="%Refactoring.convertLocalToFieldAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
 			retarget="true" />
 
 		<action id="org.eclipse.jdt.ui.actions.ExtractConstant"
@@ -1104,12 +1095,25 @@
 			definitionId="org.eclipse.jdt.ui.edit.text.java.extract.constant"
 			retarget="true" />
 
+		<action id="org.eclipse.jdt.ui.actions.ExtractTemp"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+      		label="%Refactoring.extractTempAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
+			retarget="true" />
+
 		<action id="org.eclipse.jdt.ui.actions.ExtractMethod"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.extractMethodAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.extract.method"
 			retarget="true" />
 			
+        <action
+        	definitionId="org.eclipse.jdt.ui.edit.text.java.inline"
+            label="%Refactoring.inlineAction.label"
+            retarget="true"
+            menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+            id="org.eclipse.jdt.ui.actions.Inline" />			
+
 		<!-- =========================================================================== -->
 		<!-- Source Menu                                                                 -->
 		<!-- =========================================================================== -->
@@ -1680,9 +1684,9 @@
 		description= "%ActionDefinition.extractInterface.description"
 	/>
 	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
-		name= "%ActionDefinition.moveInnerToTopLevel.name"
-		description= "%ActionDefinition.moveInnerToTopLevel.description"
+		id="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
+		name= "%ActionDefinition.convertNestedToTopLevel.name"
+		description= "%ActionDefinition.convertNestedorg.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.levelToTopLevel.description"
 	/>
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.use.supertype"
@@ -1690,9 +1694,9 @@
 		description= "%ActionDefinition.useSupertype.description"
 	/>
 	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
-		name= "%ActionDefinition.promoteLocalVariable.name"
-		description= "%ActionDefinition.promoteLocalVariable.description"
+		id="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
+		name= "%ActionDefinition.convertLocalToField.name"
+		description= "%ActionDefinition.convertLocalToField.description"
 	/>
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
@@ -1865,16 +1869,16 @@
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
 		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
+		<accelerator key="Alt+Shift+V" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
 		<accelerator key="Alt+Shift+L" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.constant" />
         <accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline"/>	
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
 		<accelerator key="Alt+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested" />
 			
 		<!-- navigate -->
@@ -1948,16 +1952,16 @@
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
 		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
+		<accelerator key="Alt+Shift+V" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
 		<accelerator key="Alt+Shift+L" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.constant" />
 		<accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
 		<accelerator key="Alt+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested" />
 	
 		<!-- navigate -->
