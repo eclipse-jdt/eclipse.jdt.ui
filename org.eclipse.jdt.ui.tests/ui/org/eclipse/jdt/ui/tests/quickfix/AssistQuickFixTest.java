@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids <sdavids@gmx.de> - testInvertEquals1-23
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -32,8 +33,10 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
 
 public class AssistQuickFixTest extends QuickFixTest {
 	
@@ -1331,6 +1334,1004 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-	}	
+	}
 	
+	private static final Class[] FILTER_EQ= { LinkedNamesAssistProposal.class, AssignToVariableAssistProposal.class };
+	
+    public void testInvertEquals() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(\"b\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"b\".equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(\"b\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+    
+    public void testInvertEquals2() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        String s= \"a\";\n");
+        buf.append("        s.equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        String s= \"a\";\n");
+        buf.append("        \"a\".equals(s);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        String s= \"a\";\n");
+        buf.append("        s.equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+    
+    public void testInvertEquals3() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    private String a= \"a\";\n");
+        buf.append("    private String b= \"b\";\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        a.equals(b);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    private String a= \"a\";\n");
+        buf.append("    private String b= \"b\";\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        b.equals(a);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    private String a= \"a\";\n");
+        buf.append("    private String b= \"b\";\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        a.equals(b);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+    
+    public void testInvertEquals4() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class S {\n");
+        buf.append("    protected String sup= \"a\";\n");
+        buf.append("}\n");
+        buf.append("public class E extends S {\n");
+        buf.append("    private String a= \"a\";\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        sup.equals(this.a);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class S {\n");
+        buf.append("    protected String sup= \"a\";\n");
+        buf.append("}\n");
+        buf.append("public class E extends S {\n");
+        buf.append("    private String a= \"a\";\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        this.a.equals(sup);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class S {\n");
+        buf.append("    protected String sup= \"a\";\n");
+        buf.append("}\n");
+        buf.append("public class E extends S {\n");
+        buf.append("    private String a= \"a\";\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        sup.equals(this.a);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+
+    public void testInvertEquals5() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class A {\n");
+        buf.append("    static String A= \"a\";\n");
+        buf.append("}\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(A.A);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class A {\n");
+        buf.append("    static String A= \"a\";\n");
+        buf.append("}\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        A.A.equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class A {\n");
+        buf.append("    static String A= \"a\";\n");
+        buf.append("}\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(A.A);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+
+    public void testInvertEquals6() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class A {\n");
+        buf.append("    static String get() {\n");
+        buf.append("        return \"a\";\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(A.get());\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class A {\n");
+        buf.append("    static String get() {\n");
+        buf.append("        return \"a\";\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        A.get().equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class A {\n");
+        buf.append("    static String get() {\n");
+        buf.append("        return \"a\";\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(A.get());\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+
+    public void testInvertEquals7() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".getClass().equals(String.class);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        String.class.equals(\"a\".getClass());\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".getClass().equals(String.class);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+
+    public void testInvertEquals8() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        boolean x = false && \"a\".equals(get());\n");
+        buf.append("    }\n");
+        buf.append("    String get() {\n");
+        buf.append("        return \"a\";\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        boolean x = false && get().equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("    String get() {\n");
+        buf.append("        return \"a\";\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        boolean x = false && \"a\".equals(get());\n");
+        buf.append("    }\n");
+        buf.append("    String get() {\n");
+        buf.append("        return \"a\";\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+
+    public void testInvertEquals9() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        equals(new E());\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        new E().equals(this);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        equals(new E());\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+    
+    public void testInvertEquals10() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(null);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+    }
+    
+    public void testInvertEquals11() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    boolean equals(Object o, boolean a) {\n");
+        buf.append("        return false;\n");
+        buf.append("    }\n");  
+        buf.append("    public void foo() {\n");        
+        buf.append("        new E().equals(\"a\", false);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+        
+        context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+    }
+    
+    public void testInvertEquals12() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    boolean equals(boolean b) {\n");
+        buf.append("        return false;\n");
+        buf.append("    }\n");  
+        buf.append("    public void foo() {\n");        
+        buf.append("        new E().equals(false);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+        
+        context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+    }
+    
+    public void testInvertEquals13() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    boolean equals(boolean b) {\n");
+        buf.append("        return false;\n");
+        buf.append("    }\n");  
+        buf.append("    public void foo() {\n");        
+        buf.append("        new E().equals(true ? true : false);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+        
+        context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+    }
+    
+    public void testInvertEquals14() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("class Super {\n");
+        buf.append("    protected boolean sBool= false;\n");
+        buf.append("}\n");
+        buf.append("public class E extends Super {\n");
+        buf.append("    boolean equals(boolean b) {\n");
+        buf.append("        return false;\n");
+        buf.append("    }\n");  
+        buf.append("    public void foo() {\n");        
+        buf.append("        new E().equals(sBool);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+        
+        context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+    }
+    
+    public void testInvertEquals15() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    boolean equals(int i) {\n");
+        buf.append("        return false;\n");
+        buf.append("    }\n");  
+        buf.append("    public void foo() {\n");        
+        buf.append("        new E().equals(1 + 1);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+        
+        context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+    }
+    
+    public void testInvertEquals16() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    boolean equals(int i) {\n");
+        buf.append("        return false;\n");
+        buf.append("    }\n");  
+        buf.append("    public void foo() {\n");
+        buf.append("        int i= 1;\n");
+        buf.append("        new E().equals(i + i);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+        
+        context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+    }
+    
+    public void testInvertEquals17() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("       \"a\".equals(null);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+    }
+    
+    public void testInvertEquals18() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public boolean equals(Object o) {\n");
+        buf.append("       return super.equals(o);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+        
+        context= getCorrectionContext(cu, buf.toString().lastIndexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 0);
+        assertCorrectLabels(proposals);
+    }
+    
+    public void testInvertEquals19() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    private String a= \"a\";\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        a.equals((Object) \"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    private String a= \"a\";\n");        
+        buf.append("    public void foo() {\n");
+        buf.append("        ((Object) \"a\").equals(a);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    private String a= \"a\";\n");        
+        buf.append("    public void foo() {\n");
+        buf.append("        a.equals((Object) \"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+    
+    public void testInvertEquals20() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        String s= null;\n");
+        buf.append("        \"a\".equals(s = \"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        String s= null;\n");
+        buf.append("        (s = \"a\").equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        String s= null;\n");
+        buf.append("        \"a\".equals(s = \"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+    
+    public void testInvertEquals21() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"aaa\".equals(\"a\" + \"a\" + \"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        (\"a\" + \"a\" + \"a\").equals(\"aaa\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"aaa\".equals(\"a\" + \"a\" + \"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+    
+    public void testInvertEquals22() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(true ? \"a\" : \"b\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        (true ? \"a\" : \"b\").equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(true ? \"a\" : \"b\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
+    
+    public void testInvertEquals23() throws Exception {
+        IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals((\"a\"));\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+        
+        String str= "equals";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        List proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+        String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        (\"a\").equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+        
+        cu= pack1.createCompilationUnit("E.java", buf.toString(), true, null);
+        context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+        proposals= collectAssists(context, FILTER_EQ);
+        
+        assertNumberOf("proposals", proposals.size(), 1);
+        assertCorrectLabels(proposals);
+        
+        proposal= (CUCorrectionProposal) proposals.get(0);
+        preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+        buf= new StringBuffer();
+        buf.append("package test1;\n");
+        buf.append("public class E {\n");
+        buf.append("    public void foo() {\n");
+        buf.append("        \"a\".equals(\"a\");\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
 }

@@ -295,17 +295,32 @@ public class QuickFixTest extends TestCase {
 	}
 
 
-	protected final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) {
+	protected final ArrayList collectAssists(IInvocationContext context, Class[] filteredTypes) {
 		ArrayList proposals= new ArrayList();
 		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		if (!includeLinkedRename) {
+		
+		if (filteredTypes != null && filteredTypes.length > 0) {
 			for (Iterator iter= proposals.iterator(); iter.hasNext(); ) {
-				if (iter.next() instanceof LinkedNamesAssistProposal) {
+				if (isFiltered(iter.next(), filteredTypes)) {
 					iter.remove();
 				}
 			}
 		}
 		return proposals;
+	}
+	
+	private boolean isFiltered(Object curr, Class[] filteredTypes) {
+		for (int k = 0; k < filteredTypes.length; k++) {
+			if (filteredTypes[k].isInstance(curr)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	protected final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) {
+		Class[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class };
+		return collectAssists(context, filteredTypes);
 	}	
 	
 	
