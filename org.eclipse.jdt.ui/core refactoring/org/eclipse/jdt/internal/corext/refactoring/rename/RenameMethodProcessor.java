@@ -530,14 +530,13 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	private IMethod getNewMethod(IMethod method, ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{
-		IType[] allNewTypes= newWorkingCopyOfDeclaringCu.getAllTypes();
-		String fullyTypeName= method.getDeclaringType().getFullyQualifiedName();
+		IType type= method.getDeclaringType();
+		IType typeWc= (IType) JavaModelUtil.findInCompilationUnit(newWorkingCopyOfDeclaringCu, type);
+		if (typeWc == null)
+			return null;
+		
 		String[] paramTypeSignatures= method.getParameterTypes();
-		for (int i= 0; i < allNewTypes.length; i++) {
-			if (allNewTypes[i].getFullyQualifiedName().equals(fullyTypeName))
-				return allNewTypes[i].getMethod(getNewElementName(), paramTypeSignatures);
-		}
-		return null;
+		return typeWc.getMethod(getNewElementName(), paramTypeSignatures);
 	}
 
 	//-------

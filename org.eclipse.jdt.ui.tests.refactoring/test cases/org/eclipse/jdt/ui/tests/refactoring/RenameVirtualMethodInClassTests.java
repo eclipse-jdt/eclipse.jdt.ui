@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
@@ -418,6 +419,17 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	public void test39() throws Exception {
 		helper2();
+	}
+	
+	public void test40() throws Exception { // test for bug 68592
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType localClass= cu.getType("A").getMethod("doit", new String[0]).getType("LocalClass", 1);
+		IMethod method= localClass.getMethod("method", new String[]{"I"});
+		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(method);
+		RenameRefactoring ref= new RenameRefactoring(processor);
+		processor.setNewElementName("method2");
+		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
 	//anonymous inner class

@@ -588,13 +588,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 
 	private IField getNewField(ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{
-		IType[] allNewTypes= newWorkingCopyOfDeclaringCu.getAllTypes();
-		String fullyTypeName= fField.getDeclaringType().getFullyQualifiedName();
-		for (int i= 0; i < allNewTypes.length; i++) {
-			if (allNewTypes[i].getFullyQualifiedName().equals(fullyTypeName))
-				return allNewTypes[i].getField(getNewElementName());
-		}
-		return null;
+		IType type= fField.getDeclaringType();
+		IType typeWc= (IType) JavaModelUtil.findInCompilationUnit(newWorkingCopyOfDeclaringCu, type);
+		if (typeWc == null)
+			return null;
+		
+		return typeWc.getField(getNewElementName());
 	}
 	
 }
