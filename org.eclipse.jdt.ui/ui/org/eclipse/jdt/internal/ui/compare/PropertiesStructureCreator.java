@@ -183,23 +183,29 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			
 	private void parsePropertyFile(PropertyNode root, IDocument doc) throws IOException {
 		
-		int start= 0;
+		int start= -1;
+		int lineStart= 0;
 		
 		int[] args= new int[2];
-		args[0]= 1;
-		args[1]= 0;
+		args[0]= 0;	// here we return the line number
+		args[1]= 0;	// and here the offset of the first character of the line 
 		
 		for (;;) {
+			
+			lineStart= args[1];	// start of current line
             String line= readLine(args, doc);
 			if (line == null)
 				return;
-
+				
 			if (line.length() <= 0)
 				continue;	// empty line
 				
 			char firstChar= line.charAt(0);
-			if (firstChar == '#' || firstChar == '!')
+			if (firstChar == '#' || firstChar == '!') {
+				if (start < 0)	// comment belongs to next key/value pair
+					start= lineStart;	
 				continue;	// comment
+			}
 								
 			// find continuation lines
 			while (needNextLine(line)) {
@@ -248,16 +254,20 @@ public class PropertiesStructureCreator implements IStructureCreator {
         		valuePos++;
     		}
     
-    		String key= line.substring(keyPos, separatorPos);
-    		String value= (separatorPos < len) ? line.substring(valuePos, len) : ""; //$NON-NLS-1$
-
-    		key= convert(key);
-    		value= convert(value);
-    		
-    		int length= (args[1]-1) - start;
-     		new PropertyNode(root, 0, key, value, doc, start, length);
-             
-			start= args[1];
+    		String key= convert(line.substring(keyPos, separatorPos));
+    		if (key.length() > 0) {
+    					
+ 				if (start < 0)
+					start= lineStart;
+    			
+	    		String value= ""; //$NON-NLS-1$
+				if (separatorPos < len)
+					value= convert(line.substring(valuePos, len));
+						    		
+	    		int length= (args[1]-1) - start;
+	     		new PropertyNode(root, 0, key, value, doc, start, length);
+ 				start= -1;
+   			}
 		}
 	}
 
