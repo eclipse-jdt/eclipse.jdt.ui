@@ -537,7 +537,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		try{
 			pm.beginTask("", 3); //$NON-NLS-1$
 				
-			TextChangeManager manager= new TextChangeManager();
+			TextChangeManager manager= new TextChangeManager(true);
 		
 			addOccurrences(new SubProgressMonitor(pm, 1), manager);
 		
@@ -631,4 +631,5 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		int offset= searchResult.getEnd() - oldName.length();
 		return SimpleTextEdit.createReplace(offset, oldName.length(), fNewElementName);
 	}
-}
+		}
+		

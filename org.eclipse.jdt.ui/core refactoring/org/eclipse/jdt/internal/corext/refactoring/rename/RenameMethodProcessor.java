@@ -341,7 +341,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 			if (declaringCuWorkingCopy == null)
 				return new SearchResultGroup[0];
 			
-			IMethod method= getNewMethod(declaringCuWorkingCopy); 
+			IMethod method= getNewMethod(declaringCuWorkingCopy);
 			if (method == null || ! method.exists())
 				return new SearchResultGroup[0];
 			
@@ -424,7 +424,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
-		TextChangeManager manager= new TextChangeManager();
+		TextChangeManager manager= new TextChangeManager(true);
 		
 		/* don't really want to add declaration and references separetely in this refactoring 
 		* (declarations of methods are different than declarations of anything else)

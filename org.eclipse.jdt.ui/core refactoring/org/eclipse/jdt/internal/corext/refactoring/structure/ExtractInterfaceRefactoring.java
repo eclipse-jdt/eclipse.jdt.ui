@@ -285,7 +285,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		try{
 			pm.beginTask("", 10); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.analyzing...")); //$NON-NLS-1$
-			TextChangeManager manager= new TextChangeManager();
+			TextChangeManager manager= new TextChangeManager(true);
 			
 			typeCu= WorkingCopyUtil.getNewWorkingCopy(getInputTypeCU(), fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
 			CompilationUnit typeCuNode= AST.parseCompilationUnit(typeCu, true, fWorkingCopyOwner);

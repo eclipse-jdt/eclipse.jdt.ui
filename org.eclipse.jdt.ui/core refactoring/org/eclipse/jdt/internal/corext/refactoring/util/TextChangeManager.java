@@ -28,6 +28,19 @@ public class TextChangeManager {
 	
 	private Map fMap= new HashMap(10); // ICompilationUnit -> TextChange
 	
+	private final boolean fKeepExecutedTextEdits;
+	
+	public TextChangeManager() {
+		this(false);
+	}
+
+	/**
+	 * @see TextChange.setKeepExecutedTextEdits
+	 */
+	public TextChangeManager(boolean keepExecutedTextEdits) {
+		fKeepExecutedTextEdits= keepExecutedTextEdits;
+	}
+	
 	/**
 	 * Adds an association between the given compilation unit and the passed
 	 * change to this manager.
@@ -50,7 +63,7 @@ public class TextChangeManager {
 		TextChange result= (TextChange)fMap.get(cu);
 		if (result == null) {
 			result= new CompilationUnitChange(cu.getElementName(), cu);
-			result.setKeepExecutedTextEdits(true);
+			result.setKeepExecutedTextEdits(fKeepExecutedTextEdits);
 			fMap.put(cu, result);
 		}
 		return result;
