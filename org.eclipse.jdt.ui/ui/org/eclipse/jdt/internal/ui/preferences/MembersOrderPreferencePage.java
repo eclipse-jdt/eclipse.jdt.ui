@@ -22,7 +22,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -60,8 +59,6 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	public static final String TYPES= "T"; //$NON-NLS-1$
 
 	private ListDialogField fSortOrderList;
-	private final int DEFAULT= 0;
-
 
 	private static List getSortOrderList(String string) {
 		StringTokenizer tokenizer= new StringTokenizer(string, ","); //$NON-NLS-1$
@@ -87,6 +84,8 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	public MembersOrderPreferencePage() {
 		//set the preference store
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		
+		setDescription(PreferencesMessages.getString("MembersOrderPreferencePage.label.description")); //$NON-NLS-1$
 
 		String string= getPreferenceStore().getString(PREF_OUTLINE_SORT_OPTION);
 
@@ -138,16 +137,10 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	private void createSortOrderListDialogField(Composite composite, int span) {
-
-		Label sortLabel= new Label(composite, SWT.NONE);
-		sortLabel.setText(PreferencesMessages.getString("MembersOrderPreferencePage.label.description")); //$NON-NLS-1$
-
-		GridData gridData= new GridData();
-		gridData.horizontalAlignment= GridData.FILL_HORIZONTAL;
-		gridData.horizontalSpan= span;
-		sortLabel.setLayoutData(gridData);
-
 		fSortOrderList.doFillIntoGrid(composite, span);
+		
+		fSortOrderList.getLabelControl(null).dispose();
+		
 		LayoutUtil.setHorizontalGrabbing(fSortOrderList.getListControl(null));
 	}
 
@@ -229,33 +222,34 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 			ImageDescriptor descriptor= null;
 
 			if (element instanceof String) {
+				int visibility= Flags.AccPublic;
 				String s= (String) element;
 				if (s.equals(FIELDS)) {
 					//0 will give the default field image	
-					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, visibility);
 				} else if (s.equals(CONSTRUCTORS)) {
-					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, DEFAULT);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 					//add a constructor adornment to the image descriptor
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 				} else if (s.equals(METHODS)) {
-					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 				} else if (s.equals(STATIC_FIELDS)) {
-					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, visibility);
 					//add a constructor adornment to the image descriptor
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 				} else if (s.equals(STATIC_METHODS)) {
-					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 					//add a constructor adornment to the image descriptor
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 				} else if (s.equals(INIT)) {
-					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, DEFAULT);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 				} else if (s.equals(STATIC_INIT)) {
-					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, DEFAULT);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 				} else if (s.equals(TYPES)) {
 					descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, true, Flags.AccPublic);
 				} else {
-					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, DEFAULT);
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
 				}
 				return registry.get(descriptor);
 			}
