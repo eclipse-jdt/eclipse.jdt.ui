@@ -11,7 +11,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -171,21 +170,18 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
+		layout.numColumns= 2;
 		
 		Composite markersComposite= new Composite(folder, SWT.NULL);
 		markersComposite.setLayout(layout);
-
-		layout= new GridLayout();
-		layout.numColumns= 2;
-
-		Group group= new Group(markersComposite, SWT.NONE);
-		group.setText(PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.taskmarkers.label")); //$NON-NLS-1$
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setLayout(layout);
 		
-		fTodoTasksList.doFillIntoGrid(group, 3);
+		fTodoTasksList.doFillIntoGrid(markersComposite, 3);
 		LayoutUtil.setHorizontalSpan(fTodoTasksList.getLabelControl(null), 2);
-		LayoutUtil.setHorizontalGrabbing(fTodoTasksList.getListControl(null));
+		
+		GridData data= (GridData) fTodoTasksList.getListControl(null).getLayoutData();
+		data.grabExcessHorizontalSpace= true;
+		data.verticalAlignment= 0;
+		data.heightHint= fPixelConverter.convertHeightInCharsToPixels(10);
 
 		return markersComposite;
 	}
