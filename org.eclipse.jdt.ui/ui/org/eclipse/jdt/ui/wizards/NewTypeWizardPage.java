@@ -519,7 +519,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		Button button= fEnclosingTypeDialogField.getChangeControl(composite);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.heightHint = SWTUtil.getButtonHeightHint(button);
 		gd.widthHint = SWTUtil.getButtonWidthHint(button);
 		button.setLayoutData(gd);
 		ControlContentAssistHelper.createTextContentAssistant(text, fEnclosingTypeCompletionProcessor);

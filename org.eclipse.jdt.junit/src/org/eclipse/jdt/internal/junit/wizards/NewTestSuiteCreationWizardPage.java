@@ -265,7 +265,6 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			fSelectAllButton= new Button(buttonContainer, SWT.PUSH);
 			fSelectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.selectAll")); //$NON-NLS-1$
 			GridData bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			bgd.heightHint = SWTUtil.getButtonHeigthHint(fSelectAllButton);
 			bgd.widthHint = SWTUtil.getButtonWidthHint(fSelectAllButton);
 			fSelectAllButton.setLayoutData(bgd);
 			fSelectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -278,7 +277,6 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			fDeselectAllButton= new Button(buttonContainer, SWT.PUSH);
 			fDeselectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.deselectAll")); //$NON-NLS-1$
 			bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			bgd.heightHint = SWTUtil.getButtonHeigthHint(fDeselectAllButton);
 			bgd.widthHint = SWTUtil.getButtonWidthHint(fDeselectAllButton);
 			fDeselectAllButton.setLayoutData(bgd);
 			fDeselectAllButton.addSelectionListener(new SelectionAdapter() {

@@ -584,7 +584,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		configure.setText(NLSUIMessages.getString("ExternalizeWizardPage.configure.button")); //$NON-NLS-1$
 		data= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_END);
 		data.widthHint= SWTUtil.getButtonWidthHint(configure);
-		data.heightHint= SWTUtil.getButtonHeightHint(configure);
 		configure.setLayoutData(data);
 
 		configure.addSelectionListener(listener);

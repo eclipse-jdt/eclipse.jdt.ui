@@ -393,7 +393,6 @@ public class CodingStyleConfigurationBlock {
 
 		final GridData gd= new GridData(style);
 		gd.widthHint= SWTUtil.getButtonWidthHint(button);
-		gd.heightHint= SWTUtil.getButtonHeightHint(button);
 		button.setLayoutData(gd);
 		return button;
 	}

@@ -105,7 +105,6 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		browseTypes.setText(RefactoringMessages.getString("IntroduceFactoryInputPage.browseLabel")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.END;
-		gd.heightHint = SWTUtil.getButtonHeightHint(browseTypes);
 		gd.widthHint = SWTUtil.getButtonWidthHint(browseTypes);		
 		browseTypes.setLayoutData(gd);
 

@@ -234,7 +234,6 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			Button newButton= new Button(firstLine, SWT.PUSH);
 			newButton.setText(ReorgMessages.getString("ReorgMoveWizard.new")); //$NON-NLS-1$
 			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			gd.heightHint = SWTUtil.getButtonHeightHint(newButton);
 			gd.widthHint = SWTUtil.getButtonWidthHint(newButton);
 			newButton.setLayoutData(gd);
 			newButton.addSelectionListener(new SelectionAdapter() {

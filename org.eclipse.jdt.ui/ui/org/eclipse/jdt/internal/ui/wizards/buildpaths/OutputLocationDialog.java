@@ -124,7 +124,6 @@ public class OutputLocationDialog extends StatusDialog {
 		Button buttonControl= fContainerDialogField.getChangeControl(inner);
 		GridData buttonData= new GridData();
 		buttonData.widthHint= SWTUtil.getButtonWidthHint(buttonControl);
-		buttonData.heightHint= SWTUtil.getButtonHeightHint(buttonControl);
 		buttonControl.setLayoutData(buttonData);
 		
 		applyDialogFont(composite);		

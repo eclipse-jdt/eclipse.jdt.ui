@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -239,9 +238,6 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 		});
 		button.setFont(composite.getFont());
 		
-		data= new GridData();
-		data.heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
-		button.setLayoutData(data);
 		fNewFolderButton= button;
 
 		treeViewer.addSelectionChangedListener(this);
