@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -49,6 +48,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -256,8 +256,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.name")); //$NON-NLS-1$
 			builder.addAll(fChangeManager.getAllChanges());
-			builder.add(createExtractedInterface());
-			return builder;	
+			builder.add(createExtractedInterface(new SubProgressMonitor(pm, 1)));
+			return builder;
+		} catch(JavaModelException e){	
+			throw e;
 		} catch(CoreException e){
 			throw new JavaModelException(e);
 		}	finally{
@@ -353,17 +355,25 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	//----- methods related to creation of the new interface -------
-	private IChange createExtractedInterface() throws CoreException {
-		String lineSeparator= getLineSeperator(); 
+	private IChange createExtractedInterface(IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", 1); //$NON-NLS-1$
 		IPath cuPath= ResourceUtil.getFile(fInputType.getCompilationUnit()).getFullPath();
-		IPath interfaceCuPath= cuPath
-										.removeLastSegments(1)
-										.append(getCuNameForNewInterface());
-		//XXX need to destroy
-		ICompilationUnit newCuWC= getInputClassPackage().getCompilationUnit(getCuNameForNewInterface());
-		String source= createExtractedInterfaceCUSource(newCuWC);
-		String formattedSource= ToolFactory.createCodeFormatter().format(source, 0, null, lineSeparator);
-		return new CreateTextFileChange(interfaceCuPath, formattedSource, true);	
+		IPath interfaceCuPath= cuPath.removeLastSegments(1).append(getCuNameForNewInterface());
+
+		ICompilationUnit newCuWC= null;
+		try{
+			newCuWC= WorkingCopyUtil.getNewWorkingCopy(getInputClassPackage(), getCuNameForNewInterface());
+			String formattedSource= formatSource(createExtractedInterfaceCUSource(newCuWC, new SubProgressMonitor(pm, 1)));
+			return new CreateTextFileChange(interfaceCuPath, formattedSource, true);	
+		} finally{
+			if (newCuWC != null)
+				newCuWC.destroy();
+			pm.done();	
+		}
+	}
+
+	private String formatSource(String source) {
+		return ToolFactory.createCodeFormatter().format(source, 0, null, getLineSeperator());
 	}
 	
 	private String getCuNameForNewInterface() {
@@ -428,20 +438,20 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return null;	
 	}
 
-	private String createExtractedInterfaceCUSource(ICompilationUnit newCu) throws CoreException {
-		StringBuffer buffer= new StringBuffer();
-		if (! getInputClassPackage().isDefaultPackage())	
-			buffer.append(createPackageDeclarationSource());
-		buffer.append(createImportsSource());
-		if (fCodeGenerationSettings.createComments){
-			String template= StubUtility.getTypeComment(newCu, fNewInterfaceName, "");//$NON-NLS-1$
-			if (template != null){
-				buffer.append(getLineSeperator());
-				buffer.append(template);
-			}
-		}	
-		buffer.append(createInterfaceSource());
-		return buffer.toString();
+	private String createExtractedInterfaceCUSource(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
+		String template= StubUtility.getTypeComment(newCu, fNewInterfaceName, "");//$NON-NLS-1$
+		newCu.getBuffer().setContents(StubUtility.getCompilationUnitContent(newCu, template, createInterfaceSource(), getLineSeperator()));
+		addImportsToNewCu(newCu, pm);
+		return newCu.getSource();
+	}
+
+	private void addImportsToNewCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", 3); //$NON-NLS-1$
+		ImportsStructure is= new ImportsStructure(newCu, fCodeGenerationSettings.importOrder, fCodeGenerationSettings.importThreshold, true);
+		addImportsToTypesReferencedInMethodDeclarations(is, new SubProgressMonitor(pm, 1));
+		addImportsToTypesReferencedInFieldDeclarations(is, new SubProgressMonitor(pm, 1));
+		is.create(false, new SubProgressMonitor(pm, 1));
+		pm.done();
 	}
 
 	private String createInterfaceSource() throws JavaModelException {
@@ -620,13 +630,6 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return ASTNodeSearchUtil.getFieldDeclarationNode(iField, fASTMappingManager);
 	}
 	
-	private String createImportsSource() throws JavaModelException {
-		StringBuffer buff= new StringBuffer();
-        addImportsToTypesReferencedInMethodDeclarations(buff);
-	    addImportsToTypesReferencedInFieldDeclarations(buff);
-		return buff.toString();
-	}
-
     private IField[] getExtractedFields() {
         List fields= new ArrayList();
         for (int i= 0; i < fExtractedMembers.length; i++) {
@@ -645,65 +648,27 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);
 	}
 
-    private void addImportsToTypesReferencedInFieldDeclarations(StringBuffer buff) throws JavaModelException {
-    	//XXX pm
-    	IProgressMonitor pm= new NullProgressMonitor();
-    	IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(getExtractedFields(), pm);
-    	for (int i= 0; i < referencedTypes.length; i++) {
-            IType type= referencedTypes[i];
-            if (shouldBeImported(type))
-	    	    addImportTo(JavaModelUtil.getFullyQualifiedName(type), buff);
-        }
-    }
-    
-    private void addImportsToTypesReferencedInMethodDeclarations(StringBuffer buff) throws JavaModelException {
-        ITypeBinding[] typesUsed= getTypesUsedInExtractedMethodDeclarations();
-        for (int i= 0; i < typesUsed.length; i++) {
-        	ITypeBinding binding= typesUsed[i];
-        	if (shouldBeImported(binding))
-        	    addImportTo(Bindings.getFullyQualifiedImportName(binding), buff);
-        }
-    }
-    
-    private static void addImportTo(String typeName, StringBuffer buff) {
-        buff.append("import ").append(typeName).append(";");//$NON-NLS-1$ //$NON-NLS-2$
-    }
-
-    private boolean shouldBeImported(IType iType) {
-        if (! iType.exists())
-            return false;
-        if (iType.getPackageFragment().equals(getInputClassPackage()))
-	        return false;
-	    if (iType.getPackageFragment().isDefaultPackage())    
-	        return false;
-        if (iType.getPackageFragment().getElementName().equals("java.lang"))//$NON-NLS-1$
-            return false;
-	    return true;    
-    }
-    
-    private boolean shouldBeImported(ITypeBinding binding) {
-		if (binding == null)
-			return false;
-		if (binding.isPrimitive())	
-			return false;
-		if (binding.isArray())	
-			return shouldBeImported(binding.getElementType());
-		if (binding.getPackage().isUnnamed())	
-			return false;
-		if (binding.getPackage().getName().equals("java.lang"))//$NON-NLS-1$
-			return false;
-		if (binding.getPackage().getName().equals(getInputClassPackage().getElementName()))
-			return false;
-		return true;	
+	private void addImportsToTypesReferencedInFieldDeclarations(ImportsStructure is, IProgressMonitor pm) throws JavaModelException {
+		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(getExtractedFields(), pm);
+		for (int i= 0; i < referencedTypes.length; i++) {
+			IType type= referencedTypes[i];
+			is.addImport(JavaModelUtil.getFullyQualifiedName(type));
+		}
 	}
-
+	
+	private void addImportsToTypesReferencedInMethodDeclarations(ImportsStructure is, IProgressMonitor pm) throws JavaModelException {
+		ITypeBinding[] typesUsed= getTypesUsedInExtractedMethodDeclarations();
+		pm.beginTask("", typesUsed.length); //$NON-NLS-1$
+		for (int i= 0; i < typesUsed.length; i++) {
+			is.addImport(typesUsed[i]);
+			pm.worked(1);
+		}
+		pm.done();
+	}
+	
 	private ITypeBinding[] getTypesUsedInExtractedMethodDeclarations() throws JavaModelException{
 		return ReferenceFinderUtil.getTypesReferencedInDeclarations(getExtractedMethods(), fASTMappingManager);
 	}	
-
-	private String createPackageDeclarationSource() {
-		return "package " + getInputClassPackage().getElementName() + ";";//$NON-NLS-2$ //$NON-NLS-1$
-	}
 
 	private CompilationUnit getAST(ICompilationUnit cu){
 		return fASTMappingManager.getAST(cu);
