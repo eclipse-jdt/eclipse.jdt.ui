@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-public class MoveCuUpdateCreator {
+class MoveCuUpdateCreator {
 	
 	private ICompilationUnit[] fCus;
 	private IPackageFragment fDestination;
