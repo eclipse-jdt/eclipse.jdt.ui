@@ -116,8 +116,9 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_NLS_NEVER_TRANSLATE= NAME_PREFIX + "never_translate.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_NLS_SKIP= NAME_PREFIX + "skip.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_SEARCH_READACCESS= NAME_PREFIX + "read_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_SEARCH_WRITEACCESS= NAME_PREFIX + "write_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_READACCESS= NAME_PREFIX + "occ_read.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_WRITEACCESS= NAME_PREFIX + "occ_write.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_OCCURRENCE= NAME_PREFIX + "occ_match.gif"; //$NON-NLS-1$
 	/*
 	 * Set of predefined Image Descriptors.
 	 */
@@ -235,6 +236,7 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_OBJS_SEARCH_READACCESS= createManaged(T_OBJ, IMG_OBJS_SEARCH_READACCESS);
 	public static final ImageDescriptor DESC_OBJS_SEARCH_WRITEACCESS= createManaged(T_OBJ, IMG_OBJS_SEARCH_WRITEACCESS);
+	public static final ImageDescriptor DESC_OBJS_SEARCH_OCCURRENCE= createManaged(T_OBJ, IMG_OBJS_SEARCH_OCCURRENCE);
 
 	public static final ImageDescriptor DESC_OBJS_LOCAL_VARIABLE= create(T_OBJ, "localvariable_obj.gif"); //$NON-NLS-1$
 	

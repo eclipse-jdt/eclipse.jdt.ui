@@ -43,7 +43,7 @@ class OccurrencesInFileLabelProvider extends JavaSearchResultLabelProvider {
 				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_WRITEACCESS);
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_READACCESS);
 		}
-		return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PUBLIC);
+		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE);
 	}
 	
 	private boolean isWriteAccess(IMarker marker) {
