@@ -19,14 +19,11 @@ import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 
+import org.eclipse.jdt.internal.corext.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
-/*
- * non java-doc
- * not API
- */
-class RenameMethodASTAnalyzer extends RenameRefactoringASTAnalyzer {
+class RenameMethodASTAnalyzer extends AbstractRefactoringASTAnalyzer {
 
 
 	private String fNewName;

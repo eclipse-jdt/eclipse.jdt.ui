@@ -6,17 +6,17 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
 
-
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+
+import org.eclipse.jdt.internal.corext.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 
-public class RenameFieldASTAnalyzer extends RenameRefactoringASTAnalyzer {
+public class RenameFieldASTAnalyzer extends AbstractRefactoringASTAnalyzer {
 	
 	private String fNewName;
 	private char[] fNewNameArray;
