@@ -240,7 +240,7 @@ public class UnresolvedElementsSubProcessor {
 
 		// create field in outer class (if inside anonymous)
 		if (outsideAnonymous != null) {
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, senderBinding.getName() } ); //$NON-NLS-1$
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, outsideAnonymous.getName() } ); //$NON-NLS-1$
 			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, outsideAnonymous, relevance + 1, image));
 		}
@@ -862,7 +862,7 @@ public class UnresolvedElementsSubProcessor {
 					return false;
 				}
 			}
-			CompilationUnit unit= AST.parsePartialCompilationUnit(targetCU, 0, true);
+			CompilationUnit unit= AST.parsePartialCompilationUnit(targetCU, 0, true, null, null);
 			return unit.findDeclaringNode(meth.getKey()) == null;
 		}
 		return false;		
