@@ -12,7 +12,12 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.GlobalVariables;
+import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplatePosition;
+import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -20,11 +25,6 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
-import org.eclipse.jdt.internal.corext.template.TemplatePosition;
-import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
 /**
   */
@@ -74,7 +74,7 @@ public class CodeTemplateContextType extends ContextType {
 			super(name, description);
 		}
 		
-		public String evaluate(TemplateContext context) {
+		public String resolve(TemplateContext context) {
 			return context.getVariable(getName());
 		}
 	}
@@ -84,7 +84,7 @@ public class CodeTemplateContextType extends ContextType {
 			super(TAGS,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.tags")); //$NON-NLS-1$
 		}
 		
-		public String evaluate(TemplateContext context) {
+		public String resolve(TemplateContext context) {
 			return "@"; //$NON-NLS-1$
 		}
 	}	
@@ -95,7 +95,7 @@ public class CodeTemplateContextType extends ContextType {
 			super("todo", JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.todo")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
-		public String evaluate(TemplateContext context) {
+		public String resolve(TemplateContext context) {
 			String todoTaskTag= StubUtility.getTodoTaskTag(((CodeTemplateContext) context).getJavaProject());
 			if (todoTaskTag == null)
 				return "XXX"; //$NON-NLS-1$
@@ -253,7 +253,7 @@ public class CodeTemplateContextType extends ContextType {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validate(java.lang.String)
 	 */
-	public String validate(String pattern) throws CoreException {
+	public String validate(String pattern) {
 		String message= super.validate(pattern);
 		if (message != null) {
 			return message;

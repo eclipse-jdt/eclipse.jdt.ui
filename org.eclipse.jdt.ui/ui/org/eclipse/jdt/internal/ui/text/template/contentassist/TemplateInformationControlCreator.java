@@ -8,7 +8,7 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 	IBM Corporation - Initial implementation
 **********************************************************************/
-package org.eclipse.jdt.internal.ui.text.template;
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;

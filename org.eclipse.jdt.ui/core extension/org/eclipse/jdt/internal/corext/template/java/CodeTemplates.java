@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.template;
+package org.eclipse.jdt.internal.corext.template.java;
 
 import java.io.File;
 import java.io.InputStream;
@@ -17,6 +17,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+
+import org.eclipse.jface.text.templates.*;
+import org.eclipse.jface.text.templates.persistence.*;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -67,6 +70,12 @@ public class CodeTemplates extends TemplateSet {
 	}
 	
 	private void create() {
+		// TODO remove once we have a contribution mechanism
+		if (ContextTypeRegistry.getInstance().getContextType("java") == null)
+			ContextTypeRegistry.getInstance().add(new JavaContextType());
+		if (ContextTypeRegistry.getInstance().getContextType("javadoc") == null)
+			ContextTypeRegistry.getInstance().add(new JavaDocContextType());
+		
 		try {
 			addFromStream(getDefaultsAsStream(), false, true);
 			File templateFile= getTemplateFile();
@@ -78,7 +87,7 @@ public class CodeTemplates extends TemplateSet {
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			ErrorDialog.openError(null,
-				TemplateMessages.getString("CodeTemplates.error.title"), //$NON-NLS-1$
+				JavaTemplateMessages.getString("CodeTemplates.error.title"), //$NON-NLS-1$
 				e.getMessage(), e.getStatus());
 
 			clear();
@@ -121,4 +130,3 @@ public class CodeTemplates extends TemplateSet {
 	}
 
 }
-

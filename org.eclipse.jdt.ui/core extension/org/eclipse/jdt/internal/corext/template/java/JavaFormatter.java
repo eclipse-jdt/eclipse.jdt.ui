@@ -29,12 +29,13 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.templates.*;
+import org.eclipse.jface.text.templates.ITemplateEditor;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplatePosition;
 
 import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
-import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
-import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
@@ -69,7 +70,7 @@ public class JavaFormatter implements ITemplateEditor {
 	/*
 	 * @see ITemplateEditor#edit(TemplateBuffer, TemplateContext)
 	 */
-	public void edit(TemplateBuffer buffer, TemplateContext context) throws CoreException {
+	public void edit(TemplateBuffer buffer, TemplateContext context) throws CoreException, BadLocationException {
 		if (fUseCodeFormatter)
 			format(buffer);
 		else

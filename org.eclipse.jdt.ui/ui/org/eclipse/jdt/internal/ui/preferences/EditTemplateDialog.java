@@ -16,8 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -49,6 +47,9 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextListener;
@@ -58,8 +59,9 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -69,17 +71,14 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateMessages;
+import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
+import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -148,8 +147,8 @@ public class EditTemplateDialog extends StatusDialog {
 		setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
 		
 		String title= edit
-			? TemplateMessages.getString("EditTemplateDialog.title.edit") //$NON-NLS-1$
-			: TemplateMessages.getString("EditTemplateDialog.title.new"); //$NON-NLS-1$
+			? JavaTemplateMessages.getString("EditTemplateDialog.title.edit") //$NON-NLS-1$
+			: JavaTemplateMessages.getString("EditTemplateDialog.title.new"); //$NON-NLS-1$
 		setTitle(title);
 
 		fTemplate= template;
@@ -179,7 +178,7 @@ public class EditTemplateDialog extends StatusDialog {
 		};
 		
 		if (fIsNameModifiable) {
-			createLabel(parent, TemplateMessages.getString("EditTemplateDialog.name")); //$NON-NLS-1$	
+			createLabel(parent, JavaTemplateMessages.getString("EditTemplateDialog.name")); //$NON-NLS-1$	
 			
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -192,7 +191,7 @@ public class EditTemplateDialog extends StatusDialog {
 			fNameText= createText(composite);
 			
 			fNameText.addModifyListener(listener);
-			createLabel(composite, TemplateMessages.getString("EditTemplateDialog.context")); //$NON-NLS-1$		
+			createLabel(composite, JavaTemplateMessages.getString("EditTemplateDialog.context")); //$NON-NLS-1$		
 			fContextCombo= new Combo(composite, SWT.READ_ONLY);
 	
 			for (int i= 0; i < fContextTypes.length; i++) {
@@ -202,7 +201,7 @@ public class EditTemplateDialog extends StatusDialog {
 			fContextCombo.addModifyListener(listener);
 		}
 		
-		createLabel(parent, TemplateMessages.getString("EditTemplateDialog.description")); //$NON-NLS-1$		
+		createLabel(parent, JavaTemplateMessages.getString("EditTemplateDialog.description")); //$NON-NLS-1$		
 		
 		int descFlags= fIsNameModifiable ? SWT.BORDER : SWT.BORDER | SWT.READ_ONLY;
 		fDescriptionText= new Text(parent, descFlags );
@@ -210,7 +209,7 @@ public class EditTemplateDialog extends StatusDialog {
 		
 		fDescriptionText.addModifyListener(listener);
 
-		Label patternLabel= createLabel(parent, TemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
+		Label patternLabel= createLabel(parent, JavaTemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
 		patternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		fPatternEditor= createEditor(parent);
 		
@@ -226,7 +225,7 @@ public class EditTemplateDialog extends StatusDialog {
 		
 		fInsertVariableButton= new Button(composite, SWT.NONE);
 		fInsertVariableButton.setLayoutData(getButtonGridData(fInsertVariableButton));
-		fInsertVariableButton.setText(TemplateMessages.getString("EditTemplateDialog.insert.variable")); //$NON-NLS-1$
+		fInsertVariableButton.setText(JavaTemplateMessages.getString("EditTemplateDialog.insert.variable")); //$NON-NLS-1$
 		fInsertVariableButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				fPatternEditor.getTextWidget().setFocus();
@@ -273,13 +272,9 @@ public class EditTemplateDialog extends StatusDialog {
 		fValidationStatus.setOK();
 		ContextType contextType= ContextTypeRegistry.getInstance().getContextType(fTemplate.getContextTypeName());
 		if (contextType != null) {
-			try {
-				String errorMessage= contextType.validate(text);
-				if (errorMessage != null) {
-					fValidationStatus.setError(errorMessage);
-				}
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
+			String errorMessage= contextType.validate(text);
+			if (errorMessage != null) {
+				fValidationStatus.setError(errorMessage);
 			}			
 		}
 
@@ -406,27 +401,27 @@ public class EditTemplateDialog extends StatusDialog {
 
 	private void initializeActions() {
 		TextViewerAction action= new TextViewerAction(fPatternEditor, SourceViewer.UNDO);
-		action.setText(TemplateMessages.getString("EditTemplateDialog.undo")); //$NON-NLS-1$
+		action.setText(JavaTemplateMessages.getString("EditTemplateDialog.undo")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.UNDO, action);
 
 		action= new TextViewerAction(fPatternEditor, SourceViewer.CUT);
-		action.setText(TemplateMessages.getString("EditTemplateDialog.cut")); //$NON-NLS-1$
+		action.setText(JavaTemplateMessages.getString("EditTemplateDialog.cut")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.CUT, action);
 
 		action= new TextViewerAction(fPatternEditor, SourceViewer.COPY);
-		action.setText(TemplateMessages.getString("EditTemplateDialog.copy")); //$NON-NLS-1$
+		action.setText(JavaTemplateMessages.getString("EditTemplateDialog.copy")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.COPY, action);
 
 		action= new TextViewerAction(fPatternEditor, SourceViewer.PASTE);
-		action.setText(TemplateMessages.getString("EditTemplateDialog.paste")); //$NON-NLS-1$
+		action.setText(JavaTemplateMessages.getString("EditTemplateDialog.paste")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.PASTE, action);
 
 		action= new TextViewerAction(fPatternEditor, SourceViewer.SELECT_ALL);
-		action.setText(TemplateMessages.getString("EditTemplateDialog.select.all")); //$NON-NLS-1$
+		action.setText(JavaTemplateMessages.getString("EditTemplateDialog.select.all")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.SELECT_ALL, action);
 
 		action= new TextViewerAction(fPatternEditor, SourceViewer.CONTENTASSIST_PROPOSALS);
-		action.setText(TemplateMessages.getString("EditTemplateDialog.content.assist")); //$NON-NLS-1$
+		action.setText(JavaTemplateMessages.getString("EditTemplateDialog.content.assist")); //$NON-NLS-1$
 		fGlobalActions.put("ContentAssistProposal", action); //$NON-NLS-1$
 
 		fSelectionActions.add(ITextEditorActionConstants.CUT);
@@ -505,7 +500,7 @@ public class EditTemplateDialog extends StatusDialog {
 		if (!valid) {
 			status = new StatusInfo();
 			if (!fSuppressError) {
-				status.setError(TemplateMessages.getString("EditTemplateDialog.error.noname")); //$NON-NLS-1$
+				status.setError(JavaTemplateMessages.getString("EditTemplateDialog.error.noname")); //$NON-NLS-1$
 			}
  		} else {
  			status= fValidationStatus; 

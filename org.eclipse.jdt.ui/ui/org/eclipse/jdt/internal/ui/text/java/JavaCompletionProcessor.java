@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -31,8 +32,12 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
 
 import org.eclipse.ui.IEditorPart;
+
+import org.eclipse.ui.texteditor.templates.TemplateProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
@@ -42,14 +47,11 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
-
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
-import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
-import org.eclipse.jdt.internal.ui.text.template.TemplateProposal;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 
 
 /**
@@ -135,6 +137,10 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		fCollector= new ResultCollector();
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java"); //$NON-NLS-1$
+		if (contextType == null) {
+			contextType= new JavaContextType();
+			ContextTypeRegistry.getInstance().add(contextType);
+		}
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
 		fExperimentalCollector= new ExperimentalResultCollector();
@@ -331,7 +337,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	private ICompletionProposal[] internalComputeCompletionProposals(ITextViewer viewer, int offset, int contextOffset) {
 		
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
-		IJavaCompletionProposal[] results;
+		ICompletionProposal[] results;
 
 		ResultCollector collector;
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
@@ -387,7 +393,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			}
 	
 			// concatenate arrays
-			IJavaCompletionProposal[] total= new IJavaCompletionProposal[results.length + templateResults.length];
+			ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length];
 			System.arraycopy(templateResults, 0, total, 0, templateResults.length);
 			System.arraycopy(results, 0, total, templateResults.length, results.length);
 			results= total;

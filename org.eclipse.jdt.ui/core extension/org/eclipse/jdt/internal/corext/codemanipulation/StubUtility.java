@@ -16,11 +16,15 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplatePosition;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -44,12 +48,9 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.template.CodeTemplates;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
-import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -471,7 +472,13 @@ public class StubUtility {
 		if (overridden != null) {
 			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overridden));
 		}
-		TemplateBuffer buffer= context.evaluate(template);
+		TemplateBuffer buffer;
+		try {
+			buffer= context.evaluate(template);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
 		if (buffer == null) {
 			return null;
 		}
@@ -555,7 +562,13 @@ public class StubUtility {
 	}
 	
 	private static String evaluateTemplate(CodeTemplateContext context, Template template) throws CoreException {
-		TemplateBuffer buffer= context.evaluate(template);
+		TemplateBuffer buffer;
+		try {
+			buffer= context.evaluate(template);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
 		if (buffer == null)
 			return null;
 		String str= buffer.getString();
@@ -593,7 +606,7 @@ public class StubUtility {
 	 * @param parameterTypesQualifiedNames Fully qualified names of parameter types of the type in which the overriddden 
 	 * method (if any exists) in declared. If isOverridden is <code>false</code>, this is ignored.
 	 * @return String Returns the method comment or <code>null</code> if the
-	 * configured template is empty. The string uses \\n as line delimiter
+	 * configured template is empty. 
 	 * (formatting required)
 	 * @throws CoreException
 	 */
@@ -608,7 +621,7 @@ public class StubUtility {
 		if (template == null) {
 			return null;
 		}		
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'));
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, decl.getName().getIdentifier());
@@ -620,7 +633,13 @@ public class StubUtility {
 			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(declaringClassQualifiedName, methodName, parameterTypesQualifiedNames));
 		}
 		
-		TemplateBuffer buffer= context.evaluate(template);
+		TemplateBuffer buffer;
+		try {
+			buffer= context.evaluate(template);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
 		if (buffer == null)
 			return null;
 		String str= buffer.getString();

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.template;
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
 import java.util.ArrayList;
 
@@ -20,18 +20,19 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.GlobalVariables;
+import org.eclipse.jface.text.templates.Template;
+
+import org.eclipse.ui.texteditor.templates.TemplateProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
-import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
-
+import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TemplateEngine {
@@ -130,6 +131,7 @@ public class TemplateEngine {
 			}
 		}
 	}
+	
 	/**
 	 * Returns <code>true</code> if one line is completely selected or if multiple lines are selected.
 	 * Being completely selected means that all characters except the new line characters are 

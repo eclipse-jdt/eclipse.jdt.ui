@@ -12,13 +12,14 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.templates.*;
+import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
-import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
 /**
  * A context type for java code.
@@ -31,7 +32,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		public Array() {
 			super("array", JavaTemplateMessages.getString("JavaContextType.variable.description.array")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	    public String evaluate(TemplateContext context) {
+	    public String resolve(TemplateContext context) {
 	        return ((JavaContext) context).guessArray();
 	    }
 	}
@@ -40,7 +41,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	    public ArrayType() {
 	     	super("array_type", JavaTemplateMessages.getString("JavaContextType.variable.description.array.type")); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
-	    public String evaluate(TemplateContext context) {
+	    public String resolve(TemplateContext context) {
 	        return ((JavaContext) context).guessArrayType();
 	    }
 	}
@@ -49,7 +50,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	    public ArrayElement() {
 	     	super("array_element", JavaTemplateMessages.getString("JavaContextType.variable.description.array.element"));	//$NON-NLS-1$ //$NON-NLS-2$    
 	    }
-	    public String evaluate(TemplateContext context) {
+	    public String resolve(TemplateContext context) {
 	        return ((JavaContext) context).guessArrayElement();
 	    }	    
 	}
@@ -58,7 +59,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	    public Index() {
 	     	super("index", JavaTemplateMessages.getString("JavaContextType.variable.description.index")); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
-	    public String evaluate(TemplateContext context) {
+	    public String resolve(TemplateContext context) {
 	        return ((JavaContext) context).getIndex();
 	    }	    
 	}
@@ -67,7 +68,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	    public Collection() {
 		    super("collection", JavaTemplateMessages.getString("JavaContextType.variable.description.collection")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	    public String evaluate(TemplateContext context) {
+	    public String resolve(TemplateContext context) {
 	        return ((JavaContext) context).guessCollection();
 	    }
 	}
@@ -77,7 +78,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	    public Iterator() {
 		    super("iterator", JavaTemplateMessages.getString("JavaContextType.variable.description.iterator")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	    public String evaluate(TemplateContext context) {
+	    public String resolve(TemplateContext context) {
 	    	JavaContext javaContext= (JavaContext) context;
 
 			if (!context.isReadOnly())
@@ -92,7 +93,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		public Todo() {
 			super("todo", JavaTemplateMessages.getString("JavaContextType.variable.description.todo")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		public String evaluate(TemplateContext context) {
+		public String resolve(TemplateContext context) {
 			JavaContext javaContext= (JavaContext) context;
 			ICompilationUnit compilationUnit= javaContext.getCompilationUnit();
 			if (compilationUnit == null)

@@ -11,13 +11,13 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.DocumentTemplateContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.DocumentTemplateContext;
 
 /**
  * A compilation unit context.

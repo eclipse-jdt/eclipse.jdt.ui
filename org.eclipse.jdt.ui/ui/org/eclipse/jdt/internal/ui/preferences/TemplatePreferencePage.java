@@ -43,11 +43,29 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.jface.window.Window;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.persistence.TemplateSet;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -56,21 +74,17 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateMessages;
-import org.eclipse.jdt.internal.corext.template.TemplateSet;
-import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
+import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.template.TemplateContentProvider;
-import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
+import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateContentProvider;
+import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -124,7 +138,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		super();
 		
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(TemplateMessages.getString("TemplatePreferencePage.message")); //$NON-NLS-1$
+		setDescription(JavaTemplateMessages.getString("TemplatePreferencePage.message")); //$NON-NLS-1$
 
 		fTemplates= Templates.getInstance();
 		fTemplateProcessor= new TemplateVariableProcessor();
@@ -174,13 +188,13 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		table.setLayout(tableLayout);
 
 		TableColumn column1= new TableColumn(table, SWT.NONE);		
-		column1.setText(TemplateMessages.getString("TemplatePreferencePage.column.name")); //$NON-NLS-1$
+		column1.setText(JavaTemplateMessages.getString("TemplatePreferencePage.column.name")); //$NON-NLS-1$
 
 		TableColumn column2= new TableColumn(table, SWT.NONE);
-		column2.setText(TemplateMessages.getString("TemplatePreferencePage.column.context")); //$NON-NLS-1$
+		column2.setText(JavaTemplateMessages.getString("TemplatePreferencePage.column.context")); //$NON-NLS-1$
 	
 		TableColumn column3= new TableColumn(table, SWT.NONE);
-		column3.setText(TemplateMessages.getString("TemplatePreferencePage.column.description")); //$NON-NLS-1$
+		column3.setText(JavaTemplateMessages.getString("TemplatePreferencePage.column.description")); //$NON-NLS-1$
 		
 		fTableViewer= new CheckboxTableViewer(table);		
 		fTableViewer.setLabelProvider(new TemplateLabelProvider());
@@ -231,7 +245,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		buttons.setLayout(layout);
 		
 		fAddButton= new Button(buttons, SWT.PUSH);
-		fAddButton.setText(TemplateMessages.getString("TemplatePreferencePage.new")); //$NON-NLS-1$
+		fAddButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.new")); //$NON-NLS-1$
 		fAddButton.setLayoutData(getButtonGridData(fAddButton));
 		fAddButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
@@ -240,7 +254,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		});
 
 		fEditButton= new Button(buttons, SWT.PUSH);
-		fEditButton.setText(TemplateMessages.getString("TemplatePreferencePage.edit")); //$NON-NLS-1$
+		fEditButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.edit")); //$NON-NLS-1$
 		fEditButton.setLayoutData(getButtonGridData(fEditButton));
 		fEditButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
@@ -249,7 +263,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		});
 
 		fRemoveButton= new Button(buttons, SWT.PUSH);
-		fRemoveButton.setText(TemplateMessages.getString("TemplatePreferencePage.remove")); //$NON-NLS-1$
+		fRemoveButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.remove")); //$NON-NLS-1$
 		fRemoveButton.setLayoutData(getButtonGridData(fRemoveButton));
 		fRemoveButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
@@ -258,7 +272,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		});
 				
 		fImportButton= new Button(buttons, SWT.PUSH);
-		fImportButton.setText(TemplateMessages.getString("TemplatePreferencePage.import")); //$NON-NLS-1$
+		fImportButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.import")); //$NON-NLS-1$
 		fImportButton.setLayoutData(getButtonGridData(fImportButton));
 		fImportButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
@@ -267,7 +281,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		});
 
 		fExportButton= new Button(buttons, SWT.PUSH);
-		fExportButton.setText(TemplateMessages.getString("TemplatePreferencePage.export")); //$NON-NLS-1$
+		fExportButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.export")); //$NON-NLS-1$
 		fExportButton.setLayoutData(getButtonGridData(fExportButton));
 		fExportButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
@@ -276,7 +290,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		});
 
 		fExportAllButton= new Button(buttons, SWT.PUSH);
-		fExportAllButton.setText(TemplateMessages.getString("TemplatePreferencePage.export.all")); //$NON-NLS-1$
+		fExportAllButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.export.all")); //$NON-NLS-1$
 		fExportAllButton.setLayoutData(getButtonGridData(fExportAllButton));
 		fExportAllButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
@@ -285,7 +299,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		});		
 
 		fEnableAllButton= new Button(buttons, SWT.PUSH);
-		fEnableAllButton.setText(TemplateMessages.getString("TemplatePreferencePage.enable.all")); //$NON-NLS-1$
+		fEnableAllButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.enable.all")); //$NON-NLS-1$
 		fEnableAllButton.setLayoutData(getButtonGridData(fEnableAllButton));
 		fEnableAllButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
@@ -294,7 +308,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		});
 
 		fDisableAllButton= new Button(buttons, SWT.PUSH);
-		fDisableAllButton.setText(TemplateMessages.getString("TemplatePreferencePage.disable.all")); //$NON-NLS-1$
+		fDisableAllButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.disable.all")); //$NON-NLS-1$
 		fDisableAllButton.setLayoutData(getButtonGridData(fDisableAllButton));
 		fDisableAllButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
@@ -305,7 +319,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		fPatternViewer= createViewer(parent);
 		
 		fFormatButton= new Button(parent, SWT.CHECK);
-		fFormatButton.setText(TemplateMessages.getString("TemplatePreferencePage.use.code.formatter")); //$NON-NLS-1$
+		fFormatButton.setText(JavaTemplateMessages.getString("TemplatePreferencePage.use.code.formatter")); //$NON-NLS-1$
         GridData gd1= new GridData();
         gd1.horizontalSpan= 2;
         fFormatButton.setLayoutData(gd1);
@@ -377,7 +391,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	
 	private SourceViewer createViewer(Composite parent) {
 		Label label= new Label(parent, SWT.NONE);
-		label.setText(TemplateMessages.getString("TemplatePreferencePage.preview")); //$NON-NLS-1$
+		label.setText(JavaTemplateMessages.getString("TemplatePreferencePage.preview")); //$NON-NLS-1$
 		GridData data= new GridData();
 		data.horizontalSpan= 2;
 		label.setLayoutData(data);
@@ -470,8 +484,8 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 			if (!newTemplate.getName().equals(template.getName()) &&
 				MessageDialog.openQuestion(getShell(),
-				TemplateMessages.getString("TemplatePreferencePage.question.create.new.title"), //$NON-NLS-1$
-				TemplateMessages.getString("TemplatePreferencePage.question.create.new.message"))) //$NON-NLS-1$
+				JavaTemplateMessages.getString("TemplatePreferencePage.question.create.new.title"), //$NON-NLS-1$
+				JavaTemplateMessages.getString("TemplatePreferencePage.question.create.new.message"))) //$NON-NLS-1$
 			{
 				template= newTemplate;
 				fTemplates.add(template);
@@ -490,8 +504,8 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		
 	private void import_() {
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(TemplateMessages.getString("TemplatePreferencePage.import.title")); //$NON-NLS-1$
-		dialog.setFilterExtensions(new String[] {TemplateMessages.getString("TemplatePreferencePage.import.extension")}); //$NON-NLS-1$
+		dialog.setText(JavaTemplateMessages.getString("TemplatePreferencePage.import.title")); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {JavaTemplateMessages.getString("TemplatePreferencePage.import.extension")}); //$NON-NLS-1$
 		String path= dialog.open();
 		
 		if (path == null)
@@ -526,9 +540,9 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	
 	private void export(TemplateSet templateSet) {
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
-		dialog.setText(TemplateMessages.getFormattedString("TemplatePreferencePage.export.title", new Integer(templateSet.getTemplates().length))); //$NON-NLS-1$
-		dialog.setFilterExtensions(new String[] {TemplateMessages.getString("TemplatePreferencePage.export.extension")}); //$NON-NLS-1$
-		dialog.setFileName(TemplateMessages.getString("TemplatePreferencePage.export.filename")); //$NON-NLS-1$
+		dialog.setText(JavaTemplateMessages.getFormattedString("TemplatePreferencePage.export.title", new Integer(templateSet.getTemplates().length))); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {JavaTemplateMessages.getString("TemplatePreferencePage.export.extension")}); //$NON-NLS-1$
+		dialog.setFileName(JavaTemplateMessages.getString("TemplatePreferencePage.export.filename")); //$NON-NLS-1$
 		String path= dialog.open();
 		
 		if (path == null)
@@ -537,15 +551,15 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		File file= new File(path);		
 
 		if (file.isHidden()) {
-			String title= TemplateMessages.getString("TemplatePreferencePage.export.error.title"); //$NON-NLS-1$ 
-			String message= TemplateMessages.getFormattedString("TemplatePreferencePage.export.error.hidden", file.getAbsolutePath()); //$NON-NLS-1$
+			String title= JavaTemplateMessages.getString("TemplatePreferencePage.export.error.title"); //$NON-NLS-1$ 
+			String message= JavaTemplateMessages.getFormattedString("TemplatePreferencePage.export.error.hidden", file.getAbsolutePath()); //$NON-NLS-1$
 			MessageDialog.openError(getShell(), title, message);
 			return;
 		}
 		
 		if (file.exists() && !file.canWrite()) {
-			String title= TemplateMessages.getString("TemplatePreferencePage.export.error.title"); //$NON-NLS-1$
-			String message= TemplateMessages.getFormattedString("TemplatePreferencePage.export.error.canNotWrite", file.getAbsolutePath()); //$NON-NLS-1$
+			String title= JavaTemplateMessages.getString("TemplatePreferencePage.export.error.title"); //$NON-NLS-1$
+			String message= JavaTemplateMessages.getFormattedString("TemplatePreferencePage.export.error.canNotWrite", file.getAbsolutePath()); //$NON-NLS-1$
 			MessageDialog.openError(getShell(), title, message);
 			return;
 		}
@@ -555,8 +569,8 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 				templateSet.saveToFile(file);
 			} catch (CoreException e) {
 				if (e.getStatus().getException() instanceof FileNotFoundException) {
-					String title= TemplateMessages.getString("TemplatePreferencePage.export.error.title"); //$NON-NLS-1$
-					String message= TemplateMessages.getFormattedString("TemplatePreferencePage.export.error.fileNotFound", e.getStatus().getException().getLocalizedMessage()); //$NON-NLS-1$
+					String title= JavaTemplateMessages.getString("TemplatePreferencePage.export.error.title"); //$NON-NLS-1$
+					String message= JavaTemplateMessages.getFormattedString("TemplatePreferencePage.export.error.fileNotFound", e.getStatus().getException().getLocalizedMessage()); //$NON-NLS-1$
 					MessageDialog.openError(getShell(), title, message);
 					return;
 				}
@@ -568,8 +582,8 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 	private boolean confirmOverwrite(File file) {
 		return MessageDialog.openQuestion(getShell(),
-			TemplateMessages.getString("TemplatePreferencePage.export.exists.title"), //$NON-NLS-1$
-			TemplateMessages.getFormattedString("TemplatePreferencePage.export.exists.message", file.getAbsolutePath())); //$NON-NLS-1$
+			JavaTemplateMessages.getString("TemplatePreferencePage.export.exists.title"), //$NON-NLS-1$
+			JavaTemplateMessages.getFormattedString("TemplatePreferencePage.export.exists.message", file.getAbsolutePath())); //$NON-NLS-1$
 	}
 	
 	private void remove() {
@@ -603,7 +617,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible)
-			setTitle(TemplateMessages.getString("TemplatePreferencePage.title")); //$NON-NLS-1$
+			setTitle(JavaTemplateMessages.getString("TemplatePreferencePage.title")); //$NON-NLS-1$
 	}
 	
 	/*
@@ -657,25 +671,25 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	}
 	
 	private void openReadErrorDialog(CoreException e) {
-		String title= TemplateMessages.getString("TemplatePreferencePage.error.read.title"); //$NON-NLS-1$
+		String title= JavaTemplateMessages.getString("TemplatePreferencePage.error.read.title"); //$NON-NLS-1$
 
 		// Show parse error in a user dialog without logging
 		if (e.getStatus().getCode() == IJavaStatusConstants.TEMPLATE_PARSE_EXCEPTION) {
 			String message= e.getStatus().getException().getLocalizedMessage();
 			if (message != null)
-				message= TemplateMessages.getFormattedString("TemplatePreferencePage.error.parse.message", message); //$NON-NLS-1$
+				message= JavaTemplateMessages.getFormattedString("TemplatePreferencePage.error.parse.message", message); //$NON-NLS-1$
 			else
-				message= TemplateMessages.getString("TemplatePreferencePage.error.read.message"); //$NON-NLS-1$
+				message= JavaTemplateMessages.getString("TemplatePreferencePage.error.read.message"); //$NON-NLS-1$
 			MessageDialog.openError(getShell(), title, message);
 		} else {
-			String message= TemplateMessages.getString("TemplatePreferencePage.error.read.message"); //$NON-NLS-1$
+			String message= JavaTemplateMessages.getString("TemplatePreferencePage.error.read.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), title, message);		
 		}
 	}
 	
 	private void openWriteErrorDialog(CoreException e) {
 		ErrorDialog.openError(getShell(),
-			TemplateMessages.getString("TemplatePreferencePage.error.write.title"), //$NON-NLS-1$
+			JavaTemplateMessages.getString("TemplatePreferencePage.error.write.title"), //$NON-NLS-1$
 			null, e.getStatus());		
 	}
 		

@@ -18,20 +18,20 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateTranslator;
+import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
-import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
-import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
 /**
-  */
+ */
 public class CodeTemplateContext extends TemplateContext {
 	
 	private String fLineDelimiter;
@@ -50,7 +50,7 @@ public class CodeTemplateContext extends TemplateContext {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#evaluate(org.eclipse.jdt.internal.corext.template.Template)
 	 */
-	public TemplateBuffer evaluate(Template template) throws CoreException {
+	public TemplateBuffer evaluate(Template template) throws CoreException, BadLocationException {
 		// test that all variables are defined
 		Iterator iterator= getContextType().variableIterator();
 		while (iterator.hasNext()) {

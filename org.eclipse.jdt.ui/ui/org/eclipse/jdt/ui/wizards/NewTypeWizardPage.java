@@ -60,7 +60,11 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.templates.Template;
+
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
@@ -70,9 +74,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -915,7 +918,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperInterfacesDialogField.setElements(interfacesNames);
 		fSuperInterfacesDialogField.setEnabled(canBeModified);
 	}
-	
+			
 	/**
 	 * Returns the resource handle that corresponds to the compilation unit to was or
 	 * will be created or modified.
@@ -1763,6 +1766,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				return JavaContext.evaluateTemplate(templates[0], parentCU, pos);
 			}
 		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 		return null;

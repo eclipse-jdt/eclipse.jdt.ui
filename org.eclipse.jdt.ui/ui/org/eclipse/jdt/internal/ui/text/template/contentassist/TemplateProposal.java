@@ -8,9 +8,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.template;
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -35,19 +37,19 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedEnvironment;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.templates.GlobalVariables;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplatePosition;
 
 import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
-import org.eclipse.jdt.internal.corext.template.TemplateMessages;
-import org.eclipse.jdt.internal.corext.template.TemplatePosition;
-import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -228,7 +230,10 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	    } catch (CoreException e) {
 			handleException(JavaPlugin.getActiveWorkbenchShell(), e);		    
 			return null;
-	    }
+	    } catch (BadLocationException e) {
+			handleException(JavaPlugin.getActiveWorkbenchShell(), new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "", e))); //$NON-NLS-1$
+			return null;
+		}
 	}
 
 	/*
@@ -236,7 +241,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 */
 	public String getDisplayString() {
 		if (fDisplayString == null) {
-			fDisplayString= fTemplate.getName() + TemplateMessages.getString("TemplateProposal.delimiter") + fTemplate.getDescription(); //$NON-NLS-1$
+			fDisplayString= fTemplate.getName() + JavaTemplateMessages.getString("TemplateProposal.delimiter") + fTemplate.getDescription(); //$NON-NLS-1$
 		}
 		return fDisplayString;
 	}
@@ -260,11 +265,11 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	}
 
 	private void openErrorDialog(Shell shell, Exception e) {
-		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
+		MessageDialog.openError(shell, JavaTemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
 	}
 
 	private void handleException(Shell shell, CoreException e) {
-		ExceptionHandler.handle(e, shell, TemplateMessages.getString("TemplateEvaluator.error.title"), null); //$NON-NLS-1$
+		ExceptionHandler.handle(e, shell, JavaTemplateMessages.getString("TemplateEvaluator.error.title"), null); //$NON-NLS-1$
 	}
 
 	/*

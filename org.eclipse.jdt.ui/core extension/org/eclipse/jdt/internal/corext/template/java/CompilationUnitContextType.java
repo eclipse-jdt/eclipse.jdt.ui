@@ -11,6 +11,11 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.GlobalVariables;
+import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplatePosition;
+import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -18,11 +23,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
-import org.eclipse.jdt.internal.corext.template.TemplateMessages;
-import org.eclipse.jdt.internal.corext.template.TemplatePosition;
-import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
 /**
  * Compilation unit context type.
@@ -33,7 +33,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 	 	public ReturnType() {
 	 	 	super("return_type", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.return.type")); //$NON-NLS-1$ //$NON-NLS-2$
 	 	}
-	 	public String evaluate(TemplateContext context) {
+	 	public String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
 			if (element == null)
 				return null;
@@ -45,7 +45,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 			}
 		}
 		public boolean isResolved(TemplateContext context) {
-			return evaluate(context) != null;
+			return resolve(context) != null;
 		}		
 	}
 
@@ -53,13 +53,13 @@ public abstract class CompilationUnitContextType extends ContextType {
 		public File() {
 			super("file", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.file")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		public String evaluate(TemplateContext context) {
+		public String resolve(TemplateContext context) {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
 			
 			return (unit == null) ? null : unit.getElementName();
 		}
 		public boolean isResolved(TemplateContext context) {
-			return evaluate(context) != null;
+			return resolve(context) != null;
 		}		
 	}
 	
@@ -68,7 +68,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 			super("primary_type_name", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.primary.type.name")); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}
-		public String evaluate(TemplateContext context) {
+		public String resolve(TemplateContext context) {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
 			if (unit == null) 
 				return null;
@@ -76,7 +76,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 			return elementName.substring(0, elementName.lastIndexOf('.'));
 		}
 		public boolean isResolved(TemplateContext context) {
-			return evaluate(context) != null;
+			return resolve(context) != null;
 		}
 	}
 
@@ -87,12 +87,12 @@ public abstract class CompilationUnitContextType extends ContextType {
 			super(name, description);
 			fElementType= elementType;
 		}
-		public String evaluate(TemplateContext context) {
+		public String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(fElementType);
 			return (element == null) ? null : element.getElementName();			
 		}
 		public boolean isResolved(TemplateContext context) {
-			return evaluate(context) != null;
+			return resolve(context) != null;
 		}
 	}
 	
@@ -140,7 +140,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 		public Arguments() {
 			super("enclosing_method_arguments", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.enclosing.method.arguments")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		public String evaluate(TemplateContext context) {
+		public String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
 			if (element == null)
 				return null;
@@ -195,7 +195,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 			TemplatePosition position= variables[i];
 			if (position.getName().equals(GlobalVariables.Cursor.NAME)) {
 				if (position.getOffsets().length > 1) {
-					return TemplateMessages.getString("ContextType.error.multiple.cursor.variables"); //$NON-NLS-1$
+					return JavaTemplateMessages.getString("ContextType.error.multiple.cursor.variables"); //$NON-NLS-1$
 				}
 			}
 		}

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.template;
+package org.eclipse.jdt.internal.ui.text.template.preferences;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,9 +21,10 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateVariable;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.TemplateVariable;
+
 
 public class TemplateVariableProcessor implements IContentAssistProcessor {	
 

@@ -14,13 +14,13 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateTranslator;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
-import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 
 /**
  * A context for javadoc.
@@ -160,9 +160,9 @@ public class JavaDocContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#evaluate(Template)
 	 */
-	public TemplateBuffer evaluate(Template template) throws CoreException {
+	public TemplateBuffer evaluate(Template template) throws CoreException, BadLocationException {
 		TemplateTranslator translator= new TemplateTranslator();
-		TemplateBuffer buffer= translator.translate(template.getPattern());
+		TemplateBuffer buffer= translator.translate(template);
 		
 		if (buffer == null)
 			return null;

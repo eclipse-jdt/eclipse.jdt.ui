@@ -27,6 +27,12 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.ITemplateEditor;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateTranslator;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -39,12 +45,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
-import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
-import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -97,13 +97,13 @@ public class JavaContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#evaluate(Template template)
 	 */
-	public TemplateBuffer evaluate(Template template) throws CoreException {
+	public TemplateBuffer evaluate(Template template) throws CoreException, BadLocationException {
 
 		if (!canEvaluate(template))
 			return null;
 		
 		TemplateTranslator translator= new TemplateTranslator();
-		TemplateBuffer buffer= translator.translate(template.getPattern());
+		TemplateBuffer buffer= translator.translate(template);
 
 		getContextType().edit(buffer, this);
 			
@@ -462,7 +462,7 @@ public class JavaContext extends CompilationUnitContext {
 	/**
 	 * Evaluates a 'java' template in thecontext of a compilation unit
 	 */
-	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException {
+	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException {
 
 		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null)

@@ -8,12 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.template;
+package org.eclipse.jdt.internal.ui.text.template.preferences;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.internal.corext.template.TemplateSet;
+import org.eclipse.jface.text.templates.persistence.TemplateSet;
+
 
 public class TemplateContentProvider implements IStructuredContentProvider {
 

@@ -26,6 +26,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -36,11 +38,9 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
-import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 
 /**
  * Java doc completion processor using contributed IJavaDocCompletionProcessor's
@@ -211,7 +211,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 				errorMessage= x.getLocalizedMessage();
 			}				
 			
-			IJavaCompletionProposal[] templateResults= fTemplateEngine.getResults();
+			ICompletionProposal[] templateResults= fTemplateEngine.getResults();
 			for (int k= 0; k < templateResults.length; k++) {
 				result.add(templateResults[k]);
 			}

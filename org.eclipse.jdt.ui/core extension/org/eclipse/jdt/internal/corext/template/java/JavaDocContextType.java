@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.templates.*;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
