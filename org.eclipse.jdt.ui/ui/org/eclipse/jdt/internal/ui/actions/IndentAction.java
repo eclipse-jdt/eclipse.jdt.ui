@@ -154,7 +154,7 @@ public class IndentAction extends TextEditorAction {
 						document.removePosition(end);
 					} catch (BadLocationException e) {
 						// will only happen on concurrent modification
-						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, null, e));
+						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "ConcurrentModification in IndentAction", e)); //$NON-NLS-1$
 						
 					} finally {
 						
@@ -223,13 +223,17 @@ public class IndentAction extends TextEditorAction {
 				// what I want to do
 //				new JavaDocAutoIndentStrategy().indentLineAtOffset(document, offset);
 //				return;
-				
-				IRegion previousLine= document.getLineInformation(line - 1);
-				
-				DocumentCommand command= new DocumentCommand() {
-				};
+
+				int start= 0;
+				if (line > 0) {
+
+					IRegion previousLine= document.getLineInformation(line - 1);
+					start= previousLine.getOffset() + previousLine.getLength();
+				}
+
+				DocumentCommand command= new DocumentCommand() {};
 				command.text= "\n"; //$NON-NLS-1$
-				command.offset= previousLine.getOffset() + previousLine.getLength();
+				command.offset= start;
 				new JavaDocAutoIndentStrategy(IJavaPartitions.JAVA_PARTITIONING).customizeDocumentCommand(document, command);
 				int i= command.text.indexOf('*');
 				if (i != -1)
