@@ -49,7 +49,7 @@ public class CodeFormatterUtil {
 	
 	private static boolean BUG_43437= true;
 	
-	public static final int K_UNKNOWN= -1;
+	public static final int K_UNKNOWN= CodeFormatter.K_UNKNOWN;
 	public static final int K_EXPRESSION = CodeFormatter.K_EXPRESSION;
 	public static final int K_STATEMENTS = CodeFormatter.K_STATEMENTS;
 	public static final int K_CLASS_BODY_DECLARATIONS = CodeFormatter.K_CLASS_BODY_DECLARATIONS;
