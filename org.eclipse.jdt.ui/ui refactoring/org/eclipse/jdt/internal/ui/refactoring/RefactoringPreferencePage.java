@@ -35,31 +35,20 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	public void createFieldEditors() {
 		Composite parent= getFieldEditorParent();
 		
-		{
-			String prefix= "RefactoringPreferencePage.errorPage.severity.";
-			RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
-				RefactoringPreferences.PREF_ERROR_PAGE_SEVERITY_THRESHOLD,
-				getResourceString(prefix + "label"),
-				2,
-				new String[] [] {
-					{ getResourceString(prefix + "fatal"), 			RefactoringPreferences.FATAL_SEVERITY },
-					{ getResourceString(prefix + "warning"), 		RefactoringPreferences.WARNING_SEVERITY },
-					{ getResourceString(prefix + "error"), 			RefactoringPreferences.ERROR_SEVERITY },
-					{ getResourceString(prefix + "information"),	RefactoringPreferences.INFO_SEVERITY }				
-				},
-				parent
-				);
-			addField(editor);
-		}
-		{
-			String prefix= "RefactoringPreferencePage.javaStyleGuideConform.";
-			BooleanFieldEditor editor= new BooleanFieldEditor(
-				RefactoringPreferences.PREF_JAVA_STYLE_GUIDE_CONFORM,
-				getResourceString(prefix + "label"),
-				BooleanFieldEditor.DEFAULT,
-				parent);
-			addField(editor);	
-		}
+		String prefix= "RefactoringPreferencePage.errorPage.severity.";
+		RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
+			RefactoringPreferences.PREF_ERROR_PAGE_SEVERITY_THRESHOLD,
+			getResourceString(prefix + "label"),
+			2,
+			new String[] [] {
+				{ getResourceString(prefix + "fatal"), 			RefactoringPreferences.FATAL_SEVERITY },
+				{ getResourceString(prefix + "warning"), 		RefactoringPreferences.WARNING_SEVERITY },
+				{ getResourceString(prefix + "error"), 			RefactoringPreferences.ERROR_SEVERITY },
+				{ getResourceString(prefix + "information"),	RefactoringPreferences.INFO_SEVERITY }				
+			},
+			parent
+			);
+		addField(editor);
 	}
 	
 	public void init(IWorkbench workbench) {
