@@ -24,6 +24,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -155,17 +156,17 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
 
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_OPEN));			
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
-			
 			MenuManager structureSelection= new MenuManager(JavaEditorMessages.getString("ExpandSelectionMenu.label"), "expandSelection"); //$NON-NLS-1$ //$NON-NLS-2$ 
+			editMenu.insertAfter(ActionFactory.SELECT_ALL.getId(), structureSelection);
 			structureSelection.add(fStructureSelectEnclosingAction);
 			structureSelection.add(fStructureSelectNextAction);
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
-
+			
+			editMenu.add(new Separator(IContextMenuConstants.GROUP_OPEN));			
+			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
+			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
+			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}
 
