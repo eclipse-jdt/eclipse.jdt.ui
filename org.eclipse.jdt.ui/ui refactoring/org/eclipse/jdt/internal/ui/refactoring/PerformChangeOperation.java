@@ -144,6 +144,8 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 						fChange.perform(fChangeContext, pm);
 					} catch (ChangeAbortException e) {
 						throw new InvocationTargetException(e);
+					} finally {
+						pm.done();
 					}
 				}
 			}).run(pm);

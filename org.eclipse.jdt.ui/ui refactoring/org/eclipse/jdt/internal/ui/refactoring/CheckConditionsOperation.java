@@ -25,11 +25,11 @@ public class CheckConditionsOperation implements IRunnableWithProgress {
 	private int fStyle;
 	private RefactoringStatus fStatus;
 	
-	public final static int NONE=		   0;
-	public final static int ACTIVATION=    1 << 1;
-	public final static int INPUT=	   1 << 2;
-	public final static int PRECONDITIONS= ACTIVATION | INPUT;
-	final static int LAST=                 1 << 3;
+	public final static int NONE=			0;
+	public final static int ACTIVATION=    	1 << 1;
+	public final static int INPUT=	   		1 << 2;
+	public final static int PRECONDITIONS= 	ACTIVATION | INPUT;
+	final static int LAST=                 	1 << 3;
 	
 	/**
 	 * Creates a new <code>CheckConditionsOperation</code>.
@@ -59,6 +59,8 @@ public class CheckConditionsOperation implements IRunnableWithProgress {
 				fStatus= fRefactoring.checkInput(pm);
 		} catch (JavaModelException e) {
 			throw new InvocationTargetException(e);
+		} finally {
+			pm.done();
 		}
 	}
 
