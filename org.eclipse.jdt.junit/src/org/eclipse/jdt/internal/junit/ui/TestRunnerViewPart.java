@@ -338,7 +338,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 			postError(msg);
 		else
 			postInfo(msg);
-		postAsyncRunnable(new Runnable() {				
+		postSyncRunnable(new Runnable() {				
 			public void run() {
 				if(isDisposed()) 
 					return;	
@@ -377,7 +377,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	public void testRunStopped(final long elapsedTime) {
 		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.stopped", elapsedTimeAsString(elapsedTime)); //$NON-NLS-1$
 		postInfo(msg);
-		postAsyncRunnable(new Runnable() {				
+		postSyncRunnable(new Runnable() {				
 			public void run() {
 				if(isDisposed()) 
 					return;	
@@ -497,7 +497,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		}			
 		info.setStatus(status);	
 		final TestRunInfo finalInfo= info;
-		postAsyncRunnable(new Runnable() {
+		postSyncRunnable(new Runnable() {
 			public void run() {
 				refreshCounters();
 				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
@@ -600,11 +600,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 			getDisplay().syncExec(r);
 	}
 
-	private void postAsyncRunnable(Runnable r) {
-		if (!isDisposed())
-			getDisplay().syncExec(r);
-	}
-
 	private void aboutToStart() {
 		postSyncRunnable(new Runnable() {
 			public void run() {
@@ -665,7 +660,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	}
 
 	protected void postShowTestResultsView() {
-		postAsyncRunnable(new Runnable() {
+		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (isDisposed()) 
 					return;
@@ -697,7 +692,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	}
 
 	protected void postInfo(final String message) {
-		postAsyncRunnable(new Runnable() {
+		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (isDisposed()) 
 					return;
@@ -708,7 +703,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	}
 
 	protected void postError(final String message) {
-		postAsyncRunnable(new Runnable() {
+		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (isDisposed()) 
 					return;
@@ -787,7 +782,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	}
 
 	private void reset(final int testCount) {
-		postAsyncRunnable(new Runnable() {
+		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (isDisposed()) 
 					return;
@@ -984,7 +979,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	}
 
 	void codeHasChanged() {
-		postAsyncRunnable(new Runnable() {
+		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (isDisposed())
 					return;
