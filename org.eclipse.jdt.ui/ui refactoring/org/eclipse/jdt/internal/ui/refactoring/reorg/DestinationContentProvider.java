@@ -10,14 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import java.util.ArrayList;
+
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 
 public final class DestinationContentProvider extends StandardJavaElementContentProvider {
@@ -49,7 +53,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 	public Object[] getChildren(Object parentElement) {
 		try {
 			if (parentElement instanceof IJavaModel) 
-				return concatenate(getJavaProjects((IJavaModel)parentElement), getNonJavaProjects((IJavaModel)parentElement));
+				return concatenate(getJavaProjects((IJavaModel)parentElement), getOpenNonJavaProjects((IJavaModel)parentElement));
 			else
 				return super.getChildren(parentElement);
 		} catch (JavaModelException e) {
@@ -58,8 +62,15 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 		}
 	}
 
-	private static Object[] getNonJavaProjects(IJavaModel model) throws JavaModelException {
-		return model.getNonJavaResources();
+	private static Object[] getOpenNonJavaProjects(IJavaModel model) throws JavaModelException {
+		Object[] nonJavaProjects= model.getNonJavaResources();
+		ArrayList result= new ArrayList(nonJavaProjects.length);
+		for (int i= 0; i < nonJavaProjects.length; i++) {
+			IProject project = (IProject) nonJavaProjects[i];
+			if (project.isOpen())
+				result.add(project);
+		}
+		return result.toArray();
 	}
 
 }
