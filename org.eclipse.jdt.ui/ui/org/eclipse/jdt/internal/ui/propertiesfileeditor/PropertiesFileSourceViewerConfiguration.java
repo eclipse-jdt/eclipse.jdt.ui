@@ -10,13 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
+import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
@@ -25,22 +33,25 @@ import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationHover;
+import org.eclipse.jdt.internal.ui.text.spelling.newapi.PropertiesSpellingReconcileStrategy;
 
 /**
  * Configuration for a source viewer which shows a properties file.
@@ -259,7 +270,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 */
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (getEditor() != null && getEditor().isEditable() && fPreferenceStore != null) {
-			IReconcilingStrategy strategy= new SpellingReconcileStrategy(getEditor(), EditorsUI.getSpellingService());
+			IReconcilingStrategy strategy= new PropertiesSpellingReconcileStrategy(getEditor());
 			MonoReconciler reconciler= new MonoReconciler(strategy, false);
 			reconciler.setIsIncrementalReconciler(false);
 			reconciler.setProgressMonitor(new NullProgressMonitor());
@@ -267,5 +278,54 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			return reconciler;
 		}
 		return null;
+	}
+	
+	/*
+	 * @see SourceViewerConfiguration#getConfiguredTextHoverStateMasks(ISourceViewer, String)
+	 */
+	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
+		return new int[] { ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK };
+	}
+	
+	/*
+	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
+	 */
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		AnnotationHover hover= new AnnotationHover();
+		hover.setEditor(getEditor());
+		return hover;
+	}
+
+	/*
+	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String)
+	 */
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
+		return getTextHover(sourceViewer, contentType, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
+	}
+	
+	/*
+	 * @see SourceViewerConfiguration#getOverviewRulerAnnotationHover(ISourceViewer)
+	 */
+	public IAnnotationHover getOverviewRulerAnnotationHover(ISourceViewer sourceViewer) {
+		return new JavaAnnotationHover(JavaAnnotationHover.OVERVIEW_RULER_HOVER);
+	}
+	
+
+	/*
+	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
+	 */
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new JavaAnnotationHover(JavaAnnotationHover.VERTICAL_RULER_HOVER);
+	}
+	
+	/*
+	 * @see SourceViewerConfiguration#getInformationControlCreator(ISourceViewer)
+	 */
+	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true));
+			}
+		};
 	}
 }
