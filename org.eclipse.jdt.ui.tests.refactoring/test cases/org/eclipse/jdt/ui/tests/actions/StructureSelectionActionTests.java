@@ -287,6 +287,21 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 //		printTestDisabledMessage("regression test for bug#23118");
 		helperSelectUp(5, 14, 5, 14);
 	}
+
+	public void test36() throws Exception{
+		printTestDisabledMessage("regression test for bug#23259");
+//		helperSelectUp(5, 14, 5, 14);
+	}
+
+	public void test37() throws Exception{
+		printTestDisabledMessage("regression test for bug#23259");
+//		helperSelectUp(7, 14, 7, 14);
+	}
+
+	public void test38() throws Exception{
+		printTestDisabledMessage("regression test for bug#23263");
+//		helperSelectPrevious(4, 5, 5, 16);
+	}
 	
 	public void testZeroLength0() throws Exception{
 		//printTestDisabledMessage("");
