@@ -12,7 +12,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
+class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
 
 	public CutSourceReferencesToClipboardAction(ISelectionProvider provider) {
 		super("Cu&t", provider);
