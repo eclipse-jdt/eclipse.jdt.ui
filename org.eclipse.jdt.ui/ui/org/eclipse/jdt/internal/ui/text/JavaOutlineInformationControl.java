@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.ui.text;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -24,6 +26,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
@@ -37,6 +41,60 @@ import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
  * @author dmegert
  */
 public class JavaOutlineInformationControl extends AbstractInformationControl {
+	
+	public class OutlineTreeViewer extends TreeViewer {
+		
+		private boolean fIsFiltering= false;
+
+		public OutlineTreeViewer(Tree tree) {
+			super(tree);
+		}
+		
+		protected Object[] getFilteredChildren(Object parent) {
+			Object[] result = getRawChildren(parent);
+			int unfilteredChildren= result.length;
+			ViewerFilter[] filters = getFilters();
+			if (filters != null) {
+				for (int i= 0; i < filters.length; i++)
+					result = filters[i].filter(this, parent, result);
+			}
+			fIsFiltering= unfilteredChildren != result.length;
+			return result;
+		}
+		
+		/*
+		 * @see org.eclipse.jface.viewers.AbstractTreeViewer#internalExpandToLevel(org.eclipse.swt.widgets.Widget, int)
+		 */
+		protected void internalExpandToLevel(Widget node, int level) {
+			if (!fIsFiltering && node instanceof Item) {
+				Item i= (Item) node;
+				if (i.getData() instanceof IJavaElement) {
+					IJavaElement je= (IJavaElement) i.getData();
+					if (je.getElementType() == IJavaElement.IMPORT_CONTAINER || isInnerType(je)) {
+						setExpanded(i, false);
+						return;
+					}
+				}
+			}
+			super.internalExpandToLevel(node, level);
+		}
+		
+		private boolean isInnerType(IJavaElement element) {
+			if (element != null && element.getElementType() == IJavaElement.TYPE) {
+				IType type= (IType)element;
+				try {
+					return type.isMember();
+				} catch (JavaModelException e) {
+					IJavaElement parent= type.getParent();
+					if (parent != null) {
+						int parentElementType= parent.getElementType();
+						return (parentElementType != IJavaElement.COMPILATION_UNIT && parentElementType != IJavaElement.CLASS_FILE);
+					}
+				}
+			}
+			return false;		
+		}
+	}
 
 	public JavaOutlineInformationControl(Shell parent, int shellStyle, int treeStyle) {
 		super(parent, shellStyle, treeStyle);
@@ -46,7 +104,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 	
-		TreeViewer treeViewer= new TreeViewer(tree);
+		TreeViewer treeViewer= new OutlineTreeViewer(tree);
 	
 		// Hide import declartions but show the container
 		treeViewer.addFilter(new ViewerFilter() {
