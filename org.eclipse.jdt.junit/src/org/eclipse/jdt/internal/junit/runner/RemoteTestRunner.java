@@ -302,14 +302,17 @@ public class RemoteTestRunner implements TestListener {
 		Test[] suites= new Test[testClassNames.length];
 		for (int i= 0; i < suites.length; i++) {
 			Test test= getTest(testClassNames[i]);
-			if (test == null)
-				return;
 			suites[i]= test;
 		}
 		
 		// count all testMethods and inform ITestRunListeners		
 		int count= countTests(suites);
 		notifyTestRunStarted(count);
+		
+		if (count == 0) {
+			notifyTestRunEnded(0);
+			return;
+		}
 		
 		long startTime= System.currentTimeMillis();
 		if (fDebugMode)
@@ -332,7 +335,8 @@ public class RemoteTestRunner implements TestListener {
 	private int countTests(Test[] tests) {
 		int count= 0;
 		for (int i= 0; i < tests.length; i++) {
-			count= count + tests[i].countTestCases();
+			if (tests[i] != null)
+				count= count + tests[i].countTestCases();
 		}
 		return count;
 	}
