@@ -1,11 +1,15 @@
 package p;
+
+
 /** typecomment template*/
 interface I {
+
 	public abstract void foo0();
 
-	abstract void foo1();
+	public abstract void foo1();
 
-	public void foo2();
+	public abstract void foo2();
 
-	void foo3();
+	public abstract void foo3();
+
 }

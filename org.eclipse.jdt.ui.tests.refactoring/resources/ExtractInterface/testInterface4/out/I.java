@@ -1,5 +1,9 @@
 package p;
+
+
 /** typecomment template*/
 interface I {
-	I a(I a1, I a2);
+
+	public abstract I a(I a1, I a2);
+
 }

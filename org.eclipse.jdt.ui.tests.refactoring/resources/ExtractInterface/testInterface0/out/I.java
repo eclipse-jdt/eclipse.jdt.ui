@@ -1,5 +1,9 @@
 package p;
+
+
 /** typecomment template*/
 interface I {
-	void m();
+
+	public abstract void m();
+
 }

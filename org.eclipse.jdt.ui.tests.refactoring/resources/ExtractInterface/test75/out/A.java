@@ -1,6 +1,9 @@
 package p;
 
 public class A implements I {
-  public int amount(){ return 1;}
-  public void add(){}
+	/* (non-Javadoc)
+	 * @see p.I#amount()
+	 */
+	public int amount(){ return 1;}
+	public void add(){}
 }

@@ -3,9 +3,15 @@ package p;
 class A implements Bag {
 	int size = 0;
 	Comparable[] elems = new Comparable[10];
+	/* (non-Javadoc)
+	 * @see p.Bag#iterator()
+	 */
 	public java.util.Iterator iterator() {
 		return new Iterator(this);
 	}
+	/* (non-Javadoc)
+	 * @see p.Bag#add(java.lang.Comparable)
+	 */
 	public Bag add(Comparable e) {
 		if (size + 1 == elems.length) {
 			Comparable[] newElems = new Comparable[2 * size];
@@ -15,6 +21,9 @@ class A implements Bag {
 		elems[size++] = e;
 		return this;
 	}
+	/* (non-Javadoc)
+	 * @see p.Bag#addAll(p.Bag)
+	 */
 	public Bag addAll(Bag v1) {
 		java.util.Iterator i = v1.iterator();
 		for (; i.hasNext(); add((Comparable) i.next()));

@@ -1,5 +1,8 @@
 package p;
 
 public class A implements OldInterface, I{
-  public int amount(){ return 1;}
+	/* (non-Javadoc)
+	 * @see p.I#amount()
+	 */
+	public int amount(){ return 1;}
 }

@@ -1,30 +1,40 @@
 package p;
 
 public class A implements I {
-	/**
-	 * comment f
+	/* (non-Javadoc)
+	 * @see p.I#f()
 	 */
 	public void f(){
 	} 
 
-	/** comment fz*/
+	/* (non-Javadoc)
+	 * @see p.I#fz()
+	 */
 	public void fz(){
 	} 
 
-	/**
-	 * comment f1
+	/* (non-Javadoc)
+	 * @see p.I#f1()
 	 */
 	public void f1(){
 	} 
 
-	/** comment f1z*/
+	/* (non-Javadoc)
+	 * @see p.I#f1z()
+	 */
 	public void f1z(){
 	} 
 
 	//comment f11
+	/* (non-Javadoc)
+	 * @see p.I#f11()
+	 */
 	public void f11(){
 	}
 
+	/* (non-Javadoc)
+	 * @see p.I#f2()
+	 */
 	public void f2(){
 	}
 }
