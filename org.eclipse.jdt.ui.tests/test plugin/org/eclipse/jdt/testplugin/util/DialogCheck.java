@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
-import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.PlatformUI;
 
 
 /**
@@ -96,12 +96,7 @@ public class DialogCheck {
 	 * the parent shell of the test dialog.
 	 */
 	public static Shell getShell() {
-		Shell shell =
-			WorkbenchPlugin
-				.getDefault()
-				.getWorkbench()
-				.getActiveWorkbenchWindow()
-				.getShell();
+		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		_verifyDialog = new VerifyDialog(shell);
 		_verifyDialog.create();
 		return _verifyDialog.getShell();

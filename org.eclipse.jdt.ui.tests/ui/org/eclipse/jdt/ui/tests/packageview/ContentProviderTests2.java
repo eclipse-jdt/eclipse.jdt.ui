@@ -78,7 +78,6 @@ public class ContentProviderTests2 extends TestCase{
 	private IPackageFragment fX;
 	private IPackageFragment fB;
 	private IPackageFragment fC;
-	private IPackageFragment fD;
 	private IPackageFragment fY;
 	private IFile fFile1;
 	private IFile fFile2;
@@ -232,7 +231,7 @@ public class ContentProviderTests2 extends TestCase{
 		fX= fInternalRoot1.getPackageFragment("x"); //$NON-NLS-1$
 		fB= fInternalRoot1.getPackageFragment("a.b"); //$NON-NLS-1$
 		fC= fInternalRoot1.getPackageFragment("a.b.c"); //$NON-NLS-1$
-		fD= fInternalRoot1.getPackageFragment("a.d"); //$NON-NLS-1$
+		fInternalRoot1.getPackageFragment("a.d"); //$NON-NLS-1$
 		fY= fInternalRoot1.getPackageFragment("x.y"); //$NON-NLS-1$
 		
 		fYClassFile= fY.getClassFile("Y.class"); //$NON-NLS-1$

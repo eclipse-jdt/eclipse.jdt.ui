@@ -65,8 +65,6 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 	private IConfigurationElement fConfigElement;
 
 	private IWorkbench fWorkbench;
-	private IStructuredSelection fSelection;
-	
 	public MyProjectCreationWizard() {
 		setWindowTitle("New XY Project");
 	}
@@ -83,8 +81,7 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		fWorkbench= workbench;
-		fSelection= selection; 
+		fWorkbench= workbench; 
 	}
 
 	/* (non-Javadoc)

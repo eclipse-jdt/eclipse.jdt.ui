@@ -70,12 +70,6 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 	private IPackageFragment fPackJunitSamples;
 	private IPackageFragment fPackJunitSamplesMoney;
 
-	private ICompilationUnit fCUIMoney;
-	private ICompilationUnit fCUMoney;
-	private ICompilationUnit fCUMoneyBag;
-	private ICompilationUnit fCUMoneyTest;
-	
-	
 	private IWorkbenchPage fPage;
 	private IPackageFragmentRoot fRoot2;
 	private IPackageFragment fPack12;
@@ -83,11 +77,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 	private IPackageFragment fPack42;
 	private IPackageFragment fPack52;
 	private IPackageFragment fPack62;
-	private ICompilationUnit fCU12;
-	private ICompilationUnit fCU22;
 	private IPackageFragment fPack21;
-	private ICompilationUnit fCU11;
-	private ICompilationUnit fCU21;
 	private IPackageFragment fPack61;
 	private IPackageFragment fPack51;
 	private IPackageFragment fPack41;
@@ -371,10 +361,10 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		assertNotNull("creating fPackJunitSamples", fPackJunitSamples);//$NON-NLS-1$
 		assertNotNull("creating fPackJunitSamplesMoney",fPackJunitSamplesMoney);//$NON-NLS-1$
 		
-		fCUIMoney= fPackJunitSamplesMoney.getCompilationUnit("IMoney.java");//$NON-NLS-1$
-		fCUMoney= fPackJunitSamplesMoney.getCompilationUnit("Money.java");//$NON-NLS-1$
-		fCUMoneyBag= fPackJunitSamplesMoney.getCompilationUnit("MoneyBag.java");//$NON-NLS-1$
-		fCUMoneyTest= fPackJunitSamplesMoney.getCompilationUnit("MoneyTest.java");//$NON-NLS-1$
+		fPackJunitSamplesMoney.getCompilationUnit("IMoney.java");//$NON-NLS-1$
+		fPackJunitSamplesMoney.getCompilationUnit("Money.java");//$NON-NLS-1$
+		fPackJunitSamplesMoney.getCompilationUnit("MoneyBag.java");//$NON-NLS-1$
+		fPackJunitSamplesMoney.getCompilationUnit("MoneyTest.java");//$NON-NLS-1$
 		
 		//java.io.File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		//assertTrue("lib not found", mylibJar != null && mylibJar.exists());//$NON-NLS-1$
@@ -406,8 +396,8 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		fPack62= fRoot2.createPackageFragment("pack3.pack5.pack6", true, null);//$NON-NLS-1$
 		fPack102=fRoot2.createPackageFragment("pack3.pack4.pack10", true, null);//$NON-NLS-1$
 		
-		fCU12= fPack12.createCompilationUnit("Object.java", "", true, null);//$NON-NLS-1$//$NON-NLS-2$
-		fCU22= fPack62.createCompilationUnit("Object.java","", true, null);//$NON-NLS-1$//$NON-NLS-2$
+		fPack12.createCompilationUnit("Object.java", "", true, null);//$NON-NLS-1$//$NON-NLS-2$
+		fPack62.createCompilationUnit("Object.java","", true, null);//$NON-NLS-1$//$NON-NLS-2$
 
 
 		//set up project #2: file system structure with in a source folder
@@ -426,8 +416,8 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		fPack61= fRoot1.createPackageFragment("pack3.pack5.pack6", true, null);//$NON-NLS-1$
 		fPack81= fRoot1.createPackageFragment("pack3.pack8", true, null);//$NON-NLS-1$
 		
-		fCU11= fPack21.createCompilationUnit("Object.java", "", true, null);//$NON-NLS-1$//$NON-NLS-2$
-		fCU21= fPack61.createCompilationUnit("Object.java","", true, null);//$NON-NLS-1$//$NON-NLS-2$
+		fPack21.createCompilationUnit("Object.java", "", true, null);//$NON-NLS-1$//$NON-NLS-2$
+		fPack61.createCompilationUnit("Object.java","", true, null);//$NON-NLS-1$//$NON-NLS-2$
 		
 		//set up the mock view
 		setUpMockView();

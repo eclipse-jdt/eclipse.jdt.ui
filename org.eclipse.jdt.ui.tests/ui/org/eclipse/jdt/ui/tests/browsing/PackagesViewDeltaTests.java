@@ -16,6 +16,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -40,9 +43,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 
@@ -75,31 +75,20 @@ public class PackagesViewDeltaTests extends TestCase {
 	private IPackageFragment fPack42;
 	private IPackageFragment fPack52;
 	private IPackageFragment fPack62;
-	private ICompilationUnit fCU12;
-	private ICompilationUnit fCU22;
 	private IPackageFragment fPack21;
-	private ICompilationUnit fCU11;
-	private ICompilationUnit fCU21;
 	private IPackageFragment fPack61;
 	private IPackageFragment fPack51;
 	private IPackageFragment fPack41;
 	private IPackageFragment fPack31;
-	private IPackageFragment fPackDefault1;
-	private IPackageFragment fPackDefault2;
-	private IPackageFragment fPack17;
 	private IPackageFragment fPack81;
 	private IPackageFragment fPack91;
 	private IPackageFragmentRoot fInternalJarRoot;
-	private IPackageFragment fInternalPackDefault;
 	private IPackageFragment fInternalPack3;
 	private IPackageFragment fInternalPack4;
 	private IPackageFragment fInternalPack5;
 	private IPackageFragment fInternalPack10;
 	private IPackageFragment fInternalPack6;
-	private IPackageFragment fInternalPackMetaInf;
 	private IPackageFragment fPack102;
-	private ICompilationUnit fCU33;
-	private ICompilationUnit fCU43;
 	private boolean fEnableAutoBuildAfterTesting;
 	
 	public PackagesViewDeltaTests(String name) {
@@ -490,32 +479,32 @@ public class PackagesViewDeltaTests extends TestCase {
 		File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar")); //$NON-NLS-1$
 		assertTrue("lib not found", myInternalJar != null && myInternalJar.exists()); //$NON-NLS-1$
 		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject, new Path(myInternalJar.getPath()), null, null);
-		fInternalPackDefault= fInternalJarRoot.getPackageFragment(""); //$NON-NLS-1$
+		fInternalJarRoot.getPackageFragment(""); //$NON-NLS-1$
 		fInternalPack3= fInternalJarRoot.getPackageFragment("pack3"); //$NON-NLS-1$
 		fInternalPack4= fInternalJarRoot.getPackageFragment("pack3.pack4"); //$NON-NLS-1$
 		fInternalPack5= fInternalJarRoot.getPackageFragment("pack3.pack5"); //$NON-NLS-1$
 		fInternalPack6= fInternalJarRoot.getPackageFragment("pack3.pack5.pack6"); //$NON-NLS-1$
 		fInternalPack10= fInternalJarRoot.getPackageFragment("pack3.pack4.pack10"); //$NON-NLS-1$
-		fInternalPackMetaInf= fInternalJarRoot.getPackageFragment("meta-inf"); //$NON-NLS-1$
+		fInternalJarRoot.getPackageFragment("meta-inf"); //$NON-NLS-1$
 
 		//-----------------Set up source folder--------------------------
 
 		fRoot2= JavaProjectHelper.addSourceContainer(fJProject, "src2"); //$NON-NLS-1$
-		fPackDefault2= fRoot2.createPackageFragment("", true, null); //$NON-NLS-1$
+		fRoot2.createPackageFragment("", true, null); //$NON-NLS-1$
 		fPack12= fRoot2.createPackageFragment("pack1", true, null); //$NON-NLS-1$
-		fPack17= fRoot2.createPackageFragment("pack1.pack7", true, null); //$NON-NLS-1$
+		fRoot2.createPackageFragment("pack1.pack7", true, null); //$NON-NLS-1$
 		fPack32= fRoot2.createPackageFragment("pack3", true, null); //$NON-NLS-1$
 		fPack42= fRoot2.createPackageFragment("pack3.pack4", true, null); //$NON-NLS-1$
 		fPack52= fRoot2.createPackageFragment("pack3.pack5", true, null); //$NON-NLS-1$
 		fPack62= fRoot2.createPackageFragment("pack3.pack5.pack6", true, null); //$NON-NLS-1$
 		fPack102= fRoot2.createPackageFragment("pack3.pack4.pack10", true, null); //$NON-NLS-1$
 
-		fCU12= fPack12.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
-		fCU22= fPack62.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+		fPack12.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+		fPack62.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
 		//so that fPack52 won't get deleted when we delete fPack62 in certain tests
-		fCU33= fPack52.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+		fPack52.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
 		//so that fPack42 won't get deleted when we delete fPack102 in certain tests
-		fCU43= fPack42.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+		fPack42.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
 
 		//set up project #2: file system structure with in a source folder
 
@@ -524,7 +513,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		//----------------Set up source folder--------------------------
 
 		fRoot1= JavaProjectHelper.addSourceContainer(fJProject, "src1"); //$NON-NLS-1$
-		fPackDefault1= fRoot1.createPackageFragment("", true, null); //$NON-NLS-1$
+		fRoot1.createPackageFragment("", true, null); //$NON-NLS-1$
 		fPack21= fRoot1.createPackageFragment("pack2", true, null); //$NON-NLS-1$
 		fPack31= fRoot1.createPackageFragment("pack3", true, null); //$NON-NLS-1$
 		fPack41= fRoot1.createPackageFragment("pack3.pack4", true, null); //$NON-NLS-1$
@@ -533,8 +522,8 @@ public class PackagesViewDeltaTests extends TestCase {
 		fPack61= fRoot1.createPackageFragment("pack3.pack5.pack6", true, null); //$NON-NLS-1$
 		fPack81= fRoot1.createPackageFragment("pack3.pack8", true, null); //$NON-NLS-1$
 
-		fCU11= fPack21.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
-		fCU21= fPack61.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+		fPack21.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+		fPack61.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
 
 		//set up the mock view
 		setUpMockView();

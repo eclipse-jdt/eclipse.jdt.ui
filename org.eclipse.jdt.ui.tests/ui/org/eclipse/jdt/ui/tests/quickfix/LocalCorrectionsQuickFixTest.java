@@ -2476,7 +2476,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	
 	public void testSuperfluousSemicolon() throws Exception {
 		Hashtable hashtable= JavaCore.getOptions();
-		hashtable.put(JavaCore.COMPILER_PB_SUPERFLUOUS_SEMICOLON, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_EMPTY_STATEMENT, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

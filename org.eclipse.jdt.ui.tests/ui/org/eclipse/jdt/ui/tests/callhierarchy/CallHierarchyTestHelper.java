@@ -16,7 +16,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -28,8 +30,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
@@ -251,8 +251,8 @@ public class CallHierarchyTestHelper {
             foundMembers.add(element.getMember());
         }
 
-        TestCase.assertEquals("Wrong number of calls", expectedMembers.size(), calls.size());
-        TestCase.assertTrue("One or more members not found", foundMembers.containsAll(expectedMembers));
+        Assert.assertEquals("Wrong number of calls", expectedMembers.size(), calls.size());
+        Assert.assertTrue("One or more members not found", foundMembers.containsAll(expectedMembers));
     }
 
     /**

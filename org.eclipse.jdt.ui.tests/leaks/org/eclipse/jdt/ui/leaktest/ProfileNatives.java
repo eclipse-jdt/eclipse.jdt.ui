@@ -43,7 +43,6 @@ public class ProfileNatives {
 	}
 	
 	public static void main(String[] args) {
-		Vector v= new Vector();
 		try {
 			System.out.println("count1= "+getInstanceCount(Vector.class));
 			MyThread t= new MyThread();
@@ -54,6 +53,7 @@ public class ProfileNatives {
 			
 			System.out.println("count3= "+getInstanceCount(Vector.class));
 			Object o= new TestClass(new Vector()).createInner();
+			o.toString();
 			System.out.println("count4= "+getInstanceCount(Vector.class));
 			o= null;
 			System.out.println("count5= "+getInstanceCount(Vector.class));

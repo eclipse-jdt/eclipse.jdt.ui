@@ -74,7 +74,6 @@ public class ContentProviderTests4 extends TestCase{
 	private IPackageFragmentRoot fInternalRoot1;
 	private IPackageFragment fA;
 	private IPackageFragment fX;
-	private IPackageFragment fB;
 	private IPackageFragment fC;
 	private IPackageFragment fD;
 	private IPackageFragment fY;
@@ -242,7 +241,7 @@ public class ContentProviderTests4 extends TestCase{
 		//create internal PackageFragments
 		fA= fInternalRoot1.getPackageFragment("a");//$NON-NLS-1$
 		fX= fInternalRoot1.getPackageFragment("x");//$NON-NLS-1$
-		fB= fInternalRoot1.getPackageFragment("a.b");//$NON-NLS-1$
+		fInternalRoot1.getPackageFragment("a.b");//$NON-NLS-1$
 		fC= fInternalRoot1.getPackageFragment("a.b.c");//$NON-NLS-1$
 		fD= fInternalRoot1.getPackageFragment("a.d");//$NON-NLS-1$
 		fY= fInternalRoot1.getPackageFragment("x.y");//$NON-NLS-1$

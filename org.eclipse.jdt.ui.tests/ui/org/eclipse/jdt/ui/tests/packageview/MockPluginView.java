@@ -100,23 +100,14 @@ public class MockPluginView extends PackageExplorerPart {
 	}
 	
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#findElementToSelect(org.eclipse.jdt.core.IJavaElement)
-	 */
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		return null;
 	}
 
-	/**
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getHelpContextId()
-	 */
 	protected String getHelpContextId() {
 		return null;
 	}
 
-	/**
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#isValidInput(java.lang.Object)
-	 */
 	protected boolean isValidInput(Object element) {
 		return false;
 	}

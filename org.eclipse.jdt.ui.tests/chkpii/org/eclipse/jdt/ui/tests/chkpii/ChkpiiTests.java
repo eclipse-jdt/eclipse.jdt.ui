@@ -17,6 +17,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.eclipse.osgi.service.environment.Constants;
+
 import junit.framework.TestCase;
 
 import org.eclipse.core.boot.BootLoader;
@@ -210,7 +212,7 @@ public class ChkpiiTests extends TestCase {
 		
 		String fileName;
 		
-		if (BootLoader.getOS().equals(BootLoader.OS_WIN32))
+		if (BootLoader.getOS().equals(Constants.OS_WIN32))
 			fileName= "ignoreErrorsWindows.txt"; //$NON-NLS-1$
 		else
 			fileName= "ignoreErrorsUnix.txt"; //$NON-NLS-1$

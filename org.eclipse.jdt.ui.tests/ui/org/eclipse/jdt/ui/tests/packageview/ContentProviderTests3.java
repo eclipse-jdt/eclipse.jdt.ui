@@ -78,7 +78,6 @@ public class ContentProviderTests3 extends TestCase {
 	private IPackageFragment fPackJunitSamples;
 	private IPackageFragment fPackJunitSamplesMoney;
 
-	private IPackageFragment fPack5;
 	private IPackageFragment fPack6;
 	private IPackageFragment fPackJunitExtentions;
 	private IPackageFragment fPackJunitFramework;
@@ -192,7 +191,7 @@ public class ContentProviderTests3 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch())
 
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
@@ -208,7 +207,8 @@ public class ContentProviderTests3 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+		}
 
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
@@ -222,7 +222,8 @@ public class ContentProviderTests3 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+		}
 		
 		assertEquals("No refreshs", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
@@ -234,7 +235,8 @@ public class ContentProviderTests3 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+		}
 		
 		assertEquals("No refreshs",0,  fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
@@ -247,7 +249,8 @@ public class ContentProviderTests3 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+		}
 
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertEquals("2 elements removed", 2, fMyPart.getRemovedObject().size()); //$NON-NLS-1$
@@ -263,7 +266,8 @@ public class ContentProviderTests3 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+		}
 
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertTrue("Correct refresh", fMyPart.getRemovedObject().contains(fCU2)); //$NON-NLS-1$
@@ -352,7 +356,7 @@ public class ContentProviderTests3 extends TestCase {
 		fPack2= fRoot1.createPackageFragment("pack2", true, null);//$NON-NLS-1$
 		fPack3= fRoot1.createPackageFragment("pack3",true,null);//$NON-NLS-1$
 		fPack4= fRoot1.createPackageFragment("pack3.pack4", true,null);//$NON-NLS-1$
-		fPack5= fRoot1.createPackageFragment("pack3.pack5",true,null);//$NON-NLS-1$
+		fRoot1.createPackageFragment("pack3.pack5",true,null);//$NON-NLS-1$
 		fPack6= fRoot1.createPackageFragment("pack3.pack5.pack6", true, null);//$NON-NLS-1$
 		
 		fCU1= fPack2.createCompilationUnit("Object.java", "", true, null);//$NON-NLS-1$//$NON-NLS-2$

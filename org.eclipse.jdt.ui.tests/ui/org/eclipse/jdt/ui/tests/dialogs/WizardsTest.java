@@ -23,7 +23,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -59,7 +59,7 @@ public class WizardsTest extends TestCase {
 		return DialogCheck.getShell();
 	}
 	private IWorkbench getWorkbench() {
-		return WorkbenchPlugin.getDefault().getWorkbench();
+		return PlatformUI.getWorkbench();
 	}
 	
 	public void testNewProjectWizard() throws Exception {	
