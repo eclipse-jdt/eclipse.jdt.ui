@@ -90,7 +90,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 					ICompilationUnit cu = (ICompilationUnit) JavaCore.create(input.getFile());
 					IJavaElement e = cu.getElementAt(line.getOffset());
 					if (e instanceof IType) 
-						type = (IType)type;
+						type = (IType)e;
 					else if (e != null && e instanceof IMember) {
 						type = ((IMember)e).getDeclaringType();
 					}
