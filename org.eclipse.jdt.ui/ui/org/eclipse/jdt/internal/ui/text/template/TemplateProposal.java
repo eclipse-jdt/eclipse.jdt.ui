@@ -304,4 +304,18 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		return false;
 	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementString()
+	 */
+	public CharSequence getCompletionText() {
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementOffset()
+	 */
+	public int getCompletionOffset() {
+		return fRegion.getOffset();
+	}
 }

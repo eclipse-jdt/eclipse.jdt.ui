@@ -132,5 +132,12 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 			(fUnqualifiedTypeName != null && startsWith(document, offset, fUnqualifiedTypeName)) ||
 			(fFullyQualifiedTypeName != null && startsWith(document, offset, fFullyQualifiedTypeName));
 	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#getCompletionText()
+	 */
+	public CharSequence getCompletionText() {
+		return fUnqualifiedTypeName;
+	}
 
 }

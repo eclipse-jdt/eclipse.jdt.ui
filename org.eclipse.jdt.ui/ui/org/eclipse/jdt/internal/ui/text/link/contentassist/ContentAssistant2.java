@@ -1594,5 +1594,13 @@ public class ContentAssistant2 implements IContentAssistant, IContentAssistantEx
 		return (fProposalPopup != null && fProposalPopup.hasFocus())
 				|| (fContextInfoPopup != null && fContextInfoPopup.hasFocus());
 	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistantExtension#completePrefix()
+	 */
+	public String completePrefix() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
 

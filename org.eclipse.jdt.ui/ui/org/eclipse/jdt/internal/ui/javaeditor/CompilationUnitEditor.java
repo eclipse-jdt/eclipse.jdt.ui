@@ -62,6 +62,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistantExtension;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -127,6 +128,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	public static final int CORRECTIONASSIST_PROPOSALS= 50;
 
+	/** 
+	 * Text operation code for requesting common prefix completion. 
+	 */
+	public static final int CONTENTASSIST_COMPLETE_PREFIX= 60;
+
 	
 	interface ITextConverter {
 		void customizeDocumentCommand(IDocument document, DocumentCommand command);
@@ -169,6 +175,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				case REDO:
 					fIgnoreTextConverters= true;
 					break;
+				case CONTENTASSIST_COMPLETE_PREFIX:
+					if (fContentAssistant instanceof IContentAssistantExtension) {
+						msg= ((IContentAssistantExtension) fContentAssistant).completePrefix();
+						setStatusLineErrorMessage(msg);
+						return;
+					} else
+						break;
 			}
 			
 			super.doOperation(operation);
@@ -180,6 +193,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		public boolean canDoOperation(int operation) {
 			if (operation == CORRECTIONASSIST_PROPOSALS)
 				return isEditable();
+			else if (operation == CONTENTASSIST_COMPLETE_PREFIX)
+				return isEditable();
+			
 			return super.canDoOperation(operation);
 		}
 		
@@ -689,6 +705,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
 		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
+
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistCompletePrefix.", this, CONTENTASSIST_COMPLETE_PREFIX);	//$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_COMPLETE_PREFIX);		
+		setAction("ContentAssistCompletePrefix", action); //$NON-NLS-1$
+		markAsStateDependentAction("ContentAssistCompletePrefix", true); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$

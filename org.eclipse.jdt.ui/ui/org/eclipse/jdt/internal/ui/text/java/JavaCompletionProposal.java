@@ -30,6 +30,7 @@ import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -39,6 +40,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -54,7 +56,7 @@ import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.ExitFlags;
 import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.IExitPolicy;
 
 
-public class JavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2 {
+public class JavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3 {
 
 	private String fDisplayString;
 	private String fReplacementString;
@@ -370,6 +372,13 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	public int getReplacementOffset() {
 		return fReplacementOffset;
 	}
+	
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getCompletionOffset()
+	 */
+	public int getCompletionOffset() {
+		return getReplacementOffset();
+	}
 
 	/**
 	 * Sets the replacement offset.
@@ -403,6 +412,13 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	 */
 	public String getReplacementString() {
 		return fReplacementString;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementText()
+	 */
+	public CharSequence getCompletionText() {
+		return getReplacementString();
 	}
 
 	/**
@@ -608,6 +624,13 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	public void unselected(ITextViewer viewer) {
 		repairPresentation(viewer);
 		fRememberedStyleRange= null;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
+	 */
+	public IInformationControlCreator getInformationControlCreator() {
+		return null;
 	}
 
 }

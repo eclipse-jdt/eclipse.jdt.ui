@@ -81,7 +81,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS)) {
 			return new ParameterGuessingProposal(
-				start, end - start, original.getImage(), original.getDisplayString(), fViewer, relevance,
+				new StringBuffer().append(name).append('(').toString(), start, end - start, original.getImage(), original.getDisplayString(), fViewer, relevance,
 				name, parameterTypePackageNames, parameterTypeNames, parameterNames, 
 				fCodeAssistOffset, fCompilationUnit);
 				

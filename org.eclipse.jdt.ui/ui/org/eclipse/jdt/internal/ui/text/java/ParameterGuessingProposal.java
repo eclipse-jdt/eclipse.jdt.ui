@@ -60,13 +60,12 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	 * @param image     the icon of the proposal.
 	 */		
 	public ParameterGuessingProposal(
-		int replacementOffset, int replacementLength, Image image,
+		String replacementString, int replacementOffset, int replacementLength, Image image,
 	    String displayString, ITextViewer viewer, int relevance,
 		char[] name,  char[][] paramaterTypePackageNames, char[][] parameterTypeNames, char[][] parameterNames,  
 		int codeAssistOffset, ICompilationUnit compilationUnit)
 	{
-		// replacementString is set in apply()
-		super("", replacementOffset, replacementLength, image, displayString, relevance); //$NON-NLS-1$		
+		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance); //$NON-NLS-1$		
 
 		fName= name;
 		fParamaterTypePackageNames= paramaterTypePackageNames;
