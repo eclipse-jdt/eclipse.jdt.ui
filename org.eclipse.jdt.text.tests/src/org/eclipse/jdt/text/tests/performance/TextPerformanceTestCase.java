@@ -84,6 +84,17 @@ public class TextPerformanceTestCase extends TestCase {
 		super(name);
 	}
 	
+	
+	/*
+	 * @see junit.framework.TestCase#setUp()
+	 * @since 3.1
+	 */
+	protected void setUp() throws Exception {
+		super.setUp();
+		// FIXME: only added for temporary debugging purpose
+		System.out.println(getClass().getName() + "." + getName() + ": " + System.currentTimeMillis());
+	}
+	
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
@@ -92,6 +103,9 @@ public class TextPerformanceTestCase extends TestCase {
 		if (fPerformanceMeters != null)
 			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
 				((PerformanceMeter) iter.next()).dispose();
+
+		// FIXME: only added for temporary debugging purpose
+		System.out.println("    teared down: " + System.currentTimeMillis());
 	}
 	
 	/**
