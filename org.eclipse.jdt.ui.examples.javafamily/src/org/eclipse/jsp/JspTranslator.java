@@ -23,6 +23,7 @@ public class JspTranslator extends AbstractJspParser {
 	boolean fIgnoreHTML= true;
 
 	boolean fInUseBean;
+	private boolean fInTagLib;
 	
 	StringBuffer fDeclarations= new StringBuffer();
 	StringBuffer fContent= new StringBuffer();
@@ -34,6 +35,7 @@ public class JspTranslator extends AbstractJspParser {
 	private ArrayList fDeclarationLines;
 	private ArrayList fLocalDeclarationLines;
 	private int[] fSmap;
+	private String fTagLibValue;
 	
 	
 	public JspTranslator() {
@@ -42,6 +44,7 @@ public class JspTranslator extends AbstractJspParser {
 	protected void startTag(boolean endTag, String name, int startName) {
 		
 		fInUseBean= "jsp:useBean".equals(name);
+		fInTagLib= "c:out".equals(name);
 		
 		if (DEBUG) {
 			if (endTag)
@@ -58,6 +61,9 @@ public class JspTranslator extends AbstractJspParser {
 			else if ("class".equals(attrName))
 				fClass= value;
 		}
+		if (fInTagLib) {
+			fTagLibValue= value;
+		}
 		if (DEBUG)
 			System.out.println("     " + attrName + "=\"" + value + "\"");
 	}
@@ -73,6 +79,13 @@ public class JspTranslator extends AbstractJspParser {
 				fId= fClass= null;
 			}
 			fInUseBean= false;
+		}
+		if (fInTagLib && fTagLibValue != null) {
+			fContent.append("System.out.println(" + fTagLibValue.substring(2, fTagLibValue.length() - 1) + ");\n");
+			fContentLines.add(new Integer(fLines));
+
+			fTagLibValue= null;
+			fInTagLib= false;
 		}
 		if (DEBUG) {
 			if (end)

@@ -122,6 +122,8 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 					javaPartitionStart= handleJavaSection(jspLineStr, relativeLineOffsetInJava);
 				else if (jspLineStr.indexOf("<jsp:useBean id=\"") != -1)  { //$NON-NLS-1$
 					javaPartitionStart= handleUseBeanTag(jspLineStr, relativeLineOffsetInJava);
+				} else if (jspLineStr.indexOf("<c:out value=\"${") != -1)  {
+					javaPartitionStart= handleTagLib(jspLineStr, relativeLineOffsetInJava);
 				}
 				pos.offset += javaPartitionStart;
 			} catch (BadLocationException e) {
@@ -135,6 +137,11 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 	private int handleJavaSection(String jspLineStr, int relativeLineOffsetInJava)  {
 		return jspLineStr.indexOf("<%") + 3; //$NON-NLS-1$
 	}
+
+	private int handleTagLib(String jspLineStr, int relativeLineOffsetInJava)  {
+		int javaFileOffset= "System.out.println(".length();
+		return jspLineStr.indexOf("<c:out value=\"${") + 16 - javaFileOffset; //$NON-NLS-1$
+	}
 	
 	/*
 	 * This is a good example where the relative line offset in the Java
@@ -145,10 +152,10 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 		int javaPartitionStart;
 
 		int variableNameStart= jspLineStr.indexOf("<jsp:useBean id=\"") + 17; //$NON-NLS-1$
-		int variableNameLength= jspLineStr.indexOf('"', variableNameStart) - variableNameStart;
+		int variableNameLength= Math.max(0, jspLineStr.indexOf('"', variableNameStart) - variableNameStart);
 
 		int typeStart= jspLineStr.indexOf("class=\"") + 7; //$NON-NLS-1$
-		int typeLength= jspLineStr.indexOf('"', typeStart) - typeStart;
+		int typeLength= Math.max(0, jspLineStr.indexOf('"', typeStart) - typeStart);
 					
 		if (relativeLineOffsetInJava < typeLength)  {
 			javaPartitionStart= typeStart;

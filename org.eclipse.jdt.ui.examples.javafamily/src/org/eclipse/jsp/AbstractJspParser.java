@@ -132,6 +132,7 @@ public abstract class AbstractJspParser {
 		boolean hasValue= false;
 		StringBuffer name= new StringBuffer();
 		StringBuffer value= new StringBuffer();
+		String startTag= ""; //$NON-NLS-1$
 		int i= 0;
 		int ix= 0;
 		int startName= 0;
@@ -164,7 +165,14 @@ public abstract class AbstractJspParser {
 						c= s.charAt(i++);
 						
 					startValue= i;
-					if (c == '"') {
+
+					// Special handling for this taglib tag
+					if (startTag.equals("c:out"))  { //$NON-NLS-1$
+						value= value.append(s.substring(startValue, Math.max(startValue, s.length() - 2)));
+						name.setLength(0);
+						tagAttribute(name.toString(), value.toString(), startName+pos, startValue+pos);
+						break;
+					} else if (c == '"') {
 						c= s.charAt(i++);
 						while (c != '"') {
 							value.append(c);
