@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.browsing;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 
@@ -17,6 +19,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
@@ -66,8 +69,15 @@ public class PackagesView extends JavaBrowsingPart {
 	 * @return	<true> if the given element is a valid input
 	 */
 	protected boolean isValidInput(Object element) {
-		return element instanceof IJavaProject
-			|| (element instanceof IPackageFragmentRoot && ((IJavaElement)element).getElementName() != IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH);
+		if (element instanceof IJavaProject || (element instanceof IPackageFragmentRoot && ((IJavaElement)element).getElementName() != IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH))
+			try {
+				IJavaProject jProject= ((IJavaElement)element).getJavaProject();
+				if (jProject != null)
+					return jProject.getProject().hasNature(JavaCore.NATURE_ID);
+			} catch (CoreException ex) {
+				return false;
+			}
+		return false;
 	}
 
 	/*
