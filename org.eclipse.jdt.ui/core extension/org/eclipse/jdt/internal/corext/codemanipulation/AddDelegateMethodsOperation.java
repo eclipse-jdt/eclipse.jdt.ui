@@ -13,240 +13,186 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IField;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.Change;
+
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class AddDelegateMethodsOperation implements IWorkspaceRunnable {	
-	private List fList;	
-	private IType fType; 		// Type to add methods to
-	private IJavaElement fInsertPosition;
-	private List fCreatedMethods;
-	private CodeGenerationSettings fCodeSettings;
+/**
+ * Workspace runnable to add delegate methods.
+ * 
+ * @since 3.1
+ */
+public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
-	public AddDelegateMethodsOperation(List resultList, CodeGenerationSettings settings, IType type, IJavaElement elementPosition) {
-		fList = resultList;
-		fType = type;
-		fCreatedMethods = new ArrayList();
-		fInsertPosition= elementPosition;
-		fCodeSettings= settings;
+	/** The method binding keys for which a method was generated */
+	private final List fCreated= new ArrayList();
+
+	/** The insertion point, or <code>null</code> */
+	private final IJavaElement fInsert;
+
+	/** The method binding keys to implement */
+	private final String[] fKeys;
+
+	/** Should the compilation unit content be saved? */
+	private final boolean fSave;
+
+	/** The code generation settings to use */
+	private final CodeGenerationSettings fSettings;
+
+	/** The type declaration to add the methods to */
+	private final IType fType;
+
+	/**
+	 * Creates a new add delegate methods operation.
+	 * 
+	 * @param type the type to add the methods to
+	 * @param insert the insertion point, or <code>null</code>
+	 * @param keys the method binding keys to implement
+	 * @param settings the code generation settings to use
+	 * @param save <code>true</code> if the changed compilation unit should be saved,
+	 *        <code>false</code> otherwise
+	 */
+	public AddDelegateMethodsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean save) {
+		Assert.isNotNull(type);
+		Assert.isNotNull(keys);
+		Assert.isNotNull(settings);
+		fType= type;
+		fInsert= insert;
+		fKeys= keys;
+		fSettings= settings;
+		fSave= save;
 	}
 
-	public IMethod[] getCreatedMethods() {
-		return (IMethod[]) fCreatedMethods.toArray(new IMethod[fCreatedMethods.size()]);
+	/**
+	 * Returns the method binding keys for which a method has been generated.
+	 * 
+	 * @return the method binding keys
+	 */
+	public final String[] getCreatedMethods() {
+		final String[] keys= new String[fCreated.size()];
+		fCreated.toArray(keys);
+		return keys;
 	}
 
-	public void run(IProgressMonitor monitor) throws CoreException {
-		if (monitor == null) {
+	/**
+	 * Returns the scheduling rule for this operation.
+	 * 
+	 * @return the scheduling rule
+	 */
+	public final ISchedulingRule getSchedulingRule() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+
+	/*
+	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public final void run(IProgressMonitor monitor) throws CoreException {
+		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		}		
 		try {
-			int listSize= fList.size();
-			String message = ActionMessages.getFormattedString("AddDelegateMethodsOperation.monitor.message", String.valueOf(listSize)); //$NON-NLS-1$
-			monitor.setTaskName(message);
-			monitor.beginTask("", listSize); //$NON-NLS-1$
-			monitor.worked(1);
-			
-			boolean addComments = fCodeSettings.createComments;
-	
-			// already existing methods
-			IMethod[] existingMethods = fType.getMethods();
-			//the delimiter used
-			String lineDelim = StubUtility.getLineDelimiterUsed(fType);
-			// the indent used + 1
-			int indent = StubUtility.getIndentUsed(fType) + 1;
-	
-			// perhaps we have to add import statements
-			final ImportsStructure imports =
-				new ImportsStructure(fType.getCompilationUnit(), fCodeSettings.importOrder, fCodeSettings.importThreshold, true);
-	
-			ITypeHierarchy typeHierarchy = fType.newSupertypeHierarchy(null);
-	
-			for (int i = 0; i < listSize; i++) {
-				//check for cancel each iteration
-				if (monitor.isCanceled()) {
-					if (i > 0) {
-						imports.create(false, null);
-					}
-					return;
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(CodeGenerationMessages.getString("AddDelegateMethodsOperation.monitor.message")); //$NON-NLS-1$
+			fCreated.clear();
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
+			ITypeBinding binding= null;
+			ListRewrite rewriter= null;
+			if (fType.isAnonymous()) {
+				final ClassInstanceCreation creation= ASTNodeSearchUtil.getClassInstanceCreationNode(fType, rewrite.getRoot());
+				if (creation != null) {
+					binding= creation.resolveTypeBinding();
+					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
+					if (declaration != null)
+						rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 				}
-	
-				String content = null;
-				Methods2Field wrapper = (Methods2Field) fList.get(i);
-				IMethod curr = wrapper.method;
-				IField field = wrapper.field;
-				
-				monitor.subTask(JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES));
-					
-				IMethod overwrittenMethod =
-					JavaModelUtil.findMethodImplementationInHierarchy(
-						typeHierarchy,
-						fType,
-						curr.getElementName(),
-						curr.getParameterTypes(),
-						curr.isConstructor());
-				if (overwrittenMethod == null) {
-					content = createStub(field, curr, addComments, overwrittenMethod, imports);
-				} else {
-					// we could ask before overwriting final methods
-	
-					IMethod declaration =
-						JavaModelUtil.findMethodDeclarationInHierarchy(
-							typeHierarchy,
-							fType,
-							curr.getElementName(),
-							curr.getParameterTypes(),
-							curr.isConstructor());
-					content = createStub(field, declaration, addComments, overwrittenMethod, imports);
+			} else {
+				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fType, rewrite.getRoot());
+				if (declaration != null) {
+					binding= declaration.resolveBinding();
+					rewriter= rewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 				}
-				IJavaElement sibling= fInsertPosition;
-				IMethod existing =
-					JavaModelUtil.findMethod(
-						curr.getElementName(),
-						curr.getParameterTypes(),
-						curr.isConstructor(),
-						existingMethods);
-				if (existing != null) {
-					// we could ask before replacing a method
-					continue;
-				} else if (curr.isConstructor() && existingMethods.length > 0) {
-					// add constructors at the beginning
-					sibling = existingMethods[0];
-				}
-	
-				String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim, fType.getJavaProject()) + lineDelim;
-				IMethod created= fType.createMethod(formattedContent, sibling, true, null);
-				fCreatedMethods.add(created);
-					
-				monitor.worked(1);			
 			}
-			imports.create(false, null);
+			if (binding != null && rewriter != null) {
+				final IBinding[][] bindings= StubUtility2.getDelegatableMethods(binding);
+				if (bindings != null && bindings.length > 0) {
+					try {
+						final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());
+						ASTNode insertion= null;
+						if (fInsert instanceof IMethod)
+							insertion= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) fInsert, rewrite.getRoot());
+						String key= null;
+						MethodDeclaration stub= null;
+						for (int index= 0; index < fKeys.length; index++) {
+							key= fKeys[index];
+							if (monitor.isCanceled())
+								break;
+							for (int offset= 0; offset < bindings.length; offset++) {
+								if (bindings[offset][1].getKey().equals(key)) {
+									stub= StubUtility2.createDelegationStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), rewrite.getAST(), bindings[offset], fSettings);
+									if (stub != null) {
+										fCreated.add(key);
+										if (insertion != null)
+											rewriter.insertBefore(stub, insertion, null);
+										else
+											rewriter.insertLast(stub, null);
+									}
+									break;
+								}
+							}
+						}
+						final Change result= rewrite.createChange();
+						if (result instanceof CompilationUnitChange) {
+							final CompilationUnitChange change= (CompilationUnitChange) result;
+							final TextEdit edit= change.getEdit();
+							if (edit != null) {
+								try {
+									edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
+									if (fSave)
+										buffer.commit(new SubProgressMonitor(monitor, 1), true);
+								} catch (Exception exception) {
+									throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
+								}
+							}
+						}
+					} finally {
+						RefactoringFileBuffers.release(fType.getCompilationUnit());
+					}
+				}
+			}
 		} finally {
 			monitor.done();
 		}
 	}
-
-	private String createStub(IField field, IMethod curr, boolean addComment, IMethod overridden, IImportsStructure imports) throws CoreException {
-		String methodName= curr.getElementName();
-		String[] paramNames= StubUtility.suggestArgumentNames(curr.getJavaProject(), curr.getParameterNames());
-		String returnTypSig= curr.getReturnType();
-
-		StringBuffer buf= new StringBuffer();
-		if (addComment) {
-			String[] typeParamNames= StubUtility.getTypeParameterNames(curr.getTypeParameters());
-			String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), methodName, paramNames, curr.getExceptionTypes(), returnTypSig, typeParamNames, overridden, String.valueOf('\n'));
-			if (comment != null) {
-				buf.append(comment);
-				buf.append('\n');
-			}
-		}
-
-		String methodDeclaration= null;
-		if (fType.isClass()) {
-			StringBuffer body= new StringBuffer();
-			if (!Signature.SIG_VOID.equals(returnTypSig)) {
-				body.append("return "); //$NON-NLS-1$
-			}
-			if (JdtFlags.isStatic(curr)) {
-				body.append(resolveTypeOfField(field).getElementName());
-			} else {
-				if (StubUtility.useThisForFieldAccess(fType.getJavaProject())) {
-					body.append("this."); //$NON-NLS-1$
-				}
-				body.append(field.getElementName());
-			}
-			body.append('.').append(methodName).append('(');
-			for (int i= 0; i < paramNames.length; i++) {
-				body.append(paramNames[i]);
-				if (i < paramNames.length - 1)
-					body.append(',');
-			}
-			body.append(");"); //$NON-NLS-1$
-			methodDeclaration= body.toString();
-		}
-		int flags= curr.getFlags() & ~Flags.AccSynchronized;
-		
-		StubUtility.genMethodDeclaration(fType.getElementName(), curr, flags, methodDeclaration, imports, buf);
-
-		return buf.toString();
-	}
-	
-	/** 
-	 * returns Type of field.
-	 * 
-	 * if field is primitive null is returned.
-	 * if field is array java.lang.Object is returned.
-	 **/
-	private static IType resolveTypeOfField(IField field) throws JavaModelException {
-		boolean isPrimitive = hasPrimitiveType(field);
-		boolean isArray = isArray(field);
-		if (!isPrimitive && !isArray) {
-			String typeName = JavaModelUtil.getResolvedTypeName(field.getTypeSignature(), field.getDeclaringType());
-			//if the CU has errors its possible no type name is resolved
-			return typeName != null ? field.getJavaProject().findType(typeName) : null;
-		} else if (isArray) {
-			return getJavaLangObject(field.getJavaProject()); 
-		}
-		return null;
-
-	}
-	
-	private static boolean hasPrimitiveType(IField field) throws JavaModelException {
-		String signature = field.getTypeSignature();
-		char first = Signature.getElementType(signature).charAt(0);
-		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
-	}
-	
-	private static IType getJavaLangObject(IJavaProject project) throws JavaModelException {
-		return JavaModelUtil.findType(project, "java.lang.Object");//$NON-NLS-1$
-	}
-
-	private static boolean isArray(IField field) throws JavaModelException {
-		return Signature.getArrayCount(field.getTypeSignature()) > 0;
-	}
-	
-	/**
-	 * to map from dialog results to corresponding fields
-	 */
-	public static class Methods2Field {
-		public IMethod method = null; 		// method to wrap
-		public IField field = null;			// field where method is declared
-		
-		public Methods2Field(IMethod method, IField field) {
-			this.method = method;
-			this.field = field;
-		}
-
-	}
-
-	/**
-	 * @return Returns the scheduling rule for this operation
-	 */
-	public ISchedulingRule getScheduleRule() {
-		return ResourcesPlugin.getWorkspace().getRoot();
-	}
-	
-	
 }

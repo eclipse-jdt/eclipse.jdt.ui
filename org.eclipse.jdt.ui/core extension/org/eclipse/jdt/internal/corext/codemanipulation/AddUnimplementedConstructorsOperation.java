@@ -11,159 +11,210 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.Change;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Evaluates all unimplemented methods and creates them.
- * If the type is open in an editor, be sure to pass over the types working working copy.
+ * Workspace runnable to add unimplemented constructors.
+ * 
+ * @since 3.1
  */
-public class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable {
+public final class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable {
 
-	private IJavaElement fInsertPosition;
-	private IMethod[] fSelected;
-	private IType fType;
-	private IMethod[] fCreatedMethods;
-	private boolean fDoSave;
-	private CodeGenerationSettings fSettings;
-	private int fVisibility;
-	private boolean fOmitSuper;
-	
-	public AddUnimplementedConstructorsOperation(IType type, CodeGenerationSettings settings, IMethod[] selected, boolean save, IJavaElement insertPosition) {
-		super();
+	/** The method binding keys for which a constructor was generated */
+	private final List fCreated= new ArrayList();
+
+	/** The insertion point, or <code>null</code> */
+	private final IJavaElement fInsert;
+
+	/** The method binding keys to implement */
+	private final String[] fKeys;
+
+	/** Should the call to the super constructor be omitted? */
+	private boolean fOmitSuper= false;
+
+	/** Should the compilation unit content be saved? */
+	private final boolean fSave;
+
+	/** The code generation settings to use */
+	private final CodeGenerationSettings fSettings;
+
+	/** The type declaration to add the constructors to */
+	private final IType fType;
+
+	/** The visibility flags of the new constructor */
+	private int fVisibility= 0;
+
+	/**
+	 * Creates a new add unimplemented constructors operation.
+	 * 
+	 * @param type the type to add the methods to
+	 * @param insert the insertion point, or <code>null</code>
+	 * @param keys the method binding keys to implement
+	 * @param settings the code generation settings to use
+	 * @param save <code>true</code> if the changed compilation unit should be saved,
+	 *        <code>false</code> otherwise
+	 */
+	public AddUnimplementedConstructorsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean save) {
+		Assert.isNotNull(type);
+		Assert.isNotNull(keys);
+		Assert.isNotNull(settings);
 		fType= type;
-		fDoSave= save;
-		fCreatedMethods= null;
+		fInsert= insert;
+		fKeys= keys;
 		fSettings= settings;
-		fSelected= selected;
-		fInsertPosition= insertPosition;
-		fVisibility= 0;
-		fOmitSuper= false;
+		fSave= save;
 	}
 
 	/**
-	 * Runs the operation.
-	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
+	 * Returns the method binding keys for which a constructor has been generated.
+	 * 
+	 * @return the method binding keys
 	 */
-	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}
-		try {
-			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
-			monitor.beginTask("", 3); //$NON-NLS-1$
-			
-			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
-			monitor.worked(1);
-			
-			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
-			String[] toImplement= genOverrideStubs(fSelected, fType, hierarchy, fSettings, imports);
-			
-			int nToImplement= toImplement.length;
-			ArrayList createdMethods= new ArrayList(nToImplement);
-			
-			if (nToImplement > 0) {
-				String lineDelim= StubUtility.getLineDelimiterUsed(fType);
-				int indent= StubUtility.getIndentUsed(fType) + 1;
-				
-				for (int i= 0; i < nToImplement; i++) {
-					String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, toImplement[i], indent, null, lineDelim, fType.getJavaProject()) + lineDelim;
-					IMethod curr= fType.createMethod(formattedContent, fInsertPosition, true, null);
-					createdMethods.add(curr);
-				}
-				monitor.worked(1);	
-	
-				imports.create(fDoSave, null);
-				monitor.worked(1);
-			} else {
-				monitor.worked(2);
-			}
+	public final String[] getCreatedConstructors() {
+		final String[] keys= new String[fCreated.size()];
+		fCreated.toArray(keys);
+		return keys;
+	}
 
-			fCreatedMethods= new IMethod[createdMethods.size()];
-			createdMethods.toArray(fCreatedMethods);
+	/**
+	 * Returns the scheduling rule for this operation.
+	 * 
+	 * @return the scheduling rule
+	 */
+	public final ISchedulingRule getSchedulingRule() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+
+	public final int getVisibility() {
+		return fVisibility;
+	}
+
+	public final boolean isOmitSuper() {
+		return fOmitSuper;
+	}
+
+	/*
+	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public final void run(IProgressMonitor monitor) throws CoreException {
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
+		try {
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
+			fCreated.clear();
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
+			ITypeBinding binding= null;
+			ListRewrite rewriter= null;
+			if (fType.isAnonymous()) {
+				final ClassInstanceCreation creation= ASTNodeSearchUtil.getClassInstanceCreationNode(fType, rewrite.getRoot());
+				if (creation != null) {
+					binding= creation.resolveTypeBinding();
+					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
+					if (declaration != null)
+						rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+				}
+			} else {
+				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fType, rewrite.getRoot());
+				if (declaration != null) {
+					binding= declaration.resolveBinding();
+					rewriter= rewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
+				}
+			}
+			if (binding != null && rewriter != null) {
+				final IMethodBinding[] bindings= StubUtility2.getOverridableConstructors(binding);
+				if (bindings != null && bindings.length > 0) {
+					try {
+						final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());
+						ASTNode insertion= null;
+						if (fInsert instanceof IMethod)
+							insertion= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) fInsert, rewrite.getRoot());
+						String key= null;
+						MethodDeclaration stub= null;
+						for (int index= 0; index < fKeys.length; index++) {
+							key= fKeys[index];
+							if (monitor.isCanceled())
+								break;
+							for (int offset= 0; offset < bindings.length; offset++) {
+								if (bindings[offset].getKey().equals(key)) {
+									stub= StubUtility2.createConstructorStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), rewrite.getAST(), bindings[offset], binding.getName(), fVisibility, fOmitSuper, fSettings);
+									if (stub != null) {
+										fCreated.add(key);
+										if (insertion != null)
+											rewriter.insertBefore(stub, insertion, null);
+										else
+											rewriter.insertLast(stub, null);
+									}
+									break;
+								}
+							}
+						}
+						final Change result= rewrite.createChange();
+						if (result instanceof CompilationUnitChange) {
+							final CompilationUnitChange change= (CompilationUnitChange) result;
+							final TextEdit edit= change.getEdit();
+							if (edit != null) {
+								try {
+									edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
+									if (fSave)
+										buffer.commit(new SubProgressMonitor(monitor, 1), true);
+								} catch (Exception exception) {
+									throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
+								}
+							}
+						}
+					} finally {
+						RefactoringFileBuffers.release(fType.getCompilationUnit());
+					}
+				}
+			}
 		} finally {
 			monitor.done();
 		}
 	}
-	
-	private String[] genOverrideStubs(IMethod[] methodsToImplement, IType type, ITypeHierarchy hierarchy, CodeGenerationSettings settings, IImportsStructure imports) throws CoreException {
-		GenStubSettings genStubSettings= new GenStubSettings(settings);
-		genStubSettings.methodOverwrites= true;
-		ICompilationUnit cu= type.getCompilationUnit();
-		String[] result= new String[methodsToImplement.length];
-		for (int i= 0; i < methodsToImplement.length; i++) {
-			IMethod curr= methodsToImplement[i];
-			IMethod overrides= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-			if (overrides != null) {				
-				curr= overrides;
-				// Ignore the omit super() checkbox setting unless the default constructor
-				if ((curr.getNumberOfParameters() == 0) && (isOmitSuper()))
-					genStubSettings.callSuper= false;
-				else
-					genStubSettings.callSuper= true;				
-			}
-			genStubSettings.methodModifiers= fVisibility | JdtFlags.clearAccessModifiers(curr.getFlags());
 
-			IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-			if (desc == null) {
-				desc= curr;
-			}
-			result[i]= StubUtility.genStub(cu, type.getElementName(), curr, desc.getDeclaringType(), genStubSettings, imports);
-		}
-		return result;
+	public final void setOmitSuper(final boolean omit) {
+		fOmitSuper= omit;
 	}
-		
-	/**
-	 * Returns the created accessors. To be called after a sucessful run.
-	 */	
-	public IMethod[] getCreatedMethods() {
-		return fCreatedMethods;
-	}
-	
-	public int getVisibility() {
-		return fVisibility;
-	}
-		
-	public void setVisibility(int visibility) {
+
+	public final void setVisibility(final int visibility) {
 		fVisibility= visibility;
 	}
-	
-	/**
-	 * Determines whether super() is called when the default constructor is created 
-	 */
-	public void setOmitSuper(boolean omitSuper) {
-		fOmitSuper= omitSuper;
-	}
-	
-	public boolean isOmitSuper() {
-		return fOmitSuper;
-	}
-	
-	/**
-	 * @return Returns the scheduling rule for this operation
-	 */
-	public ISchedulingRule getScheduleRule() {
-		return ResourcesPlugin.getWorkspace().getRoot();
-	}
-	
-
 }
