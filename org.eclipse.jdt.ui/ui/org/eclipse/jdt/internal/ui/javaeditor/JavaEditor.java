@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -4056,11 +4055,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private boolean isNavigationTarget(Annotation annotation) {
-		// TODO - this reference relies on core runtime compatibility layer
-		// in order to remove it, the org.eclipse.ui.editors plug-in will need
-		// to provide a way for org.eclipse.jdt.ui to access either 
-		// its preferences or its Plugin.
-		Preferences preferences= Platform.getPlugin(EditorsUI.PLUGIN_ID).getPluginPreferences();
+		Preferences preferences= EditorsUI.getPluginPreferences();
 		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
 //		See bug 41689
 //		String key= forward ? preference.getIsGoToNextNavigationTargetKey() : preference.getIsGoToPreviousNavigationTargetKey();
