@@ -69,7 +69,7 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)fElementPattern);
 			else
 				desc= fElementPattern.getElementName();
-			if ("".equals(desc) && fElementPattern.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
+			if ("".equals(desc) && fElementPattern.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
 				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
 		}
 		else
