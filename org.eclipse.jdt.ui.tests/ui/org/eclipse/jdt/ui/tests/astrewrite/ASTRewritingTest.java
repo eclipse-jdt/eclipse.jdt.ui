@@ -17,12 +17,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.StringAsserts;
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -68,7 +64,7 @@ public class ASTRewritingTest extends TestCase {
 	/**
 	 * Returns the result of a rewrite.
 	 */
-	protected String evaluateRewrite(ICompilationUnit cu, NewASTRewrite rewrite) throws CoreException, MalformedTreeException, BadLocationException {
+	protected String evaluateRewrite(ICompilationUnit cu, NewASTRewrite rewrite) throws Exception {
 		Document document= new Document(cu.getSource());
 		TextEdit res= rewrite.rewriteAST(document);
 		

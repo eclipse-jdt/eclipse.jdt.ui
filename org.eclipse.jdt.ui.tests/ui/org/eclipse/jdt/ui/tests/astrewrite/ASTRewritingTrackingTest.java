@@ -104,7 +104,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
 		ArrayList gd= new ArrayList();
 		
@@ -168,7 +169,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
 		ArrayList gd= new ArrayList();
 		
@@ -234,7 +235,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
 		ArrayList gd= new ArrayList();
 		
@@ -302,7 +303,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
 		ArrayList gd= new ArrayList();
 		
@@ -366,7 +368,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
 		ArrayList gd= new ArrayList();
 		
@@ -429,7 +431,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
 		ArrayList gd= new ArrayList();
 		
@@ -479,7 +482,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(ast);
 		
 		ArrayList gd= new ArrayList();
 		

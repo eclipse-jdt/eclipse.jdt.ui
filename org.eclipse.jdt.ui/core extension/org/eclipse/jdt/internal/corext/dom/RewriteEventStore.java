@@ -11,8 +11,10 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +28,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 
 /**
  * Stores all rewrite events, descriptions of events and knows which nodes
- * are copy or move sources.
+ * are copy or move sources or tracked.
  */
 public final class RewriteEventStore {
 	
@@ -76,6 +78,54 @@ public final class RewriteEventStore {
 		int copyCount= 0; // number of times this node is copied
 	}
 	
+	/**
+	 * Iterates over all event parent nodes, tracked nodes and all copy/move sources 
+	 */
+	private class ParentIterator implements Iterator {
+		
+		private Iterator fEventIter;
+		private Iterator fSourceNodeIter;
+		private Iterator fTrackedNodeIter;
+		
+		public ParentIterator() {
+			fEventIter= fEvents.iterator();
+			fSourceNodeIter= fNodeSourceDatas.keySet().iterator();
+			if (fTrackedNodes != null) {
+				fTrackedNodeIter= fTrackedNodes.keySet().iterator();
+			} else {
+				fTrackedNodeIter= Collections.EMPTY_LIST.iterator();
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
+		public boolean hasNext() {
+			return fEventIter.hasNext() || fSourceNodeIter.hasNext() || fTrackedNodeIter.hasNext();
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		public Object next() {
+			if (fEventIter.hasNext()) {
+				return ((EventHolder) fEventIter.next()).parent;
+			}
+			if (fSourceNodeIter.hasNext()) {
+				return fSourceNodeIter.next();
+			}
+			return fTrackedNodeIter.next();
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
+		
+	
 	/** all events */
 	private final List fEvents;
 	
@@ -87,6 +137,9 @@ public final class RewriteEventStore {
 	
 	/** Stores which nodes are source of a copy or move */
 	private Map fNodeSourceDatas;
+	
+	/** Stores which nodes are tracked and the corresponding edit group*/
+	private Map fTrackedNodes;
 	
 	/** Stores which inserted nodes bound to the previous node. If not, a node is
 	 * always bound to the next node */
@@ -101,6 +154,8 @@ public final class RewriteEventStore {
 		
 		fNodeSourceDatas= new IdentityHashMap();
 		fEditGroups= null; // lazy initialization
+		
+		fTrackedNodes= null;
 		fInsertBoundToPrevious= null;
 		
 		fNodePropertyMapper= null;
@@ -118,6 +173,7 @@ public final class RewriteEventStore {
 	public void clear() {
 		fEvents.clear();
 		fLastEvent= null;
+		fTrackedNodes= null;
 		
 		fNodeSourceDatas.clear();
 		fEditGroups= null; // lazy initialization
@@ -152,7 +208,6 @@ public final class RewriteEventStore {
 			return fLastEvent.event;
 		}
 		
-		// TODO: To optimize
 		for (int i= 0; i < fEvents.size(); i++) {
 			EventHolder holder= (EventHolder) fEvents.get(i);
 			if (holder.parent == parent && holder.childProperty == property) {
@@ -185,7 +240,12 @@ public final class RewriteEventStore {
 		return event;
 	}
 	
-	public boolean hasChildrenChanges(ASTNode parent) {
+	public Iterator getChangeRootIterator() {
+		return new ParentIterator();
+	}
+	
+	
+	public boolean hasChangedProperties(ASTNode parent) {
 		for (int i= 0; i < fEvents.size(); i++) {
 			EventHolder holder= (EventHolder) fEvents.get(i);
 			if (holder.parent == parent) {
@@ -195,7 +255,8 @@ public final class RewriteEventStore {
 			}
 		}
 		return false;
-	}	
+	}
+	
 	
 	public RewriteEvent findEventByOriginal(Object original) {
 		for (int i= 0; i < fEvents.size(); i++) {
@@ -231,7 +292,8 @@ public final class RewriteEventStore {
 			}
 		}
 		return null;
-	}	
+	}
+	
 	
 	public Object getOriginalValue(ASTNode parent, int property) {
 		RewriteEvent event= getEvent(parent, property);
@@ -284,6 +346,34 @@ public final class RewriteEventStore {
 			fEditGroups.put(event, editGroup);
 		}
 	}
+	
+	
+	public final TextEditGroup getTrackedNodeData(ASTNode node) {
+		if (fTrackedNodes != null) {
+			return (TextEditGroup) fTrackedNodes.get(node);
+		}
+		return null;	
+	}
+	
+	public void setTrackedNodeData(ASTNode node, TextEditGroup editGroup) {
+		if (fTrackedNodes == null) {
+			fTrackedNodes= new IdentityHashMap();
+		}
+		fTrackedNodes.put(node, editGroup);
+	}
+	
+	/**
+	 * Marks a node as tracked. The edits added to the group editGroup can be used to get the
+	 * position of the node after the rewrite operation.
+	 * @param node The node to track
+	 * @param editGroup Collects the range markers describing the node position.
+	 */
+	public final void markAsTracked(ASTNode node, TextEditGroup editGroup) {
+		if (getTrackedNodeData(node) != null) {
+			throw new IllegalArgumentException("Node is already marked as tracked"); //$NON-NLS-1$
+		}
+		setTrackedNodeData(node, editGroup);
+	}	
 	
 	
 	public NodeSourceData getNodeSourceData(ASTNode node) {
@@ -367,4 +457,10 @@ public final class RewriteEventStore {
 		}
 		return buf.toString();
 	}
+	
+	public static boolean isNewNode(ASTNode node) {
+		return node.getStartPosition() == -1; // should be changed with new API
+	}
+
+
 }

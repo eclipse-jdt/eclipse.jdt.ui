@@ -152,11 +152,11 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private final boolean hasChildrenChanges(ASTNode node) {
-		return fEventStore.hasChildrenChanges(node);
+		return fEventStore.hasChangedProperties(node);
 	}
 	
 	private boolean visitChildrenNeeded(ASTNode node) {
-		return true; // TODO: Check if changes in range
+		return true;
 	}
 		
 	private final boolean isChanged(ASTNode node, int property) {
@@ -479,7 +479,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 						
 						TextEditGroup editGroup= getEditGroup(currEvent);
 						ASTNode changed= (ASTNode) currEvent.getNewValue();
-						doTextRemoveAndVisit(currPos, currEnd - currPos, node, getEditGroup(currEvent));
+						doTextRemoveAndVisit(currPos, currEnd - currPos, node, editGroup);
 						doTextInsert(currPos, changed, getNodeIndent(i), true, editGroup);
 						
 						prevEnd= currEnd;
@@ -1037,7 +1037,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		TextEditGroup editGroup= fNodeInfos.getTrackedNodeData(node);
+		TextEditGroup editGroup= fEventStore.getTrackedNodeData(node);
 		if (editGroup != null) {
 			fCurrentEdit= fCurrentEdit.getParent();
 		}
@@ -1069,7 +1069,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				fCurrentEdit= edit;		
 			}
 		}
-		TextEditGroup editGroup= fNodeInfos.getTrackedNodeData(node);
+		TextEditGroup editGroup= fEventStore.getTrackedNodeData(node);
 		if (editGroup != null) {
 			int offset= getExtendedOffset(node);
 			int length= getExtendedLength(node);
@@ -2460,6 +2460,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 
 	private void handleException(Throwable e) {
 		JavaPlugin.log(e);
+		throw new RewriteRuntimeException(e);
 	}
 
 }

@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Example:
@@ -80,13 +81,15 @@ public final class ASTRewrite extends NewASTRewrite {
 	private HashMap fChangedProperties;
 
 	private boolean fHasASTModifications;
+	private ASTNode fRootNode;
 	
 	/**
 	 * Creates the <code>ASTRewrite</code> object.
 	 * @param node A node which is parent to all modified, changed or tracked nodes.
 	 */
 	public ASTRewrite(ASTNode node) {
-		super(node);
+		super(node.getAST());
+		fRootNode= node;
 		fChangedProperties= new HashMap();
 
 		fHasASTModifications= false;
@@ -127,16 +130,30 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param rootEdit
 	 */
 	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit) {
-		TextEdit res= rewriteAST(textBuffer.getDocument());
-		rootEdit.addChildren(res.removeChildren());
+		try {
+			TextEdit res= rewriteAST(textBuffer.getDocument());
+			rootEdit.addChildren(res.removeChildren());
+		} catch (RewriteException e) {
+			JavaPlugin.log(e);
+		}
 	}
 	
 	/**
 	 * New API.
 	 */
-	public TextEdit rewriteAST(IDocument document) {
+	public TextEdit rewriteAST(IDocument document) throws RewriteException {
 		convertOldToNewEvents();
 		return super.rewriteAST(document);
+	}
+	
+	/**
+	 * Returns the root node of the rewrite. All modifications or move/copy sources lie
+	 * inside the root.
+	 * @return Returns the root node or <code>null</code> if no node has been
+	 * changed.
+	 */
+	public ASTNode getRootNode() {
+		return fRootNode;
 	}
 	
 	/**
@@ -211,6 +228,17 @@ public final class ASTRewrite extends NewASTRewrite {
 		return fHasASTModifications;
 	}
 	
+	/**
+	 * Clears all events and other internal structures.
+	 */
+	protected final void clearRewrite() {
+		fEventStore.clear();
+		fNodeStore.clear();
+	}
+	
+	public final boolean isCollapsed(ASTNode node) {
+		return fNodeStore.isCollapsed(node);
+	}
 	
 			
 	/**

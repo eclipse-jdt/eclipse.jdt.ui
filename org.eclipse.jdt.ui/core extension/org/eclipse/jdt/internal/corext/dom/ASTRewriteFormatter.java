@@ -35,7 +35,6 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 		private ArrayList fPositions;
 
-		
 		public ExtendedFlattener(RewriteEventStore store) {
 			super(store);
 			fPositions= new ArrayList();
@@ -45,7 +44,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 		 */
 		public void preVisit(ASTNode node) {
-			Object trackData= fPlaceholders.getTrackedNodeData(node);
+			Object trackData= fEventStore.getTrackedNodeData(node);
 			if (trackData != null) {
 				addMarker(trackData, fResult.length(), 0);
 			}
@@ -63,7 +62,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			if (placeholderData != null) {
 				fixupLength(placeholderData, fResult.length());
 			}
-			Object trackData= fPlaceholders.getTrackedNodeData(node);
+			Object trackData= fEventStore.getTrackedNodeData(node);
 			if (trackData != null) {
 				fixupLength(trackData, fResult.length());
 			}

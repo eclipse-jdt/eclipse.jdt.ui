@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.Iterator;
+
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -43,34 +45,25 @@ public class NewASTRewrite {
 		
 
 	/** root node for the rewrite: Only nodes under this root are accepted */
-	private ASTNode fRootNode;
+	private AST fAST;
 
 	protected final RewriteEventStore fEventStore;
 	protected final NodeInfoStore fNodeStore;
 	
-	public NewASTRewrite(ASTNode node) {
-		fRootNode= node;
+	public NewASTRewrite(AST ast) {
+		fAST= ast;
 		fEventStore= new RewriteEventStore();
-		fNodeStore= new NodeInfoStore(node.getAST());
+		fNodeStore= new NodeInfoStore(ast);
+		//ast.disallowModifications();
 	}
 	
 	/**
 	 * @return Returns the AST the rewrite was set up on.
 	 */
 	public AST getAST() {
-		return fRootNode.getAST();
+		return fAST;
 	}
-		
-	/**
-	 * Returns the root node of the rewrite. All modifications or move/copy sources lie
-	 * inside the root.
-	 * @return Returns the root node or <code>null</code> if no node has been
-	 * changed.
-	 */
-	public ASTNode getRootNode() {
-		return fRootNode;
-	}
-	
+			
 	protected RewriteEventStore getRewriteEventStore() {
 		return fEventStore;
 	}
@@ -81,20 +74,64 @@ public class NewASTRewrite {
 	 * constructor. This document is accessed read-only.
 	 * @return Returns the edit describing the text changes.
 	 */
-	public TextEdit rewriteAST(IDocument document) {
+	public TextEdit rewriteAST(IDocument document) throws RewriteException {
 		TextEdit result= new MultiTextEdit();
 		
 		ASTNode rootNode= getRootNode();
-		if (rootNode != null) {		
-			ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, result, fEventStore, fNodeStore);
-		
-			// update extra comment ranges
-			CommentMapper.annotateExtraRanges(rootNode, visitor.getScanner());
+		if (rootNode != null) {
+			try {
+				ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, result, fEventStore, fNodeStore);
 
-			rootNode.accept(visitor);
+				// update extra comment ranges
+				CommentMapper.annotateExtraRanges(rootNode, visitor.getScanner());
+
+				rootNode.accept(visitor);
+			} catch (RewriteRuntimeException e) {
+				throw new RewriteException(e.getCause());
+			}
 		}
 		return result;
 	}
+	
+	private ASTNode getRootNode() {
+		ASTNode node= null;
+		int start= -1;
+		int end= -1;
+		
+		for (Iterator iter= fEventStore.getChangeRootIterator(); iter.hasNext();) {
+			ASTNode curr= (ASTNode) iter.next();
+			if (!RewriteEventStore.isNewNode(curr)) {
+				int currStart= curr.getStartPosition();
+				int currEnd= currStart + curr.getLength();
+				if (node == null || currStart < start && currEnd > end) {
+					start= currStart;
+					end= currEnd;
+					node= curr;
+				} else if (currStart < start) {
+					start= currStart;
+				} else if (currEnd > end) {
+					end= currEnd;
+				}
+			}
+		}
+		if (node != null) {
+			int currStart= node.getStartPosition();
+			int currEnd= currStart + node.getLength();
+			while (start < currStart || end > currEnd) { // go up until a node covers all
+				node= node.getParent();
+				currStart= node.getStartPosition();
+				currEnd= currStart + node.getLength();
+			}
+			ASTNode parent= node.getParent(); // go up until a parent has different range
+			while (parent != null && parent.getStartPosition() == node.getStartPosition() && parent.getLength() == node.getLength()) {
+				node= parent;
+				parent= node.getParent();
+			}
+		}
+		return node;
+
+	}
+	
 	
 	
 	/**
@@ -215,15 +252,7 @@ public class NewASTRewrite {
 		
 		return new ListRewriter(this, parent, childProperty);
 	}
-	
-	private void validateIsListProperty(int property) {
-		if (!ASTNodeConstants.isListProperty(property)) {
-			String message= ASTNodeConstants.getPropertyName(property) + " is not a list property"; //$NON-NLS-1$
-			throw new IllegalArgumentException(message);
-		}
-	}
-
-	
+		
 	/**
 	 * Marks a node as tracked. The edits added to the group editGroup can be used to get the
 	 * position of the node after the rewrite operation.
@@ -231,21 +260,12 @@ public class NewASTRewrite {
 	 * @param editGroup Collects the range markers describing the node position.
 	 */
 	public final void markAsTracked(ASTNode node, TextEditGroup editGroup) {
-		if (fNodeStore.getTrackedNodeData(node) != null) {
+		if (fEventStore.getTrackedNodeData(node) != null) {
 			throw new IllegalArgumentException("Node is already marked as tracked"); //$NON-NLS-1$
 		}
-		fNodeStore.setTrackedNodeData(node, editGroup);
+		fEventStore.setTrackedNodeData(node, editGroup);
 	}	
-	
-	
-	/**
-	 * Clears all events and other internal structures.
-	 */
-	protected final void clearRewrite() {
-		fEventStore.clear();
-		fNodeStore.clear();
-	}
-		
+			
 	protected final void validateIsInsideAST(ASTNode node) {
 		if (node.getStartPosition() == -1) {
 			throw new IllegalArgumentException("Node is not an existing node"); //$NON-NLS-1$
@@ -253,6 +273,13 @@ public class NewASTRewrite {
 	
 		if (node.getAST() != getAST()) {
 			throw new IllegalArgumentException("Node is not inside the AST"); //$NON-NLS-1$
+		}
+	}
+	
+	protected void validateIsListProperty(int property) {
+		if (!ASTNodeConstants.isListProperty(property)) {
+			String message= ASTNodeConstants.getPropertyName(property) + " is not a list property"; //$NON-NLS-1$
+			throw new IllegalArgumentException(message);
 		}
 	}
 	
@@ -331,11 +358,7 @@ public class NewASTRewrite {
 		fNodeStore.markAsMoveTarget(placeholder, node);
 		return placeholder;
 	}	
-		
-	public final boolean isCollapsed(ASTNode node) {
-		return fNodeStore.isCollapsed(node);
-	}
-	
+			
 	public String toString() {
 		StringBuffer buf= new StringBuffer();
 		buf.append("Events:\n"); //$NON-NLS-1$

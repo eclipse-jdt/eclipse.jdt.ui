@@ -15,8 +15,6 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -51,15 +49,11 @@ public final class NodeInfoStore {
 	private Map fPlaceholderNodes;
 	private Set fCollapsedNodes;
 
-	private Map fTrackedNodes;
-	
 	public NodeInfoStore(AST ast) {
 		super();
 		fAst= ast;
 		fPlaceholderNodes= null;
 		fCollapsedNodes= null;
-		
-		fTrackedNodes= null;
 	}
 	
 	/**
@@ -247,40 +241,12 @@ public final class NodeInfoStore {
 		}
 	}
 
-
-	public final TextEditGroup getTrackedNodeData(ASTNode node) {
-		if (fTrackedNodes != null) {
-			return (TextEditGroup) fTrackedNodes.get(node);
-		}
-		return null;	
-	}
-	
-	public void setTrackedNodeData(ASTNode node, TextEditGroup editGroup) {
-		if (fTrackedNodes == null) {
-			fTrackedNodes= new IdentityHashMap();
-		}
-		fTrackedNodes.put(node, editGroup);
-	}
-	
-	/**
-	 * Marks a node as tracked. The edits added to the group editGroup can be used to get the
-	 * position of the node after the rewrite operation.
-	 * @param node The node to track
-	 * @param editGroup Collects the range markers describing the node position.
-	 */
-	public final void markAsTracked(ASTNode node, TextEditGroup editGroup) {
-		if (getTrackedNodeData(node) != null) {
-			throw new IllegalArgumentException("Node is already marked as tracked"); //$NON-NLS-1$
-		}
-		setTrackedNodeData(node, editGroup);
-	}	
 	
 	/**
 	 * 
 	 */
 	public void clear() {
 		fPlaceholderNodes= null;
-		fTrackedNodes= null;
 		fCollapsedNodes= null;
 	}
 }

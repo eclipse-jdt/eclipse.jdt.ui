@@ -124,7 +124,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
@@ -188,7 +188,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 		
@@ -256,7 +256,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
@@ -328,7 +328,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
@@ -391,7 +391,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
@@ -464,7 +464,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 		
@@ -529,7 +529,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -577,7 +577,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -628,7 +628,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -676,7 +676,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -724,7 +724,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -786,7 +786,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -859,7 +859,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -925,7 +925,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -988,7 +988,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1060,7 +1060,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1125,7 +1125,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1189,7 +1189,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1251,7 +1251,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1325,7 +1325,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1399,7 +1399,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1458,7 +1458,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1518,7 +1518,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1579,7 +1579,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
