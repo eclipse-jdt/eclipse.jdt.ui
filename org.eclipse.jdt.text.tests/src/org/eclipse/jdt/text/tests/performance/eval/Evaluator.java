@@ -13,9 +13,15 @@ package org.eclipse.jdt.text.tests.performance.eval;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
+
+import org.eclipse.perfmsr.core.LoadValueConstants;
 
 import junit.framework.Assert;
 
+import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 import org.eclipse.jdt.text.tests.performance.PerfMsrConstants;
 import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
 import org.eclipse.jdt.text.tests.performance.data.PerfMsrDimensions;
@@ -27,8 +33,12 @@ import org.eclipse.jdt.text.tests.performance.data.PerformanceDataModel;
  */
 public class Evaluator implements IEvaluator {
 
-	private static final String DRIVER_PROPERTY= "eclipse.performance.reference.driver"; //$NON-NLS-1$
-	private static final String TIMESTAMP_PROPERTY= "eclipse.performance.reference.timestamp"; //$NON-NLS-1$
+	private static final String PLUGIN_ID= JdtTextTestPlugin.PLUGIN_ID;
+	private static final String DRIVER_OPTION= "/option/driver"; //$NON-NLS-1$
+	private static final String TIMESTAMP_OPTION= "/option/timestamp"; //$NON-NLS-1$
+	
+	private static final String DRIVER_SYSTEM_PROPERTY= "eclipse.performance.reference.driver"; //$NON-NLS-1$
+	private static final String TIMESTAMP_SYSTEM_PROPERTY= "eclipse.performance.reference.timestamp"; //$NON-NLS-1$
 	
 	private static IEvaluator fgDefaultEvaluator;
 	
@@ -42,7 +52,7 @@ public class Evaluator implements IEvaluator {
 		StatisticsSession referenceStats= new StatisticsSession(reference);
 		StatisticsSession measuredStats= new StatisticsSession(session);
 		
-		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to driver '" + reference.getProperty(PerfMsrConstants.DRIVER_PROPERTY) + "' from " + reference.getProperty(PerfMsrConstants.RUN_TS_PROPERTY) + ":");
+		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to driver '" + reference.getProperty(PerfMsrConstants.DRIVER_PROPERTY) + "' from " + reference.getProperty(PerfMsrConstants.RUN_TS_PROPERTY) + ":"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		boolean pass= true;
 		for (int i= 0; i < fCheckers.length; i++) {
 			pass &= fCheckers[i].test(referenceStats, measuredStats, failMesg);
@@ -81,7 +91,25 @@ public class Evaluator implements IEvaluator {
 	}
 
 	protected PerformanceDataModel getDataModel() {
-		return PerformanceDataModel.getInstance("/home/tei/tmp/perfmsr");
+		return PerformanceDataModel.getInstance(getXMLDir());
+	}
+
+	private String getXMLDir() {
+		String ctrl= System.getProperty(LoadValueConstants.ENV_PERF_CTRL);
+		if (ctrl != null) {
+			StringTokenizer st= new StringTokenizer(ctrl, ";");
+			while(st.hasMoreTokens()) {
+				String token= st.nextToken();
+				int i= token.indexOf('=');
+				if (i < 1)
+					continue;
+				String value= token.substring(i+1);
+				String parm= token.substring(0,i);
+				if (parm.equals(LoadValueConstants.PerfCtrl.log))
+					return value;
+			}
+		}
+		return System.getProperty("user.home"); //$NON-NLS-1$
 	}
 
 	public void setAssertCheckers(AssertChecker[] asserts) {
@@ -99,8 +127,18 @@ public class Evaluator implements IEvaluator {
 	public static synchronized IEvaluator getDefaultEvaluator() {
 		if (fgDefaultEvaluator == null) {
 			fgDefaultEvaluator= new Evaluator();
-			String driver= System.getProperty(DRIVER_PROPERTY, "3.0"); //$NON-NLS-1$
-			String timestamp= System.getProperty(TIMESTAMP_PROPERTY, "20040625"); //$NON-NLS-1$
+			
+			String driver= System.getProperty(DRIVER_SYSTEM_PROPERTY);
+			if (driver == null)
+				driver= Platform.getDebugOption(PLUGIN_ID + DRIVER_OPTION);
+			if (driver == null)
+				driver= "3.0"; //$NON-NLS-1$
+			String timestamp= System.getProperty(TIMESTAMP_SYSTEM_PROPERTY);
+			if (timestamp == null)
+				timestamp= Platform.getDebugOption(PLUGIN_ID + TIMESTAMP_OPTION);
+			if (timestamp == null)
+				timestamp= "20040625"; //$NON-NLS-1$
+			
 			fgDefaultEvaluator.setReferenceFilterProperties(driver, timestamp);
 			
 			AssertChecker cpu= new RelativeBandChecker(PerfMsrDimensions.CPU_TIME, 0.0F, 1.0F);
