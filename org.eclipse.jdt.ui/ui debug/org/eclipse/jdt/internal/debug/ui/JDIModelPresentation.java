@@ -67,16 +67,22 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	private static final String PREFIX= "jdi_model_presentation.";
 	private static final String TERMINATED= "terminated";
 	private static final String NOT_RESPONDING= PREFIX + "not_responding";
-	private static final String LINE= "line";
-	private static final String HITCOUNT= "hitCount";
 	
 	private static final String NO_RETURN_VALUE= PREFIX + "no_return_value";
+	
+	private static final String LINE= "line";
+	private static final String HITCOUNT= "hitCount";
+	private static final String BREAKPOINT_FORMAT= PREFIX + "format";	
 
 	protected final static String EXCEPTION= PREFIX + "exception.";
-	protected final static String FORMAT= EXCEPTION + "format";
 	protected final static String CAUGHT= EXCEPTION + "caught";
 	protected final static String UNCAUGHT= EXCEPTION + "uncaught";
-	protected final static String BOTH= EXCEPTION + "both";
+	protected final static String CAUGHTANDUNCAUGHT= EXCEPTION + "caughtanduncaught";
+	
+	protected final static String WATCHPOINT= PREFIX + "watchpoint.";
+	protected final static String ACCESS= WATCHPOINT + "access";
+	protected final static String MODIFICATION= WATCHPOINT + "modification";
+	protected final static String ACCESSANDMODIFICATION= WATCHPOINT + "accessandmodification";
 
 	protected static final String fgStringName= "java.lang.String";
 
@@ -716,7 +722,9 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		if (breakpoint instanceof IJavaExceptionBreakpoint) {
 			return getExceptionBreakpointText((IJavaExceptionBreakpoint)breakpoint);
 		}
-		if (breakpoint instanceof IJavaLineBreakpoint) {
+		if (breakpoint instanceof IJavaWatchpoint) {
+			return getWatchpointText((IJavaWatchpoint)breakpoint);
+		} else if (breakpoint instanceof IJavaLineBreakpoint) {
 			return getLineBreakpointText((IJavaLineBreakpoint)breakpoint);
 		}
 
@@ -725,22 +733,30 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 
 	protected String getExceptionBreakpointText(IJavaExceptionBreakpoint breakpoint) throws CoreException {
 
-		String name = "";
+		StringBuffer buffer = new StringBuffer();
 		IType type = breakpoint.getType();
 		if (type != null) {
 			boolean showQualified= isShowQualifiedNames();
 			if (showQualified) {
-				name= type.getFullyQualifiedName();
+				buffer.append(type.getFullyQualifiedName());
 			} else {
-				name= type.getElementName();
+				buffer.append(type.getElementName());
 			}
 		}
+		int hitCount= breakpoint.getHitCount();
+		if (hitCount > 0) {
+			buffer.append(" [");
+			buffer.append(DebugUIUtils.getResourceString(PREFIX + HITCOUNT));
+			buffer.append(' ');
+			buffer.append(hitCount);
+			buffer.append(']');
+		}		
 
 		String state= null;
 		boolean c= breakpoint.isCaught();
 		boolean u= breakpoint.isUncaught();
 		if (c && u) {
-			state= BOTH;
+			state= CAUGHTANDUNCAUGHT;
 		} else if (c) {
 			state= CAUGHT;
 		} else if (u) {
@@ -748,11 +764,11 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		}
 		String label= null;
 		if (state == null) {
-			label= name;
+			label= buffer.toString();
 		} else {
-			String format= DebugUIUtils.getResourceString(FORMAT);
+			String format= DebugUIUtils.getResourceString(BREAKPOINT_FORMAT);
 			state= DebugUIUtils.getResourceString(state);
-			label= MessageFormat.format(format, new Object[] {state, name});
+			label= MessageFormat.format(format, new Object[] {state, buffer});
 		}
 		return label;
 
@@ -797,6 +813,32 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		return "";
 
 	}
+	
+	protected String getWatchpointText(IJavaWatchpoint watchpoint) throws CoreException {
+		
+		boolean showQualified= isShowQualifiedNames();
+		String lineInfo= getLineBreakpointText(watchpoint);
+
+		String state= null;
+		boolean access= watchpoint.isAccess();
+		boolean modification= watchpoint.isModification();
+		if (access && modification) {
+			state= ACCESSANDMODIFICATION;
+		} else if (access) {
+			state= ACCESS;
+		} else if (modification) {
+			state= MODIFICATION;
+		}		
+		String label= null;
+		if (state == null) {
+			label= lineInfo;
+		} else {
+			String format= DebugUIUtils.getResourceString(BREAKPOINT_FORMAT);
+			state= DebugUIUtils.getResourceString(state);
+			label= MessageFormat.format(format, new Object[] {state, lineInfo});
+		}
+		return label;	
+	}	
 
 	protected String getStackFrameText(IStackFrame stackFrame) throws DebugException {
 		IJavaStackFrame frame= (IJavaStackFrame) stackFrame.getAdapter(IJavaStackFrame.class);
