@@ -1,8 +1,7 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import java.lang.reflect.InvocationTargetException;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Text;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.FilteredList;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.JavaModelUtil;import org.eclipse.jdt.internal.ui.util.TypeInfo;import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
+package org.eclipse.jdt.internal.ui.launcher;/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */ import java.lang.reflect.InvocationTargetException;import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.FilteredList;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.JavaModelUtil;import org.eclipse.jdt.internal.ui.util.TypeInfo;import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Text;
 
 /**
- * Lots of stuff commented out because pending API change in 
- * Debugger
+ * A dialog to select an exception type to add as an exception breakpoint.
  */
 public class AddExceptionDialog extends StatusDialog {		private static final String DIALOG_SETTINGS= "AddExceptionDialog"; //$NON-NLS-1$	private static final String SETTING_CAUGHT_CHECKED= "caughtChecked"; //$NON-NLS-1$
 	private static final String SETTING_UNCAUGHT_CHECKED= "uncaughtChecked"; //$NON-NLS-1$	private Text fFilterText;
@@ -32,9 +31,7 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 	private int fExceptionType= NO_EXCEPTION;
 	private boolean fIsCaughtSelected= true;
 	private boolean fIsUncaughtSelected= true;
-	/**
-	 * Constructor for AddExceptionDialog
-	 */
+	
 	public AddExceptionDialog(Shell parentShell) {
 		super(parentShell);
 		setTitle(LauncherMessages.getString("AddExceptionDialog.title")); //$NON-NLS-1$
@@ -67,11 +64,11 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 		return parent;
 	}
 		
-	public void addFromListSelected(boolean selected) {
+	protected void addFromListSelected(boolean selected) {
 		fTypeList.setEnabled(selected);
 		if (selected) {
 			if (!fTypeListInitialized) {
-				initializeTypeList();
+				initializeTypeList();				if (!fTypeListInitialized) {					return; //cancelled				}
 			}
 			fTypeList.addSelectionListener(fListListener);
 			validateListSelection();
@@ -146,13 +143,12 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 		return fIsUncaughtSelected;
 	}
 	
-	public void initializeTypeList() {
+	protected void initializeTypeList() {
 		AllTypesSearchEngine searchEngine= new AllTypesSearchEngine(JavaPlugin.getWorkspace());
 		int flags= IJavaElementSearchConstants.CONSIDER_BINARIES |
 					IJavaElementSearchConstants.CONSIDER_CLASSES |
-					IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS;
-		List result= searchEngine.searchTypes(new ProgressMonitorDialog(getShell()), SearchEngine.createWorkspaceScope(), flags);
-		fFilterText.setText("*Exception*"); //$NON-NLS-1$		fTypeList.setElements(result.toArray()); // XXX inefficient
+					IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS;		ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());		final List result= searchEngine.searchTypes(dialog, SearchEngine.createWorkspaceScope(), flags);		if (dialog.getReturnCode() == dialog.CANCEL) {			getShell().getDisplay().asyncExec( 				new Runnable() {					public void run() {						cancelPressed();					}				}			);			return;		}
+		fFilterText.setText("*Exception*"); //$NON-NLS-1$				BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();		IRunnableWithProgress runnable= new IRunnableWithProgress() {			public void run(IProgressMonitor pm) {				fTypeList.setElements(result.toArray()); // XXX inefficient			}		};		try {					context.run(false, false, runnable);		} catch (InterruptedException e) {		} catch (InvocationTargetException e) {			JavaPlugin.log(e);		}		
 		fTypeListInitialized= true;
 	}
 	
