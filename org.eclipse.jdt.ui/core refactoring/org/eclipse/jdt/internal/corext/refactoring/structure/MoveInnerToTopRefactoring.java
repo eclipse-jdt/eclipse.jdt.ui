@@ -580,8 +580,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private String createCuSourcePrefix(IProgressMonitor pm, ICompilationUnit newCu) throws CoreException{
 		pm.beginTask("", 1); //$NON-NLS-1$
 		StringBuffer buffer= new StringBuffer();
-		if (fCodeGenerationSettings.createFileComments)
+		if (fCodeGenerationSettings.createFileComments){
 			buffer.append(TemplateUtil.createFileCommentsSource(newCu));
+			buffer.append(getLineSeperator());
+		}	
 		if (! getInputTypePackage().isDefaultPackage())	
 			buffer.append(createPackageDeclarationSource());
 		buffer.append(createImportsSource(new SubProgressMonitor(pm, 1)));
