@@ -12,19 +12,26 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.Platform;
+
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.util.ListenerList;
+import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-public class JavaUILabelProvider extends LabelProvider implements IColorProvider {
+public class JavaUILabelProvider implements ILabelProvider, IColorProvider {
+	
+	protected ListenerList fListeners = new ListenerList(1);
 	
 	protected JavaElementImageProvider fImageLabelProvider;
 	protected StorageLabelProvider fStorageLabelProvider;
@@ -184,7 +191,7 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 				decorator.addListener(listener);
 			}
 		}
-		super.addListener(listener);	
+		fListeners.add(listener);	
 	}
 
 	/* (non-Javadoc)
@@ -204,7 +211,7 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 				decorator.removeListener(listener);
 			}
 		}
-		super.removeListener(listener);	
+		fListeners.remove(listener);	
 	}
 	
 	public static ILabelDecorator[] getDecorators(boolean errortick, ILabelDecorator extra) {
@@ -233,6 +240,26 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 	 */
 	public Color getBackground(Object element) {
 		return null;
-	}	
+	}
+	
+    /**
+     * Fires a label provider changed event to all registered listeners
+     * Only listeners registered at the time this method is called are notified.
+     *
+     * @param event a label provider changed event
+     *
+     * @see ILabelProviderListener#labelProviderChanged
+     */
+    protected void fireLabelProviderChanged(final LabelProviderChangedEvent event) {
+        Object[] listeners = fListeners.getListeners();
+        for (int i = 0; i < listeners.length; ++i) {
+            final ILabelProviderListener l = (ILabelProviderListener) listeners[i];
+            Platform.run(new SafeRunnable() {
+                public void run() {
+                    l.labelProviderChanged(event);
+                }
+            });
+        }
+    }
 
 }

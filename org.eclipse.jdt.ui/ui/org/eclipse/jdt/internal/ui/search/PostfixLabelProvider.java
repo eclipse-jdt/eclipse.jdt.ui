@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.MessageFormat;
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.viewers.ITreeContentProvider;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModel;
@@ -18,85 +21,56 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.swt.graphics.Image;
-
 public class PostfixLabelProvider extends SearchLabelProvider {
 	private ITreeContentProvider fContentProvider;
 	
 	public PostfixLabelProvider(JavaSearchResultPage page) {
-		super(page, new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS));
+		super(page, DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, DEFAULT_IMAGEFLAGS);
 		fContentProvider= new LevelTreeContentProvider.FastJavaElementProvider();
 	}
 
 	public Image getImage(Object element) {
-		Image image= getLabelProvider().getImage(element);
+		Image image= super.getImage(element);
 		if (image != null)
 			return image;
 		return getParticipantImage(element);
 	}
 	
 	public String getText(Object element) {
+		String labelWithCounts= getLabelWithCounts(element, internalGetText(element));
+		
+		StringBuffer res= new StringBuffer(labelWithCounts);
+		
 		ITreeContentProvider provider= (ITreeContentProvider) fPage.getViewer().getContentProvider();
 		Object visibleParent= provider.getParent(element);
 		Object realParent= fContentProvider.getParent(element);
 		Object lastElement= element;
-		StringBuffer postfix= new StringBuffer();
 		while (realParent != null && !(realParent instanceof IJavaModel) && !realParent.equals(visibleParent)) {
 			if (!isSameInformation(realParent, lastElement))  {
-				postfix.append(" - "); //$NON-NLS-1$
-				postfix.append(internalGetText(realParent));
+				res.append(JavaElementLabels.CONCAT_STRING).append(internalGetText(realParent));
 			}
 			lastElement= realParent;
 			realParent= fContentProvider.getParent(realParent);
 		}
-		int matchCount= fPage.getDisplayedMatchCount(element);
-		String text=internalGetText(element);
-		if (hasShownChildren(element) && matchCount == 1) {
-				String label= getSingularLabel(element);
-				return MessageFormat.format(label, new String[] { text, postfix.toString() });
-		} 
-			if (matchCount < 2) {
-				String label= getNoCountLabel(element);
-				return MessageFormat.format(label, new String[] { text, postfix.toString() });
-			} 
-		String label= getPluralLabel(element);
-		return MessageFormat.format(label, new Object[] { text, new Integer(matchCount), postfix.toString() });
+		return res.toString();
 	}
+	
 
-	private boolean hasShownChildren(Object element) {
+	protected boolean hasChildren(Object element) {
 		ITreeContentProvider contentProvider= (ITreeContentProvider) fPage.getViewer().getContentProvider();
 		return contentProvider.hasChildren(element);
 	}
 
-	private String getNoCountLabel(Object element) {
-		if (hasPotentialMatches(element))
-			return SearchMessages.getString("PostfixLabelProvider.potential_noCount"); //$NON-NLS-1$
-		return SearchMessages.getString("PostfixLabelProvider.exact_noCount"); //$NON-NLS-1$
-	}
-
-	private String getSingularLabel(Object element) {
-		if (hasPotentialMatches(element))
-			return SearchMessages.getString("PostfixLabelProvider.potential_singular"); //$NON-NLS-1$
-		return SearchMessages.getString("PostfixLabelProvider.exact_singular"); //$NON-NLS-1$
-	}
-
-	private String getPluralLabel(Object element) {
-		if (hasPotentialMatches(element))
-			return SearchMessages.getString("PostfixLabelProvider.potential_plural"); //$NON-NLS-1$
-		return SearchMessages.getString("PostfixLabelProvider.exact_plural"); //$NON-NLS-1$
-	}
-
 	private String internalGetText(Object element) {
-		String text= getLabelProvider().getText(element);
-		if (text != null && !"".equals(text)) //$NON-NLS-1$
+		String text= super.getText(element);
+		if (text != null && text.length() > 0)
 			return text;
-		return getParticipantText(element);	}
+		return getParticipantText(element);
+	}
 
 	private boolean isSameInformation(Object realParent, Object lastElement) {
 		if (lastElement instanceof IType) {
-			IType type= (IType)lastElement;
+			IType type= (IType) lastElement;
 			if (realParent instanceof IClassFile) {
 				if (type.getClassFile().equals(realParent))
 					return true;

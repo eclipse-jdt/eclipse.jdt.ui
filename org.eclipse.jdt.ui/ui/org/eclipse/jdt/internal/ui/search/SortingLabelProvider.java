@@ -10,16 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.MessageFormat;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.viewers.IColorProvider;
+
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jface.viewers.IColorProvider;
-import org.eclipse.swt.graphics.Image;
 
 
 public class SortingLabelProvider extends SearchLabelProvider implements IColorProvider {
@@ -28,47 +30,28 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 	public static final int SHOW_PATH= 3;
 	
 	public SortingLabelProvider(JavaSearchResultPage page) {
-		super(page, new AppearanceAwareLabelProvider());
+		super(page, DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
 	}	
 
 	public Image getImage(Object element) {
 		Image image= null;
 		if (element instanceof IJavaElement || element instanceof IResource)
-			image= getLabelProvider().getImage(element);
+			image= super.getImage(element);
 		if (image != null)
 			return image;
 		return getParticipantImage(element);
 	}
 		
 	public final String getText(Object element) {
-		int matchCount= fPage.getDisplayedMatchCount(element);
-		String text= internalGetText(element);
-		if (matchCount < 2) {
-			String label= getSingularLabel(element);
-			return MessageFormat.format(label, new String[] { text });
-		}
-		String label= getPluralLabel(element);
-		return MessageFormat.format(label, new Object[] { text,  new Integer(matchCount) });
-	}
-
-	private String getSingularLabel(Object element) {
-		if (hasPotentialMatches(element))
-			return SearchMessages.getString("SortingLabelProvider.potential_singular"); //$NON-NLS-1$
-		return SearchMessages.getString("SortingLabelProvider.exact_singular"); //$NON-NLS-1$
-	}
-
-	private String getPluralLabel(Object element) {
-		if (hasPotentialMatches(element))
-			return SearchMessages.getString("SortingLabelProvider.potential_plural"); //$NON-NLS-1$
-		return SearchMessages.getString("SortingLabelProvider.exact_plural"); //$NON-NLS-1$
+		return getLabelWithCounts(element, internalGetText(element));
 	}
 
 	private String internalGetText(Object o) {
 		if (o instanceof IImportDeclaration)
 			o= ((IImportDeclaration)o).getParent().getParent();
 
-		String text= getLabelProvider().getText(o);
-		if (text != null && (!"".equals(text))) //$NON-NLS-1$
+		String text= super.getText(o);
+		if (text != null && (text.length() > 0))
 			return text;
 		return getParticipantText(o);	
 	}
@@ -87,6 +70,6 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
 			flags |= JavaElementLabels.PREPEND_ROOT_PATH;
 		}
-		getLabelProvider().setTextFlags(flags);
+		setTextFlags(flags);
 	}
 }

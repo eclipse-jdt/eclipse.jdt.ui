@@ -13,46 +13,70 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.eclipse.jdt.core.search.SearchMatch;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.ui.ProblemsLabelDecorator;
-import org.eclipse.jdt.ui.search.IMatchPresentation;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IColorProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.search.internal.ui.SearchPlugin;
-import org.eclipse.search.internal.ui.SearchPreferencePage;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
-import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGB;
 
-public abstract class SearchLabelProvider extends LabelProvider implements IColorProvider, IPropertyChangeListener {
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
+
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.jdt.core.search.SearchMatch;
+
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
+import org.eclipse.jdt.ui.search.IMatchPresentation;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+
+public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
+	
 	public static final String PROPERTY_MATCH_COUNT= "org.eclipse.jdt.search.matchCount"; //$NON-NLS-1$
+
+	// copied from SearchPreferencePage
+	private static final String EMPHASIZE_POTENTIAL_MATCHES= "org.eclipse.search.potentialMatch.emphasize"; //$NON-NLS-1$
+	private static final String POTENTIAL_MATCH_FG_COLOR= "org.eclipse.search.potentialMatch.fgColor"; //$NON-NLS-1$
 
 	private Color fPotentialMatchFgColor;
 	private Map fLabelProviderMap;
 	
 	protected JavaSearchResultPage fPage;
-	private AppearanceAwareLabelProvider fLabelProvider;
 
-	public SearchLabelProvider(JavaSearchResultPage page, AppearanceAwareLabelProvider inner) {
+	private ScopedPreferenceStore fSearchPreferences;
+	private IPropertyChangeListener fSearchPropertyListener;
+
+	public SearchLabelProvider(JavaSearchResultPage page, long textFlags, int imageFlags) {
+		super(textFlags, imageFlags);
+		addLabelDecorator(new ProblemsLabelDecorator());
+		
 		fPage= page;
-		fLabelProvider= inner;
 		fLabelProviderMap= new HashMap(5);
-		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator());
-		SearchPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+		
+		fSearchPreferences= new ScopedPreferenceStore(new InstanceScope(), NewSearchUI.PLUGIN_ID);
+		fSearchPropertyListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				doSearchPropertyChange(event);
+			}
+		};
+		fSearchPreferences.addPropertyChangeListener(fSearchPropertyListener);
 	}
 	
-	public void propertyChange(PropertyChangeEvent event) {
+	final void doSearchPropertyChange(PropertyChangeEvent event) {
 		if (fPotentialMatchFgColor == null)
 			return;
-		if (SearchPreferencePage.POTENTIAL_MATCH_FG_COLOR.equals(event.getProperty()) || SearchPreferencePage.EMPHASIZE_POTENTIAL_MATCHES.equals(event.getProperty())) {
+		if (POTENTIAL_MATCH_FG_COLOR.equals(event.getProperty()) || EMPHASIZE_POTENTIAL_MATCHES.equals(event.getProperty())) {
 			fPotentialMatchFgColor.dispose();
 			fPotentialMatchFgColor= null;
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(SearchLabelProvider.this, null); // refresh all
@@ -60,76 +84,106 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 		}
 	}
 
-	public AppearanceAwareLabelProvider getLabelProvider() {
-		return fLabelProvider;
-	}
-
 	public Color getForeground(Object element) {
-		if (SearchPreferencePage.arePotentialMatchesEmphasized()) {
-			if (hasPotentialMatches(element))
+		if (arePotentialMatchesEmphasized()) {
+			if (getNumberOfPotentialMatches(element) > 0)
 				return getForegroundColor();
 		}
-		if (fLabelProvider != null)
-			return fLabelProvider.getForeground(element);
-		return null;
+		return super.getForeground(element);
+	}
+	
+	private Color getForegroundColor() {
+		if (fPotentialMatchFgColor == null) {
+			fPotentialMatchFgColor= new Color(JavaPlugin.getActiveWorkbenchShell().getDisplay(), getPotentialMatchForegroundColor());
+		}
+		return fPotentialMatchFgColor;
 	}
 
-	protected boolean hasPotentialMatches(Object element) {
+	protected final int getNumberOfPotentialMatches(Object element) {
+		int res= 0;
 		AbstractTextSearchResult result= fPage.getInput();
 		if (result != null) {
 			Match[] matches= result.getMatches(element);
 			for (int i = 0; i < matches.length; i++) {
 				if ((matches[i]) instanceof JavaElementMatch) {
 					if (((JavaElementMatch)matches[i]).getAccuracy() == SearchMatch.A_INACCURATE)
-						return true;
+						res++;
 				}
 			}
 		}
-		return false;
+		return res;
 	}
-
-	public Color getBackground(Object element) {
-		if (fLabelProvider != null)
-			return fLabelProvider.getBackground(element);
-		return null;
-	}
-
-	private Color getForegroundColor() {
-		if (fPotentialMatchFgColor == null) {
-			fPotentialMatchFgColor= new Color(JavaPlugin.getActiveWorkbenchShell().getDisplay(), SearchPreferencePage.getPotentialMatchForegroundColor());
+		
+	protected final String getLabelWithCounts(Object element, String elementName) {
+		int matchCount= fPage.getDisplayedMatchCount(element);
+		int potentialCount= getNumberOfPotentialMatches(element);
+		
+		if (matchCount < 2) {
+			if (matchCount == 1 && hasChildren(element)) {
+				if (potentialCount > 0)
+					return SearchMessages.getFormattedString("SearchLabelProvider.potential_singular", elementName); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("SearchLabelProvider.exact_singular", elementName); //$NON-NLS-1$
+			}
+			if (potentialCount > 0)
+				return SearchMessages.getFormattedString("SearchLabelProvider.potential_noCount", elementName); //$NON-NLS-1$
+			return SearchMessages.getFormattedString("SearchLabelProvider.exact_noCount", elementName); //$NON-NLS-1$
+		} else {
+			int exactCount= matchCount - potentialCount;
+			
+			if (potentialCount > 0 && exactCount > 0) {
+				String[] args= new String[] { elementName, String.valueOf(matchCount), String.valueOf(exactCount), String.valueOf(potentialCount) };
+				return SearchMessages.getFormattedString("SearchLabelProvider.exact_and_potential_plural", args); //$NON-NLS-1$
+			} else if (exactCount == 0) {
+				String[] args= new String[] { elementName, String.valueOf(matchCount) };
+				return SearchMessages.getFormattedString("SearchLabelProvider.potential_plural", args); //$NON-NLS-1$
+			}
+			String[] args= new String[] { elementName, String.valueOf(matchCount) };
+			return SearchMessages.getFormattedString("SearchLabelProvider.exact_plural", args); //$NON-NLS-1$
 		}
-		return fPotentialMatchFgColor;
+	}
+	
+	protected boolean hasChildren(Object elem) {
+		return false;
 	}
 	
 	public void dispose() {
 		if (fPotentialMatchFgColor != null) {
 			fPotentialMatchFgColor.dispose();
+			fPotentialMatchFgColor= null;
 		}
-		SearchPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-		fLabelProvider.dispose();
+		fSearchPreferences.removePropertyChangeListener(fSearchPropertyListener);
 		for (Iterator labelProviders = fLabelProviderMap.values().iterator(); labelProviders.hasNext();) {
 			ILabelProvider labelProvider = (ILabelProvider) labelProviders.next();
 			labelProvider.dispose();
 		}
+		fSearchPreferences= null;
+		fSearchPropertyListener= null;
+		fLabelProviderMap.clear();
+		
 		super.dispose();
 	}
 	
 	public void addListener(ILabelProviderListener listener) {
 		super.addListener(listener);
-		getLabelProvider().addListener(listener);
+		for (Iterator labelProviders = fLabelProviderMap.values().iterator(); labelProviders.hasNext();) {
+			ILabelProvider labelProvider = (ILabelProvider) labelProviders.next();
+			labelProvider.addListener(listener);
+		}
 	}
 
 	public boolean isLabelProperty(Object element, String property) {
 		if (PROPERTY_MATCH_COUNT.equals(property))
 			return true;
-		return getLabelProvider().isLabelProperty(element, property);
+		return getLabelProvider(element).isLabelProperty(element, property);
 	}
 
 	public void removeListener(ILabelProviderListener listener) {
 		super.removeListener(listener);
-		getLabelProvider().removeListener(listener);
+		for (Iterator labelProviders = fLabelProviderMap.values().iterator(); labelProviders.hasNext();) {
+			ILabelProvider labelProvider = (ILabelProvider) labelProviders.next();
+			labelProvider.removeListener(listener);
+		}
 	}
-
 
 	protected String getParticipantText(Object element) {
 		ILabelProvider labelProvider= getLabelProvider(element);
@@ -138,7 +192,6 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 		return ""; //$NON-NLS-1$
 	
 	}
-
 
 	protected Image getParticipantImage(Object element) {
 		ILabelProvider lp= getLabelProvider(element);
@@ -149,14 +202,28 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 
 
 	private ILabelProvider getLabelProvider(Object element) {
-		IMatchPresentation participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
+		IMatchPresentation participant= ((JavaSearchResult) fPage.getInput()).getSearchParticpant(element);
 		if (participant == null)
 			return null;
+		
 		ILabelProvider lp= (ILabelProvider) fLabelProviderMap.get(participant);
 		if (lp == null) {
 			lp= participant.createLabelProvider();
 			fLabelProviderMap.put(participant, lp);
+			
+			Object[] listeners= fListeners.getListeners();
+			for (int i= 0; i < listeners.length; i++) {
+				lp.addListener((ILabelProviderListener) listeners[i]);
+			}
 		}
 		return lp;
+	}
+	
+	private boolean arePotentialMatchesEmphasized() {
+		return fSearchPreferences.getBoolean(EMPHASIZE_POTENTIAL_MATCHES);
+	}
+
+	private RGB getPotentialMatchForegroundColor() {
+		return PreferenceConverter.getColor(fSearchPreferences, POTENTIAL_MATCH_FG_COLOR);
 	}
 }
