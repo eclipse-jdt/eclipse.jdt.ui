@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.Document;
@@ -52,6 +51,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -66,7 +66,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -739,17 +738,13 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 				
 		private TextEdit createSubstituteStringForExpressionEdit(String string, Expression expression) throws JavaModelException {
-			OldASTRewrite rewrite= new OldASTRewrite(expression.getRoot());
+			ASTRewrite rewrite= ASTRewrite.create(expression.getRoot().getAST());
 
 			rewrite.replace(expression, rewrite.createStringPlaceholder(string, expression.getNodeType()), null);
 			
-			TextEdit edit= new MultiTextEdit();
 			TextBuffer textBuffer= TextBuffer.create(fUnit.getBuffer().getContents());
-			rewrite.rewriteNode(textBuffer, edit);
-			
-			rewrite.removeModifications();
-			
-			return edit;
+
+			return rewrite.rewriteAST(textBuffer.getDocument(), fInitializerUnit.getJavaProject().getOptions(true));
 		}
 
 		public boolean checkReferences(RefactoringStatus result) throws CoreException {
@@ -955,7 +950,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 	
-	/**
+	/*
 	 * Returns the constant's initializer, or null
 	 * if the constant has no initializer at its declaration.
 	 * 
@@ -965,7 +960,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		return fInitializer;
 	}
 	
-	/**
+	/*
 	 * Returns the  variable declaration fragment
 	 * corresponding to the selected static final field name,
 	 * or null if the constant is declared in a class file.
@@ -1108,17 +1103,13 @@ public class InlineConstantRefactoring extends Refactoring {
 		ASTNode toRemove= getNodeToRemoveForConstantDeclarationRemoval();
 		Assert.isNotNull(toRemove);
 
-		OldASTRewrite rewrite= new OldASTRewrite(toRemove.getRoot());
+		ASTRewrite rewrite= ASTRewrite.create(toRemove.getRoot().getAST());
 	
 		rewrite.remove(toRemove, null);
 			
-		TextEdit edit= new MultiTextEdit();
 		TextBuffer textBuffer= TextBuffer.create(getDeclaringCompilationUnit().getBuffer().getContents());
-		rewrite.rewriteNode(textBuffer, edit);
-		
-		rewrite.removeModifications();
-		
-		return edit;
+
+		return rewrite.rewriteAST(textBuffer.getDocument(), getDeclaringCompilationUnit().getJavaProject().getOptions(true));
 	}
 	
 	private ASTNode getNodeToRemoveForConstantDeclarationRemoval() throws JavaModelException {

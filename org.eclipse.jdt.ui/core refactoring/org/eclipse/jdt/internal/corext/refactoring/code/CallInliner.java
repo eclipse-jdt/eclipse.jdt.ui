@@ -25,12 +25,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -62,6 +61,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
@@ -73,7 +73,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
@@ -100,8 +99,8 @@ public class CallInliner {
 	private int fNumberOfLocals;
 	
 	private ASTNode fInvocation;
-	private OldASTRewrite fRewriter;
-	private List fStatements;
+	private ASTRewrite fRewrite;
+	private Block fBlock;
 	private int fInsertionIndex;
 	private boolean fNeedsStatement;
 	private ASTNode fTargetNode;
@@ -275,13 +274,13 @@ public class CallInliner {
 		// but block can't be a child of field initializer
 		ASTNode parentField= ASTNodes.getParent(fInvocation, ASTNode.FIELD_DECLARATION);
 		if(parentField != null) {
-			fRewriter= new OldASTRewrite(parentField);
+			fRewrite= ASTRewrite.create(parentField.getAST());
 			fFieldInitializer= true;
 		}
 		else {
 			ASTNode parentBlock= ASTNodes.getParent(fInvocation, ASTNode.BLOCK);
 			Assert.isNotNull(parentBlock);
-			fRewriter= new OldASTRewrite(parentBlock);
+			fRewrite= ASTRewrite.create(parentBlock.getAST());
 		}
 	}
 
@@ -450,10 +449,7 @@ public class CallInliner {
 		addNewLocals();
 		replaceCall(blocks);
 		
-		MultiTextEdit result= new MultiTextEdit();
-		fRewriter.rewriteNode(fBuffer, result);
-		fRewriter.removeModifications();
-		return result;
+		return fRewrite.rewriteAST(fBuffer.getDocument(), fCUnit.getJavaProject().getOptions(true));
 	}
 
 	private void computeRealArguments() {
@@ -473,7 +469,7 @@ public class CallInliner {
 				realArguments[i]= name;
 				fLocals.add(createLocalDeclaration(
 					parameter.getTypeBinding(), name, 
-					(Expression)fRewriter.createCopyTarget(expression)));
+					(Expression)fRewrite.createCopyTarget(expression)));
 			}
 		}
 		fContext.arguments= realArguments;
@@ -497,7 +493,7 @@ public class CallInliner {
 				fLocals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
 					fInvocationScope.createName("r", true),  //$NON-NLS-1$
-					(Expression)fRewriter.createCopyTarget(receiver)));
+					(Expression)fRewrite.createCopyTarget(receiver)));
 				return;
 			case 1:
 				fContext.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
@@ -507,7 +503,7 @@ public class CallInliner {
 					fLocals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
 					local, 
-					(Expression)fRewriter.createCopyTarget(receiver)));
+					(Expression)fRewrite.createCopyTarget(receiver)));
 				fContext.receiver= local;
 				return;
 		}
@@ -516,8 +512,7 @@ public class CallInliner {
 	private void addNewLocals() {
 		for (Iterator iter= fLocals.iterator(); iter.hasNext();) {
 			ASTNode element= (ASTNode)iter.next();
-			fRewriter.markAsInserted(element);
-			fStatements.add(fInsertionIndex++, element);
+			fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY).insertAt(element, fInsertionIndex++, null);
 		}
 	}
 
@@ -525,16 +520,15 @@ public class CallInliner {
 		// Inline empty body
 		if (blocks.length == 0) {
 			if (fNeedsStatement) {
-				fRewriter.replace(fTargetNode, fTargetNode.getAST().newEmptyStatement(), null);
+				fRewrite.replace(fTargetNode, fTargetNode.getAST().newEmptyStatement(), null);
 			} else {
-				fRewriter.remove(fTargetNode, null);
+				fRewrite.remove(fTargetNode, null);
 			}
 		} else {
 			ASTNode node= null;
 			for (int i= 0; i < blocks.length - 1; i++) {
-				node= fRewriter.createStringPlaceholder(blocks[i], ASTNode.RETURN_STATEMENT);
-				fRewriter.markAsInserted(node);
-				fStatements.add(fInsertionIndex++, node);
+				node= fRewrite.createStringPlaceholder(blocks[i], ASTNode.RETURN_STATEMENT);
+				fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY).insertAt(node, fInsertionIndex++, null);
 			}
 			String block= blocks[blocks.length - 1];
 			// We can inline a call where the declaration is a function and the call itself
@@ -546,16 +540,16 @@ public class CallInliner {
 						node= createLocalDeclaration(
 							fSourceProvider.getReturnType(), 
 							fInvocationScope.createName(fSourceProvider.getMethodName(), true), 
-							(Expression)fRewriter.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
+							(Expression)fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					} else {
 						node= fTargetNode.getAST().newExpressionStatement(
-							(Expression)fRewriter.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
+							(Expression)fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					}
 				} else {
 					node= null;
 				}
 			} else if (fTargetNode instanceof Expression) {
-				node= fRewriter.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION);
+				node= fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION);
 				
 				// fixes bug #24941
 				if(needsExplicitCast()) {
@@ -574,20 +568,19 @@ public class CallInliner {
 					node= pExp;
 				}
 			} else {
-				node= fRewriter.createStringPlaceholder(block, ASTNode.RETURN_STATEMENT);
+				node= fRewrite.createStringPlaceholder(block, ASTNode.RETURN_STATEMENT);
 			}
 			
 			// Now replace the target node with the source node
 			if (node != null) {
 				if (fTargetNode == null) {
-					fRewriter.markAsInserted(node);
-					fStatements.add(fInsertionIndex++, node);
+					fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY).insertAt(node, fInsertionIndex++, null);
 				} else {
-					fRewriter.replace(fTargetNode, node, null);
+					fRewrite.replace(fTargetNode, node, null);
 				}
 			} else {
 				if (fTargetNode != null) {
-					fRewriter.remove(fTargetNode, null);
+					fRewrite.remove(fTargetNode, null);
 				}
 			}
 		}
@@ -611,7 +604,7 @@ public class CallInliner {
 			ITypeBinding[] parameters= method.getParameterTypes();
 			int argumentIndex= methodInvocation.arguments().indexOf(fInvocation);
 			List returnExprs= fSourceProvider.getReturnExpressions();
-			// it is infered that only methods consisting of a single 
+			// it is inferred that only methods consisting of a single 
 			// return statement can be inlined as parameters in other 
 			// method invocations
 			if (returnExprs.size() != 1)
@@ -665,20 +658,20 @@ public class CallInliner {
 	}
 	
 	private void initializeInsertionPoint(int nos) {
-		fStatements= null;
+		fBlock= null;
 		fInsertionIndex= -1;
 		fNeedsStatement= false;
 		ASTNode parentStatement= ASTNodes.getParent(fInvocation, Statement.class);
 		ASTNode container= parentStatement.getParent();
 		int type= container.getNodeType();
 		if (type == ASTNode.BLOCK) {
-			fStatements= ((Block)container).statements();
-			fInsertionIndex= fStatements.indexOf(parentStatement);
+			fBlock= (Block) container;
+			fInsertionIndex= fBlock.statements().indexOf(parentStatement);
 		} else if (isControlStatement(container)) {
 			fNeedsStatement= true;
 			if (nos > 1) {
 				Block block= fInvocation.getAST().newBlock();
-				fStatements= block.statements();
+				fBlock= block;
 				fInsertionIndex= 0;
 				Statement currentStatement= null;
 				switch(type) {
@@ -704,14 +697,13 @@ public class CallInliner {
 				Assert.isNotNull(currentStatement);
 				// The method to be inlined is not the body of the control statement.
 				if (currentStatement != fTargetNode) {
-					ASTNode copy= fRewriter.createCopyTarget(currentStatement);
-					fStatements.add(copy);
+					fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY).insertLast(fRewrite.createCopyTarget(currentStatement), null);
 				} else {
 					// We can't replace a copy with something else. So we
 					// have to insert all statements to be inlined.
 					fTargetNode= null;
 				}
-				fRewriter.replace(currentStatement, block, null);
+				fRewrite.replace(currentStatement, block, null);
 			}
 		}
 		// We only insert one new statement or we delete the existing call. 
