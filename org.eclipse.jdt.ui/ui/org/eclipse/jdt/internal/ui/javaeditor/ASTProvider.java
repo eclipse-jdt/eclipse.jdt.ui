@@ -442,12 +442,18 @@ public final class ASTProvider {
 		synchronized (this) {
 			isActiveElement= je.equals(fActiveJavaElement);
 			if (isActiveElement) {
-				if (fAST != null || waitFlag == WAIT_NO) {
-					
+				if (fAST != null) {
 					if (DEBUG)
-						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning cached AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning cached AST:" + toString(fAST) + " for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 					
 					return fAST;
+				}
+				if (waitFlag == WAIT_NO) {
+					if (DEBUG)
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning null (WAIT_NO) for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					return null;
+					
 				}
 			}
 		}
