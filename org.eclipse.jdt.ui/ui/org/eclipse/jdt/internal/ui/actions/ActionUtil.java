@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
@@ -22,6 +23,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -37,14 +39,14 @@ public class ActionUtil {
 
 	//bug 31998	we will have to disable renaming of linked packages (and cus)
 	public static boolean mustDisableJavaModelAction(Shell shell, Object element) throws JavaModelException{
-		if (!(element instanceof IPackageFragment))
+		if (!(element instanceof IPackageFragment) && !(element instanceof IPackageFragmentRoot))
 			return false;
 		
 		IResource resource= ResourceUtil.getResource(element);
-		if (resource == null || ! resource.isLinked())
+		if ((resource == null) || (! (resource instanceof IFolder)) || (! resource.isLinked()))
 			return false;
 			
-		MessageDialog.openInformation(shell, ActionMessages.getString("ActionUtil.not_possible"), ActionMessages.getString("ActionUtil.no_linked_packages")); //$NON-NLS-1$ //$NON-NLS-2$
+		MessageDialog.openInformation(shell, ActionMessages.getString("ActionUtil.not_possible"), ActionMessages.getString("ActionUtil.no_linked")); //$NON-NLS-1$ //$NON-NLS-2$
 		return true;
 	}
 	
