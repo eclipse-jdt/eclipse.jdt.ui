@@ -97,8 +97,7 @@ public class ChangeParametersControl extends Composite {
 		public String getColumnText(Object element, int columnIndex) {
 			ParameterInfo info= (ParameterInfo) element;
 			if (columnIndex == TYPE_PROP) {
-				String result= info.getNewTypeName();
-				return info.isVarargs() ? (result + "...") : result; //$NON-NLS-1$
+				return info.getNewTypeName();
 			}
 			if (columnIndex == NEWNAME_PROP) {
 				return info.getNewName();
@@ -361,16 +360,15 @@ public class ChangeParametersControl extends Composite {
 		if (fCanChangeParameterNames)
 			fEditButton= createEditButton(buttonComposite);
 		
+		if(fCanAddParameters)
+			fRemoveButton= createRemoveButton(buttonComposite);	
+		
 		if (buttonComposite.getChildren().length != 0)
 			addSpacer(buttonComposite);
 
 		fUpButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_up"), true); //$NON-NLS-1$
 		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_down"), false); //$NON-NLS-1$
 
-		if(fCanAddParameters){
-			addSpacer(buttonComposite);
-			fRemoveButton= createRemoveButton(buttonComposite);
-		}
 		updateButtonsEnabledState();
 	}
 
@@ -439,12 +437,19 @@ public class ChangeParametersControl extends Composite {
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				ParameterInfo newInfo= ParameterInfo.createInfoForAddedParameter();
-				fParameterInfos.add(newInfo);
+				int insertIndex= fParameterInfos.size();
+				for (int i= fParameterInfos.size() - 1;  i >= 0; i--) {
+					ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
+					if (info.isNewVarargs()) {
+						insertIndex= i;
+						break;
+					}
+				}
+				fParameterInfos.add(insertIndex, newInfo);
 				fListener.parameterAdded(newInfo);
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
-				int row= getTableItemCount() - 1;
-				getTable().setSelection(row);
+				fTableViewer.setSelection(new StructuredSelection(newInfo), true);
 				updateButtonsEnabledState();
 				editColumnOrNextPossible(0);
 			}

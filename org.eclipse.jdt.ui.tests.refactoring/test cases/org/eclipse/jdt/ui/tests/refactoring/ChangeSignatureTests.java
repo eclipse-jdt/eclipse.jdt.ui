@@ -44,6 +44,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
 	private static final boolean BUG_83319_CORE_REFS_IN_STATIC_IMPORT= true;
+	private static final boolean BUG_83393_CORE_VARARG_JAVADOC_REFERENCE= true;
 	
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
@@ -186,7 +187,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		if (deleted == null)
 			return;
 		for (int i= 0; i < deleted.length; i++) {
-			((ParameterInfo)list.get(i)).markAsDeleted();
+			((ParameterInfo)list.get(deleted[i])).markAsDeleted();
 		}
 	}
 
@@ -316,17 +317,17 @@ public class ChangeSignatureTests extends RefactoringTest {
 							  	int[] newIndices, 
 							  	String[] oldParamNames, 
 							  	String[] newParamNames, 
-							  	int[] permutation, 
+							  	String[] newParameterTypeNames, 
+							  	int[] permutation,
 							  	int newVisibility,
-							  	int[] deleted,
-							  	int expectedSeverity)  throws Exception{
+							  	int[] deleted, int expectedSeverity)  throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, false);
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method does not exist", method.exists());
 		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
-		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, null, permutation);
+		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
 			ref.setVisibility(newVisibility);
 		RefactoringStatus result= performRefactoring(ref);
@@ -476,7 +477,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] deletedIndices= {0};
 		int newVisibility= Modifier.NONE;
 		int expectedSeverity= RefactoringStatus.ERROR;
-		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
 	}	
 	
 	public void testFailDoAll6()throws Exception{
@@ -493,7 +494,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] deletedIndices= {0};
 		int newVisibility= Modifier.NONE;
 		int expectedSeverity= RefactoringStatus.ERROR;
-		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
 	}	
 
 	public void testFailDoAll7()throws Exception{
@@ -510,7 +511,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] deletedIndices= {0};
 		int newVisibility= Modifier.NONE;
 		int expectedSeverity= RefactoringStatus.ERROR;
-		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
 	}	
 	
 	public void testFailDoAll8()throws Exception{
@@ -524,7 +525,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] deletedIndices= {0};
 		int newVisibility= Modifier.NONE;
 		int expectedSeverity= RefactoringStatus.ERROR;
-		helperDoAllFail("run", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+		helperDoAllFail("run", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
 	}
 
 	public void testFailAnnotation1() throws Exception{
@@ -533,6 +534,99 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertNotNull(method);
 		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
 		assertNull(ref);
+	}
+	
+	public void testFailVararg01() throws Exception {
+		//cannot change m(int, String...) to m(String..., int)
+		String[] signature= {"I", "[QString;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"i", "names"};
+		String[] newParamNames= {"i", "names"};
+		int[] permutation= {1, 0};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		int expectedSeverity= RefactoringStatus.FATAL;
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
+	}
+
+	public void testFailVararg02() throws Exception {
+		//cannot introduce vararg in non-last position
+		String[] signature= {"I", "[QString;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"i", "names"};
+		String[] newParamNames= {"i", "names"};
+		String[] newParamTypeNames= {"int...", "String[]"};
+		int[] permutation= {0, 1};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		int expectedSeverity= RefactoringStatus.FATAL;
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+	}
+
+	public void testFailVararg03() throws Exception {
+		//cannot change parameter type which is vararg in overriding method
+		String[] signature= {"I", "[QString;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"i", "names"};
+		String[] newParamNames= {"i", "names"};
+		String[] newParamTypeNames= {"int", "Object[]"};
+		int[] permutation= {1, 0};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		int expectedSeverity= RefactoringStatus.FATAL;
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+	}
+
+	public void testFailVararg04() throws Exception {
+		//cannot change vararg to non-vararg
+		String[] signature= {"I", "[QString;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"i", "names"};
+		String[] newParamNames= {"i", "names"};
+		String[] newParamTypeNames= {"int", "String[]"};
+		int[] permutation= {0, 1};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		int expectedSeverity= RefactoringStatus.FATAL;
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+	}
+
+	public void testFailVararg05() throws Exception {
+		//cannot move parameter which is vararg in ripple method
+		String[] signature= {"I", "[QString;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"i", "names"};
+		String[] newParamNames= {"i", "names"};
+		int[] permutation= {1, 0};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		int expectedSeverity= RefactoringStatus.FATAL;
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
 	}
 
 	//---------
@@ -1637,5 +1731,132 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] newIndices= {1};
 		helperAdd(signature, newParamInfo, newIndices);
 	}
+	
+	public void testVararg01() throws Exception {
+		String[] signature= {"I", "[QString;"};
+		String[] newNames= {};
+		String[] newTypes= {};
+		String[] newDefaultValues= {};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= {"i", "names"};
+		String[] newParamNames= {"i", "strings"};
+		int[] permutation= {0, 1};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testVararg02() throws Exception {
+		String[] signature= {"I", "[QString;"};
+		String[] newNames= {"o"};
+		String[] newTypes= {"Object"};
+		String[] newDefaultValues= {"new Object()"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {"i", "names"};
+		String[] newParamNames= oldParamNames;
+		int[] permutation= {0, 1, 2};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testVararg03() throws Exception {
+		if (BUG_83393_CORE_VARARG_JAVADOC_REFERENCE) {
+			printTestDisabledMessage("BUG_83393_CORE_VARARG_JAVADOC_REFERENCE");
+			return;
+		}
+		String[] signature= {"[QString;"};
+		String[] newNames= {};
+		String[] newTypes= {};
+		String[] newDefaultValues= {};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= {"args"};
+		String[] newParamNames= oldParamNames;
+		String[] newParameterTypeNames= {"Object..."};
+		int[] permutation= {0};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "use", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testVararg04() throws Exception {
+		String[] signature= {"[QString;"};
+		String[] newNames= {"i"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"1"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {"args"};
+		String[] newParamNames= {"args"};
+		int[] permutation= {};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "use", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testVararg05() throws Exception {
+		String[] signature= {"QObject;", "[QString;"};
+		String[] newNames= {};
+		String[] newTypes= {};
+		String[] newDefaultValues= {};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= {"first", "args"};
+		String[] newParamNames= {"arg", "invalid name"};
+		int[] permutation= {0, 1};
+		int[] deletedIndices= {1};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "use", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testVararg06() throws Exception {
+		String[] signature= {"I", "[QString;"};
+		String[] newNames= {};
+		String[] newTypes= {};
+		String[] newDefaultValues= {};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= {"i", "names"};
+		String[] newParamNames= {"i", "names"};
+		String[] newParameterTypeNames= {"int", "String..."};
+		int[] permutation= {0, 1};
+		int[] deletedIndices= { };
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testVararg07() throws Exception {
+		//can remove parameter which is vararg in ripple method
+		String[] signature= {"I", "[QString;"};
+		String[] newNames= {"j", "k"};
+		String[] newTypes= {"String", "Integer"};
+		String[] newDefaultValues= {"\"none\"", "17"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1, 2};
+
+		String[] oldParamNames= {"i", "names"};
+		String[] newParamNames= {"i", "names"};
+		int[] permutation= {0, 1, 2, 3};
+		int[] deletedIndices= { 1 };
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
 }
 

@@ -553,7 +553,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			boolean isVarargs= declaration instanceof SingleVariableDeclaration 
 				? ((SingleVariableDeclaration)declaration).isVarargs()
 				: false;
-			ParameterInfo info= new ParameterInfo(argument, isVarargs, getType(declaration), argument.getName(), i);
+			ParameterInfo info= new ParameterInfo(argument, getType(declaration, isVarargs), argument.getName(), i);
 			fParameterInfos.add(info);
 		}
 	}
@@ -607,8 +607,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return status;	
 	}
 	
-	private String getType(VariableDeclaration declaration) {
-		return ASTNodes.asString(ASTNodeFactory.newType(declaration.getAST(), declaration));
+	private String getType(VariableDeclaration declaration, boolean isVarargs) {
+		String type= ASTNodes.asString(ASTNodeFactory.newType(declaration.getAST(), declaration));
+		if (isVarargs)
+			return type + ParameterInfo.ELLIPSIS;
+		else
+			return type;
 	}
 	
 	//---- Code generation -----------------------------------------------------------------------
@@ -732,7 +736,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			parameter.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, ASTNodes.getModifiers(infoDecl)));
 			parameter.setType(ASTNodeFactory.newType(fAST, infoDecl));
 			parameter.setName(fAST.newSimpleName(info.getNewName()));
-			parameter.setVarargs(info.isVarargs());
+			parameter.setVarargs(info.isNewVarargs());
 			parameters.add(parameter);
 		}
 		

@@ -103,7 +103,7 @@ public class TypeContextChecker {
 			int parameterCount= fParameterInfos.size();
 			String[] types= new String[parameterCount + 1];
 			for (int i= 0; i < parameterCount; i++)
-				types[i]= ((ParameterInfo) fParameterInfos.get(i)).getNewTypeName();
+				types[i]= ParameterInfo.stripEllipsis(((ParameterInfo) fParameterInfos.get(i)).getNewTypeName());
 			types[parameterCount]= fReturnTypeInfo.getNewTypeName();
 			RefactoringStatus[] semanticsResults= new RefactoringStatus[parameterCount + 1];
 			ITypeBinding[] typeBindings= resolveBindings(types, semanticsResults, true);
@@ -137,7 +137,7 @@ public class TypeContextChecker {
 			return results;
 		}
 
-		private RefactoringStatus[] checkSyntax() {
+		public RefactoringStatus[] checkSyntax() {
 			int parameterCount= fParameterInfos.size();
 			RefactoringStatus[] results= new RefactoringStatus[parameterCount + 1];
 			results[parameterCount]= checkReturnTypeSyntax();
@@ -152,16 +152,20 @@ public class TypeContextChecker {
 			if (! info.isAdded() && ! info.isTypeNameChanged())
 				return null;
 
-			if ("".equals(info.getNewTypeName().trim())){ //$NON-NLS-1$
+			String newTypeName= info.getNewTypeName();
+			if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
 				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type", new String[]{info.getNewName()}); //$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
-			Type parsedType= parseType(info.getNewTypeName());
+			
+			newTypeName= ParameterInfo.stripEllipsis(newTypeName);
+			
+			Type parsedType= parseType(newTypeName);
 			boolean valid= parsedType != null;
 			if (valid && parsedType instanceof PrimitiveType)
 				valid= ! PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
 			if (! valid) {
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_name", new String[]{info.getNewTypeName()}); //$NON-NLS-1$
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_name", new String[]{newTypeName}); //$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 			return null;

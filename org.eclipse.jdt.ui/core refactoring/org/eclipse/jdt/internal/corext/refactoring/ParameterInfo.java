@@ -18,8 +18,9 @@ import org.eclipse.jdt.internal.corext.Assert;
 public class ParameterInfo {
 	
 	public static final int INDEX_FOR_ADDED= -1;
+	public static final String ELLIPSIS= "..."; //$NON-NLS-1$
+	
 	private final IVariableBinding fOldBinding;
-	private final boolean fIsVarargs;
 	private final String fOldName;
 	private final String fOldTypeName;
 	private final int fOldIndex;
@@ -35,10 +36,6 @@ public class ParameterInfo {
 	}
 
 	public ParameterInfo(IVariableBinding binding, String type, String name, int index) {
-		this(binding, false, type, name, index);
-	}
-
-	public ParameterInfo(IVariableBinding binding, boolean isVarargs, String type, String name, int index) {
 		fOldBinding= binding;
 		fOldTypeName= type;
 		fNewTypeName= type;
@@ -47,7 +44,6 @@ public class ParameterInfo {
 		fOldIndex= index;
 		fDefaultValue= ""; //$NON-NLS-1$
 		fIsDeleted= false;
-		fIsVarargs= isVarargs;
 	}
 
 	public static ParameterInfo createInfoForAddedParameter(){
@@ -56,8 +52,8 @@ public class ParameterInfo {
 		return info;
 	}
 	
-	public boolean isVarargs() {
-		return fIsVarargs;
+	public int getOldIndex() {
+		return fOldIndex;
 	}
 	
 	public boolean isDeleted(){
@@ -73,15 +69,18 @@ public class ParameterInfo {
 		return fOldIndex == INDEX_FOR_ADDED;
 	}
 	
-	public String getDefaultValue(){
-		return fDefaultValue;
+	public boolean isTypeNameChanged() {
+		return !fOldTypeName.equals(fNewTypeName);
 	}
 	
-	public void setDefaultValue(String value){
-		Assert.isNotNull(value);
-		fDefaultValue= value;
+	public boolean isRenamed() {
+		return !fOldName.equals(fNewName);
 	}
-
+	
+	public boolean isVarargChanged() {
+		return isOldVarargs() != isNewVarargs();
+	}
+	
 	public IVariableBinding getOldBinding() {
 		return fOldBinding;
 	}
@@ -107,34 +106,50 @@ public class ParameterInfo {
 		fNewTypeBinding= typeBinding;
 	}
 
+	public boolean isOldVarargs() {
+		return isVarargs(fOldTypeName);
+	}
+	
+	public boolean isNewVarargs() {
+		return isVarargs(fNewTypeName);
+	}
+	
 	public String getOldName() {
 		return fOldName;
-	}
-
-	public int getOldIndex() {
-		return fOldIndex;
-	}
-
-	public void setNewName(String newName) {
-		Assert.isNotNull(newName);
-		fNewName= newName;
 	}
 
 	public String getNewName() {
 		return fNewName;
 	}
+	
+	public void setNewName(String newName) {
+		Assert.isNotNull(newName);
+		fNewName= newName;
+	}
 
-	public boolean isRenamed() {
-		return !fOldName.equals(fNewName);
+	public String getDefaultValue(){
+		return fDefaultValue;
 	}
 	
-	public boolean isTypeNameChanged() {
-		return !fOldTypeName.equals(fNewTypeName);
+	public void setDefaultValue(String value){
+		Assert.isNotNull(value);
+		fDefaultValue= value;
 	}
-	
+
 	public String toString() {
 		return fOldTypeName + " " + fOldName + " @" + fOldIndex + " -> " //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		+ fNewTypeName + " " + fNewName + ": " + fDefaultValue  //$NON-NLS-1$//$NON-NLS-2$
 		+ (fIsDeleted ? " (deleted)" : " (stays)");  //$NON-NLS-1$//$NON-NLS-2$
+	}
+	
+	public static String stripEllipsis(String typeName) {
+		if (isVarargs(typeName))
+			return typeName.substring(0, typeName.length() - 3);
+		else
+			return typeName;
+	}
+	
+	private static boolean isVarargs(String typeName) {
+		return typeName.endsWith("..."); //$NON-NLS-1$
 	}
 }
