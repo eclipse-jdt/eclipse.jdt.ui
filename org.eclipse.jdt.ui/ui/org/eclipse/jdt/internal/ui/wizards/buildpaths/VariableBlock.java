@@ -401,7 +401,11 @@ public class VariableBlock {
 		for (int i= 0; i < nElements; i++) {
 			CPVariableElement curr= (CPVariableElement) fVariablesList.getElement(i);
 			IPath entryPath= JavaCore.getClasspathVariable(curr.getName());
-			curr.setPath(entryPath);
+			if (entryPath != null) {			
+				curr.setPath(entryPath);
+			} else {
+				curr.setPath(Path.EMPTY);
+			}
 		}
 		fVariablesList.refresh();
 	}
