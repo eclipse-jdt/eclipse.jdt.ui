@@ -54,7 +54,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 
 	private boolean fIsFlatLayout;
 	private PackageFragmentProvider fPackageFragmentProvider= new PackageFragmentProvider();
-	
+
 
 	/**
 	 * Creates a new content provider for Java elements.
@@ -159,6 +159,12 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
 		
+		if(element.getElementType()!= IJavaElement.JAVA_MODEL && element.getElementType()!= IJavaElement.JAVA_PROJECT){
+			IJavaProject proj= element.getJavaProject();
+			if (proj == null || !proj.getProject().isOpen())
+				return;	
+		}
+		
 		if (!fIsFlatLayout && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			fPackageFragmentProvider.processDelta(delta);
 			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();			
@@ -223,6 +229,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 						postRefresh(parent);
 					}	
 				}
+				return;				
 			} else {  
 				postAdd(parent, element);
 			}
@@ -245,9 +252,10 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			return;
 			
 		// the contents of an external JAR has changed
-		if (element instanceof IPackageFragmentRoot && ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0))
+		if (element instanceof IPackageFragmentRoot && ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0)) {
 			postRefresh(element);
-
+			return;
+		}
 		// the source attachment of a JAR has changed
 		if (element instanceof IPackageFragmentRoot && (((flags & IJavaElementDelta.F_SOURCEATTACHED) != 0 || ((flags & IJavaElementDelta.F_SOURCEDETACHED)) != 0)))
 			postUpdateIcon(element);
@@ -255,14 +263,11 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		if (isClassPathChange(delta)) {
 			 // throw the towel and do a full refresh of the affected java project. 
 			postRefresh(element.getJavaProject());
+			return;
 		}
 		
-		if (delta.getResourceDeltas() != null) {
-			IResourceDelta[] rd= delta.getResourceDeltas();
-				for (int i= 0; i < rd.length; i++) {
-					processResourceDelta(rd[i], element);
-				}
-		}
+		if (processResourceDeltas(delta.getResourceDeltas(), element))
+			return;
 
 		handleAffectedChildren(delta, element);
 	}
@@ -368,40 +373,60 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	 }
 
 	/**
-	 * Process resource deltas
+1	 * Process a resource delta.
+	 * 
+	 * @return true if the parent got refreshed
 	 */
-	private void processResourceDelta(IResourceDelta delta, Object parent) {
+	private boolean processResourceDelta(IResourceDelta delta, Object parent) {
 		int status= delta.getKind();
 		IResource resource= delta.getResource();
 		// filter out changes affecting the output folder
-		if (resource == null) 
-			return;
+		if (resource == null)
+			return false;	
 			
 		// this could be optimized by handling all the added children in the parent
 		if ((status & IResourceDelta.REMOVED) != 0) {
-			if (parent instanceof IPackageFragment) 
+			if (parent instanceof IPackageFragment) {
 				// refresh one level above to deal with empty package filtering properly
 				postRefresh(internalGetParent(parent));
-			else 
+				return true;
+			} else 
 				postRemove(resource);
 		}
 		if ((status & IResourceDelta.ADDED) != 0) {
-			if (parent instanceof IPackageFragment) 
+			if (parent instanceof IPackageFragment) {
 				// refresh one level above to deal with empty package filtering properly
-				postRefresh(internalGetParent(parent));
-			else
+				postRefresh(internalGetParent(parent));	
+				return true;
+			} else
 				postAdd(parent, resource);
 		}
-		IResourceDelta[] affectedChildren= delta.getAffectedChildren();
 		
-		if (affectedChildren.length > 1) {
+		processResourceDeltas(delta.getAffectedChildren(), resource);
+		return false;
+	}
+	
+	/**
+	 * Process resource deltas.
+	 *
+	 * @return true if the parent got refreshed
+	 */
+	private boolean processResourceDeltas(IResourceDelta[] deltas, Object parent) {
+		if (deltas == null)
+			return false;
+		
+		if (deltas.length > 1) {
 			// more than one child changed, refresh from here downwards
-			postRefresh(resource);
-			return;
+			postRefresh(parent);
+			return true;
 		}
 
-		for (int i= 0; i < affectedChildren.length; i++)
-			processResourceDelta(affectedChildren[i], resource);
+		for (int i= 0; i < deltas.length; i++) {
+			if (processResourceDelta(deltas[i], parent))
+				return true;
+		}
+
+		return false;
 	}
 	
 	private void postRefresh(final Object root) {
@@ -410,9 +435,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()){
-					ctrl.setRedraw(false); 
 					fViewer.refresh(root);
-					ctrl.setRedraw(true);
 				}
 			}
 		});
@@ -424,9 +447,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()){
-					ctrl.setRedraw(false); 
 					fViewer.add(parent, element);
-					ctrl.setRedraw(true);
 				}
 			}
 		});
@@ -438,9 +459,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
-					ctrl.setRedraw(false);
 					fViewer.remove(element);
-					ctrl.setRedraw(true);
 				}
 			}
 		});
