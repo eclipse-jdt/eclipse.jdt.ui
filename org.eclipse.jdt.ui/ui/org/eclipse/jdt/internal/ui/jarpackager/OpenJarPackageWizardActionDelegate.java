@@ -42,7 +42,6 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 		wizard.init(getWorkbench(), jarPackage);
 		WizardDialog dialog= new WizardDialog(parent, wizard);
 		dialog.create();
-		dialog.getShell().setSize(SIZING_WIZARD_WIDTH, SIZING_WIZARD_HEIGHT);
 		dialog.open();
 	}
 }
