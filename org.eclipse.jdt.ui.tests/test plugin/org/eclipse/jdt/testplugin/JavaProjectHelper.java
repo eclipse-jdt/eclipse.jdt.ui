@@ -141,6 +141,7 @@ public class JavaProjectHelper {
 	public static void set15CompilerOptions(Map options) {
 		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
 	}
@@ -152,6 +153,7 @@ public class JavaProjectHelper {
 	public static void set14CompilerOptions(Map options) {
 		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
 		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
 	}
