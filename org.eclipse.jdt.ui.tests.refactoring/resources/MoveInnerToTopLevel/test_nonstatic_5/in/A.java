@@ -5,4 +5,7 @@ class A{
 	}
 }
 class B extends A.Inner{
+	B(){
+		new A().super();
+	}
 }
