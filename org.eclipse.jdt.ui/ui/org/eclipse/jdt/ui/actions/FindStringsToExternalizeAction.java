@@ -56,6 +56,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.ReorgUtils2;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -99,20 +100,34 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(computeEnablementState(selection));
+		try {
+			setEnabled(computeEnablementState(selection));
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			setEnabled(false);//no ui - happens on selection changes
+		}
 	}
 	
-	private boolean computeEnablementState(IStructuredSelection selection) {
+	private boolean computeEnablementState(IStructuredSelection selection) throws JavaModelException {
 		if (selection.isEmpty())
 			return false;
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= (Object)iter.next();
 			if (!(element instanceof IJavaElement))
 				return false;
-			int elementType= ((IJavaElement)element).getElementType();
-			if (elementType !=  IJavaElement.PACKAGE_FRAGMENT && elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT &&
-					elementType != IJavaElement.JAVA_PROJECT)
+			IJavaElement javaElement= (IJavaElement)element;
+			if (! javaElement.exists() || javaElement.isReadOnly())
 				return false;
+			int elementType= javaElement.getElementType();
+			if (elementType != IJavaElement.PACKAGE_FRAGMENT && 
+				elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT &&
+				elementType != IJavaElement.JAVA_PROJECT)
+				return false;
+			if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT){
+				IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement;
+				if (root.isExternal() || ReorgUtils2.isClassFolder(root))
+					return false;
+			}
 		}
 		return true;
 	}
