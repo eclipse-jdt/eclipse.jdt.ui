@@ -220,8 +220,10 @@ public class PullUpRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;			
 
+			if (getSuperType() == null)
+				return RefactoringStatus.createFatalErrorStatus("Pull up not allowed.");
 			if (getSuperType().isBinary())
-				return RefactoringStatus.createFatalErrorStatus("Pull up method is not allowed on methods declared in subtypes binary types.");
+				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subtypes of binary types.");
 
 			fElementsToPullUp= getOriginals(fElementsToPullUp);		
 			return new RefactoringStatus();
