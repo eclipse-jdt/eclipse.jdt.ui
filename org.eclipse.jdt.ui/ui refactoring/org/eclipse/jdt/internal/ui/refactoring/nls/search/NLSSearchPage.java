@@ -51,7 +51,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.model.IWorkbenchAdapter;
-import org.omg.CORBA.UNKNOWN;
 
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
