@@ -48,7 +48,7 @@ public class CheckedTreeSelectionDialog extends SelectionStatusDialog {
 	
 	private ISelectionValidator fValidator= null;
 	private ViewerSorter fSorter;
-	private String fEmptyListMessage= JavaUIMessages.getString("ElementTreeSelectionDialog.nothing_available"); //$NON-NLS-1$	
+	private String fEmptyListMessage= JavaUIMessages.getString("CheckedTreeSelectionDialog.nothing_available"); //$NON-NLS-1$	
 	
 	private IStatus fCurrStatus= new StatusInfo();
 	private List fFilters;
@@ -290,7 +290,7 @@ public class CheckedTreeSelectionDialog extends SelectionStatusDialog {
 		data.grabExcessHorizontalSpace= true;
 		composite.setData(data);
 
-		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, "Select &All", false);
+		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, JavaUIMessages.getString("CheckedTreeSelectionDialog.select_all"), false);
 
 		SelectionListener listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -300,7 +300,7 @@ public class CheckedTreeSelectionDialog extends SelectionStatusDialog {
 		};
 		selectButton.addSelectionListener(listener);
 
-		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, "&Deselect All", false);
+		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, JavaUIMessages.getString("CheckedTreeSelectionDialog.deselect_all"), false);
 
 		listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
