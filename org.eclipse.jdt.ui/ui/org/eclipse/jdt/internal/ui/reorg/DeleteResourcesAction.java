@@ -22,11 +22,13 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 public class DeleteResourcesAction extends SelectionDispatchAction {
 
@@ -43,7 +45,7 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 			return;
 		}	
 
-		DeleteRefactoring refactoring= new DeleteRefactoring(selection.toList());
+		DeleteRefactoring refactoring= new DeleteRefactoring(selection.toList(), createRootManipulationQuery());
 		
 		if (!confirmDelete(selection))
 			return;
@@ -65,8 +67,13 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 			return;
 		}	
 	}
+	
+	private IPackageFragmentRootManipulationQuery createRootManipulationQuery(){
+		String messagePattern= 	"Package fragment root ''{0}'' is referenced by the following projects. " +								"Do you still want to delete it?";
+		return new PackageFragmentRootManipulationQuery(getShell(), "Delete", messagePattern);
+	}
 
-	private void deleteProjects(IStructuredSelection selection){
+	private static void deleteProjects(IStructuredSelection selection){
 		DeleteResourceAction action= new DeleteResourceAction(JavaPlugin.getActiveWorkbenchShell());
 		action.selectionChanged(selection);
 		action.run();
@@ -81,7 +88,7 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 					msg);
 	}
 	
-	private boolean hasReadOnlyResources(IStructuredSelection selection){
+	private static boolean hasReadOnlyResources(IStructuredSelection selection){
 		for (Iterator iter= selection.iterator(); iter.hasNext();){	
 			if (ReorgUtils.shouldConfirmReadOnly(iter.next()))
 				return true;
@@ -130,7 +137,7 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		if (selection.isEmpty())
 			setEnabled(false);
 		else	
-			setEnabled(ClipboardActionUtil.canActivate(new DeleteRefactoring(selection.toList())));
+			setEnabled(ClipboardActionUtil.canActivate(new DeleteRefactoring(selection.toList(), null)));
 	}
 	
 	private static boolean confirmDelete(IStructuredSelection selection) {
