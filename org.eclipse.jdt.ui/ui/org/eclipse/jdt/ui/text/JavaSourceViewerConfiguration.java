@@ -24,6 +24,7 @@ import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.ContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatter;
@@ -35,7 +36,7 @@ import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
-import org.eclipse.jface.text.rules.RuleBasedDamagerRepairer;
+import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -166,23 +167,23 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 		PresentationReconciler reconciler= new PresentationReconciler();
 
-		RuleBasedDamagerRepairer dr= new RuleBasedDamagerRepairer(getCodeScanner());
+		DefaultDamagerRepairer dr= new DefaultDamagerRepairer(getCodeScanner());
 		reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
 		reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
-		dr= new RuleBasedDamagerRepairer(getJavaDocScanner());
+		dr= new DefaultDamagerRepairer(getJavaDocScanner());
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_DOC);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_DOC);
 
-		dr= new RuleBasedDamagerRepairer(getMultilineCommentScanner());		
+		dr= new DefaultDamagerRepairer(getMultilineCommentScanner());		
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
 
-		dr= new RuleBasedDamagerRepairer(getSinglelineCommentScanner());		
+		dr= new DefaultDamagerRepairer(getSinglelineCommentScanner());		
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
 		
-		dr= new RuleBasedDamagerRepairer(getStringScanner());
+		dr= new DefaultDamagerRepairer(getStringScanner());
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_STRING);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_STRING);
 		
@@ -197,7 +198,13 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		if (getEditor() != null) {
 		
 			ContentAssistant assistant= new ContentAssistant();
-			assistant.setContentAssistProcessor(new JavaCompletionProcessor(getEditor()), IDocument.DEFAULT_CONTENT_TYPE);
+			
+			IContentAssistProcessor processor= new JavaCompletionProcessor(getEditor());
+			assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
+				// Register the same processor for strings and single line comments to get code completion at the start of those partitions.
+			assistant.setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_STRING);
+			assistant.setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
+			
 			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), JavaPartitionScanner.JAVA_DOC);
 			
 			ContentAssistPreference.configure(assistant, getPreferenceStore());
