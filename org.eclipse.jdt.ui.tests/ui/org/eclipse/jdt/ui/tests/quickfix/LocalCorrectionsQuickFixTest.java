@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
 
-public class LocalCorrectionsLocalCorrectionsQuickFixTestQuickFixTest extends QuickFixTest {
+public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	
 	private static final Class THIS= LocalCorrectionsQuickFixTest.class;
 	
@@ -44,7 +44,7 @@ public class LocalCorrectionsLocalCorrectionsQuickFixTestQuickFixTest extends Qu
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testInvisibleFieldRequestedInSamePackage2"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testInvisibleTypeRequestedInDifferentPackage"));
 			return suite;
 		}
 	}
@@ -980,9 +980,9 @@ public class LocalCorrectionsLocalCorrectionsQuickFixTestQuickFixTest extends Qu
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		IProblem[] problems= astRoot.getProblems();
-		assertNumberOf("problems", problems.length, 1);
+		assertNumberOf("problems", problems.length, 2);
 		
-		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ProblemPosition problemPos= new ProblemPosition(problems[1], cu);
 		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
 		ArrayList proposals= new ArrayList();
 		
