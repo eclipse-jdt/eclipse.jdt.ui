@@ -29,7 +29,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
   */
 public class FolderSelectionDialog extends ElementTreeSelectionDialog implements ISelectionChangedListener {
 
-	private static final int NEW_ID= IDialogConstants.CLIENT_ID;
 	private Button fNewFolderButton;
 	private IContainer fSelectedContainer;
 
