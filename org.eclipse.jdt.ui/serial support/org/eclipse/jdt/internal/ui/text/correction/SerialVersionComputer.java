@@ -29,6 +29,9 @@ import java.io.ObjectStreamClass;
  */
 public final class SerialVersionComputer {
 
+	/** The serial version computation error prefix */
+	public static final String ERROR_PREFIX= "SerialVersionComputationError: "; //$NON-NLS-1$
+
 	/**
 	 * The entry point of this process.
 	 * 
@@ -39,15 +42,15 @@ public final class SerialVersionComputer {
 			try {
 				final ObjectStreamClass stream= ObjectStreamClass.lookup(Class.forName(arguments[0]));
 				if (stream != null) {
-					System.out.println(stream.getSerialVersionUID());
+					System.out.println(ERROR_PREFIX + stream.getSerialVersionUID());
 					return;
 				} else
-					System.err.println(SerialVersionMessages.getFormattedString("SerialVersionComputer.not.serializable", arguments[0])); //$NON-NLS-1$
+					System.err.println(ERROR_PREFIX + SerialVersionMessages.getFormattedString("SerialVersionComputer.not.serializable", arguments[0])); //$NON-NLS-1$
 			} catch (ClassNotFoundException exception) {
-				System.err.println(SerialVersionMessages.getFormattedString("SerialVersionComputer.not.resolvable", arguments[0])); //$NON-NLS-1$
+				System.err.println(ERROR_PREFIX + SerialVersionMessages.getFormattedString("SerialVersionComputer.not.resolvable", arguments[0])); //$NON-NLS-1$
 			}
 		} else
-			System.err.println(SerialVersionMessages.getString("SerialVersionComputer.no.argument")); //$NON-NLS-1$
+			System.err.println(ERROR_PREFIX + SerialVersionMessages.getString("SerialVersionComputer.no.argument")); //$NON-NLS-1$
 		System.out.println(1);
 	}
 }

@@ -95,7 +95,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 		 * Construct and return a String containing the full path of a java executable command such as 'java' or 'javaw.exe'. If the configuration specifies an explicit executable, that is used.
 		 * 
 		 * @return full path to java executable
-		 * @exception CoreException if unable to locate an executeable
+		 * @exception CoreException if unable to locate an executable
 		 */
 		private String getJavaExecutable(final VMRunnerConfiguration configuration) throws CoreException {
 			Assert.isNotNull(configuration);
@@ -193,10 +193,14 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 						fErrorMessage= exception.getLocalizedMessage();
 					}
 					final StringBuffer buffer= new StringBuffer();
-					BufferedReader reader= new BufferedReader(new InputStreamReader(process.getErrorStream()));
+					final BufferedReader reader= new BufferedReader(new InputStreamReader(process.getErrorStream()));
 					try {
-						while (reader.ready())
-							buffer.append(reader.readLine());
+						String line= null;
+						while (reader.ready()) {
+							line= reader.readLine();
+							if (line.startsWith(ERROR_PREFIX))
+								buffer.append(line.substring(ERROR_PREFIX.length()));
+						}
 						fErrorMessage= buffer.toString();
 					} catch (IOException exception) {
 						JavaPlugin.log(exception);
@@ -210,6 +214,9 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			}
 		}
 	}
+
+	/** The serial version computation error prefix */
+	public static final String ERROR_PREFIX= "SerialVersionComputationError: "; //$NON-NLS-1$
 
 	/** The error message */
 	protected String fErrorMessage= null;
