@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnit
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 public class ReorgCorrectionsSubProcessor {
@@ -49,7 +50,7 @@ public class ReorgCorrectionsSubProcessor {
 
 			label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renamecu.description", newCUName); //$NON-NLS-1$
 			// rename cu
-			proposals.add(new ChangeCorrectionProposal(label, change, 2));
+			proposals.add(new ChangeCorrectionProposal(label, change, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
 		}
 	}
 	
@@ -83,7 +84,7 @@ public class ReorgCorrectionsSubProcessor {
 			composite.add(new CreatePackageChange(newPack));
 			composite.add(new MoveCompilationUnitChange(cu, newPack));
 
-			proposals.add(new ChangeCorrectionProposal(label, composite, 2));
+			proposals.add(new ChangeCorrectionProposal(label, composite, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE)));
 		}
 	}
 	
@@ -102,7 +103,9 @@ public class ReorgCorrectionsSubProcessor {
 					start= region.getOffset() + region.getLength();
 				} 
 				String label= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.unusedimport.description"); //$NON-NLS-1$
-				proposals.add(new ReplaceCorrectionProposal(label, problemPos.getCompilationUnit(), start, end - start, "", 0)); //$NON-NLS-1$
+				ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, problemPos.getCompilationUnit(), start, end - start, "", 0); //$NON-NLS-1$
+				proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT));
+				proposals.add(proposal); 
 			}
 		} finally {
 			if (buffer != null) {

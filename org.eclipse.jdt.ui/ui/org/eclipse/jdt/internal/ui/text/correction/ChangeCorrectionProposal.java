@@ -36,10 +36,10 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 	private Image fImage;
 
 	public ChangeCorrectionProposal(String name, Change change, int relevance) {
-		this(name, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ENV_VAR));
+		this(name, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 	
-	protected ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
+	public ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
 		fName= name;
 		fChange= change;
 		fRelevance= relevance;

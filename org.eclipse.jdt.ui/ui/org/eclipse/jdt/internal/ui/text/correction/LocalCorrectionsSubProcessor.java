@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
@@ -135,6 +136,7 @@ public class LocalCorrectionsSubProcessor {
 			if (refactoring.checkActivationBasics(astRoot, null).isOK()) {
 				String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$
 				CUCorrectionProposal proposal= new CUCorrectionProposal(label, (CompilationUnitChange) refactoring.createChange(null), 0);
+				proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION));
 				proposals.add(proposal);
 			}
 		}
@@ -157,6 +159,7 @@ public class LocalCorrectionsSubProcessor {
 			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addthrows.description"); //$NON-NLS-1$
 			InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, insertString.toString(), 0);
+			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION));
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			ImportEdit edit= new ImportEdit(cu, settings);
 			edit.addImport(uncaughtName);

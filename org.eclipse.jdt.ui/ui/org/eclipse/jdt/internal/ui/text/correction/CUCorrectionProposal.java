@@ -32,10 +32,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	private boolean fIsInitialized;
 
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) throws CoreException {
-		this(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPCONT));
+		this(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 	
-	protected CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) throws CoreException {
+	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) throws CoreException {
 		super(name, createCompilationUnitChange(name, cu, false), relevance, image);
 		fIsInitialized= false;
 	}
@@ -44,6 +44,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 		super(name, change, relevance);
 		change.setTrackPositionChanges(true);
 		fIsInitialized= true;
+		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}	
 	
 	private static Change createCompilationUnitChange(String name, ICompilationUnit cu, boolean doSave) throws CoreException {

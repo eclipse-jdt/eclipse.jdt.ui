@@ -165,11 +165,16 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 	private IMember fParentMember;
 
 	public NewVariableCompletionProposal(String label, int variableKind, SimpleName node, IMember parentMember, int relevance) throws CoreException {
-		super(label, parentMember.getCompilationUnit(), relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
+		super(label, parentMember.getCompilationUnit(), relevance, null);
 	
 		fVariableKind= variableKind;
 		fNode= node;
 		fParentMember= parentMember;
+		if (variableKind == FIELD) {
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
+		} else {
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
+		}
 	}
 
 	/*
