@@ -30,9 +30,9 @@ import org.eclipse.ui.PartInitException;
  */
 public interface IMatchPresentation {
 	/**
-	 * Creates a new instance of a label provider for elments that have been contributed
+	 * Creates a new instance of a label provider for elements that have been contributed
 	 * to a search result by the corresponding query participant. The search view
-	 * will call this method when it needs to render elements and will dipose the 
+	 * will call this method when it needs to render elements and will dispose the 
 	 * label providers when it is done with them. This method may therefore be called
 	 * multiple times.
 	 * @return A label provider for elements found by the corresponding query participant
@@ -45,7 +45,7 @@ public interface IMatchPresentation {
 	 * When a file buffer is saved, the current positions are written back to the 
 	 * match.
 	 * If the <code>activate</code> parameter is <code>true</code> the opened editor
-	 * shoud have be activated. Otherwise the focus should not be changed.
+	 * should have be activated. Otherwise the focus should not be changed.
 	 * 
 	 * @param match
 	 *            The match to show

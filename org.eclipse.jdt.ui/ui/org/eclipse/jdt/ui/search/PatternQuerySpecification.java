@@ -31,18 +31,20 @@ public class PatternQuerySpecification extends QuerySpecification {
 	private boolean fCaseSensitive;
 
 	/**
-	 * @param pattern The string that the query should search for.
-	 * @see org.eclipse.jdt.core.search.SearchEngine#createSearchPattern(String,
-	 *         int, int, boolean) for a description of the possible search patterns
-	 * @param searchFor What kind of <code>IJavaElement</code> the query
-	 *                should search for. (@see
-	 *                org.eclipse.jdt.core.search.IJavaSearchConstants#TYPE, for
-	 *                example).
-	 * @param caseSensitive Whether the query shoudl be case sensitive
-	 * @param limitTo The kind of occurrence the query should search for
-	 * @param scope The scope to search in
-	 * @param scopeDescription A human readable description of the search
-	 *                scope.
+	 * @param pattern
+	 *            The string that the query should search for
+	 * @param searchFor
+	 *            What kind of <code>IJavaElement</code> the query should search for
+	 * @param caseSensitive
+	 *            Whether the query should be case sensitive
+	 * @param limitTo
+	 *            The kind of occurrence the query should search for
+	 * @param scope
+	 *            The scope to search in
+	 * @param scopeDescription
+	 *            A human readable description of the search scope
+	 * 
+	 * @see org.eclipse.jdt.core.search.SearchPattern#createPattern(java.lang.String, int, int, int)
 	 */
 	public PatternQuerySpecification(String pattern, int searchFor, boolean caseSensitive, int limitTo, IJavaSearchScope scope, String scopeDescription) {
 		super(limitTo, scope, scopeDescription);
@@ -61,9 +63,8 @@ public class PatternQuerySpecification extends QuerySpecification {
 
 	/**
 	 * Returns the search pattern the query should search for. 
-	 * @return The search pattern
-	 * @see org.eclipse.jdt.core.search.SearchEngine#createSearchPattern(String,
-	 *         int, int, boolean) for a description of the possible search patterns
+	 * @return the search pattern
+	 * @see org.eclipse.jdt.core.search.SearchPattern#createPattern(java.lang.String, int, int, int)
 	 */
 	public String getPattern() {
 		return fPattern;

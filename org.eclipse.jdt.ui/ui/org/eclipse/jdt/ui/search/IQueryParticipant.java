@@ -46,12 +46,13 @@ public interface IQueryParticipant {
 	 * it should return 500, etc.
 	 * This method is supposed to give a quick estimate of the work to be done and is assumed
 	 * to be much faster than the actual query.
+	 * @param specification the specification to estimate
 	 * @return The number of ticks estimated
 	 */
-	int estimateTicks(QuerySpecification data);
+	int estimateTicks(QuerySpecification specification);
 	/**
 	 * Gets the UI participant responsible for handling the display of any elements that can't 
-	 * be handled by the java serach UI, i.e. elements that are not implementors if <code>IJavaElement</code>
+	 * be handled by the java search UI, i.e. elements that are not implementors if <code>IJavaElement</code>
 	 * of <code>IResource</code>.
 	 * A participant may return null if matches are only reported against <code>IResources</code> or <code>IJavaElements</code>.
 	 * @return The UI participant for this query participant or <code>null</code>
