@@ -79,7 +79,7 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 			if (element instanceof IPackageFragment) 
 				return getPackageContents((IPackageFragment)element);
 			if (fProvideMembers && element instanceof IType)
-				return withImportAndPackageDeclarations((IType)element);
+				return getChildren((IType)element);
 			if (fProvideMembers && element instanceof ISourceReference && element instanceof IParent)
 				return removeImportAndPackageDeclarations(super.getChildren(element));
 			if (element instanceof IJavaProject) 
@@ -127,7 +127,7 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 		return tempResult.toArray();
 	}
 
-	private Object[] withImportAndPackageDeclarations(IType type) throws JavaModelException{
+	private Object[] getChildren(IType type) throws JavaModelException{
 		IParent parent;
 		if (type.isBinary())
 			parent= type.getClassFile();
@@ -143,7 +143,11 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 				}
 			}
 		}
-		IJavaElement[] members= parent.getChildren();
+		if (type.getDeclaringType() != null)
+			return type.getChildren();
+
+		// Add import declarations
+		IJavaElement[] members= parent.getChildren();		
 		ArrayList tempResult= new ArrayList(members.length);
 		for (int i= 0; i < members.length; i++)
 			if ((members[i] instanceof IImportContainer))
