@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -127,8 +129,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		try{
 			pm.beginTask("", 8);
 	
-			if (analyzeSelection().getSelectedNodes() == null || analyzeSelection().getSelectedNodes().length != 1)
+			if (getSelectedExpression() == null)
 				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
+
 			pm.worked(1);
 			
 			if (isUsedInExplicitConstructorCall())
@@ -138,10 +141,6 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (getSelectedMethodNode() == null)
 				return RefactoringStatus.createFatalErrorStatus("An expression used in a method must be selected to activate this refactoring.");			
 			pm.worked(1);				
-			
-			if (getSelectedExpression() == null)
-				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
-			pm.worked(1);			
 			
 			if (getSelectedExpression().getParent() instanceof ExpressionStatement)
 				return RefactoringStatus.createFatalErrorStatus("Cannot extract expressions used as statements.");
@@ -188,23 +187,17 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
-		SelectionAnalyzer analyzer= analyzeSelection();
-		ASTNode[] nodes= analyzer.getSelectedNodes();
-		if (nodes == null || nodes.length != 1) 
-			return null;
-		
-		ASTNode node= nodes[0];
-		if (node instanceof NullLiteral) {
+		Expression selectedExpression= getSelectedExpression();
+		if (selectedExpression instanceof NullLiteral) {
 			return RefactoringStatus.createFatalErrorStatus("Cannot extract single null literals.");
-		} else if (node instanceof ArrayInitializer) {
+		} else if (selectedExpression instanceof ArrayInitializer) {
 			return RefactoringStatus.createFatalErrorStatus("Operation not applicable to an array initializer.");
-		} else if (node instanceof Assignment) {
-			ASTNode[] parents= findParents(node);
-			if (parents != null && parents.length != 0 && parents[parents.length - 1] instanceof Expression)
+		} else if (selectedExpression instanceof Assignment) {
+			if (selectedExpression.getParent() instanceof Expression)
 				return RefactoringStatus.createFatalErrorStatus("Cannot extract assignment that is part of another expression.");
 			else
-				return null;
-		} else if (node instanceof ConditionalExpression) {
+				return null;	
+		} else if (selectedExpression instanceof ConditionalExpression) {
 			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single conditional expression.");
 		} else
 			return null;
@@ -239,14 +232,12 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private boolean isUsedInExplicitConstructorCall() throws JavaModelException{
-		ASTNode[] parents= getParentsOfSelectedNode();
-		for (int i= parents.length - 1; i >= 0; i--) {
-			if (parents[i] instanceof ConstructorInvocation)
-				return true;
-			if (parents[i] instanceof SuperConstructorInvocation)
-				return true;
-		}
-		return false;
+		Expression selectedExpression= getSelectedExpression();
+		if (ASTNodes.getParent(selectedExpression, ConstructorInvocation.class) != null)
+			return true;
+		if (ASTNodes.getParent(selectedExpression, SuperConstructorInvocation.class) != null)
+			return true;
+		return false;	
 	}
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {		
@@ -287,30 +278,26 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private ASTNode getNodeToInsertTempDeclarationBefore() throws JavaModelException {
 		if ((! fReplaceAllOccurrences) || (getNodesToReplace().length == 1))
-			return getInnermostStatement(getSelectedExpression());
+			return getInnermostStatementInBlock(getSelectedExpression());
 		
-		ASTNode[] firstReplaceNodeParents= findParents(getFirstReplacedExpression());
+		ASTNode[] firstReplaceNodeParents= getParents(getFirstReplacedExpression());
 		ASTNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes();
 		Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
 		
 		if (firstReplaceNodeParents[commonPath.length - 1] instanceof TryStatement)
 			return firstReplaceNodeParents[commonPath.length - 1];
 		
-		if (isBlock(firstReplaceNodeParents[commonPath.length - 1]))
+		if (firstReplaceNodeParents[commonPath.length - 1] instanceof Block)
 			return firstReplaceNodeParents[commonPath.length];
-		else
-			return findInnermostStatement(firstReplaceNodeParents);
-	}
-	
-	private static boolean isBlock(ASTNode node){
-		return (node instanceof Block);
+
+		return getInnermostStatementInBlock(getFirstReplacedExpression());
 	}
 	
 	private ASTNode[] findDeepestCommonSuperNodePathForReplacedNodes() throws JavaModelException {
 		ASTNode[] matchingNodes= getNodesToReplace();
 		ASTNode[][] matchingNodesParents= new ASTNode[matchingNodes.length][];
 		for (int i= 0; i < matchingNodes.length; i++) {
-			matchingNodesParents[i]= findParents(matchingNodes[i]);
+			matchingNodesParents[i]= getParents(matchingNodes[i]);
 		}
 		List l=Arrays.asList(getLongestArrayPrefix(matchingNodesParents));
 		return (ASTNode[]) l.toArray(new ASTNode[l.size()]);
@@ -346,12 +333,6 @@ public class ExtractTempRefactoring extends Refactoring {
 			prefix[i]= array[i];
 		}
 		return prefix;
-	}
-	
-	private ASTNode[] findParents(ASTNode astNode)  throws JavaModelException {
-		SelectionAnalyzer selAnalyzer= new SelectionAnalyzer(Selection.createFromStartLength(astNode.getStartPosition(), astNode.getLength()), true);
-		fCompilationUnitNode.accept(selAnalyzer);
-		return getParents(selAnalyzer.getFirstSelectedNode());
 	}
 	
 	private Expression getFirstReplacedExpression() throws JavaModelException {
@@ -396,6 +377,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			return ""; //fallback
 	}
 	
+	//recursive
 	private static String getNameIdentifier(Name name)  throws JavaModelException {
 		if (name.isSimpleName())
 			return ((SimpleName)name).getIdentifier();
@@ -408,7 +390,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private String getInitializerSource() throws JavaModelException {
-		return removeTrailingSemicolons(fCu.getSource().substring(fSelectionStart, fSelectionStart + fSelectionLength));
+		return removeTrailingSemicolons(fCu.getBuffer().getText(fSelectionStart, fSelectionLength));
 	}
 	
 	//recursive
@@ -442,39 +424,27 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 	}
 	
-	private Statement getInnermostStatement(Expression expression) throws JavaModelException {
-		return findInnermostStatement(findParents(expression));	
-	}
-
-	private Statement findInnermostStatement(ASTNode[] parents) {
-		if (parents.length < 2)
+	private Statement getInnermostStatementInBlock(ASTNode node) {
+		Block block= (Block)ASTNodes.getParent(node, Block.class);
+		if (block == null)
 			return null;
-		for (int i= parents.length - 2; i >= 0; i--) {
-			if (isBlock(parents[i]))
-				return (Statement)parents[i + 1];
-		}	
-		return null;	
-	}	
+		for (Iterator iter= block.statements().iterator(); iter.hasNext();) {
+			Statement statement= (Statement) iter.next();
+			if (ASTNodes.isParent(node, statement))
+				return statement;
+		}
+		return null;
+	}
 	
 	private ASTNode[] getNodesToReplace() throws JavaModelException {
-		Expression expression= getSelectedExpression();
-	
 		if (fReplaceAllOccurrences)
-			return  AstMatchingNodeFinder.findMatchingNodes(getSelectedMethodNode(), expression);
+			return  AstMatchingNodeFinder.findMatchingNodes(getSelectedMethodNode(), getSelectedExpression());
 		else 
-			return new ASTNode[]{expression};	
+			return new ASTNode[]{getSelectedExpression()};	
 	}
 		
 	private MethodDeclaration getSelectedMethodNode() throws JavaModelException {
-		ASTNode[] parents= getParentsOfSelectedNode();
-		if (parents == null)
-			return null;
-		for (int i= parents.length - 1; i >= 0 ; i--) {
-			ASTNode astNode= parents[i];
-			if (astNode instanceof MethodDeclaration)
-				return (MethodDeclaration)astNode;
-		}
-		return null;
+		return (MethodDeclaration)ASTNodes.getParent(getSelectedExpression(), MethodDeclaration.class);
 	}
 	
 	private static ASTNode[] getParents(ASTNode node){
@@ -488,24 +458,16 @@ public class ExtractTempRefactoring extends Refactoring {
 		return (ASTNode[]) parents.toArray(new ASTNode[parents.size()]);
 	}
 	
-	private ASTNode[] getParentsOfSelectedNode() throws JavaModelException {
-		return getParents(analyzeSelection().getFirstSelectedNode());
-	}
-
-	private SelectionAnalyzer analyzeSelection() throws JavaModelException {
+	private Expression getSelectedExpression() throws JavaModelException {
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(fSelectionStart, fSelectionLength), true);
 		fCompilationUnitNode.accept(analyzer);
-		return analyzer;
-	}
-	
-	private Expression getSelectedExpression() throws JavaModelException {
-		ASTNode[] selected= analyzeSelection().getSelectedNodes();
-		if (selected[0] instanceof Expression)
-			return (Expression)selected[0];
+		ASTNode selectedNode= analyzer.getFirstSelectedNode();
+		if (selectedNode instanceof Expression)
+			return (Expression)selectedNode;
 		else 
 			return null;	
-	}	
-	
+	}
+
 	private IFile getFile() throws JavaModelException {
 		if (fCu.isWorkingCopy())
 			return (IFile)fCu.getOriginalElement().getCorrespondingResource();
