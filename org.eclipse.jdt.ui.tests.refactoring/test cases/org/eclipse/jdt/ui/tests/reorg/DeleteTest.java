@@ -763,7 +763,7 @@ public class DeleteTest extends RefactoringTest{
 		ParticipantTesting.reset();
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib does not exist",  lib != null && lib.exists());
-		IPackageFragmentRoot internalJAR= JavaProjectHelper.addLibraryWithImport(RefactoringTestSetup.getProject(), new Path(lib.getPath()), null, null);
+		IPackageFragmentRoot internalJAR= JavaProjectHelper.addLibraryWithImport(RefactoringTestSetup.getProject(), Path.fromOSString(lib.getPath()), null, null);
 
 		Object[] elements= {internalJAR};
 		verifyEnabled(elements);			

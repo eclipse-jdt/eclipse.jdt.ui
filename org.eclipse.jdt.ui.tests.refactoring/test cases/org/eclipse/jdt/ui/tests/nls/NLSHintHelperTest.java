@@ -62,7 +62,7 @@ public class NLSHintHelperTest extends TestCase {
 		fJProject= ProjectTestSetup.getProject();
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.NLS_LIB);
 		assertTrue("lib does not exist",  lib != null && lib.exists());
-		fLibrary= JavaProjectHelper.addLibrary(fJProject, new Path(lib.getPath())); // add library to project
+		fLibrary= JavaProjectHelper.addLibrary(fJProject, Path.fromOSString(lib.getPath())); // add library to project
 	}
 	
 	public void testFind() {
