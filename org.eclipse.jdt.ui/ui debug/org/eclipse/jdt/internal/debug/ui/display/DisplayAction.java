@@ -45,6 +45,10 @@ public class DisplayAction extends EvaluateAction {
 				public void run() {
 					if (result.hasProblems()) {
 						reportProblems(result);
+						IDataDisplay dataDisplay= getDataDisplay();
+						if (dataDisplay != null) {
+							dataDisplay.displayExpressionValue(DisplayMessages.getString("DisplayAction.(evaluation_failed)_1")); //$NON-NLS-1$
+						}
 					}
 					if (value != null) {
 						insertResult(value, result.getThread());
