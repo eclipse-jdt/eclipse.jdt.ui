@@ -74,9 +74,11 @@ public class OpenSuperImplementationAction extends Action implements IUpdate, IO
 			Object element= selection.getFirstElement();
 			if (element instanceof IMethod) {
 				IMethod method= (IMethod) element;
-				int flags= method.getFlags();
-				if (!Flags.isStatic(flags) && !Flags.isPrivate(flags)) {
-					return method;
+				if (method.exists()) {
+					int flags= method.getFlags();
+					if (!Flags.isStatic(flags) && !Flags.isPrivate(flags)) {
+						return method;
+					}
 				}
 			}
 		} catch (JavaModelException e) {
