@@ -81,28 +81,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	 * Should be called from the wizard with the input element.
 	 */
 	public void init(IStructuredSelection selection) {
-		IJavaElement jelem= null;
-		
-		if (selection != null && !selection.isEmpty()) {
-			Object selectedElement= selection.getFirstElement();
-			if (selectedElement instanceof IAdaptable) {
-				IAdaptable adaptable= (IAdaptable) selectedElement;			
-				
-				jelem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
-				if (jelem == null) {
-					IResource resource= (IResource) adaptable.getAdapter(IResource.class);
-					if (resource != null) {
-						IProject proj= resource.getProject();
-						if (proj != null) {
-							jelem= JavaCore.create(proj);
-						}
-					}
-				}
-			}
-		}
-		if (jelem == null) {
-			jelem= EditorUtility.getActiveEditorJavaInput();
-		}		
+		IJavaElement jelem= getInitialJavaElement(selection);	
 		
 		initContainerPage(jelem);
 		setPackageText(""); //$NON-NLS-1$

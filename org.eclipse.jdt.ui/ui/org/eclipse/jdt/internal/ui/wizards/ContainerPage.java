@@ -4,17 +4,19 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.swt.widgets.Composite;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -32,6 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -105,6 +108,43 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		}	
 		setPackageFragmentRoot(initRoot, true);
 	}
+	
+	/**
+	 * Utility method to inspect a selection to find a Java element as initial element.
+	 * @return Returns a Java element to use as initial selection, or <code>null</code>,
+	 * if none is found.
+	 */
+	protected IJavaElement getInitialJavaElement(IStructuredSelection selection) {
+		IJavaElement jelem= null;
+		if (selection != null && !selection.isEmpty()) {
+			Object selectedElement= selection.getFirstElement();
+			if (selectedElement instanceof IAdaptable) {
+				IAdaptable adaptable= (IAdaptable) selectedElement;			
+				
+				jelem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+				if (jelem == null) {
+					IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+					if (resource != null) {
+						IProject proj= resource.getProject();
+						if (proj != null) {
+							jelem= JavaCore.create(proj);
+						}
+					}
+				}
+			}
+		}
+		if (jelem == null) {
+			jelem= EditorUtility.getActiveEditorJavaInput();
+		}
+		if (jelem == null) {
+			IProject[] projects= getWorkspaceRoot().getProjects();
+			if (projects.length > 0) {
+				jelem= JavaCore.create(projects[0]);
+			}
+		}
+		return jelem;
+	}
+	
 	
 	/**
 	 * Creates the controls for the container field.

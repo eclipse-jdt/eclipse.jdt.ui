@@ -2,12 +2,18 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.actions;
+package org.eclipse.jdt.internal.ui.wizards;
 
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -17,6 +23,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.IWorkbenchWizard;
+import org.eclipse.ui.internal.NewProjectAction; // using internal class (PR: 6095)
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -47,6 +54,7 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		super(label);
 		fActivatedOnTypes= activatedOnTypes;
 		fAcceptEmptySelection= acceptEmptySelection;
+		fNoChecking= false;
 	}
 
 	/**
@@ -121,6 +129,9 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		if (!fNoChecking && !canActionBeAdded()) {
 			return;
 		}
+		if (!checkWorkspaceNotEmpty()) {
+			return;
+		}
 		
 		Wizard wizard= createWizard();
 		if (wizard instanceof IWorkbenchWizard) {
@@ -168,5 +179,21 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 	public void selectionChanged(IAction action, ISelection selection) {
 		// selection taken from selectionprovider
 	}
+	
+	protected boolean checkWorkspaceNotEmpty() {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		if (workspace.getRoot().getProjects().length == 0) {
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			String title= JavaUIMessages.getString("AbstractOpenWizardAction.noproject.title");
+			String message= JavaUIMessages.getString("AbstractOpenWizardAction.noproject.message");
+			if (MessageDialog.openQuestion(shell, title, message)) {
+				(new NewProjectAction()).run();	// using internal class (PR: 6095)
+				return workspace.getRoot().getProjects().length != 0;
+			}
+			return false;
+		}
+		return true;
+	}
+	
 
 }

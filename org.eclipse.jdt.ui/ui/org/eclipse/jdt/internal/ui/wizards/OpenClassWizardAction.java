@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.jface.wizard.Wizard;import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
+import org.eclipse.jface.wizard.Wizard;
 
 public class OpenClassWizardAction extends AbstractOpenWizardAction {
 
@@ -22,4 +22,5 @@ public class OpenClassWizardAction extends AbstractOpenWizardAction {
 	protected boolean shouldAcceptElement(Object obj) { 
 		return NewGroup.isOnBuildPath(obj) && !NewGroup.isInArchive(obj);
 	}
+
 }

@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.jface.wizard.Wizard;import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
+import org.eclipse.jface.wizard.Wizard;
 
 public class OpenProjectWizardAction extends AbstractOpenWizardAction {
 
@@ -18,4 +18,11 @@ public class OpenProjectWizardAction extends AbstractOpenWizardAction {
 	protected Wizard createWizard() { 
 		return new NewProjectCreationWizard(); 
 	}	
+	/*
+	 * @see AbstractOpenWizardAction#showWorkspaceEmptyWizard()
+	 */
+	protected boolean checkWorkspaceNotEmpty() {
+		return true;
+	}
+
 }

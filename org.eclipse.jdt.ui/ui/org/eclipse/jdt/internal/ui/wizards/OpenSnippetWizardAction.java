@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.jface.wizard.Wizard;import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
+import org.eclipse.jface.wizard.Wizard;
 
 public class OpenSnippetWizardAction extends AbstractOpenWizardAction {
 
