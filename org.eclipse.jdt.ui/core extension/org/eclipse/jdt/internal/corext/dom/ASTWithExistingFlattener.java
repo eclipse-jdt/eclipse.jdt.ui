@@ -18,9 +18,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite.AnnotationData;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
-
 /* package */ class ASTWithExistingFlattener extends ASTFlattener {
 
 	public static class NodeMarker {
@@ -99,9 +96,13 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 	 */
 	public void preVisit(ASTNode node) {
-		TrackData data= fRewrite.getTrackData(node);
-		if (data != null) {
-			addMarker(data, fResult.length(), 0);
+		Object trackData= fRewrite.getTrackedNodeData(node);
+		if (trackData != null) {
+			addMarker(trackData, fResult.length(), 0);
+		}
+		Object placeholderData= fRewrite.getPlaceholderData(node);
+		if (placeholderData != null) {
+			addMarker(placeholderData, fResult.length(), 0);
 		}
 	}
 
@@ -109,13 +110,13 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite.TrackData;
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		TrackData data= fRewrite.getTrackData(node);
-		if (data != null) {
-			if (data instanceof AnnotationData) {
-				addMarker(data, fResult.length(), -1);
-			} else {
-				fixupLength(data, fResult.length());
-			}
+		Object placeholderData= fRewrite.getPlaceholderData(node);
+		if (placeholderData != null) {
+			fixupLength(placeholderData, fResult.length());
+		}
+		Object trackData= fRewrite.getTrackedNodeData(node);
+		if (trackData != null) {
+			addMarker(trackData, fResult.length(), -1);
 		}
 	}
 	

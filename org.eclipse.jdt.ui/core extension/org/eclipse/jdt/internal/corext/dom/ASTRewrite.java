@@ -98,20 +98,24 @@ public final class ASTRewrite {
 	private HashMap fChangedProperties;
 	private HashMap fCopyCounts;
 	private HashSet fMoveSources;
-	private HashMap fTrackedAnnotations;
+	
+	private HashMap fTrackedNodes;
+	private HashMap fPlaceholderNodes;
+	
 	private HashMap fGroupDescriptions;
 	private boolean fHasASTModifications;
 	
 	/**
 	 * Creates the <code>ASTRewrite</code> object.
-	 * @param node A node which is parent to all modified or changed nodes.
+	 * @param node A node which is parent to all modified, changed or tracked nodes.
 	 */
 	public ASTRewrite(ASTNode node) {
 		fRootNode= node;
 		fChangedProperties= new HashMap();
 		fCopyCounts= null;
 		fMoveSources= null;
-		fTrackedAnnotations= null;
+		fTrackedNodes= null;
+		fPlaceholderNodes= null;
 		fHasASTModifications= false;
 	}
 	
@@ -153,7 +157,8 @@ public final class ASTRewrite {
 		fChangedProperties.clear();
 		fCopyCounts= null;
 		fMoveSources= null;
-		fTrackedAnnotations= null;
+		fPlaceholderNodes= null;
+		fTrackedNodes= null;
 		fGroupDescriptions= null;
 	}
 
@@ -361,7 +366,7 @@ public final class ASTRewrite {
 	}
 
 	/**
-	 * Marks an node as modified. The modifiued node describes changes like changed modifiers,
+	 * Marks an node as modified. The modifiied node describes changes like changed modifiers,
 	 * or operators: This is only for properties that are not children nodes of type ASTNode.
 	 * @param node The node to be marked as modified.
 	 * @param modifiedNode The node of the same type as the modified node but with the new properties.
@@ -371,12 +376,13 @@ public final class ASTRewrite {
 	}
 	
 	/**
-	 * Marks a node as tracked. 
+	 * Marks a node as tracked. The edits added to the group description can be used to get the
+	 * position of the node after the rewrite operation.
 	 */
 	public final void markAsTracked(ASTNode node, GroupDescription description) {
-		AnnotationData data= new AnnotationData();
-		data.description= description;
-		setTrackData(node, data);
+		Assert.isTrue(getTrackedNodeData(node) == null, "Node is already marked as tracked"); //$NON-NLS-1$
+
+		setTrackedNodeData(node, description);
 	}	
 	
 	/**
@@ -483,7 +489,7 @@ public final class ASTRewrite {
 		return createPlaceholder(data, nodeType);
 	}
 	
-	private final ASTNode createPlaceholder(TrackData data, int nodeType) {
+	private final ASTNode createPlaceholder(PlaceholderData data, int nodeType) {
 		AST ast= fRootNode.getAST();
 		ASTNode placeHolder;
 		switch (nodeType) {
@@ -523,7 +529,7 @@ public final class ASTRewrite {
 			default:
 				return null;
 		}
-		setTrackData(placeHolder, data);
+		setPlaceholderData(placeHolder, data);
 		return placeHolder;
 	}	
 	
@@ -690,19 +696,33 @@ public final class ASTRewrite {
 		fCopyCounts.put(node, new Integer(count + 1));
 	}
 	
-	public final TrackData getTrackData(ASTNode node) {
-		if (fTrackedAnnotations != null) {
-			return (TrackData) fTrackedAnnotations.get(node);
+	public final Object getPlaceholderData(ASTNode node) {
+		if (fPlaceholderNodes != null) {
+			return fPlaceholderNodes.get(node);
 		}
 		return null;	
 	}
 	
-	private void setTrackData(ASTNode node, TrackData data) {
-		if (fTrackedAnnotations == null) {
-			fTrackedAnnotations= new HashMap();
+	private void setPlaceholderData(ASTNode node, PlaceholderData data) {
+		if (fPlaceholderNodes == null) {
+			fPlaceholderNodes= new HashMap();
 		}
-		fTrackedAnnotations.put(node, data);		
+		fPlaceholderNodes.put(node, data);		
 	}
+	
+	public final GroupDescription getTrackedNodeData(ASTNode node) {
+		if (fTrackedNodes != null) {
+			return (GroupDescription) fTrackedNodes.get(node);
+		}
+		return null;	
+	}
+	
+	private void setTrackedNodeData(ASTNode node, GroupDescription data) {
+		if (fTrackedNodes == null) {
+			fTrackedNodes= new HashMap();
+		}
+		fTrackedNodes.put(node, data);		
+	}	
 	
 	
 	private final void setChangeProperty(ASTNode node, Object change) {
@@ -736,23 +756,19 @@ public final class ASTRewrite {
 		public ASTNode modifiedNode;
 	}
 	
-	public static abstract class TrackData {
+	private static class PlaceholderData {
 	}
 	
-	public static final class MovePlaceholderData extends TrackData {
+	public static final class MovePlaceholderData extends PlaceholderData {
 		public ASTNode node;
 	}
 	
-	public static final class CopyPlaceholderData extends TrackData {
+	public static final class CopyPlaceholderData extends PlaceholderData {
 		public ASTNode node;
 	}	
 	
-	public static final class StringPlaceholderData extends TrackData {
+	public static final class StringPlaceholderData extends PlaceholderData {
 		public String code;
 	}
-	
-	public static final class AnnotationData extends TrackData {
-		public GroupDescription description;
-	}	
-	
+		
 }

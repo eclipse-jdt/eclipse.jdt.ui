@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite.AnnotationData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.CopyPlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.MovePlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.StringPlaceholderData;
@@ -817,9 +816,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				doTextInsert(insertOffset, insertStr, description);
 			}
 			Object data= markers[i].data;
-			if (data instanceof AnnotationData) {
+			if (data instanceof GroupDescription) {
 				TextEdit edit= new RangeMarker(insertOffset, 0);
-				addDescription(((AnnotationData) data).description, edit);	
+				addDescription((GroupDescription) data, edit);
 				addEdit(edit);				
 			} else {
 				String destIndentString=  Strings.getIndentString(getCurrentLine(formatted, offset), tabWidth);
@@ -913,8 +912,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		Object annotation= fRewrite.getTrackData(node);
-		if (annotation instanceof AnnotationData) {
+		Object annotation= fRewrite.getTrackedNodeData(node);
+		if (annotation != null) {
 			fCurrentEdit= fCurrentEdit.getParent();
 		}
 		int count= fRewrite.getCopyCount(node);
@@ -945,11 +944,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				fCurrentEdit= edit;		
 			}
 		}
-		Object data= fRewrite.getTrackData(node);
-		if (data instanceof AnnotationData) {
+		GroupDescription data= fRewrite.getTrackedNodeData(node);
+		if (data != null) {
 			ISourceRange range= getNodeRange(node, -1);
 			TextEdit edit= new RangeMarker(range.getOffset(), range.getLength());
-			addDescription(((AnnotationData) data).description, edit);
+			addDescription(data, edit);
 			addEdit(edit);
 			fCurrentEdit= edit;
 		}
