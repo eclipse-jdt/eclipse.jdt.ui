@@ -72,7 +72,7 @@ public class NLSUtil {
 		NLSElement[] elements= nlsLine.getElements();
 		int indexInElementList= Arrays.asList(elements).indexOf(element);
 		int editOffset= computeInsertOffset(elements, indexInElementList, cu);
-		String editText= NLSElement.createTagText(indexInElementList + 1); //tags are 1-based
+		String editText= " " + NLSElement.createTagText(indexInElementList + 1); //tags are 1-based //$NON-NLS-1$
 		return SimpleTextEdit.createInsert(editOffset, editText);
 	}
 
