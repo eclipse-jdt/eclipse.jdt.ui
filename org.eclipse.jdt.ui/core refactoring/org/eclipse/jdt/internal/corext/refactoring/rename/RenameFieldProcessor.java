@@ -12,19 +12,17 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -279,13 +277,13 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	public String getNewGetterName() throws CoreException {
 		IMethod primaryGetterCandidate= JavaModelUtil.findMethod(GetterSetterUtil.getGetterName(fField, new String[0]), new String[0], false, fField.getDeclaringType());
 		if (! JavaModelUtil.isBoolean(fField) || (primaryGetterCandidate != null && primaryGetterCandidate.exists()))
-			return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
+			return GetterSetterUtil.getGetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
 		//bug 30906 describes why we need to look for other alternatives here	
-		return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), false, null);
+		return GetterSetterUtil.getGetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), false, null);
 	}
 
 	public String getNewSetterName() throws CoreException {
-		return NamingConventions.suggestSetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
+		return GetterSetterUtil.getSetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
 	}
 
 	// -------------- Preconditions -----------------------
