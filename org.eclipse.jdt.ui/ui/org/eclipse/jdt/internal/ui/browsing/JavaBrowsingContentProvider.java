@@ -220,7 +220,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		try {
 			processDelta(event.getDelta());
 		} catch(JavaModelException e) {
-			JavaPlugin.getDefault().log(e.getStatus()); //$NON-NLS-1$
+			JavaPlugin.log(e.getStatus());
 		}
 	}
 
@@ -463,7 +463,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (ctrl != null && !ctrl.isDisposed()) {
 			fBrowsingPart.setProcessSelectionEvents(false);
 			try {
-				Display currentDisplay= ctrl.getDisplay().getCurrent();
+				Display currentDisplay= Display.getCurrent();
 				if (currentDisplay != null && currentDisplay.equals(ctrl.getDisplay()))
 					ctrl.getDisplay().syncExec(r);
 				else				

@@ -70,7 +70,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	}
 
 	protected void setInitialInput() {
-		IJavaElement root= JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot());
+		IJavaElement root= JavaCore.create(JavaPlugin.getWorkspace().getRoot());
 		getViewer().setInput(root);
 		updateTitle();
 	}

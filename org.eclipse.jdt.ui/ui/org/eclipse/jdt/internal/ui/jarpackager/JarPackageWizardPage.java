@@ -409,7 +409,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		dialog.getShell().setText(JarPackagerMessages.getString("JarPackageWizardPage.saveAsDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JarPackagerMessages.getString("JarPackageWizardPage.saveAsDialog.message")); //$NON-NLS-1$
 		dialog.setOriginalFile(createFileHandle(fJarPackage.getDescriptionLocation()));
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == SaveAsDialog.OK) {
 			IPath path= dialog.getResult();
 			path= path.removeFileExtension().addFileExtension(JarPackagerUtil.DESCRIPTION_EXTENSION);
 			fDescriptionFileText.setText(path.toString());

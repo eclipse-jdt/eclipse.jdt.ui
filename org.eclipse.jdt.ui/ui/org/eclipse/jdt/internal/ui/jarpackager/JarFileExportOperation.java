@@ -271,7 +271,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 			
 			if (pkgRoot != null) {
 				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
-				if (mustUseSourceFolderHierarchy() && !pkgRoot.getElementName().equals(pkgRoot.DEFAULT_PACKAGEROOT_PATH))
+				if (mustUseSourceFolderHierarchy() && !pkgRoot.getElementName().equals(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH))
 					leadSegmentsToRemove--;
 			}
 			
@@ -342,7 +342,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 		boolean isNonJavaResource= !isInJavaProject || pkgRoot == null;
 		boolean isInClassFolder= false;
 		try {
-			isInClassFolder= pkgRoot != null && !pkgRoot.isArchive() && pkgRoot.getKind() == pkgRoot.K_BINARY;
+			isInClassFolder= pkgRoot != null && !pkgRoot.isArchive() && pkgRoot.getKind() == IPackageFragmentRoot.K_BINARY;
 		} catch (JavaModelException ex) {
 			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.cantGetRootKind", resource.getFullPath()), ex); //$NON-NLS-1$
 		}

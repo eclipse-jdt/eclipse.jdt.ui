@@ -83,7 +83,7 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 		if (fElementPattern != null)
 			engine.search(fWorkspace, fElementPattern, fLimitTo, fScope, fCollector);
 		else
-			engine.search(fWorkspace, engine.createSearchPattern(fStringPattern, fSearchFor, fLimitTo, fIsCaseSensitive), fScope, fCollector);
+			engine.search(fWorkspace, SearchEngine.createSearchPattern(fStringPattern, fSearchFor, fLimitTo, fIsCaseSensitive), fScope, fCollector);
 	}
 
 	String getSingularLabel() {
