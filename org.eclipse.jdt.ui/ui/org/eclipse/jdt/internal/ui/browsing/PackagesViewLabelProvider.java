@@ -212,7 +212,7 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 		if (fragment.isDefaultPackage())
 			//this must exist already but not in JavaElementLable
 			return decorateText(JavaElementLabels.getElementLabel(fragment, getTextFlags()), fragment);
-		String name= fragment.getElementName();
+		String name= JavaElementLabels.getElementLabel(fragment, getTextFlags());
 		if (name.indexOf(".") != -1)//$NON-NLS-1$
 			name= name.substring(name.lastIndexOf(".") + 1);//$NON-NLS-1$
 		return decorateText(name, fragment);

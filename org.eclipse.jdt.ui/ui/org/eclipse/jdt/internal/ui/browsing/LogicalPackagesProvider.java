@@ -10,10 +10,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -90,7 +90,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 		if (!fCompoundState)
 			return children;
 
-		Set newChildren= new HashSet();
+		List newChildren= new ArrayList();
 
 		for (int i= 0; i < children.length; i++) {
 			IPackageFragment fragment=  children[i];
@@ -104,6 +104,9 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 				if (lp.belongs(fragment)) {
 					lp.add(fragment);
 				}
+				if(!newChildren.contains(lp))
+					newChildren.add(lp);
+				
 			} else {
 				String key= getKey(fragment);
 				IPackageFragment frag= (IPackageFragment)fMapToPackageFragments.get(key);

@@ -340,7 +340,7 @@ public class PackagesView extends JavaBrowsingPart{
 
 		ILabelProvider labelProvider= createLabelProvider();	
 		ILabelDecorator decorationMgr= PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
-		viewer.setLabelProvider(new DecoratingLabelProvider(labelProvider, decorationMgr));
+		viewer.setLabelProvider(createDecoratingLabelProvider(labelProvider, decorationMgr));
 		
 		viewer.setSorter(createJavaElementSorter());
 		viewer.setUseHashlookup(true);
@@ -530,6 +530,7 @@ public class PackagesView extends JavaBrowsingPart{
 	 */
 	protected DecoratingLabelProvider createDecoratingLabelProvider(ILabelProvider provider, ILabelDecorator decorationMgr) {
 		return new DecoratingLabelProvider(provider, decorationMgr){
+			
 			public String getText(Object element){
 				if (element instanceof LogicalPackage) {
 					LogicalPackage el= (LogicalPackage) element;
