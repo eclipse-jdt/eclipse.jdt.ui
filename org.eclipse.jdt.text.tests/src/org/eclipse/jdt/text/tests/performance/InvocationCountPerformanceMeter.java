@@ -129,29 +129,45 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 				}
 				while (!fIsStopping) {
 					try {
-						EventSet eventSet= fEventQueue.remove();
+						EventSet eventSet;
+						if (fTimeout == -1)
+							eventSet= fEventQueue.remove();
+						else {
+							eventSet= fEventQueue.remove(fTimeout);
+							if (eventSet == null) {
+								fIsStopping= true;
+								System.out.println("Event reader timed out");
+								return;
+							}
+						}
 						
 						EventIterator iterator= eventSet.eventIterator();
 						while (iterator.hasNext()) {
 							Event event= iterator.nextEvent();
 							if (event instanceof BreakpointEvent)
 								handleBreakpointEvent((BreakpointEvent) event);
-							if (event instanceof VMDeathEvent)
-								stop();
+							if (event instanceof VMDeathEvent) {
+								fIsStopping= true;
+								System.out.println("VM unexpectedly died"); //$NON-NLS-1$
+							}
 						}
 						
 						eventSet.resume();
-					} catch (InterruptedException e) {
+					} catch (InterruptedException x) {
 						if (fIsStopping)
 							return;
 						System.out.println("Event reader loop unexpectedly interrupted"); //$NON-NLS-1$
-					} catch (VMDisconnectedException e) {
+						x.printStackTrace();
+						return;
+					} catch (VMDisconnectedException x) {
 						System.out.println("VM unexpectedly disconnected"); //$NON-NLS-1$
+						x.printStackTrace();
 						return;
 					}
 				}
 			} finally {
 				disableBreakpoints();
+				fVM.resume();
 			}
 		}
 
@@ -305,6 +321,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 	/** <code>true</code> iff additional information should be collected per instance */
 	private boolean fCollectInstanceResults= true;
+	
+	/** Timeout after which the event reader aborts when no event occurred, <code>-1</code> for infinite */
+	private long fTimeout= -1;
 	
 	/**
 	 * Initialize the performance meter to count the number of invocation of
@@ -629,11 +648,33 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	}
 	
 	/**
-	 * Returns the invocationCount.
+	 * Returns the timeout after which the event reader aborts when no event
+	 * occurred, <code>-1</code> for infinite.
+	 * <p>
+	 * For debugging purposes.
+	 * </p>
+	 * <p>
+	 * For debugging purposes.
+	 * </p>
 	 * 
-	 * @return the invocationCount
+	 * @return the timeout after which the event reader aborts when no event
+	 *         occurred, <code>-1</code> for infinite
 	 */
-	protected long getInvocationCount() {
-		return fInvocationCount;
+	public long getTimeout() {
+		return fTimeout;
+	}
+	
+	/**
+	 * Sets the timeout after which the event reader aborts when no event
+	 * occurred, <code>-1</code> for infinite.
+	 * <p>
+	 * For debugging purposes.
+	 * </p>
+	 * 
+	 * @param timeout the timeout after which the event reader aborts when
+	 *                no event occurred, <code>-1</code> for infinite
+	 */
+	public void setTimeout(long timeout) {
+		fTimeout= timeout;
 	}
 }
