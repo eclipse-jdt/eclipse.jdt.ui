@@ -124,6 +124,34 @@ public class PreferenceConstants {
 	public static final String APPEARANCE_MEMBER_SORT_ORDER= "outlinesortoption"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that defines how member elements are ordered by visibility in the
+	 * Java views using the <code>JavaElementSorter</code>.
+	 * <p>
+	 * Value is of type <code>String</code>: A comma separated list of the
+	 * following entries. Each entry must be in the list, no duplication. List
+	 * order defines the sort order.
+	 * <ul>
+	 * <li><b>B</b>: Public</li>
+	 * <li><b>V</b>: Private</li>
+	 * <li><b>R</b>: Protected</li>
+	 * <li><b>D</b>: Default</li>
+	 * </ul>
+	 * </p>
+	 * @since 3.0
+	 */
+	public static final String APPEARANCE_VISIBILITY_SORT_ORDER= "org.eclipse.jdt.ui.visibility.order"; //$NON-NLS-1$
+	
+	/**
+	 * A named preferences that controls if java elements are also sorted by 
+	 * visibility.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.0
+	 */
+	public static final String APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER= "org.eclipse.jdt.ui.enable.visibility.order"; //$NON-NLS-1$
+	
+	/**
 	 * A named preference that controls if prefix removal during setter/getter generation is turned on or off. 
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -2091,6 +2119,8 @@ public class PreferenceConstants {
 
 		// MembersOrderPreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SF,SI,SM,I,F,C,M"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER, "B,V,R,D"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER, false);
 		// must add here to guarantee that it is the first in the listener list
 		store.addPropertyChangeListener(JavaPlugin.getDefault().getMemberOrderPreferenceCache());
 

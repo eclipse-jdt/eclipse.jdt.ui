@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -78,8 +79,12 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int JAVAELEMENTS= 50;
 	private static final int OTHERS= 51;
 	
-	public JavaElementSorter() {
+	private MembersOrderPreferenceCache fMemberOrderCache;
+	
+	
+	public JavaElementSorter() {	
 		super(null); // delay initialization of collator
+		fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
 	}
 		
 	/**
@@ -171,10 +176,10 @@ public class JavaElementSorter extends ViewerSorter {
 	}
 	
 	private int getMemberCategory(int kind) {
-		int offset= JavaPlugin.getDefault().getMemberOrderPreferenceCache().getIndex(kind);
+		int offset= fMemberOrderCache.getCategoryIndex(kind);
 		return offset + MEMBERSOFFSET;
-	}		
-
+	}
+	
 	/*
 	 * @see ViewerSorter#compare
 	 */
@@ -216,6 +221,18 @@ public class JavaElementSorter extends ViewerSorter {
 			return compareWithLabelProvider(viewer, e1, e2);
 		}
 		
+		if (e1 instanceof IMember) {
+			if (fMemberOrderCache.isSortByVisibility()) {
+				try {
+					int vis= fMemberOrderCache.getVisibilityIndex(((IMember) e1).getFlags()) - fMemberOrderCache.getVisibilityIndex(((IMember) e2).getFlags());
+					if (vis != 0) {
+						return vis;
+					}
+				} catch (JavaModelException ignore) {
+				}
+			}
+		}
+		
 		String name1= ((IJavaElement) e1).getElementName();
 		String name2= ((IJavaElement) e2).getElementName();
 		
@@ -234,14 +251,15 @@ public class JavaElementSorter extends ViewerSorter {
 				return -1;
 			}
 		}
-		
-		// java element are sorted by name
+				
 		int cmp= getCollator().compare(name1, name2);
 		if (cmp != 0) {
 			return cmp;
 		}
 		
 		if (e1 instanceof IMethod) {
+
+			
 			String[] params1= ((IMethod) e1).getParameterTypes();
 			String[] params2= ((IMethod) e2).getParameterTypes();
 			int len= Math.min(params1.length, params2.length);
@@ -255,6 +273,7 @@ public class JavaElementSorter extends ViewerSorter {
 		}
 		return 0;
 	}
+	
 
 	private IPackageFragmentRoot getPackageFragmentRoot(Object element) {
 		if (element instanceof ClassPathContainer) {

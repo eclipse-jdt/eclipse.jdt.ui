@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
@@ -292,7 +293,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER)) {
+		if (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty())) {
 			getViewer().refresh();
 		}
 	}

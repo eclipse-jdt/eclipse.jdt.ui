@@ -120,6 +120,7 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -900,7 +901,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	
 	private void doPropertyChange(PropertyChangeEvent event) {
 		if (fOutlineViewer != null) {
-			if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(event.getProperty())) {
+			if (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty())) {
 				fOutlineViewer.refresh(false);
 			}
 		}

@@ -16,6 +16,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jdt.core.Flags;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
@@ -30,36 +32,63 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 	public static final int STATIC_FIELDS_INDEX= 5;
 	public static final int STATIC_INIT_INDEX= 6;
 	public static final int STATIC_METHODS_INDEX= 7;
-	public static final int N_ENTRIES= STATIC_METHODS_INDEX + 1;	
+	public static final int N_CATEGORIES= STATIC_METHODS_INDEX + 1;
 	
-	private int[] fOffsets= null;
+	private static final int PUBLIC_INDEX= 0;
+	private static final int PRIVATE_INDEX= 1;
+	private static final int PROTECTED_INDEX= 2;
+	private static final int DEFAULT_INDEX= 3;
+	private static final int N_VISIBILITIES= DEFAULT_INDEX + 1;	
+	
+	private int[] fCategoryOffsets= null;
+	
+	private boolean fSortByVisibility;
+	private int[] fVisibilityOffsets= null;
+	
+	public MembersOrderPreferenceCache() {
+		fCategoryOffsets= null;
+		fSortByVisibility= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
+		fVisibilityOffsets= null;
+	}
+	
+	public static boolean isMemberOrderProperty(String property) {
+		return PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(property)
+			|| PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER.equals(property)
+			|| PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER.equals(property);
+	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(event.getProperty())) {
-			fOffsets= null;
+		String property= event.getProperty();
+		
+		if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(property)) {
+			fCategoryOffsets= null;
+		} else if (PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER.equals(property)) {
+			fVisibilityOffsets= null;
+		} else if (PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER.equals(property)) {
+			fSortByVisibility= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
 		}
 	}
 
-	public int getIndex(int kind) {
-		if (fOffsets == null) {
-			fOffsets= getOffsets();
+	public int getCategoryIndex(int kind) {
+		if (fCategoryOffsets == null) {
+			fCategoryOffsets= getCategoryOffsets();
 		}
-		return fOffsets[kind];
+		return fCategoryOffsets[kind];
 	}
 	
-	private int[] getOffsets() {
-		int[] offsets= new int[N_ENTRIES];
+	private int[] getCategoryOffsets() {
+		int[] offsets= new int[N_CATEGORIES];
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		String key= PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER;
-		boolean success= fillOffsetsFromPreferenceString(store.getString(key), offsets);
+		boolean success= fillCategoryOffsetsFromPreferenceString(store.getString(key), offsets);
 		if (!success) {
 			store.setToDefault(key);
-			fillOffsetsFromPreferenceString(store.getDefaultString(key), offsets);	
+			fillCategoryOffsetsFromPreferenceString(store.getDefaultString(key), offsets);	
 		}
 		return offsets;
-	}		
+	}
 	
-	private boolean fillOffsetsFromPreferenceString(String str, int[] offsets) {
+	private boolean fillCategoryOffsetsFromPreferenceString(String str, int[] offsets) {
 		StringTokenizer tokenizer= new StringTokenizer(str, ","); //$NON-NLS-1$
 		int i= 0;
 		while (tokenizer.hasMoreTokens()) {
@@ -82,7 +111,58 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 				offsets[CONSTRUCTORS_INDEX]= i++;
 			}
 		}
-		return i == N_ENTRIES;
+		return i == N_CATEGORIES;
+	}
+	
+	public boolean isSortByVisibility() {
+		return fSortByVisibility;
+	}
+	
+	
+	public int getVisibilityIndex(int modifierFlags) {
+		if (fVisibilityOffsets == null) {
+			fVisibilityOffsets= getVisibilityOffsets();
+		}
+		int kind= DEFAULT_INDEX;
+		if (Flags.isPublic(modifierFlags)) {
+			kind= PUBLIC_INDEX;
+		} else if (Flags.isProtected(modifierFlags)) {
+			kind= PROTECTED_INDEX;
+		} else if (Flags.isPrivate(modifierFlags)) {
+			kind= PRIVATE_INDEX;
+		}
+		
+		return fVisibilityOffsets[kind];
+	}
+	
+	private int[] getVisibilityOffsets() {
+		int[] offsets= new int[N_VISIBILITIES];
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		String key= PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER;
+		boolean success= fillVisibilityOffsetsFromPreferenceString(store.getString(key), offsets);
+		if (!success) {
+			store.setToDefault(key);
+			fillVisibilityOffsetsFromPreferenceString(store.getDefaultString(key), offsets);	
+		}
+		return offsets;
+	}	
+		
+	private boolean fillVisibilityOffsetsFromPreferenceString(String str, int[] offsets) {
+		StringTokenizer tokenizer= new StringTokenizer(str, ","); //$NON-NLS-1$
+		int i= 0;
+		while (tokenizer.hasMoreTokens()) {
+			String token= tokenizer.nextToken().trim();
+			if ("B".equals(token)) { //$NON-NLS-1$
+				offsets[PUBLIC_INDEX]= i++;
+			} else if ("V".equals(token)) { //$NON-NLS-1$
+				offsets[PRIVATE_INDEX]= i++;
+			} else if ("R".equals(token)) { //$NON-NLS-1$
+				offsets[PROTECTED_INDEX]= i++;
+			} else if ("D".equals(token)) { //$NON-NLS-1$
+				offsets[DEFAULT_INDEX]= i++;
+			}
+		}
+		return i == N_VISIBILITIES;
 	}
 	
 

@@ -43,40 +43,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IElementComparer;
-import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IOpenListener;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.ITreeViewerListener;
-import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeExpansionEvent;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.*;
 
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IPageLayout;
-import org.eclipse.ui.IPartListener;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IViewSite;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.*;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
@@ -105,7 +74,6 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
@@ -118,6 +86,7 @@ import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
@@ -1134,7 +1103,7 @@ public class PackageExplorerPart extends ViewPart
 			((StandardJavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
 			
 			refreshViewer= true;
-		} else if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(event.getProperty())) {
+		} else if (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty())) {
 			refreshViewer= true;
 		}
 

@@ -112,6 +112,7 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -311,7 +312,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	protected void doPropertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (fMethodsViewer != null) {
-			if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(property)) {
+			if (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty())) {
 				fMethodsViewer.refresh();
 			}
 		}

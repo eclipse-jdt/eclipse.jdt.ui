@@ -51,10 +51,12 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	 */
 	public class DefaultJavaElementComparator implements Comparator {
 
-		private Collator collator;
+		private Collator fCollator;
+		private MembersOrderPreferenceCache fMemberOrderCache;
 
 		public DefaultJavaElementComparator() {
-			this.collator= Collator.getInstance();
+			this.fCollator= Collator.getInstance();
+			fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
 		}
 
 		private int category(BodyDeclaration bodyDeclaration) {
@@ -94,7 +96,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		}
 
 		private int getMemberCategory(int kind) {
-			return JavaPlugin.getDefault().getMemberOrderPreferenceCache().getIndex(kind);
+			return fMemberOrderCache.getCategoryIndex(kind);
 		}
 
 		/**
@@ -118,11 +120,18 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						MethodDeclaration method1= (MethodDeclaration) bodyDeclaration1;
 						MethodDeclaration method2= (MethodDeclaration) bodyDeclaration2;
 
+						if (fMemberOrderCache.isSortByVisibility()) {
+							int vis= fMemberOrderCache.getVisibilityIndex(method1.getModifiers()) - fMemberOrderCache.getVisibilityIndex(method2.getModifiers());
+							if (vis != 0) {
+								return vis;
+							}
+						}
+						
 						String name1= method1.getName().getIdentifier();
 						String name2= method2.getName().getIdentifier();
 
 						// method declarations (constructors) are sorted by name
-						int cmp= this.collator.compare(name1, name2);
+						int cmp= this.fCollator.compare(name1, name2);
 						if (cmp != 0) {
 							return cmp;
 						}
@@ -137,7 +146,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						for (int i= 0; i < len; i++) {
 							SingleVariableDeclaration param1= (SingleVariableDeclaration) parameters1.get(i);
 							SingleVariableDeclaration param2= (SingleVariableDeclaration) parameters2.get(i);
-							cmp= this.collator.compare(buildSignature(param1.getType()), buildSignature(param2.getType()));
+							cmp= this.fCollator.compare(buildSignature(param1.getType()), buildSignature(param2.getType()));
 							if (cmp != 0) {
 								return cmp;
 							}
@@ -159,7 +168,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						String name2= ((VariableDeclarationFragment) field2.fragments().get(0)).getName().getIdentifier();
 
 						// field declarations are sorted by name
-						int cmp= this.collator.compare(name1, name2);
+						int cmp= this.fCollator.compare(name1, name2);
 						if (cmp != 0) {
 							return cmp;
 						}
@@ -184,7 +193,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						String name2= type2.getName().getIdentifier();
 
 						// typedeclarations are sorted by name
-						int cmp= this.collator.compare(name1, name2);
+						int cmp= this.fCollator.compare(name1, name2);
 						if (cmp != 0) {
 							return cmp;
 						}
