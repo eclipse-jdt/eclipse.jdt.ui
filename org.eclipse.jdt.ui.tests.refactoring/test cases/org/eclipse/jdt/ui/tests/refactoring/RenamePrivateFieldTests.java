@@ -57,7 +57,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private void helper1_0(String fieldName, String newFieldName, String typeName,
 							boolean renameGetter, boolean renameSetter) throws Exception{
 		IType declaringType= getType(createCUfromTestFile(getPackageP(), "A"), typeName);
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(declaringType.getField(fieldName), getSettings(), getPrefixes(), getSuffixes());
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(declaringType.getField(fieldName), getPrefixes(), getSuffixes());
 		ref.setNewName(newFieldName);
 		ref.setRenameGetter(renameGetter);
 		ref.setRenameSetter(renameSetter);
@@ -68,26 +68,26 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private void helper1_0(String fieldName, String newFieldName) throws Exception{
 		helper1_0(fieldName, newFieldName, "A", false, false);
 	}
-	
-	//--
+
 	private void helper1() throws Exception{
 		helper1_0("f", "g");
 	}
 	
-	private void helper2(String fieldName, String newFieldName) throws Exception{
-		helper2(fieldName, newFieldName, true, false, false, false, false, false);
-	}
-	
+	//--
+		
 	private void helper2(String fieldName, String newFieldName, boolean updateReferences,  boolean updateJavaDoc, 
 											boolean updateComments, boolean updateStrings,
-											boolean renameGetter, boolean renameSetter) throws Exception{
+											boolean renameGetter, boolean renameSetter,
+											boolean expectedGetterRenameEnabled, boolean expectedSetterRenameEnabled) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName), getSettings(), getPrefixes(), getSuffixes());
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName), getPrefixes(), getSuffixes());
 		ref.setUpdateReferences(updateReferences);
 		ref.setUpdateJavaDoc(updateJavaDoc);
 		ref.setUpdateComments(updateComments);
 		ref.setUpdateStrings(updateStrings);
+		assertEquals("getter rename enabled", expectedGetterRenameEnabled, ref.canEnableGetterRenaming());
+		assertEquals("setter rename enabled", expectedSetterRenameEnabled, ref.canEnableSetterRenaming());
 		ref.setRenameGetter(renameGetter);
 		ref.setRenameSetter(renameSetter);
 		ref.setNewName(newFieldName);
@@ -108,13 +108,13 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
+
+	private void helper2(boolean updateReferences) throws Exception{
+		helper2("f", "g", updateReferences, false, false, false, false, false, false, false);
+	}
 	
 	private void helper2() throws Exception{
 		helper2(true);
-	}
-	
-	private void helper2(boolean updateReferences) throws Exception{
-		helper2("f", "g", updateReferences, false, false, false, false, false);
 	}
 
 	//--------- tests ----------	
@@ -176,10 +176,22 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}	
 	
 	public void test3() throws Exception{
-		helper2("f", "gg", true, true, true, true, false, false);
+		helper2("f", "gg", true, true, true, true, false, false, false, false);
 	}	
 
 	public void test4() throws Exception{
-		helper2("fMe", "fYou", true, false, false, false, true, true);
+		helper2("fMe", "fYou", true, false, false, false, true, true, true, true);
 	}		
+	
+	public void test5() throws Exception{
+		//regression test for 9895
+		helper2("fMe", "fYou", true, false, false, false, true, false, true, false);
+	}		
+	
+	public void test6() throws Exception{
+		//regression test for 9895 - opposite case
+		helper2("fMe", "fYou", true, false, false, false, false, true, false, true);
+	}		
+	
+	
 }
