@@ -49,6 +49,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
@@ -106,6 +107,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private MarkerAdapterFactory fMarkerAdapterFactory;
 	private EditorInputAdapterFactory fEditorInputAdapterFactory;
 	private ResourceAdapterFactory fResourceAdapterFactory;
+	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 	
 	
 	public static JavaPlugin getDefault() {
@@ -273,6 +275,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fJavaTextTools= new JavaTextTools(getPreferenceStore());
 		return fJavaTextTools;
 	}
+	
+	public MembersOrderPreferenceCache getMemberOrderPreferenceCache() {
+		if (fMembersOrderPreferenceCache == null)
+			fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
+		return fMembersOrderPreferenceCache;
+	}	
 		
 	/**
 	 * Creates the Java plugin standard groups in a context menu.

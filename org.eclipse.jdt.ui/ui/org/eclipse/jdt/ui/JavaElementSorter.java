@@ -11,7 +11,6 @@
 package org.eclipse.jdt.ui;
 
 import java.text.Collator;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -19,9 +18,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -40,6 +36,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
 
 /**
@@ -76,86 +73,10 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int JAVAELEMENTS= 50;
 	private static final int OTHERS= 51;
 	
-	// cache for configurable member sort order
-	
-	// index to cache array
-	private static final int TYPE_INDEX= 0;
-	private static final int CONSTRUCTORS_INDEX= 1;
-	private static final int METHOD_INDEX= 2;
-	private static final int FIELDS_INDEX= 3;
-	private static final int INIT_INDEX= 4;
-	private static final int STATIC_FIELDS_INDEX= 5;
-	private static final int STATIC_INIT_INDEX= 6;
-	private static final int STATIC_METHODS_INDEX= 7;
-	private static final int N_ENTRIES= STATIC_METHODS_INDEX + 1;
-
-	private static Cache fgCache= null;
-	
-	private static int getMemberCategory(int kind) {
-		if (fgCache == null) {
-			fgCache= new Cache();
-			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(fgCache);
-		}			
-		return fgCache.getIndex(kind) + MEMBERSOFFSET;
-	}		
-
-	private static class Cache implements IPropertyChangeListener {
-		private int[] fOffsets= null;
-
-		public void propertyChange(PropertyChangeEvent event) {
-			fOffsets= null;
-		}
-
-		public int getIndex(int kind) {
-			if (fOffsets == null) {
-				fOffsets= getOffsets();
-			}
-			return fOffsets[kind];
-		}
-		
-		private int[] getOffsets() {
-			int[] offsets= new int[N_ENTRIES];
-			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-			String key= PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER;
-			boolean success= fillOffsetsFromPreferenceString(store.getString(key), offsets);
-			if (!success) {
-				store.setToDefault(key);
-				fillOffsetsFromPreferenceString(store.getDefaultString(key), offsets);	
-			}
-			return offsets;
-		}		
-		
-		private boolean fillOffsetsFromPreferenceString(String str, int[] offsets) {
-			StringTokenizer tokenizer= new StringTokenizer(str, ","); //$NON-NLS-1$
-			int i= 0;
-			while (tokenizer.hasMoreTokens()) {
-				String token= tokenizer.nextToken().trim();
-				if ("T".equals(token)) {
-					offsets[TYPE_INDEX]= i++;
-				} else if ("M".equals(token)) {
-					offsets[METHOD_INDEX]= i++;
-				} else if ("F".equals(token)) {
-					offsets[FIELDS_INDEX]= i++;
-				} else if ("I".equals(token)) {
-					offsets[INIT_INDEX]= i++;
-				} else if ("SF".equals(token)) {
-					offsets[STATIC_FIELDS_INDEX]= i++;
-				} else if ("SI".equals(token)) {
-					offsets[STATIC_INIT_INDEX]= i++;
-				} else if ("SM".equals(token)) {
-					offsets[STATIC_METHODS_INDEX]= i++;
-				} else if ("C".equals(token)) {
-					offsets[CONSTRUCTORS_INDEX]= i++;
-				}
-			}
-			return i == N_ENTRIES;
-		}
-	}
-	
 	public JavaElementSorter() {
 		super(null); // delay initialization of collator
 	}
-	
+		
 	/**
 	 * @deprecated Bug 22518. Method never used: does not override ViewerSorter#isSorterProperty(Object, String).
 	 * Method could be removed, but kept for API compatibility.
@@ -177,32 +98,32 @@ public class JavaElementSorter extends ViewerSorter {
 						{
 							IMethod method= (IMethod) je;
 							if (method.isConstructor()) {
-								return getMemberCategory(CONSTRUCTORS_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCache.CONSTRUCTORS_INDEX);
 							}
 							int flags= method.getFlags();
 							if (Flags.isStatic(flags))
-								return getMemberCategory(STATIC_METHODS_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCache.STATIC_METHODS_INDEX);
 							else
-								return getMemberCategory(METHOD_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCache.METHOD_INDEX);
 						}
 					case IJavaElement.FIELD :
 						{
 							int flags= ((IField) je).getFlags();
 							if (Flags.isStatic(flags))
-								return getMemberCategory(STATIC_FIELDS_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCache.STATIC_FIELDS_INDEX);
 							else
-								return getMemberCategory(FIELDS_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCache.FIELDS_INDEX);
 						}
 					case IJavaElement.INITIALIZER :
 						{
 							int flags= ((IInitializer) je).getFlags();
 							if (Flags.isStatic(flags))
-								return getMemberCategory(STATIC_INIT_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCache.STATIC_INIT_INDEX);
 							else
-								return getMemberCategory(INIT_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCache.INIT_INDEX);
 						}
 					case IJavaElement.TYPE :
-						return getMemberCategory(TYPE_INDEX);
+						return getMemberCategory(MembersOrderPreferenceCache.TYPE_INDEX);
 					case IJavaElement.PACKAGE_DECLARATION :
 						return PACKAGE_DECL;
 					case IJavaElement.IMPORT_CONTAINER :
@@ -238,6 +159,11 @@ public class JavaElementSorter extends ViewerSorter {
 		}
 		return OTHERS;
 	}
+	
+	private int getMemberCategory(int kind) {
+		int offset= JavaPlugin.getDefault().getMemberOrderPreferenceCache().getIndex(kind);
+		return offset + MEMBERSOFFSET;
+	}		
 
 	/*
 	 * @see ViewerSorter#compare
