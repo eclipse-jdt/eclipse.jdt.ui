@@ -59,12 +59,12 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.ui.IEditorPart)
 	 */
-	public Match[] findContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
+	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		//TODO: copied from JavaSearchResult:
 		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput instanceof IFileEditorInput)  {
 			IFileEditorInput fileEditorInput= (IFileEditorInput) editorInput;
-			return findContainedMatches(result, fileEditorInput.getFile());
+			return computeContainedMatches(result, fileEditorInput.getFile());
 		} else if (editorInput instanceof IClassFileEditorInput) {
 			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) editorInput;
 			Set matches= new HashSet();
@@ -77,7 +77,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.core.resources.IFile)
 	 */
-	public Match[] findContainedMatches(AbstractTextSearchResult result, IFile file) {
+	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
 		if (fQuery.getPropertiesFile().equals(file)) {
 			ArrayList matches= new ArrayList();
 			if (fDuplicatesGroup != null)

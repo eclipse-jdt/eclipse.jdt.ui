@@ -65,11 +65,11 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 		return getLabel();
 	}
 
-	public Match[] findContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
+	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput instanceof IFileEditorInput)  {
 			IFileEditorInput fileEditorInput= (IFileEditorInput) editorInput;
-			return findContainedMatches(result, fileEditorInput.getFile());
+			return computeContainedMatches(result, fileEditorInput.getFile());
 		} else if (editorInput instanceof IClassFileEditorInput) {
 			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) editorInput;
 			Set matches= new HashSet();
@@ -79,12 +79,13 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 		return null;
 	}
 
-	public Match[] findContainedMatches(AbstractTextSearchResult result, IFile file) {
+	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
 		IJavaElement javaElement= JavaCore.create(file);
 		Set matches= new HashSet();
 		collectMatches(matches, javaElement);
 		return (Match[]) matches.toArray(new Match[matches.size()]);
 	}
+	
 	private void collectMatches(Set matches, IJavaElement element) {
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
