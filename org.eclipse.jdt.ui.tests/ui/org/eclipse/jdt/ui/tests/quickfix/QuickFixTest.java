@@ -115,6 +115,14 @@ public class QuickFixTest extends TestCase {
 		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expecteds);			
 	}
 	
+	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException {
+		String[] actuals= new String[actualProposals.size()];
+		for (int i= 0; i < actualProposals.size(); i++) {
+			actuals[i]= getPreviewContent((CUCorrectionProposal) actualProposals.get(i));
+		}
+		StringAsserts.assertExpectedExistInProposals(actuals, expecteds);
+	}
+	
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
 		List types= astRoot.types();
 		for (int i= 0; i < types.size(); i++) {
@@ -156,12 +164,12 @@ public class QuickFixTest extends TestCase {
 	}
 
 
-	protected final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot) {
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot) {
 		return collectCorrections(cu, astRoot, 1);
 	}
 
 
-	protected final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) {
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) {
 		IProblem[] problems= astRoot.getProblems();
 		if (problems.length != nProblems) {
 			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
@@ -177,7 +185,7 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, problems[0]);
 	}
 	
-	protected final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws JavaModelException {
+	protected static final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws JavaModelException {
 		
 		final ArrayList problemsList= new ArrayList();
 		IProblemRequestor requestor= new IProblemRequestor() {
@@ -213,7 +221,7 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, problems[0]);
 	}
 		
-	protected final ArrayList collectCorrections(ICompilationUnit cu, IProblem curr) {
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, IProblem curr) {
 			
 		int offset= curr.getSourceStart();
 		int length= curr.getSourceEnd() + 1 - offset;
@@ -231,7 +239,7 @@ public class QuickFixTest extends TestCase {
 	}
 
 
-	protected final ArrayList collectAssists(IInvocationContext context, Class[] filteredTypes) {
+	protected static final ArrayList collectAssists(IInvocationContext context, Class[] filteredTypes) {
 		ArrayList proposals= new ArrayList();
 		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		
@@ -245,7 +253,7 @@ public class QuickFixTest extends TestCase {
 		return proposals;
 	}
 	
-	private boolean isFiltered(Object curr, Class[] filteredTypes) {
+	private static boolean isFiltered(Object curr, Class[] filteredTypes) {
 		for (int k = 0; k < filteredTypes.length; k++) {
 			if (filteredTypes[k].isInstance(curr)) {
 				return true;
@@ -254,23 +262,23 @@ public class QuickFixTest extends TestCase {
 		return false;
 	}
 	
-	protected final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) {
+	protected static final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) {
 		Class[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class };
 		return collectAssists(context, filteredTypes);
 	}
 	
-	protected CompilationUnit getASTRoot(ICompilationUnit cu) {
+	protected static CompilationUnit getASTRoot(ICompilationUnit cu) {
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);
 	}
 	
-	protected String getPreviewContent(CUCorrectionProposal proposal) throws CoreException {
+	protected static String getPreviewContent(CUCorrectionProposal proposal) throws CoreException {
 		return proposal.getPreviewContent();
 	}
 	
-	protected void assertNumberOfProposals(List proposals, int expectedProposals) {
+	protected static void assertNumberOfProposals(List proposals, int expectedProposals) {
 		if (proposals.size() != expectedProposals) {
 			StringBuffer buf= new StringBuffer();
 			buf.append("Wrong number of proposals, is: ").append(proposals.size()). append(", expected: ").append(expectedProposals).append('\n');
@@ -285,7 +293,7 @@ public class QuickFixTest extends TestCase {
 		}
 	}
 	
-	private void appendSource(CUCorrectionProposal proposal, StringBuffer buf) {
+	private static void appendSource(CUCorrectionProposal proposal, StringBuffer buf) {
 		
 	}
 }

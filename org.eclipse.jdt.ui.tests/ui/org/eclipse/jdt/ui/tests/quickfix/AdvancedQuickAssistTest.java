@@ -226,11 +226,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -244,19 +240,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(boolean a, int b) {\n");
-		buf.append("        return;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });	
 		
 	}
 

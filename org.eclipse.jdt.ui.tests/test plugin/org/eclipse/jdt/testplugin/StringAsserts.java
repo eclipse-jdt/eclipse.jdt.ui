@@ -149,5 +149,47 @@ public class StringAsserts {
 		}				
 	}
 	
+	public static void assertExpectedExistInProposals(String[] actuals, String[] expecteds) {
+		ArrayList list1= new ArrayList(Arrays.asList(actuals));
+		ArrayList list2= new ArrayList(Arrays.asList(expecteds));
+		
+		for (int i= list1.size() - 1; i >= 0; i--) {
+			if (list2.remove(list1.get(i))) {
+				list1.remove(i);
+			}
+		}
+		
+		int n1= list1.size();
+		int n2= list2.size();
+		
+		if (n2 > 0) {
+			if (n1 == 1 && n2 == 1) {
+				assertEqualString((String) list1.get(0), (String) list2.get(0));
+			}
+			
+			StringBuffer buf= new StringBuffer();
+			for (int i= 0; i < n1; i++) {
+				String s1= (String) list1.get(i);
+				if (s1 != null) {
+					buf.append(s1);
+					buf.append("\n");
+				}
+			}
+			String actual= buf.toString();
+			
+			buf= new StringBuffer();
+			for (int i= 0; i < n2; i++) {
+				String s2= (String) list2.get(i);
+				if (s2 != null) {
+					buf.append(s2);
+					buf.append("\n");
+				}
+			}
+			String expected= buf.toString();
+
+			String message= "Content not as expected: Content is: \n" + actual + "\nExpected contents: \n" + expected;
+			Assert.assertEquals(message, expected, actual);
+		}
+	}
 	
 }
