@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 
-import org.eclipse.jface.text.source.ITagHandler;
-import org.eclipse.jface.text.source.ITagHandlerFactory;
-import org.eclipse.jface.text.source.ITranslator;
+import org.eclipse.jface.text.source.translation.ITagHandler;
+import org.eclipse.jface.text.source.translation.ITagHandlerFactory;
+import org.eclipse.jface.text.source.translation.ITranslator;
 
 import org.eclipse.jdt.internal.ui.examples.jspeditor.JspTranslatorResultCollector;
 

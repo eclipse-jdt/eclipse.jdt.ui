@@ -14,8 +14,8 @@ package org.eclipse.jdt.internal.ui.examples.jspeditor;
 import java.io.IOException;
 
 import org.eclipse.jface.text.Assert;
-import org.eclipse.jface.text.source.ITagHandler;
-import org.eclipse.jface.text.source.ITranslatorResultCollector;
+import org.eclipse.jface.text.source.translation.ITagHandler;
+import org.eclipse.jface.text.source.translation.ITranslatorResultCollector;
 
 /**
  * 

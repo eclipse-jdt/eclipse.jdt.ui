@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
 import java.util.ArrayList;
 
-import org.eclipse.jface.text.source.ITranslatorResultCollector;
+import org.eclipse.jface.text.source.translation.ITranslatorResultCollector;
 
 /**
  * Collects the result for the JspTranslator.

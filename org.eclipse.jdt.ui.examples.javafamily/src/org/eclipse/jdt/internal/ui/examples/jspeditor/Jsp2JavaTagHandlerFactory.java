@@ -11,8 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
-import org.eclipse.jface.text.source.ITagHandler;
-import org.eclipse.jface.text.source.ITagHandlerFactory;
+import org.eclipse.jface.text.source.translation.ITagHandler;
+import org.eclipse.jface.text.source.translation.ITagHandlerFactory;
 
 /**
  * First cut of JSP to Java tag handler factory.

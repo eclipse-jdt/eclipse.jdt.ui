@@ -26,7 +26,7 @@ import org.eclipse.jface.text.reconciler.IReconcileStep;
 import org.eclipse.jface.text.reconciler.IReconcileResult;
 import org.eclipse.jface.text.reconciler.IReconcilableModel;
 import org.eclipse.jface.text.reconciler.DocumentAdapter;
-import org.eclipse.jface.text.source.ITranslator;
+import org.eclipse.jface.text.source.translation.ITranslator;
 
 import org.eclipse.jsp.JspTranslator;
 
