@@ -64,7 +64,9 @@ public class CompareResultDialog extends Dialog {
              super(parent, style, configuration);
          }
         protected ITokenComparator createTokenComparator(String s) {
-            return new CharacterComparator(s);
+        	if (s.length() < 100)
+        		return new CharacterComparator(s);
+        	return super.createTokenComparator(s);
         }
         protected void configureTextViewer(TextViewer textViewer) {
             if (textViewer instanceof SourceViewer) {
