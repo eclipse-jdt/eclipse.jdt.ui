@@ -20,12 +20,13 @@ import java.util.List;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -65,13 +66,14 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.ui.editors.text.IStorageDocumentProvider;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.editors.text.IStorageDocumentProvider;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
@@ -964,11 +966,15 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			return;
 		}
 			
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IFile file= workspace.getRoot().getFile(filePath);
+		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
+		IFile file= workspaceRoot.getFile(filePath);
 		final IEditorInput newInput= new FileEditorInput(file);
 		
-		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+		ISchedulingRule scheduleRule= file.getParent();
+		if (scheduleRule == null)
+			scheduleRule= workspaceRoot;
+		
+		WorkspaceModifyOperation op= new WorkspaceModifyOperation(scheduleRule) {
 			public void execute(final IProgressMonitor monitor) throws CoreException {
 				getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()), true);
 			}

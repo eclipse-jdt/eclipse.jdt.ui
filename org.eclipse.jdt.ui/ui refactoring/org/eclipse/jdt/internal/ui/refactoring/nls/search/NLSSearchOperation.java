@@ -44,6 +44,7 @@ class NLSSearchOperation extends WorkspaceModifyOperation {
 				IJavaSearchScope scope,
 				String scopeDescription,
 				NLSSearchResultCollector collector) {
+		super(null);
 		fWorkspace= workspace;
 		fLimitTo= limitTo;
 		fScope= scope;
