@@ -13,7 +13,7 @@
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="quickAssistProcessors" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="quickAssistProcessor" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
