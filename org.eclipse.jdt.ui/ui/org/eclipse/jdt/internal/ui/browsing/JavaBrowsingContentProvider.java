@@ -246,7 +246,7 @@ class JavaBrowsingContentProvider extends BaseJavaElementContentProvider impleme
 				if (element instanceof IClassFile) {
 					postRemove(((IClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
-					if (!getProvideWorkingCopy())
+//					if (!getProvideWorkingCopy())
 						postRefresh(null);
 				} else if (element instanceof ICompilationUnit && ((ICompilationUnit)element).isWorkingCopy()) {
 					if (getProvideWorkingCopy())
@@ -282,7 +282,7 @@ class JavaBrowsingContentProvider extends BaseJavaElementContentProvider impleme
 				if (element instanceof IClassFile) {
 					postAdd(parent, ((IClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
-					if (!getProvideWorkingCopy())
+//					if (!getProvideWorkingCopy())
 						postAdd(parent, ((ICompilationUnit)element).getAllTypes());
 				} else if (parent instanceof ICompilationUnit && getProvideWorkingCopy() && !((ICompilationUnit)parent).isWorkingCopy()) {
 					//	do nothing
