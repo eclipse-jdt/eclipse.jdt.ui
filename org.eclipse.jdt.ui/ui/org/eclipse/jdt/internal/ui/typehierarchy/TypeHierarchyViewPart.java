@@ -71,7 +71,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	private AddMethodStubAction fAddStubAction;
 	private FocusOnTypeAction fFocusOnTypeAction;
 	private FocusOnSelectionAction fFocusOnSelectionAction;
-		
+			
 	public TypeHierarchyViewPart() {
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle();
 		fHierarchyLifeCycle.addChangedListener(this);
@@ -454,6 +454,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		selProvider.addSelectionChangedListener(new StatusBarUpdater(slManager));
 		
 		getSite().setSelectionProvider(selProvider);
+		fFocusOnSelectionAction= new FocusOnSelectionAction(this, selProvider);		
 		
 		IType input= determineInputElement();
 		if (fMemento != null) {
@@ -475,11 +476,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		addOpenWithMenu(menu, selection);
 		
 		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fFocusOnTypeAction);
-		if (fFocusOnSelectionAction == null)
-			fFocusOnSelectionAction= new FocusOnSelectionAction(this, viewer);
-		if (fFocusOnSelectionAction.canActionBeAdded()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fFocusOnSelectionAction);	
-		}
+		if (fFocusOnSelectionAction.canActionBeAdded())
+			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fFocusOnSelectionAction);
+			
 		addRefactoring(menu, viewer);
 	}
 
