@@ -286,7 +286,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			String[] types= meth.getParameterTypes();
 			int last= types.length - 1;
 			for (int i= 0; i <= last; i++) {
-				buf.append(Signature.toString(types[i]));
+				buf.append(Signature.toString(Signature.getTypeErasure(types[i])));
 				if (i != last) {
 					buf.append(", "); //$NON-NLS-1$
 				}
