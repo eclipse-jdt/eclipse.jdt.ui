@@ -95,12 +95,12 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		for (int i= 0; i < cus.length; i++) {
 			String actual= cus[i].getSource();
 			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
-			SourceCompareUtil.compare(actual, expected);
+			SourceCompareUtil.compare(cus[i].getElementName(), actual, expected);
 		}
 		ICompilationUnit newCu= clas.getPackageFragment().getCompilationUnit(className + ".java");
 		String expected= getFileContents(getOutputTestFileName(className));
 		String actual= newCu.getSource();
-		SourceCompareUtil.compare(actual, expected);
+		SourceCompareUtil.compare("new Cu:", actual, expected);
 	}
 	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName) throws Exception {
 		validatePassingTest(parentClassName, className, cuNames, packageNames, enclosingInstanceName, false);
