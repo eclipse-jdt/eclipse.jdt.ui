@@ -55,11 +55,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMethodDeclTest("testBUG_38447"));
+			suite.addTest(new ASTRewritingMethodDeclTest("testMethodComments4"));
 			return suite;
 		}
 	}
@@ -1370,6 +1370,77 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+
+	public void testMethodComments4() throws Exception {
+	
+	
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+
+		buf.append("public class DD {\n");
+		buf.append("    // one line comment\n");
+		buf.append("\n");		
+		buf.append("    private void foo(){\n");
+		buf.append("    } // another\n");
+		buf.append("\n");
+		buf.append("    /*\n");
+		buf.append("     *\n");
+		buf.append("     */\n");
+		buf.append("    private void foo1(){\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void foo2(){\n");
+		buf.append("    }\n");	
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("DD.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "DD");
+		{
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+			ASTNode copy= rewrite.createCopy(methodDecl);
+			
+			type.bodyDeclarations().add(copy);
+			rewrite.markAsInserted(copy);
+			
+			MethodDeclaration newMethodDecl= createNewMethod(astRoot.getAST(), "xoo", false);
+			rewrite.markAsReplaced(methodDecl, newMethodDecl);
+			
+			//MethodDeclaration methodDecl2= findMethodDeclaration(type, "foo1");
+			//rewrite.markAsReplaced(methodDecl2, copy);
+		}
+
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+
+		proposal.apply(null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+
+		buf.append("public class DD {\n");
+		buf.append("    // one line comment\n");
+		buf.append("\n");		
+		buf.append("    private void xoo(String str) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /*\n");
+		buf.append("     *\n");
+		buf.append("     */\n");
+		buf.append("    private void foo1(){\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void foo2(){\n");
+		buf.append("    }\n");
+		buf.append("\n");	
+		buf.append("    private void foo(){\n");
+		buf.append("    } // another\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}	
 	
 	
 }

@@ -15,38 +15,15 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.Message;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.*;
+
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 public class ASTNodes {
@@ -62,40 +39,25 @@ public class ASTNodes {
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	private static final IProblem[] EMPTY_PROBLEMS= new IProblem[0];
 	
-	/**
-	 * @deprecated Use list finder
-	 */
-	private static class NextSiblingVisitor extends GenericVisitor {
-		private ASTNode fNode;
-		private ASTNode fParent;
-		private ASTNode fResult;
-		private boolean fNodeFound;
-		public NextSiblingVisitor(ASTNode node) {
-			fNode= node;
-			fParent= node.getParent();
+	private static class ChildrenCollector extends GenericVisitor {
+		public List result;
+
+		public ChildrenCollector() {
+			result= null;
 		}
 		protected boolean visitNode(ASTNode node) {
-			if (node == fParent)
+			if (result == null) { // first visitNode: on the node's parent: do nothing, return true
+				result= new ArrayList();
 				return true;
-			if (node == fNode) {
-				fNodeFound= true;
 			}
-			if (fNodeFound && node.getParent() == fParent)
-				fResult= node;
+			result.add(node);
 			return false;
-		}
-		public static ASTNode perform(ASTNode node) {
-			ASTNode parent= node.getParent();
-			if (parent == null)
-				return null;
-			NextSiblingVisitor visitor= new NextSiblingVisitor(node);
-			parent.accept(visitor);
-			return visitor.fResult;
 		}
 	}
 	
 	private static class ListFinder extends ASTVisitor {
-		private List result;
+		public List result;
+		
 		private ASTNode fNode;
 		public ListFinder(ASTNode node) {
 			fNode= node;
@@ -104,24 +66,82 @@ public class ASTNodes {
 			test(node.bodyDeclarations());
 			return false;
 		}
+		public boolean visit(ArrayCreation node) {
+			test(node.dimensions());
+			return false;
+		}
+		public boolean visit(ArrayInitializer node) {
+			test(node.expressions());
+			return false;
+		}		
 		public boolean visit(Block node) {
 			test(node.statements());
+			return false;
+		}
+		public boolean visit(ClassInstanceCreation node) {
+			test(node.arguments());
+			return false;
+		}
+		public boolean visit(CompilationUnit node) {
+			test(node.imports());
+			test(node.types());
+			return false;
+		}		
+		public boolean visit(ConstructorInvocation node) {
+			test(node.arguments());
+			return false;
+		}
+		public boolean visit(FieldDeclaration node) {
+			test(node.fragments());
+			return false;
+		}
+		public boolean visit(ForStatement node) {
+			test(node.initializers());
+			test(node.updaters());
+			return false;
+		}
+		public boolean visit(MethodDeclaration node) {
+			test(node.parameters());
+			test(node.thrownExceptions());
+			return false;
+		}
+		public boolean visit(MethodInvocation node) {
+			test(node.arguments());
+			return false;
+		}
+		public boolean visit(SuperConstructorInvocation node) {
+			test(node.arguments());
+			return false;
+		}
+		public boolean visit(SuperMethodInvocation node) {
+			test(node.arguments());
 			return false;
 		}
 		public boolean visit(SwitchStatement node) {
 			test(node.statements());
 			return false;
 		}
+		public boolean visit(TryStatement node) {
+			test(node.catchClauses());
+			return false;
+		}		
 		public boolean visit(TypeDeclaration node) {
 			test(node.bodyDeclarations());
+			test(node.superInterfaces());
+			return false;
+		}		
+		public boolean visit(VariableDeclarationExpression node) {
+			test(node.fragments());
 			return false;
 		}
-		private boolean test(List nodes) {
-			if (nodes.indexOf(fNode) != -1) {
-				result= nodes;
-				return true;
-			}
+		public boolean visit(VariableDeclarationStatement node) {
+			test(node.fragments());
 			return false;
+		}
+		private void test(List nodes) {
+			if (nodes.contains(fNode)) {
+				result= nodes;
+			}
 		}
 	}
 	
@@ -157,6 +177,15 @@ public class ASTNodes {
     	return finder.result;
     }
     
+	/**
+	 * Returns a list of the direct chidrens of a node. The siblings are ordered by start offset.
+	 */    
+	public static List getChildren(ASTNode node) {
+		ChildrenCollector visitor= new ChildrenCollector();
+		node.accept(visitor);
+		return visitor.result;		
+	}
+        
 	public static ASTNode findDeclaration(IBinding binding, ASTNode root) {
 		root= root.getRoot();
 		if (root instanceof CompilationUnit) {
@@ -319,9 +348,7 @@ public class ASTNodes {
 		return false;
 	}
 	
-	public static ASTNode getNextSibling(ASTNode node) {
-		return NextSiblingVisitor.perform(node);
-	}
+
 	
 	public static int getExclusiveEnd(ASTNode node){
 		return node.getStartPosition() + node.getLength();
@@ -469,4 +496,41 @@ public class ASTNodes {
 				return 1;
 		}
 	}
+	
+	public static ISourceRange getNodeRangeWithComments(ASTNode node, TokenScanner scanner) {
+		int tokenStart= node.getStartPosition();
+		int lastPos= 0;
+		int nextPos= -1;
+		ASTNode parent= node.getParent();
+		if (parent != null && parent.getStartPosition() != -1) {
+			lastPos= parent.getStartPosition();
+		}
+		List siblings= ASTNodes.getChildren(parent);
+		for (int i= 0; i < siblings.size(); i++) {
+			ASTNode curr= (ASTNode) siblings.get(i);
+			int offset= curr.getStartPosition();
+			if (offset != -1) {
+				if (offset < tokenStart) {
+					lastPos= getExclusiveEnd(curr);
+				}
+				if (offset > tokenStart) {
+					nextPos= offset;
+					break;
+				}
+			}
+		}
+		return getNodeRangeWithComments(node, lastPos, nextPos, scanner);
+	}
+	
+	public static ISourceRange getNodeRangeWithComments(ASTNode node, int prevEnd, int nextStart, TokenScanner scanner) {
+		try {
+			int tokenStart= node.getStartPosition();
+			int start= scanner.getTokenCommentStart(prevEnd, tokenStart);
+			int end= scanner.getTokenCommentEnd(tokenStart + node.getLength(), nextStart);
+			return new SourceRange(start, end - start);
+		} catch (CoreException e) {
+			return new SourceRange(node.getStartPosition(), node.getLength());
+		}
+	}		
+	
 }

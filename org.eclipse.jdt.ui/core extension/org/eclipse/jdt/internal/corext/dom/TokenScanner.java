@@ -12,11 +12,13 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
@@ -28,16 +30,38 @@ public class TokenScanner {
 	public static final int LEXICAL_ERROR= 20002;
 	
 	private IScanner fScanner;
+	private TextBuffer fTextBuffer;
 	private int fEndPosition;
 	
 	/**
 	 * Creates a TokenScanner
-	 * @param scanner The scanner to be wrapped
+	 * @param scanner The scanner to be wrapped. The scanner has to support line information
+	 * if the comment position methods are used.
 	 */
 	public TokenScanner(IScanner scanner) {
+		this(scanner, null);
+	}
+	
+	/**
+	 * Creates a TokenScanner
+	 * @param scanner The scanner to be wrapped
+	 * @param textBuffer The textbuffer used for line information if specified
+	 */
+	public TokenScanner(IScanner scanner, TextBuffer textBuffer) {
 		fScanner= scanner;
 		fEndPosition= fScanner.getSource().length - 1;
 	}
+	
+	/**
+	 * Creates a TokenScanner
+	 * @param textBuffer The textbuffer to create the scanner on
+	 */
+	public TokenScanner(TextBuffer textBuffer) {
+		fScanner= ToolFactory.createScanner(true, false, false, false);
+		fScanner.setSource(textBuffer.getContent().toCharArray());
+		fTextBuffer= textBuffer;
+		fEndPosition= fScanner.getSource().length - 1;
+	}		
 	
 	/**
 	 * Returns the wrapped scanner
@@ -174,37 +198,134 @@ public class TokenScanner {
 	}
 	
 	/**
-	 * Reads from the given offset until a non-comment token is reached and returns the start offset of the comments
-	 * directly ahead of the token.
-	 * @param startOffset The offset to before the comments of the non-comment token.
+	 * Evaluates the start offset of comments directly ahead of a token specified by its start offset
+	 * 
+	 * @param lastPos An offset to before the node start offset. Can be 0 but better is the end location of the previous node. 
+	 * @param nodeStart Start offset of the node to find the comments for.
+	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
+	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
+	 */		
+	public int getTokenCommentStart(int lastPos, int nodeStart) throws CoreException {
+		setOffset(lastPos);
+
+		int prevEndPos= lastPos;
+		int prevEndLine= getLineOfOffset(prevEndPos - 1);
+		int nodeLine= getLineOfOffset(nodeStart);
+		
+		int res= -1;
+
+		int curr= readNext(false);
+		int currStartPos= getCurrentStartOffset();
+		int currStartLine= getLineOfOffset(currStartPos);
+		while (nodeStart > currStartPos) {
+			if (TokenScanner.isComment(curr)) {
+				int linesDifference= currStartLine - prevEndLine;
+				if ((linesDifference > 1) || (res == -1 && (linesDifference != 0 || nodeLine == currStartLine))) {
+					res= currStartPos; // begin new
+				}
+			} else {
+				res= -1;
+			}
+			
+			if (curr == ITerminalSymbols.TokenNameCOMMENT_LINE) {
+				prevEndLine= currStartLine;
+			} else {
+				prevEndLine= getLineOfOffset(getCurrentEndOffset() - 1);
+			}					
+			curr= readNext(false);
+			currStartPos= getCurrentStartOffset();
+			currStartLine= getLineOfOffset(currStartPos);
+		}
+		if (res == -1) {
+			return nodeStart;
+		}
+		if (currStartLine - prevEndLine > 1) {
+			return nodeStart;
+		}			
+		return res;
+	}
+	
+	/**
+	 * Looks for comments after a node and returns the end position of the comment still belonging to the node.
+	 * @param nodeEndOffset The end position of the node
+	 * @param nextTokenStart The start positoion of the next node. Optional, can be -1
 	 * @param buffer The text buffer that corresponds to the content that is scanned or <code>null</code> if
 	 * the line information shoould be taken from the scanner object
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
 	 */		
-	public int getTokenCommentStart(int startOffset, TextBuffer buffer) throws CoreException {
-		int curr= 0;
-		int res= -1;
-		int lastCommentEndLine= -1;
-		setOffset(startOffset);
-		do {
-			curr= readNext(false);
+	public int getTokenCommentEnd(int nodeEnd, int nextTokenStart) throws CoreException {
+		// assign comments to the previous comments as long they are all on the same line as the
+		// node end position or if they are on the next line but there is a separation from the next
+		// node
+		// } //aa
+		// // aa
+		//
+		// // bb
+		// public void b...
+		//
+		// } /* cc */ /*
+		// cc/*
+		// /*dd*/
+		// public void d...
+		
+		int prevEndLine= getLineOfOffset(nodeEnd - 1);
+		int prevEndPos= nodeEnd;
+		int res= nodeEnd;
+		boolean sameLineComment= true;
+		
+		setOffset(nodeEnd);
+		
+		int curr= readNext(false);
+		while (curr == ITerminalSymbols.TokenNameCOMMENT_LINE || curr == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
+			int currStartLine= getLineOfOffset(getCurrentStartOffset());
+			int linesDifference= currStartLine - prevEndLine;
 			
-			int startLine= getLineOfOffset(buffer, getCurrentStartOffset());
-			if (lastCommentEndLine == -1 || startLine - lastCommentEndLine > 1) {
-				res= getCurrentStartOffset();
+			if (linesDifference > 1) {
+				return prevEndPos; // separated comments
 			}
-			lastCommentEndLine= getLineOfOffset(buffer, getCurrentEndOffset() - 1);
-		} while (isComment(curr));
+			
+			if (curr == ITerminalSymbols.TokenNameCOMMENT_LINE) {
+				prevEndPos= getLineEnd(currStartLine);
+				prevEndLine= currStartLine;
+			} else {
+				prevEndPos= getCurrentEndOffset();
+				prevEndLine= getLineOfOffset(prevEndPos - 1);
+			}
+			if (sameLineComment) {
+				if (linesDifference == 0) {
+					res= prevEndPos;
+				} else {
+					sameLineComment= false;
+				}	
+			}
+			curr= readNext(false);
+		}
+		int currStartLine= getLineOfOffset(getCurrentStartOffset());
+		int linesDifference= currStartLine - prevEndLine;
+		if (linesDifference > 1) {
+			return prevEndPos; // separated comments
+		}
+		if (currStartLine == 0 && nextTokenStart == getCurrentStartOffset()) {
+			return nodeEnd;
+		}
 		return res;
 	}
 	
-	private int getLineOfOffset(TextBuffer buffer, int offset) {
-		if (buffer != null) {
-			return buffer.getLineOfOffset(offset);
+	private int getLineOfOffset(int offset) {
+		if (fTextBuffer != null) {
+			return fTextBuffer.getLineOfOffset(offset);
 		}
-		return fScanner.getLineNumber(offset);
+		return getScanner().getLineNumber(offset);
 	}
+	
+	private int getLineEnd(int line) {
+		if (fTextBuffer != null) {
+			TextRegion region= fTextBuffer.getLineInformation(line);
+			return region.getOffset() + region.getLength();
+		}
+		return getScanner().getLineEnd(line);
+	}			
 	
 		
 	public static boolean isComment(int token) {

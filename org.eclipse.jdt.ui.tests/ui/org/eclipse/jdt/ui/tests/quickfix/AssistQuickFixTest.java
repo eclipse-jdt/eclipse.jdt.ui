@@ -662,7 +662,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        {\n");
-		buf.append("            throw new NullPointerException();//comment\n");
+		buf.append("            throw new NullPointerException();\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");

@@ -288,10 +288,12 @@ public final class ASTRewrite {
 	 */
 	public final ASTNode createCopy(ASTNode node) {
 		Assert.isTrue(node.getStartPosition() != -1, "Tries to copy a non-existing node"); //$NON-NLS-1$
-		Assert.isTrue(getCopySourceEdit(node) == null, "Node used as more than one copy source"); //$NON-NLS-1$
+		Assert.isTrue(!isCopied(node), "Node used as more than one copy source"); //$NON-NLS-1$
 		assertIsInside(node);
-		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node.getStartPosition(), node.getLength());
-		setCopySourceEdit(node, copySource);
+		
+		ASTCopySource copySource= new ASTCopySource();
+		copySource.data= null;
+		setCopyProperty(node, copySource);
 		
 		int placeHolderType= getPlaceholderType(node);
 		if (placeHolderType == UNKNOWN) {
@@ -350,7 +352,7 @@ public final class ASTRewrite {
 	 * @param code String that will be inserted. The string must have no extra indent.
 	 * @param nodeType the type of the place holder. Valid values are <code>BODY_DECLARATION</code>,
 	 * <code>BLOCK</code>, <code>STATEMENT</code>, <code>SINGLEVAR_DECLARATION</code>,
-	 * <code>TYPE</code>, <code>TYPE_DECLARATION</code>, <code>EXPRESSION</code> and <code>JAVADOC</code> .
+	 * <code>TYPE</code>, <code>EXPRESSION</code> and <code>JAVADOC</code> .
 	 * @return the place holder node
 	 */
 	public final ASTNode createPlaceholder(String code, int nodeType) {
@@ -410,6 +412,10 @@ public final class ASTRewrite {
 		return node.getProperty(COMPOUND_CHILDREN) instanceof List;
 	}
 	
+	public final boolean isCopied(ASTNode node) {
+		return fCopiedProperties.containsKey(node);
+	}
+	
 	public final String getDescription(ASTNode node) {
 		Object info= getChangeProperty(node);
 		if (info instanceof ASTChange) {
@@ -434,9 +440,8 @@ public final class ASTRewrite {
 		return null;
 	}
 	
-	public void clearMark(ASTNode node) {
-		setCopySourceEdit(node, null);
-		setChangeProperty(node, null);
+	private final void setCopyProperty(ASTNode node, ASTCopySource copySource) {
+		fCopiedProperties.put(node, copySource);
 	}
 	
 	private final void setChangeProperty(ASTNode node, ASTChange change) {
@@ -447,12 +452,18 @@ public final class ASTRewrite {
 		return fChangedProperties.get(node);
 	}
 	
-	private final void setCopySourceEdit(ASTNode node, Object copySource) {
-		fCopiedProperties.put(node, copySource);
+	/* package */ final void setCopyData(ASTNode node, Object data) {
+		ASTCopySource copySource= (ASTCopySource) fCopiedProperties.get(node);
+		Assert.isTrue(copySource != null, "Node is not marked as copied"); //$NON-NLS-1$
+		copySource.data= data;
 	}
 	
-	/* package */ final Object getCopySourceEdit(ASTNode node) {
-		return fCopiedProperties.get(node);
+	/* package */  final Object getCopyData(ASTNode node) {
+		ASTCopySource copySource= (ASTCopySource) fCopiedProperties.get(node);
+		if (copySource != null) {
+			return copySource.data;
+		}
+		return null;
 	}
 	
 	private void assertIsInside(ASTNode node) {
@@ -480,4 +491,8 @@ public final class ASTRewrite {
 	private static final class ASTModify extends ASTChange {
 		public ASTNode modifiedNode;
 	}
+	
+	private static final class ASTCopySource {
+		public Object data; // rewriter specific data
+	}	
 }

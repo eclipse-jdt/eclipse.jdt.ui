@@ -40,7 +40,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -652,12 +652,78 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		proposal.apply(null);
 		
 		buf= new StringBuffer();
-		buf.append("package org.eclipse;\n");
+		buf.append("package org.eclipse; // comment\n");
 		buf.append("public class Z {\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	public void testCompilationUnit() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Z {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("Z.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		{
+			PackageDeclaration packageDeclaration= astRoot.getPackage();
+			rewrite.markAsRemoved(packageDeclaration);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("\n");	
+		buf.append("public class Z {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	public void testCompilationUnit2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class Z {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("Z.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		{
+			PackageDeclaration packageDeclaration= ast.newPackageDeclaration();
+			Name name= ast.newName(new String[] { "org", "eclipse" });
+			packageDeclaration.setName(name);
+			rewrite.markAsInserted(packageDeclaration);
+			astRoot.setPackage(packageDeclaration);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package org.eclipse;\n");
+		buf.append("public class Z {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}	
 	
 	public void testSingleVariableDeclaration() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

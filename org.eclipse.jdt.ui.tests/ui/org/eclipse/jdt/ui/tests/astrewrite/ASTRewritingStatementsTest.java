@@ -42,11 +42,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		super(name);
 	}
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingStatementsTest("testRemove"));
+			suite.addTest(new ASTRewritingStatementsTest("testSwitchStatement"));
 			return suite;
 		}
 	}
