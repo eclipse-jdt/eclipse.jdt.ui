@@ -66,13 +66,13 @@ import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.link.ExclusivePositionUpdater;
-import org.eclipse.jface.text.link.ILinkedListener;
-import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.ILinkedModeListener;
+import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedUIControl;
-import org.eclipse.jface.text.link.LinkedUIControl.ExitFlags;
-import org.eclipse.jface.text.link.LinkedUIControl.IExitPolicy;
+import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
+import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -405,7 +405,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
 		 */
-		public ExitFlags doExit(LinkedEnvironment environment, VerifyEvent event, int offset, int length) {
+		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
 			
 			if (event.character == fExitCharacter) {
 				
@@ -415,9 +415,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						return null;
 					if (level.fSecondPosition.offset == offset && length == 0)
 						// don't enter the character if if its the closing peer
-						return new ExitFlags(ILinkedListener.UPDATE_CARET, false);
+						return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
 					else
-						return new ExitFlags(ILinkedListener.UPDATE_CARET, true);
+						return new ExitFlags(ILinkedModeListener.UPDATE_CARET, true);
 				}
 			}
 			return null;
@@ -436,12 +436,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	private static class BracketLevel {
 		int fOffset;
 		int fLength;
-		LinkedUIControl fEditor;
+		LinkedModeUI fUI;
 		Position fFirstPosition;
 		Position fSecondPosition;
 	}
 	
-	private class BracketInserter implements VerifyKeyListener, ILinkedListener {
+	private class BracketInserter implements VerifyKeyListener, ILinkedModeListener {
 		
 		private boolean fCloseBrackets= true;
 		private boolean fCloseStrings= true;
@@ -577,10 +577,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					LinkedPositionGroup group= new LinkedPositionGroup(); 
 					group.addPosition(new LinkedPosition(document, offset + 1, 0, LinkedPositionGroup.NO_STOP));
 
-					LinkedEnvironment env= new LinkedEnvironment();
-					env.addLinkedListener(this);
-					env.addGroup(group);
-					env.forceInstall();
+					LinkedModeModel model= new LinkedModeModel();
+					model.addLinkingListener(this);
+					model.addGroup(group);
+					model.forceInstall();
 					
 					level.fOffset= offset;
 					level.fLength= 2;
@@ -595,16 +595,16 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					document.addPosition(CATEGORY, level.fFirstPosition);
 					document.addPosition(CATEGORY, level.fSecondPosition);
 					
-					level.fEditor= new LinkedUIControl(env, sourceViewer);
-					level.fEditor.setSimpleMode(true);
-					level.fEditor.setPositionListener(new EditorHistoryUpdater());
-					level.fEditor.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
-					level.fEditor.setExitPosition(sourceViewer, offset + 2, 0, Integer.MAX_VALUE);
-					level.fEditor.setCyclingMode(LinkedUIControl.CYCLE_NEVER);
-					level.fEditor.enter();
+					level.fUI= new LinkedModeUI(model, sourceViewer);
+					level.fUI.setSimpleMode(true);
+					level.fUI.setPositionListener(new EditorHistoryUpdater());
+					level.fUI.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
+					level.fUI.setExitPosition(sourceViewer, offset + 2, 0, Integer.MAX_VALUE);
+					level.fUI.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
+					level.fUI.enter();
 					
 					
-					IRegion newSelection= level.fEditor.getSelectedRegion();
+					IRegion newSelection= level.fUI.getSelectedRegion();
 					sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection.getLength());
 	
 					event.doit= false;
@@ -619,13 +619,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 		
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment.ILinkedListener#left(org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment, int)
+		 * @see org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
 		 */
-		public void left(LinkedEnvironment environment, int flags) {
+		public void left(LinkedModeModel environment, int flags) {
 			
 			final BracketLevel level= (BracketLevel) fBracketLevelStack.pop();
 
-			if (flags != ILinkedListener.EXTERNAL_MODIFICATION)
+			if (flags != ILinkedModeListener.EXTERNAL_MODIFICATION)
 				return;
 
 			// remove brackets
@@ -658,15 +658,15 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment.ILinkedListener#suspend(org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment)
+		 * @see org.eclipse.jface.text.link.ILinkedModeListener#suspend(org.eclipse.jface.text.link.LinkedModeModel)
 		 */
-		public void suspend(LinkedEnvironment environment) {
+		public void suspend(LinkedModeModel environment) {
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment.ILinkedListener#resume(org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment, int)
+		 * @see org.eclipse.jface.text.link.ILinkedModeListener#resume(org.eclipse.jface.text.link.LinkedModeModel, int)
 		 */
-		public void resume(LinkedEnvironment environment, int flags) {
+		public void resume(LinkedModeModel environment, int flags) {
 		}
 	}
 	

@@ -33,12 +33,12 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.link.ILinkedListener;
+import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.InclusivePositionUpdater;
-import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.ProposalPosition;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.GlobalVariables;
@@ -142,7 +142,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			document.replace(start, end - start, templateString);	
 			
 			// translate positions
-			LinkedEnvironment env= new LinkedEnvironment();
+			LinkedModeModel model= new LinkedModeModel();
 			TemplateVariable[] variables= templateBuffer.getVariables();
 			
 			MultiVariableGuess guess= fContext instanceof CompilationUnitContext ? ((CompilationUnitContext) fContext).getMultiVariableGuess() : null;
@@ -167,7 +167,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 					String[] values= variable.getValues();
 					ICompletionProposal[] proposals= new ICompletionProposal[values.length];
 					for (int j= 0; j < values.length; j++) {
-						ensurePositionCategoryInstalled(document, env);
+						ensurePositionCategoryInstalled(document, model);
 						Position pos= new Position(offsets[0] + start, length);
 						document.addPosition(getCategory(), pos);
 						proposals[j]= new PositionBasedCompletionProposal(values[j], pos, length);
@@ -185,18 +185,18 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 					else
 						group.addPosition(new LinkedPosition(document, offsets[j] + start, length));
 				
-				env.addGroup(group);
+				model.addGroup(group);
 				hasPositions= true;
 			}
 			
 			if (hasPositions) {
-				env.forceInstall();
-				LinkedUIControl editor= new LinkedUIControl(env, viewer);
-				editor.setPositionListener(new EditorHistoryUpdater());
-				editor.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, Integer.MAX_VALUE);
-				editor.enter();
+				model.forceInstall();
+				LinkedModeUI ui= new LinkedModeUI(model, viewer);
+				ui.setPositionListener(new EditorHistoryUpdater());
+				ui.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, Integer.MAX_VALUE);
+				ui.enter();
 				
-				fSelectedRegion= editor.getSelectedRegion();
+				fSelectedRegion= ui.getSelectedRegion();
 			} else
 				fSelectedRegion= new Region(getCaretOffset(templateBuffer) + start, 0);
 			
@@ -248,18 +248,18 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		return end;
 	}
 
-	private void ensurePositionCategoryInstalled(final IDocument document, LinkedEnvironment env) {
+	private void ensurePositionCategoryInstalled(final IDocument document, LinkedModeModel model) {
 		if (!document.containsPositionCategory(getCategory())) {
 			document.addPositionCategory(getCategory());
 			final InclusivePositionUpdater updater= new InclusivePositionUpdater(getCategory());
 			document.addPositionUpdater(updater);
 			
-			env.addLinkedListener(new ILinkedListener() {
+			model.addLinkingListener(new ILinkedModeListener() {
 
 				/*
-				 * @see org.eclipse.jface.text.link.ILinkedListener#left(org.eclipse.jface.text.link.LinkedEnvironment, int)
+				 * @see org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
 				 */
-				public void left(LinkedEnvironment environment, int flags) {
+				public void left(LinkedModeModel environment, int flags) {
 					try {
 						document.removePositionCategory(getCategory());
 					} catch (BadPositionCategoryException e) {
@@ -268,8 +268,8 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 					document.removePositionUpdater(updater);
 				}
 
-				public void suspend(LinkedEnvironment environment) {}
-				public void resume(LinkedEnvironment environment, int flags) {}
+				public void suspend(LinkedModeModel environment) {}
+				public void resume(LinkedModeModel environment, int flags) {}
 			});
 		}
 	}

@@ -21,10 +21,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.LinkedModeUI;
 
 import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
@@ -69,16 +69,16 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 
 		if (fPositionOffsets.length > 0) {
 			try {
-				LinkedEnvironment env= new LinkedEnvironment();
+				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != fPositionOffsets.length; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
 					group.addPosition(new LinkedPosition(document, replacementOffset + fPositionOffsets[i], fPositionLengths[i], LinkedPositionGroup.NO_STOP));
-					env.addGroup(group);
+					model.addGroup(group);
 				}
 				
-				env.forceInstall();
+				model.forceInstall();
 				
-				LinkedUIControl ui= new LinkedUIControl(env, fViewer);
+				LinkedModeUI ui= new LinkedModeUI(model, fViewer);
 				ui.setPositionListener(new EditorHistoryUpdater());
 				ui.setExitPosition(fViewer, replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setDoContextInfo(true);

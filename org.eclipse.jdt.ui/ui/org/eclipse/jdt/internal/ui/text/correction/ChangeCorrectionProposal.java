@@ -21,7 +21,7 @@ import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedModeModel;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -88,7 +88,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 			change= getChange();
 			if (change != null) {
 				if (document != null) {
-					LinkedEnvironment.closeEnvironment(document);
+					LinkedModeModel.closeAllModels(document);
 				}
 				
 				change.initializeValidationData(new NullProgressMonitor());

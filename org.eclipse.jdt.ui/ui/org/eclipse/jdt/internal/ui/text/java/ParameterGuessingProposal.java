@@ -25,10 +25,10 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.ProposalPosition;
 
 import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
@@ -134,7 +134,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			super.apply(document, trigger, offset);
 
 			if (parameterCount > 0) {
-				LinkedEnvironment environment= new LinkedEnvironment();
+				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != parameterCount; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
 					int positionOffset= baseOffset + positionOffsets[i];
@@ -143,19 +143,19 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 					} else {
 						group.addPosition(new ProposalPosition(document, positionOffset, positionLengths[i], LinkedPositionGroup.NO_STOP, fChoices[i]));
 					}
-					environment.addGroup(group);
+					model.addGroup(group);
 				}
 				
-				environment.forceInstall();
+				model.forceInstall();
 				
-				LinkedUIControl editor= new LinkedUIControl(environment, fViewer);
-				editor.setPositionListener(new EditorHistoryUpdater());
-				editor.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
-				editor.setExitPolicy(new ExitPolicy(')'));
-				editor.setCyclingMode(LinkedUIControl.CYCLE_WHEN_NO_PARENT);
-				editor.setDoContextInfo(true);
-				editor.enter();
-				fSelectedRegion= editor.getSelectedRegion();
+				LinkedModeUI ui= new LinkedModeUI(model, fViewer);
+				ui.setPositionListener(new EditorHistoryUpdater());
+				ui.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+				ui.setExitPolicy(new ExitPolicy(')'));
+				ui.setCyclingMode(LinkedModeUI.CYCLE_WHEN_NO_PARENT);
+				ui.setDoContextInfo(true);
+				ui.enter();
+				fSelectedRegion= ui.getSelectedRegion();
 				
 			} else {
 				fSelectedRegion= new Region(baseOffset + replacementString.length(), 0);

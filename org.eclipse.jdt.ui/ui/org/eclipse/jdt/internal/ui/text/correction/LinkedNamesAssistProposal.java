@@ -24,10 +24,10 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.LinkedModeUI;
 
 import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
@@ -115,11 +115,11 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 				group.addPosition(new LinkedPosition(document, elem.getStartPosition(), elem.getLength(), i));
 			}
 			
-			LinkedEnvironment enviroment= new LinkedEnvironment();
-			enviroment.addGroup(group);
-			enviroment.forceInstall();
+			LinkedModeModel model= new LinkedModeModel();
+			model.addGroup(group);
+			model.forceInstall();
 			
-			LinkedUIControl ui= new LinkedUIControl(enviroment, viewer);
+			LinkedModeUI ui= new LinkedModeUI(model, viewer);
 			ui.setPositionListener(new EditorHistoryUpdater());
 //			ui.setInitialOffset(offset);
 			ui.setExitPosition(viewer, offset, 0, LinkedPositionGroup.NO_STOP);

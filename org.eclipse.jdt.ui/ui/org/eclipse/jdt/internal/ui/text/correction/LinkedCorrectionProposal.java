@@ -33,10 +33,10 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.ProposalPosition;
 
 import org.eclipse.ui.IEditorPart;
@@ -195,7 +195,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	private void enterLinkedMode(ITextViewer viewer) throws BadLocationException {
 		IDocument document= viewer.getDocument();
 		
-		LinkedEnvironment environment= new LinkedEnvironment();
+		LinkedModeModel model= new LinkedModeModel();
 		boolean added= false;
 		
 		Iterator iterator= fLinkGroups.values().iterator();
@@ -224,15 +224,15 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 						}
 					}
 				}
-				environment.addGroup(group);
+				model.addGroup(group);
 				added= true;
 			}
 		}
 
-		environment.forceInstall();
+		model.forceInstall();
 		
 		if (added) { // only set up UI if there are any positions set
-			LinkedUIControl ui= new LinkedUIControl(environment, viewer);
+			LinkedModeUI ui= new LinkedModeUI(model, viewer);
 			ui.setPositionListener(new EditorHistoryUpdater());
 			if (fSelectionDescription != null && fSelectionDescription.getStartPosition() != -1) {
 				ui.setExitPosition(viewer, fSelectionDescription.getStartPosition() + fSelectionDescription.getLength(), 0, Integer.MAX_VALUE);				

@@ -42,13 +42,13 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.link.ILinkedListener;
-import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.ILinkedModeListener;
+import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedUIControl;
-import org.eclipse.jface.text.link.LinkedUIControl.ExitFlags;
-import org.eclipse.jface.text.link.LinkedUIControl.IExitPolicy;
+import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
+import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 
 import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
@@ -204,16 +204,16 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 						LinkedPositionGroup group= new LinkedPositionGroup();
 						group.addPosition(new LinkedPosition(document, newOffset, 0, LinkedPositionGroup.NO_STOP));
 						
-						LinkedEnvironment env= new LinkedEnvironment();
-						env.addGroup(group);
-						env.forceInstall();
+						LinkedModeModel model= new LinkedModeModel();
+						model.addGroup(group);
+						model.forceInstall();
 						
-						LinkedUIControl ui= new LinkedUIControl(env, fTextViewer);
+						LinkedModeUI ui= new LinkedModeUI(model, fTextViewer);
 						ui.setSimpleMode(true);
 						ui.setPositionListener(new EditorHistoryUpdater());
 						ui.setExitPolicy(new ExitPolicy(')'));
 						ui.setExitPosition(fTextViewer, newOffset + 1, 0, Integer.MAX_VALUE);
-						ui.setCyclingMode(LinkedUIControl.CYCLE_NEVER);
+						ui.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
 						ui.enter();
 					}
 				}
@@ -285,18 +285,18 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
 		 */
-		public ExitFlags doExit(LinkedEnvironment environment, VerifyEvent event, int offset, int length) {
+		public ExitFlags doExit(LinkedModeModel environment, VerifyEvent event, int offset, int length) {
 			
 			if (event.character == fExitCharacter) {
 				if (environment.anyPositionContains(offset))
-					return new ExitFlags(ILinkedListener.UPDATE_CARET, false);
+					return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
 				else
-					return new ExitFlags(ILinkedListener.UPDATE_CARET, true);
+					return new ExitFlags(ILinkedModeListener.UPDATE_CARET, true);
 			}	
 			
 			switch (event.character) {			
 			case ';':
-				return new ExitFlags(ILinkedListener.NONE, true);
+				return new ExitFlags(ILinkedModeListener.NONE, true);
 								
 			default:
 				return null;
