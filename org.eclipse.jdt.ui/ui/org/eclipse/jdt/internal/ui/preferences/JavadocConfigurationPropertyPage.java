@@ -8,7 +8,12 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -21,6 +26,9 @@ import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -43,8 +51,24 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	private StringButtonDialogField fJavaDocField;
 	private IStatus fJavaDocStatus;
 
+	private IJavaElement fElem;
+
 	public JavadocConfigurationPropertyPage() {
-		setDescription(JavaUIMessages.getString("JavadocConfigurationPropertyPage.description")); //$NON-NLS-1$
+		
+	}
+
+	/**
+	 * @see IDialogPage#createControl(Composite)
+	 */
+	public void createControl(Composite parent) {
+		IJavaElement elem= getJavaElement();
+		if(elem instanceof IPackageFragmentRoot)
+			setDescription(JavaUIMessages.getString("JavadocConfigurationPropertyPage.IsPackageFragmentRoot.description")); //$NON-NLS-1$
+		else if(elem instanceof IJavaProject) 
+			setDescription(JavaUIMessages.getString("JavadocConfigurationPropertyPage.IsJavaProject.description"));  //$NON-NLS-1$
+		else setDescription(JavaUIMessages.getString("JavadocConfigurationPropertyPage.IsIncorrectElement.description")); //$NON-NLS-1$
+
+		super.createControl(parent);
 	}
 
 
@@ -52,10 +76,17 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
+
 		Composite topComp= new Composite(parent, SWT.NONE);
 		GridLayout topLayout= new GridLayout();
 		topLayout.numColumns= 3;
 		topComp.setLayout(topLayout);
+
+		IJavaElement elem= getJavaElement();
+		if (elem == null) {
+			return topComp;
+		}
+
 
 		JDocConfigurationAdapter adapter= new JDocConfigurationAdapter();
 
@@ -77,18 +108,52 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	//Sets the default by getting the stored URL setting if it exists
 	//otherwise the text box is left empty.
 	private void setValues() {
-		IJavaProject project= getJavaProject();
-		URL location= null;
-		if (project != null) {
-			location= JavaDocLocations.getProjectJavadocLocation(project);
-		}
-		if (location != null)
-			fJavaDocField.setText(location.toExternalForm());
-		else
-			fJavaDocField.setText(""); //$NON-NLS-1$
+		
+				// try to find it as Java element (needed for external jars)
+		IJavaElement elem= getJavaElement();
+		
+		String initialValue= "";//$NON-NLS-1$
+	
+		if(elem != null) {
+				try {
+					URL location = JavaDocLocations.getJavadocBaseLocation(elem);
+					if (location != null)
+						initialValue=  location.toExternalForm();
+				} catch(JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+		}	
+		fJavaDocField.setText(initialValue);
 
 	}
 
+	private IJavaElement getJavaElement() {
+		if (fElem == null) {
+			IAdaptable adaptable = getElement();
+			fElem = (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+			if (fElem == null) {
+
+				IResource resource = (IResource) adaptable.getAdapter(IResource.class);
+				//special case when the .jar is a file
+				try {
+					if (resource instanceof IFile) {
+						IProject proj = resource.getProject();
+						if (proj.hasNature(JavaCore.NATURE_ID)) {
+							IJavaProject jproject = JavaCore.create(proj);
+							IPackageFragmentRoot root= jproject.findPackageFragmentRoot(resource.getFullPath());
+							if (root != null && root.isArchive()) {
+								fElem= root;
+							}
+							
+						}
+					}
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		}
+		return fElem;
+	}
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
@@ -171,21 +236,15 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	 * @see IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		IJavaProject jproject= getJavaProject();
-		if (jproject != null) {
-			JavaDocLocations.setProjectJavadocLocation(jproject, fJavaDocLocation);
+		IJavaElement elem= getJavaElement();
+		if (elem != null) {
+			IPath path= elem.getPath();
+			if(elem instanceof IJavaProject)
+				JavaDocLocations.setProjectJavadocLocation((IJavaProject)elem, fJavaDocLocation);
+			else	JavaDocLocations.setLibraryJavadocLocation(path, fJavaDocLocation);
+			return true;
 		}
-		return true;
-	}
-
-	private IJavaProject getJavaProject() {
-		IAdaptable adaptable= getElement();
-		IJavaElement elem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
-		if (elem instanceof IJavaProject) {
-			return (IJavaProject) elem;
-		} else {
-			return null;
-		}
+		return false;
 	}
 
 	private class JDocConfigurationAdapter implements IStringButtonAdapter, IDialogFieldListener {
@@ -200,4 +259,5 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 			jdocDialogFieldChanged(field);
 		}
 	}
+
 }

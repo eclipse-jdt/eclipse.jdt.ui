@@ -211,18 +211,31 @@
 		class="org.eclipse.jdt.internal.ui.preferences.SourceAttachmentPropertyPage"
 		nameFilter="*.jar">
     </page>
+    </page>
 	<page name="%javadocLocationPageName"
-		id="org.eclipse.jdt.internal.ui.preferences"
+		id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage1"
 		objectClass="org.eclipse.core.resources.IProject"
 		class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage">
 		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
 	</page>
+	<page name="%javadocLocationPageName"
+		id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage2"
+		objectClass="org.eclipse.core.resources.IFile"
+		class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
+		nameFilter="*.jar">
+	</page>
+	<page name="%javadocLocationPageName"
+		id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage3"
+		objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
+		class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
+		nameFilter="*.jar">
+	</page>
  	<page name="%javadocLocationPageName"
-		id="org.eclipse.jdt.internal.ui.preferences"
+		id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage4"
 		objectClass="org.eclipse.jdt.core.IJavaProject"
 		class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage">
 		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
-	</page>   
+	</page>  
  </extension>
 
 <extension
