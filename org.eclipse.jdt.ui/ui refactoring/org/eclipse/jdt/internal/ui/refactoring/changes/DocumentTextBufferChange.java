@@ -7,6 +7,9 @@ package org.eclipse.jdt.internal.ui.refactoring.changes;
 
 import java.util.List;import org.eclipse.jface.text.Document;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;import org.eclipse.jdt.internal.ui.util.IDocumentManager;
 
+/**
+ * @deprecated Use TextBufferChange instead
+ */
 public class DocumentTextBufferChange extends AbstractTextBufferChange {
 	
 	private IDocumentManager fDocumentManager;
@@ -82,7 +85,7 @@ public class DocumentTextBufferChange extends AbstractTextBufferChange {
 	
 	protected IChange createChange(List modifications, boolean isUndo) {
 		return new DocumentTextBufferChange(getName(), 
-			getCorrespondingJavaElement(), fDocumentManager, modifications, isUndo);
+			(IJavaElement)getModifiedLanguageElement(), fDocumentManager, modifications, isUndo);
 	}
 	
 	protected ITextBuffer createTextBuffer(String content) {

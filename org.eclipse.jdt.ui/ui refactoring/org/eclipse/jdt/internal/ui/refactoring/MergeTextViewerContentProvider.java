@@ -73,10 +73,10 @@ public class MergeTextViewerContentProvider implements IMergeViewerContentProvid
 			ITextChange change= (ITextChange)element;
 			String content= change.getCurrentContent();
 			fLeftSize= content.length();
-			
-			if (true) {
-				content= getText(change, content, 0);
-			}
+//			
+//			if (true) {
+//				content= getText(change, content, 0);
+//			}
 			return attachPartitioner(new Document(content));
 		} catch (JavaModelException e) {
 			return null;
@@ -107,10 +107,10 @@ public class MergeTextViewerContentProvider implements IMergeViewerContentProvid
 		try {
 			ITextChange change= (ITextChange)element;
 			String content= change.getPreview();
-			if (true) {
-				int diff= fLeftSize - content.length();
-				content= getText(change, content, diff);
-			}
+//			if (true) {
+//				int diff= fLeftSize - content.length();
+//				content= getText(change, content, diff);
+//			}
 			return attachPartitioner(new Document(content));
 		} catch (JavaModelException e) {
 			return null;
@@ -128,7 +128,7 @@ public class MergeTextViewerContentProvider implements IMergeViewerContentProvid
 
 	private String getText(IChange change, String content, int sizeDiff) throws JavaModelException {
 		String result= content;
-		IJavaElement element= change.getCorrespondingJavaElement();
+		Object element= change.getModifiedLanguageElement();
 		if (element instanceof ISourceReference) {
 			ISourceRange range= ((ISourceReference)element).getSourceRange();
 			result= content.substring(

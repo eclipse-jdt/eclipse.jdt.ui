@@ -2,19 +2,18 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.core.refactoring.text;
+package org.eclipse.jdt.internal.core.codemanipulation;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 
-public class AddMemberChange extends SimpleReplaceTextChange {
+public class AddMemberEdit extends SimpleTextEdit {
 	
 	public static final int INSERT_BEFORE= 0;
 	public static final int INSERT_AFTER= 1;
@@ -24,8 +23,7 @@ public class AddMemberChange extends SimpleReplaceTextChange {
 	private String[] fSource;
 	private int fTabWidth;
 	
-	public AddMemberChange(String name, IMember sibling, int insertionKind, String[] source, int tabWidth) {
-		super(name);
+	public AddMemberEdit(IMember sibling, int insertionKind, String[] source, int tabWidth) {
 		fSibling= sibling;
 		Assert.isNotNull(fSibling);
 		fInsertionKind= insertionKind;
@@ -36,15 +34,27 @@ public class AddMemberChange extends SimpleReplaceTextChange {
 		Assert.isTrue(fTabWidth >= 0);
 	}
 	
-	public IJavaElement getCorrespondingJavaElement() {
-		return fSibling.getDeclaringType();
+	/* non Java-doc
+	 * @see TextEdit#getCopy
+	 */
+	public TextEdit copy() {
+		return new AddMemberEdit(fSibling, fInsertionKind, fSource, fTabWidth);
 	}
 	
-	protected SimpleTextChange[] adjust(ITextBuffer buffer) throws JavaModelException {
+	/* non Java-doc
+	 * @see TextEdit#getModifiedLanguageElement
+	 */
+	public Object getModifiedLanguageElement() {
+		return fSibling.getParent();
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#connect
+	 */
+	public void connect(TextBuffer buffer) throws CoreException {
 		StringBuffer sb= new StringBuffer();
 		String lineDelimiter= buffer.getLineDelimiter();
 		int offset= computeOffset(buffer);
-		setOffset(offset);
 		int indent = createLineIndent(buffer);
 		if (fInsertionKind == INSERT_AFTER) {
 			sb.append(lineDelimiter);
@@ -56,24 +66,24 @@ public class AddMemberChange extends SimpleReplaceTextChange {
 			sb.append(lineDelimiter);
 		}
 		String text= sb.toString();
-		setLength(0);
+		setPosition(new TextPosition(offset, 0));
 		setText(text);
-		return null;
+		super.connect(buffer);
 	}
 
-	private int createLineIndent(ITextBuffer buffer) throws JavaModelException {
+	private int createLineIndent(TextBuffer buffer) throws CoreException {
 		int line= buffer.getLineOfOffset(fSibling.getSourceRange().getOffset());
 		return buffer.getLineIndent(line, fTabWidth);
 	}
 	
-	private int computeOffset(ITextBuffer buffer) throws JavaModelException {
+	private int computeOffset(TextBuffer buffer) throws CoreException {
 		ISourceRange range= fSibling.getSourceRange();
 		int end= range.getOffset() + range.getLength();
 		if (fInsertionKind == INSERT_AFTER) {
 			return end;
 		} else {
 			int line= buffer.getLineOfOffset(range.getOffset());
-			ITextRegion region= buffer.getLineInformation(line);
+			TextRegion region= buffer.getLineInformation(line);
 			return region.getOffset();
 		}
 	}

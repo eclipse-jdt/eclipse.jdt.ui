@@ -25,9 +25,9 @@ import org.eclipse.jdt.core.JavaModelException;
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public interface IChange {
-	
+
 	public static final int REFACTORING_CHANGE_ABORTED= 900;
-
+
 	/**
 	 * The client is about to calling <code>perform</code> on this change. The client of this
 	 * change must ensure that the method is called outside a runnable that modifies the 
@@ -84,10 +84,12 @@ public interface IChange {
 	public void setActive(boolean active);
 	
 	/**
-	 * Returns the activation status of this <code>IChange</code>.
+	 * Returns the activation status of this <code>IChange</code>. This method doesn't
+	 * consider the activation status of possible children.
 	 *
 	 * @return the change's activation status.
 	 * @see setActive
+	 * @see getActivationStatus
 	 */
 	public boolean isActive();
 	
@@ -100,12 +102,12 @@ public interface IChange {
 	public String getName();
 	
 	/**
-	 * Returns the Java Element on which this change operates. Returns <code>null</code> 
-	 * if there is no such element.
-	 *
-	 * @return the java element this change is operating on. May return <code>null</code>.
+	 * Returns the language element modified by this <code>IChange</code>. The method
+	 * may return <code>null</code> if the change isn't related to a language element.
+	 * 
+	 * @return the language element modified by this change
 	 */
-	public IJavaElement getCorrespondingJavaElement();	
+	public Object getModifiedLanguageElement();
 	
 	/**
 	 * Returns whether the change can be undone.

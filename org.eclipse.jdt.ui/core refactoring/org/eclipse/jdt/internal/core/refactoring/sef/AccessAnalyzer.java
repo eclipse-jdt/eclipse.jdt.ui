@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.core.refactoring.util.ASTUtil;
 import org.eclipse.jdt.internal.core.refactoring.util.ParentProvider;
 
@@ -29,10 +29,13 @@ public class AccessAnalyzer extends ParentProvider {
 	private char[] fFieldIdentifier;
 	private String fGetter;
 	private String fSetter;
-	private ITextBufferChange fChange;
+	private TextChange fChange;
 	private RefactoringStatus fStatus;
-	
-	public AccessAnalyzer( SelfEncapsulateFieldRefactoring refactoring, FieldDeclaration field, ITextBufferChange change) {
+
+	private static final String READ_ACCESS= "Encapsulate read access";
+	private static final String WRITE_ACCESS= "Encapsulate write access";
+		
+	public AccessAnalyzer( SelfEncapsulateFieldRefactoring refactoring, FieldDeclaration field, TextChange change) {
 		fFieldIdentifier= ASTUtil.getIdentifier(field.binding);
 		Assert.isNotNull(fFieldIdentifier);
 		fChange= change;
@@ -47,10 +50,11 @@ public class AccessAnalyzer extends ParentProvider {
 	}
 	
 	public boolean visit(Assignment node, BlockScope scope) {
-		FieldBinding binding= getFieldBinding(node.lhs);
-		if (binding != null) {	
-			handleSingleWriteAccess(node, scope);
-			return false;
+		if (node.lhs instanceof SingleNameReference) {
+			if (getFieldBinding(node.lhs) != null) {	
+				handleSingleWriteAccess(node, scope);
+				return false;
+			}
 		} else if (node.lhs instanceof QualifiedNameReference) {
 			QualifiedNameReference qnr= (QualifiedNameReference)node.lhs;
 			return handleQualifiedWriteAccess(node, scope, qnr);
@@ -63,10 +67,10 @@ public class AccessAnalyzer extends ParentProvider {
 	 */
 	private void handleSingleWriteAccess(Assignment node, BlockScope scope) {
 		if (checkParent(node))
-			fChange.addSimpleTextChange(new EncapsulateWriteAccess(fSetter, node.lhs, node.expression));
+			fChange.addTextEdit(WRITE_ACCESS, new EncapsulateWriteAccess(fSetter, node.lhs, node.expression));
 		node.expression.traverse(this, scope);
 	}
-	
+	 
 	/*
 	 * Handles write access of kind a.field= value
 	 */
@@ -77,7 +81,7 @@ public class AccessAnalyzer extends ParentProvider {
 		if (considerFieldBinding(binding)) {
 			if (checkParent(node)) {
 				int offset= getOffset(qnr, index);
-				fChange.addSimpleTextChange(new EncapsulateWriteAccess(
+				fChange.addTextEdit(WRITE_ACCESS, new EncapsulateWriteAccess(
 					fSetter, offset, node.expression.sourceStart - offset, node.expression));
 			}
 			node.expression.traverse(this, scope);
@@ -120,14 +124,14 @@ public class AccessAnalyzer extends ParentProvider {
 		if (binding == null)
 			return true;
 		
-		fChange.addSimpleTextChange(new EncapsulateReadAccess(fGetter, node));
+		fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, node));
 		return true;
 	}
 	
 	public boolean visit(QualifiedNameReference node, BlockScope scope) {
 		FieldBinding binding= getFieldBinding(node);
 		if (binding != null)
-			fChange.addSimpleTextChange(new EncapsulateReadAccess(fGetter, node.sourceStart, node.tokens[0].length));
+			fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, node.sourceStart, node.tokens[0].length));
 	
 		FieldBinding[] others= node.otherBindings;
 		int start= node.sourceStart + node.tokens[0].length + 1;
@@ -135,7 +139,7 @@ public class AccessAnalyzer extends ParentProvider {
 			FieldBinding other= others[i];
 			int length= node.tokens[i + 1].length;
 			if (considerFieldBinding(other)) {
-				fChange.addSimpleTextChange(new EncapsulateReadAccess(fGetter, start, length));
+				fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, start, length));
 			}
 			start+=  length + 1;
 		}

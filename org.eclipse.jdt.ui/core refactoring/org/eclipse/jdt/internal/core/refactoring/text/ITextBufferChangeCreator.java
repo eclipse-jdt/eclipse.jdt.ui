@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.JavaModelException;
  * and expected to change significantly before reaching stability. It is being made available at 
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
+ * 
+ * @deprecated Use TextBuffer and TextBufferEditor from code manipulation
  */
 public interface ITextBufferChangeCreator {
 

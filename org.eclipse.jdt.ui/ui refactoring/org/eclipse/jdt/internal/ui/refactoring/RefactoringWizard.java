@@ -104,7 +104,7 @@ public class RefactoringWizard extends Wizard {
 	 * Sets the change object.
 	 */
 	public void setChange(IChange change){
-		PreviewWizardPage page= (PreviewWizardPage)getPage(PreviewWizardPage.PAGE_NAME);
+		IPreviewWizardPage page= (IPreviewWizardPage)getPage(PreviewWizardPage.PAGE_NAME);
 		if (page != null)
 			page.setChange(change);
 		fChange= change;

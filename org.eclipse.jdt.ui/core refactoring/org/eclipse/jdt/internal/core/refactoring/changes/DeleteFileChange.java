@@ -45,10 +45,10 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	}
 
 	/* non java-doc
-	 * @see IChange#getCorrespondingJavaElement()
+	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public IJavaElement getCorrespondingJavaElement() {
-		return JavaCore.create(getFile());
+	public Object getModifiedLanguageElement() {
+		return getFile();
 	}
 
 	/* non java-doc

@@ -14,6 +14,8 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * and expected to change significantly before reaching stability. It is being made available at 
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
+ * 
+ * @deprecated Use AbstractTextChange instead
  */
 public abstract class AbstractTextBufferChange extends Change implements ITextBufferChange, ITextChange, ICompositeChange {
 	
@@ -145,7 +147,7 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 	 */
 	public String getName(){
 		if (fIsUndoChange)
-			return RefactoringCoreMessages.getFormattedString("AbstractTextBufferChange.undo", fName); //$NON-NLS-1$
+			return RefactoringCoreMessages.getFormattedString("TextChange.undo", fName); //$NON-NLS-1$
 		else	
 			return fName;
 	}
@@ -153,7 +155,7 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
-	public IJavaElement getCorrespondingJavaElement(){
+	public Object getModifiedLanguageElement(){
 		return fElement;
 	}
 
@@ -294,7 +296,7 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 		buff.append("name: ")
 			.append(getName())
 			.append(" javaElement:")
-			.append(getCorrespondingJavaElement().getElementName());
+			.append(getModifiedLanguageElement().toString());
 		for (Iterator iter= fTextModifications.iterator(); iter.hasNext(); ){
 			Object each= iter.next();
 			buff.append("< ").append(each.toString()).append(" />");

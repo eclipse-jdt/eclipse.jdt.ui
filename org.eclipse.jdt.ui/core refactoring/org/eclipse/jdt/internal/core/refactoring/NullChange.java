@@ -29,7 +29,7 @@ public class NullChange extends Change {
 		return "NullChange (" + fName + ")";  //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
-	public IJavaElement getCorrespondingJavaElement(){
+	public Object getModifiedLanguageElement(){
 		return null;
 	}
 }

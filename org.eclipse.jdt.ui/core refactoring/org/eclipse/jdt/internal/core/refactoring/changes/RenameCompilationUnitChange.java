@@ -9,7 +9,7 @@ import org.eclipse.jdt.internal.core.refactoring.*;
 import org.eclipse.jdt.internal.core.refactoring.changes.*;
 
 
-public class RenameCompilationUnitChange extends AbstractRenameChange {
+public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
 
 	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) throws JavaModelException{
 		this(Refactoring.getResource(cu).getFullPath(), cu.getElementName(), newName);
@@ -34,5 +34,5 @@ public class RenameCompilationUnitChange extends AbstractRenameChange {
 	/* non java-doc	 * @see AbstractRenameChange#createUndoChange()	 */	protected IChange createUndoChange() throws JavaModelException{		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName());	}
 	
 	protected void doRename(IProgressMonitor pm) throws JavaModelException {
-		((ICompilationUnit)getCorrespondingJavaElement()).rename(getNewName(), false, pm);
+		((ICompilationUnit)getModifiedLanguageElement()).rename(getNewName(), false, pm);
 	}}

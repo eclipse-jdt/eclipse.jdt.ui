@@ -8,14 +8,14 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.AbstractRenameChange;
+import org.eclipse.jdt.internal.core.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 
-public class RenameJavaProjectChange extends AbstractRenameChange {
+public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 
 	public RenameJavaProjectChange(IJavaProject project, String newName) throws JavaModelException {
 		this(project.getCorrespondingResource().getFullPath(), project.getElementName(), newName);
@@ -30,7 +30,7 @@ public class RenameJavaProjectChange extends AbstractRenameChange {
 	 * @see AbstractRenameChange#doRename(IProgressMonitor)
 	 */
 	protected void doRename(IProgressMonitor pm) throws Exception {
-		IJavaProject p= (IJavaProject)getCorrespondingJavaElement();
+		IJavaProject p= (IJavaProject)getModifiedLanguageElement();
 		IProject project= p.getProject();
 		IContainer parent= project.getParent();
 		IPath newPath= parent.getFullPath().append(getNewName());
@@ -61,7 +61,7 @@ public class RenameJavaProjectChange extends AbstractRenameChange {
 		if (context.getUnsavedFiles().length == 0)
 			return result;
 			
-		IJavaProject project= (IJavaProject)getCorrespondingJavaElement();
+		IJavaProject project= (IJavaProject)getModifiedLanguageElement();
 		if (! project.exists()) 
 			return result;
 			

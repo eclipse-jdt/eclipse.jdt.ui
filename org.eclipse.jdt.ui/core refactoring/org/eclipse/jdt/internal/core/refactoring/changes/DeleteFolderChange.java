@@ -48,10 +48,10 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 	}
 	
 	/* non java-doc
-	 * @see IChange#getCorrespondingJavaElement()
+	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public IJavaElement getCorrespondingJavaElement() {
-		return JavaCore.create(getFolder(fPath));
+	public Object getModifiedLanguageElement() {
+		return getFolder(fPath);
 	}
 
 	/* non java-doc

@@ -4,39 +4,91 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.sef;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
+import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.core.refactoring.Assert;
 
-public class EncapsulateWriteAccess extends SimpleReplaceTextChange {
+final class EncapsulateWriteAccess extends TextEdit {
 
-	private static final String WRITE_ACCESS= "Encapsulate write access";
-	
-	private int fLength;	
 	private String fSetter;
-	private int fClosingBracket;
+	private TextPosition fWriteAccess;
+	private TextPosition fClosingBracket;
 	
+	private static final class UndoEncapsulateWriteAccess extends TextEdit {
+		private String fSetter;
+		private TextPosition fWriteAccess;
+		private TextPosition fClosingBracket;
+		
+		public UndoEncapsulateWriteAccess(String setter, TextPosition write, TextPosition bracket) {
+			fSetter= setter;
+			fWriteAccess= write;
+			fClosingBracket= bracket;
+		}
+		public TextEdit copy() {
+			return new UndoEncapsulateWriteAccess(fSetter, fWriteAccess.copy(), fClosingBracket.copy()); 
+		}
+		public TextPosition[] getTextPositions() {
+			return new TextPosition[] { fWriteAccess, fClosingBracket };
+		}
+		public TextEdit perform(TextBuffer buffer) throws CoreException {
+			buffer.replace(fClosingBracket.getOffset(), fClosingBracket.getLength(), "");
+			int offset= fWriteAccess.getOffset();
+			int length= fWriteAccess.getLength();
+			String old= buffer.getContent(offset, length);
+			buffer.replace(offset, length, fSetter);
+			return new EncapsulateWriteAccess(old, fWriteAccess, fClosingBracket);
+		}	
+	}
 	public EncapsulateWriteAccess(String setter, Reference lhs, Expression expression) {
-		this(setter, lhs.sourceStart, expression.sourceStart - lhs.sourceStart, expression.sourceEnd + 1);
+		this(setter + "(", lhs.sourceStart, expression.sourceStart - lhs.sourceStart, expression.sourceEnd + 1);
 	}
 	
 	public EncapsulateWriteAccess(String setter, int offset, int length, Expression expression) {
-		this(setter, offset, length, expression.sourceEnd + 1);
+		this(setter + "(", offset, length, expression.sourceEnd + 1);
 	}
 	
-	public EncapsulateWriteAccess(String setter, int offset, int length, int closingBracket) {
-		super(WRITE_ACCESS, offset, length, setter + "(");
-		fClosingBracket= closingBracket;
+	private EncapsulateWriteAccess(String text, int offset, int lhsLength, int closingBracket) {
+		fSetter= text;
+		fWriteAccess= new TextPosition(offset, lhsLength);
+		fClosingBracket= new TextPosition(closingBracket, 0);
 	}
 	
-	protected SimpleTextChange[] adjust(ITextBuffer buffer) throws JavaModelException {
-		return new SimpleTextChange[] {
-				new SimpleReplaceTextChange("Add closing bracket", fClosingBracket, 0, ")")
-			};
+	private EncapsulateWriteAccess(String text, TextPosition write, TextPosition bracket) {
+		fSetter= text;
+		fWriteAccess= write;
+		fClosingBracket= bracket;
 	}
+	
+	/* non Java-doc
+	 * @see TextEdit#getCopy
+	 */
+	public TextEdit copy() {
+		return new EncapsulateWriteAccess(fSetter, fWriteAccess.copy(), fClosingBracket.copy());
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#getTextPositions
+	 */
+	public TextPosition[] getTextPositions() {
+		return new TextPosition[] { fWriteAccess, fClosingBracket };
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#doPerform
+	 */
+	public TextEdit perform(TextBuffer buffer) throws CoreException {
+		int offset= fWriteAccess.getOffset();
+		int length= fWriteAccess.getLength();
+		String old= buffer.getContent(offset, length);
+		buffer.replace(offset, length, fSetter);
+		buffer.replace(fClosingBracket.getOffset(), 0, ")");
+		return new UndoEncapsulateWriteAccess(old, fWriteAccess, fClosingBracket);
+	}	
 }
 

@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.AbstractRenameChange;
+import org.eclipse.jdt.internal.core.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.*;
 import org.eclipse.jdt.internal.core.refactoring.*;
 
-public class RenameSourceFolderChange extends AbstractRenameChange {
+public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
 	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) throws JavaModelException {
 		this(sourceFolder.getCorrespondingResource().getFullPath(), sourceFolder.getElementName(), newName);
@@ -50,7 +50,7 @@ public class RenameSourceFolderChange extends AbstractRenameChange {
 	}
 	
 	protected void doRename(IProgressMonitor pm) throws Exception {
-		IPackageFragmentRoot root= (IPackageFragmentRoot)getCorrespondingJavaElement();
+		IPackageFragmentRoot root= (IPackageFragmentRoot)getModifiedLanguageElement();
 		IResource res= (IResource)root.getCorrespondingResource();
 		IPath path= res.getFullPath().removeLastSegments(1).append(getNewName());
 		res.move(path, false, pm);
@@ -66,7 +66,7 @@ public class RenameSourceFolderChange extends AbstractRenameChange {
 		if (context.getUnsavedFiles().length == 0)
 			return result;
 		
-		result.merge(checkIfUnsaved((IPackageFragmentRoot)getCorrespondingJavaElement(), context, pm));
+		result.merge(checkIfUnsaved((IPackageFragmentRoot)getModifiedLanguageElement(), context, pm));
 		
 		return result;
 	}

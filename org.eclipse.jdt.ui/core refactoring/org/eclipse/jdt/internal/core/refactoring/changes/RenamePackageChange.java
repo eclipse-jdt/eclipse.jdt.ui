@@ -4,13 +4,13 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.changes;
 
-import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.AbstractRenameChange;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.AbstractJavaElementRenameChange;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.changes.*;
 import org.eclipse.jdt.internal.core.refactoring.*;
 
 
-public class RenamePackageChange extends AbstractRenameChange {
+public class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 	public RenamePackageChange(IPackageFragment pack, String newName) throws JavaModelException{
 		this(pack.getCorrespondingResource().getFullPath(), pack.getElementName(), newName);
@@ -26,7 +26,7 @@ public class RenamePackageChange extends AbstractRenameChange {
 	}
 	
 	private IPath createNewPath(){
-		IPackageFragment oldPackage= (IPackageFragment)getCorrespondingJavaElement();
+		IPackageFragment oldPackage= (IPackageFragment)getModifiedLanguageElement();
 		IPath oldPackageName= createPath(oldPackage.getElementName());
 		IPath newPackageName= createPath(getNewName());
 		return getResourcePath().removeLastSegments(oldPackageName.segmentCount()).append(newPackageName);
@@ -44,12 +44,12 @@ public class RenamePackageChange extends AbstractRenameChange {
 	}
 	
 	protected void doRename(IProgressMonitor pm) throws JavaModelException {
-		((IPackageFragment)getCorrespondingJavaElement()).rename(getNewName(), false, pm);
+		((IPackageFragment)getModifiedLanguageElement()).rename(getNewName(), false, pm);
 	}
 	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= super.aboutToPerform(context, pm);
-		IJavaElement element= getCorrespondingJavaElement();
+		IJavaElement element= (IJavaElement)getModifiedLanguageElement();
 		if (element != null && element.exists() && context.getUnsavedFiles().length > 0 && element instanceof IPackageFragment) {
 			IPackageFragment pack= (IPackageFragment)element;
 			try {

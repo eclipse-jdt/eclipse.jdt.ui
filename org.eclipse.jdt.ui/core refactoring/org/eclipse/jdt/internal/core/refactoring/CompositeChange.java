@@ -140,9 +140,9 @@ public class CompositeChange extends Change implements ICompositeChange {
 	}
 
 	/* non java-doc
-	 * @see IChange#getCorrespondingJavaElement()
+	 * @see IChange#getModifiedLanguageElement()
 	 */	
-	public IJavaElement getCorrespondingJavaElement(){
+	public Object getModifiedLanguageElement(){
 		return null;
 	}
 

@@ -107,9 +107,9 @@ public class DeleteFromClasspathChange extends Change {
 	}
 
 	/* non java-doc
-	 * @see IChange#getCorrespondingJavaElement()
+	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public IJavaElement getCorrespondingJavaElement() {
+	public Object getModifiedLanguageElement() {
 		return getJavaProject();
 	}
 }

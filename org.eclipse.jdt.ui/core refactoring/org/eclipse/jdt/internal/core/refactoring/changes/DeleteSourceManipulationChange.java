@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
-	private String fHandle;;
+	private String fHandle;
 	
 	public DeleteSourceManipulationChange(ISourceManipulation sm){
 		Assert.isNotNull(sm);
@@ -33,9 +33,9 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	}
 
 	/**
-	 * @see IChange#getCorrespondingJavaElement()
+	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public IJavaElement getCorrespondingJavaElement() {
+	public Object getModifiedLanguageElement() {
 		return JavaCore.create(fHandle);
 	}
 	
@@ -44,7 +44,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 */
 	protected void doDelete(IProgressMonitor pm) throws JavaModelException{
 		//cast safe
-		((ISourceManipulation)getCorrespondingJavaElement()).delete(false, pm);	
+		((ISourceManipulation)getModifiedLanguageElement()).delete(false, pm);	
 	}
 		
 	private static IJavaElement getJavaElement(ISourceManipulation sm){

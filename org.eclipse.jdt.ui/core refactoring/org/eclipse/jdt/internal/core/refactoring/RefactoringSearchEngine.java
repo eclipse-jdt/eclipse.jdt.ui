@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.refactoring.util.ResourceManager;
+
 /**
  * Convenience wrapper for <code>SearchEngine</code> - performs searching and sorts the results.
  */
@@ -56,14 +58,30 @@ public class RefactoringSearchEngine {
 			};
 		};
 		fgSearchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
+		ICompilationUnit[] workingCopies= ResourceManager.getWorkingCopies();
 		List result= new ArrayList(matches.size());
 		for (Iterator iter= matches.iterator(); iter.hasNext(); ) {
 			IResource resource= (IResource)iter.next();
 			IJavaElement element= JavaCore.create(resource);
-			if (element instanceof ICompilationUnit)
-				result.add(element);
+			if (element instanceof ICompilationUnit) {
+				ICompilationUnit original= (ICompilationUnit)element;
+				ICompilationUnit wcopy= getWorkingCopy(original, workingCopies);
+				if (wcopy != null)
+					result.add(wcopy);
+				else
+					result.add(original);
+			}
 		}
 		return (ICompilationUnit[])result.toArray(new ICompilationUnit[result.size()]);
+	}
+	
+	private static ICompilationUnit getWorkingCopy(ICompilationUnit unit, ICompilationUnit[] workingCopies) {
+		for (int i= 0; i < workingCopies.length; i++) {
+			ICompilationUnit wcopy= workingCopies[i];
+			if (unit.equals(wcopy.getOriginalElement()))
+				return wcopy;
+		}
+		return null;
 	}
 	
 	private static void search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector) throws JavaModelException {

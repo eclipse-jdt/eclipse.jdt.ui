@@ -58,9 +58,9 @@ abstract class CompilationUnitReorgChange extends Change {
 	abstract void doPeform(IProgressMonitor pm) throws JavaModelException;
 	
 	/**
-	 * @see IChange#getCorrespondingJavaElement()
+	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public IJavaElement getCorrespondingJavaElement() {
+	public Object getModifiedLanguageElement() {
 		return getCu();
 	}
 	

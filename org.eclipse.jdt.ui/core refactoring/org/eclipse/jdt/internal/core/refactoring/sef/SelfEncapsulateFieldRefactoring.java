@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -27,6 +28,9 @@ import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.core.codemanipulation.AddMemberEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.ChangeVisibilityEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
@@ -35,19 +39,17 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.text.AddMemberChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ChangeVisibilityChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.util.AST;
 import org.eclipse.jdt.internal.core.refactoring.util.JavaElementMapper;
-import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
+import org.eclipse.jdt.internal.core.refactoring.util.TextChangeManager;
 
 public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	private IField fField;
 	private int fTabWidth;
-	private TextBufferChangeManager fChangeManager;
+	private TextChangeManager fChangeManager;
 	private CompositeChange fChange;
 	
 	private FieldDeclaration fFieldDeclaration;
@@ -64,7 +66,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		Assert.isNotNull(fField);
 		fTabWidth= tabWidth;
 		Assert.isNotNull(creator);
-		fChangeManager= new TextBufferChangeManager(creator);
+		fChangeManager= new TextChangeManager();
 		fChange= new CompositeChange(getName());
 		String proposal= createProposal();
 		fGetterName= createGetterProposal(proposal);
@@ -163,61 +165,69 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		fChangeManager.clear();
-		pm.beginTask("Checking preconditions", 11);
-		result.merge(checkMethodNames());
-		pm.worked(1);
-		if (result.hasFatalError())
-			return result;
-		pm.setTaskName("Searching for affected compilation units");
-		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
-			new SubProgressMonitor(pm, 5), SearchEngine.createWorkspaceScope(),
-			SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
-		pm.setTaskName("Analyzing");	
-		IProgressMonitor sub= new SubProgressMonitor(pm, 5);
-		sub.beginTask("", affectedCUs.length);
-		for (int i= 0; i < affectedCUs.length; i++) {
-			ICompilationUnit unit= affectedCUs[i];
-			if (unit.isStructureKnown()) {
-				sub.subTask(unit.getElementName());
-				AST ast= new AST(affectedCUs[i]);
-				ITextBufferChange change= fChangeManager.get(unit);
-				AccessAnalyzer analyzer= new AccessAnalyzer(this, fFieldDeclaration, change);
-				ast.accept(analyzer);
-				if (ast.hasProblems()) {
-					compilerErrorFound(result, unit);
+		try {
+			RefactoringStatus result= new RefactoringStatus();
+			fChangeManager.clear();
+			pm.beginTask("Checking preconditions", 11);
+			result.merge(checkMethodNames());
+			pm.worked(1);
+			if (result.hasFatalError())
+				return result;
+			pm.setTaskName("Searching for affected compilation units");
+			ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
+				new SubProgressMonitor(pm, 5), SearchEngine.createWorkspaceScope(),
+				SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
+			pm.setTaskName("Analyzing");	
+			IProgressMonitor sub= new SubProgressMonitor(pm, 5);
+			sub.beginTask("", affectedCUs.length);
+			for (int i= 0; i < affectedCUs.length; i++) {
+				ICompilationUnit unit= affectedCUs[i];
+				if (unit.isStructureKnown()) {
+					sub.subTask(unit.getElementName());
+					AST ast= new AST(affectedCUs[i]);
+					TextChange change= fChangeManager.get(unit);
+					AccessAnalyzer analyzer= new AccessAnalyzer(this, fFieldDeclaration, change);
+					ast.accept(analyzer);
+					if (ast.hasProblems()) {
+						compilerErrorFound(result, unit);
+					}
+					result.merge(analyzer.getStatus());
+					if (result.hasFatalError())
+						break;
+				} else {
+					syntaxErrorFound(result, unit);
 				}
-				result.merge(analyzer.getStatus());
-				if (result.hasFatalError())
-					break;
-			} else {
-				syntaxErrorFound(result, unit);
+				sub.worked(1);
 			}
-			sub.worked(1);
+			sub.done();
+			return result;
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
 		}
-		sub.done();
-		return result;
 	}
 
 	/*
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		CompositeChange result= new CompositeChange(getName());
-		pm.beginTask("", 10);
-		pm.subTask("Create changes");
-		addChanges(result, new SubProgressMonitor(pm, 2));
-		ITextBufferChange[] changes= fChangeManager.getAllChanges();
-		SubProgressMonitor sub= new SubProgressMonitor(pm, 8);
-		sub.beginTask("", changes.length);
-		for (int i= 0; i < changes.length; i++) {
-			result.addChange(changes[i]);
-			sub.worked(1);
+		try {
+			CompositeChange result= new CompositeChange(getName());
+			pm.beginTask("", 10);
+			pm.subTask("Create changes");
+			addChanges(result, new SubProgressMonitor(pm, 2));
+			TextChange[] changes= fChangeManager.getAllChanges();
+			SubProgressMonitor sub= new SubProgressMonitor(pm, 8);
+			sub.beginTask("", changes.length);
+			for (int i= 0; i < changes.length; i++) {
+				result.addChange(changes[i]);
+				sub.worked(1);
+			}
+			sub.done();
+			pm.done();
+			return result;
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
 		}
-		sub.done();
-		pm.done();
-		return result;
 	}
 
 	/*
@@ -279,14 +289,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 	}
 	
-	private void addChanges(CompositeChange parent, IProgressMonitor pm) throws JavaModelException {
-		int insertionKind= AddMemberChange.INSERT_AFTER;
+	private void addChanges(CompositeChange parent, IProgressMonitor pm) throws CoreException {
+		int insertionKind= AddMemberEdit.INSERT_AFTER;
 		IMember sibling= null;
 		IMethod[] methods= fField.getDeclaringType().getMethods();
 		if (fInsertionIndex < 0) {
 			if (methods.length > 0) {
 				sibling= methods[0];
-				insertionKind= AddMemberChange.INSERT_BEFORE;
+				insertionKind= AddMemberEdit.INSERT_BEFORE;
 			} else {
 				IField[] fields= fField.getDeclaringType().getFields();
 				sibling= fields[fields.length - 1];
@@ -295,21 +305,20 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			sibling= methods[fInsertionIndex];
 		}
 							
-		ITextBufferChange change= fChangeManager.get(fField.getCompilationUnit());
+		TextChange change= fChangeManager.get(fField.getCompilationUnit());
 		
-		change.addSimpleTextChange(new ChangeVisibilityChange(fField, "private"));
+		change.addTextEdit("Change visibility to private", new ChangeVisibilityEdit(fField, "private"));
 		
 		String modifiers= createModifiers();
 		String type= Signature.toString(fField.getTypeSignature());
 		if (!Flags.isFinal(fField.getFlags()))
-			change.addSimpleTextChange(createSetterMethod(insertionKind, sibling, modifiers, type));
-		change.addSimpleTextChange(createGetterMethod(insertionKind, sibling, modifiers, type));	
+			change.addTextEdit("Add Setter method", createSetterMethod(insertionKind, sibling, modifiers, type));
+		change.addTextEdit("Add Getter method", createGetterMethod(insertionKind, sibling, modifiers, type));	
 	}
 
-	private AddMemberChange createSetterMethod(int insertionKind, IMember sibling, String modifiers, String type) throws JavaModelException {
+	private TextEdit createSetterMethod(int insertionKind, IMember sibling, String modifiers, String type) throws JavaModelException {
 		String argname= createArgName();
-		return new AddMemberChange(
-			"Add Setter method",
+		return new AddMemberEdit(
 			sibling,
 			insertionKind,
 			new String[] {
@@ -322,9 +331,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			fTabWidth);
 	}
 	
-	private AddMemberChange createGetterMethod(int insertionKind, IMember sibling, String modifiers, String type) {
-		return new AddMemberChange(
-			"Add Getter method",
+	private TextEdit createGetterMethod(int insertionKind, IMember sibling, String modifiers, String type) {
+		return new AddMemberEdit(
 			sibling,
 			insertionKind,
 			new String[] {

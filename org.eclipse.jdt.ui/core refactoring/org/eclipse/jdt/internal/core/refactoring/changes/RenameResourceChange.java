@@ -85,7 +85,7 @@ public class RenameResourceChange extends Change {
 		return RefactoringCoreMessages.getFormattedString("RenameResourceChange.name", new String[]{fResourcePath.toString(), fNewName});//$NON-NLS-1$
 	}
 	
-	public IJavaElement getCorrespondingJavaElement(){
-		return JavaCore.create(getResource());
+	public Object getModifiedLanguageElement(){
+		return getResource();
 	}	
 }

@@ -10,9 +10,10 @@ import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jface.view
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 /**
  * Presents the changes made by the refactoring.
- * Consists of a tree of changes and a compare viewer that shows the differences. 
+ * Consists of a tree of changes and a compare viewer that shows the differences.
+ * @deprecated Use NewPreviewWizardPage 
  */
-public class PreviewWizardPage extends RefactoringWizardPage {
+public class PreviewWizardPage extends RefactoringWizardPage implements IPreviewWizardPage {
 
 	// Dummy root node if input element isn't a composite change.
 	private static class DummyRootNode extends Change implements ICompositeChange {
@@ -27,7 +28,7 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 		public String getName() {
 			return null;
 		}
-		public IJavaElement getCorrespondingJavaElement() {
+		public Object getModifiedLanguageElement() {
 			return null;
 		}
 		public IChange getUndoChange() {
@@ -72,18 +73,18 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 			
 		public final Image getImage(Object element) {
 			IChange change= (IChange)element;
-			IJavaElement je= change.getCorrespondingJavaElement();
-			if (je == null)
+			Object me= change.getModifiedLanguageElement();
+			if (me == null)
 				return null;
-			return super.getImage(je);
+			return super.getImage(me);
 		}
 		
 		public final String getText(Object element) {
 			StringBuffer result= new StringBuffer();
 			IChange change= (IChange)element;
-			IJavaElement je= change.getCorrespondingJavaElement();
-			if (je != null) {
-				result.append(super.getText(je));
+			Object me= change.getModifiedLanguageElement();
+			if (me instanceof IJavaElement) {
+				result.append(super.getText(me));
 			}
 			String name= change.getName();
 			if (name != null) {
@@ -100,8 +101,6 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 	private CheckboxTreeViewer fTreeViewer;
 	private boolean fExpandFirstNode;
 	
-	public static final String PAGE_NAME= "PreviewPage"; //$NON-NLS-1$
-
 	/**
 	 * Creates a new proposed changes wizard page.
 	 */

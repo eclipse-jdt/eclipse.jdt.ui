@@ -4,25 +4,30 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.sef;
 
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.compiler.ast.Expression;
-import org.eclipse.jdt.internal.compiler.ast.Reference;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
 
-public class EncapsulateReadAccess extends SimpleReplaceTextChange {
+final class EncapsulateReadAccess extends SimpleTextEdit {
 
-	private static final String READ_ACCESS= "Encapsulate read access";
-	
 	public EncapsulateReadAccess(String getter, SingleNameReference node) {
 		this(getter, node.sourceStart, node.sourceEnd - node.sourceStart + 1);
 	}
 	
-	protected EncapsulateReadAccess(String getter, int offset, int length) {
-		super(READ_ACCESS, offset, length, getter + "()");
+	public EncapsulateReadAccess(String getter, int offset, int length) {
+		super(offset, length, getter + "()");
 	}
+	
+	private EncapsulateReadAccess(TextPosition position, String text) {
+		super(position, text);
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#getCopy
+	 */
+	public TextEdit copy() {
+		return new EncapsulateReadAccess(getTextPosition().copy(), getText());
+	}	
 }
 

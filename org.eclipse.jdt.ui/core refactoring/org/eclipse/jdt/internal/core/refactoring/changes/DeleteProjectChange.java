@@ -28,10 +28,10 @@ public class DeleteProjectChange extends AbstractDeleteChange {
 	}
 
 	/* non java-doc
-	 * @see IChange#getCorrespondingJavaElement()
+	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public IJavaElement getCorrespondingJavaElement() {
-		return JavaCore.create(fProject);
+	public Object getModifiedLanguageElement() {
+		return fProject;
 	}
 	
 	/* non java-doc

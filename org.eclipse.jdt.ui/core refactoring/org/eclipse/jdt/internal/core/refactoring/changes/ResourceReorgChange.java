@@ -83,10 +83,10 @@ abstract class ResourceReorgChange extends Change {
 		return fNewName;	
 	}
 		/* non java-doc
-	 * @see IChange#getCorrespondingJavaElement()
+	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public IJavaElement getCorrespondingJavaElement() {
-		return JavaCore.create(getResource());
+	public Object getModifiedLanguageElement() {
+		return getResource();
 	}
 
 	private IFile getFile(){

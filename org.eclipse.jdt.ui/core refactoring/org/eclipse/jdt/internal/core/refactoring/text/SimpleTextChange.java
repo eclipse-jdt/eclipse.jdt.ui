@@ -16,6 +16,8 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * and expected to change significantly before reaching stability. It is being made available at 
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
+ * 
+ * @deprecated Use TextEdit from code manipulation
  */
 public abstract class SimpleTextChange extends Change implements ITextChange {
 	
@@ -91,7 +93,7 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	}
 	 
 	/**
-	 * Sets the surrounding <code>AbstractTextBufferChange</code>.
+	 * Sets the surrounding <code>TextChange</code>.
 	 *
 	 * @param the enclosing text buffer change. The given value must not be <code>null</code>.
 	 */
@@ -103,8 +105,8 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
-	public IJavaElement getCorrespondingJavaElement() {
-		IJavaElement element= fChange.getCorrespondingJavaElement();
+	public Object getModifiedLanguageElement() {
+		Object element= fChange.getModifiedLanguageElement();
 		if (element instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit)element;
 			try {
@@ -152,7 +154,7 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
 		Assert.isTrue(false,
 			RefactoringCoreMessages.getFormattedString("SimpleTextChange.assert.only_from",  //$NON-NLS-1$
-				new String[] {"SimpleTextChange", "AbstractTextBufferChange"})); //$NON-NLS-1$ //$NON-NLS-2$
+				new String[] {"SimpleTextChange", "TextChange"})); //$NON-NLS-1$ //$NON-NLS-2$
 		return null;
 	}
 	
@@ -162,7 +164,7 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
 		Assert.isTrue(false,
 			RefactoringCoreMessages.getFormattedString("SimpleTextChange.assert.only_from",  //$NON-NLS-1$
-				new String[] {"SimpleTextChange", "AbstractTextBufferChange"})); //$NON-NLS-1$ //$NON-NLS-2$
+				new String[] {"SimpleTextChange", "TextChange"})); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 		
@@ -172,7 +174,7 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	public void performed() {
 		Assert.isTrue(false,
 			RefactoringCoreMessages.getFormattedString("SimpleTextChange.assert.only_from",  //$NON-NLS-1$
-				new String[] {"SimpleTextChange", "AbstractTextBufferChange"})); //$NON-NLS-1$ //$NON-NLS-2$
+				new String[] {"SimpleTextChange", "TextChange"})); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/* (Non-Javadoc)
@@ -181,7 +183,7 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	public IChange getUndoChange() {
 		Assert.isTrue(false,
 			RefactoringCoreMessages.getFormattedString("SimpleTextChange.assert.only_from",  //$NON-NLS-1$
-				new String[] {"SimpleTextChange", "AbstractTextBufferChange"})); //$NON-NLS-1$ //$NON-NLS-2$
+				new String[] {"SimpleTextChange", "TextChange"})); //$NON-NLS-1$ //$NON-NLS-2$
 		return null;
 	}	
 }
