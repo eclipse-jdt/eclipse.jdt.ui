@@ -175,6 +175,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * 
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
 	 * progress reporting is not desired
+	 * @since 2.1
 	 */
 	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
 		BuildPathsBlock.createProject(project, locationPath, monitor);

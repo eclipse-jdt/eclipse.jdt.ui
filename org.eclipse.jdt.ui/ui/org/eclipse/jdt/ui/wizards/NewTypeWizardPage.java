@@ -1445,6 +1445,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @return String Returns the result of evaluating the new file template
 	 * with the given type content.
 	 * @throws CoreException
+	 * @since 2.1
 	 */
 	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
 		StringBuffer typeQualifiedName= new StringBuffer();
