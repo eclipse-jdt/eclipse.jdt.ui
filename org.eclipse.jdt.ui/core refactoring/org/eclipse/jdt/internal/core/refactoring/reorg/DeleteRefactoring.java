@@ -146,14 +146,19 @@ public class DeleteRefactoring extends Refactoring {
 	
 	private static boolean hasParentOnList(Object element, List list) throws JavaModelException {
 		IPath elementPath= getPath(element);
-		//FIX ME ???
 		if (elementPath == null)
 			return false;
 
 		for (Iterator iter= list.iterator(); iter.hasNext(); ){
-			IPath parentPath= getPath(iter.next());
+			Object parent= iter.next();
+			IPath parentPath= getPath(parent);
 			if (parentPath == null)
 				return false;
+			
+			//special case (2 packages are never parents of each other)
+			if 	(element instanceof IPackageFragment && parent instanceof IPackageFragment)
+				continue;
+			
 			if (! parentPath.equals(elementPath) && parentPath.isPrefixOf(elementPath))	
 				return true;
 		}
@@ -161,12 +166,11 @@ public class DeleteRefactoring extends Refactoring {
 	}
 	
 	private static IPath getPath(Object o) throws JavaModelException {
-		Object o1= o;
-		if (o1 instanceof IJavaElement) 
-			o1= ((IJavaElement)o1).getUnderlyingResource();
+		if (o instanceof IJavaElement) 
+			return ((IJavaElement)o).getUnderlyingResource().getFullPath();
 
-		if (o1 instanceof IResource)
-			return ((IResource)o1).getFullPath();
+		if (o instanceof IResource)
+			return ((IResource)o).getFullPath();
 				
 		return null;
 	}
@@ -176,7 +180,7 @@ public class DeleteRefactoring extends Refactoring {
 			public int compare(Object left, Object right) {
 				return getPathLength(right) - getPathLength(left);
 			}
-			private int getPathLength(final Object o){
+			private int getPathLength(Object o){
 				try{
 					return getPath(o).segmentCount();
 				} catch (JavaModelException e){
@@ -205,9 +209,7 @@ public class DeleteRefactoring extends Refactoring {
 		if (o instanceof IResource)
 			return createDeleteChange((IResource)o);
 		
-		Assert.isTrue(false);	
-		return null;	
-					
+		return new NullChange();				
 	}
 	
 	private static IResource getResourceToDelete(IJavaElement element) throws JavaModelException {
@@ -219,21 +221,20 @@ public class DeleteRefactoring extends Refactoring {
 	private IChange createDeleteChange(IResource res) throws JavaModelException {
 		if (res == null)
 			return null;
+			
 		if (!res.exists())	
 			return null;
+			
 		if (res instanceof IFile)
 			return new DeleteFileChange((IFile)res);
+			
 		if (res instanceof IFolder)	
-			return createDeleteChange((IFolder)res);
+			return createDeleteChange((IFolder)res, false);
+			
 		if (res instanceof IProject)
 			return new DeleteProjectChange((IProject)res, deleteProjectContents((IProject)res));
-
-		Assert.isTrue(false);	
-		return null;
-	}
-	
-	private IChange createDeleteChange(IFolder folder) throws JavaModelException {
-		return createDeleteChange(folder, false);
+			
+		return new NullChange();
 	}
 	
 	private IChange createDeleteChange(IFolder folder, boolean removeContentOnly) throws JavaModelException {
@@ -242,7 +243,7 @@ public class DeleteRefactoring extends Refactoring {
 			
 		IResource[] members = getMembers(folder);		
 		if (members.length == 0)
-			return null;
+			return new NullChange();
 			
 		CompositeChange composite= new CompositeChange("Delete resources", members.length);
 		for (int i= 0; i < members.length; i++){
