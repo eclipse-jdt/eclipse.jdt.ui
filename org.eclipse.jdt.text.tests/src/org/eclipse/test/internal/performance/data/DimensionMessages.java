@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
  */
 class DimensionMessages {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.text.tests.performance.data.DimensionMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.test.internal.performance.data.DimensionMessages";//$NON-NLS-1$
 
 	private static final ResourceBundle RESOURCE_BUNDLE= ResourceBundle.getBundle(BUNDLE_NAME);
 
