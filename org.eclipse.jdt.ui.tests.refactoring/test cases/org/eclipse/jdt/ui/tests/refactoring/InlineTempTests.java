@@ -165,6 +165,12 @@ public class InlineTempTests extends RefactoringTest {
 		printTestDisabledMessage("incorrect for multiple declarations");		
 //		helper1(4, 19, 4, 20);
 	}	
+	
+	public void test16() throws Exception{
+//		printTestDisabledMessage("regression test for 10751");		
+		helper1(5, 17, 5, 24);
+	}	
+	
 
 	//------
 	
