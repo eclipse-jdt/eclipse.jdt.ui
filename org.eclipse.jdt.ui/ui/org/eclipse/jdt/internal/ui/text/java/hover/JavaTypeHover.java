@@ -5,6 +5,8 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
  * All Rights Reserved.
  */
 
+import java.io.Reader;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 
@@ -19,18 +21,20 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class JavaTypeHover implements IJavaEditorTextHover {
 	
 	private IEditorPart fEditor;
 	
-	private final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
+	private final int LABEL_FLAGS=  JavaElementLabels.T_CONTAINER_QUALIFIED | JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.F_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 	
@@ -59,7 +63,7 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 		return null;
 	}
 	
-	private String getInfoText(IMember member) {
+	private String getInfoText(IMember member) {		
 		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
 	}
 		
@@ -105,7 +109,10 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 					if (curr instanceof IMember) {
 						IMember member= (IMember) curr;
 						HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
-						HTMLPrinter.addParagraph(buffer, JavaDocAccess.getJavaDoc(member));
+						Reader reader= JavaDocAccess.getJavaDoc(member);
+						if (reader != null) {
+							HTMLPrinter.addParagraph(buffer, new JavaDoc2HTMLTextReader(reader));
+						}
 					}
 				}
 				

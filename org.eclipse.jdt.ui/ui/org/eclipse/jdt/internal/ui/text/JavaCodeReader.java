@@ -10,6 +10,8 @@ import java.io.IOException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jdt.internal.corext.javadoc.SingleCharReader;
+
 /**
  * Reads from a document either forwards or backwards. May be configured to
  * skip comments and strings.

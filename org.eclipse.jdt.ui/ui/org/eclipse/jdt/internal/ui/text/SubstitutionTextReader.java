@@ -7,6 +7,8 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.io.IOException;
 import java.io.Reader;
+
+import org.eclipse.jdt.internal.corext.javadoc.SingleCharReader;
 
 /**
  * Reads the text contents from a reader and computes for each character

@@ -5,6 +5,9 @@ package org.eclipse.jdt.internal.ui.text.java;
  * All Rights Reserved.
  */
  
+import java.io.IOException;
+import java.io.Reader;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -12,9 +15,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 
 public class ProposalInfo {
@@ -84,12 +88,18 @@ public class ProposalInfo {
 					member= type;
 				}
 				
-				if (member != null)
-					return  JavaDocAccess.getJavaDocText(member);
+				if (member != null) {
+					Reader reader= JavaDocAccess.getJavaDoc(member);
+					if (reader != null) {
+						return  new JavaDoc2HTMLTextReader(reader).getString();
+					}
+				}
 					
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
+			JavaPlugin.log(e);
+		} catch (IOException e) {
+			JavaPlugin.log(e);
 		}
 		return null;
 	}

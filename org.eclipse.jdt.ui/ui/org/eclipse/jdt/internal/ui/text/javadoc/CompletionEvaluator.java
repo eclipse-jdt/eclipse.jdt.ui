@@ -5,6 +5,8 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  * All Rights Reserved.
  */
  
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,10 +30,11 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class CompletionEvaluator {
 	
@@ -263,9 +266,14 @@ public class CompletionEvaluator {
 	private String getProposalInfo(IJavaElement elem) {
 		if (elem instanceof IMember) {
 			try {
-				return JavaDocAccess.getJavaDocText((IMember)elem);
+				Reader reader= JavaDocAccess.getJavaDoc((IMember)elem);
+				if (reader != null) {
+					return (new JavaDoc2HTMLTextReader(reader)).getString();
+				}				
 			} catch (JavaModelException e) {
-				JavaPlugin.getDefault().log(e.getStatus());
+				JavaPlugin.getDefault().log(e);
+			} catch (IOException e) {
+				JavaPlugin.getDefault().log(e);
 			}
 		}
 		return null;
