@@ -306,4 +306,16 @@ public interface IJavaHelpContextIds {
 	
 	// Custom Filters
 	public static final String CUSTOM_FILTERS_DIALOG= PREFIX + "open_custom_filters_dialog_context"; //$NON-NLS-1$
+    
+    // Call Hierarchy
+    public static final String CALL_HIERARCHY_VIEW= PREFIX + "call_hierarchy_view_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_FILTERS_DIALOG= PREFIX + "call_hierarchy_filters_dialog_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_FOCUS_ON_SELECTION_ACTION= PREFIX + "call_hierarchy_focus_on_selection_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_HISTORY_ACTION= PREFIX + "call_hierarchy_history_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_HISTORY_DROP_DOWN_ACTION= PREFIX + "call_hierarchy_history_drop_down_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_REFRESH_ACTION= PREFIX + "call_hierarchy_refresh_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_SEARCH_SCOPE_ACTION= PREFIX + "call_hierarchy_search_scope_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_TOGGLE_CALL_MODE_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_TOGGLE_JAVA_LABEL_FORMAT_ACTION= PREFIX + "call_hierarchy_toggle_java_label_format_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
 }
