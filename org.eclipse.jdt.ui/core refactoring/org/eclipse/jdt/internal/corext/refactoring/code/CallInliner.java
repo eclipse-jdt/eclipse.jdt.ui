@@ -295,19 +295,7 @@ public class CallInliner {
 	}
 	
 	private VariableDeclarationStatement createLocalDeclaration(ITypeBinding type, String name, Expression initializer) {
-		String typeName;
-		if (type.isPrimitive()) {
-			typeName= type.getName();
-		} else {
-			typeName= fImportEdit.addImport(type);
-			if (type.isArray()) {
-				StringBuffer buffer= new StringBuffer(typeName);
-				for (int i= 0; i < type.getDimensions(); i++) {
-					buffer.append("[]"); //$NON-NLS-1$
-				}
-				typeName= buffer.toString();
-			}
-		}
+		String typeName= fImportEdit.addImport(type);
 		VariableDeclarationStatement decl= (VariableDeclarationStatement)ASTNodeFactory.newStatement(
 			fInvocation.getAST(), typeName + " " + name + ";"); //$NON-NLS-1$ //$NON-NLS-2$
 		((VariableDeclarationFragment)decl.fragments().get(0)).setInitializer(initializer);
