@@ -5,10 +5,10 @@
 package org.eclipse.jdt.internal.ui.text.link;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ExtendedModifyEvent;
-import org.eclipse.swt.custom.ExtendedModifyListener;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.PaintEvent;
@@ -17,22 +17,19 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextListener;
+import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -41,7 +38,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * A user interface for <code>LinkedPositionManager</code>, using <code>ITextViewer</code>.
  */
 public class LinkedPositionUI implements LinkedPositionListener,
-	ModifyListener, VerifyKeyListener, PaintListener {
+	ITextInputListener, ModifyListener, VerifyKeyListener, PaintListener {
 
 	/**
 	 * A listener for notification when the user cancelled the edit operation.
@@ -65,14 +62,6 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	
 	private CancelListener fCancelListener;
 	
-	/**
-	 * XXX StyledText workaround.
-	 */
-	public void setReplace(IDocumentExtension.IReplace replace) {
-		Display display= fViewer.getTextWidget().getDisplay();
-		display.asyncExec((Runnable) replace);
-	}
-
 	/**
 	 * Creates a user interface for <code>LinkedPositionManager</code>.
 	 * 
@@ -118,13 +107,6 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		fCaretOffset= caretOffset;
 	}
 
-	/*
-	 * @see LinkedPositionManager.LinkedPositionListener#exit(boolean)
-	 */
-	public void exit(boolean success) {
-		leave2(success);	
-	}
-
 	/**
 	 * Enters the linked mode. The linked mode can be left by calling
 	 * <code>exit</code>.
@@ -144,7 +126,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			JavaPlugin.log(e);
 			openErrorDialog(fViewer.getTextWidget().getShell(), e);
 		}
-		
+
+		fViewer.addTextInputListener(this);
+				
 		StyledText text= fViewer.getTextWidget();			
 		text.addModifyListener(this);
 		text.addVerifyKeyListener(this);
@@ -165,18 +149,31 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		}
 	}
 
+	/*
+	 * @see LinkedPositionManager.LinkedPositionListener#exit(boolean)
+	 */
+	public void exit(boolean success) {
+		leave2(success, false);	
+	}
+
 	private void leave(boolean accept) {
+		leave(accept, false);	
+	}
+
+	private void leave(boolean accept, boolean documentChanged) {
 		fManager.uninstall(accept);
 		
-		leave2(accept);		
+		leave2(accept, documentChanged);		
 	}
 	
-	private void leave2(boolean accept) {
+	private void leave2(boolean accept, boolean documentChanged) {
 		StyledText text= fViewer.getTextWidget();	
 		text.removePaintListener(this);
 		text.removeVerifyKeyListener(this);
 		text.removeModifyListener(this);
 
+		fViewer.removeTextInputListener(this);
+		
 		try {
 			IRegion region= fViewer.getVisibleRegion();
 			IDocument document= fViewer.getDocument();
@@ -186,7 +183,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 				if ((positions != null) && (positions.length != 0)) {
 					int offset= positions[0].getOffset() - region.getOffset();		
-					if ((offset >= 0) && (offset <= region.getLength()))
+					if (!documentChanged && (offset >= 0) && (offset <= region.getLength()))
 						text.setSelection(offset, offset);
 				}
 			}
@@ -243,7 +240,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 				int length= selection.y - selection.x;
 				
 				// if tab was treated as a document change, would it exceed variable range?
-				if (exceeds(fFramePosition, offset, length)) {
+				if (!LinkedPositionManager.includes(fFramePosition, offset, length)) {
 					leave(true);
 					return;
 				}
@@ -269,23 +266,56 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 * @see PaintListener#paintControl(PaintEvent)
 	 */
 	public void paintControl(PaintEvent event) {	
-		GC gc= event.gc;
-
+		if (fFramePosition == null)
+			return;
+		
 		IRegion region= fViewer.getVisibleRegion();		
 		int offset= fFramePosition.getOffset() -  region.getOffset();
 		int length= fFramePosition.getLength();
 			
 		StyledText text= fViewer.getTextWidget();
-		Point minLocation= text.getLocationAtOffset(offset);
-		Point maxLocation= text.getLocationAtOffset(offset + length);
-
-		int x= minLocation.x;
-		int y= minLocation.y;
-		int width= maxLocation.x - minLocation.x - 1;
-		int height= gc.getFontMetrics().getHeight() - 1;
 		
+		// support for bidi
+		Point minLocation= getMinimumLocation(text, offset, length);
+		Point maxLocation= getMaximumLocation(text, offset, length);
+
+		int x1= minLocation.x;
+		int x2= minLocation.x + maxLocation.x - minLocation.x - 1;
+		int y= minLocation.y + text.getLineHeight() - 1;
+		
+		GC gc= event.gc;
 		gc.setForeground(fFrameColor);
-		gc.drawLine(x, y + height, x + width, y + height);
+		gc.drawLine(x1, y, x2, y);
+	}
+
+	private static Point getMinimumLocation(StyledText text, int offset, int length) {
+		Point minLocation= new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+		for (int i= 0; i <= length; i++) {
+			Point location= text.getLocationAtOffset(offset + i);
+			
+			if (location.x < minLocation.x)
+				minLocation.x= location.x;			
+			if (location.y < minLocation.y)
+				minLocation.y= location.y;			
+		}	
+		
+		return minLocation;
+	}
+
+	private static Point getMaximumLocation(StyledText text, int offset, int length) {
+		Point maxLocation= new Point(Integer.MIN_VALUE, Integer.MIN_VALUE);
+
+		for (int i= 0; i <= length; i++) {
+			Point location= text.getLocationAtOffset(offset + i);
+			
+			if (location.x > maxLocation.x)
+				maxLocation.x= location.x;			
+			if (location.y > maxLocation.y)
+				maxLocation.y= location.y;			
+		}	
+		
+		return maxLocation;
 	}
 
 	private void redrawRegion() {
@@ -320,12 +350,6 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		redrawRegion();
 		updateCaret();
 	}
-
-	private static boolean exceeds(Position position, int offset, int length) {
-		return
-			(offset < position.getOffset()) ||
-			(offset + length > position.getOffset() + position.getLength());
-	}
 	
 	/**
 	 * Returns the cursor selection, after having entered the linked mode.
@@ -340,6 +364,21 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 	private static void openErrorDialog(Shell shell, Exception e) {
 		MessageDialog.openError(shell, LinkedPositionMessages.getString("LinkedPositionUI.error.title"), e.getMessage()); //$NON-NLS-1$
+	}
+
+	/*
+	 * @see ITextInputListener#inputDocumentAboutToBeChanged(IDocument, IDocument)
+	 */
+	public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
+		// 5326: leave linked mode on document change
+		boolean documentChanged= !oldInput.equals(newInput);
+		leave(true, documentChanged);
+	}
+
+	/*
+	 * @see ITextInputListener#inputDocumentChanged(IDocument, IDocument)
+	 */
+	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
 	}
 
 }

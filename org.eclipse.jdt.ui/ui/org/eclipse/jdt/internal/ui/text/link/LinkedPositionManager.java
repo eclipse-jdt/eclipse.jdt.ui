@@ -271,12 +271,12 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		return null;
 	}	
 
-	private static boolean exceeds(Position position, int offset, int length) {
+	public static boolean includes(Position position, int offset, int length) {
 		return
-			(offset < position.getOffset()) ||
-			(offset + length > position.getOffset() + position.getLength());
+			(offset >= position.getOffset()) &&
+			(offset + length <= position.getOffset() + position.getLength());
 	}
-	
+
 	/*
 	 * Collides if spacing if positions intersect each other or are adjacent.
 	 */
@@ -313,7 +313,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 				
 		// find a valid position
 		for (int i= 0; i != positions.length; i++)
-			if (!exceeds(positions[i], event.getOffset(), event.getLength()))
+			if (includes(positions[i], event.getOffset(), event.getLength()))
 				return;
 		
 		leave(true);
@@ -374,7 +374,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 
 	private static Position findCurrentPosition(Position[] positions, int offset) {
 		for (int i= 0; i != positions.length; i++)
-			if (!exceeds(positions[i], offset, 0))
+			if (includes(positions[i], offset, 0))
 				return positions[i];
 		
 		return null;			
