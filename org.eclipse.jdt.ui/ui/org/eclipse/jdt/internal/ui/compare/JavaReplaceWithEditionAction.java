@@ -20,17 +20,14 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.ui.*;
 
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.compare.*;
-import org.eclipse.compare.internal.TimeoutContext;
 
 
 /**

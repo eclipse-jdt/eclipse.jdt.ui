@@ -21,8 +21,6 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.IStreamContentAccessor;
-import org.eclipse.compare.ITypedElement;
-import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
 
 public class JavaTextViewer extends Viewer {

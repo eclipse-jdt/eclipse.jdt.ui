@@ -12,7 +12,6 @@ import org.eclipse.jface.text.*;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.help.internal.util.Resources;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.*;

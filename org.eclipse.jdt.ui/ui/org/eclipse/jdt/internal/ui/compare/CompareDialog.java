@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.io.*;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWT;
@@ -13,17 +12,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.layout.*;
 
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.compare.*;
-import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;

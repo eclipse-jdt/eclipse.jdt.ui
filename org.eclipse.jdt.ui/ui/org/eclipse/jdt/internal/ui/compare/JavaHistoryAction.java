@@ -9,11 +9,9 @@ import java.io.*;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.action.*;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.*;
 
 import org.eclipse.ui.IActionDelegate;
-import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.core.resources.*;

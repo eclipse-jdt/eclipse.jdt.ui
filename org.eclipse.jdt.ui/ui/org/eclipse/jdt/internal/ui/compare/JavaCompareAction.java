@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.ui.*;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.compare.*;

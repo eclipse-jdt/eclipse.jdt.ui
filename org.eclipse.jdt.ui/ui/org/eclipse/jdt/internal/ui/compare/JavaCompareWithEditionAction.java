@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.compare.*;
