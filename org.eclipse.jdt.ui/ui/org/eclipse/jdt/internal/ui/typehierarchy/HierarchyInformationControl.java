@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -75,7 +74,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	private HierarchyInformationControlLabelProvider fLabelProvider;
 	private Label fLabel;
 	
-	private IMethod fFocus;
+	private IMethod fFocus; // method to filter for or null if type hierarchy
 	private boolean fDoFilter= true;
 
 	public HierarchyInformationControl(Shell parent, int shellStyle, int treeStyle) {
@@ -250,7 +249,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#getSelectedElement()
 	 */
 	protected Object getSelectedElement() {
-		Object selectedElement= ((IStructuredSelection)getTreeViewer().getSelection()).getFirstElement();
+		Object selectedElement= super.getSelectedElement();
 		if (selectedElement instanceof IType && fFocus != null) {
 			IMethod[] methods= ((IType) selectedElement).findMethods(fFocus);
 			if (methods != null && methods.length > 0) {
