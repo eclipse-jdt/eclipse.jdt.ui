@@ -137,6 +137,10 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		}
 	}
 	
+	public void setFocus() {
+		fTable.setFocus();
+	}
+	
 	public void endTest(String testName){
 		TestRunInfo testInfo= fRunnerViewPart.getTestInfo(testName);
 		if(testInfo == null || testInfo.fStatus == ITestRunListener.STATUS_OK) 

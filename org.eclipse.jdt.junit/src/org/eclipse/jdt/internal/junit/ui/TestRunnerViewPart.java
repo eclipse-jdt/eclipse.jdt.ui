@@ -66,8 +66,7 @@ import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
 /**
  * A ViewPart that shows the results of a test run.
  */
-public class TestRunnerViewPart extends ViewPart
-	implements ITestRunListener, IPropertyChangeListener {
+public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IPropertyChangeListener {
 
 	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
  	/**
@@ -711,7 +710,8 @@ public class TestRunnerViewPart extends ViewPart
 	}
 
     public void setFocus() {
-    	fProgressBar.setFocus();
+    	if (fActiveRunView != null)
+    		fActiveRunView.setFocus();
     }
 
     public void createPartControl(Composite parent) {		

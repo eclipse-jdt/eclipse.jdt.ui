@@ -227,6 +227,10 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		testSelected();
 	}
 	
+	public void setFocus() {
+		fTree.setFocus();
+	}
+
 	public void aboutToStart() {
 		fTree.removeAll();
 		fSuiteInfos.removeAllElements();

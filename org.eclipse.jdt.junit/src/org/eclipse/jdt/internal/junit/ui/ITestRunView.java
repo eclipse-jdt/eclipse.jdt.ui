@@ -22,6 +22,11 @@ interface ITestRunView {
 	public void activate();
 	
 	/**
+	 * Sets the focus in the TestRunView
+	 */
+	public void setFocus();
+	
+	/**
 	 * Informs that the suite is about to start 
 	 */
 	public void aboutToStart();
