@@ -117,7 +117,8 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 			// Let superclass deal with this
 			return super.showPossibleCompletions();
 		
-		int initalOffset= fViewer.getSelectedRange().x;
+		Point selectedRange= fViewer.getSelectedRange();
+		int initalOffset= selectedRange.x;
 		int invocationOffset;
 		int invocationLength;
 		
@@ -126,13 +127,12 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 				IDocument document= fViewer.getDocument();
 				IRegion start= document.getLineInformationOfOffset(initalOffset);
 				invocationOffset= start.getOffset();
-				int line= document.getLineOfOffset(initalOffset);
-				if (line + 1 < document.getNumberOfLines()) {
-					IRegion end= document.getLineInformation(line + 1);
-					invocationLength= end.getOffset() - invocationOffset + end.getLength();
-				} else {
-					invocationLength= start.getLength();
+				IRegion end= document.getLineInformationOfOffset(initalOffset + selectedRange.y);
+				if (end.getOffset() == initalOffset + selectedRange.y) {
+					int line= document.getLineOfOffset(end.getOffset());
+					end= fViewer.getDocument().getLineInformation(line - 1);
 				}
+				invocationLength= end.getOffset() + end.getLength() - invocationOffset;
 			} catch (BadLocationException ex) {
 				invocationOffset= initalOffset;
 				invocationLength= 0;
