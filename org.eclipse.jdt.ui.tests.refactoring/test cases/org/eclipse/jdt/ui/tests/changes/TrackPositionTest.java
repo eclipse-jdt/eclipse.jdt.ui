@@ -54,7 +54,7 @@ public class TrackPositionTest extends TestCase {
 		TextEdit edit= SimpleTextEdit.createReplace(2, 2, "xyz");
 		fChange.addTextEdit(NN, edit);
 		executeChange();
-		assert(fChange.getNewTextRange(edit), 2, 3);
+		assertEquals(fChange.getNewTextRange(edit), 2, 3);
 	}
 	
 	public void test2() throws Exception {
@@ -63,7 +63,7 @@ public class TrackPositionTest extends TestCase {
 		TextBuffer preview= fChange.getPreviewTextBuffer();
 		assertEquals(fBuffer.getContent(), "0123456789");
 		assertEquals(preview.getContent(), "01234xy89");
-		assert(fChange.getNewTextRange(edit), 5, 2);
+		assertEquals(fChange.getNewTextRange(edit), 5, 2);
 	}
 		
 	private void executeChange() throws Exception {
@@ -76,7 +76,7 @@ public class TrackPositionTest extends TestCase {
 		}
 	}
 	
-	private void assert(TextRange r, int offset, int length) {
+	private void assertEquals(TextRange r, int offset, int length) {
 		assertEquals("Offset", offset, r.getOffset());
 		assertEquals("Length", length, r.getLength());	
 	}	
