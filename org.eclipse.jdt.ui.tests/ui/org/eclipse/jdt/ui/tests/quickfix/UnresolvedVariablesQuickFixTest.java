@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewVariableCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.ReplaceCorrectionProposal;
 
 public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	
@@ -244,20 +245,33 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
-		NewVariableCompletionProposal proposal= (NewVariableCompletionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
-		
 		buf= new StringBuffer();
+		
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int k;\n");
 		buf.append("    private int i= k;\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final int k = 0;\n");
+		buf.append("    private int i= k;\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 	
 	public void testVarInOtherType() throws Exception {
@@ -635,10 +649,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOf("proposals", proposals.size(), 6);
+		assertNumberOf("proposals", proposals.size(), 7);
 		assertCorrectLabels(proposals);
 
-		boolean doField= true, doParam= true, doLocal= true, doInterface= true, doClass= true, doChange= true;
+		boolean doField= true, doParam= true, doLocal= true, doConst= true, doInterface= true, doClass= true, doChange= true;
 		for (int i= 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
 			if (curr instanceof NewVariableCompletionProposal) {
@@ -687,6 +701,22 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 					buf.append("    }\n");
 					buf.append("}\n");
 					assertEqualString(preview, buf.toString());
+				} else if (proposal.getVariableKind() == NewVariableCompletionProposal.CONST_FIELD) {
+					assertTrue("2 const proposals", doConst);
+					doConst= false;
+					
+					buf= new StringBuffer();
+					buf.append("package test1;\n");
+					buf.append("import java.io.File;\n");
+					buf.append("public class F {\n");
+					buf.append("    private static final String Fixe = null;\n");
+					buf.append("\n");
+					buf.append("    void foo() {\n");
+					buf.append("        char ch= Fixe.pathSeparatorChar;\n");
+					buf.append("    }\n");
+					buf.append("}\n");
+					assertEqualString(preview, buf.toString());
+					
 				} else {
 					assertTrue("unknown type", false);
 				}
@@ -744,6 +774,142 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		}		
 	
 	}
+	
+	public void testSimilarVariableNames1() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final short CON1= 1;\n");
+		buf.append("    private static final float CON2= 1.0f;\n");
+		buf.append("    private String bla;\n");
+		buf.append("    private String cout;\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return count;\n");		
+		buf.append("    }\n");				
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		for (int i= proposals.size() - 1; i >= 0; i--) {
+			Object curr= proposals.get(i);
+			if (!(curr instanceof ReplaceCorrectionProposal)) {
+				proposals.remove(i);
+			}
+		}
+		
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
 
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final short CON1= 1;\n");
+		buf.append("    private static final float CON2= 1.0f;\n");
+		buf.append("    private String bla;\n");
+		buf.append("    private String cout;\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return CON1;\n");		
+		buf.append("    }\n");				
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final short CON1= 1;\n");
+		buf.append("    private static final float CON2= 1.0f;\n");
+		buf.append("    private String bla;\n");
+		buf.append("    private String cout;\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return cout;\n");		
+		buf.append("    }\n");				
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
+	
+	public void testSimilarVariableNames2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final short CON1= 1;\n");
+		buf.append("    private static final float CON2= 1.0f;\n");
+		buf.append("    private static short var1= 1;\n");
+		buf.append("    private static float var2= 1.0f;\n");
+		buf.append("    private String bla;\n");
+		buf.append("    private String cout;\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        count= x;\n");		
+		buf.append("    }\n");				
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		for (int i= proposals.size() - 1; i >= 0; i--) {
+			Object curr= proposals.get(i);
+			if (!(curr instanceof ReplaceCorrectionProposal)) {
+				proposals.remove(i);
+			}
+		}
+		
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final short CON1= 1;\n");
+		buf.append("    private static final float CON2= 1.0f;\n");
+		buf.append("    private static short var1= 1;\n");
+		buf.append("    private static float var2= 1.0f;\n");
+		buf.append("    private String bla;\n");
+		buf.append("    private String cout;\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        var2= x;\n");		
+		buf.append("    }\n");				
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final short CON1= 1;\n");
+		buf.append("    private static final float CON2= 1.0f;\n");
+		buf.append("    private static short var1= 1;\n");
+		buf.append("    private static float var2= 1.0f;\n");
+		buf.append("    private String bla;\n");
+		buf.append("    private String cout;\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        cout= x;\n");		
+		buf.append("    }\n");				
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
+	
+
+	
 
 }
