@@ -258,7 +258,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			IMarker marker= ((MarkerAnnotation) annot).getMarker();
 			if (marker.exists() && marker.isSubtypeOf(IMarker.PROBLEM)) {
 				Position pos= model.getPosition(annot);
-				if (isInside(pos.getOffset(), sourceElement)) {
+				if (sourceElement == null || isInside(pos.getOffset(), sourceElement)) {
 					return marker;
 				}
 			}
