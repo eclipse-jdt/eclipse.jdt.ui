@@ -2,7 +2,8 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.core.refactoring.cus;import org.eclipse.core.runtime.IPath;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
+package org.eclipse.jdt.internal.core.refactoring.cus;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.*;
 
@@ -28,4 +29,8 @@ public class RenameCompilationUnitChange extends AbstractRenameChange {
 		return RefactoringCoreMessages.getFormattedString("RenameCompilationUnitChange.name", new String[]{getOldName(), getNewName()}); //$NON-NLS-1$
 	}
 	
-	/**	 * @see AbstractRenameChange#createUndoChange()	 */	protected IChange createUndoChange() throws JavaModelException{		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName());	}}
+	/**	 * @see AbstractRenameChange#createUndoChange()	 */	protected IChange createUndoChange() throws JavaModelException{		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName());	}
+	
+	protected void doRename(IProgressMonitor pm) throws JavaModelException {
+		((ICompilationUnit)getCorrespondingJavaElement()).rename(getNewName(), false, pm);
+	}}

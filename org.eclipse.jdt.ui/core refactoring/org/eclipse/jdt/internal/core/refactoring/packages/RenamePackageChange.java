@@ -29,7 +29,7 @@ public class RenamePackageChange extends AbstractRenameChange {
 		return new Path(packageName.replace('.', IPath.SEPARATOR));
 	}
 	
-	protected IPath createNewPath(){
+	private IPath createNewPath(){
 		IPackageFragment oldPackage= (IPackageFragment)getCorrespondingJavaElement();
 		IPath oldPackageName= createPath(oldPackage.getElementName());
 		IPath newPackageName= createPath(getNewName());
@@ -45,6 +45,10 @@ public class RenamePackageChange extends AbstractRenameChange {
 	 */
 	protected IChange createUndoChange() {
 		return new RenamePackageChange(createNewPath(), getNewName(), getOldName());
+	}
+	
+	protected void doRename(IProgressMonitor pm) throws JavaModelException {
+		((IPackageFragment)getCorrespondingJavaElement()).rename(getNewName(), false, pm);
 	}
 	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
