@@ -284,11 +284,11 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		dialog.addFilter(new ContainerFilter(refactoring));
 		dialog.setSorter(new PackageViewerSorter());
 		dialog.setMessage(getDestinationDialogMessage());
-		dialog.setInitialSizeInCharacters(60, 18);
+		dialog.setSize(60, 18);
 		dialog.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		
 		if (dialog.open() != dialog.CANCEL)
-			return dialog.getSelectedElement();
+			return dialog.getFirstResult();
 		return null;
 	}
 

@@ -182,7 +182,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		dialog.setElements(results);
 
 		return (dialog.open() == dialog.OK)
-			? (IType) dialog.getSelectedElement()
+			? (IType) dialog.getFirstResult()
 			: null;
 	}
 }

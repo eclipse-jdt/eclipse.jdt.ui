@@ -605,7 +605,7 @@ public class BuildPathsBlock {
 		dialog.setInitialSelection(initSelection);
 		
 		if (dialog.open() == dialog.OK) {
-			return (IContainer)dialog.getSelectedElement();
+			return (IContainer)dialog.getFirstResult();
 		}
 		return null;
 	}

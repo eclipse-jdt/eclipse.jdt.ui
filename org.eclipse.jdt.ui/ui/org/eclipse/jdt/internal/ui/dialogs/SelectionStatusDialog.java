@@ -66,8 +66,8 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	 *
 	 * @return the first result element if one exists. Otherwise <code>null</code> is
 	 *  returned.
-	 */
-	public Object getPrimaryResult() {
+	 */	
+	public Object getFirstResult() {
 		Object[] result= getResult();
 		if (result == null || result.length == 0)
 			return null;

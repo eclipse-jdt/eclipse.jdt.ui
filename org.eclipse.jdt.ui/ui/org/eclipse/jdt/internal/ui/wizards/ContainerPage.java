@@ -316,7 +316,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		dialog.setInitialSelection(initElement);
 		
 		if (dialog.open() == dialog.OK) {
-			Object element= dialog.getPrimaryResult();
+			Object element= dialog.getFirstResult();
 			if (element instanceof IJavaProject) {
 				IJavaProject jproject= (IJavaProject)element;
 				return jproject.getPackageFragmentRoot(jproject.getProject());

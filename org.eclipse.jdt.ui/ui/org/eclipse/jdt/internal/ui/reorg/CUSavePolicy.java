@@ -239,7 +239,7 @@ public class CUSavePolicy implements ISavePolicy {
 		dialog.setElements(packages);
 		dialog.open();
 
-		Object[] selection= dialog.getSelectedElements();
+		Object[] selection= dialog.getResult();
 		if (selection != null && selection.length == 1) {
 			return (IPackageFragment)selection[0];
 		}

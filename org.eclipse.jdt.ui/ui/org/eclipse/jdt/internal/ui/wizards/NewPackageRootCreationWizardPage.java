@@ -394,7 +394,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		dialog.setInput(fCurrJProject.getProject());
 
 		if (dialog.open() == dialog.OK) {
-			return (IFolder) dialog.getPrimaryResult();
+			return (IFolder) dialog.getFirstResult();
 		}			
 		return null;		
 	}
@@ -415,7 +415,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		dialog.setInput(JavaCore.create(fWorkspaceRoot));
 		dialog.setInitialSelection(fCurrJProject);
 		if (dialog.open() == dialog.OK) {			
-			return (IJavaProject) dialog.getPrimaryResult();
+			return (IJavaProject) dialog.getFirstResult();
 		}			
 		return null;		
 	}

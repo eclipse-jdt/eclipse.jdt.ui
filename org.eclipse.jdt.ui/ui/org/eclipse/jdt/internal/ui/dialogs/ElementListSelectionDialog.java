@@ -55,14 +55,17 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 		setResult(getWidgetSelection());
 	}
 
+/*
 	public Object[] getSelectedElements() {
 		return getResult();
 	}
-	
+*/	
+
+/*	
 	public Object getSelectedElement() {
 		return getPrimaryResult();
 	}
-	
+*/	
 	protected Control createDialogArea(Composite parent) {
 		Composite contents= (Composite) super.createDialogArea(parent);
 		

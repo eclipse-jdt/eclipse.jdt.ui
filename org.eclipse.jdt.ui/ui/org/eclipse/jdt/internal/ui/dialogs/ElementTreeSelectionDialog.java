@@ -44,13 +44,14 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	private boolean fAllowMultiple= true;
 	private boolean fDoubleClickSelects= true;
 	private String fEmptyListMessage= JavaUIMessages.getString("ElementTreeSelectionDialog.nothing_available"); //$NON-NLS-1$	
-	private int fInitialCharWidth= 40;
-	private int fInitialCharHeight= 18;
 	
 	private IStatus fCurrStatus= new StatusInfo();
 	private List fFilters;
 	private Object fInput;		
 	private boolean fIsEmpty;
+	
+	private int fWidth= 40;
+	private int fHeight= 18;
 
 	/**
 	 * Constructor for the ElementTreeSelectionDialog.
@@ -132,24 +133,6 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		fInput= input;
 	} 
 
-	/**
-	 * @deprecated Use SelectionDialog.getResult() instead.
-	 */
-	public Object[] getSelectedElements() {
-		return getResult();
-	}
-	
-	/**
-	 * Returns the selected element. If no element is selected or more
-	 * than one element is selected then <code>null</code> is returned.
-	 */
-	public Object getSelectedElement() {
-		Object[] result= getResult();
-		if (result != null && result.length > 0)
-			return result[0];
-		return null;
-	}
-			
 	/*
 	 * @private
 	 */	 
@@ -181,9 +164,12 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		return getReturnCode();
 	}
 	
-	public void setInitialSizeInCharacters(int width, int height) {
-		fInitialCharWidth= width;
-		fInitialCharHeight= height;
+	/**
+	 * Sets the size of the list in unit of characters.
+	 */
+	public void setSize(int width, int height) {
+		fWidth= width;
+		fHeight= height;
 	}
 	
 	private void access$superOpen() {
@@ -228,8 +214,8 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		Control treeWidget= createTreeViewer(composite);
 
 		GridData data= new GridData(GridData.FILL_BOTH);
-		data.widthHint= convertWidthInCharsToPixels(fInitialCharWidth);
-		data.heightHint= convertHeightInCharsToPixels(fInitialCharHeight);
+		data.widthHint= convertWidthInCharsToPixels(fWidth);
+		data.heightHint= convertHeightInCharsToPixels(fHeight);
 		treeWidget.setLayoutData(data);
 		
 		if (fIsEmpty) {

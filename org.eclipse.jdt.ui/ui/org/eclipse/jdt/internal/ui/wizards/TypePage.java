@@ -997,7 +997,7 @@ public abstract class TypePage extends ContainerPage {
 		dialog.setElements(packages);
 
 		if (dialog.open() == dialog.OK) {
-			return (IPackageFragment) dialog.getPrimaryResult();
+			return (IPackageFragment) dialog.getFirstResult();
 		}
 		return null;
 	}
@@ -1017,7 +1017,7 @@ public abstract class TypePage extends ContainerPage {
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
 		if (dialog.open() == dialog.OK) {	
-			return (IType) dialog.getPrimaryResult();
+			return (IType) dialog.getFirstResult();
 		}
 		return null;
 	}	
@@ -1039,7 +1039,7 @@ public abstract class TypePage extends ContainerPage {
 		dialog.setMessage(NewWizardMessages.getString("TypePage.SuperClassDialog.message")); //$NON-NLS-1$
 
 		if (dialog.open() == dialog.OK) {
-			return (IType) dialog.getPrimaryResult();
+			return (IType) dialog.getFirstResult();
 		}
 		return null;
 	}

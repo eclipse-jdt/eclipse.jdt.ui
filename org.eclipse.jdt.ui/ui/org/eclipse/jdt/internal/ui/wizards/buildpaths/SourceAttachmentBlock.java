@@ -596,7 +596,7 @@ public class SourceAttachmentBlock {
 		dialog.setInput(fRoot);
 		dialog.setInitialSelection(initSel);
 		if (dialog.open() == dialog.OK) {
-			IFile file= (IFile) dialog.getPrimaryResult();
+			IFile file= (IFile) dialog.getFirstResult();
 			return file.getFullPath();
 		}
 		return null;
@@ -628,7 +628,7 @@ public class SourceAttachmentBlock {
 				dialog.setInput(zipFile);
 				dialog.setInitialSelection(contentProvider.getSelectedNode(initSelection));
 				if (dialog.open() == dialog.OK) {
-					Object obj= dialog.getPrimaryResult();
+					Object obj= dialog.getFirstResult();
 					IPath path= new Path(obj.toString());
 					if (fIsVariableEntry) {
 						path= modifyPath(path, currPath.segment(0));
