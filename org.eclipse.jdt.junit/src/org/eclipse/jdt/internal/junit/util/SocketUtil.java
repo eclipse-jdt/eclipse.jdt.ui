@@ -22,11 +22,11 @@ public class SocketUtil {
 	 * @param searchFrom lower limit of port range
 	 * @param searchTo upper limit of port range
 	 */
-	public static int findUnusedLocalPort(int searchFrom, int searchTo) {
+	public static int findUnusedLocalPort(String host, int searchFrom, int searchTo) {
 		for (int i= 0; i < 10; i++) {
 			int port= getRandomPort(searchFrom, searchTo);
 			try {
-				new Socket("127.0.0.1", port);
+				new Socket(host, port);
 			} catch (SocketException e) {
 				return port;
 			} catch (IOException e) {

@@ -132,40 +132,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	/*
 	 * @see ILaunchListener#launchAdded(ILaunch)
 	 */
-	public void launchAdded(final ILaunch launch) {
-		ILauncher launcher=launch.getLauncher();
-		IType launchedType= null;
-		int port= -1;
-		
-		if (launcher != null && launcher.getDelegate() instanceof IJUnitLauncherDelegate) {
-			// old launchers
-			IJUnitLauncherDelegate launcherDelegate= (IJUnitLauncherDelegate)launch.getLauncher().getDelegate();
-			launchedType= launcherDelegate.getLaunchedType();
-			port= launcherDelegate.getPort();
-		} else {
-			// new launch configs
-			ILaunchConfiguration config= launch.getLaunchConfiguration();
-			if (config != null) {
-				// test whether the launch defines the JUnit attributes
-				String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
-				String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
-				if (portStr != null && typeStr != null) {
-					port= Integer.parseInt(portStr);
-					IJavaElement element= JavaCore.create(typeStr);
-					if (element instanceof IType) 
-						launchedType= (IType)element;
-				}
-			}	
-		}
-		if (launchedType != null) {
-			final int finalPort= port;
-			final IType finalType= launchedType;
-			getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					connectTestRunner(launch, finalType, finalPort);
-				}
-			});		
-		}	
+	public void launchAdded(ILaunch launch) {
 	}
 
 	public void connectTestRunner(ILaunch launch, IType launchedType, int port) {
@@ -191,7 +158,40 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	/*
 	 * @see ILaunchListener#launchChanged(ILaunch)
 	 */
-	public void launchChanged(ILaunch launch) {
+	public void launchChanged(final ILaunch launch) {
+		ILauncher launcher=launch.getLauncher();
+		IType launchedType= null;
+		int port= -1;
+		
+		if (launcher != null && launcher.getDelegate() instanceof IJUnitLauncherDelegate) {
+			// old launchers
+			IJUnitLauncherDelegate launcherDelegate= (IJUnitLauncherDelegate)launch.getLauncher().getDelegate();
+			launchedType= launcherDelegate.getLaunchedType();
+			port= launcherDelegate.getPort();
+		} else {
+			// new launch configs
+			ILaunchConfiguration config= launch.getLaunchConfiguration();
+			if (config != null) {
+				// test whether the launch defines the JUnit attributes
+				String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
+				String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
+				if (portStr != null && typeStr != null) {
+					port= Integer.parseInt(portStr);
+					IJavaElement element= JavaCore.create(typeStr);
+					if (element instanceof IType) 
+						launchedType= (IType)element; 
+				}
+			}	
+		}
+		if (launchedType != null) {
+			final int finalPort= port;
+			final IType finalType= launchedType;
+			getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					connectTestRunner(launch, finalType, finalPort);
+				}
+			});		
+		}	
 	}
 	
 	/*

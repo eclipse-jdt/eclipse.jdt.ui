@@ -29,7 +29,7 @@ public class RemoteTestRunnerClient {
 	 */
 	private ServerSocket fServerSocket;
 	private Socket fSocket;
-	private int fPort;
+	private int fPort= -1;
 	private PrintWriter fWriter;
 	private BufferedReader fBufferedReader;
 

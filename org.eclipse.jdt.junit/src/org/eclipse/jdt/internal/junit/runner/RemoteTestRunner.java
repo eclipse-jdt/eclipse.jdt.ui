@@ -67,7 +67,7 @@ public class RemoteTestRunner implements TestListener {
 	/**
 	 * Host to connect to, default is the localhost
 	 */
-	private String fHost= "127.0.0.1";
+	private String fHost= "";
 	/**
 	 * Port to connect to.
 	 */

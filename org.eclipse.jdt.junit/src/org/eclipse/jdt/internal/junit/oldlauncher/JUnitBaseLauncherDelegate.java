@@ -44,7 +44,6 @@ import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.ProjectSourceLocator;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.jdt.launching.VMRunnerResult;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
@@ -121,18 +120,17 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate, IJ
 	    }
 	    
 		final IVMRunner vmRunner= vmInstall.getVMRunner(runMode);	
-		final VMRunnerResult returnResult[]= new VMRunnerResult[1];
-		VMRunnerResult result;
 		
-		fPort= SocketUtil.findUnusedLocalPort(4000, 5000);  
+		fPort= SocketUtil.findUnusedLocalPort("", 5000, 15000);  
 		final int finalPort= fPort;
+		final Launch newLaunch= new Launch(launcher, runMode, testType.getCompilationUnit(), new ProjectSourceLocator(testType.getJavaProject()), null, null); 
 		
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				pm.beginTask("Starting VM ...", IProgressMonitor.UNKNOWN);
 				try {
 					VMRunnerConfiguration vmConfig= configureVM(testTypes, finalPort, runMode);
-					returnResult[0]= vmRunner.run(vmConfig);
+					vmRunner.run(vmConfig, newLaunch, pm);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
@@ -148,12 +146,7 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate, IJ
 			MessageDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), "Could not launch VM", te.getMessage());			
 			return false;
 		}
-		result= returnResult[0];
-		if (result != null && launcher != null) {
-			// TO DO should use JavaUISourceLocator, but this would break 1.0 compatibility
-			Launch newLaunch= new Launch(launcher, runMode, testType.getCompilationUnit(), new ProjectSourceLocator(testType.getJavaProject()), result.getProcesses(), result.getDebugTarget());
-			registerLaunch(newLaunch);
-		}
+		registerLaunch(newLaunch);
 		fLauncher= launcher;
 		fType= testType;
 		return true;

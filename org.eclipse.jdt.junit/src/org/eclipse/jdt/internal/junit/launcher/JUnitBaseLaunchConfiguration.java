@@ -37,7 +37,6 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.jdt.launching.VMRunnerResult;
 import org.eclipse.jdt.launching.sourcelookup.JavaSourceLocator;
 
 /**
@@ -52,7 +51,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	 * @see ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String)
 	 */
 	
-	public ILaunch launch(ILaunchConfiguration configuration, String mode, IProgressMonitor pm) throws CoreException {		
+	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor pm) throws CoreException {		
 		IJavaProject javaProject= getJavaProject(configuration);
 		if ((javaProject == null) || !javaProject.exists()) {
 			abort("Invalid project specified", null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
@@ -75,7 +74,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		
 		// Create VM config
 		IType types[]= { testType };
-		int port= SocketUtil.findUnusedLocalPort(4000, 5000);  
+		int port= SocketUtil.findUnusedLocalPort("", 5000, 15000);  
 
 		VMRunnerConfiguration runConfig= createVMRunner(configuration, types, port, mode);
 		runConfig.setVMArguments(execArgs.getVMArgumentsArray());
@@ -85,16 +84,16 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		if (bootpath.length > 0) 
 			runConfig.setBootClassPath(bootpath);
 				
-		VMRunnerResult result = runner.run(runConfig, pm);		
-		if (result == null) {
-			return null;
+		//  set default source locator if none specified
+		String id= configuration.getAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, (String)null);
+		if (id == null) {
+			ISourceLocator sourceLocator = new JavaSourceLocator(javaProject);
+			launch.setSourceLocator(sourceLocator);
 		}
-		// Create & return Launch
-		ISourceLocator sourceLocator = new JavaSourceLocator(javaProject);
-		Launch launch = new Launch(configuration, mode, sourceLocator, result.getProcesses(), result.getDebugTarget());
+		
 		launch.setAttribute(PORT_ATTR, Integer.toString(port));
 		launch.setAttribute(TESTTYPE_ATTR, testType.getHandleIdentifier());
-		return launch;
+		runner.run(runConfig, launch, pm);		
 	}
 
 	public IType getTestType(ILaunchConfiguration configuration, IJavaProject javaProject) throws CoreException {
