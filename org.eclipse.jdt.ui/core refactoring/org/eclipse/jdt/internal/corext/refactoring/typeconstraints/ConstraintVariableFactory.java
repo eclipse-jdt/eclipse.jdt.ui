@@ -46,8 +46,8 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 	private Map/*<String,ReturnTypeVariable>*/ fReturnVariableMap= new HashMap();
 	
 	public static final boolean REPORT= false;
-	private int nrCreated=0;
-	private int nrRetrieved=0;
+	protected int nrCreated=0;
+	protected int nrRetrieved=0;
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.IConstraintVariableFactory#makeExpressionVariable(org.eclipse.jdt.core.dom.Expression, org.eclipse.jdt.internal.corext.refactoring.typeconstraints.IContext)
@@ -247,7 +247,7 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 		return (TypeVariable) fTypeVariableMap.get(range);
 	}
 
-	private void dumpConstraintStats() {
+	protected void dumpConstraintStats() {
 		System.out.println("created: " + nrCreated + ", retrieved: " + nrRetrieved); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
