@@ -6,7 +6,9 @@
  * http://www.eclipse.org/legal/cpl-v10.html
  * 
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
+ *       bug "inline method - doesn't handle implicit cast" (see
+ *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
