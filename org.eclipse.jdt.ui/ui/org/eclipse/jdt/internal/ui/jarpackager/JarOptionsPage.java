@@ -206,7 +206,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 			fJarPackage.setExportWarnings(settings.getBoolean(STORE_EXPORT_WARNINGS));
 			fJarPackage.setExportErrors(settings.getBoolean(STORE_EXPORT_ERRORS));
 			fJarPackage.setUseSourceFolderHierarchy(settings.getBoolean(STORE_USE_SRC_FOLDERS));
-			fJarPackage.setSaveDescription(settings.getBoolean(STORE_SAVE_DESCRIPTION));
+			fJarPackage.setSaveDescription(false); // bug 15877
 			String pathStr= settings.get(STORE_DESCRIPTION_LOCATION);
 			if (pathStr == null)
 				pathStr= ""; //$NON-NLS-1$
@@ -262,6 +262,13 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		fDescriptionFileBrowseButton.setEnabled(saveDescription);
 		fDescriptionFileText.setEnabled(saveDescription);
 		fDescriptionFileLabel.setEnabled(saveDescription);
+		
+		boolean exportClassFiles= fJarPackage.areClassFilesExported();
+		fExportWarningsCheckbox.setEnabled(exportClassFiles);
+		fExportErrorsCheckbox.setEnabled(exportClassFiles);
+		fBuildIfNeededCheckbox.setEnabled(exportClassFiles);
+		
+		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported());		
 	}
 
 	/*
@@ -355,6 +362,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 	 */
 	public void setPreviousPage(IWizardPage page) {
 		super.setPreviousPage(page);
+		updateWidgetEnablements();
 		if (getControl() != null)
 			updatePageCompletion();
 	}
@@ -403,7 +411,6 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 	 */
 	protected void updatePageCompletion() {
 		boolean pageComplete= isPageComplete();
-		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported());
 		setPageComplete(pageComplete);
 		if (pageComplete) {
 			setErrorMessage(null);

@@ -878,7 +878,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 
 	protected void saveFiles() {
 		// Save the manifest
-		if (fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
+		if (fJarPackage.areClassFilesExported() && fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
 			try {
 				saveManifest();
 			} catch (CoreException ex) {
