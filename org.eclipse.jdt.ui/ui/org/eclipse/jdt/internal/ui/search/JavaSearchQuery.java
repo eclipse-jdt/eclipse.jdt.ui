@@ -101,8 +101,6 @@ public class JavaSearchQuery implements ISearchQuery {
 		textResult.removeAll();
 		// Don't need to pass in working copies in 3.0 here
 		SearchEngine engine= new SearchEngine();
-		int matchCount= 0;
-
 		try {
 
 			int totalTicks= 1000;
