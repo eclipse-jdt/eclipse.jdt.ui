@@ -277,8 +277,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			fPackageFragmentProvider.processDelta(delta);
 			if (processResourceDeltas(delta.getResourceDeltas(), element))
 			    return;
-			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();			
-			processAffectedChildren(affectedChildren);
+			handleAffectedChildren(delta, element);
 			return;
 		}
 		
