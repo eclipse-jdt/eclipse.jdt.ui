@@ -4,7 +4,31 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import java.util.Iterator;import java.util.List;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -407,5 +431,49 @@ public class Checks {
 		if ((!wasEmpty) && grouped.isEmpty())
 			result.addFatalError(RefactoringCoreMessages.getString("Checks.all_excluded")); //$NON-NLS-1$
 		return result;	
+	}
+	
+	//------
+	public static boolean isReadOnly(Object element) throws JavaModelException{
+		if (element instanceof IResource)
+			return isReadOnly((IResource)element);
+		
+		if (element instanceof IJavaElement) {
+			if ((element instanceof IPackageFragmentRoot) && isClasspathDelete((IPackageFragmentRoot)element)) 
+				return false;
+			return isReadOnly(((IJavaElement)element).getCorrespondingResource());
+		}
+		
+		Assert.isTrue(false, "not expected to get here");	
+		return false;
+	}
+	
+	public static boolean isReadOnly(IResource res) throws JavaModelException{
+		if (res.isReadOnly()) 
+			return true;
+		
+		if (! (res instanceof IContainer))	
+			return false;
+		
+		IContainer container= (IContainer)res;
+		try {
+			IResource[] children= container.members();
+			for (int i= 0; i < children.length; i++) {
+				if (isReadOnly(children[i]))
+					return true;
+			}
+			return false;
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
+		}
+	}
+	
+	public static boolean isClasspathDelete(IPackageFragmentRoot pkgRoot) throws JavaModelException {
+		IResource res= pkgRoot.getUnderlyingResource();
+		if (res == null)
+			return true;
+		IProject definingProject= res.getProject();
+		IProject occurringProject= pkgRoot.getJavaProject().getProject();
+		return !definingProject.equals(occurringProject);
 	}
 }
