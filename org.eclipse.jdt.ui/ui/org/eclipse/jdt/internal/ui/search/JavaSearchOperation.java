@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class JavaSearchOperation extends WorkspaceModifyOperation {
@@ -84,7 +85,12 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 		fCollector.setProgressMonitor(monitor);
 		
 		// Also search working copies
-		SearchEngine engine= new SearchEngine(JavaUI.getSharedWorkingCopiesOnClasspath());
+		SearchEngine engine;
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			engine= new SearchEngine();
+		} else {
+			engine= new SearchEngine(JavaUI.getSharedWorkingCopiesOnClasspath());
+		}
 		
 		if (fElementPattern != null)
 			engine.search(fWorkspace, fElementPattern, fLimitTo, fScope, fCollector);

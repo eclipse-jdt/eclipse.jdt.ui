@@ -92,6 +92,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -519,6 +520,18 @@ class ExtractInterfaceUtil {
 	}
 
 	private static ICompilationUnit[] getWorkingCopies(ICompilationUnit precedingWC1, ICompilationUnit precedingWC2) {
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			ArrayList result= new ArrayList(2);
+			if (precedingWC1 != null && precedingWC1.isWorkingCopy()) {
+				result.add(precedingWC1);
+			}
+			if (precedingWC2 != null && precedingWC2.isWorkingCopy()) {
+				result.add(precedingWC2);
+			}
+			return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
+		}
+		
+		
 		// XXX: This is a layer breaker - should not access jdt.ui
 		IWorkingCopy[] copies= JavaUI.getSharedWorkingCopiesOnClasspath();
 		Set result= new HashSet(copies.length);
