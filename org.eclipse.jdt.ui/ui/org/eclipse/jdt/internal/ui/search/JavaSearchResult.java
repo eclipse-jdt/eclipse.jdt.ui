@@ -55,7 +55,7 @@ public class JavaSearchResult extends AbstractTextSearchResult {
 		int matchCount= getMatchCount();
 		String format= null;
 		if (matchCount == 1)
-			format= fQuery.getSingularLabel();
+			return fQuery.getSingularLabel();
 		else 
 			format= fQuery.getPluralLabelPattern();
 		return MessageFormat.format(format, new Object[] { new Integer(matchCount) });

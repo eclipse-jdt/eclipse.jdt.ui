@@ -128,7 +128,8 @@ public class JavaSearchQuery implements ISearchQuery {
 		else
 			desc= fPattern;
 
-		String[] args= new String[] {desc, "{0}", fScopeDescription}; //$NON-NLS-1$
+		desc= "\""+desc+"\"";
+		String[] args= new String[] {desc, fScopeDescription}; //$NON-NLS-1$
 		switch (fLimitTo) {
 			case IJavaSearchConstants.IMPLEMENTORS:
 				return SearchMessages.getFormattedString("JavaSearchOperation.singularImplementorsPostfix", args); //$NON-NLS-1$
@@ -161,6 +162,7 @@ public class JavaSearchQuery implements ISearchQuery {
 		else
 			desc= fPattern;
 
+		desc= "\""+desc+"\"";
 		String[] args= new String[] {desc, "{0}", fScopeDescription}; //$NON-NLS-1$
 		switch (fLimitTo) {
 			case IJavaSearchConstants.IMPLEMENTORS:
