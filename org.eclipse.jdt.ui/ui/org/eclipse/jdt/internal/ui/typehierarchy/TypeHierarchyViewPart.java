@@ -44,6 +44,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener;
@@ -94,9 +95,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	public static final int VIEW_ID_SUB= 1;
 	
 	private static final String DIALOGSTORE_HIERARCHYVIEW= "TypeHierarchyViewPart.hierarchyview";	 //$NON-NLS-1$
+	private static final String DIALOGSTORE_VIEWORIENTATION= "TypeHierarchyViewPart.orientation";	 //$NON-NLS-1$
+
 
 	private static final String TAG_INPUT= "input"; //$NON-NLS-1$
 	private static final String TAG_VIEW= "view"; //$NON-NLS-1$
+	private static final String TAG_ORIENTATION= "orientation"; //$NON-NLS-1$
 
 	private IType fInput;
 	
@@ -129,6 +133,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	
 	private HistoryAction fForwardAction;
 	private HistoryAction fBackwardAction;
+	
+	private ToggleOrientationAction fToggleOrientationAction;
 	
 	private EnableMemberFilterAction fEnableMemberFilterAction;
 	private AddMethodStubAction fAddStubAction;
@@ -169,8 +175,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		subViewAction.setOthers(fViewActions);
 		vajViewAction.setOthers(fViewActions);
 		
+		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
+		
 		fForwardAction= new HistoryAction(this, true);
 		fBackwardAction= new HistoryAction(this, false);
+		
+		fToggleOrientationAction= new ToggleOrientationAction(this, fDialogSettings.getBoolean(DIALOGSTORE_VIEWORIENTATION));
 		
 		fEnableMemberFilterAction= new EnableMemberFilterAction(this, false);
 		
@@ -179,8 +189,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		fPaneLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS);
 		
 		fAllViewers= new TypeHierarchyViewer[3];
-		
-		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	
 		fPartListener= new IPartListener() {
 			public void partActivated(IWorkbenchPart part) {
@@ -471,16 +479,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		fTypeMethodsSplitter.setVisible(false);
 
 		ViewForm typeViewerViewForm= new ViewForm(fTypeMethodsSplitter, SWT.NONE);
-		//setViewFormMargins(typeViewerViewForm);
 		
 		Control typeViewerControl= createTypeViewerControl(typeViewerViewForm);
 		typeViewerViewForm.setContent(typeViewerControl);
 				
 		ViewForm methodViewerViewForm= new ViewForm(fTypeMethodsSplitter, SWT.NONE);
-		//methodViewerViewForm.setTopCenterSeparate(true);
-		//setViewFormMargins(methodViewerViewForm);
 		fTypeMethodsSplitter.setWeights(new int[] {35, 65});
-		
+		setOrientation(fToggleOrientationAction.isChecked());	
 		
 		Control methodViewerPart= createMethodViewerControl(methodViewerViewForm);
 		methodViewerViewForm.setContent(methodViewerPart);
@@ -501,11 +506,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		
 		fPagebook.showPage(fNoHierarchyShownLabel);
 		
-		// toolbar actions	
-		IToolBarManager tbmanager= getViewSite().getActionBars().getToolBarManager();
-		
+		// toolbar actions
+		IActionBars actionBars= getViewSite().getActionBars();
+		IToolBarManager tbmanager= actionBars.getToolBarManager();
 		tbmanager.add(fBackwardAction);
 		tbmanager.add(fForwardAction);
+		IMenuManager viewMenu= actionBars.getMenuManager();
+		viewMenu.add(fToggleOrientationAction);  		
 		
 		for (int i= 0; i < fViewActions.length; i++) {
 			ToggleViewAction action= fViewActions[i];
@@ -866,6 +873,16 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	}
 	
 	/**
+	 * called from ToggleOrientationAction
+	 */	
+	public void setOrientation(boolean horizontal) {
+		if (fTypeMethodsSplitter != null && !fTypeMethodsSplitter.isDisposed()) {
+			fTypeMethodsSplitter.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
+		}
+		fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, horizontal);
+	}
+	
+	/**
 	 * Determines the input element to be used initially 
 	 */	
 	private IType determineInputElement() {
@@ -899,7 +916,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 			memento.putString(TAG_INPUT, fInput.getHandleIdentifier());
 		}
 		memento.putString(TAG_VIEW, Integer.toString(getViewIndex()));
-				
+		memento.putString(TAG_ORIENTATION, String.valueOf(fToggleOrientationAction.isChecked()));	
+			
 		fMethodsViewer.saveState(memento);
 	}
 	
@@ -915,10 +933,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		setInput(input);
 
 		String viewerIndex= memento.getString(TAG_VIEW);
+		String orientation= memento.getString(TAG_ORIENTATION);
 		try {
 			setView(Integer.parseInt(viewerIndex));
+			fToggleOrientationAction.setChecked(new Boolean(orientation).booleanValue());
 		} catch (NumberFormatException e) {
 		}
+
 		
 		fMethodsViewer.restoreState(memento);
 	}
