@@ -16,12 +16,6 @@ public class StructureSelectEnclosingAction extends StructureSelectionAction {
 		setDescription(JavaEditorMessages.getString("StructureSelectEnclosing.description"));
 	}
 	
-	/*
-	 * This constructor is for testing purpose only.
-	 */
-	public StructureSelectEnclosingAction() {
-	}
-		
 	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, StructureSelectionAnalyzer selAnalyzer) throws JavaModelException{
 		ASTNode first= selAnalyzer.getFirstSelectedNode();	
 		if (first == null || first.getParent() == null) 

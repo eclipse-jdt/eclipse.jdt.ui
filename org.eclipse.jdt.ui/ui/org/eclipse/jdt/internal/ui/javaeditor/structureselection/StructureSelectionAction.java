@@ -39,13 +39,6 @@ public abstract class StructureSelectionAction extends Action {
 		fSelectionHistory= history;
 	}
 	
-	/*
-	 * This constructor is for testing purpose only.
-	 */
-	protected StructureSelectionAction() {
-		super("");
-	}
-	
 	/* (non-JavaDoc)
 	 * Method declared in IAction.
 	 */
@@ -76,10 +69,6 @@ public abstract class StructureSelectionAction extends Action {
 	 	}
 	}
 	
-	/**
-	 * This is the default implementation - it goes up one level in the AST.
-	 * Subclasses may implement different behavior and/or use this implementation as a fallback for cases they do not handle..
-	 */
 	abstract ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, StructureSelectionAnalyzer selAnalyzer) throws JavaModelException;
 	
 	protected final ICompilationUnit getCompilationUnit() {
