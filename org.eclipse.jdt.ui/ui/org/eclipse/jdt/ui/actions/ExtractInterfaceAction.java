@@ -8,14 +8,15 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -89,20 +90,25 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	}
 		
 	private boolean canEnable(IStructuredSelection selection){
-		if (true) //XXX work in progress
-			return false;
+		try {
+			if (selection.isEmpty() || selection.size() != 1) 
+				return false;
 			
-		if (selection.isEmpty() || selection.size() != 1) 
+			Object first= selection.getFirstElement();
+			if (first instanceof IType)
+				return shouldAcceptElement((IType)first);
+			if (first instanceof ICompilationUnit)	
+				return shouldAcceptElement(JavaElementUtil.getMainType((ICompilationUnit)first));
 			return false;
-		
-		Object first= selection.getFirstElement();
-		return (first instanceof IType) && shouldAcceptElement((IType)first);
+		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
+			return false;	
+		}
 	}
 		
 	private boolean canRun(ITextSelection selection){
-		if (true) //XXX work in progress
-			return false;
-			
 		IJavaElement[] elements= resolveElements();
 		if (elements.length != 1)
 			return false;
