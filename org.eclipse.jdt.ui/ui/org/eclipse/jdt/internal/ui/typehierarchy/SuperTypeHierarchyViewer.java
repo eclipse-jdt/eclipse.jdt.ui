@@ -39,8 +39,10 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 	 * @see TypeHierarchyViewer#updateContent
 	 */	
 	public void updateContent() {
+		getTree().setRedraw(false);
 		refresh();
 		expandAll();
+		getTree().setRedraw(true);
 	}
 	
 	/*
@@ -58,6 +60,12 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 			}
 			return new IType[0];
 		}
+		
+		protected IType getParentType(IType type) {
+			// cant handle
+			return null;
+		}			
+		
 	}		
 
 }

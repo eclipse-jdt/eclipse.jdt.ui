@@ -39,12 +39,14 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 	 * @see TypeHierarchyViewer#updateContent
 	 */
 	public void updateContent() {
+		getTree().setRedraw(false);
 		refresh();
 		int expandLevel= 2;
 		if (isMethodFiltering()) {
 			expandLevel++;
 		}
 		expandToLevel(expandLevel);
+		getTree().setRedraw(true);
 	}
 	
 	/**
@@ -62,5 +64,18 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 			}
 			return new IType[0];
 		}
-	}	
+		
+		protected IType getParentType(IType type) {
+			ITypeHierarchy hierarchy= getHierarchy();
+			if (hierarchy != null) {
+				return hierarchy.getSuperclass(type);
+				// dont handle interfaces
+			}
+			return null;
+		}
+
+}
+	
+	
+	
 }

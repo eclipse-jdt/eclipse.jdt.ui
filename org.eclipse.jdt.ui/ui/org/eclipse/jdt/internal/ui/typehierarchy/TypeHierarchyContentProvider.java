@@ -12,6 +12,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -92,6 +93,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * Hook to overwrite. Filter will be applied on the returned types
 	 */	
 	protected abstract IType[] getTypesInHierarchy(IType type);
+	
+	/**
+	 * Hook to overwrite. Return null if parent is ambiguous.
+	 */	
+	protected abstract IType getParentType(IType type);	
 	
 	/*
 	 * Called for the tree children.
@@ -216,6 +222,13 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * @see ITreeContentProvider#getParent
 	 */
 	public Object getParent(Object element) {
+		if (element instanceof IMember) {
+			IMember member= (IMember) element;
+			if (member.getElementType() == IJavaElement.TYPE) {
+				return getParentType((IType)member);
+			}
+			return member.getDeclaringType();
+		}
 		return null;
 	}
 }

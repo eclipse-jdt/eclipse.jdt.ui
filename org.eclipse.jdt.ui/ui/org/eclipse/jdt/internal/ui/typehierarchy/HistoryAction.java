@@ -25,7 +25,7 @@ public class HistoryAction extends Action {
 		fViewPart= viewPart;
 		fElement= element;		
 		
-		String elementName= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES);
+		String elementName= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES);
 		setText(elementName);
 		setImageDescriptor(getImageDescriptor(element));
 				
