@@ -64,7 +64,7 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 			return;
 		Test topTest= (Test) path.get(top);
 		// only reorder TestSuites
-		if (topTest.getClass().equals(TestSuite.class)) {
+		if (topTest instanceof TestSuite) {
 			TestSuite suite= (TestSuite) topTest;
 			moveTestToFront(suite, test);
 		}
@@ -86,15 +86,20 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 	}
 	
 	public static Object getField(Object object, String fieldName) {
-	    Class clazz= object.getClass();
-	    try {
-	        Field field= clazz.getDeclaredField(fieldName);
+	    return getFieldInClass(object, fieldName, object.getClass());
+	}
+
+	private static Object getFieldInClass(Object object, String fieldName, Class clazz) {
+		Field field= null;
+		if (clazz == null) 
+			return null;
+		try {
+			field= clazz.getDeclaredField(fieldName);
 	        field.setAccessible(true);
 	        return field.get(object);	       
 	    } catch (Exception e) {
 	        // fall through
 	    }
-	    return null;
+	    return getFieldInClass(object, fieldName, clazz.getSuperclass());
 	}
-
 }
