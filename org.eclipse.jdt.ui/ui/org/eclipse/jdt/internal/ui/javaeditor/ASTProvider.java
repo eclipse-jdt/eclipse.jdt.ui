@@ -41,15 +41,24 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 
 /**
- * Provides ASTs for clients with the option to cache it.
+ * Provides a shared AST for clients.
  * 
  * @since 3.0
  */
 public final class ASTProvider {
 
+	/**
+	 * Tells whether this class is in debug mode.
+	 * @since 3.0
+	 */
 	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ASTProvider"));  //$NON-NLS-1$//$NON-NLS-2$
 
 	
+	/**
+	 * Internal activation listener.
+	 * 
+	 * @since 3.0
+	 */
 	private class ActivationListener implements IPartListener2, IWindowListener {
 
 		
@@ -230,6 +239,12 @@ public final class ASTProvider {
 		return ast != null && fAST == ast; 
 	}
 
+	/**
+	 * Informs that reconciling for the given element is about to be started.
+	 * 
+	 * @param javaElement the Java element
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
+	 */
 	void aboutToBeReconciled(IJavaElement javaElement) {
 
 		if (DEBUG)
@@ -245,6 +260,9 @@ public final class ASTProvider {
 		cache(null, javaElement);
 	}
 	
+	/**
+	 * Disposes the cached AST.
+	 */
 	private synchronized void disposeAST() {
 		
 		if (fAST == null)
@@ -290,6 +308,12 @@ public final class ASTProvider {
 			return "AST without any type"; //$NON-NLS-1$
 	}
 
+	/**
+	 * Caches the given compilation unit AST for the given Java element.
+	 * 
+	 * @param ast
+	 * @param javaElement
+	 */
 	private synchronized void cache(CompilationUnit ast, IJavaElement javaElement) {
 		
 		if (DEBUG && (javaElement != null || ast != null)) // don't report call from disposeAST()
@@ -307,7 +331,22 @@ public final class ASTProvider {
 			fWaitLock.notifyAll();
 		}
 	}
-	
+
+	/**
+	 * Returns a shared compilation unit AST for the given
+	 * Java element.
+	 * <p>
+	 * Clients are not allowed to modify the AST and must
+	 * synchronize all access to its nodes.
+	 * </p>
+	 * 
+	 * @param je				the Java element
+	 * @param wait				<code>true</code> if the client wants to wait for the result,
+	 * 								<code>null</code> will be returned if the AST is not ready and
+	 * 								the client does not want to wait
+	 * @param progressMonitor	the progress monitor
+	 * @return					the AST or <code>null</code> if the AST is not available
+	 */
 	public CompilationUnit getAST(IJavaElement je, boolean wait, IProgressMonitor progressMonitor) {
 		Assert.isTrue(je != null && (je.getElementType() == IJavaElement.CLASS_FILE || je.getElementType() == IJavaElement.COMPILATION_UNIT));
 		
@@ -360,6 +399,13 @@ public final class ASTProvider {
 		return ast;
 	}
 
+	/**
+	 * Tells whether a reconciler is reconciling the
+	 * given Java element.
+	 * 
+	 * @param javaElement the Java element
+	 * @return
+	 */
 	private boolean isReconciling(IJavaElement javaElement) {
 		synchronized (fReconcileLock) {
 			return javaElement.equals(fReconcilingJavaElement) && fIsReconciling;		
@@ -367,11 +413,13 @@ public final class ASTProvider {
 	}
 	
 	/**
-	 * @param je
-	 * @param progressMonitor
+	 * Creates a new compilation unit AST.
+	 * 
+	 * @param je the Java element for which to create the AST
+	 * @param progressMonitor the progress monitor
 	 * @return
-	 * @exception IllegalStateException if the settings provided
-	 * are insufficient, contradictory, or otherwise unsupported
+	 * @throws	IllegalStateException if the settings provided are
+	 * 					insufficient, contradictory, or otherwise unsupported
 	 */
 	private CompilationUnit createAST(IJavaElement je, IProgressMonitor progressMonitor) {
 		ASTParser parser = ASTParser.newParser(AST.LEVEL_2_0);
@@ -394,8 +442,13 @@ public final class ASTProvider {
 		}
 	}
 	
-	private void markAsUnmodifiable(CompilationUnit root) {
-		root.accept(new GenericVisitor() {
+	/**
+	 * Marks the given compilation unit AST as unmodifiable.
+	 * 
+	 * @param ast the compilation unit AST to mark
+	 */
+	private void markAsUnmodifiable(CompilationUnit ast) {
+		ast.accept(new GenericVisitor() {
 			protected boolean visitNode(ASTNode node) {
 				int flags= node.getFlags();
 				node.setFlags(flags | ASTNode.PROTECT);
@@ -404,9 +457,8 @@ public final class ASTProvider {
 		});
 	}
 	
-	
 	/**
-	 * Dispose this AST provider.
+	 * Disposes this AST provider.
 	 */
 	public void dispose() {
 
