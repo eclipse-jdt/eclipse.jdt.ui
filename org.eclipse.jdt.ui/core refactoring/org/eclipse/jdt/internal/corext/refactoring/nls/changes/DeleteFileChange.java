@@ -41,7 +41,9 @@ public class DeleteFileChange extends JDTChange {
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) {
-		return new RefactoringStatus();
+		RefactoringStatus result= new RefactoringStatus();
+		checkModificationStamp(result, ResourcesPlugin.getWorkspace().getRoot().getFile(fPath));
+		return result;
 	}
 	
 	public Change perform(IProgressMonitor pm) throws CoreException {
@@ -52,7 +54,7 @@ public class DeleteFileChange extends JDTChange {
 			Assert.isTrue(file.exists());
 			Assert.isTrue(!file.isReadOnly());
 			fSource= getSource(file);
-			CreateFileChange undo= createUndoChange(file, fPath, fSource);
+			CreateFileChange undo= createUndoChange(file, fPath, file.getModificationStamp(), fSource);
 			file.delete(true, true, pm);
 			return undo;
 		} finally {
@@ -92,14 +94,14 @@ public class DeleteFileChange extends JDTChange {
 		return sb.toString();
 	}
 	
-	private static CreateFileChange createUndoChange(IFile file, IPath path, String source) {
+	private static CreateFileChange createUndoChange(IFile file, IPath path, long stampToRestore, String source) {
 		String encoding;
 		try {
 			encoding= file.getCharset(false);
 		} catch (CoreException e) {
 			encoding= null;
 		}
-		return new CreateFileChange(path, source, encoding);
+		return new CreateFileChange(path, source, encoding, stampToRestore);
 	}
 
 	public String getName() {

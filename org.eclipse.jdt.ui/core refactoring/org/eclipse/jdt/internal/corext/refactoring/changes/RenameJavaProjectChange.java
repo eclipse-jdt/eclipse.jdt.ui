@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -36,19 +37,16 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	private boolean fUpdateReferences;
 	
 	public RenameJavaProjectChange(IJavaProject project, String newName, boolean updateReferences) {
-		this(project.getPath(), project.getElementName(), newName);
+		this(project.getPath(), project.getElementName(), newName, IResource.NULL_STAMP);
 		Assert.isTrue(!project.isReadOnly(), "should not be read only");  //$NON-NLS-1$
 		
 		fUpdateReferences= updateReferences;
 	}
 	
-	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName) {
+	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
 		super(resourcePath, oldName, newName);
 	}
 
-	/* non java-doc
-	 * @see IChange#getName()
-	 */
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("RenameJavaProjectChange.rename", //$NON-NLS-1$
 			 new String[]{getOldName(), getNewName()});
@@ -56,12 +54,14 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-
-		if (! getJavaProject().exists()) 
+		IJavaProject javaProject= getJavaProject();
+		
+		if (! javaProject.exists()) 
 			return result;
-			
+		
+		checkModificationStamp(result, javaProject);
 		try {
-			IPackageFragmentRoot[] roots= getJavaProject().getPackageFragmentRoots();
+			IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
 			if (roots.length == 0)
 				return result;
 			
@@ -75,9 +75,6 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		return result;	
 	}
 	
-	/* non java-doc
-	 * @see AbstractRenameChange#doRename(IProgressMonitor)
-	 */
 	protected void doRename(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask(getName(), 2);
@@ -94,11 +91,12 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		}	
 	}
 
-	/* non java-doc
-	 * @see AbstractRenameChange#createUndoChange()
-	 */
-	protected Change createUndoChange() throws JavaModelException {
-		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName());
+	protected IPath createNewPath() {
+		return getResourcePath().removeLastSegments(1).append(getNewName());
+	}
+	
+	protected Change createUndoChange(long stampToRestore) throws JavaModelException {
+		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
 	}
 
 	private IProject getProject() {
@@ -154,9 +152,5 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	
 	private IProject[] getReferencingProjects() {
 		return  getProject().getReferencingProjects();
-	}
-	
-	private IPath createNewPath(){
-		return getResourcePath().removeLastSegments(1).append(getNewName());
 	}
 }

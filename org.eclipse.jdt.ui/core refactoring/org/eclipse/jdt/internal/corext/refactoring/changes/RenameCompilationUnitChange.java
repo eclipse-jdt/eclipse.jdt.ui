@@ -14,6 +14,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -21,6 +23,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -28,16 +31,16 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
 
 	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) {
-		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName);
+		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName, IResource.NULL_STAMP);
 		Assert.isTrue(!cu.isReadOnly(), "cu must not be read-only"); //$NON-NLS-1$
+	}
+	
+	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName, long stampToRestore){
+		super(resourcePath, oldName, newName, stampToRestore);
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		return super.isValid(pm, true, false);
-	}
-	
-	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName){
-		super(resourcePath, oldName, newName);
 	}
 	
 	protected IPath createNewPath() {
@@ -54,8 +57,8 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	/* non java-doc
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
-	protected Change createUndoChange() throws JavaModelException{
-		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName());
+	protected Change createUndoChange(long stampToRestore) throws JavaModelException{
+		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
 	}
 	
 	protected void doRename(IProgressMonitor pm) throws CoreException {

@@ -32,19 +32,20 @@ public class RenameResourceChange extends JDTChange {
 	 * paths do not.
 	 */
 	private IPath fResourcePath;
-
 	private String fNewName;
+	private long fStampToRestore;
 
 	/**
 	 * @param newName includes the extension
 	 */
 	public RenameResourceChange(IResource resource, String newName) {
-		this(resource.getFullPath(), newName);
+		this(resource.getFullPath(), newName, IResource.NULL_STAMP);
 	}
 
-	private RenameResourceChange(IPath resourcePath, String newName) {
+	private RenameResourceChange(IPath resourcePath, String newName, long stampToRestore) {
 		fResourcePath= resourcePath;
 		fNewName= newName;
+		fStampToRestore= stampToRestore;
 	}
 
 	private IResource getResource() {
@@ -70,11 +71,16 @@ public class RenameResourceChange extends JDTChange {
 				throw new NullPointerException();
 			pm.beginTask(RefactoringCoreMessages.getString("RenameResourceChange.rename_resource"), 1); //$NON-NLS-1$
 
-			getResource().move(renamedResourcePath(fResourcePath, fNewName), getCoreRenameFlags(), pm);
-
-			String oldName= fResourcePath.lastSegment();
+			IResource resource= getResource();
+			long currentStamp= resource.getModificationStamp();
 			IPath newPath= renamedResourcePath(fResourcePath, fNewName);
-			return new RenameResourceChange(newPath, oldName);
+			resource.move(newPath, getCoreRenameFlags(), pm);
+			if (fStampToRestore != IResource.NULL_STAMP) {
+				IResource newResource= ResourcesPlugin.getWorkspace().getRoot().findMember(newPath);
+				newResource.revertModificationStamp(fStampToRestore);
+			}
+			String oldName= fResourcePath.lastSegment();
+			return new RenameResourceChange(newPath, oldName, currentStamp);
 		} finally {
 			pm.done();
 		}

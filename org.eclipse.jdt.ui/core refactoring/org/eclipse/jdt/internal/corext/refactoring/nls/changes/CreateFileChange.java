@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
@@ -35,28 +36,35 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public class CreateFileChange extends JDTChange {
 
 	private String fChangeName;
-	
+
 	private IPath fPath;
 	private String fSource;
 	private String fEncoding;
 	private boolean fExplicitEncoding;
-	
+	private long fStampToRestore;
+
 	public CreateFileChange(IPath path, String source, String encoding) {
+		this(path, source, encoding, IResource.NULL_STAMP);
+	}
+
+	public CreateFileChange(IPath path, String source, String encoding, long stampToRestore) {
 		Assert.isNotNull(path, "path"); //$NON-NLS-1$
 		Assert.isNotNull(source, "source"); //$NON-NLS-1$
 		fPath= path;
 		fSource= source;
 		fEncoding= encoding;
 		fExplicitEncoding= fEncoding != null;
+		fStampToRestore= stampToRestore;
 	}
 
-	private CreateFileChange(IPath path, String source, String encoding, boolean explicit) {
+	private CreateFileChange(IPath path, String source, String encoding, long stampToRestore, boolean explicit) {
 		Assert.isNotNull(path, "path"); //$NON-NLS-1$
 		Assert.isNotNull(source, "source"); //$NON-NLS-1$
 		Assert.isNotNull(encoding, "encoding"); //$NON-NLS-1$
 		fPath= path;
 		fSource= source;
 		fEncoding= encoding;
+		fStampToRestore= stampToRestore;
 		fExplicitEncoding= explicit;
 	}
 
@@ -65,24 +73,43 @@ public class CreateFileChange extends JDTChange {
 		fEncoding= encoding;
 		fExplicitEncoding= explicit;
 	}
+
+	public String getName() {
+		if (fChangeName == null)
+			return NLSChangesMessages.getString("createFile.Create_file") + fPath.toString(); //$NON-NLS-1$
+		else
+			return fChangeName;
+	}
+
+	public void setName(String name) {
+		fChangeName= name;
+	}
 	
 	protected void setSource(String source) {
 		fSource= source;
 	}
 
-	protected void setPath(IPath path){
+	protected String getSource() {
+		return fSource;
+	}
+
+	protected void setPath(IPath path) {
 		fPath= path;
-	}	
-	
-	protected IPath getPath(){
+	}
+
+	protected IPath getPath() {
 		return fPath;
-	}	
-	
+	}
+
+	public Object getModifiedElement() {
+		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
+	}
+
 	public RefactoringStatus isValid(IProgressMonitor pm) {
 		return new RefactoringStatus();
 	}
-	
-	public Change perform(IProgressMonitor pm)	throws CoreException {
+
+	public Change perform(IProgressMonitor pm) throws CoreException {
 
 		InputStream is= null;
 		try {
@@ -90,16 +117,19 @@ public class CreateFileChange extends JDTChange {
 
 			initializeEncoding();
 			IFile file= getOldFile(new SubProgressMonitor(pm, 1));
-			if (file.exists()){
+			if (file.exists()) {
 				CompositeChange composite= new CompositeChange(getName());
 				composite.add(new DeleteFileChange(file));
-				composite.add(new CreateFileChange(fPath, fSource, fEncoding, fExplicitEncoding));
+				composite.add(new CreateFileChange(fPath, fSource, fEncoding, fStampToRestore, fExplicitEncoding));
 				pm.worked(1);
 				return composite.perform(new SubProgressMonitor(pm, 1));
 			} else {
 				try {
 					is= new ByteArrayInputStream(fSource.getBytes(fEncoding));
 					file.create(is, false, new SubProgressMonitor(pm, 1));
+					if (fStampToRestore != IResource.NULL_STAMP) {
+						file.revertModificationStamp(fStampToRestore);
+					}
 					if (fExplicitEncoding) {
 						file.setCharset(fEncoding, new SubProgressMonitor(pm, 1));
 					} else {
@@ -109,9 +139,9 @@ public class CreateFileChange extends JDTChange {
 				} catch (UnsupportedEncodingException e) {
 					throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
 				}
-			}				
+			}
 		} finally {
-			try{
+			try {
 				if (is != null)
 					is.close();
 			} catch (IOException ioe) {
@@ -121,12 +151,12 @@ public class CreateFileChange extends JDTChange {
 			}
 		}
 	}
-	
+
 	protected IFile getOldFile(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		try{
+		try {
 			return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
-		} finally{
+		} finally {
 			pm.done();
 		}
 	}
@@ -158,24 +188,4 @@ public class CreateFileChange extends JDTChange {
 		}
 		Assert.isNotNull(fEncoding);
 	}
-
-	public String getName() {
-		if (fChangeName == null)
-			return NLSChangesMessages.getString("createFile.Create_file") + fPath.toString(); //$NON-NLS-1$
-		else 
-			return fChangeName;
-	}
-
-	public Object getModifiedElement() {
-		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
-	}
-
-	protected String getSource() {
-		return fSource;
-	}
-
-	public void setName(String name) {
-		fChangeName = name;
-	}
 }
-

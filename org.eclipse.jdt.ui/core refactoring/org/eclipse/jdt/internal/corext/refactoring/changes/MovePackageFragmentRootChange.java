@@ -15,13 +15,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.ltk.core.refactoring.Change;
+
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MovePackageFragmentRootChange extends PackageFragmentRootReorgChange {
 
@@ -29,10 +29,6 @@ public class MovePackageFragmentRootChange extends PackageFragmentRootReorgChang
 		super(root, destination, null, updateClasspathQuery);
 	}
 
-	public RefactoringStatus isValid(IProgressMonitor pm) {
-		return new RefactoringStatus();
-	}
-	
 	protected Change doPerformReorg(IPath destinationPath, IProgressMonitor pm) throws JavaModelException {
 		getRoot().move(destinationPath, getResourceUpdateFlags(), getUpdateModelFlags(false), null, pm);
 		return null;

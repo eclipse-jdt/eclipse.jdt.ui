@@ -42,4 +42,3 @@ public class CopyResourceChange extends ResourceReorgChange {
 			new String[]{getResource().getFullPath().toString(), getDestination().getName()});
 	}
 }
-

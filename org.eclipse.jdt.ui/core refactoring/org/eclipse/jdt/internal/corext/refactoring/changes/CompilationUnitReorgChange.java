@@ -22,7 +22,6 @@ import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
@@ -36,19 +35,19 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 	private String fNewPackageHandle;
 
 	private INewNameQuery fNewNameQuery;
-	
-	CompilationUnitReorgChange(ICompilationUnit cu, IPackageFragment dest, INewNameQuery newNameQuery){
+
+	CompilationUnitReorgChange(ICompilationUnit cu, IPackageFragment dest, INewNameQuery newNameQuery) {
 		fCuHandle= cu.getHandleIdentifier();
 		fNewPackageHandle= dest.getHandleIdentifier();
 		fNewNameQuery= newNameQuery;
 		fOldPackageHandle= cu.getParent().getHandleIdentifier();
 	}
-	
-	CompilationUnitReorgChange(ICompilationUnit cu, IPackageFragment dest){
+
+	CompilationUnitReorgChange(ICompilationUnit cu, IPackageFragment dest) {
 		this(cu, dest, null);
 	}
-	
-	CompilationUnitReorgChange(String oldPackageHandle, String newPackageHandle, String cuHandle){
+
+	CompilationUnitReorgChange(String oldPackageHandle, String newPackageHandle, String cuHandle) {
 		fOldPackageHandle= oldPackageHandle;
 		fNewPackageHandle= newPackageHandle;
 		fCuHandle= cuHandle;
@@ -56,7 +55,7 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
-		try{
+		try {
 			ICompilationUnit unit= getCu();
 			ResourceMapping mapping= JavaElementResourceMapping.create(unit);
 			Change result= doPerformReorg(new SubProgressMonitor(pm, 1));
@@ -66,38 +65,38 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 			pm.done();
 		}
 	}
-	
-	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException;
-	
+
+	abstract Change doPerformReorg(IProgressMonitor pm) throws CoreException;
+
 	public Object getModifiedElement() {
 		return getCu();
 	}
-	
-	ICompilationUnit getCu(){
+
+	ICompilationUnit getCu() {
 		return (ICompilationUnit)JavaCore.create(fCuHandle);
 	}
-	
-	IPackageFragment getOldPackage(){
+
+	IPackageFragment getOldPackage() {
 		return (IPackageFragment)JavaCore.create(fOldPackageHandle);
 	}
-	
-	IPackageFragment getDestinationPackage(){
+
+	IPackageFragment getDestinationPackage() {
 		return (IPackageFragment)JavaCore.create(fNewPackageHandle);
 	}
-	
+
 	String getNewName() {
 		if (fNewNameQuery == null)
 			return null;
-		return fNewNameQuery.getNewName();	
+		return fNewNameQuery.getNewName();
 	}
 
-	static String getPackageName(IPackageFragment pack){
+	static String getPackageName(IPackageFragment pack) {
 		if (pack.isDefaultPackage())
 			return RefactoringCoreMessages.getString("MoveCompilationUnitChange.default_package"); //$NON-NLS-1$
 		else
-			return pack.getElementName();	
+			return pack.getElementName();
 	}
-	
+
 	private void markAsExecuted(ICompilationUnit unit, ResourceMapping mapping) {
 		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
 		if (log != null) {
@@ -106,4 +105,3 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 		}
 	}
 }
-

@@ -13,24 +13,29 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 
 	private boolean fUndoable;
+	private long fStampToRestore;
 	
 	public MoveCompilationUnitChange(ICompilationUnit cu, IPackageFragment newPackage){
 		super(cu, newPackage);
+		fStampToRestore= IResource.NULL_STAMP;
 	}
 	
-	private MoveCompilationUnitChange(IPackageFragment oldPackage, String cuName, IPackageFragment newPackage){
+	private MoveCompilationUnitChange(IPackageFragment oldPackage, String cuName, IPackageFragment newPackage, long stampToRestore) {
 		super(oldPackage.getHandleIdentifier(), newPackage.getHandleIdentifier(), oldPackage.getCompilationUnit(cuName).getHandleIdentifier());
+		fStampToRestore= stampToRestore;
 	}
 	
 	public String getName() {
@@ -42,18 +47,35 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 		return super.isValid(pm, false, false);
 	}
 	
-	Change doPerformReorg(IProgressMonitor pm) throws JavaModelException{
+	Change doPerformReorg(IProgressMonitor pm) throws CoreException {
 		String name;
 		String newName= getNewName();
 		if (newName == null)
 			name= getCu().getElementName();
 		else
-			name= newName;	
+			name= newName;
+		
+		// get current modification stamp
+		long currentStamp= IResource.NULL_STAMP;
+		IResource resource= getCu().getResource();
+		if (resource != null) {
+			currentStamp= resource.getModificationStamp();
+		}
+		
 		fUndoable= ! getDestinationPackage().getCompilationUnit(name).exists();
 		
+		// perform the move and restore modification stamp
 		getCu().move(getDestinationPackage(), null, newName, true, pm);
+		if (fStampToRestore != IResource.NULL_STAMP) {
+			ICompilationUnit moved= getDestinationPackage().getCompilationUnit(name);
+			IResource movedResource= moved.getResource();
+			if (movedResource != null) {
+				movedResource.revertModificationStamp(fStampToRestore);
+			}
+		}
+		
 		if (fUndoable) {
-			return new MoveCompilationUnitChange(getDestinationPackage(), getCu().getElementName(), getOldPackage());
+			return new MoveCompilationUnitChange(getDestinationPackage(), getCu().getElementName(), getOldPackage(), currentStamp);
 		} else {
 			return null;
 		}

@@ -15,14 +15,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.ltk.core.refactoring.Change;
+
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CopyPackageFragmentRootChange extends PackageFragmentRootReorgChange {
 
@@ -30,10 +30,6 @@ public class CopyPackageFragmentRootChange extends PackageFragmentRootReorgChang
 		super(root, destination, newNameQuery, updateClasspathQuery);
 	}
 
-	public RefactoringStatus isValid(IProgressMonitor pm) {
-		return new RefactoringStatus();
-	}
-	
 	protected Change doPerformReorg(IPath destinationPath, IProgressMonitor pm) throws JavaModelException {
 		getRoot().copy(destinationPath, getResourceUpdateFlags(), getUpdateModelFlags(true), null, pm);
 		return null;

@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -49,6 +50,12 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		fUpdateClasspathQuery= updateClasspathQuery;
 	}
 
+	public RefactoringStatus isValid(IProgressMonitor pm) {
+		RefactoringStatus result= new RefactoringStatus();
+		checkModificationStamp(result, getRoot());
+		return result;
+	}
+	
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 2);
 		try {

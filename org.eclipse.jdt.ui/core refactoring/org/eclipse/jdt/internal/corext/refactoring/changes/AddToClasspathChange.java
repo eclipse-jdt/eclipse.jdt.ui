@@ -131,4 +131,3 @@ public class AddToClasspathChange extends JDTChange {
 		return fEntryToAdd;
 	}
 }
-

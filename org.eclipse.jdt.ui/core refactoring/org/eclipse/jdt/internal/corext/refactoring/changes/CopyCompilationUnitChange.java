@@ -13,14 +13,14 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	
@@ -32,7 +32,7 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 		return super.isValid(pm, false, false);
 	}
 	
-	Change doPerformReorg(IProgressMonitor pm) throws JavaModelException{
+	Change doPerformReorg(IProgressMonitor pm) throws CoreException {
 		getCu().copy(getDestinationPackage(), null, getNewName(), true, pm);
 		return null;
 	}
@@ -41,6 +41,4 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 		return RefactoringCoreMessages.getFormattedString("CopyCompilationUnitChange.copy", //$NON-NLS-1$
 			new String[]{getCu().getElementName(), getPackageName(getDestinationPackage())});
 	}
-
 }
-

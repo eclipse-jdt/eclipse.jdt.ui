@@ -21,43 +21,35 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
 	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) {
-		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName);
+		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName, IResource.NULL_STAMP);
 		Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read only");  //$NON-NLS-1$
 		Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive");  //$NON-NLS-1$
 	}
 	
-	private RenameSourceFolderChange(IPath resourcePath, String oldName, String newName){
+	private RenameSourceFolderChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
 		super(resourcePath, oldName, newName);
 	}
 	
-	private IPath createNewPath(){
+	protected IPath createNewPath(){
 		return getResourcePath().removeLastSegments(1).append(getNewName());
 	}
 	
-	/* non java-doc
-	 * @see AbstractRenameChange#createUndoChange()
-	 */
-	protected Change createUndoChange() {
-		return new RenameSourceFolderChange(createNewPath(), getNewName(), getOldName());
+	protected Change createUndoChange(long stampToRestore) {
+		return new RenameSourceFolderChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
 	}
 
-	/* non java-doc
-	 * @see IChange#getName()
-	 */
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("RenameSourceFolderChange.rename", //$NON-NLS-1$
 			new String[]{getOldName(), getNewName()});
 	}
 
-	/* non java-doc
-	 * @see AbstractRenameChange#doRename
-	 */	
 	protected void doRename(IProgressMonitor pm) throws CoreException {
 		IPackageFragmentRoot sourceFolder= getSourceFolder();
 		if (sourceFolder != null)
@@ -88,10 +80,11 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-
-		result.merge(checkIfModifiable(getSourceFolder(), pm));
+		IPackageFragmentRoot sourceFolder= getSourceFolder();
+		
+		checkModificationStamp(result, sourceFolder);
+		result.merge(checkIfModifiable(sourceFolder, pm));
 		
 		return result;
 	}
 }
-

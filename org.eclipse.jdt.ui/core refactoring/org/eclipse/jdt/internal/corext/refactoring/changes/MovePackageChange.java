@@ -12,22 +12,18 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Change;
+
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MovePackageChange extends PackageReorgChange {
 	
 	public MovePackageChange(IPackageFragment pack, IPackageFragmentRoot dest){
 		super(pack, dest, null);
-	}
-	
-	public RefactoringStatus isValid(IProgressMonitor pm) {
-		return new RefactoringStatus();
 	}
 	
 	protected Change doPerformReorg(IProgressMonitor pm) throws JavaModelException{
@@ -40,4 +36,3 @@ public class MovePackageChange extends PackageReorgChange {
 			new String[]{getPackage().getElementName(), getDestination().getElementName()});
 	}
 }
-

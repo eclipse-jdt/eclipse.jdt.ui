@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 
 import org.eclipse.jdt.core.IPackageFragment;
@@ -32,18 +33,21 @@ abstract class PackageReorgChange extends JDTChange {
 	private String fPackageHandle;
 	private String fDestinationHandle;
 	private INewNameQuery fNameQuery;
-	
-	PackageReorgChange(IPackageFragment pack, IPackageFragmentRoot dest, INewNameQuery nameQuery){
+
+	PackageReorgChange(IPackageFragment pack, IPackageFragmentRoot dest, INewNameQuery nameQuery) {
 		fPackageHandle= pack.getHandleIdentifier();
 		fDestinationHandle= dest.getHandleIdentifier();
 		fNameQuery= nameQuery;
 	}
-	
+
 	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException;
-	
-	/* non java-doc
-	 * @see IChange#perform(ChangeContext, IProgressMonitor)
-	 */
+
+	public RefactoringStatus isValid(IProgressMonitor pm) {
+		RefactoringStatus result= new RefactoringStatus();
+		checkModificationStamp(result, getPackage());
+		return result;
+	}
+
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
 		try {
@@ -56,19 +60,16 @@ abstract class PackageReorgChange extends JDTChange {
 			pm.done();
 		}
 	}
-	
-	/* non java-doc
-	 * @see IChange#getModifiedLanguageElement()
-	 */
+
 	public Object getModifiedElement() {
 		return getPackage();
 	}
-	
-	IPackageFragmentRoot getDestination(){
+
+	IPackageFragmentRoot getDestination() {
 		return (IPackageFragmentRoot)JavaCore.create(fDestinationHandle);
 	}
-	
-	IPackageFragment getPackage(){
+
+	IPackageFragment getPackage() {
 		return (IPackageFragment)JavaCore.create(fPackageHandle);
 	}
 
@@ -77,7 +78,7 @@ abstract class PackageReorgChange extends JDTChange {
 			return null;
 		return fNameQuery.getNewName();
 	}
-	
+
 	private void markAsExecuted(IPackageFragment pack, ResourceMapping mapping) {
 		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
 		if (log != null) {
@@ -86,4 +87,3 @@ abstract class PackageReorgChange extends JDTChange {
 		}
 	}
 }
-
