@@ -1051,6 +1051,15 @@
             %javaCompareFontDefiniton.description
          </description>
       </fontDefinition>
+      <fontDefinition
+            label="%propertiesFileCompareFontDefiniton.label"
+            defaultsTo="org.eclipse.jdt.ui.PropertiesFileEditor.textfont"
+            categoryId="org.eclipse.compare.contentmergeviewer.TextMergeViewer"
+            id="org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewer">
+         <description>
+            %propertiesFileCompareFontDefiniton.description
+         </description>
+      </fontDefinition>
    </extension>
    
    <extension
