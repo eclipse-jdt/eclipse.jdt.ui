@@ -48,6 +48,11 @@ interface ITestRunView {
 	public void setSelectedTest(String testId);
 	
 	/**
+	 * A test has started
+	 */
+	public void startTest(String testId);
+
+	/**
 	 * A test has ended
 	 */
 	public void endTest(String testId);
@@ -60,5 +65,6 @@ interface ITestRunView {
 	 * A new tree entry got posted.
 	 */
 	public void newTreeEntry(String treeEntry);
+
 
 }

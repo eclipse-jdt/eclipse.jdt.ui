@@ -52,7 +52,7 @@
                   Test run class implementing org.eclipse.jdt.junit.ITestRunListener
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.jdt.internal.junit.runner.ITestRunListener"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jdt.junit.ITestRunListener"/>
                </appInfo>
             </annotation>
          </attribute>

@@ -76,6 +76,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	private final Image fSuiteErrorIcon= TestRunnerViewPart.createImage("obj16/tsuiteerror.gif"); //$NON-NLS-1$
 	private final Image fSuiteFailIcon= TestRunnerViewPart.createImage("obj16/tsuitefail.gif"); //$NON-NLS-1$
 	private final Image fTestIcon= TestRunnerViewPart.createImage("obj16/test.gif"); //$NON-NLS-1$
+	private final Image fTestRunningIcon= TestRunnerViewPart.createImage("obj16/testrun.gif"); //$NON-NLS-1$
 		
 	public HierarchyRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
 		fTestRunnerPart= runner;
@@ -110,6 +111,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		fOkIcon.dispose();
 		fHierarchyIcon.dispose();
 		fTestIcon.dispose();
+		fTestRunningIcon.dispose();
 		fSuiteIcon.dispose();
 		fSuiteErrorIcon.dispose();
 		fSuiteFailIcon.dispose(); 
@@ -178,9 +180,19 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			fTree.setSelection(new TreeItem[]{treeItem});
 	}
 	
+	public void startTest(String testId) {	
+		TreeItem treeItem= findTreeItem(testId);
+		if (treeItem == null)  
+			return;
+		setCurrentItem(treeItem);		
+	}
+
+	private void setCurrentItem(TreeItem treeItem) {
+		treeItem.setImage(fTestRunningIcon);
+	}
+
 	public void endTest(String testId) {	
 		TreeItem treeItem= findTreeItem(testId);
-		// workaround for bug 8657
 		if (treeItem == null)  
 			return;
 			
@@ -188,7 +200,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			
 		updateItem(treeItem, testInfo);
 			
-		if (testInfo.getTrace() != null)
+		//if (testInfo.getTrace() != null)
 			fTree.showItem(treeItem);
 	}
 

@@ -56,9 +56,12 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor pm) throws CoreException {		
 		IJavaProject javaProject= getJavaProject(configuration);
 		if ((javaProject == null) || !javaProject.exists()) {
-			abort(JUnitMessages.getString("JUnitBaseLaunchConfiguration.error.invalidproject"), null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); //$NON-NLS-1$
+			abort(JUnitMessages.getString("JUnitBaseLaunchConfiguration.error.invalidproject"), null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		IType[] testTypes = getTestTypes(configuration, javaProject, pm);
+		if (testTypes.length == 0) {
+			abort(JUnitMessages.getString("JUnitBaseLaunchConfiguration.error.notests"), null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); //$NON-NLS-1$
+		}
 		IVMInstall install= getVMInstall(configuration);
 		IVMRunner runner = install.getVMRunner(mode);
 		if (runner == null) {
@@ -109,7 +112,13 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		else 
 			return findTestsInContainer(javaProject, containerHandle, pm);
 	}
-
+	/**
+	 * @inheritdoc 
+	 * @param javaProject
+	 * @param containerHandle
+	 * @param pm
+	 * @return
+	 */
 	private IType[] findTestsInContainer(IJavaProject javaProject, String containerHandle, IProgressMonitor pm) {
 		IJavaElement container= JavaCore.create(containerHandle);
 		Set result= new HashSet();

@@ -260,4 +260,10 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		if (item != null)
 			fTable.showItem(item);
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#startTest(java.lang.String)
+	 */
+	public void startTest(String testId) {
+	}
 }

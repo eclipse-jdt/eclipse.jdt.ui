@@ -368,6 +368,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	 * @see ITestRunListener#testStarted
 	 */
 	public void testStarted(String testId, String testName) {
+		postStartTest(testId, testName);
 		// reveal the part when the first test starts
 		if (!fShowOnErrorOnly && fExecutedTests == 1) 
 			postShowTestResultsView();
@@ -585,6 +586,19 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 					ITestRunView v= (ITestRunView) e.nextElement();
 					v.endTest(testId);
+				}
+			}
+		});	
+	}
+
+	private void postStartTest(final String testId, final String testName) {
+		postSyncRunnable(new Runnable() {
+			public void run() {
+				if(isDisposed()) 
+					return;
+				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
+					ITestRunView v= (ITestRunView) e.nextElement();
+					v.startTest(testId);
 				}
 			}
 		});	
