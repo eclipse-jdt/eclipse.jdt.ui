@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.jface.action.Action;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.text.TextSelection;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.search.ui.ISearchResultViewEntry;
@@ -42,10 +43,10 @@ public abstract class JavaElementAction extends Action {
 		fValidTypes= validTypes;
 	}
 	public boolean canOperateOn(ISelection sel) {
-		boolean result= !sel.isEmpty();
-		if (!result || fValidTypes == null)
-			return result;
-
+		boolean hasSelection= !sel.isEmpty();
+		if (!hasSelection || fValidTypes == null)
+			return hasSelection;
+
 		if (fValidTypes.length == 0)
 			return false;
 
@@ -123,8 +124,10 @@ public abstract class JavaElementAction extends Action {
 		return null;
 	}
 	private IJavaElement getJavaElement(ITextSelection selection) {
-		IEditorPart editorPart= JavaPlugin.getActivePage().getActiveEditor();
-
+		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
+		if (wbPage == null)
+			return null;
+		IEditorPart editorPart= wbPage.getActiveEditor();
 		if (editorPart == null)
 			return null;
 		ICodeAssist assist= getCodeAssist(editorPart);
@@ -170,7 +173,7 @@ public abstract class JavaElementAction extends Action {
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setElements(openChoices);
 		if (dialog.open() == dialog.OK)
-			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
+			return (IJavaElement)dialog.getFirstResult();
 		return null;
 	}
 	/**
@@ -220,6 +223,8 @@ public abstract class JavaElementAction extends Action {
 			}
 			if (types.length == 1)
 				return types[0];
+			if (types.length == 0)
+				return null;
 			String title= SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.title"); //$NON-NLS-1$
 			String message = SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.message"); //$NON-NLS-1$
 			Shell parent= JavaPlugin.getActiveWorkbenchShell();
@@ -230,21 +235,19 @@ public abstract class JavaElementAction extends Action {
 			dialog.setMessage(message);
 			dialog.setElements(types);
 			
-			if (dialog.open() == dialog.OK) {
-				Object[] elements= dialog.getResult();
-				if (elements != null && elements.length == 1)
-					return ((IType) elements[0]);
-			}
+			if (dialog.open() == dialog.OK)
+				return (IType)dialog.getFirstResult();
 			else
 				return RETURN_WITHOUT_BEEP;
 		}
-		return null;
 	}
-	protected IJavaElement findType(IClassFile cf) {
+
+	protected IType findType(IClassFile cf) {
 		IType mainType;
 		try {					
 			mainType= cf.getType();
 		} catch (JavaModelException ex) {
+			ExceptionHandler.log(ex, SearchMessages.getString("OpenTypeAction.error.open.message")); //$NON-NLS-1$
 			return null;
 		}
 		return mainType;

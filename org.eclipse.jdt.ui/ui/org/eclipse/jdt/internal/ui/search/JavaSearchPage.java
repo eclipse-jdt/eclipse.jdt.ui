@@ -77,7 +77,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
 
-	private static java.util.List fgPreviousSearchPatterns= new ArrayList(20);
+	private static List fgPreviousSearchPatterns= new ArrayList(20);
 
 	private Combo fPattern;
 	private String fInitialPattern;
@@ -569,9 +569,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
-		dialog.setElements(openChoices); // XXX inefficient
+		dialog.setElements(openChoices);
 		if (dialog.open() == dialog.OK)
-			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
+			return (IJavaElement)dialog.getFirstResult();
 		return null;
 	}
 

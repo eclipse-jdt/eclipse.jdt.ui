@@ -42,7 +42,8 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			IMarker marker= ((ISearchResultViewEntry)element).getSelectedMarker();
 			try {
 				return JavaCore.create((String) ((IMarker) marker).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));	
-			} catch (CoreException e) {
+			} catch (CoreException ex) {
+				ExceptionHandler.log(ex, SearchMessages.getString("Search.Error.createJavaElement.message"));
 				return null;
 			}
 		}
