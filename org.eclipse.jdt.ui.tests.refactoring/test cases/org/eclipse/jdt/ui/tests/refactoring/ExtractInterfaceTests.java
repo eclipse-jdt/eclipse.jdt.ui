@@ -250,11 +250,10 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		String[][] signatures= new String[][]{new String[0], new String[0]};
 		validatePassingTest("A", new String[]{"A"},"I", true, names, signatures, null);
 	}
-	
-//	public void test21() throws Exception{
-		//disable for Exceptions
-//		validatePassingTest("A", "I", true, true);
-//	}
+
+	public void test21() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
 
 	public void test22() throws Exception{
 		validatePassingTest("A", "I", true, true);
@@ -514,10 +513,10 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test77() throws Exception{
-		printTestDisabledMessage("Waiting for new type constraints infrastructure");
-//		String[] names= new String[]{"amount"};
-//		String[][] signatures= new String[][]{new String[0]};
-//		validatePassingTest("A.Inner", new String[]{"A", "B"}, "I", true, names, signatures, null);
+//		printTestDisabledMessage("Waiting for new type constraints infrastructure");
+		String[] names= new String[]{"amount"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A.Inner", new String[]{"A", "B"}, "I", true, names, signatures, null);
 	}
 
 	public void test78() throws Exception{
@@ -701,17 +700,15 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test102() throws Exception{
-		printTestDisabledMessage("Waiting for new type constraints infrastructure");
-//		String[] names= new String[]{};
-//		String[][] signatures= new String[][]{};
-//		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
+		String[] names= new String[]{};
+		String[][] signatures= new String[][]{};
+		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
 	public void test103() throws Exception{
-		printTestDisabledMessage("Waiting for new type constraints infrastructure");
-//		String[] names= new String[]{};
-//		String[][] signatures= new String[][]{};
-//		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
+		String[] names= new String[]{};
+		String[][] signatures= new String[][]{};
+		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
 	public void testPaperExample0() throws Exception{
@@ -862,11 +859,6 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		String[] fieldNames= null;
 		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
 	}
-
-//disabled - can extract interface from interface
-//	public void testFail0() throws Exception{
-//		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
-//	}
 
 	public void testFail1() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);

@@ -3,7 +3,7 @@ package p;
 public class As {
 	void f(){
 		I a= new A();
-		if (a instanceof I){
+		if (a instanceof A){
 		} else {
 		}
 	}

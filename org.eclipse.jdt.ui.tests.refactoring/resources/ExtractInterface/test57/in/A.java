@@ -1,6 +1,6 @@
 package p;
 
-class A {
+public class A {
 	public void m() {}
 	public void m1() {}
 	protected A f(){

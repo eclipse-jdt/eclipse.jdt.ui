@@ -2,7 +2,7 @@ package p;
 
 
 /** typecomment template*/
-interface I {
+public interface I {
 
 	public abstract void m();
 

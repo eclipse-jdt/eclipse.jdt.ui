@@ -6,7 +6,7 @@ class A implements I {
 	 */
 	public void m() {}
 	public void m1() {}
-	protected A g() {
+	protected I g() {
 		return this;	
 	}
 }
