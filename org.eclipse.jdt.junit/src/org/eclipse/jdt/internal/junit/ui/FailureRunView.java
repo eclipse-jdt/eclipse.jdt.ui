@@ -9,13 +9,11 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -36,7 +34,6 @@ import org.eclipse.jdt.junit.ITestRunListener;
 class FailureRunView implements ITestRunView, IMenuListener {
 	private Table fTable;
 	private TestRunnerViewPart fRunnerViewPart;
-	private boolean fPressed= false;
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
@@ -211,40 +208,15 @@ class FailureRunView implements ITestRunView, IMenuListener {
 			}
 		});
 
-		fTable.addMouseListener(new MouseListener() {
+		fTable.addMouseListener(new MouseAdapter() {
 			public void mouseDoubleClick(MouseEvent e){
 				handleDoubleClick(e);
 			}
 			public void mouseDown(MouseEvent e) {
-				fPressed= true;
 				activate();
 			}
 			public void mouseUp(MouseEvent e) {
-				fPressed= false;
 				activate();
-			}
-		});
-		
-		fTable.addMouseMoveListener(new MouseMoveListener() {
-			public void mouseMove(MouseEvent e) {
-				TableItem tableItem= ((Table) e.getSource()).getItem(new Point(e.x, e.y));
-				if (fPressed & (null != tableItem)) {
-					fTable.setSelection(new TableItem[] { tableItem });
-					activate();
-				}
-				// scrolling up and down
-				if ((e.y + 1 > fTable.getBounds().height)
-					& fPressed
-					& (fTable.getSelectionIndex() != fTable.getItemCount() - 1)) {
-					fTable.setTopIndex(fTable.getTopIndex() + 1);
-					fTable.setSelection(fTable.getSelectionIndex() + 1);
-					activate();
-				}
-				if ((e.y - 1 < 0) & fPressed & (fTable.getTopIndex() != 0)) {
-					fTable.setTopIndex(fTable.getTopIndex() - 1);
-					fTable.setSelection(fTable.getSelectionIndex() - 1);
-					activate();
-				}
 			}
 		});
 	}

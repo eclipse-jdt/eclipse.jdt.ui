@@ -15,13 +15,11 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -71,8 +69,6 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	private Map fTreeItemMap= new HashMap();
 	
 	private TestRunnerViewPart fTestRunnerPart;
-	
-	private boolean fPressed= false;
 	
 	private final Image fOkIcon= TestRunnerViewPart.createImage("obj16/testok.gif"); //$NON-NLS-1$
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
@@ -275,37 +271,9 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			}
 		});
 
-		fTree.addMouseListener(new MouseListener() {
+		fTree.addMouseListener(new MouseAdapter() {
 			public void mouseDoubleClick(MouseEvent e) {
 				handleDoubleClick(e);
-			}
-			public void mouseDown(MouseEvent e) {
-				fPressed= true;
-			}
-			public void mouseUp(MouseEvent e) {
-				fPressed= false;
-			}
-		});
-		
-		fTree.addMouseMoveListener(new MouseMoveListener() {
-			public void mouseMove(MouseEvent e) {
-				if (!(e.getSource() instanceof Tree)) 
-					return;
-				
-				TreeItem[] treeItem= {((Tree) e.getSource()).getItem(new Point(e.x, e.y))};
-				if (fPressed & (null != treeItem[0])) {
-					fTree.setSelection(treeItem);
-					activate();
-				}
-				// scroll
-				if ((e.y < 1) & fPressed) {
-					try {
-						TreeItem tItem= treeItem[0].getParentItem();
-						fTree.setSelection(new TreeItem[] { tItem });
-						activate();
-					} catch (Exception ex) {
-					}
-				}
 			}
 		});
 	}
