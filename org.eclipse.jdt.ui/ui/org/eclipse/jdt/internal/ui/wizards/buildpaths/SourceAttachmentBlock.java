@@ -346,7 +346,7 @@ public class SourceAttachmentBlock {
 					return status;
 				}
 				File file= resolvedPath.toFile();
-				if (!file.isFile()) {				
+				if (!file.exists()) {				
 					String message= NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", resolvedPath.toOSString()); //$NON-NLS-1$
 					status.setWarning(message);
 					return status;

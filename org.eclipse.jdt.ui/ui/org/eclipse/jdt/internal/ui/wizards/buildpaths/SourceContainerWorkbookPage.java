@@ -94,7 +94,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.setDialogFieldListener(adapter);
 		fFoldersList.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.label")); //$NON-NLS-1$
 		fFoldersList.setRemoveButtonIndex(removeIndex);
-		fFoldersList.setTreeExpansionLevel(3);
 		
 		fFoldersList.setViewerSorter(new CPListElementSorter());
 		
@@ -118,8 +117,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
 			if (cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				fFoldersList.addElement(cpe);
-				if (cpe.getAttribute(CPListElement.OUTPUT) != null) {
+				boolean hasOutputFolder= (cpe.getAttribute(CPListElement.OUTPUT) != null);
+				if (hasOutputFolder) {
 					useFolderOutputs= true;
+				}
+				IPath[] patterns= (IPath[]) cpe.getAttribute(CPListElement.EXCLUSION);
+				if (patterns.length > 0 || hasOutputFolder) {
+					fFoldersList.expandElement(cpe, 3);
 				}
 			}
 		}
@@ -139,6 +143,16 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			
 		fSWTControl= composite;
 		
+		// expand
+		List elements= fFoldersList.getElements();
+		for (int i= 0; i < elements.size(); i++) {
+			CPListElement elem= (CPListElement) elements.get(i);
+			IPath[] patterns= (IPath[]) elem.getAttribute(CPListElement.EXCLUSION);
+			IPath output= (IPath) elem.getAttribute(CPListElement.OUTPUT);
+			if (patterns.length > 0 || output != null) {
+				fFoldersList.expandElement(elem, 3);
+			}
+		}
 		return composite;
 	}
 	

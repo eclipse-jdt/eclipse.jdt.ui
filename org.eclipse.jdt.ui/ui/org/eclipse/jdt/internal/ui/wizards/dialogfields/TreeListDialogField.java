@@ -804,6 +804,13 @@ public class TreeListDialogField extends DialogField {
 		}
 		return result;
 	}
+	
+	public void expandElement(Object element, int level) {
+		if (fTree != null) {
+			fTree.expandToLevel(element, level);
+		}
+	}
+	
 
 	// ------- TreeViewerAdapter
 
