@@ -449,6 +449,64 @@ public class AssistQuickFixTest extends QuickFixTest {
 		}
 	}
 
+	public void testAssignToLocal6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    static {\n");
+		buf.append("        getClass();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("getClass()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+		
+		boolean doField= true, doLocal= true;
+		for (int i= 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (!(curr instanceof AssignToVariableAssistProposal)) {
+				continue;
+			}
+			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
+			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
+				assertTrue("same proposal kind", doField);
+				doField= false;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("    private static Class class1;\n");
+				buf.append("\n");
+				buf.append("    static {\n");
+				buf.append("        class1 = getClass();\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+				
+			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
+				assertTrue("same proposal kind", doLocal);
+				doLocal= false;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("    static {\n");
+				buf.append("        Class class1 = getClass();\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+			}
+		}
+	}
 
 	
 	public void testAssignParamToField() throws Exception {
@@ -613,7 +671,48 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	
-	}	
+	}
+	
+	public void testAssignParamToField5() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int p1;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int p1, int p2) {\n");
+		buf.append("        this.p1 = p1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("int p2");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int p1;\n");
+		buf.append("    private int p2;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int p1, int p2) {\n");
+		buf.append("        this.p1 = p1;\n");
+		buf.append("        this.p2 = p2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}		
 	
 	
 	

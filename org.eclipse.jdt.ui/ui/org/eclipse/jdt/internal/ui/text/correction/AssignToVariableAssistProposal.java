@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -107,10 +108,12 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	private ASTRewrite doAddField() throws CoreException {
 		boolean isParamToField= fNodeToAssign.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION;
+			
+		ASTNode newTypeDecl= ASTResolving.findParentType(fNodeToAssign);
+		if (newTypeDecl == null) {
+			return null;
+		}
 		
-		MethodDeclaration methodDecl= ASTResolving.findParentMethodDeclaration(fNodeToAssign);
-		
-		ASTNode newTypeDecl= ASTResolving.findParentType(methodDecl);
 		Expression expression= isParamToField ? ((SingleVariableDeclaration) fNodeToAssign).getName() : ((ExpressionStatement) fNodeToAssign).getExpression();
 		
 		boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
@@ -119,7 +122,17 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
 		AST ast= newTypeDecl.getAST();
 		
-		boolean isStatic= Modifier.isStatic(methodDecl.getModifiers()) && !isAnonymous;
+		BodyDeclaration bodyDecl= ASTResolving.findParentBodyDeclaration(fNodeToAssign);
+		Block body;
+		if (bodyDecl instanceof MethodDeclaration) {
+			body= ((MethodDeclaration) bodyDecl).getBody();
+		} else if (bodyDecl instanceof Initializer) {
+			body= ((Initializer) bodyDecl).getBody();
+		} else {
+			return null;
+		}
+		
+		boolean isStatic= Modifier.isStatic(bodyDecl.getModifiers()) && !isAnonymous;
 		int modifiers= Modifier.PRIVATE;
 		if (isStatic) {
 			modifiers |= Modifier.STATIC;
@@ -164,7 +177,6 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		ASTNode selectionNode;
 		if (isParamToField) {
 			// assign parameter to field
-			Block body= methodDecl.getBody();
 			ExpressionStatement statement= ast.newExpressionStatement(assignment);
 			int insertIdx=  findAssignmentInsertIndex(body.statements());
 			rewrite.markAsInsertInOriginal(body, ASTNodeConstants.STATEMENTS, statement, insertIdx, null);
@@ -263,13 +275,41 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	}
 
 	private int findAssignmentInsertIndex(List statements) {
-		if (!statements.isEmpty()) {
-			int nodeType= ((ASTNode) statements.get(0)).getNodeType();
-			if (nodeType == ASTNode.CONSTRUCTOR_INVOCATION || nodeType == ASTNode.SUPER_CONSTRUCTOR_INVOCATION) {
-				return 1;
+
+		HashSet paramsBefore= new HashSet();
+		List params = ((MethodDeclaration) fNodeToAssign.getParent()).parameters();
+		for (int i = 0; i < params.size() && (params.get(i) != fNodeToAssign); i++) {
+			SingleVariableDeclaration decl= (SingleVariableDeclaration) params.get(i);
+			paramsBefore.add(decl.getName().getIdentifier());
+		}
+		
+		int i= 0;
+		for (i = 0; i < statements.size(); i++) {
+			Statement curr= (Statement) statements.get(i);
+			switch (curr.getNodeType()) {
+				case ASTNode.CONSTRUCTOR_INVOCATION:
+				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
+					break;
+				case ASTNode.EXPRESSION_STATEMENT:
+					Expression expr= ((ExpressionStatement) curr).getExpression();
+					if (expr instanceof Assignment) {
+						Assignment assignment= (Assignment) expr;
+						Expression rightHand = assignment.getRightHandSide();
+						if (rightHand instanceof SimpleName && paramsBefore.contains(((SimpleName) rightHand).getIdentifier())) {
+							IVariableBinding binding = Bindings.getAssignedVariable(assignment);
+							if (binding == null || binding.isField()) {
+								break;
+							}
+						}
+					}
+					return i;
+				default:
+					return i;
+			
 			}
 		}
-		return 0;
+		return i;
+		
 	}
 	
 	private int findFieldInsertIndex(List decls, int currPos) {
