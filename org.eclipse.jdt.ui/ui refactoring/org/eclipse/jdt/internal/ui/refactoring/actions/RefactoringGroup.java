@@ -62,8 +62,9 @@ public class RefactoringGroup extends ContextMenuGroup {
 		for (int i= 0; i < openWizardActions.length; i++)
 			if (openWizardActions[i].canActionBeAdded())
 				manager.add(openWizardActions[i]);	
-
-		manager.add(new Separator());
+	
+		if (!manager.isEmpty())
+			manager.add(new Separator());
 
 		if (fUndoRefactoring.canActionBeAdded()) {
 			fUndoRefactoring.update();
