@@ -6,7 +6,6 @@ class A {
 	}	
 
 	protected int f;
-
 }
 
 class B extends A {

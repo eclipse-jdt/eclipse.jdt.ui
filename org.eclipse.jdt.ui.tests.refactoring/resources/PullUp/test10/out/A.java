@@ -8,7 +8,6 @@ class A {
 		this.j++;
 		this.j= 0;
 	}
-
 }
 
 class B extends A {

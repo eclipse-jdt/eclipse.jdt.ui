@@ -6,7 +6,6 @@ class A {
 	protected void m() { 
 		a(this);
 	}
-
 }
 
 class B extends A {

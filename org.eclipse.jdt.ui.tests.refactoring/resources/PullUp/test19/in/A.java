@@ -10,8 +10,8 @@ class C extends A {
 }
 
 class B extends C {
-    void m() {
-        super.m();
-        //further implementation
-    }
+	void m() {
+		super.m();
+		//further implementation
+	}
 }

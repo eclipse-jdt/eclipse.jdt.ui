@@ -4,9 +4,7 @@ class A{
 
 	protected void mmm(){}
 
-
 	protected void n(){}
-
 }
 class B extends A{
 }

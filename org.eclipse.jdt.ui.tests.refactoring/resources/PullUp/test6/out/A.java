@@ -5,7 +5,6 @@ class A {
 	protected void m() { 
 		this.x++;
 	}
-
 }
 
 class B extends A {

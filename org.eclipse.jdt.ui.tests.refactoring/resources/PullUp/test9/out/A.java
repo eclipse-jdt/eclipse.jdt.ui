@@ -7,7 +7,6 @@ class A {
 		this.a();
 		this.a();
 	}
-
 }
 
 class B extends A {
