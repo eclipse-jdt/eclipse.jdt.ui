@@ -119,6 +119,9 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			}
 
 			IClassFileReader reader= ToolFactory.createDefaultClassFileReader(location.toOSString(), IClassFileReader.CLASSFILE_ATTRIBUTES);
+			if (reader == null) {
+				continue; // problematic class file
+			}
 			char[] className= reader.getClassName();
 			ISourceAttribute sourceAttribute= reader.getSourceFileAttribute();
 			if (className != null && sourceAttribute != null && sourceAttribute.getSourceFileName() != null) {
