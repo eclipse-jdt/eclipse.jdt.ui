@@ -30,8 +30,10 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -185,8 +187,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		// Setup viewer
 		fViewer= createViewer(parent);
+
 		fLabelProvider= createLabelProvider();
 		fViewer.setLabelProvider(fLabelProvider);
+		ILabelDecorator decorationMgr= getViewSite().getDecoratorManager();
+		fViewer.setLabelProvider(new DecoratingLabelProvider(fLabelProvider, decorationMgr));
+		
 		fViewer.setSorter(new JavaElementSorter());
 		fViewer.setUseHashlookup(true);
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener((IProblemChangedListener)fViewer);
@@ -598,19 +604,19 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	void adjustInputAndSetSelection(IJavaElement je) {
-		je= findElementToSelect(je);
-
-		if (je == null) {
-			// Adjust input to selection
+		IJavaElement elementToSelect= findElementToSelect(je);
+		IJavaElement newInput= findInputForJavaElement(je);
+		if (elementToSelect == null && !isValidInput(newInput))
+			// Clear input
 			setInput(null);
-			setSelection(StructuredSelection.EMPTY, true);
-			return;
-		}
-		else if (getViewer().testFindItem(je) == null)
+		else if (elementToSelect == null || getViewer().testFindItem(elementToSelect) == null)
 			// Adjust input to selection
 			setInput(findInputForJavaElement(je));
-
-		setSelection(new StructuredSelection(je), true);
+		
+		if (elementToSelect != null)
+			setSelection(new StructuredSelection(elementToSelect), true);
+		else
+			setSelection(StructuredSelection.EMPTY, true);
 	}
 
 	/**
