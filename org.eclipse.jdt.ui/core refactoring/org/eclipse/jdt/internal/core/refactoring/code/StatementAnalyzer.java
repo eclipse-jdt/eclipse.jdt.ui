@@ -764,7 +764,7 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 		// XXX: 1GF089K: ITPJCORE:WIN2000 - AbstractLocalDeclaration.declarationSourceStart includes preceeding comment
 		AstNode node= getLastSelectedNode();
 		int start= localDeclaration.declarationSourceStart;
-		if (node != null)
+		if (node != null && node.sourceEnd < localDeclaration.declarationSourceEnd)
 			start= Math.max(start, node.sourceEnd + 1);
 		int pos= fBuffer.indexOfStatementCharacter(start);		
 		localDeclaration.declarationSourceStart= pos;

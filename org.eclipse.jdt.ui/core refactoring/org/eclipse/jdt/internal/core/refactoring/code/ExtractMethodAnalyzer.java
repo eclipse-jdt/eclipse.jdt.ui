@@ -46,6 +46,9 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 	private MethodScope fOuterMostMethodScope;
 	private int fReturnKind;
 	
+	private FlowInfo fInputFlowInfo;
+	private FlowContext fInputFlowContext;
+	
 	private LocalVariableBinding[] fArguments;
 	private LocalVariableBinding[] fMethodLocals;
 	
@@ -168,24 +171,24 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 	}
 	
 	private RefactoringStatus analyzeSelection(RefactoringStatus status) {
-		FlowContext flowContext= new FlowContext(0, fOuterMostMethodScope.analysisIndex);
-		flowContext.setConsiderExecutionFlow(true);
-		flowContext.setConsiderAccessMode(true);
-		flowContext.setComputeMode(FlowContext.ARGUMENTS);
+		fInputFlowContext= new FlowContext(0, fOuterMostMethodScope.analysisIndex);
+		fInputFlowContext.setConsiderExecutionFlow(true);
+		fInputFlowContext.setConsiderAccessMode(true);
+		fInputFlowContext.setComputeMode(FlowContext.ARGUMENTS);
 		
-		InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(flowContext, fSelection);
-		FlowInfo flowInfo= flowAnalyzer.analyse(fTopNodes, (BlockScope)getEnclosingScope());
+		InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(fInputFlowContext, fSelection);
+		fInputFlowInfo= flowAnalyzer.analyse(fTopNodes, (BlockScope)getEnclosingScope());
 		
-		if (flowInfo.branches()) {
+		if (fInputFlowInfo.branches()) {
 			status.addFatalError("Selection contains branch statement but corresponding branch target isn't selected.");
 			fReturnKind= ERROR;
 			return status;
 		}
-		if (flowInfo.isValueReturn()) {
+		if (fInputFlowInfo.isValueReturn()) {
 			fReturnKind= RETURN_STATEMENT_VALUE;
-		} else  if (flowInfo.isVoidReturn()) {
+		} else  if (fInputFlowInfo.isVoidReturn()) {
 			fReturnKind= RETURN_STATEMENT_VOID;
-		} else if (flowInfo.isNoReturn() || flowInfo.isThrow() || flowInfo.isUndefined()) {
+		} else if (fInputFlowInfo.isNoReturn() || fInputFlowInfo.isThrow() || fInputFlowInfo.isUndefined()) {
 			fReturnKind= NO;
 		}
 		
@@ -194,8 +197,10 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 			fReturnKind= ERROR;
 			return status;
 		}
-		computeInput(flowInfo, flowContext);
+		computeInput();
 		computeOutput(status);
+		if (!status.hasFatalError())
+			adjustArgumentsAndMethodLocals();
 		return status;
 	}
 	
@@ -209,10 +214,11 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 		return true;	
 	}
 	
-	private void computeInput(FlowInfo flowInfo, FlowContext flowContext) {
-		fArguments= flowInfo.getArguments(flowContext);
+	private void computeInput() {
+		int argumentMode= FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN;
+		fArguments= fInputFlowInfo.get(fInputFlowContext, argumentMode);
 		removeSelectedDeclarations(fArguments);
-		fMethodLocals= flowInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL);
+		fMethodLocals= fInputFlowInfo.get(fInputFlowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL);
 		removeSelectedDeclarations(fMethodLocals);
 	}
 
@@ -231,11 +237,11 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 		flowContext.setConsiderAccessMode(true);
 		flowContext.setComputeMode(FlowContext.RETURN_VALUES);
 		FlowInfo flowInfo= new InOutFlowAnalyzer(flowContext, fSelection).analyse(fTopNodes, (BlockScope)getEnclosingScope());
-		LocalVariableBinding[] returnValues= flowInfo.getReturnValues(flowContext);
+		LocalVariableBinding[] returnValues= flowInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
 		
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);
 		flowInfo= new InputFlowAnalyzer(flowContext, fSelection).analyse(getEnclosingMethod(), fClassScope);
-		LocalVariableBinding[] reads= flowInfo.getArguments(flowContext);
+		LocalVariableBinding[] reads= flowInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
 		int counter= 0;
 		outer: for (int i= 0; i < returnValues.length && counter <= 1; i++) {
 			LocalVariableBinding binding= returnValues[i];
@@ -277,6 +283,23 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 			scope= scope.parent;
 		}
 		return null;
+	}
+	
+	private void adjustArgumentsAndMethodLocals() {
+		for (int i= 0; i < fArguments.length; i++) {
+			LocalVariableBinding argument= fArguments[i];
+			if (fInputFlowInfo.hasAccessMode(fInputFlowContext, argument, FlowInfo.WRITE_POTENTIAL)) {
+				if (argument != fReturnValue)
+					fArguments[i]= null;
+				// We didn't remove the argument. So we have to remove the local declaration
+				if (fArguments[i] != null) {
+					for (int l= 0; l < fMethodLocals.length; l++) {
+						if (fMethodLocals[l] == argument)
+							fMethodLocals[l]= null;						
+					}
+				}
+			}
+		}
 	}
 }
 

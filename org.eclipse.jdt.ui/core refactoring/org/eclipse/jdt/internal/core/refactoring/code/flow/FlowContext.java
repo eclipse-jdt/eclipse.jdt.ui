@@ -19,6 +19,7 @@ public class FlowContext {
 	private int fLength;
 	private boolean fConsiderExecutionFlow;
 	private boolean fConsiderAccessMode;
+	private boolean fLoopReentranceMode;
 	private Enum fComputeMode;
 	private LocalVariableBinding[] fLocals;
 	
@@ -39,6 +40,10 @@ public class FlowContext {
 		fComputeMode= mode;
 	}
 	
+	void setLoopReentranceMode(boolean b) {
+		fLoopReentranceMode= b;
+	}
+	
 	int getArrayLength() {
 		return fLength;
 	}
@@ -53,6 +58,10 @@ public class FlowContext {
 	
 	boolean considerAccessMode() {
 		return fConsiderAccessMode;
+	}
+	
+	boolean isLoopReentranceMode() {
+		return fLoopReentranceMode;
 	}
 	
 	boolean computeArguments() {
@@ -71,6 +80,16 @@ public class FlowContext {
 		if (fLocals == null || index > fLocals.length)
 			return null;
 		return fLocals[index];
+	}
+	
+	public int getIndexFromLocal(LocalVariableBinding local) {
+		if (fLocals == null)
+			return -1;
+		for (int i= 0; i < fLocals.length; i++) {
+			if (fLocals[i] == local)
+				return i;
+		}
+		return -1;
 	}
 	
 	void manageLocal(LocalVariableBinding local) {

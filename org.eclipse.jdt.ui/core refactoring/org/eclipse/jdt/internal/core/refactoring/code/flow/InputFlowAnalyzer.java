@@ -36,6 +36,11 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		protected AstNode getLoopNode() {
 			return fLoopNode;
 		}
+		public void process(AstNode node, BlockScope scope) {
+			fFlowContext.setLoopReentranceMode(true);	
+			node.traverse(this, scope);
+			fFlowContext.setLoopReentranceMode(false);
+		}
 		public void endVisit(DoStatement node, BlockScope scope) {
 			if (skipNode(node))
 				return;
@@ -43,8 +48,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			setFlowInfo(node, info);
 			info.mergeAction(getFlowInfo(node.action), fFlowContext);
 			// No need to merge the condition. It was already considered by the InputFlowAnalyzer.
-			info.removeLabel(null);
-			
+			info.removeLabel(null);	
 		}
 		public void endVisit(ForStatement node, BlockScope scope) {
 			if (skipNode(node))
@@ -53,11 +57,11 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			FlowInfo conditionInfo= getFlowInfo(node.condition);
 			FlowInfo incrementInfo= createSequential(node.increments);
 			FlowInfo actionInfo= getFlowInfo(node.action);
+			ForFlowInfo forInfo= createFor();
+			setFlowInfo(node, forInfo);
 			// the for statement is the outermost loop. In this case we only have
 			// to consider the increment, condition and action.
 			if (node == fLoopNode) {
-				ForFlowInfo forInfo= createFor();
-				setFlowInfo(node, forInfo);
 				forInfo.mergeIncrement(incrementInfo, fFlowContext);
 				forInfo.mergeCondition(conditionInfo, fFlowContext);
 				forInfo.mergeAction(actionInfo, fFlowContext);
@@ -72,13 +76,11 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 				GenericConditionalFlowInfo initIncr= new GenericConditionalFlowInfo();
 				initIncr.merge(initInfo, fFlowContext);
 				initIncr.merge(incrementInfo, fFlowContext);
-				ForFlowInfo forInfo= createFor();
 				forInfo.mergeAccessModeSequential(initIncr, fFlowContext);
 				forInfo.mergeCondition(conditionInfo, fFlowContext);
 				forInfo.mergeAction(actionInfo, fFlowContext);
-				forInfo.removeLabel(null);
-				setFlowInfo(node, forInfo);
 			}
+			forInfo.removeLabel(null);
 		}
 	}
 	
@@ -145,8 +147,8 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	private void handleLoopReentrance(AstNode node, BlockScope scope) {
 		if (!fSelection.enclosedBy(node) || fLoopReentranceVisitor.getLoopNode() != node)
 			return;
-			
-		node.traverse(fLoopReentranceVisitor, scope);
+		
+		fLoopReentranceVisitor.process(node, scope);
 		GenericSequentialFlowInfo info= createSequential();
 		info.merge(getFlowInfo(node), fFlowContext);
 		info.merge(fLoopReentranceVisitor.getFlowInfo(node), fFlowContext);

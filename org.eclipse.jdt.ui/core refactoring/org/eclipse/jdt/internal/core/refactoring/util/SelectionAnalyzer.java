@@ -484,7 +484,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 		// XXX: 1GF089K: ITPJCORE:WIN2000 - AbstractLocalDeclaration.declarationSourceStart includes preceeding comment
 		AstNode lastNode= getLastSelectedNode();
 		int start= node.declarationSourceStart;
-		if (lastNode != null)
+		if (lastNode != null && lastNode.sourceEnd < node.declarationSourceEnd)
 			start= Math.max(start, lastNode.sourceEnd + 1);
 		int pos= fBuffer.indexOfStatementCharacter(start);		
 		node.declarationSourceStart= pos;

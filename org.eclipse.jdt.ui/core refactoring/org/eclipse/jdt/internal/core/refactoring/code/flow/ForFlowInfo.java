@@ -30,7 +30,8 @@ class ForFlowInfo extends FlowInfo {
 		if (info == null)
 			return;
 		
-		info.mergeEmptyCondition(context);
+		if (!context.isLoopReentranceMode())
+			info.mergeEmptyCondition(context);
 		
 		mergeSequential(info, context);		
 	}

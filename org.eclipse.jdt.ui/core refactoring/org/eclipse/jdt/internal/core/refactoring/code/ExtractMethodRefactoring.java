@@ -194,6 +194,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 			IMethod method= (IMethod)fCUnit.getElementAt(node.sourceStart);
 			IType type= method.getDeclaringType();
 			
+			if (type.getElementName().equals(fMethodName))
+				result.addWarning("New method name has constructor name");
+			
 //			LocalVariableAnalyzer localAnalyzer= fAnalyzer.getLocalVariableAnalyzer();
 //			String[] params= localAnalyzer.getParameterTypes();
 //		
