@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
+import org.eclipse.jdt.internal.ui.text.correction.UnimplementedMethodsCompletionProposal;
 
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	
@@ -1788,6 +1789,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -1798,6 +1801,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -1850,6 +1855,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -1860,6 +1867,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -1914,6 +1923,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -1929,6 +1940,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -1966,6 +1979,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -1975,6 +1990,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -2014,6 +2031,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -2023,6 +2042,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -2061,6 +2082,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -2070,6 +2093,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
+		if (proposal instanceof UnimplementedMethodsCompletionProposal)
+			((UnimplementedMethodsCompletionProposal) proposal).setGenerateAnnotations(false);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
