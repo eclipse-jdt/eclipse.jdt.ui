@@ -312,13 +312,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkAvailability(fMethod));
-		if (result.hasFatalError())
-			return result;
-			
-		//XXX disable for constructors  - broken. see bug 23585
-//		if (fMethod.isConstructor())
-//			return RefactoringStatus.createFatalErrorStatus("This refactoring is not implemented for constructors");
-
 		return result;
 	}
 	
@@ -917,7 +910,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private ASTNode[] findOccurrenceNodes(IProgressMonitor pm) throws JavaModelException{
-		return ASTNodeSearchUtil.findOccurrenceNodes(fRippleMethods, fAstManager, pm, createRefactoringScope());
+		if (fMethod.isConstructor())
+			return ConstructorReferenceFinder.getConstructorOccurrenceNodes(fMethod, fAstManager, pm);
+		else	
+			return ASTNodeSearchUtil.findOccurrenceNodes(fRippleMethods, fAstManager, pm, createRefactoringScope());
 	}
 	
 	private void addRenamings() throws JavaModelException {
@@ -959,20 +955,31 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private static List getArguments(ASTNode node) {
 		if (node instanceof SimpleName && node.getParent() instanceof MethodInvocation)
 			return ((MethodInvocation)node.getParent()).arguments();
+			
 		if (node instanceof SimpleName && node.getParent() instanceof SuperMethodInvocation)
 			return ((SuperMethodInvocation)node.getParent()).arguments();
+			
+		if (node instanceof SimpleName && node.getParent() instanceof ClassInstanceCreation)
+			return ((ClassInstanceCreation)node.getParent()).arguments();
+			
 		if (node instanceof ExpressionStatement && isReferenceNode(((ExpressionStatement)node).getExpression()))
 			return getArguments(((ExpressionStatement)node).getExpression());
+			
 		if (node instanceof MethodInvocation)	
 			return ((MethodInvocation)node).arguments();
+			
 		if (node instanceof SuperMethodInvocation)	
 			return ((SuperMethodInvocation)node).arguments();
+			
 		if (node instanceof ClassInstanceCreation)	
 			return ((ClassInstanceCreation)node).arguments();
+			
 		if (node instanceof ConstructorInvocation)	
 			return ((ConstructorInvocation)node).arguments();
+			
 		if (node instanceof SuperConstructorInvocation)	
 			return ((SuperConstructorInvocation)node).arguments();
+			
 		return null;	
 	}
 	
@@ -980,6 +987,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		if (node instanceof SimpleName && node.getParent() instanceof MethodInvocation)
 			return true;
 		if (node instanceof SimpleName && node.getParent() instanceof SuperMethodInvocation)
+			return true;
+		if (node instanceof SimpleName && node.getParent() instanceof ClassInstanceCreation)
 			return true;
 		if (node instanceof ExpressionStatement && isReferenceNode(((ExpressionStatement)node).getExpression()))
 			return true;
