@@ -42,9 +42,9 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
@@ -64,13 +64,17 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	private QualifiedNameFinder fQualifiedNameFinder;
 	
 	private final CodeGenerationSettings fSettings;
+	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
+	private final ICopyQueries fCopyQueries;
 	
-	public MoveRefactoring(List elements, CodeGenerationSettings settings) {
+	public MoveRefactoring(List elements, CodeGenerationSettings settings, IPackageFragmentRootManipulationQuery updateClasspathQuery, ICopyQueries copyQueries) {
 		super(elements);
 		Assert.isNotNull(settings);
 		fSettings= settings;
 		fUpdateReferences= true;
 		fQualifiedNameFinder= new QualifiedNameFinder();
+		fUpdateClasspathQuery= updateClasspathQuery;
+		fCopyQueries= copyQueries;
 	}
 		
 	/* non java-doc
@@ -504,21 +508,15 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 		if (dest instanceof IPackageFragment)
 			return new MoveCompilationUnitChange(cu, (IPackageFragment)dest);
 		Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
-		return new MoveResourceChange(ResourceUtil.getResource(cu), (IContainer)dest);
+		return new MoveResourceChange(ResourceUtil.getResource(cu), (IContainer)dest, fCopyQueries.getDeepCopyQuery());
 	}
 
 	/*
 	 * @see ReorgRefactoring#createChange(IPackageFragmentRoot)
 	 */
 	IChange createChange(IProgressMonitor pm, IPackageFragmentRoot root) throws JavaModelException{
-		IResource res= root.getResource();
-		IProject project= getDestinationForSourceFolders(getDestination());
-		IJavaProject javaProject= JavaCore.create(project);
-		CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.move_source_folder"), 2); //$NON-NLS-1$
-		result.add(new MoveResourceChange(res, project));
-		if (javaProject != null)
-			result.add(new AddToClasspathChange(javaProject, root.getElementName()));
-		return result;
+		IProject destinationProject= getDestinationForSourceFolders(getDestination());
+		return new MovePackageFragmentRootChange(root, destinationProject, fUpdateClasspathQuery, fCopyQueries.getDeepCopyQuery());
 	}
 
 	/*
@@ -532,7 +530,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	 * @see ReorgRefactoring#createChange(IResource)
 	 */	
 	IChange createChange(IProgressMonitor pm, IResource res) throws JavaModelException{
-		return new MoveResourceChange(res, getDestinationForResources(getDestination()));
+		return new MoveResourceChange(res, getDestinationForResources(getDestination()), fCopyQueries.getDeepCopyQuery());
 	}
 	
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {

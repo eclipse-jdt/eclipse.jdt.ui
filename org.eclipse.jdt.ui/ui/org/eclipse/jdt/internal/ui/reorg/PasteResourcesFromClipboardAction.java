@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -29,6 +30,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 
 public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 
@@ -128,7 +130,7 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		if (! allResourcesExist(resourceData))
 			return false;
 			
-		return canActivateCopyRefactoring(resourceData, ClipboardActionUtil.getFirstResource(selection));
+		return canActivateCopyRefactoring(getShell(), resourceData, ClipboardActionUtil.getFirstResource(selection));
 	}
 	
     private static boolean allResourcesExist(IResource[] resourceData) {
@@ -166,9 +168,9 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		return false;	
     }
 
-	private static boolean canActivateCopyRefactoring(IResource[] resourceData, IResource selectedResource) {
+	private static boolean canActivateCopyRefactoring(Shell shell, IResource[] resourceData, IResource selectedResource) {
 		try{
-			CopyRefactoring ref= createCopyRefactoring(resourceData);
+			CopyRefactoring ref= createCopyRefactoring(shell, resourceData);
 			if (! ref.checkActivation(new NullProgressMonitor()).isOK())
 				return false;
 
@@ -197,7 +199,8 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		return ((TypedSource[])fClipboard.getContents(TypedSourceTransfer.getInstance()));
 	}
 
-	private static CopyRefactoring createCopyRefactoring(IResource[] resourceData) {
-		return new CopyRefactoring(ClipboardActionUtil.getConvertedResources(resourceData), new CopyQueries());
+	private static CopyRefactoring createCopyRefactoring(Shell shell, IResource[] resourceData) {
+		IPackageFragmentRootManipulationQuery query= JdtCopyAction.createUpdateClasspathQuery(shell);
+		return new CopyRefactoring(ClipboardActionUtil.getConvertedResources(resourceData), new CopyQueries(), query);
 	}
 }

@@ -2,12 +2,15 @@ package org.eclipse.jdt.internal.ui.reorg;
 
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.CopyProjectAction;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -18,7 +21,7 @@ public class JdtCopyAction extends ReorgDestinationAction {
 	}
 
 	ReorgRefactoring createRefactoring(List elements){
-		return new CopyRefactoring(elements, new CopyQueries());
+		return new CopyRefactoring(elements, new CopyQueries(), createUpdateClasspathQuery(getShell()));
 	}
 	
 	String getActionName() {
@@ -41,7 +44,7 @@ public class JdtCopyAction extends ReorgDestinationAction {
 			return super.canOperateOn(selection);
 	}
 	
-	protected  void run(IStructuredSelection selection) {
+	protected void run(IStructuredSelection selection) {
 		if (ClipboardActionUtil.hasOnlyProjects(selection)){
 			copyProject(selection);
 		}	else {
@@ -55,4 +58,9 @@ public class JdtCopyAction extends ReorgDestinationAction {
 		action.run();
 	}
 
+	public static IPackageFragmentRootManipulationQuery createUpdateClasspathQuery(Shell shell){
+		String messagePattern= "Package fragment root ''{0}'' is referenced by other projects." +
+			"Do you want to update classpath of the other projects?";
+		return new PackageFragmentRootManipulationQuery(shell, "Copy", messagePattern);
+	}
 }

@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
@@ -135,7 +136,8 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	 * see @ReorgDestinationAction#createRefactoring
 	 */
 	ReorgRefactoring createRefactoring(List elements){
-		return new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings());
+		IPackageFragmentRootManipulationQuery query= createUpdateClasspathQuery(getShell());
+		return new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), query, new CopyQueries());
 	}
 	
 	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){
@@ -146,7 +148,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	 * see @ReorgDestinationAction#isOkToProceed
 	 */
 	protected boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException{
-		return (isOkToMoveReadOnly(refactoring));
+		return isOkToMoveReadOnly(refactoring);
 	}
 	
 	protected void setShowPreview(boolean showPreview) {
@@ -353,5 +355,10 @@ public class JdtMoveAction extends ReorgDestinationAction {
 			}
 			return result;
 		}			
+	}
+	
+	public static IPackageFragmentRootManipulationQuery createUpdateClasspathQuery(Shell shell){
+		String messagePattern= "Package fragment root ''{0}'' is referenced by other projects." +			"Do you want to update classpath of the other projects?";
+		return new PackageFragmentRootManipulationQuery(shell, "Move", messagePattern);
 	}
 }

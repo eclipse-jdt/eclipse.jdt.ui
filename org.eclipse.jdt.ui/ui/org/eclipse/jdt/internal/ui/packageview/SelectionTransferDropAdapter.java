@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
 import org.eclipse.jdt.internal.ui.reorg.CopyQueries;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
+import org.eclipse.jdt.internal.ui.reorg.JdtCopyAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
@@ -203,7 +205,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		}	
 		
 		if (fMoveRefactoring == null){
-			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			IPackageFragmentRootManipulationQuery query= JdtMoveAction.createUpdateClasspathQuery(getViewer().getControl().getShell());
+			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings(), query, new CopyQueries());
 		}	
 		
 		if (!canMoveElements())
@@ -270,8 +273,10 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (canPasteSourceReferences(target))
 			return DND.DROP_COPY;
 		
-		if (fCopyRefactoring == null)
-			fCopyRefactoring= new CopyRefactoring(fElements, new CopyQueries());
+		if (fCopyRefactoring == null){
+			IPackageFragmentRootManipulationQuery query= JdtCopyAction.createUpdateClasspathQuery(getViewer().getControl().getShell());
+			fCopyRefactoring= new CopyRefactoring(fElements, new CopyQueries(), query);
+		}
 		
 		if (!canCopyElements())
 			return DND.DROP_NONE;	
