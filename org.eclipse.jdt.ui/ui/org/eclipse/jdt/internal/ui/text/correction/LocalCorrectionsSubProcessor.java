@@ -302,9 +302,13 @@ public class LocalCorrectionsSubProcessor {
 			} else if (selectedNode instanceof ReturnStatement) {
 				ReturnStatement returnStatement= (ReturnStatement) selectedNode;
 				if (returnStatement.getExpression() == null) {
-					ReturnStatement modified= (ReturnStatement) ASTNode.copySubtree(returnStatement.getAST(), returnStatement);
-					modified.setExpression(ASTResolving.getNullExpression(methodDecl.getReturnType()));
-					ASTRewriteAnalyzer.markAsModified(returnStatement, modified);
+					Expression expression= ASTResolving.getNullExpression(methodDecl.getReturnType());
+					returnStatement.setExpression(expression);
+					ASTRewriteAnalyzer.markAsInserted(expression);
+					
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Change return statement", cu, astRoot, 10, image);
+					proposals.add(proposal);
 				}
 			}
 		}

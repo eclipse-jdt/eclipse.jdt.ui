@@ -254,10 +254,10 @@ public class ASTResolving {
 		return scanner;
 	}
 	
-	public static Expression getNullExpression(Type returnType) {
-		AST ast= returnType.getAST();
-		if (returnType.isPrimitiveType()) {
-			ITypeBinding binding= returnType.resolveBinding();
+	public static Expression getNullExpression(Type type) {
+		AST ast= type.getAST();
+		if (type.isPrimitiveType()) {
+			ITypeBinding binding= type.resolveBinding();
 			if (ast.resolveWellKnownType("boolean").equals(binding)) {
 				return ast.newBooleanLiteral(false);
 			} else {
@@ -265,6 +265,8 @@ public class ASTResolving {
 			}
 		}
 		return ast.newNullLiteral();
-	}	
+	}
+	
+	
 
 }

@@ -17,14 +17,6 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	private CompilationUnit fAstRoot;
 
-	/**
-	 * Constructor for ASTChangeProposal.
-	 * @param name
-	 * @param cu
-	 * @param relevance
-	 * @param image
-	 * @throws CoreException
-	 */
 	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, CompilationUnit astRoot, int relevance, Image image) throws CoreException {
 		super(name, cu, relevance, image);
 		fAstRoot= astRoot;

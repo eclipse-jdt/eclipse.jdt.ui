@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -81,7 +82,7 @@ public class ASTRewritingTest extends TestCase {
 		buf.append("    public Object goo() {\n");
 		buf.append("        return new Integer(3);\n");
 		buf.append("    }\n");
-		buf.append("    public void hoo() {\n");
+		buf.append("    public void hoo(int p1, Object p2) {\n");
 		buf.append("        return;\n");
 		buf.append("    }\n");		
 		buf.append("}\n");	
@@ -183,7 +184,7 @@ public class ASTRewritingTest extends TestCase {
 			buf.append("    public Object goo() {\n");
 			buf.append("        return new Integer(3);\n");
 			buf.append("    }\n");
-			buf.append("    public void hoo() {\n");
+			buf.append("    public void hoo(int p1, Object p2) {\n");
 			buf.append("        return false;\n");
 			buf.append("    }\n");		
 			buf.append("}\n");	
@@ -248,7 +249,7 @@ public class ASTRewritingTest extends TestCase {
 			buf.append("    public Object goo() {\n");
 			buf.append("        return;\n");
 			buf.append("    }\n");
-			buf.append("    public void hoo() {\n");
+			buf.append("    public void hoo(int p1, Object p2) {\n");
 			buf.append("        return;\n");
 			buf.append("    }\n");		
 			buf.append("}\n");	
@@ -316,13 +317,90 @@ public class ASTRewritingTest extends TestCase {
 			buf.append("    public Object goo() {\n");
 			buf.append("        return null;\n");
 			buf.append("    }\n");
-			buf.append("    public void hoo() {\n");
+			buf.append("    public void hoo(int p1, Object p2) {\n");
 			buf.append("        return;\n");
 			buf.append("    }\n");		
 			buf.append("}\n");	
 			
 			assertEqualString(cu.getSource(), buf.toString());
 		}
-	}	
+	}
+	
+	
+	public void testMethodDeclChanges() throws Exception {
+		{	/* foo(): change return type */
+			ICompilationUnit cu= fCU_C;
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+			
+			MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "foo");
+			
+			Type returnType= methodDecl.getReturnType();
+			Type newReturnType= astRoot.getAST().newPrimitiveType(PrimitiveType.FLOAT);
+			
+			ASTRewriteAnalyzer.markAsReplaced(returnType, newReturnType);
+					
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+			proposal.getCompilationUnitChange().setSave(true);
+			
+			proposal.apply(null);
+			
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class C {\n");
+			buf.append("    public float foo() {\n");
+			buf.append("        if (this.equals(new Object())) {\n");
+			buf.append("            toString();\n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+				
+			assertEqualString(cu.getSource(), buf.toString());
+		}
+		{	/* goo(): change method name */
+			ICompilationUnit cu= fCU_D;
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+			AST ast= astRoot.getAST();
+			
+			{
+				MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "goo");
+				
+				SimpleName name= methodDecl.getName();
+				SimpleName newName= ast.newSimpleName("xii");
+				
+				ASTRewriteAnalyzer.markAsReplaced(name, newName);
+			}
+			{
+				MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "hoo");
+				List parameters= methodDecl.parameters();
+				assertTrue("no parameters", !parameters.isEmpty());
+				
+				ASTNode firstParam= (ASTNode) parameters.get(0);
+				SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
+				newParam.setType(ast.newPrimitiveType(PrimitiveType.FLOAT));
+				newParam.setName(ast.newSimpleName("m"));
+				
+				ASTRewriteAnalyzer.markAsReplaced(firstParam, newParam);
+			}
+			
+					
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+			proposal.getCompilationUnitChange().setSave(true);
+			
+			proposal.apply(null);
+			
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class D {\n");
+			buf.append("    public Object xii() {\n");
+			buf.append("        return new Integer(3);\n");
+			buf.append("    }\n");
+			buf.append("    public void hoo(float m, Object p2) {\n");
+			buf.append("        return;\n");
+			buf.append("    }\n");		
+			buf.append("}\n");
+				
+			assertEqualString(cu.getSource(), buf.toString());
+		}
+	}
 	
 }
