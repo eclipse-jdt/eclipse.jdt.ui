@@ -171,23 +171,15 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			// cancelled by user
 			return CANCEL;
 		}
-
-		// #6385 workaround: filter out anonymous (!) classes
-		List filteredList= new ArrayList(typeList.size());
-		for (Iterator iterator = typeList.iterator(); iterator.hasNext();) {
-            TypeInfo info = (TypeInfo) iterator.next();
-            if (info.getTypeName().length() != 0)
-	            filteredList.add(info);
-        }
 		
-		if (filteredList.isEmpty()) {
+		if (typeList.isEmpty()) {
 			String title= JavaUIMessages.getString("TypeSelectionDialog.notypes.title"); //$NON-NLS-1$
 			String message= JavaUIMessages.getString("TypeSelectionDialog.notypes.message"); //$NON-NLS-1$
 			MessageDialog.openInformation(getShell(), title, message);
 			return CANCEL;
 		}
 			
-		TypeInfo[] typeRefs= (TypeInfo[])filteredList.toArray(new TypeInfo[filteredList.size()]);
+		TypeInfo[] typeRefs= (TypeInfo[])typeList.toArray(new TypeInfo[typeList.size()]);
 		setElements(typeRefs);
 
 		return super.open();
