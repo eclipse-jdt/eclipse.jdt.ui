@@ -170,6 +170,10 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 		}	
 	}
 	
+	public RefactoringStatus getStatus() {
+		return fStatus;
+	}
+	
 	/**
 	 * Returns a viewer used to show a context for the given status entry. The returned viewer
 	 * is kept referenced until the wizard page gets disposed. So it is up to the implementor of this

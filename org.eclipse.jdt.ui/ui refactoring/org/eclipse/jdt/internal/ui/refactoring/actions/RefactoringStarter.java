@@ -6,14 +6,6 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.util.Arrays;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,6 +24,15 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.GlobalBuildAction;
 
@@ -44,6 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
@@ -52,6 +54,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog2;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
@@ -69,7 +72,11 @@ public class RefactoringStarter {
 		RefactoringStatus activationStatus= refactoring.checkActivation(new NullProgressMonitor());
 		if (! activationStatus.hasFatalError()){
 			wizard.setActivationStatus(activationStatus);
-			RefactoringWizardDialog dialog= new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
+			Dialog dialog;
+			if (RefactoringPreferences.useWizardUI())
+				dialog= new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
+			else 
+				dialog= new RefactoringWizardDialog2(JavaPlugin.getActiveWorkbenchShell(), wizard);
 			if (dialog.open() == Dialog.CANCEL)
 				triggerBuild();
 			return null;	

@@ -167,20 +167,9 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			return;
 		
 		fChange= change;	
-		ChangeElement input;
-		
-		if (fChange == null) {
-			input= null;
-		} else if (fChange instanceof ICompositeChange && !(fChange instanceof TextChange)) {
-			input= new DefaultChangeElement(null, fChange);
-		} else {
-			input= new DefaultChangeElement(null, new DummyRootNode(fChange));
-		}
-		if (fTreeViewer != null) {
-			fTreeViewer.setInput(input);
-		}
+		setTreeViewerInput();
 	}
-	
+
 	/**
 	 * Creates the tree viewer to present the hierarchy of changes. Subclasses may override
 	 * to create their own custom tree viewer.
@@ -353,6 +342,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		fTreeViewer.addSelectionChangedListener(createSelectionChangedListener());
 		fTreeViewer.addCheckStateListener(createCheckStateListener());
 		pane.setContent(fTreeViewer.getControl());
+		setTreeViewerInput();
 		
 		fPreviewContainer= new PageBook(sashForm, SWT.NONE);
 		fComparePreview= new ComparePreviewer(fPreviewContainer);
@@ -393,6 +383,20 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		}
 		super.setVisible(visible);
 		fTreeViewer.getControl().setFocus();
+	}
+	
+	private void setTreeViewerInput() {
+		ChangeElement input;
+		if (fChange == null) {
+			input= null;
+		} else if (fChange instanceof ICompositeChange && !(fChange instanceof TextChange)) {
+			input= new DefaultChangeElement(null, fChange);
+		} else {
+			input= new DefaultChangeElement(null, new DummyRootNode(fChange));
+		}
+		if (fTreeViewer != null) {
+			fTreeViewer.setInput(input);
+		}
 	}
 	
 	private ICheckStateListener createCheckStateListener() {

@@ -8,6 +8,7 @@ package org.eclipse.jdt.internal.ui.refactoring.changes;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -23,11 +24,17 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
  */
 public class ChangeExceptionHandler implements IChangeExceptionHandler {
 	
+	private Shell fParent;
+	
+	public ChangeExceptionHandler(Shell parent) {
+		Assert.isNotNull(parent);
+		fParent= parent;
+	}
+	
 	public void handle(ChangeContext context, IChange change, Exception e) {
 		JavaPlugin.log(e);
 		
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		final MessageDialog dialog= new MessageDialog(parent,
+		final MessageDialog dialog= new MessageDialog(fParent,
 			RefactoringMessages.getString("ChangeExceptionHandler.refactoring"), null, //$NON-NLS-1$
 			RefactoringMessages.getFormattedString("ChangeExceptionHandler.unexpected_exception", new String[] {change.getName(), e.getMessage()}), //$NON-NLS-1$
 			MessageDialog.ERROR, new String[] { RefactoringMessages.getString("ChangeExceptionHandler.undo"), RefactoringMessages.getString("ChangeExceptionHandler.abort")}, 1); //$NON-NLS-2$ //$NON-NLS-1$
@@ -37,7 +44,7 @@ public class ChangeExceptionHandler implements IChangeExceptionHandler {
 				result[0]= dialog.open();
 			}
 		};
-		parent.getDisplay().syncExec(runnable);
+		fParent.getDisplay().syncExec(runnable);
 		switch(result[0]) {
 			case 0:
 				context.setTryToUndo();

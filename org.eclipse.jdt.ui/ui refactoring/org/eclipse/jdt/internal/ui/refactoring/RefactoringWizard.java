@@ -334,7 +334,7 @@ public class RefactoringWizard extends Wizard {
 	}
 
 	public boolean performFinish(PerformChangeOperation op) {
-		ChangeContext context= new ChangeContext(new ChangeExceptionHandler());
+		ChangeContext context= new ChangeContext(new ChangeExceptionHandler(getContainer().getShell()));
 		boolean success= false;
 		IUndoManager undoManager= Refactoring.getUndoManager();
 		try{

@@ -14,6 +14,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
@@ -28,7 +30,8 @@ class PerformRefactoringUtil {
 	}
 
 	public static boolean performRefactoring(PerformChangeOperation op, Refactoring refactoring) {
-		ChangeContext context= new ChangeContext(new ChangeExceptionHandler());
+		ChangeContext context= new ChangeContext(new ChangeExceptionHandler(
+			JavaPlugin.getActiveWorkbenchShell()));
 		boolean success= false;
 		IUndoManager undoManager= Refactoring.getUndoManager();
 		try{

@@ -26,6 +26,18 @@ public class RefactoringPreferences {
 		}
 	}
 	
+	public static int getStopSeverity() {
+		switch (getCheckPassedSeverity()) {
+			case RefactoringStatus.OK:
+				return RefactoringStatus.INFO;
+			case RefactoringStatus.INFO:
+				return RefactoringStatus.WARNING;
+			case RefactoringStatus.WARNING:
+				return RefactoringStatus.ERROR;
+		}
+		return RefactoringStatus.FATAL;
+	}
+	
 	public static boolean getSaveAllEditors() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(PREF_SAVE_ALL_EDITORS);
@@ -34,5 +46,13 @@ public class RefactoringPreferences {
 	public static void setSaveAllEditors(boolean save) {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(RefactoringPreferences.PREF_SAVE_ALL_EDITORS, save);
+	}
+	
+	public static boolean useWizardUI() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		String value= store.getString("RefactoringUI");
+		if (value == null || value.equals("wizard"))
+			return true;
+		return false;
 	}
 }

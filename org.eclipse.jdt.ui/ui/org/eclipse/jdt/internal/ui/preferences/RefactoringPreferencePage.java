@@ -45,10 +45,11 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	public void createFieldEditors() {
     	addField(createSeverityLevelField(getFieldEditorParent()));
     	addField(createSaveAllField(getFieldEditorParent()));
+    	addField(createUIField(getFieldEditorParent()));
     }
 	
-	private FieldEditor createSeverityLevelField(Composite parent){
-			RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
+	private FieldEditor createSeverityLevelField(Composite parent) {
+		RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
 			RefactoringPreferences.PREF_ERROR_PAGE_SEVERITY_THRESHOLD,
 			RefactoringMessages.getString("RefactoringPreferencePage.show_error_page"), //$NON-NLS-1$
 			1,
@@ -63,13 +64,27 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 		return editor;	
 	}
 	
-	private FieldEditor createSaveAllField(Composite parent){
+	private FieldEditor createSaveAllField(Composite parent) {
 		BooleanFieldEditor editor= new BooleanFieldEditor(
 		RefactoringPreferences.PREF_SAVE_ALL_EDITORS,
 			RefactoringMessages.getString("RefactoringPreferencePage.auto_save"), //$NON-NLS-1$
 			BooleanFieldEditor.DEFAULT,
 			parent);
 		return editor;
+	}
+	
+	private FieldEditor createUIField(Composite parent) {
+		RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
+			"RefactoringUI",
+			"User Interface mode",
+			1,
+			new String[] [] {
+				{ "Wizard based user interface", "wizard" }, 
+				{ "Dialog based user interface (new)", "dialog" }, 
+			},
+			parent, true
+			);
+		return editor;	
 	}
 	
 	public void init(IWorkbench workbench) {

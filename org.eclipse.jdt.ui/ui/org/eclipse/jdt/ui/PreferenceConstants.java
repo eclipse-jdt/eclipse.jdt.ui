@@ -726,7 +726,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 */
 	public final static String EDITOR_CLOSE_BRACKETS= "closeBrackets"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference that controls whether the 'close braces' feature is
 	 * enabled.
@@ -1536,7 +1536,8 @@ public class PreferenceConstants {
 		
 		// RefactoringPreferencePage
 		store.setDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, PreferenceConstants.REFACTOR_ERROR_SEVERITY);
-		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);		
+		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);
+		store.setDefault("RefactoringUI", "dialog");		
 
 		// TemplatePreferencePage
 		store.setDefault(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER, true);

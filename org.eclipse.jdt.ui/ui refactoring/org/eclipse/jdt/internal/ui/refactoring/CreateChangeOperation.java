@@ -139,6 +139,11 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 		return fStyle;
 	}
 	
+	public void setConditionCheckingStyle(int style) {
+		Assert.isTrue(checkStyle(style));
+		fStyle= style;
+	}
+	
 	private boolean checkStyle(int style) {
 		return style < LAST;
 	}

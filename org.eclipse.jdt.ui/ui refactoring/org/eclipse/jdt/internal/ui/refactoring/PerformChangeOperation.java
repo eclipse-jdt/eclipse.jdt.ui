@@ -79,6 +79,10 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 	public IChange getChange() {
 		return fChange;
 	}
+	
+	public RefactoringStatus getStatus() {
+		return fCreateChangeOperation != null ? fCreateChangeOperation.getStatus() : null;
+	}
 	 
 	/**
 	 * Sets the check passed severity value. This value is used to deceide whether the 
