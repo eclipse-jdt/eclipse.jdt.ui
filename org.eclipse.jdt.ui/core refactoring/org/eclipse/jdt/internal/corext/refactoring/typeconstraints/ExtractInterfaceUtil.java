@@ -228,7 +228,7 @@ public final class ExtractInterfaceUtil {
 		Set result= new HashSet();
 		for (int i= 0; i < referringCus.length; i++) {
 			ICompilationUnit unit= referringCus[i];
-			ConstraintCollector collector= new ConstraintCollector();
+			ConstraintCollector collector= new ConstraintCollector(new ExtractInterfaceConstraintCreator());
 			astManager.getAST(unit).accept(collector);
 			result.addAll(Arrays.asList(collector.getConstraints()));
 		}
