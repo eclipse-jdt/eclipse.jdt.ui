@@ -62,10 +62,10 @@ public final class StubUtility2 {
 		Assert.isNotNull(bindings);
 		Assert.isTrue(bindings.length == 2);
 		Assert.isTrue(bindings[0] instanceof IVariableBinding);
-		Assert.isTrue(bindings[0] instanceof IMethodBinding);
+		Assert.isTrue(bindings[1] instanceof IMethodBinding);
 
 		IVariableBinding variableBinding= (IVariableBinding) bindings[0];
-		IMethodBinding methodBinding= (IMethodBinding) bindings[0];
+		IMethodBinding methodBinding= (IMethodBinding) bindings[1];
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, methodBinding.getModifiers() & ~Modifier.ABSTRACT));
@@ -96,7 +96,17 @@ public final class StubUtility2 {
 		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), methodBinding);
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			var.setType(imports.addImport(params[i], ast));
+			final ITypeBinding variableType= variableBinding.getType();
+			if (params[i].isWildcardType()) {
+				ITypeBinding bound= params[i].getBound();
+				if (bound != null)
+					var.setType(imports.addImport(bound, ast));
+				else
+					var.setType(ast.newSimpleType(ast.newSimpleName("Object"))); //$NON-NLS-1$
+			} else if (variableType.isTypeVariable()) {
+				var.setType(ast.newSimpleType(ast.newSimpleName(variableType.getName())));
+			} else
+				var.setType(imports.addImport(params[i], ast));
 			var.setName(ast.newSimpleName(paramNames[i]));
 			parameters.add(var);
 		}
@@ -116,6 +126,7 @@ public final class StubUtility2 {
 		String bodyStatement= ""; //$NON-NLS-1$
 		Statement statement= null;
 		MethodInvocation invocation= ast.newMethodInvocation();
+		invocation.setName(ast.newSimpleName(methodBinding.getName()));
 		List arguments= invocation.arguments();
 		for (int i= 0; i < params.length; i++)
 			arguments.add(ast.newSimpleName(paramNames[i]));
@@ -360,18 +371,39 @@ public final class StubUtility2 {
 				if (typeBinding.isTypeVariable()) {
 					ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
 					for (int offset= 0; offset < typeBounds.length; offset++) {
-						IBinding[][] tuples= getDelegatableMethods(typeBounds[offset]);
-						for (int tuple= 0; tuple < tuples.length; tuple++)
-							allTuples.add(tuples[tuple]);
+						IMethodBinding[] candidates= getDelegateCandidates(typeBounds[offset]);
+						for (int candidate= 0; candidate < candidates.length; candidate++)
+							allTuples.add(new IBinding[] { fieldBinding, candidates[candidate]});
+					}
+				} else if (typeBinding.isParameterizedType()) {
+					ITypeBinding[] typeArguments= typeBinding.getTypeArguments();
+					for (int argument= 0; argument < typeArguments.length; argument++) {
+						ITypeBinding typeArgument= typeArguments[argument];
+						if (typeArgument.isWildcardType() && typeArgument.getBound() != null && !typeArgument.isUpperbound()) {
+							IMethodBinding[] candidates= getDelegateCandidates(typeArgument.getBound());
+							for (int candidate= 0; candidate < candidates.length; candidate++)
+								allTuples.add(new IBinding[] { fieldBinding, candidates[candidate]});
+						} else if (typeArgument.isTypeVariable()) {
+							ITypeBinding[] typeBounds= typeArgument.getTypeBounds();
+							for (int bound= 0; bound < typeBounds.length; bound++) {
+								IMethodBinding[] candidates= getDelegateCandidates(typeBounds[bound]);
+								for (int candidate= 0; candidate < candidates.length; candidate++)
+									allTuples.add(new IBinding[] { fieldBinding, candidates[candidate]});
+							}
+						} else {
+							IMethodBinding[] candidates= getDelegateCandidates(typeArgument);
+							for (int candidate= 0; candidate < candidates.length; candidate++)
+								allTuples.add(new IBinding[] { fieldBinding, candidates[candidate]});
+						}
 					}
 				} else {
 					IMethodBinding[] candidates= getDelegateCandidates(typeBinding);
-					for (int offset= 0; offset < candidates.length; offset++)
-						allTuples.add(new IBinding[] { fieldBinding, candidates[offset]});
+					for (int candidate= 0; candidate < candidates.length; candidate++)
+						allTuples.add(new IBinding[] { fieldBinding, candidates[candidate]});
 				}
 			}
 		}
-		// Array of tuple<IVariableBinding, IMethodBinding>
+		// list of tuple<IVariableBinding, IMethodBinding>
 		return (IBinding[][]) allTuples.toArray(new IBinding[allTuples.size()][2]);
 	}
 
@@ -380,7 +412,8 @@ public final class StubUtility2 {
 		boolean isInterface= binding.isInterface();
 		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
 		for (int index= 0; index < typeMethods.length; index++) {
-			if (!typeMethods[index].isConstructor() && !Modifier.isFinal((typeMethods[index].getModifiers())) && (isInterface || Modifier.isPublic(typeMethods[index].getModifiers())))
+			final int modifiers= typeMethods[index].getModifiers();
+			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isNative(modifiers) && !Modifier.isFinal((modifiers)) && (isInterface || Modifier.isPublic(modifiers)))
 				allMethods.add(typeMethods[index]);
 		}
 		return (IMethodBinding[]) allMethods.toArray(new IMethodBinding[allMethods.size()]);
@@ -390,14 +423,16 @@ public final class StubUtility2 {
 		List allMethods= new ArrayList();
 		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
 		for (int index= 0; index < typeMethods.length; index++) {
-			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(typeMethods[index].getModifiers()) && !Modifier.isPrivate(typeMethods[index].getModifiers()))
+			final int modifiers= typeMethods[index].getModifiers();
+			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers))
 				allMethods.add(typeMethods[index]);
 		}
 		ITypeBinding clazz= typeBinding.getSuperclass();
 		while (clazz != null) {
 			IMethodBinding[] methods= clazz.getDeclaredMethods();
 			for (int offset= 0; offset < methods.length; offset++) {
-				if (!methods[offset].isConstructor() && !Modifier.isStatic(methods[offset].getModifiers()) && !Modifier.isPrivate(methods[offset].getModifiers())) {
+				final int modifiers= methods[offset].getModifiers();
+				if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
 					if (findOverridingMethod(methods[offset], allMethods) == null)
 						allMethods.add(methods[offset]);
 				}
@@ -410,8 +445,9 @@ public final class StubUtility2 {
 			for (int index= 0; index < superInterfaces.length; index++) {
 				IMethodBinding[] methods= superInterfaces[index].getDeclaredMethods();
 				for (int offset= 0; offset < methods.length; offset++) {
-					if (!methods[offset].isConstructor() && !Modifier.isStatic(methods[offset].getModifiers()) && !Modifier.isPrivate(methods[offset].getModifiers())) {
-						if (findOverridingMethod(methods[offset], allMethods) == null && !Modifier.isStatic(methods[offset].getModifiers()))
+					final int modifiers= methods[offset].getModifiers();
+					if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
+						if (findOverridingMethod(methods[offset], allMethods) == null && !Modifier.isStatic(modifiers))
 							allMethods.add(methods[offset]);
 					}
 				}
