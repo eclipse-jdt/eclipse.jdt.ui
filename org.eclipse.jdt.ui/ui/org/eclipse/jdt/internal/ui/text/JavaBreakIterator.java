@@ -18,7 +18,7 @@ import org.eclipse.jface.text.Assert;
 
 /**
  * A java break iterator. It returns all breaks, including before and after 
- * whitespace, and it returns all camelcase breaks.
+ * whitespace, and it returns all camel case breaks.
  * <p>
  * A line break may be any of "\n", "\r", "\r\n", "\n\r".
  * </p>
@@ -253,7 +253,7 @@ public class JavaBreakIterator extends BreakIterator {
 	 * @see java.text.BreakIterator#following(int)
 	 */
 	public int following(int offset) {
-		// work around too eager IAEs in standard impl
+		// work around too eager IAEs in standard implementation
 		if (offset == getText().getEndIndex())
 			return DONE;
 		
@@ -263,7 +263,7 @@ public class JavaBreakIterator extends BreakIterator {
 		
 		// TODO deal with complex script word boundaries
 		// Math.min(offset + run.length, next) does not work
-		// since wordinstance considers _ as boundaries
+		// since BreakIterator.getWordInstance considers _ as boundaries
 		// seems to work fine, however
 		Run run= consumeRun(offset);
 		return offset + run.length;
@@ -290,7 +290,7 @@ public class JavaBreakIterator extends BreakIterator {
 	}
 
 	/**
-	 * Retunrs a run based on a character.
+	 * Returns a run based on a character.
 	 * 
 	 * @param ch the character to test
 	 * @return the correct character given <code>ch</code>
