@@ -1023,7 +1023,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			IMethod method= null;
 			for (int index= 0; index < methods.length; index++) {
 				method= methods[index];
-				if (method.getElementName().equals(fMethodName))
+				if (method.getElementName().equals(fMethodName) && method.getParameterTypes().length == fMethod.getParameterTypes().length - 1)
 					status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.method.already.exists", new String[] { fMethodName, fTargetType.getElementName()}), JavaStatusContext.create(method))); //$NON-NLS-1$
 				monitor.worked(1);
 			}
@@ -1359,7 +1359,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				ITypeBinding binding= null;
 				for (int index= 0; index < bindings.length; index++) {
 					binding= bindings[index].getType();
-					if ((binding.isClass() || binding.isEnum()) && binding.isFromSource() && !Bindings.equals(declaring, binding)) {
+					if ((binding.isClass() || binding.isEnum()) && binding.isFromSource()) {
 						possibleTargets.add(bindings[index]);
 						candidateTargets.add(bindings[index]);
 					}
@@ -1369,13 +1369,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				bindings= visitor.getReadOnlyFields();
 				for (int index= 0; index < bindings.length; index++) {
 					binding= bindings[index].getType();
-					if (binding.isClass() && binding.isFromSource() && !Bindings.equals(declaring, binding))
+					if (binding.isClass() && binding.isFromSource())
 						possibleTargets.add(bindings[index]);
 				}
 				bindings= visitor.getDeclaredFields();
 				for (int index= 0; index < bindings.length; index++) {
 					binding= bindings[index].getType();
-					if (binding.isClass() && binding.isFromSource() && !Bindings.equals(declaring, binding))
+					if (binding.isClass() && binding.isFromSource())
 						candidateTargets.add(bindings[index]);
 				}
 			}
