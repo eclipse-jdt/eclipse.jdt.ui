@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.corext.util;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -22,9 +20,21 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -625,28 +635,13 @@ public class JavaModelUtil {
 	}
 
 	public static IType[] getAllSuperTypes(IType type, IProgressMonitor pm) throws JavaModelException {
-		//workaround for bugs 23644 and 23656
-		try{
-			pm.beginTask("", 3); //$NON-NLS-1$
-			ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1));
-			
-			IProgressMonitor subPm= new SubProgressMonitor(pm, 2);
-			List typeList= Arrays.asList(hierarchy.getAllSupertypes(type));
-			subPm.beginTask("", typeList.size()); //$NON-NLS-1$
-			Set types= new HashSet(typeList);
-			for (Iterator iter= typeList.iterator(); iter.hasNext();) {
-				IType superType= (IType)iter.next();
-				IType[] superTypes= getAllSuperTypes(superType, new SubProgressMonitor(subPm, 1));
-				types.addAll(Arrays.asList(superTypes));
-			}
-			types.add(type.getJavaProject().findType("java.lang.Object"));//$NON-NLS-1$
-			subPm.done();
-			return (IType[]) types.toArray(new IType[types.size()]);
-		} finally {
-			pm.done();
-		}	
+		//workaround for 23656
+		Set types= new HashSet(Arrays.asList(type.newSupertypeHierarchy(pm).getAllSupertypes(type)));
+		IType objekt= type.getJavaProject().findType("java.lang.Object");//$NON-NLS-1$
+		if (objekt != null)
+			types.add(objekt);
+		return (IType[]) types.toArray(new IType[types.size()]);
 	}
-	
 	
 	public static boolean isExcludedPath(IPath resourcePath, IPath[] exclusionPatterns) {
 		char[] path = resourcePath.toString().toCharArray();
