@@ -16,9 +16,11 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -40,8 +42,13 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
@@ -82,6 +89,8 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
 import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor.BracketHighlighter.BracketPositionManager;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor.BracketHighlighter.HighlightBrackets;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
 /**
@@ -89,135 +98,244 @@ import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
  */
 public class CompilationUnitEditor extends JavaEditor {
 	
+	
 	/**
 	 * Responsible for highlighting matching pairs of brackets.
 	 */
 	class BracketHighlighter implements KeyListener, MouseListener {		
 		
 		/**
-		 * Closure to be posted into the event queue to highlight brackets.
+		 * Highlights the brackets.
 		 */
-		class HighlightBrackets implements Runnable {
+		class HighlightBrackets implements PaintListener {
+						
+			private boolean fHooked= false;
+			private JavaPairMatcher fMatcher= new JavaPairMatcher(new char[] { '{', '}', '(', ')', '[', ']' });
+			private StyledText fTextWidget;
+			private Color fColor;
 			
-			/** Indicates whether this closure has been posted. */ 
-			private boolean fPosted= false;
+			public HighlightBrackets() {
+				fTextWidget= fSourceViewer.getTextWidget();
+				fColor= fTextWidget.getDisplay().getSystemColor(SWT.COLOR_MAGENTA);
+			}
 			
-			/**
-			 * @see Runnable#run()
-			 */
-			public void run() {
-				if (fDoubleClicked) {
-					fDoubleClicked= false;
-					fPosted= false;
-					return;
+			public void dispose() {
+				if (fMatcher != null) {
+					fMatcher.dispose();
+					fMatcher= null;
 				}
+				
+				fTextWidget= null;
+				fColor= null;
+			}
+			
+			public void run() {
 				
 				int offset= fSourceViewer.getSelectedRange().x;
 				IRegion pair= fMatcher.match(fSourceViewer.getDocument(), offset);
-				if (pair != null) {
-					fLeftPeer.start= pair.getOffset();
-					fLeftPeer.length= 1;
-					fLeftPeer.fontStyle= SWT.BOLD;
-					fRightPeer.start= pair.getOffset() + pair.getLength() -1;
-					fRightPeer.fontStyle= SWT.BOLD;
-					fRightPeer.length= 1;
-					fSourceViewer.changeTextPresentation(fPresentation, true);
-					fUndoable= true;
+				
+				if (pair == null) {
+					removeStyles();
 				} else {
-					fUndoable= false;
-				}				
-				fPosted= false;
+					
+					if (pair.getOffset() != fBracketPosition.getOffset() || pair.getLength() != fBracketPosition.getLength())
+						removeStyles();
+						
+					fBracketPosition.offset= pair.getOffset();
+					fBracketPosition.length= pair.getLength();
+					fBracketPosition.isDeleted= false;
+					
+					applyStyles();
+				}
 			}
 			
-			/**
-			 * Posts this closure into the event queue.
-			 */
-			public void post() {
-				Control c= fSourceViewer.getTextWidget();
-				if (c != null && !c.isDisposed()) {
-					if (!fPosted) {
-						fPosted= true;
-						Display d= c.getDisplay();
-						d.asyncExec(this);
+			public void paintControl(PaintEvent event) {
+				IRegion region= fSourceViewer.getVisibleRegion();
+				int offset= fBracketPosition.getOffset();
+				int length= fBracketPosition.getLength();
+				
+				if (region.getOffset() <= offset && region.getOffset() + region.getLength() >= offset + length) {
+					offset -= region.getOffset();						
+					if (length == 2) {
+						draw(event.gc, offset, length);
+					} else {
+						draw(event.gc, offset, 1);
+						draw(event.gc, offset + length -1, 1);
 					}
 				}
 			}
+			
+			private void draw(GC gc, int offset, int length) {
+				Point left= fTextWidget.getLocationAtOffset(offset);
+				Point right= fTextWidget.getLocationAtOffset(offset + length);
+				gc.setForeground(fColor);
+				gc.drawRectangle(left.x, left.y, right.x - left.x - 1, gc.getFontMetrics().getHeight() - 1);
+			}
+			
+			private void redraw() {
+				IRegion region= fSourceViewer.getVisibleRegion();
+				int offset= fBracketPosition.getOffset() - region.getOffset();
+				fSourceViewer.getTextWidget().redrawRange(offset, fBracketPosition.getLength(), true);
+			}
+			
+			private void removeStyles() {
+				fHooked= false;
+				fTextWidget.removePaintListener(this);
+				redraw();
+			}
+			
+			private void applyStyles() {
+				if (!fHooked) {
+					fHooked= true;
+					fTextWidget.addPaintListener(this);
+				}
+				redraw();
+			}
 		};
 		
-		private ISourceViewer fSourceViewer;
-		private JavaPairMatcher fMatcher;
-		private TextPresentation fPresentation;
-		private StyleRange fLeftPeer;
-		private StyleRange fRightPeer;
-		private boolean fUndoable= false;
-		private boolean fDoubleClicked= false;
-		private HighlightBrackets fHighlightBrackets= new HighlightBrackets();
+		/**
+		 * Monitors the input document of the source viewer.
+		 */
+		class BracketPositionManager implements ITextInputListener {
+			
+			private IDocument fDocument;
+			private IPositionUpdater fPositionUpdater;
+			private String fCategory;
+			
+			public BracketPositionManager() {
+				fCategory= getClass().getName() + hashCode();
+				fPositionUpdater= new DefaultPositionUpdater(fCategory);
+			}
+			
+			public void install() {
+				fSourceViewer.addTextInputListener(this);
+				start(fSourceViewer.getDocument());
+			}
+			
+			public void dispose() {
+				fSourceViewer.removeTextInputListener(this);
+				if (fDocument != null) {
+					stop(fDocument);
+					fDocument= null;
+				}
+			}
+			
+			private void start(IDocument document) {
+				fDocument= document;
+				fDocument.addPositionCategory(fCategory);
+				fDocument.addPositionUpdater(fPositionUpdater);
+				try {
+					fDocument.addPosition(fCategory, fBracketPosition);
+				} catch (BadPositionCategoryException x) {
+					// should not happen
+				} catch (BadLocationException x) {
+					// should not happen
+				}
+			}
+			
+			private void stop(IDocument document) {
+				if (document == fDocument) {
+					try {
+						document.removePositionUpdater(fPositionUpdater);
+						document.removePositionCategory(fCategory);			
+					} catch (BadPositionCategoryException x) {
+						// should not happen
+					}
+					fDocument= null;
+				}
+			}
+			
+			/*
+			 * @see ITextInputListener#inputDocumentAboutToBeChanged(IDocument, IDocument)
+			 */
+			public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
+				if (oldInput != null)
+					stop(oldInput);
+			}
+			
+			/*
+			 * @see ITextInputListener#inputDocumentChanged(IDocument, IDocument)
+			 */
+			public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
+				if (newInput != null)
+					start(newInput);
+			}
+		};
 		
+		private Position fBracketPosition= new Position(0, 0);
+		private BracketPositionManager fManager= new BracketPositionManager();
+		
+		private ISourceViewer fSourceViewer;
+		private HighlightBrackets fHighlightBrackets;
+
 		public BracketHighlighter(ISourceViewer sourceViewer) {
-			
 			fSourceViewer= sourceViewer;
-			fMatcher= new JavaPairMatcher(new char[] { '{', '}', '(', ')', '[', ']' });
+			fHighlightBrackets= new HighlightBrackets();
+		}
+		
+		public void install() {
 			
-			fPresentation= new TextPresentation();
-			fPresentation.addStyleRange(fLeftPeer= new StyleRange());
-			fPresentation.addStyleRange(fRightPeer= new StyleRange());
+			fManager.install();
+			
+			StyledText text= fSourceViewer.getTextWidget();
+			text.addKeyListener(this);
+			text.addMouseListener(this);
 		}
 		
 		public void dispose() {
-			fSourceViewer= null;
-			if (fPresentation != null) {
-				fPresentation.clear();
-				fPresentation= null;
+			
+			if (fManager != null) {
+				fManager.dispose();
+				fManager= null;
 			}
 			
-			if (fMatcher != null) {
-				fMatcher.dispose();
-				fMatcher= null;
+			if (fHighlightBrackets != null) {
+				fHighlightBrackets.dispose();
+				fHighlightBrackets= null;
 			}
-		}
-		
-		private void resetBracketHighlighting() {
-			if (fUndoable) {
-				fLeftPeer.fontStyle= SWT.NORMAL;
-				fRightPeer.fontStyle= SWT.NORMAL;
-				fSourceViewer.changeTextPresentation(fPresentation, true);
-				fUndoable= false;
+			
+			if (fSourceViewer != null && fBracketHighlighter != null) {
+				
+				StyledText text= fSourceViewer.getTextWidget();
+				if (text != null && !text.isDisposed()) {
+					text.removeKeyListener(fBracketHighlighter);
+					text.removeMouseListener(fBracketHighlighter);
+				}
+				
+				fSourceViewer= null;
 			}
 		}
 		
 		/*
 		 * @see KeyListener#keyPressed(KeyEvent)
 		 */
-		public void keyPressed(KeyEvent arg0) {
-			resetBracketHighlighting();
+		public void keyPressed(KeyEvent e) {
 		}
 
 		/*
 		 * @see KeyListener#keyReleased(KeyEvent)
 		 */
-		public void keyReleased(KeyEvent arg0) {
-			fHighlightBrackets.post();
+		public void keyReleased(KeyEvent e) {
+			fHighlightBrackets.run();
 		}
 
 		/*
 		 * @see MouseListener#mouseDoubleClick(MouseEvent)
 		 */
-		public void mouseDoubleClick(MouseEvent arg0) {
-			fDoubleClicked= true;
+		public void mouseDoubleClick(MouseEvent e) {
 		}
 
 		/*
 		 * @see MouseListener#mouseDown(MouseEvent)
 		 */
-		public void mouseDown(MouseEvent arg0) {
-			resetBracketHighlighting();
+		public void mouseDown(MouseEvent e) {
 		}
 
 		/*
 		 * @see MouseListener#mouseUp(MouseEvent)
 		 */
-		public void mouseUp(MouseEvent arg0) {
-			fHighlightBrackets.post();
+		public void mouseUp(MouseEvent e) {
+			fHighlightBrackets.run();
 		}
 	};
 	
@@ -693,8 +811,6 @@ public class CompilationUnitEditor extends JavaEditor {
 		// create and install bracket highlighter
 		ISourceViewer sourceViewer= getSourceViewer();
 		fBracketHighlighter= new BracketHighlighter(sourceViewer);
-		StyledText styledText= sourceViewer.getTextWidget();
-		styledText.addKeyListener(fBracketHighlighter);
-		styledText.addMouseListener(fBracketHighlighter);
+		fBracketHighlighter.install();
 	}
 }
