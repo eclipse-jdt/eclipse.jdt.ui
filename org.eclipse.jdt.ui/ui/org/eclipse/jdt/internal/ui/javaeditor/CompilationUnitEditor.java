@@ -156,8 +156,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		private boolean fIgnoreTextConverters= false;
 		private JavaCorrectionAssistant fCorrectionAssistant;
 		
-		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles) {
-			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
+		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
+			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, store);
 		}
 				
 		public IContentAssistant getContentAssistant() {
@@ -206,8 +206,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			return super.canDoOperation(operation);
 		}
 		
-		/**
-		 * @inheritDoc
+		/*
+		 * @see org.eclipse.jface.text.source.ISourceViewerExtension2#unconfigure()
 		 * @since 3.0
 		 */
 		public void unconfigure() {
@@ -1702,8 +1702,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#createJavaSourceViewer(org.eclipse.swt.widgets.Composite, org.eclipse.jface.text.source.IVerticalRuler, org.eclipse.jface.text.source.IOverviewRuler, boolean, int)
 	 */
-	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles) {
-		return new AdaptedSourceViewer(parent, verticalRuler, overviewRuler, isOverviewRulerVisible, styles);
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
+		return new AdaptedSourceViewer(parent, verticalRuler, overviewRuler, isOverviewRulerVisible, styles, store);
 	}
 	
 	/*

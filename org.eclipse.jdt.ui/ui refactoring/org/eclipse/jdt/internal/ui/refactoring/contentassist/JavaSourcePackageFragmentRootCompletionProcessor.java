@@ -53,7 +53,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 
 	public JavaSourcePackageFragmentRootCompletionProcessor() {
 		fRoot= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore();
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
 		fProposalAutoActivationSet= triggers.toCharArray();
 		fComparator= new JavaCompletionProposalComparator();

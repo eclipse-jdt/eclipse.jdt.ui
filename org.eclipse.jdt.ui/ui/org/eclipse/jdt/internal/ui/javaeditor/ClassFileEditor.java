@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.JFaceResources;
@@ -729,8 +730,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see JavaEditor#createJavaSourceViewer(Composite, IVerticalRuler, int)
 	 */
-	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		return new JavaSourceViewer(parent, ruler, null, false, styles) {
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles, IPreferenceStore store) {
+		return new JavaSourceViewer(parent, ruler, null, false, styles, store) {
 			
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
 				if (WorkbenchHelp.isContextHelpDisplayed())

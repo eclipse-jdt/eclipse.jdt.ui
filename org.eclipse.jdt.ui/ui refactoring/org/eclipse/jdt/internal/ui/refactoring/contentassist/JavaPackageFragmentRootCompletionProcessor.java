@@ -63,7 +63,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 		fPackageFragmentRoot= packageFragmentRoot;
 		fComparator= new JavaCompletionProposalComparator();
 
-		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore();
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
 		fProposalAutoActivationSet = triggers.toCharArray();
 	}

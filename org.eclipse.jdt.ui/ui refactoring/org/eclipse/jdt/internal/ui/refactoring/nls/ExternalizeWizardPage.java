@@ -43,6 +43,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
@@ -529,8 +530,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		// source viewer
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();		
 		int styles= SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION;
-		fSourceViewer= new JavaSourceViewer(c, null, null, false, styles);
-		fSourceViewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		fSourceViewer= new JavaSourceViewer(c, null, null, false, styles, store);
+		fSourceViewer.configure(new JavaSourceViewerConfiguration(tools.getColorManager(), store, null, null));
 		fSourceViewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 
 		try {

@@ -39,12 +39,12 @@ public class JavaMergeViewer extends TextMergeViewer {
 	private IPropertyChangeListener fPreferenceChangeListener;
 	private IPreferenceStore fPreferenceStore;
 	private boolean fUseSystemColors;
-		
+	private JavaSourceViewerConfiguration fSourceViewerConfiguration;
 		
 	public JavaMergeViewer(Composite parent, int styles, CompareConfiguration mp) {
 		super(parent, styles, mp);
 		
-		fPreferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		fPreferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		if (fPreferenceStore != null) {
 			 fPreferenceChangeListener= new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {
@@ -103,9 +103,10 @@ public class JavaMergeViewer extends TextMergeViewer {
 			}
 		}
 		
-		JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
-		if (tools.affectsBehavior(event))
+		if (getSourceViewerConfiguration().affectsTextPresentation(event)) {
+			getSourceViewerConfiguration().handlePropertyChangeEvent(event);
 			invalidateTextPresentation();
+		}
 	}
 	
 	/**
@@ -136,10 +137,22 @@ public class JavaMergeViewer extends TextMergeViewer {
 		if (textViewer instanceof SourceViewer) {
 			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
 			if (tools != null)
-				((SourceViewer)textViewer).configure(new JavaSourceViewerConfiguration(tools, null));
+				((SourceViewer)textViewer).configure(getSourceViewerConfiguration());
 		}
 	}
 	
+	private JavaSourceViewerConfiguration getSourceViewerConfiguration() {
+		JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
+		if (tools != null) {
+			if (fSourceViewerConfiguration == null) {
+				IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+				fSourceViewerConfiguration= new JavaSourceViewerConfiguration(tools.getColorManager(), store, null, null);
+			}
+			return fSourceViewerConfiguration;
+		}
+		return null;
+	}
+
 	protected int findInsertionPosition(char type, ICompareInput input) {
 		
 		int pos= super.findInsertionPosition(type, input);

@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -52,11 +54,13 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		getSourceViewer().configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools(), null));
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		getSourceViewer().configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 	}
 	
 	protected SourceViewer createSourceViewer(Composite parent) {
-	    return new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		return new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION, store);
 	}
 	
 	/* (non-Javadoc)

@@ -92,9 +92,16 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @since 3.0
 	 */
 	private IPreferenceStore fPreferenceStore;
+	/**
+	 * Is this source viewer configured?
+	 * 
+	 * @since 3.0
+	 */
+	private boolean fIsConfigured;
 
-	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles) {
+	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
+		setPreferenceStore(store);
 	}
 
 	/*
@@ -165,12 +172,12 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fHierarchyPresenter= ((JavaSourceViewerConfiguration)configuration).getHierarchyPresenter(this, true);
 			fHierarchyPresenter.install(this);
             
-			fPreferenceStore= ((JavaSourceViewerConfiguration)configuration).getCombinedPreferenceStore();
 			if (fPreferenceStore != null) {
 				fPreferenceStore.addPropertyChangeListener(this);
 				initializeViewerColors();
 			}
 		}
+		fIsConfigured= true;
 	}
 	
     
@@ -253,8 +260,9 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
         return null;
     }
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jface.text.source.ISourceViewerExtension2#unconfigure()
+	 * @since 3.0
 	 */
 	public void unconfigure() {
 		if (fOutlinePresenter != null) {
@@ -277,12 +285,12 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fBackgroundColor.dispose();
 			fBackgroundColor= null;
 		}
-		if (fPreferenceStore != null) {
+		if (fPreferenceStore != null)
 			fPreferenceStore.removePropertyChangeListener(this);
-			fPreferenceStore= null;
-		}
 		
 		super.unconfigure();
+		
+		fIsConfigured= false;
 	}
 	
 	/*
@@ -315,5 +323,24 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		{
 			initializeViewerColors();
 		}		
+	}
+
+	/**
+	 * Sets the preference store on this viewer.
+	 * 
+	 * @param store the preference store
+	 * 
+	 * @since 3.0
+	 */
+	public void setPreferenceStore(IPreferenceStore store) {
+		if (fIsConfigured && fPreferenceStore != null)
+			fPreferenceStore.removePropertyChangeListener(this);
+		
+		fPreferenceStore= store;
+
+		if (fIsConfigured && fPreferenceStore != null) {
+			fPreferenceStore.addPropertyChangeListener(this);
+			initializeViewerColors();
+		}
 	}
 }

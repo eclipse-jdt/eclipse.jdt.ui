@@ -147,7 +147,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 
 	private OverlayPreferenceStore fOverlayStore;
-	private JavaTextTools fJavaTextTools;
 	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
 	
 	/**
@@ -627,22 +626,19 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private Control createPreviewer(Composite parent) {
 		
-		Preferences coreStore= createTemporaryCorePreferenceStore();
-		
-		fJavaTextTools= new JavaTextTools(fOverlayStore, coreStore, false);
-		
-		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		IPreferenceStore newStore= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, new PreferencesAdapter(coreStore) });
-		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(fJavaTextTools.getColorManager(), newStore, null, IJavaPartitions.JAVA_PARTITIONING);
+		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, new PreferencesAdapter(createTemporaryCorePreferenceStore()) });
+		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
+		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(tools.getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewViewer.configure(configuration);
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
-		new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, newStore);
+		new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, store);
 		fPreviewViewer.setEditable(false);
 		
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
-		fJavaTextTools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
+		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewViewer.setDocument(document);
 
 		return fPreviewViewer.getControl();
@@ -1623,11 +1619,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 * @see DialogPage#dispose()
 	 */
 	public void dispose() {
-		
-		if (fJavaTextTools != null) {
-			fJavaTextTools.dispose();
-			fJavaTextTools= null;
-		}
 		
 		if (fOverlayStore != null) {
 			fOverlayStore.stop();

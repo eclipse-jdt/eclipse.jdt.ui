@@ -56,7 +56,7 @@ public class ControlContentAssistHelper {
 		
 		contentAssistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
 		
-		ContentAssistPreference.configure(contentAssistant, JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore());
+		ContentAssistPreference.configure(contentAssistant, JavaPlugin.getDefault().getPreferenceStore());
 		contentAssistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 		contentAssistant.setInformationControlCreator(new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {

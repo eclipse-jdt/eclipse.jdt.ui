@@ -62,8 +62,10 @@ public abstract class JavaPreview {
 		
 	    final IPropertyChangeListener propertyListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				if (fTextTools.affectsBehavior(event))
+				if (fViewerConfiguration.affectsTextPresentation(event)) {
+					fViewerConfiguration.handlePropertyChangeEvent(event);
 					fSourceViewer.invalidateTextPresentation();
+				}
 			}
 		};
 		
@@ -71,12 +73,12 @@ public abstract class JavaPreview {
 		public JavaSourcePreviewerUpdater() {
 			
 		    JFaceResources.getFontRegistry().addListener(fontListener);
-			fTextTools.getPreferenceStore().addPropertyChangeListener(propertyListener);
+		    fPreferenceStore.addPropertyChangeListener(propertyListener);
 			
 			fSourceViewer.getTextWidget().addDisposeListener(new DisposeListener() {
 				public void widgetDisposed(DisposeEvent e) {
 					JFaceResources.getFontRegistry().removeListener(fontListener);
-					fTextTools.getPreferenceStore().removePropertyChangeListener(propertyListener);
+					fPreferenceStore.removePropertyChangeListener(propertyListener);
 				}
 			});
 		}
@@ -84,8 +86,8 @@ public abstract class JavaPreview {
 	
 	protected final JavaSourceViewerConfiguration fViewerConfiguration;
 	protected final Document fPreviewDocument;
-	protected final JavaTextTools fTextTools;
 	protected final SourceViewer fSourceViewer;
+	protected final IPreferenceStore fPreferenceStore;
 	
 	protected final MarginPainter fMarginPainter;
 	
@@ -98,20 +100,20 @@ public abstract class JavaPreview {
 	 */
 	
 	public JavaPreview(Map workingValues, Composite parent) {
-		fTextTools= JavaPlugin.getDefault().getJavaTextTools();
-		fViewerConfiguration= new JavaSourceViewerConfiguration( fTextTools, null, IJavaPartitions.JAVA_PARTITIONING);
+		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		fPreviewDocument= new Document();
 		fWorkingValues= workingValues;
-		fTextTools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);	
+		tools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);	
 		
-		fSourceViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		fPreferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		fSourceViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, fPreferenceStore);
+		fViewerConfiguration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, IJavaPartitions.JAVA_PARTITIONING);
 		fSourceViewer.configure(fViewerConfiguration);
 		fSourceViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 		
 		fMarginPainter= new MarginPainter(fSourceViewer);
-		final IPreferenceStore prefStore= JavaPlugin.getDefault().getPreferenceStore();
-		final RGB rgb= PreferenceConverter.getColor(prefStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR);
-		fMarginPainter.setMarginRulerColor(fTextTools.getColorManager().getColor(rgb));
+		final RGB rgb= PreferenceConverter.getColor(fPreferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR);
+		fMarginPainter.setMarginRulerColor(tools.getColorManager().getColor(rgb));
 		fSourceViewer.addPainter(fMarginPainter);
 		
 		new JavaSourcePreviewerUpdater();

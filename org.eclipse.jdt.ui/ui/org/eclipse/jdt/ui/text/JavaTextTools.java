@@ -205,6 +205,7 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java source code.
 	 *
 	 * @return a Java source code scanner
+	 * @deprecated As of 3.0
 	 */
 	public RuleBasedScanner getCodeScanner() {
 		return fCodeScanner;
@@ -215,6 +216,7 @@ public class JavaTextTools {
 	 *
 	 * @return a Java multiline comment scanner
 	 * @since 2.0
+	 * @deprecated As of 3.0
 	 */
 	public RuleBasedScanner getMultilineCommentScanner() {
 		return fMultilineCommentScanner;
@@ -225,6 +227,7 @@ public class JavaTextTools {
 	 *
 	 * @return a Java singleline comment scanner
 	 * @since 2.0
+	 * @deprecated As of 3.0
 	 */
 	public RuleBasedScanner getSinglelineCommentScanner() {
 		return fSinglelineCommentScanner;
@@ -235,6 +238,7 @@ public class JavaTextTools {
 	 *
 	 * @return a Java string scanner
 	 * @since 2.0
+	 * @deprecated As of 3.0
 	 */
 	public RuleBasedScanner getStringScanner() {
 		return fStringScanner;
@@ -247,6 +251,7 @@ public class JavaTextTools {
 	 * are part of the JavaDoc comment.</p>
 	 *
 	 * @return a JavaDoc scanner
+	 * @deprecated As of 3.0
 	 */
 	public RuleBasedScanner getJavaDocScanner() {
 		return fJavaDocScanner;
@@ -304,6 +309,7 @@ public class JavaTextTools {
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
 	 * @since 2.0
+	 * @deprecated As of 3.0
 	 */
 	public boolean affectsBehavior(PropertyChangeEvent event) {
 		return  fCodeScanner.affectsBehavior(event) ||
@@ -319,6 +325,7 @@ public class JavaTextTools {
 	 * 
 	 * @param event the event to which to adapt
 	 * @since 2.0
+	 * @deprecated As of 3.0
 	 */
 	protected void adaptToPreferenceChange(PropertyChangeEvent event) {
 		if (fCodeScanner.affectsBehavior(event))
@@ -367,7 +374,7 @@ public class JavaTextTools {
 	 * @return the preference store
 	 * @since 3.0
 	 */
-	public IPreferenceStore getPreferenceStore() {
+	protected IPreferenceStore getPreferenceStore() {
 		return fPreferenceStore;
 	}
 
@@ -377,7 +384,7 @@ public class JavaTextTools {
 	 * @return the core preference store
 	 * @since 3.0
 	 */
-	public Preferences getCorePreferenceStore() {
+	protected Preferences getCorePreferenceStore() {
 		return fCorePreferenceStore;
 	}
 }

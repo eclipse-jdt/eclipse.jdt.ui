@@ -75,11 +75,13 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory;
 import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
@@ -187,7 +189,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.0
 	 */
 	private ASTProvider fASTProvider;
-
+	
+	/**
+	 * The combined preference store.
+	 * @since 3.0
+	 */
+	private IPreferenceStore fCombinedPreferenceStore;
 
 	
 	public static JavaPlugin getDefault() {
@@ -712,5 +719,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.unregisterAdapters(fEditorInputAdapterFactory);
 		manager.unregisterAdapters(fResourceAdapterFactory);
 		manager.unregisterAdapters(fLogicalPackageAdapterFactory);
+	}
+	
+	/**
+	 * Returns a combined preference store, this store is read-only.
+	 * 
+	 * @return the combined preference store
+	 * 
+	 * @since 3.0
+	 */
+	public IPreferenceStore getCombinedPreferenceStore() {
+		if (fCombinedPreferenceStore == null)
+			fCombinedPreferenceStore= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()) });
+		return fCombinedPreferenceStore;
 	}
 }

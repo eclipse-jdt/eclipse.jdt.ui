@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -50,7 +51,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -81,9 +81,10 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			if (fViewer == null)
 				return;
 			
-			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-			if (textTools.affectsBehavior(event))
+			if (fViewerConfiguration.affectsTextPresentation(event)) {
+				fViewerConfiguration.handlePropertyChangeEvent(event);
 				fViewer.invalidateTextPresentation();
+			}
 		}
 	}
 
@@ -138,6 +139,8 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 
 	/** This view's source viewer */
 	private SourceViewer fViewer;
+	/** The viewers configuration */
+	private JavaSourceViewerConfiguration fViewerConfiguration;
 	/** The viewer's font properties change listener. */
 	private IPropertyChangeListener fFontPropertyChangeListener= new FontPropertyChangeListener();
 	/**
@@ -159,14 +162,16 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	 * @see AbstractInfoView#internalCreatePartControl(Composite)
 	 */
 	protected void internalCreatePartControl(Composite parent) {
-		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL);
-		fViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools(), null));
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, store);
+		fViewerConfiguration= new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null);
+		fViewer.configure(fViewerConfiguration);
 		fViewer.setEditable(false);
 
 		setViewerFont();
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
 		
-		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
+		store.addPropertyChangeListener(fPropertyChangeListener);
 
 		getViewSite().setSelectionProvider(fViewer);
 	}
@@ -328,8 +333,9 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	 */
 	protected void internalDispose() {
 		fViewer= null;
+		fViewerConfiguration= null;
 		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
-		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
+		JavaPlugin.getDefault().getCombinedPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 	}
 
 	/*

@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -79,7 +80,8 @@ public class CreateTextFileChangePreviewViewer implements IChangePreviewViewer {
 			if ("java".equals(textFileChange.getTextType())) { //$NON-NLS-1$
 				JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 				textTools.setupJavaDocumentPartitioner(document);
-				fSourceViewer.configure(new JavaSourceViewerConfiguration(textTools, null));
+				IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+				fSourceViewer.configure(new JavaSourceViewerConfiguration(textTools.getColorManager(), store, null, null));
 			} else {
 				fSourceViewer.configure(new SourceViewerConfiguration());
 			}

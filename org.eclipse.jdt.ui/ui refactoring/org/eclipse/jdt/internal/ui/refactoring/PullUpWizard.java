@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -1185,8 +1186,9 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 		private void createSourceViewer(Composite c) {
-			  fSourceViewer= new JavaSourceViewer(c, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-			  fSourceViewer.configure(new JavaSourceViewerConfiguration(getJavaTextTools(), null));
+			  IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+			  fSourceViewer= new JavaSourceViewer(c, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION, store);
+			  fSourceViewer.configure(new JavaSourceViewerConfiguration(getJavaTextTools().getColorManager(), store, null, null));
 			  fSourceViewer.setEditable(false);
 			  fSourceViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
 			  fSourceViewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));			

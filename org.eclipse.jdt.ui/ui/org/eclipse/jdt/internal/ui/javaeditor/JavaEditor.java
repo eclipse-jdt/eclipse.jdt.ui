@@ -172,6 +172,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -2160,12 +2161,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeEditor()
 	 */
 	protected void initializeEditor() {
-		IPreferenceStore newStore= createNewPreferenceStore(null);
-		setPreferenceStore(newStore);
+		IPreferenceStore store= createCombinedPreferenceStore(null);
+		setPreferenceStore(store);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), newStore, this, IJavaPartitions.JAVA_PARTITIONING));
-		fMarkOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
-		fStickyOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
+		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), store, this, IJavaPartitions.JAVA_PARTITIONING));
+		fMarkOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
+		fStickyOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 	}
 	
 	/*
@@ -2173,7 +2174,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
 		
-		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles);
+		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
 		
 		StyledText text= viewer.getTextWidget();
 		text.addBidiSegmentListener(new  BidiSegmentListener() {
@@ -2197,8 +2198,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
-	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles) {
-		return new JavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles);
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
+		return new JavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
 	}
 	
 	/*
@@ -2216,7 +2217,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 *
 	 * @since 3.0
 	 */
-	private IPreferenceStore createNewPreferenceStore(IEditorInput input) {
+	private IPreferenceStore createCombinedPreferenceStore(IEditorInput input) {
 		List stores= new ArrayList(3);
 
 		IJavaProject project= EditorUtility.getJavaProject(input);
@@ -2234,10 +2235,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				
 			}));
 		
-		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		stores.add(tools.getPreferenceStore());
-		if (tools.getCorePreferenceStore() != null)
-			stores.add(new PreferencesAdapter(tools.getCorePreferenceStore()));
+		stores.add(JavaPlugin.getDefault().getPreferenceStore());
+		stores.add(new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()));
 		
 		if (stores.size() == 1)
 			return (IPreferenceStore) stores.get(0);
@@ -2647,7 +2646,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (!(sourceViewer instanceof ISourceViewerExtension2)) {
-			setPreferenceStore(createNewPreferenceStore(input));
+			setPreferenceStore(createCombinedPreferenceStore(input));
 			internalDoSetInput(input);
 			return;
 		}
@@ -2658,7 +2657,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		getSourceViewerDecorationSupport(sourceViewer).uninstall();
 		((ISourceViewerExtension2)sourceViewer).unconfigure();
 		
-		setPreferenceStore(createNewPreferenceStore(input));
+		setPreferenceStore(createCombinedPreferenceStore(input));
 		
 		// install & register preference store listener 
 		sourceViewer.configure(getSourceViewerConfiguration());
@@ -2689,8 +2688,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected void setPreferenceStore(IPreferenceStore store) {
 		super.setPreferenceStore(store);
-		if (getSourceViewerConfiguration() instanceof JavaSourceViewerConfiguration)
-			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).setCombinedPreferenceStore(store);
+		if (getSourceViewerConfiguration() instanceof JavaSourceViewerConfiguration) {
+			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+			setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), store, this, IJavaPartitions.JAVA_PARTITIONING));
+		}
+		if (getSourceViewer() instanceof JavaSourceViewer)
+			((JavaSourceViewer)getSourceViewer()).setPreferenceStore(store);
 	}
 	
 	/*

@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -37,8 +38,10 @@ public class JavaTextViewer extends Viewer {
 	JavaTextViewer(Composite parent) {
 		fSourceViewer= new SourceViewer(parent, null, SWT.H_SCROLL + SWT.V_SCROLL);
 		JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
-		if (tools != null)
-			fSourceViewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		if (tools != null) {
+			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+			fSourceViewer.configure(new JavaSourceViewerConfiguration(tools.getColorManager(), store, null, null));
+		}
 
 		fSourceViewer.setEditable(false);
 	}

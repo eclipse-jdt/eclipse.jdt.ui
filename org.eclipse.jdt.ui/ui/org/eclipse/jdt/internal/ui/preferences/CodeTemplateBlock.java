@@ -56,9 +56,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
-import org.eclipse.jdt.internal.ui.javaeditor.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -272,19 +270,19 @@ public class CodeTemplateBlock {
 		data.horizontalSpan= nColumns;
 		label.setLayoutData(data);
 		
-		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		IDocument document= new Document();
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
-		IPreferenceStore newStore= new ChainedPreferenceStore(new IPreferenceStore[] { tools.getPreferenceStore(), new PreferencesAdapter(tools.getCorePreferenceStore()) });
-		TemplateEditorSourceViewerConfiguration configuration= new TemplateEditorSourceViewerConfiguration(tools.getColorManager(), newStore, null, fTemplateProcessor);
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL, store);
+		TemplateEditorSourceViewerConfiguration configuration= new TemplateEditorSourceViewerConfiguration(tools.getColorManager(), store, null, fTemplateProcessor);
 		viewer.configure(configuration);
 		viewer.setEditable(false);
 		viewer.setDocument(document);
 	
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
-		new JavaSourcePreviewerUpdater(viewer, configuration, newStore);
+		new JavaSourcePreviewerUpdater(viewer, configuration, store);
 		
 		Control control= viewer.getControl();
 		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);

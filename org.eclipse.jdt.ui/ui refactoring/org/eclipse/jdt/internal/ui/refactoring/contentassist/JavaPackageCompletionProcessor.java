@@ -66,7 +66,7 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 		fComparator= new JavaCompletionProposalComparator();
 		fLabelProvider= labelProvider;
 
-		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore();
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
 		fProposalAutoActivationSet = triggers.toCharArray();
 	}

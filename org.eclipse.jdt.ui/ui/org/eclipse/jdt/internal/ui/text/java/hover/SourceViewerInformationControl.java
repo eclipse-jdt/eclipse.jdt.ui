@@ -29,6 +29,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
@@ -131,8 +133,9 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		}		
 
 		// Source viewer
-		fViewer= new JavaSourceViewer(composite, null, null, false, style);
-		fViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools(), null));
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		fViewer= new JavaSourceViewer(composite, null, null, false, style, store);
+		fViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 		fViewer.setEditable(false);
 		
 		fText= fViewer.getTextWidget();
