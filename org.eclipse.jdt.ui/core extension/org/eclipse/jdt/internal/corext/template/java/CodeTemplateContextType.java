@@ -32,7 +32,7 @@ public class CodeTemplateContextType extends ContextType {
 	protected static class Todo extends TemplateVariable {
 
 		public Todo() {
-			super(JavaTemplateMessages.getString("CodeTemplateContextType.variable.name.todo"), JavaTemplateMessages.getString("JavaContextType.variable.description.todo")); //$NON-NLS-1$ //$NON-NLS-2$
+			super("todo", JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.todo")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		public String evaluate(TemplateContext context) {
