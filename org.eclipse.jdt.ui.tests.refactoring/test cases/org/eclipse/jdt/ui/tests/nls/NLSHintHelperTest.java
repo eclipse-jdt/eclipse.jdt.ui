@@ -22,34 +22,39 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 
 /**
@@ -233,6 +238,190 @@ public class NLSHintHelperTest extends TestCase {
 				// ignore: test itself was already successful
 			}
 		}
+	}
+	
+	public void testFindResourceBundleName1f() throws Exception {
+	    String source=
+			"package test;\n" +
+			"public class TestMessages {\n" +
+			"	private static final String BUNDLE_NAME = \"test.test\";\n" +
+			"	public static String getString(String s) {" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    
+	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName1s() throws Exception {
+	    String source=
+			"package test;\n" +
+			"public class TestMessages {\n" +
+			"	private static String BUNDLE_NAME;\n" +
+			"   static {\n" +
+			"		BUNDLE_NAME= \"test.test\";\n" +
+			"   }\n" +
+			"	public static String getString(String s) {" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    
+	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName2f() throws Exception {
+	    String source=
+			"package test;\n" +
+			"public class TestMessages {\n" +
+			"	private static final String BUNDLE_NAME = TestMessages.class.getName();\n" +
+			"	public static String getString(String s) {\n" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName2s() throws Exception {
+	    String source=
+			"package test;\n" +
+			"public class TestMessages {\n" +
+			"	private static String BUNDLE_NAME;\n" +
+			"   static {\n" +
+			"		BUNDLE_NAME = TestMessages.class.getName();\n" +
+			"   }\n" +
+			"	public static String getString(String s) {\n" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName3f() throws Exception {
+	    String source=
+			"package test;\n" +
+			"import java.util.ResourceBundle;\n" +
+			"public class TestMessages {\n" +
+			"	private static final ResourceBundle b= ResourceBundle.getBundle(TestMessages.class.getName());\n" +
+			"	public static String getString(String s) {\n" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName3s() throws Exception {
+	    String source=
+			"package test;\n" +
+			"import java.util.ResourceBundle;\n" +
+			"public class TestMessages {\n" +
+			"	private static ResourceBundle b;\n" +
+			"   static {\n" +
+			"		b= ResourceBundle.getBundle(TestMessages.class.getName());\n" +
+			"   }\n" +
+			"	public static String getString(String s) {\n" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName4f() throws Exception {
+	    String source=
+			"package test;\n" +
+			"import java.util.ResourceBundle;\n" +
+			"public class TestMessages {\n" +
+			"	private static final ResourceBundle b= ResourceBundle.getBundle(\"test.test\");\n" +
+			"	public static String getString(String s) {\n" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName4s() throws Exception {
+	    String source=
+			"package test;\n" +
+			"import java.util.ResourceBundle;\n" +
+			"public class TestMessages {\n" +
+			"	private static ResourceBundle b;\n" +
+			"   static {\n" +
+			"		b= ResourceBundle.getBundle(\"test.test\");\n" +
+			"   }\n" +
+			"	public static String getString(String s) {\n" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName5f() throws Exception {
+	    String source=
+			"package test;\n" +
+			"import java.util.ResourceBundle;\n" +
+			"public class TestMessages {\n" +
+			"	private static final String RESOURCE_BUNDLE= TestMessages.class.getName();\n" +
+			"	private static final ResourceBundle b= ResourceBundle.getBundle(RESOURCE_BUNDLE);\n" +
+			"	public static String getString(String s) {\n" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName5s() throws Exception {
+	    String source=
+			"package test;\n" +
+			"import java.util.ResourceBundle;\n" +
+			"public class TestMessages {\n" +
+			"	private static final String RESOURCE_BUNDLE= TestMessages.class.getName();\n" +
+			"	private static ResourceBundle b;\n" +
+			"   static {\n" +
+			"		b= ResourceBundle.getBundle(RESOURCE_BUNDLE);\n" +
+			"   }\n" +
+			"	public static String getString(String s) {\n" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	public void testFindResourceBundleName6() throws Exception {
+	    String source=
+			"package test;\n" +
+			"import java.util.ResourceBundle;\n" +
+			"public class TestMessages {\n" +
+			"	private static final String RESOURCE_BUNDLE= TestMessages.class.getName();\n" +
+			"	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);\n" + 
+			"	public static String getString(String s) {\n" +
+			"		return \"\";\n" +
+			"	}\n" +
+			"}\n";
+	    
+	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
+	}
+	
+	private String getResourceBundleName(String source, String className, String packageName) throws Exception {
+		// Create CU
+	    IPackageFragmentRoot sourceFolder = JavaProjectHelper.addSourceContainer(fJProject, "src");
+        IPackageFragment pack = sourceFolder.createPackageFragment(packageName, false, null);
+        ICompilationUnit  cu= pack.createCompilationUnit(className + ".java", source, false, null);
+
+        // Get type binding
+        CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_YES, null);
+        ASTNode node= NodeFinder.perform(ast, cu.getType(className).getSourceRange());
+        ITypeBinding typeBinding= ((TypeDeclaration)node).resolveBinding();
+        
+        return  NLSHintHelper.getResourceBundleName(typeBinding);
 	}
 
 	protected void tearDown() throws Exception {
