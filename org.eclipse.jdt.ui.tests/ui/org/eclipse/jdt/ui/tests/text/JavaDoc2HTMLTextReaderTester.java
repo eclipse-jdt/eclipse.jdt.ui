@@ -36,98 +36,98 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 	private void verify(String string, String expected){
 		String result = getTransformedJavaDoc(string);
 		if (isVerbose)
-			System.out.println("result:" + result);
+			System.out.println("result:" + result); //$NON-NLS-1$
 		assertEquals(expected, result);
 	}
 
 	public void test0(){
-		String string= "/**@deprecated*/";
-		String expected= "<dl><dt>@deprecated</dt><dd></dd></dl>";
+		String string= "/**@deprecated*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>@deprecated</dt><dd></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test1(){
-		String string= "/**@author Foo Bar*/";
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd></dl>";
+		String string= "/**@author Foo Bar*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test2(){
 		//test for bug 14658
-		String string= "/**@author Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a>*/";
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a></dd></dl>";
+		String string= "/**@author Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a>*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 	
 	public void test3(){
 		//test for bug 14658
-		String string= "/**@author Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a>\n *@deprecated*/";
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a></dd><dt>@deprecated</dt><dd></dd></dl>";
+		String string= "/**@author Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a>\n *@deprecated*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a></dd><dt>@deprecated</dt><dd></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test4(){
-		String string= "/**@author Foo Bar\n * @deprecated*/";
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd><dt>@deprecated</dt><dd></dd></dl>";
+		String string= "/**@author Foo Bar\n * @deprecated*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd><dt>@deprecated</dt><dd></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 	
 	public void test5(){
-		String string= "/**@author Foo Bar\n * @author Baz Fred*/";
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd><dt>@author</dt><dd>Baz Fred</dd></dl>";
+		String string= "/**@author Foo Bar\n * @author Baz Fred*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd><dt>@author</dt><dd>Baz Fred</dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test6(){
-		String string= "/**@author Foo Bar\n * @since 2.0*/";
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd><dt>@since</dt><dd>2.0</dd></dl>";
+		String string= "/**@author Foo Bar\n * @since 2.0*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>@author</dt><dd>Foo Bar</dd><dt>@since</dt><dd>2.0</dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	
 	public void test7(){
 		if (true){
-			System.out.println(getClass().getName()+"::" + getName() +" disabled(corner case - @see tag inside <a> tag)");
+			System.out.println(getClass().getName()+"::" + getName() +" disabled(corner case - @see tag inside <a> tag)"); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
-		String string= "/**@author Foo Bar<a href=\"mailto:foobar@see.org\">foobar@see.org</a>*/";
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@see.org\">foobar@see.org</a></dd></dl>";
+		String string= "/**@author Foo Bar<a href=\"mailto:foobar@see.org\">foobar@see.org</a>*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@see.org\">foobar@see.org</a></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test8(){
 		if (true){
-			System.out.println(getClass().getName()+"::" + getName() +" disabled(corner case - @see tag inside <a> tag)");
+			System.out.println(getClass().getName()+"::" + getName() +" disabled(corner case - @see tag inside <a> tag)"); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
-		String string= "/**@author Foo Bar<a href=\"mailto:foobar@see.org\">foobar@eclipse.org</a>*/";
-		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@see.org\">foobar@eclipse.org</a></dd></dl>";
+		String string= "/**@author Foo Bar<a href=\"mailto:foobar@see.org\">foobar@eclipse.org</a>*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>@author</dt><dd>Foo Bar<a href=\"mailto:foobar@see.org\">foobar@eclipse.org</a></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test9(){
-		String string= "/**@throws NullPointerException*/";
-		String expected= "<dl><dt>Throws:</dt><dd>NullPointerException</dd></dl>";
+		String string= "/**@throws NullPointerException*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>Throws:</dt><dd>NullPointerException</dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test10(){
 		//test for bug 8131
-		String string= "/**@exception NullPointerException*/";
-		String expected= "<dl><dt>Throws:</dt><dd>NullPointerException</dd></dl>";
+		String string= "/**@exception NullPointerException*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>Throws:</dt><dd>NullPointerException</dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test11(){
 		//test for bug 8132
-		String string= "/**@exception NullPointerException \n * @throws java.lang.Exception*/";
-		String expected= "<dl><dt>Throws:</dt><dd>NullPointerException</dd><dd>java.lang.Exception</dd></dl>";
+		String string= "/**@exception NullPointerException \n * @throws java.lang.Exception*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>Throws:</dt><dd>NullPointerException</dd><dd>java.lang.Exception</dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
 	public void test12(){
-		String string= "/** \n * @param i fred or <code>null</code> \n*/";
-		String expected= "<dl><dt>Parameters:</dt><dd><b>i</b> fred or <code>null</code></dd></dl>";
+		String string= "/** \n *@param i fred or <code>null</code> \n*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>Parameters:</dt><dd><b>i</b> fred or <code>null</code></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
 
