@@ -19,15 +19,6 @@ package org.eclipse.jdt.internal.ui.text.spelling.engine;
 public interface ISpellCheckPreferenceKeys {
 
 	/**
-	 * A named preference that controls whether spell-checking should be
-	 * enabled.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 */
-	public final static String SPELLING_CHECK_SPELLING= "spelling_check_spelling"; //$NON-NLS-1$
-
-	/**
 	 * A named preference that controls whether words containing digits should
 	 * be skipped during spell-checking.
 	 * <p>
