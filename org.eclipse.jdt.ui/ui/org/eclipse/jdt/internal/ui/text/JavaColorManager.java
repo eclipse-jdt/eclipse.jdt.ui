@@ -20,10 +20,10 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 /**
  * Java color manager.
  */
-public class JavaColorManager implements IColorManager {	
+public class JavaColorManager implements IColorManager {
 	
-	protected Map fColorTable= new HashMap(10);
 	protected Map fKeyTable= new HashMap(10);
+	protected Map fDisplayTable= new HashMap(2);
 	
 	
 	public JavaColorManager() {
@@ -47,7 +47,16 @@ public class JavaColorManager implements IColorManager {
 	public void put(String key, RGB rgb) {
 		fKeyTable.put(key, rgb);
 	}
-		
+	
+	private void dispose(Display display) {
+		Map colorTable= (Map) fDisplayTable.get(display);
+		if (colorTable != null) {
+			Iterator e= colorTable.values().iterator();
+			while (e.hasNext())
+				((Color) e.next()).dispose();
+		}
+	}
+	
 	/**
 	 * @see IColorManager#getColor(RGB)
 	 */
@@ -55,12 +64,25 @@ public class JavaColorManager implements IColorManager {
 		
 		if (rgb == null)
 			return null;
-			
-		Color color= (Color) fColorTable.get(rgb);
+		
+		final Display display= Display.getCurrent();
+		Map colorTable= (Map) fDisplayTable.get(display);
+		if (colorTable == null) {
+			colorTable= new HashMap(10);
+			fDisplayTable.put(display, colorTable);
+			display.disposeExec(new Runnable() {
+				public void run() {
+					dispose(display);
+				}
+			});
+		}
+		
+		Color color= (Color) colorTable.get(rgb);
 		if (color == null) {
 			color= new Color(Display.getCurrent(), rgb);
-			fColorTable.put(rgb, color);
+			colorTable.put(rgb, color);
 		}
+		
 		return color;
 	}
 	
@@ -68,11 +90,9 @@ public class JavaColorManager implements IColorManager {
 	 * @see IColorManager#dispose
 	 */
 	public void dispose() {
-		Iterator e= fColorTable.values().iterator();
-		while (e.hasNext())
-			((Color) e.next()).dispose();
+		// unfortunately the display's are already gone at this point
 	}
-
+	
 	/**
 	 * @see IColorManager#getColor(String)
 	 */
