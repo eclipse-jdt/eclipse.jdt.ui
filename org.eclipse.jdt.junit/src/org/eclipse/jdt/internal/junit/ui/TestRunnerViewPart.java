@@ -138,6 +138,16 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 * first failed tests at the end of a run.
 	 */
 	private List fFailures= new ArrayList();
+	
+	/** 
+	 * Queue used for processing Tree Entries
+	 */
+	private List fTreeEntryQueue= new ArrayList();
+	/**
+	 * Indicates an instance of TreeEntryQueueDrainer is already running, or scheduled to
+	 */
+	private boolean fQueueDrainRequestOutstanding;
+
 	private boolean fTestIsRunning= false;
 
 	protected JUnitProgressBar fProgressBar;
@@ -360,6 +370,26 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			}
 		}
 	};
+	
+	private class TreeEntryQueueDrainer implements Runnable {
+		public void run() {
+			while (true) {
+				String treeEntry;
+				synchronized (fTreeEntryQueue) {
+					if (fTreeEntryQueue.isEmpty() || isDisposed()) {
+						fQueueDrainRequestOutstanding= false;
+						return;
+					}
+					treeEntry= (String)fTreeEntryQueue.remove(0);
+				}
+				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+					TestRunTab v= (TestRunTab)e.nextElement();
+					v.newTreeEntry(treeEntry);
+				}
+			}
+		}
+	}
+		
 
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
@@ -698,22 +728,21 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		
 	}
 
+	
 	/*
 	 * @see ITestRunListener#testTreeEntry
 	 */
 	public void testTreeEntry(final String treeEntry){
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				if(isDisposed()) 
-					return;
-				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-					TestRunTab v= (TestRunTab) e.nextElement();
-					v.newTreeEntry(treeEntry);
-				}
+		synchronized(fTreeEntryQueue) {
+			fTreeEntryQueue.add(treeEntry);
+			if (!fQueueDrainRequestOutstanding) {
+				fQueueDrainRequestOutstanding= true;
+				if (!isDisposed())
+					getDisplay().asyncExec(new TreeEntryQueueDrainer());
 			}
-		});	
+		}
 	}
-
+	
 	public void startTestRunListening(IJavaElement type, int port, ILaunch launch) {
 		fTestProject= type.getJavaProject();
 		fLaunchMode= launch.getLaunchMode();
