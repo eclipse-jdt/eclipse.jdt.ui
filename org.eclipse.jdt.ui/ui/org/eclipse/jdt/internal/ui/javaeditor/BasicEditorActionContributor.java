@@ -35,7 +35,6 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 	
 	protected RetargetAction fRetargetContentAssist;
 	protected RetargetTextEditorAction fContentAssist;
-	protected RetargetTextEditorAction fCompletePrefix;
 	protected RetargetTextEditorAction fContextInformation;
 	protected RetargetTextEditorAction fCorrectionAssist;
 	private EncodingActionGroup fEncodingActionGroup;
@@ -54,9 +53,6 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		
 		fContextInformation= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation."); //$NON-NLS-1$
 		fContextInformation.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
-		
-		fCompletePrefix= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistCompletePrefix."); //$NON-NLS-1$
-		fCompletePrefix.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_COMPLETE_PREFIX);
 		
 		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fCorrectionAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
@@ -77,7 +73,6 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetContentAssist);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCompletePrefix);
 		}		
 	}
 	
@@ -94,7 +89,6 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
 		fContextInformation.setAction(getAction(textEditor, "ContentAssistContextInformation")); //$NON-NLS-1$
 		fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
-		fCompletePrefix.setAction(getAction(textEditor, "ContentAssistCompletePrefix")); //$NON-NLS-1$
 		
 		IActionBars actionBars= getActionBars();
 		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_RIGHT, getAction(textEditor, "ShiftRight")); //$NON-NLS-1$
