@@ -505,6 +505,9 @@ public class RemoteTestRunnerClient {
 	}
 	
 	private void notifyTestRunTerminated() {
+		// fix for 77771 RemoteTestRunnerClient doing work after junit shutdown [JUnit]
+		if (JUnitPlugin.isStopped())
+			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
