@@ -720,6 +720,15 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	/**
 	 * {@inheritDoc}
 	 */
+	public Rectangle computeTrim() {
+		if (fTrim != null)
+			return fTrim;
+		return new Rectangle(0, 0, 0, 0);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setLocation(Point location) {
 		fTrim= fShell.computeTrim(0, 0, 0, 0);
 		Point compositeLocation= fComposite.getLocation();
