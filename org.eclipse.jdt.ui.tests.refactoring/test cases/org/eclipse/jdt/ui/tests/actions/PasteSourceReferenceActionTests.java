@@ -127,15 +127,15 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 	}
 
 	public void test4() throws Exception{
-		printTestDisabledMessage("test for bug 20151");
-//		Object elem0= fCuA.getType("A").getMethod("f", new String[0]);
-//				
-//		SourceReferenceTestUtil.copy(new Object[]{elem0}, fClipboard);
-//		
-//		Object dest= fCuA.getType("A").getMethod("f1", new String[0]);
-//		SourceReferenceTestUtil.paste(new Object[]{dest}, fClipboard);
-//
-//		check();
+//		printTestDisabledMessage("test for bug 20151");
+		Object elem0= fCuA.getType("A").getMethod("f", new String[0]);
+				
+		SourceReferenceTestUtil.copy(new Object[]{elem0}, fClipboard);
+		
+		Object dest= fCuA.getType("A").getMethod("f1", new String[0]);
+		SourceReferenceTestUtil.paste(new Object[]{dest}, fClipboard);
+
+		check();
 	}
 	
 }
