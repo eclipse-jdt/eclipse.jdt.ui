@@ -1,6 +1,8 @@
 feature.properties
 feature.xml
-cpl*.html
+cpl-*.html
+epl-*.html
+ipl-*.html
 license.html
 about.html
 notice.html
