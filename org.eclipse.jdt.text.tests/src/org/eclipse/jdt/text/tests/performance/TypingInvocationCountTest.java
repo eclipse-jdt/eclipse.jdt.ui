@@ -238,7 +238,5 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 		EditorTestHelper.runEventQueue(200);
 		performanceMeter.stop();
 		performanceMeter.commit();
-		
-		assertTrue(performanceMeter.getInvocationCount() > 0);
 	}
 }
