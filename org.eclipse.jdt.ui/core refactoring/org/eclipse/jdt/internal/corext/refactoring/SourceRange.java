@@ -31,5 +31,12 @@ public class SourceRange implements ISourceRange{
 	public int getOffset() {
 		return fOffset;
 	}
+	
+	/*non java doc
+	 * for debugging only
+	 */
+	public String toString(){
+		return "<offset: " + fOffset +" length: " + fLength + "/>";
+	}
 }
 
