@@ -505,7 +505,7 @@ public class StubUtility {
 	
 	public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
-		return formatter.format(sourceString, initialIndentationLevel, null, lineDelim) + lineDelim;
+		return formatter.format(sourceString, initialIndentationLevel, null, lineDelim);
 	}
 	
 	/**

@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -42,8 +40,8 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewVariableCompletionProposal extends CUCorrectionProposal {
@@ -96,7 +94,7 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 					int startLine= buffer.getLineOfOffset(offset);
 					String indentString= CodeFormatterUtil.createIndentString(buffer.getLineIndent(startLine, fTabSize));
 					String lineDelim= buffer.getLineDelimiter();
-					insertString= StubUtility.codeFormat(fContent, 0, lineDelim) +  indentString;
+					insertString= StubUtility.codeFormat(fContent, 0, lineDelim) +  lineDelim + indentString;
 				}
 			}
 			setTextRange(new TextRange(offset, 0));
@@ -129,7 +127,6 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 				return;
 			}
 			
-			TextBuffer buffer= editor.getTextBuffer();
 			int offset= 0;
 			String insertString= ""; //$NON-NLS-1$
 			
