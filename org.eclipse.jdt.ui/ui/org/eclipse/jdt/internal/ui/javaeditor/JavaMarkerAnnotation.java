@@ -96,7 +96,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 				} else if (marker.isSubtypeOf(IMarker.TASK))
 					fType= AnnotationType.TASK;
 				else if (marker.isSubtypeOf(SearchUI.SEARCH_MARKER)) 
-					fType= AnnotationType.SEARCH_RESULT;
+					fType= AnnotationType.SEARCH;
 				else if (marker.isSubtypeOf(IMarker.BOOKMARK))
 					fType= AnnotationType.BOOKMARK;
 					

@@ -18,7 +18,7 @@ public final class AnnotationType {
 	public final static AnnotationType TASK= new AnnotationType();
 	public final static AnnotationType ERROR= new AnnotationType();
 	public final static AnnotationType WARNING= new AnnotationType();
-	public final static AnnotationType SEARCH_RESULT= new AnnotationType();
+	public final static AnnotationType SEARCH= new AnnotationType();
 	
 	private AnnotationType() {
 	}

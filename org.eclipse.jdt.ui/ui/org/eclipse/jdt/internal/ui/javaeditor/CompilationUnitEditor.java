@@ -15,22 +15,14 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.resources.IFile;
@@ -43,34 +35,31 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 
-import org.eclipse.jface.text.AbstractHoverInformationControlManager;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.CursorLinePainter;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
-import org.eclipse.jface.text.IPainter;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
-import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
-import org.eclipse.jface.text.MarginPainter;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.AnnotationPainter;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IOverviewRuler;
+import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.MatchingCharacterPainter;
+import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.jface.action.Action;
@@ -81,7 +70,6 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -102,6 +90,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.tasklist.TaskList;
 
@@ -119,7 +108,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -153,88 +141,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		void customizeDocumentCommand(IDocument document, DocumentCommand command);
 	};
 	
-	
-	class AdaptedRulerLayout extends Layout {
-		
-		protected int fGap;
-		protected AdaptedSourceViewer fAdaptedSourceViewer;
-		
-		
-		protected AdaptedRulerLayout(int gap, AdaptedSourceViewer asv) {
-			fGap= gap;
-			fAdaptedSourceViewer= asv;
-		}
-		
-		protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
-			Control[] children= composite.getChildren();
-			Point s= children[children.length - 1].computeSize(SWT.DEFAULT, SWT.DEFAULT, flushCache);
-			if (fAdaptedSourceViewer.isVerticalRulerVisible())
-				s.x += fAdaptedSourceViewer.getVerticalRuler().getWidth() + fGap;
-			return s;
-		}
-		
-		protected void layout(Composite composite, boolean flushCache) {
-			Rectangle clArea= composite.getClientArea();
-			if (fAdaptedSourceViewer.isVerticalRulerVisible()) {
-				
-				StyledText textWidget= fAdaptedSourceViewer.getTextWidget();
-				Rectangle trim= textWidget.computeTrim(0, 0, 0, 0);
-				int scrollbarHeight= trim.height;
-				
-				IVerticalRuler vr= fAdaptedSourceViewer.getVerticalRuler();
-				int vrWidth=vr.getWidth();
-				
-				int orWidth= 0;
-				if (fAdaptedSourceViewer.isOverviewRulerVisible()) {
-					OverviewRuler or= fAdaptedSourceViewer.getOverviewRuler();
-					orWidth= or.getWidth();
-					or.getControl().setBounds(clArea.width - orWidth, scrollbarHeight, orWidth, clArea.height - 3*scrollbarHeight);
-				}
-				
-				textWidget.setBounds(vrWidth + fGap, 0, clArea.width - vrWidth - orWidth - 2*fGap, clArea.height);
-				vr.getControl().setBounds(0, 0, vrWidth, clArea.height - scrollbarHeight);
-				
-			} else {
-				StyledText textWidget= fAdaptedSourceViewer.getTextWidget();
-				textWidget.setBounds(0, 0, clArea.width, clArea.height);
-			}
-		}
-	};
-
-	
 	class AdaptedSourceViewer extends JavaCorrectionSourceViewer  {
 		
 		private List fTextConverters;
-
-		private OverviewRuler fOverviewRuler;
-		private boolean fIsOverviewRulerVisible;
-		/** The viewer's overview ruler hovering controller */
-		private AbstractHoverInformationControlManager fOverviewRulerHoveringController;
-
 		private boolean fIgnoreTextConverters= false;
 		
-		private IVerticalRuler fCachedVerticalRuler;
-		private boolean fCachedIsVerticalRulerVisible;
 		
-		
-		public AdaptedSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-			super(parent, ruler, styles, CompilationUnitEditor.this);
-			
-			fCachedVerticalRuler= ruler;
-			fCachedIsVerticalRulerVisible= (ruler != null);
-			fOverviewRuler= new OverviewRuler(VERTICAL_RULER_WIDTH);
-			
-			delayedCreateControl(parent, styles);
+		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles) {
+			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, CompilationUnitEditor.this);
 		}
-		
-		/*
-		 * @see ISourceViewer#showAnnotations(boolean)
-		 */
-		public void showAnnotations(boolean show) {
-			fCachedIsVerticalRulerVisible= (show && fCachedVerticalRuler != null);
-			super.showAnnotations(show);
-		}
-		
+				
 		public IContentAssistant getContentAssistant() {
 			return fContentAssistant;
 		}
@@ -294,80 +210,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 			fIgnoreTextConverters= false;
 		}
-		
-		public IVerticalRuler getVerticalRuler() {
-			return fCachedVerticalRuler;
-		}
-		
-		public boolean isVerticalRulerVisible() {
-			return fCachedIsVerticalRulerVisible;
-		}
-		
-		public OverviewRuler getOverviewRuler() {
-			return fOverviewRuler;
-		}
-		
-		/*
-		 * @see TextViewer#createControl(Composite, int)
-		 */
-		protected void createControl(Composite parent, int styles) {
-			// do nothing here
-		}
-		
-		protected void delayedCreateControl(Composite parent, int styles) {
-			//create the viewer
-			super.createControl(parent, styles);
-			
-			Control control= getControl();
-			if (control instanceof Composite) {
-				Composite composite= (Composite) control;
-				composite.setLayout(new AdaptedRulerLayout(GAP_SIZE, this));
-				fOverviewRuler.createControl(composite, this);
-			}
-		}
-		
-		private void ensureOverviewHoverManagerInstalled() {
-			if (fOverviewRulerHoveringController == null && fAnnotationHover != null && fHoverControlCreator != null)	{
-				fOverviewRulerHoveringController= new OverviewRulerHoverManager(fOverviewRuler, this, fAnnotationHover, fHoverControlCreator);
-				fOverviewRulerHoveringController.install(fOverviewRuler.getControl());
-			}
-		}
-		
-		public void hideOverviewRuler() {
-			fIsOverviewRulerVisible= false;
-			Control control= getControl();
-			if (control instanceof Composite) {
-				Composite composite= (Composite) control;
-				composite.layout();
-			}
-			if (fOverviewRulerHoveringController != null) {
-				fOverviewRulerHoveringController.dispose();
-				fOverviewRulerHoveringController= null;
-			}
-		}
-		
-		public void showOverviewRuler() {
-			fIsOverviewRulerVisible= true;
-			Control control= getControl();
-			if (control instanceof Composite) {
-				Composite composite= (Composite) control;
-				composite.layout();
-			}
-			ensureOverviewHoverManagerInstalled();
-		}
-		
-		public boolean isOverviewRulerVisible() {
-			return fIsOverviewRulerVisible;
-		}
-		
-		/*
-		 * @see ISourceViewer#setDocument(IDocument, IAnnotationModel, int, int)
-		 */
-		public void setDocument(IDocument document, IAnnotationModel annotationModel, int visibleRegionOffset, int visibleRegionLength) {
-			super.setDocument(document, annotationModel, visibleRegionOffset, visibleRegionLength);
-			fOverviewRuler.setModel(annotationModel);
-		}
-		
+				
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
 		public void updateIndentationPrefixes() {
 			SourceViewerConfiguration configuration= getSourceViewerConfiguration();
@@ -395,18 +238,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			super.configure(configuration);
 			prependAutoEditStrategy(new SmartBracesAutoEditStrategy(this), IDocument.DEFAULT_CONTENT_TYPE);
 		}
-
-		protected void handleDispose() {
-			fOverviewRuler= null;
-					
-			if (fOverviewRulerHoveringController != null) {
-				fOverviewRulerHoveringController.dispose();
-				fOverviewRulerHoveringController= null;
-			}
-			
-			super.handleDispose();
-		}
-
 	};
 	
 	static class TabConverter implements ITextConverter {
@@ -492,7 +323,234 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		public void propertyChange(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
 			handlePreferencePropertyChanged(event);
 		}
-	}
+	};
+	
+	static class AnnotationAccess implements IAnnotationAccess {
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
+		 */
+		public Object getType(Annotation annotation) {
+			if (annotation instanceof IProblemAnnotation) {
+				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
+				if (problemAnnotation.isRelevant())
+					return problemAnnotation.getAnnotationType();
+			}
+			return null;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isMultiLine(org.eclipse.jface.text.source.Annotation)
+		 */
+		public boolean isMultiLine(Annotation annotation) {
+			return true;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
+		 */
+		public boolean isTemporary(Annotation annotation) {
+			if (annotation instanceof IProblemAnnotation) {
+				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
+				if (problemAnnotation.isRelevant())
+					return problemAnnotation.isTemporary();
+			}
+			return false;
+		}
+	};
+	
+	private static class ExitPolicy implements LinkedPositionUI.ExitPolicy {
+		
+		final char fExitCharacter;
+		
+		public ExitPolicy(char exitCharacter) {
+			fExitCharacter= exitCharacter;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
+		 */
+		public ExitFlags doExit(LinkedPositionManager manager, VerifyEvent event, int offset, int length) {
+			
+			if (event.character == fExitCharacter) {
+				if (manager.anyPositionIncludes(offset, length))
+					return new ExitFlags(LinkedPositionUI.COMMIT| LinkedPositionUI.UPDATE_CARET, false);
+				else
+					return new ExitFlags(LinkedPositionUI.COMMIT, true);
+			}	
+			
+			switch (event.character) {			
+			case '\b':
+				if (manager.getFirstPosition().length == 0)
+					return new ExitFlags(0, false);
+				else
+					return null;
+				
+			case '\n':
+			case '\r':
+				return new ExitFlags(LinkedPositionUI.COMMIT, true);
+				
+			default:
+				return null;
+			}						
+		}
+
+	};
+	
+	private class BracketInserter implements VerifyKeyListener, LinkedPositionUI.ExitListener {
+		
+		private boolean fCloseBrackets= true;
+		private boolean fCloseStrings= true;
+		
+		private int fOffset;
+		private int fLength;
+
+		public void setCloseBracketsEnabled(boolean enabled) {
+			fCloseBrackets= enabled;
+		}
+
+		public void setCloseStringsEnabled(boolean enabled) {
+			fCloseStrings= enabled;
+		}
+
+		private boolean hasIdentifierToTheRight(IDocument document, int offset) {
+			try {
+				int end= offset;
+				IRegion endLine= document.getLineInformationOfOffset(end);
+				int maxEnd= endLine.getOffset() + endLine.getLength();
+				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
+					++end;
+
+				return end != maxEnd && Character.isJavaIdentifierPart(document.getChar(end));
+
+			} catch (BadLocationException e) {
+				// be conservative
+				return true;
+			}
+		}
+
+		private boolean hasIdentifierToTheLeft(IDocument document, int offset) {
+			try {
+				int start= offset;
+				IRegion startLine= document.getLineInformationOfOffset(start);
+				int minStart= startLine.getOffset();
+				while (start != minStart && Character.isWhitespace(document.getChar(start - 1)))
+					--start;
+				
+				return start != minStart && Character.isJavaIdentifierPart(document.getChar(start - 1));
+
+			} catch (BadLocationException e) {
+				return true;
+			}			
+		}
+
+		private boolean hasCharacterToTheRight(IDocument document, int offset, char character) {
+			try {
+				int end= offset;
+				IRegion endLine= document.getLineInformationOfOffset(end);
+				int maxEnd= endLine.getOffset() + endLine.getLength();
+				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
+					++end;
+				
+				return end != maxEnd && document.getChar(end) == character;
+
+
+			} catch (BadLocationException e) {
+				// be conservative
+				return true;
+			}			
+		}
+		
+		/*
+		 * @see org.eclipse.swt.custom.VerifyKeyListener#verifyKey(org.eclipse.swt.events.VerifyEvent)
+		 */
+		public void verifyKey(VerifyEvent event) {			
+
+			if (!event.doit)
+				return;
+
+			final ISourceViewer sourceViewer= getSourceViewer();
+			IDocument document= sourceViewer.getDocument();
+
+			final Point selection= sourceViewer.getSelectedRange();
+			final int offset= selection.x;
+			final int length= selection.y;
+
+			switch (event.character) {
+			case '(':
+				if (hasCharacterToTheRight(document, offset + length, '('))
+					return;
+
+				// fall through
+
+			case '[':
+					if (!fCloseBrackets)
+						return;
+					if (hasIdentifierToTheRight(document, offset + length))
+						return;
+			
+				// fall through
+			
+			case '"':
+				if (event.character == '"') {
+					if (!fCloseStrings)
+						return;
+					if (hasIdentifierToTheLeft(document, offset) || hasIdentifierToTheRight(document, offset + length))
+						return;
+				}
+				
+				try {		
+					ITypedRegion partition= document.getPartition(offset);
+					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && partition.getOffset() != offset)
+						return;
+
+					final char character= event.character;
+					final char closingCharacter= getPeerCharacter(character);		
+					final StringBuffer buffer= new StringBuffer();
+					buffer.append(character);
+					buffer.append(closingCharacter);
+
+					document.replace(offset, length, buffer.toString());
+
+					LinkedPositionManager manager= new LinkedPositionManager(document);
+					manager.addPosition(offset + 1, 0);
+
+					fOffset= offset;
+					fLength= 2;
+			
+					LinkedPositionUI editor= new LinkedPositionUI(sourceViewer, manager);
+					editor.setCancelListener(this);
+					editor.setExitPolicy(new ExitPolicy(closingCharacter));
+					editor.setFinalCaretOffset(offset + 2);
+					editor.enter();
+
+					IRegion newSelection= editor.getSelectedRegion();
+					sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection.getLength());
+	
+					event.doit= false;
+
+				} catch (BadLocationException e) {
+				}
+				break;	
+			}
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitListener#exit(boolean)
+		 */
+		public void exit(boolean accept) {
+			if (accept)
+				return;
+
+			// remove brackets
+			try {
+				final ISourceViewer sourceViewer= getSourceViewer();
+				IDocument document= sourceViewer.getDocument();
+				document.replace(fOffset, fLength, null);
+			} catch (BadLocationException e) {
+			}
+		}
+	};
 	
 	/* Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
@@ -567,99 +625,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	/** Preference key for smart paste */
 	private final static String SMART_PASTE= PreferenceConstants.EDITOR_SMART_PASTE;
 	
-	
-	static class AnnotationAccess implements IAnnotationAccess {
-
-		/*
-		 * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
-		 */
-		public Object getType(Annotation annotation) {
-			if (annotation instanceof IProblemAnnotation) {
-				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
-				if (problemAnnotation.isRelevant())
-					return problemAnnotation.getAnnotationType();
-			}
-			return null;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isMultiLine(org.eclipse.jface.text.source.Annotation)
-		 */
-		public boolean isMultiLine(Annotation annotation) {
-			return true;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
-		 */
-		public boolean isTemporary(Annotation annotation) {
-			if (annotation instanceof IProblemAnnotation) {
-				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
-				if (problemAnnotation.isRelevant())
-					return problemAnnotation.isTemporary();
-			}
-			return false;
-		}
-	};
-	
-	private final static class AnnotationInfo {
-		public String fColorPreference;
-		public String fOverviewRulerPreference;
-		public String fEditorPreference;
-	};
-	
-	private final static Map ANNOTATION_MAP;
-	static {
-		
-		AnnotationInfo info;
-		ANNOTATION_MAP= new HashMap();
-
-		info= new AnnotationInfo();
-		info.fColorPreference= TASK_INDICATION_COLOR;
-		info.fOverviewRulerPreference= TASK_INDICATION_IN_OVERVIEW_RULER;
-		info.fEditorPreference= TASK_INDICATION;
-		ANNOTATION_MAP.put(AnnotationType.TASK, info);
-		
-		info= new AnnotationInfo();
-		info.fColorPreference= ERROR_INDICATION_COLOR;
-		info.fOverviewRulerPreference= ERROR_INDICATION_IN_OVERVIEW_RULER;
-		info.fEditorPreference= ERROR_INDICATION;
-		ANNOTATION_MAP.put(AnnotationType.ERROR, info);
-		
-		info= new AnnotationInfo();
-		info.fColorPreference= WARNING_INDICATION_COLOR;
-		info.fOverviewRulerPreference= WARNING_INDICATION_IN_OVERVIEW_RULER;
-		info.fEditorPreference= WARNING_INDICATION;
-		ANNOTATION_MAP.put(AnnotationType.WARNING, info);
-		
-		info= new AnnotationInfo();
-		info.fColorPreference= BOOKMARK_INDICATION_COLOR;
-		info.fOverviewRulerPreference=  BOOKMARK_INDICATION_IN_OVERVIEW_RULER;
-		info.fEditorPreference=  BOOKMARK_INDICATION;
-		ANNOTATION_MAP.put(AnnotationType.BOOKMARK, info);
-		
-		info= new AnnotationInfo();
-		info.fColorPreference= SEARCH_RESULT_INDICATION_COLOR;
-		info.fOverviewRulerPreference=  SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER;
-		info.fEditorPreference=  SEARCH_RESULT_INDICATION;
-		ANNOTATION_MAP.put(AnnotationType.SEARCH_RESULT, info);
-		
-		info= new AnnotationInfo();
-		info.fColorPreference= UNKNOWN_INDICATION_COLOR;
-		info.fOverviewRulerPreference=  UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
-		info.fEditorPreference=  UNKNOWN_INDICATION;
-		ANNOTATION_MAP.put(AnnotationType.UNKNOWN, info);
-	};
-	
-	private final static AnnotationType[] ANNOTATION_LAYERS= new AnnotationType[] {
-		AnnotationType.UNKNOWN,
-		AnnotationType.BOOKMARK,
-		AnnotationType.TASK,
-		AnnotationType.SEARCH_RESULT,
-		AnnotationType.WARNING,
-		AnnotationType.ERROR
-	};
-	
 	private final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
 
 	
@@ -667,16 +632,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	protected ISavePolicy fSavePolicy;
 	/** Listener to annotation model changes that updates the error tick in the tab image */
 	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
-	/** The editor's bracket painter */
-	private MatchingCharacterPainter fBracketPainter;
 	/** The editor's bracket matcher */
-	private JavaPairMatcher fBracketMatcher;
-	/** The editor's line painter */
-	private CursorLinePainter fLinePainter;
-	/** The editor's print margin ruler painter */
-	private MarginPainter fPrintMarginPainter;
-	/** The editor's annotation painter */
-	private AnnotationPainter fProblemPainter;
+	private JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
 	/** The editor's tab converter */
 	private TabConverter fTabConverter;
 	/** History for structure select action */
@@ -691,6 +648,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private int fRememberedElementOffset;
 	/** The bracket inserter. */
 	private BracketInserter fBracketInserter= new BracketInserter();
+	/** The annotation access */
+	private IAnnotationAccess fAnnotationAccess= new AnnotationAccess();
+	/** The overview ruler */
+	private OverviewRuler fOverviewRuler;
+	/** The source viewer decoration support */
+	private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
 	
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
@@ -708,7 +671,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		// don't set help contextId, we install our own help context
 		fSavePolicy= null;
 			
-		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
+		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);		
 	}
 	
 	/*
@@ -1079,10 +1042,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * Jumps to the matching bracket.
 	 */
 	public void gotoMatchingBracket() {
-
-		if (fBracketMatcher == null)
-			fBracketMatcher= new JavaPairMatcher(BRACKETS);
-
+		
 		ISourceViewer sourceViewer= getSourceViewer();
 		IDocument document= sourceViewer.getDocument();
 		if (document == null)
@@ -1294,168 +1254,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		super.doSetInput(input);
 		configureTabConverter();
 	}
-	
-	private void startBracketHighlighting() {
-		if (fBracketPainter == null) {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer instanceof ITextViewerExtension2) {
-				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
-				fBracketPainter= new MatchingCharacterPainter(sourceViewer, new JavaPairMatcher(BRACKETS));
-				fBracketPainter.setColor(getColor(MATCHING_BRACKETS_COLOR));
-				extension.addPainter(fBracketPainter);
-			}
-		}
-	}
-	
-	private void stopBracketHighlighting() {
-		if (fBracketPainter != null) {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer instanceof ITextViewerExtension2) {
-				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
-				extension.removePainter(fBracketPainter);
-				fBracketPainter.deactivate(true);
-				fBracketPainter.dispose();
-				fBracketPainter= null;
-			}
-		}
-	}
-	
-	private boolean isBracketHighlightingEnabled() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(MATCHING_BRACKETS);
-	}
-	
-	private void startLineHighlighting() {
-		if (fLinePainter == null) {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer instanceof ITextViewerExtension2) {
-				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
-				fLinePainter= new CursorLinePainter(sourceViewer);
-				fLinePainter.setHighlightColor(getColor(CURRENT_LINE_COLOR));
-				extension.addPainter(fLinePainter);
-			}
-		}
-	}
-	
-	private void stopLineHighlighting() {
-		if (fLinePainter != null) {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer instanceof ITextViewerExtension2) {
-				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
-				extension.removePainter(fLinePainter);
-				fLinePainter.deactivate(true);
-				fLinePainter.dispose();
-				fLinePainter= null;
-			}
-		}
-	}
-	
-	private boolean isLineHighlightingEnabled() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(CURRENT_LINE);
-	}
-	
-	private void showPrintMargin() {
-		if (fPrintMarginPainter == null) {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer instanceof ITextViewerExtension2) {
-				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
-				fPrintMarginPainter= new MarginPainter(getSourceViewer());
-				fPrintMarginPainter.setMarginRulerColor(getColor(PRINT_MARGIN_COLOR));
-				fPrintMarginPainter.setMarginRulerColumn(getPreferenceStore().getInt(PRINT_MARGIN_COLUMN));
-				extension.addPainter(fPrintMarginPainter);
-			}
-		}
-	}
-	
-	private void hidePrintMargin() {
-		if (fPrintMarginPainter != null) {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer instanceof ITextViewerExtension2) {
-				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
-				extension.removePainter(fPrintMarginPainter);
-				fPrintMarginPainter.deactivate(true);
-				fPrintMarginPainter.dispose();
-				fPrintMarginPainter= null;
-			}
-		}
-	}
-	
-	private boolean isPrintMarginVisible() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(PRINT_MARGIN);
-	}
-	
-	private void startAnnotationIndication(AnnotationType annotationType) {
-		ISourceViewer sourceViewer= getSourceViewer();
-		if (sourceViewer instanceof ITextViewerExtension2) {
-			ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
-			if (fProblemPainter == null) {
-				fProblemPainter= new AnnotationPainter(sourceViewer, new AnnotationAccess());
-				extension.addPainter(fProblemPainter);
-			}
-			fProblemPainter.setAnnotationTypeColor(annotationType, getColor(annotationType));
-			fProblemPainter.addAnnotationType(annotationType);
-			fProblemPainter.paint(IPainter.CONFIGURATION);
-		}
-	}
-	
-	private void shutdownAnnotationIndication() {
-		if (!fProblemPainter.isPaintingAnnotations()) {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer instanceof ITextViewerExtension2) {
-				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
-				extension.removePainter(fProblemPainter);
-			}
-			fProblemPainter.deactivate(true);
-			fProblemPainter.dispose();
-			fProblemPainter= null;
-		} else {
-			fProblemPainter.paint(IPainter.CONFIGURATION);
-		}
-	}
-
-	private void stopAnnotationIndication(AnnotationType annotationType) {
-		if (fProblemPainter != null) {
-			fProblemPainter.removeAnnotationType(annotationType);
-			shutdownAnnotationIndication();
-		}
-	}
-	
-	private boolean isAnnotationIndicationEnabled(AnnotationType annotationType) {
-		IPreferenceStore store= getPreferenceStore();
-		AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(annotationType);
-		if (info != null)
-			return store.getBoolean(info.fEditorPreference);
-		return false;
-	}
-	
-	private boolean isAnnotationIndicationInOverviewRulerEnabled(AnnotationType annotationType) {
-		IPreferenceStore store= getPreferenceStore();
-		AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(annotationType);
-		if (info != null)
-			return store.getBoolean(info.fOverviewRulerPreference);
-		return false;
-	}
-	
-	private void showAnnotationIndicationInOverviewRuler(AnnotationType annotationType, boolean show) {
-		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-		OverviewRuler ruler= asv.getOverviewRuler();
-		if (ruler != null) {
-			ruler.setColor(annotationType, getColor(annotationType));
-			ruler.showAnnotation(annotationType, show);
-			ruler.update();
-		}
-	}
-
-	private void setColorInOverviewRuler(AnnotationType annotationType, Color color) {
-		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-		OverviewRuler ruler= asv.getOverviewRuler();
-		if (ruler != null) {
-			ruler.setColor(annotationType, color);
-			ruler.update();
-		}
-	}
 
 	private void configureTabConverter() {
 		if (fTabConverter != null) {
@@ -1500,45 +1298,24 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	private void showOverviewRuler() {
-		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-		asv.showOverviewRuler();
-		
-		OverviewRuler overviewRuler= asv.getOverviewRuler();
-		if (overviewRuler != null) {
-			for (int i= 0; i < ANNOTATION_LAYERS.length; i++) {
-				AnnotationType type= ANNOTATION_LAYERS[i];
-				overviewRuler.setLayer(type, i);	
-				if (isAnnotationIndicationInOverviewRulerEnabled(type))
-					showAnnotationIndicationInOverviewRuler(type, true);
+		if (fOverviewRuler != null) {
+			if (getSourceViewer() instanceof ISourceViewerExtension) {
+				((ISourceViewerExtension) getSourceViewer()).showAnnotationsOverview(true);
+				fSourceViewerDecorationSupport.updateOverviewDecorations();
 			}
 		}
 	}
 	
 	private void hideOverviewRuler() {
-		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-		asv.hideOverviewRuler();
+		if (getSourceViewer() instanceof ISourceViewerExtension) {
+			fSourceViewerDecorationSupport.hideAnnotationOverview();
+			((ISourceViewerExtension) getSourceViewer()).showAnnotationsOverview(false);
+		}
 	}
 	
 	private boolean isOverviewRulerVisible() {
 		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(OVERVIEW_RULER);
-	}
-	
-	private Color getColor(String key) {
-		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
-		return getColor(rgb);
-	}
-	
-	private Color getColor(RGB rgb) {
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		return textTools.getColorManager().getColor(rgb);
-	}
-	
-	private Color getColor(AnnotationType annotationType) {
-		AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(annotationType);
-		if (info != null)
-			return getColor(info.fColorPreference);
-		return null;
 	}
 	
 	/*
@@ -1561,12 +1338,26 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fJavaEditorErrorTickUpdater= null;
 		}
 		
-		if (fSelectionHistory != null)
+		if (fSelectionHistory != null) {
 			fSelectionHistory.dispose();
+			fSelectionHistory= null;
+		}
 				
-		if (fActionGroups != null)
-			fActionGroups.dispose();		
+		if (fActionGroups != null) {
+			fActionGroups.dispose();
+			fActionGroups= null;
+		}
+			
+		if (fSourceViewerDecorationSupport != null) {
+			fSourceViewerDecorationSupport.dispose();
+			fSourceViewerDecorationSupport= null;
+		}
 		
+		if (fBracketMatcher != null) {
+			fBracketMatcher.dispose();
+			fBracketMatcher= null;
+		}
+			
 		super.dispose();
 	}
 	
@@ -1577,27 +1368,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		super.createPartControl(parent);
 		
-		if (isBracketHighlightingEnabled())
-			startBracketHighlighting();
-		if (isLineHighlightingEnabled())
-			startLineHighlighting();
-		if (isPrintMarginVisible())
-			showPrintMargin();
-		
-		
-		Iterator e= ANNOTATION_MAP.keySet().iterator();
-		while (e.hasNext()) {
-			AnnotationType type= (AnnotationType) e.next();
-			if (isAnnotationIndicationEnabled(type))
-				startAnnotationIndication(type);
-		}
-			
-		if (isTabConversionEnabled())
-			startTabConversion();
-
 		if (isOverviewRulerVisible())
 			showOverviewRuler();
 			
+		if (isTabConversionEnabled())
+			startTabConversion();			
 			
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 		preferences.addPropertyChangeListener(fPropertyChangeListener);			
@@ -1636,213 +1411,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}					
 	}
 	
-	private static class ExitPolicy implements LinkedPositionUI.ExitPolicy {
-		
-		final char fExitCharacter;
-		
-		public ExitPolicy(char exitCharacter) {
-			fExitCharacter= exitCharacter;
-		}
-
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
-		 */
-		public ExitFlags doExit(LinkedPositionManager manager, VerifyEvent event, int offset, int length) {
-			
-			if (event.character == fExitCharacter) {
-				if (manager.anyPositionIncludes(offset, length))
-					return new ExitFlags(LinkedPositionUI.COMMIT| LinkedPositionUI.UPDATE_CARET, false);
-				else
-					return new ExitFlags(LinkedPositionUI.COMMIT, true);
-			}	
-			
-			switch (event.character) {			
-			case '\b':
-				if (manager.getFirstPosition().length == 0)
-					return new ExitFlags(0, false);
-				else
-					return null;
-				
-			case '\n':
-			case '\r':
-				return new ExitFlags(LinkedPositionUI.COMMIT, true);
-				
-			default:
-				return null;
-			}						
-		}
-
-	}
-	
-	private class BracketInserter implements VerifyKeyListener, LinkedPositionUI.ExitListener {
-		
-		private boolean fCloseBrackets= true;
-		private boolean fCloseStrings= true;
-		
-		private int fOffset;
-		private int fLength;
-
-		public void setCloseBracketsEnabled(boolean enabled) {
-			fCloseBrackets= enabled;
-		}
-
-		public void setCloseStringsEnabled(boolean enabled) {
-			fCloseStrings= enabled;
-		}
-
-		private boolean hasIdentifierToTheRight(IDocument document, int offset) {
-			try {
-				int end= offset;
-				IRegion endLine= document.getLineInformationOfOffset(end);
-				int maxEnd= endLine.getOffset() + endLine.getLength();
-				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
-					++end;
-
-				return end != maxEnd && Character.isJavaIdentifierPart(document.getChar(end));
-
-			} catch (BadLocationException e) {
-				// be conservative
-				return true;
-			}
-		}
-
-		private boolean hasIdentifierToTheLeft(IDocument document, int offset) {
-			try {
-				int start= offset;
-				IRegion startLine= document.getLineInformationOfOffset(start);
-				int minStart= startLine.getOffset();
-				while (start != minStart && Character.isWhitespace(document.getChar(start - 1)))
-					--start;
-				
-				return start != minStart && Character.isJavaIdentifierPart(document.getChar(start - 1));
-
-			} catch (BadLocationException e) {
-				return true;
-			}			
-		}
-
-		private boolean hasCharacterToTheRight(IDocument document, int offset, char character) {
-			try {
-				int end= offset;
-				IRegion endLine= document.getLineInformationOfOffset(end);
-				int maxEnd= endLine.getOffset() + endLine.getLength();
-				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
-					++end;
-				
-				return end != maxEnd && document.getChar(end) == character;
-
-
-			} catch (BadLocationException e) {
-				// be conservative
-				return true;
-			}			
-		}
-		
-		/*
-		 * @see org.eclipse.swt.custom.VerifyKeyListener#verifyKey(org.eclipse.swt.events.VerifyEvent)
-		 */
-		public void verifyKey(VerifyEvent event) {			
-
-			if (!event.doit)
-				return;
-
-			final ISourceViewer sourceViewer= getSourceViewer();
-			IDocument document= sourceViewer.getDocument();
-
-			final Point selection= sourceViewer.getSelectedRange();
-			final int offset= selection.x;
-			final int length= selection.y;
-
-			switch (event.character) {
-			case '(':
-				if (hasCharacterToTheRight(document, offset + length, '('))
-					return;
-
-				// fall through
-
-			case '[':
-					if (!fCloseBrackets)
-						return;
- 					if (hasIdentifierToTheRight(document, offset + length))
- 						return;
-			
-				// fall through
-			
-			case '"':
-				if (event.character == '"') {
-					if (!fCloseStrings)
-						return;
- 					if (hasIdentifierToTheLeft(document, offset) || hasIdentifierToTheRight(document, offset + length))
- 						return;
-				}
-				
-				try {		
-					ITypedRegion partition= document.getPartition(offset);
-					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && partition.getOffset() != offset)
-						return;
-
-					final char character= event.character;
-					final char closingCharacter= getPeerCharacter(character);		
-					final StringBuffer buffer= new StringBuffer();
-					buffer.append(character);
-					buffer.append(closingCharacter);
-
-					document.replace(offset, length, buffer.toString());
-
-					LinkedPositionManager manager= new LinkedPositionManager(document);
-					manager.addPosition(offset + 1, 0);
-
-					fOffset= offset;
-					fLength= 2;
-			
-					LinkedPositionUI editor= new LinkedPositionUI(sourceViewer, manager);
-					editor.setCancelListener(this);
-					editor.setExitPolicy(new ExitPolicy(closingCharacter));
-					editor.setFinalCaretOffset(offset + 2);
-					editor.enter();
-
-					IRegion newSelection= editor.getSelectedRegion();
-					sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection.getLength());
-	
-					event.doit= false;
-
-				} catch (BadLocationException e) {
-				}
-				break;	
-			}
-		}
-		
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitListener#exit(boolean)
-		 */
-		public void exit(boolean accept) {
-			if (accept)
-				return;
-
-			// remove brackets
-			try {
-				final ISourceViewer sourceViewer= getSourceViewer();
-				IDocument document= sourceViewer.getDocument();
-				document.replace(fOffset, fLength, null);
-			} catch (BadLocationException e) {
-			}
-		}
-
-	}
-	
-	protected AnnotationType getAnnotationType(String preferenceKey) {
-		Iterator e= ANNOTATION_MAP.keySet().iterator();
-		while (e.hasNext()) {
-			AnnotationType type= (AnnotationType) e.next();
-			AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(type);
-			if (info != null) {
-				if (preferenceKey.equals(info.fColorPreference) || preferenceKey.equals(info.fEditorPreference) || preferenceKey.equals(info.fOverviewRulerPreference)) 
-					return type;
-			}
-		}
-		return null;
-	}
-	
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
@@ -1872,94 +1440,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 						stopTabConversion();
 					return;
 				}
-				
-				if (MATCHING_BRACKETS.equals(p)) {
-					if (isBracketHighlightingEnabled())
-						startBracketHighlighting();
-					else
-						stopBracketHighlighting();
-					return;
-				}
-				
-				if (MATCHING_BRACKETS_COLOR.equals(p)) {
-					if (fBracketPainter != null)
-						fBracketPainter.setColor(getColor(MATCHING_BRACKETS_COLOR));
-					return;
-				}
-				
-				if (CURRENT_LINE.equals(p)) {
-					if (isLineHighlightingEnabled())
-						startLineHighlighting();
-					else
-						stopLineHighlighting();
-					return;
-				}
-				
-				if (CURRENT_LINE_COLOR.equals(p)) {
-					if (fLinePainter != null) {
-						stopLineHighlighting();
-						startLineHighlighting();
-					}					
-					return;
-				}
-				
-				if (PRINT_MARGIN.equals(p)) {
-					if (isPrintMarginVisible())
-						showPrintMargin();
-					else
-						hidePrintMargin();
-					return;
-				}
-				
-				if (PRINT_MARGIN_COLOR.equals(p)) {
-					if (fPrintMarginPainter != null)
-						fPrintMarginPainter.setMarginRulerColor(getColor(PRINT_MARGIN_COLOR));
-					return;
-				}
-				
-				if (PRINT_MARGIN_COLUMN.equals(p)) {
-					if (fPrintMarginPainter != null)
-						fPrintMarginPainter.setMarginRulerColumn(getPreferenceStore().getInt(PRINT_MARGIN_COLUMN));
-					return;
-				}
-				
+
 				if (OVERVIEW_RULER.equals(p))  {
 					if (isOverviewRulerVisible())
 						showOverviewRuler();
 					else
 						hideOverviewRuler();
 					return;
-				}
-				
-				AnnotationType type= getAnnotationType(p);
-				if (type != null) {
-					
-					AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(type);
-					if (info.fColorPreference.equals(p)) {
-						Color color= getColor(type);
-						if (fProblemPainter != null) {
-							fProblemPainter.setAnnotationTypeColor(type, color);
-							fProblemPainter.paint(IPainter.CONFIGURATION);
-						}
-						setColorInOverviewRuler(type, color);
-						return;
-					}
-					
-					if (info.fEditorPreference.equals(p)) {
-						if (isAnnotationIndicationEnabled(type))
-							startAnnotationIndication(type);
-						else
-							stopAnnotationIndication(type);
-						return;
-					}
-					
-					if (info.fOverviewRulerPreference.equals(p)) {
-						if (isAnnotationIndicationInOverviewRulerEnabled(type))
-							showAnnotationIndicationInOverviewRuler(type, true);
-						else
-							showAnnotationIndicationInOverviewRuler(type, false);
-						return;
-					}
 				}
 
 				IContentAssistant c= asv.getContentAssistant();
@@ -2005,9 +1492,36 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @see JavaEditor#createJavaSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
-		return new AdaptedSourceViewer(parent, ruler, styles);
+		ISharedTextColors sharedColors= JavaPlugin.getDefault().getJavaTextTools().getColorManager();
+		fOverviewRuler= new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);
+		ISourceViewer sourceViewer= new AdaptedSourceViewer(parent, ruler, fOverviewRuler, isOverviewRulerVisible(), styles);
+		fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(sourceViewer, fOverviewRuler, fAnnotationAccess, sharedColors);
+		configureSourceViewerDecorationSupport();
+		return sourceViewer;
 	}
 	
+	/**
+	 * Method configureSourceViewerDecorationSupport.
+	 */
+	private void configureSourceViewerDecorationSupport() {
+
+		fSourceViewerDecorationSupport.setCharacterPairMatcher(fBracketMatcher);
+				
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.UNKNOWN, UNKNOWN_INDICATION_COLOR, UNKNOWN_INDICATION, UNKNOWN_INDICATION_IN_OVERVIEW_RULER, 0);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.BOOKMARK, BOOKMARK_INDICATION_COLOR, BOOKMARK_INDICATION, BOOKMARK_INDICATION_IN_OVERVIEW_RULER, 1);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.TASK, TASK_INDICATION_COLOR, TASK_INDICATION, TASK_INDICATION_IN_OVERVIEW_RULER, 2);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.SEARCH, SEARCH_RESULT_INDICATION_COLOR, SEARCH_RESULT_INDICATION, SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER, 3);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.WARNING, WARNING_INDICATION_COLOR, WARNING_INDICATION, WARNING_INDICATION_IN_OVERVIEW_RULER, 4);
+		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.ERROR, ERROR_INDICATION_COLOR, ERROR_INDICATION, ERROR_INDICATION_IN_OVERVIEW_RULER, 5);
+				
+		
+		fSourceViewerDecorationSupport.setCursorLinePainterPreferenceKeys(CURRENT_LINE, CURRENT_LINE_COLOR);
+		fSourceViewerDecorationSupport.setMarginPainterPreferenceKeys(PRINT_MARGIN, PRINT_MARGIN_COLOR, PRINT_MARGIN_COLUMN);
+		fSourceViewerDecorationSupport.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
+		
+		fSourceViewerDecorationSupport.install(getPreferenceStore());
+	}
+
 	/*
 	 * @see JavaEditor#synchronizeOutlinePageSelection()
 	 */

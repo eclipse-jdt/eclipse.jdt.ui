@@ -11,7 +11,7 @@
 package org.eclipse.jdt.ui.text;
 
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
+import org.eclipse.jface.text.source.ISharedTextColors;
 
 
 /**
@@ -25,7 +25,7 @@ import org.eclipse.swt.graphics.RGB;
  *
  * @see IJavaColorConstants
  */
-public interface IColorManager {
+public interface IColorManager extends ISharedTextColors {
 	
 	/**
 	 * Returns a color object for the given key. The color objects 
@@ -36,18 +36,4 @@ public interface IColorManager {
 	 * @return the color object for the given key
 	 */
 	Color getColor(String key);
-	
-	/**
-	 * Returns the color object for the value represented by the given
-	 * <code>RGB</code> object.
-	 *
-	 * @param rgb the rgb color specification
-	 * @return the color object for the given rgb value
-	 */
-	Color getColor(RGB rgb);	
-	
-	/**
-	 * Disposes all color objects remembered by this color manager.
-	 */
-	void dispose();
 }

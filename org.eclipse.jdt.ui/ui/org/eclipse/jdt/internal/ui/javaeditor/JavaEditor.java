@@ -1621,7 +1621,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		IColorManager manager= textTools.getColorManager();	
 		
 		IPreferenceStore store= getPreferenceStore();
-		if (store != null) {	
+		if (store != null) {
 		
 			RGB rgb=  null;
 			// foreground color
@@ -1645,6 +1645,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				}
 			}
 			rulerColumn.setBackground(manager.getColor(rgb));
+			
+			rulerColumn.redraw();
 		}
 	}
 	
@@ -1691,7 +1693,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer instanceof ITextViewerExtension2) {
 				// Remove existing hovers			
-				((ITextViewerExtension2)sourceViewer).removeTextHover(t);
+				((ITextViewerExtension2)sourceViewer).removeTextHovers(t);
 				
 				int[] stateMasks= configuration.getConfiguredTextHoverStateMasks(getSourceViewer(), t);
 

@@ -19,6 +19,9 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 
 /**
+ * JavaPairMatcher.java
+ */
+/**
  * Helper class for match pairs of characters.
  */
 public class JavaPairMatcher implements ICharacterPairMatcher {
@@ -50,7 +53,7 @@ public class JavaPairMatcher implements ICharacterPairMatcher {
 
 		fDocument= document;
 
-		if (matchPairsAt() && fStartPos != fEndPos)
+		if (fDocument != null && matchPairsAt() && fStartPos != fEndPos)
 			return new Region(fStartPos, fEndPos - fStartPos + 1);
 			
 		return null;
@@ -67,14 +70,21 @@ public class JavaPairMatcher implements ICharacterPairMatcher {
 	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#dispose()
 	 */
 	public void dispose() {
+		clear();
 		fDocument= null;
+		fReader= null;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#clear()
+	 */
+	public void clear() {
 		if (fReader != null) {
 			try {
 				fReader.close();
 			} catch (IOException x) {
 				// ignore
 			}
-			fReader= null;
 		}
 	}
 	

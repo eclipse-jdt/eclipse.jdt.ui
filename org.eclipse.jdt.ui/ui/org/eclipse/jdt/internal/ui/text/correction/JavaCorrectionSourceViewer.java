@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.text.information.IInformationPresenter;
+import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -46,8 +47,9 @@ public class JavaCorrectionSourceViewer extends SourceViewer {
 	
 	private IEditorPart fEditor;
 
-	public JavaCorrectionSourceViewer(Composite parent, IVerticalRuler ruler, int styles, IEditorPart editor) {
-		super(parent, ruler, styles);
+
+	public JavaCorrectionSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IEditorPart editor) {
+		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
 		fEditor= editor;
 	}
 
