@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.text.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -40,7 +42,7 @@ public class ModifierCorrectionSubProcessor {
 	public static final int TO_NON_STATIC= 4;
 	public static final int TO_NON_FINAL= 5;
 	
-	public static void addNonAccessibleMemberProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws CoreException {
+	public static void addNonAccessibleReferenceProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind, int relevance) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -123,6 +125,7 @@ public class ModifierCorrectionSubProcessor {
 					excludedModifiers= Modifier.FINAL;
 					break;
 				default:
+					Assert.isTrue(false, "not supported"); //$NON-NLS-1$
 					return;
 			}
 			ICompilationUnit targetCU= isLocalVar ? cu : ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding);
@@ -138,7 +141,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void addOverridesFinalProposals(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind) throws JavaModelException {
+	public static void addChangeOverriddenModfierProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -173,7 +176,13 @@ public class ModifierCorrectionSubProcessor {
 						excludedModifiers= Modifier.FINAL;
 						includedModifiers= 0;
 						break;
+					case TO_NON_STATIC:
+						label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemethodtononstatic.description", methodName); //$NON-NLS-1$
+						excludedModifiers= Modifier.STATIC;
+						includedModifiers= 0;
+						break;
 					default:
+						Assert.isTrue(false, "not supported"); //$NON-NLS-1$
 						return;
 				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -193,7 +202,6 @@ public class ModifierCorrectionSubProcessor {
 		
 	}
 	
-	
 	public static void addNonFinalLocalProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -207,6 +215,82 @@ public class ModifierCorrectionSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertofinal.description", binding.getName()); //$NON-NLS-1$
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
+		}
+	}
+	
+	
+	
+	public static void addRemoveInvalidModfiersProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int relevance) {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode instanceof MethodDeclaration) {
+			selectedNode= ((MethodDeclaration) selectedNode).getName();
+		}
+		
+		if (!(selectedNode instanceof SimpleName)) {
+			return;
+		}
+
+		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
+		if (binding != null) {
+			String methodName= binding.getName();
+			String label;
+			if (problem.getProblemId() == IProblem.CannotHideAnInstanceMethodWithAStaticMethod) {
+				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemethodtononstatic.description", methodName); //$NON-NLS-1$
+			} else {
+				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.removeinvalidmodifiers.description", methodName); //$NON-NLS-1$				
+			}
+			
+			int excludedModifiers= 0;
+			int includedModifiers= 0;	
+			
+			switch (problem.getProblemId()) {
+			case IProblem.CannotHideAnInstanceMethodWithAStaticMethod:
+					excludedModifiers= Modifier.STATIC;
+					break;
+				case IProblem.IllegalModifierForInterfaceMethod:
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT);
+					break;
+				case IProblem.IllegalModifierForInterface:
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.STRICTFP);
+					break;
+				case IProblem.IllegalModifierForClass:
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.FINAL | Modifier.STRICTFP);
+					break;
+				case IProblem.IllegalModifierForInterfaceField:
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.FINAL);
+					break;
+				case IProblem.IllegalModifierForMemberInterface:
+				case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.STATIC | Modifier.STRICTFP);
+					break;
+				case IProblem.IllegalModifierForMemberClass:
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.STATIC | Modifier.ABSTRACT | Modifier.FINAL | Modifier.STRICTFP);
+					break;
+				case IProblem.IllegalModifierForLocalClass:
+					excludedModifiers= ~(Modifier.ABSTRACT | Modifier.FINAL | Modifier.STRICTFP);
+					break;
+				case IProblem.IllegalModifierForArgument:
+					excludedModifiers= ~Modifier.FINAL;
+					break;
+				case IProblem.IllegalModifierForField:
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.STATIC |  Modifier.FINAL | Modifier.VOLATILE | Modifier.TRANSIENT);
+					break;
+				case IProblem.IllegalModifierForMethod:
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.STATIC | Modifier.ABSTRACT | Modifier.FINAL | Modifier.NATIVE | Modifier.STRICTFP);
+					break;
+				case IProblem.IllegalModifierForVariable:
+					excludedModifiers= ~Modifier.FINAL;
+					break;
+				default:
+					Assert.isTrue(false, "not supported"); //$NON-NLS-1$
+					return;
+			}
+
+			
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
 		}
 	}
 		

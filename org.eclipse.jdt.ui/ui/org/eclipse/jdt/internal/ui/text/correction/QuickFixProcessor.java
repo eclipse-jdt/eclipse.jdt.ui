@@ -21,8 +21,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.ui.text.java.*;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 
 /**
   */
@@ -125,16 +127,33 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DuplicateFinalLocalInitialization:
 			case IProblem.FinalFieldAssignment:
 			case IProblem.DuplicateBlankFinalFieldInitialization:
+			case IProblem.AnonymousClassCannotExtendFinalClass:
+			case IProblem.ClassExtendFinalClass:
 			case IProblem.FinalMethodCannotBeOverridden:
 			case IProblem.InheritedMethodReducesVisibility:
 			case IProblem.MethodReducesVisibility:
 			case IProblem.OverridingNonVisibleMethod:
+			case IProblem.CannotOverrideAStaticMethodWithAnInstanceMethod:
+			case IProblem.CannotHideAnInstanceMethodWithAStaticMethod:
 			case IProblem.LocalVariableHidingLocalVariable:
 			case IProblem.LocalVariableHidingField:
 			case IProblem.FieldHidingLocalVariable:
 			case IProblem.FieldHidingField:
 			case IProblem.ArgumentHidingLocalVariable:
 			case IProblem.ArgumentHidingField:
+			case IProblem.IllegalModifierForInterfaceMethod:
+			case IProblem.IllegalModifierForInterface:
+			case IProblem.IllegalModifierForClass:
+			case IProblem.IllegalModifierForInterfaceField:
+			case IProblem.IllegalModifierForMemberInterface:
+			case IProblem.IllegalModifierForMemberClass:
+			case IProblem.IllegalModifierForLocalClass:
+			case IProblem.IllegalModifierForArgument:
+			case IProblem.IllegalModifierForField:
+			case IProblem.IllegalModifierForMethod:
+			case IProblem.IllegalModifierForVariable:
+			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
+
 				return true;
 			default:
 				return false;
@@ -272,22 +291,42 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NonStaticFieldFromStaticInvocation:
 			case IProblem.InstanceMethodDuringConstructorInvocation:
 			case IProblem.InstanceFieldDuringConstructorInvocation:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_STATIC, 5); 
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_STATIC, 5); 
 				break;
 			case IProblem.NonBlankFinalLocalAssignment:
 			case IProblem.DuplicateFinalLocalInitialization:
 			case IProblem.FinalFieldAssignment:
 			case IProblem.DuplicateBlankFinalFieldInitialization:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_FINAL, 9); 
+			case IProblem.AnonymousClassCannotExtendFinalClass:
+			case IProblem.ClassExtendFinalClass:	
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_FINAL, 9); 
 				break;
 			case IProblem.InheritedMethodReducesVisibility:
-			case IProblem.MethodReducesVisibility:
+			case IProblem.MethodReducesVisibility:		
 			case IProblem.OverridingNonVisibleMethod:
-				ModifierCorrectionSubProcessor.addOverridesFinalProposals(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE);
+				ModifierCorrectionSubProcessor.addChangeOverriddenModfierProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE);
 				break;			
 			case IProblem.FinalMethodCannotBeOverridden:
-				ModifierCorrectionSubProcessor.addOverridesFinalProposals(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_FINAL);
-				break;			
+				ModifierCorrectionSubProcessor.addChangeOverriddenModfierProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_FINAL);
+				break;
+			case IProblem.CannotOverrideAStaticMethodWithAnInstanceMethod:
+				ModifierCorrectionSubProcessor.addChangeOverriddenModfierProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC);
+				break;
+			case IProblem.CannotHideAnInstanceMethodWithAStaticMethod:
+			case IProblem.IllegalModifierForInterfaceMethod:
+			case IProblem.IllegalModifierForInterface:
+			case IProblem.IllegalModifierForClass:
+			case IProblem.IllegalModifierForInterfaceField:
+			case IProblem.IllegalModifierForMemberInterface:
+			case IProblem.IllegalModifierForMemberClass:
+			case IProblem.IllegalModifierForLocalClass:
+			case IProblem.IllegalModifierForArgument:
+			case IProblem.IllegalModifierForField:
+			case IProblem.IllegalModifierForMethod:
+			case IProblem.IllegalModifierForVariable:
+			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
+				ModifierCorrectionSubProcessor.addRemoveInvalidModfiersProposal(context, problem, proposals, 5); 
+				break;
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:
 			case IProblem.NotVisibleType:
@@ -300,7 +339,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NotVisibleField:
 			case IProblem.ImportNotVisible:
 			case IProblem.JavadocNotVisibleType:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10); 
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10); 
 				break;
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
@@ -338,7 +377,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NeedToEmulateFieldWriteAccess:
 			case IProblem.NeedToEmulateMethodAccess:
 			case IProblem.NeedToEmulateConstructorAccess:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE, 5);
+				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE, 5);
 				break;
 			case IProblem.SuperfluousSemicolon:
 				LocalCorrectionsSubProcessor.addSuperfluousSemicolonProposal(context, problem, proposals);
@@ -375,6 +414,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ArgumentHidingLocalVariable:
 			case IProblem.ArgumentHidingField:
 				LocalCorrectionsSubProcessor.addHidingVariablesProposals(context, problem, proposals);
+			case IProblem.IncompatibleExceptionInThrowsClause:
+			case IProblem.IncompatibleExceptionInInheritedMethodThrowsClause:
+				
+			
 			default:
 		}
 	}

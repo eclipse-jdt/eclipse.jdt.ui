@@ -335,7 +335,7 @@ public class LocalCorrectionsSubProcessor {
 				proposals.add(proposal);
 			}
 		}
-		ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC, 4);
+		ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC, 4);
 	}
 	
 	private static ITypeBinding getDeclaringTypeBinding(IBinding accessBinding) {
