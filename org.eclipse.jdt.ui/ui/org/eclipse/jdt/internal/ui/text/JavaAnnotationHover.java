@@ -116,7 +116,11 @@ public class JavaAnnotationHover implements IAnnotationHover {
 						continue;
 				} else if (TEXT_RULER_HOVER.equals(fType)) {				
 					AnnotationPreference preference= getAnnotationPreference(a.getAnnotationType());
-					if (preference == null || !fStore.getBoolean(preference.getTextPreferenceKey()))
+					if (preference == null || !(fStore.getBoolean(preference.getTextPreferenceKey()) || (preference.getHighlightPreferenceKey() != null && fStore.getBoolean(preference.getHighlightPreferenceKey()))))
+						continue;
+				} else if (VERTICAL_RULER_HOVER.equals(fType)) {
+					AnnotationPreference preference= getAnnotationPreference(a.getAnnotationType());
+					if (preference == null || !fStore.getBoolean(preference.getVerticalRulerPreferenceKey()))
 						continue;
 				}
 				
@@ -152,7 +156,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 					Object type= fAnnotationAccess.getType((Annotation)a);
 					if (type != null) {
 						AnnotationPreference preference= getAnnotationPreference(type.toString());
-						if (preference == null || !fStore.getBoolean(preference.getTextPreferenceKey()))
+						if (preference == null || !(fStore.getBoolean(preference.getTextPreferenceKey()) || fStore.getBoolean(preference.getHighlightPreferenceKey())))
 							continue;
 					} else
 						continue;
