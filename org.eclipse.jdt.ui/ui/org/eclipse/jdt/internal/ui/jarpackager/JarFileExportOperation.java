@@ -133,6 +133,16 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	}
 
 	/**
+	 * Adds a new info to the list with the passed information.
+	 * Normally the export operation continues after a warning.
+	 * @param	message		the message
+	 * @param	exception	the throwable that caused the warning, or <code>null</code>
+	 */
+	protected void addInfo(String message, Throwable error) {
+		fStatus.add(new Status(IStatus.INFO, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, error));
+	}
+
+	/**
 	 * Adds a new warning to the list with the passed information.
 	 * Normally the export operation continues after a warning.
 	 * @param	message		the message
@@ -440,7 +450,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 			if (fJavaNameToClassFilesMap == null) {
 				// Could not fully build map. fallback is to export whole directory
 				String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.missingSourceFileAttributeExportedAll", classContainer.getLocation().toFile()); //$NON-NLS-1$
-				addWarning(msg, null);
+				addInfo(msg, null);
 				fExportedClassContainers.add(classContainer);
 				return getClassesIn(classContainer);
 			}
