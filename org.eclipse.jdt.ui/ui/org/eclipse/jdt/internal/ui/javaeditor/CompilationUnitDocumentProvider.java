@@ -406,9 +406,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					} catch (JavaModelException ex) {
 						if (!ex.isDoesNotExist())
 							handleCoreException(ex, ex.getMessage());
-					} finally {
-						// ensure problem requestor gets deactivated
-						//fCollectedProblems= null;
 					}
 				}
 			}
