@@ -132,7 +132,7 @@ public class ImportsStructure implements IImportsStructure {
 		ISourceRange sourceRange= curr.getSourceRange();
 		int currOffset= sourceRange.getOffset();
 		int currLength= sourceRange.getLength();
-		int currEndLine= buffer.getLineOfOffset(currLength);
+		int currEndLine= buffer.getLineOfOffset(currOffset + currLength);
 			
 		for (int i= 1; i < decls.length; i++) {
 			String name= curr.getElementName();
