@@ -129,7 +129,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * The content outline page of the Java editor. The viewer implements a proprietary
  * update mechanism based on Java model deltas. It does not react on domain changes.
  * It is specified to show the content of ICompilationUnits and IClassFiles.
- * Pulishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outline"</code>.
+ * Publishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outline"</code>.
  */
 public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdaptable , IPostSelectionProvider {
 
@@ -822,7 +822,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private ToggleLinkingAction fToggleLinkingAction;
 	
 	private CompositeActionGroup fActionGroups;
-	private CCPActionGroup fCCPActionGroup;
 
 	private IPropertyChangeListener fPropertyChangeListener;
 	
@@ -1024,7 +1023,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		// we must create the groups after we have set the selection provider to the site
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenViewActionGroup(this), 
-				fCCPActionGroup= new CCPActionGroup(this),
+				new CCPActionGroup(this),
 				new GenerateActionGroup(this),
 				new RefactorActionGroup(this), 
 				new JavaSearchActionGroup(this)});
@@ -1197,7 +1196,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	}
 	
 	/**
-	 * Checkes whether a given Java element is an inner type.
+	 * Checks whether a given Java element is an inner type.
 	 */
 	private boolean isInnerType(IJavaElement element) {
 		

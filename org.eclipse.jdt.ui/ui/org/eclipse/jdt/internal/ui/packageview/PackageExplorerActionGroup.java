@@ -91,7 +91,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private ToggleLinkingAction fToggleLinkingAction;
 
 	private NavigateActionGroup fNavigateActionGroup;
-	private CCPActionGroup fCCPActionGroup;
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;	
@@ -119,7 +118,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		setGroups(new ActionGroup[] {
 			new NewWizardsActionGroup(site),
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
-			fCCPActionGroup= new CCPActionGroup(fPart),
+			new CCPActionGroup(fPart),
 			new GenerateActionGroup(fPart), 
 			new RefactorActionGroup(fPart),
 			new ImportActionGroup(fPart),
