@@ -76,7 +76,7 @@ public class ExtractTempTests extends RefactoringTest {
 		JavaCore.setOptions(options);	
 	}
 
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName) throws Exception{
+	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, String guessedTempName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength(), 
@@ -85,14 +85,20 @@ public class ExtractTempTests extends RefactoringTest {
 		ref.setReplaceAllOccurrences(replaceAll);
 		ref.setDeclareFinal(makeFinal);
 		ref.setTempName(tempName);
+
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
+		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEquals("incorrect extraction", getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+	
+	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName) throws Exception{
+		helper1(startLine, startColumn, endLine, endColumn, replaceAll, makeFinal, tempName, tempName);
 	}	
 	
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName) throws Exception{
@@ -286,6 +292,26 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(4, 14, 4, 26, true, false, "temp");
 	}
 	
+	public void test40() throws Exception{
+		printTestDisabledMessage("test for bug 21815");
+//		helper1(4, 9, 4, 16, true, false, "temp");
+	}
+
+	public void test41() throws Exception{
+		printTestDisabledMessage("test for bug 21815");
+//		helper1(4, 9, 4, 36, true, false, "temp");
+	}
+
+	public void test42() throws Exception{
+//		printTestDisabledMessage("test for bug 19930");
+		helper1(5, 16, 5, 35, true, false, "temp", "length");
+	}
+
+	public void test43() throws Exception{
+//		printTestDisabledMessage("test for bug 19930");
+		helper1(5, 20, 5, 36, true, false, "temp", "fred");
+	}
+
 	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
@@ -383,6 +409,16 @@ public class ExtractTempTests extends RefactoringTest {
 	public void testFail21() throws Exception{
 		//test for bug 19851
 		failHelper1(6, 9, 6, 24, false, false, "temp");
+	}	
+
+	public void testFail22() throws Exception{
+//		printTestDisabledMessage("test for bug 21815");
+		failHelper1(5, 9, 5, 12, false, false, "temp");
+	}	
+
+	public void testFail23() throws Exception{
+		printTestDisabledMessage("test for bug 21939");
+//		failHelper1(5, 16, 5, 19, false, false, "temp");
 	}	
 	
 }
