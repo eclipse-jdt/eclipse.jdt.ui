@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import org.eclipse.core.resources.IResource;
 
@@ -29,8 +30,12 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.ui.JavaUI;
@@ -112,31 +117,14 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	 */
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
 		Object[] source= event.getElements();
-		if (source == null) {
-			super.handleLabelProviderChanged(event);
+		IContentProvider provider= getContentProvider();
+		if (source != null && provider instanceof BaseJavaElementContentProvider) {
+			BaseJavaElementContentProvider javaProvider= (BaseJavaElementContentProvider)provider;
+			Object[] mapped= javaProvider.getCorrespondingJavaElements(source, true);
+			super.handleLabelProviderChanged(new LabelProviderChangedEvent((IBaseLabelProvider)event.getSource(), mapped));	
 			return;
-		}
-		
-		// map the event to the Java elements if possible
-		// this does not handle the ambiguity of default packages
-		Object[] mapped= new Object[source.length];
-		for (int i= 0; i < source.length; i++) {
-			Object o= source[i];
-			// needs to handle the case of:
-			// default package
-			// package fragment root on project
-			if (o instanceof IResource) {
-				IResource r= (IResource)o;
-				IJavaElement element= JavaCore.create(r);
-				if (element != null) 
-					mapped[i]= element;
-				else
-					mapped[i]= o;
-			} else {
-				mapped[i]= o;
-			}
-		}
-		super.handleLabelProviderChanged(new LabelProviderChangedEvent((IBaseLabelProvider)event.getSource(), mapped));	
+		} 
+		super.handleLabelProviderChanged(event);
 	}
 	
 	/**
