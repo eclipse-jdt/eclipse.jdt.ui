@@ -48,6 +48,8 @@ import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -101,6 +103,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	private Label fClassToTestLabel;
 	private Text fClassToTestText;
 	private Button fClassToTestButton;
+	private JavaTypeCompletionProcessor fClassToTestCompletionProcessor;
 	
 	private boolean fFirstTime;  
 
@@ -122,6 +125,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
 		fMethodStubsButtons.setLabelText(WizardMessages.getString("NewTestClassWizPage.method.Stub.label")); //$NON-NLS-1$
+		
+		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false); //$NON-NLS-1$
 
 		fClassToTestStatus= new JUnitStatus();
 		fTestClassStatus= new JUnitStatus();
@@ -313,6 +318,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		gd.widthHint = SWTUtil.getButtonWidthHint(fClassToTestButton);		
 		fClassToTestButton.setLayoutData(gd);
 
+		ControlContentAssistHelper.createTextContentAssistant(fClassToTestText, fClassToTestCompletionProcessor);
 	}
 
 	private void classToTestButtonPressed() {
@@ -350,6 +356,15 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		return type;
 	}
 
+	/*
+	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#packageChanged()
+	 */
+	protected IStatus packageChanged() {
+		IStatus status= super.packageChanged();
+		fClassToTestCompletionProcessor.setPackageFragment(getPackageFragment());
+		return status;
+	}
+	
 	private IStatus classToTestClassChanged() {
 		fClassToTestButton.setEnabled(getPackageFragmentRoot() != null);	// sets the test class field?
 		IStatus status= validateClassToTest();
