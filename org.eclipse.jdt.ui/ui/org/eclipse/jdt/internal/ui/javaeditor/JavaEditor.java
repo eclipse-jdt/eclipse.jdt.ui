@@ -906,7 +906,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 					text.redrawRange(offset, length, false);
 				} catch (IllegalArgumentException x) {
-					JavaPlugin.log(x);
+//					JavaPlugin.log(x);
 				}
 			}
 		}
