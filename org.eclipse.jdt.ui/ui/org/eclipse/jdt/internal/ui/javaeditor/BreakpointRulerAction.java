@@ -44,7 +44,8 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 					markers= resource.findMarkers(IDebugConstants.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
 				else {
 					IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
-					root.findMarkers(IDebugConstants.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
+					//fix for: 1GEUMGZ
+					markers= root.findMarkers(IDebugConstants.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
 				}
 				
 				if (markers != null) {
