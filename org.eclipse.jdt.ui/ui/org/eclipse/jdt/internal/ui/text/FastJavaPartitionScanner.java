@@ -57,8 +57,8 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 	/** The amount of characters already read on first call to nextToken(). */
 	private int fPrefixLength;
 	
-	//emulate JavaPartitionScanner
-	private static final boolean fgEmulate= true;
+	// emulate JavaPartitionScanner
+	private static final boolean fgEmulate= false;
 	private int fJavaOffset;
 	private int fJavaLength;
 	
@@ -96,7 +96,8 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner {
 			// characters
 	 		switch (ch) {
 	 		case ICharacterScanner.EOF:
-		 		if (fTokenLength > 0) {		 			
+		 		if (fTokenLength > 0) {
+		 			fLast= NONE; // ignore last
 		 			return preFix(fState, JAVA, NONE, 0);
 
 		 		} else {
