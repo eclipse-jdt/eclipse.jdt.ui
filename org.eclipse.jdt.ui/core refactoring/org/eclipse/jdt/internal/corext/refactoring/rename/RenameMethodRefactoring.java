@@ -172,8 +172,11 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	 */		
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		IMethod orig= (IMethod)WorkingCopyUtil.getOriginal(fMethod);
-		if (orig == null || ! orig.exists())
-			return RefactoringStatus.createFatalErrorStatus("The selected method has been deleted from '" + fMethod.getCompilationUnit().getElementName()+ "'.");
+		if (orig == null || ! orig.exists()){
+			String message= RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.deleted", //$NON-NLS-1$
+								fMethod.getCompilationUnit().getElementName());
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}	
 		fMethod= orig;
 		
 		RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
@@ -383,7 +386,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	
 	public final IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			return new CompositeChange("Rename Method", fChangeManager.getAllChanges());
+			return new CompositeChange(RefactoringCoreMessages.getString("RenameMethodRefactoring.rename"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
 		}	
@@ -403,7 +406,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 	
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", fOccurrences.length);				
+		pm.beginTask("", fOccurrences.length);				 //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){
 			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
 			if (!(element instanceof ICompilationUnit))
@@ -411,7 +414,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				String editName= "Update method occurrence";
+				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_occurrence"); //$NON-NLS-1$
 				manager.get(cu).addTextEdit(editName, createTextChange(results[j]));
 			}
 			pm.worked(1);
@@ -425,7 +428,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 	
 	final void addDeclarationUpdate(TextChange change) throws JavaModelException{
-		change.addTextEdit("Update method declaration", SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewName)); 
+		change.addTextEdit(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewName));  //$NON-NLS-1$
 	}
 	
 	final TextEdit createTextChange(SearchResult searchResult) {

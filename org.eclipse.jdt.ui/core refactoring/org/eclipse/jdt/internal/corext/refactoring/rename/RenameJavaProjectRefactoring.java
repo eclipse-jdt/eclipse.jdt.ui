@@ -9,6 +9,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -62,7 +64,9 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Rename Java project '" + getCurrentName() + "' to:'" + fNewName + "'";
+		String messages= RefactoringCoreMessages.getFormattedString("RenameJavaProjectRefactoring.rename", //$NON-NLS-1$
+							new String[]{getCurrentName(), fNewName});
+		return messages;
 	}
 	
 	/*
@@ -94,16 +98,16 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		if (! fProject.exists())
-			return RefactoringStatus.createFatalErrorStatus("");
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
 		if (fProject.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus("");
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
 		if (! fProject.isConsistent())
-			return RefactoringStatus.createFatalErrorStatus("");
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
 		if (! fProject.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus("");
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
 		return new RefactoringStatus();
 	}
@@ -118,7 +122,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 			return result;
 		
 		if (projectNameAlreadyExists(newName))
-			return RefactoringStatus.createFatalErrorStatus("A project with that name already exists.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameJavaProjectRefactoring.already_exists")); //$NON-NLS-1$
 		
 		return new RefactoringStatus();
 	}
@@ -128,10 +132,13 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			if (isReadOnly())
-				return RefactoringStatus.createErrorStatus("Project " + fProject.getElementName() + " is marked as read-only.");
+			if (isReadOnly()){
+				String message= RefactoringCoreMessages.getFormattedString("RenameJavaProjectRefactoring.read_only", //$NON-NLS-1$
+									fProject.getElementName());
+				return RefactoringStatus.createErrorStatus(message);
+			}	
 			return new RefactoringStatus();
 		} finally{
 			pm.done();
@@ -152,7 +159,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new RenameJavaProjectChange(fProject, fNewName, fUpdateReferences);
 		} finally{

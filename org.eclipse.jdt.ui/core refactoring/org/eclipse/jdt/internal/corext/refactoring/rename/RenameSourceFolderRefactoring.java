@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -36,7 +37,9 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Rename Source Folder:" + fSourceFolder + " to:" + fNewName;
+		String message= RefactoringCoreMessages.getFormattedString("RenameSourceFolderRefactoring.rename", //$NON-NLS-1$
+					new String[]{fSourceFolder.getElementName(), fNewName});
+		return message;
 	}
 	
 	public Object getNewElement() throws JavaModelException{
@@ -75,25 +78,25 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		if (! fSourceFolder.exists())
-			return RefactoringStatus.createFatalErrorStatus("");
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
 		if (fSourceFolder.isArchive())
-			return RefactoringStatus.createFatalErrorStatus("");
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
 		if (fSourceFolder.isExternal())	
-			return RefactoringStatus.createFatalErrorStatus("");
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 			
 		if (fSourceFolder.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus("");
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 			
 		if (! fSourceFolder.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus("");	
+			return RefactoringStatus.createFatalErrorStatus("");	 //$NON-NLS-1$
 		
 		if (! fSourceFolder.isConsistent())	
-			return RefactoringStatus.createFatalErrorStatus("");	
+			return RefactoringStatus.createFatalErrorStatus("");	 //$NON-NLS-1$
 		
 		if (fSourceFolder.getUnderlyingResource() instanceof IProject)
-			return RefactoringStatus.createFatalErrorStatus("");
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 
 		return new RefactoringStatus();
 	}
@@ -104,11 +107,11 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		if (! newName.trim().equals(newName))
-			return RefactoringStatus.createFatalErrorStatus("Name must not start or end with a blank.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameSourceFolderRefactoring.blank")); //$NON-NLS-1$
 		
 		IContainer c= 	fSourceFolder.getCorrespondingResource().getParent();
 		if (! c.getFullPath().isValidSegment(newName))
-			return RefactoringStatus.createFatalErrorStatus("This is an invalid name for a file or folder.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameSourceFolderRefactoring.invalid_name")); //$NON-NLS-1$
 		
 		RefactoringStatus result= RefactoringStatus.create(c.getWorkspace().validateName(newName, IResource.FOLDER));
 		if (result.hasFatalError())
@@ -121,10 +124,10 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 		IJavaProject project= fSourceFolder.getJavaProject();
 		IPath p= project.getProject().getFullPath().append(newName);
 		if (project.findPackageFragmentRoot(p) != null)
-			return RefactoringStatus.createFatalErrorStatus("An element with this name already exists");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameSourceFolderRefactoring.already_exists")); //$NON-NLS-1$
 		
 		if (project.getProject().findMember(new Path(newName)) != null)
-			return RefactoringStatus.createFatalErrorStatus("An element with this name already exists");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameSourceFolderRefactoring.alread_exists")); //$NON-NLS-1$
 		return result;		
 	}
 	
@@ -136,10 +139,13 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			if (isReadOnly())
-				return RefactoringStatus.createErrorStatus("Source folder " + fSourceFolder.getElementName() + " is marked as read-only.");
+			if (isReadOnly()){
+				String message= RefactoringCoreMessages.getFormattedString("RenameSourceFolderRefactoring.read_only", //$NON-NLS-1$
+									fSourceFolder.getElementName());
+				return RefactoringStatus.createErrorStatus(message);
+			}	
 			return new RefactoringStatus();
 		} finally{
 			pm.done();
@@ -158,7 +164,7 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new RenameSourceFolderChange(fSourceFolder, fNewName);
 		} finally{

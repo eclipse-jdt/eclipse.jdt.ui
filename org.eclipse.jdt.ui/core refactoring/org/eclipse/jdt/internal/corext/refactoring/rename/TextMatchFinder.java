@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
@@ -60,9 +61,9 @@ class TextMatchFinder {
 			findTextMatches(pm, scope, scanner, javaDocMatches, commentsMatches, stringMatches);
 			int patternLength= scanner.getPattern().length();
 			String newName= refactoring.getNewName();
-			addMatches(manager, newName, patternLength, javaDocMatches, "text reference update in JavaDoc");
-			addMatches(manager, newName, patternLength, commentsMatches, "text reference update in a comment");
-			addMatches(manager, newName, patternLength, stringMatches, "text reference update in a string literal");
+			addMatches(manager, newName, patternLength, javaDocMatches, RefactoringCoreMessages.getString("TextMatchFinder.javadoc")); //$NON-NLS-1$
+			addMatches(manager, newName, patternLength, commentsMatches, RefactoringCoreMessages.getString("TextMatchFinder.comment")); //$NON-NLS-1$
+			addMatches(manager, newName, patternLength, stringMatches, RefactoringCoreMessages.getString("TextMatchFinder.string")); //$NON-NLS-1$
 		} catch (CoreException e){
 			throw new JavaModelException(e);
 		}
@@ -102,7 +103,7 @@ class TextMatchFinder {
 	private void findTextMatches(IProgressMonitor pm) throws JavaModelException{	
 		try{
 			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-			pm.beginTask("", projects.length);
+			pm.beginTask("", projects.length); //$NON-NLS-1$
 			
 			Set enclosingProjectSet = createEnclosingProjectSet();
 			
@@ -130,7 +131,7 @@ class TextMatchFinder {
 		try{
 			if (resource instanceof IFile){
 				IJavaElement element= JavaCore.create(resource);
-				pm.beginTask("", 1);
+				pm.beginTask("", 1); //$NON-NLS-1$
 				if (!(element instanceof ICompilationUnit))
 					return;
 				if (! fScope.encloses((ICompilationUnit)element))
@@ -140,8 +141,8 @@ class TextMatchFinder {
 			if (resource instanceof IContainer){
 				IContainer container= (IContainer)resource;
 				IResource[] members= container.members();
-				pm.beginTask("", members.length);
-				pm.subTask("searching for text matches in:" + container.getFullPath());
+				pm.beginTask("", members.length); //$NON-NLS-1$
+				pm.subTask(RefactoringCoreMessages.getString("TextMatchFinder.searching") + container.getFullPath()); //$NON-NLS-1$
 				for (int i = 0; i < members.length; i++) {
 					if (pm.isCanceled())
 						throw new OperationCanceledException();

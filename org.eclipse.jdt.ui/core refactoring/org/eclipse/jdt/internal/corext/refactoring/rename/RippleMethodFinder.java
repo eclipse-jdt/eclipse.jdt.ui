@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 
 /**
@@ -92,8 +94,8 @@ public class RippleMethodFinder {
 			if (m.isBinary())
 				continue; 
 			IType type= m.getDeclaringType();
-			Assert.isTrue(! visitedTypes.contains(type), "! visitedTypes.contains(type)");
-			Assert.isTrue(type.isInterface() || declaresAsVirtual(type, method), "second condition");
+			Assert.isTrue(! visitedTypes.contains(type), RefactoringCoreMessages.getString("RippleMethodFinder.assert.contain")); //$NON-NLS-1$
+			Assert.isTrue(type.isInterface() || declaresAsVirtual(type, method), RefactoringCoreMessages.getString("RippleMethodFinder.assert.second")); //$NON-NLS-1$
 			
 			visitedTypes.add(type);
 			result.add(m);
@@ -116,7 +118,7 @@ public class RippleMethodFinder {
 	 
 		
 	private static IMethod findAppropriateMethod(Set visitedTypes, List methodQueue, IType type, IMethod method, IProgressMonitor pm)throws JavaModelException{
-		pm.beginTask("analizing hierarchy", 1);
+		pm.beginTask(RefactoringCoreMessages.getString("RippleMethodFinder.analizing_hierarchy"), 1); //$NON-NLS-1$
 		IType[] superTypes= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
 		for (int i= 0; i< superTypes.length; i++){
 			IType x= superTypes[i];
@@ -135,7 +137,7 @@ public class RippleMethodFinder {
 	}
 	
 	private static IMethod getTopMostMethod(Set visitedTypes, List methodQueue, IMethod method, IType type, IProgressMonitor pm)throws JavaModelException{
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		Assert.isTrue(Checks.findMethod(method, type) != null);
 		IType[] superTypes= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
 		for (int i= 0; i < superTypes.length; i++){

@@ -89,7 +89,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	 * overriding RenameMethodrefactoring@addOccurrences
 	 */
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getMethod().getCompilationUnit());
 		addReferenceUpdates(manager.get(cu));
 		addDeclarationUpdate(manager.get(cu));
@@ -112,7 +112,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 			return;
 		SearchResult[] results= grouped[0].getSearchResults();
 		for (int i= 0; i < results.length; i++){
-			String editName= "Update method reference";
+			String editName= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.update"); //$NON-NLS-1$
 			change.addTextEdit(editName , createTextChange(results[i]));
 		}
 	}

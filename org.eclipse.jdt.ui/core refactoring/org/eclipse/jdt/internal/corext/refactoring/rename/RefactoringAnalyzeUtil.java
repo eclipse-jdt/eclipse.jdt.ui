@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
@@ -37,7 +38,7 @@ public class RefactoringAnalyzeUtil {
 	
 	public static ICompilationUnit getWorkingCopyWithNewContent(TextEdit[] edits, TextChange change, ICompilationUnit cu) throws JavaModelException {
 		for (int i= 0; i < edits.length; i++) {
-			change.addTextEdit("", edits[i]);
+			change.addTextEdit("", edits[i]); //$NON-NLS-1$
 		}
 		ICompilationUnit wc= WorkingCopyUtil.getNewWorkingCopy(cu);
 		Assert.isTrue(! cu.equals(wc));
@@ -59,7 +60,7 @@ public class RefactoringAnalyzeUtil {
 			//FIX ME incorrect - needs backlinking see http://bugs.eclipse.org/bugs/show_bug.cgi?id=11646
 			//see also http://bugs.eclipse.org/bugs/show_bug.cgi?id=12035
 			RefactoringStatusEntry.Context context= JavaSourceContext.create(modifiedWorkingCopy, new SourceRange(0,0));
-			result.addError("Name collision with name " + problemNodes[i].getIdentifier(), context);
+			result.addError(RefactoringCoreMessages.getString("RefactoringAnalyzeUtil.name_collision") + problemNodes[i].getIdentifier(), context); //$NON-NLS-1$
 		}
 		return result;
 	}
@@ -83,7 +84,7 @@ public class RefactoringAnalyzeUtil {
 			if (acd.resolveBinding().getKey() != null)
 				buff.append(acd.resolveBinding().getKey());
 			else
-				buff.append("AnonymousClassDeclaration");	
+				buff.append("AnonymousClassDeclaration");	 //$NON-NLS-1$
 			buff.append('/');	
 		}	
 		
@@ -92,7 +93,7 @@ public class RefactoringAnalyzeUtil {
 			if (td.resolveBinding().getKey() != null)
 				buff.append(td.resolveBinding().getKey());
 			else
-				buff.append("TypeDeclaration");	
+				buff.append("TypeDeclaration");	 //$NON-NLS-1$
 			buff.append('/');	
 		}
 		
@@ -101,7 +102,7 @@ public class RefactoringAnalyzeUtil {
 			if (md.resolveBinding().getKey() != null)
 				buff.append(md.resolveBinding().getKey());
 			else
-				buff.append("MethodDeclaration");	
+				buff.append("MethodDeclaration");	 //$NON-NLS-1$
 		}
 		return buff.toString();
 	}

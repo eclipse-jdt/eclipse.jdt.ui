@@ -47,7 +47,7 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	 */		
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		try{
-			pm.beginTask("", 1);
+			pm.beginTask("", 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(super.checkActivation(new SubProgressMonitor(pm, 1)));
 			if (result.hasFatalError())

@@ -193,7 +193,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		if (Checks.isAlreadyNamed(fPackage, newName))
 			result.addFatalError(RefactoringCoreMessages.getString("RenamePackageRefactoring.another_name")); //$NON-NLS-1$
 		else if (fPackage.getElementName().equalsIgnoreCase(newName))	
-			result.addFatalError("A resource exists with a different case.");
+			result.addFatalError(RefactoringCoreMessages.getString("RenamePackageRefactoring.different_case")); //$NON-NLS-1$
 		result.merge(checkPackageInCurrentRoot(newName));
 		return result;
 	}
@@ -210,11 +210,17 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			result.merge(checkForMainMethods());
 			pm.worked(1);
 			
-			if (fPackage.isReadOnly())
-				result.addWarning("Package \'" + fPackage.getElementName() + "\' is read-only");
+			if (fPackage.isReadOnly()){
+				String message= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.Packagered_only",  //$NON-NLS-1$
+									fPackage.getElementName()); 
+				result.addWarning(message);
+			}	
 				
-			if (fPackage.getCorrespondingResource().isReadOnly())
-				result.addWarning("Resource corresponding to package \'" + fPackage.getElementName() + "\' is read-only");
+			if (fPackage.getCorrespondingResource().isReadOnly()){
+				String message= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.resource_read_only", //$NON-NLS-1$
+									fPackage.getElementName());
+				result.addWarning(message);
+			}	
 				
 			if (!fUpdateReferences)
 				return result;
@@ -353,26 +359,26 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		TextChangeManager manager= new TextChangeManager();
 		
-		pm.subTask("searching for text matches...");
+		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching_text")); //$NON-NLS-1$
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
 		
-		pm.subTask("adding occurrences...");
+		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.adding_occurrences")); //$NON-NLS-1$
 		addReferenceUpdates(manager, new SubProgressMonitor(pm, 1));
 		
 		return manager;
 	}
 	
 	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		TextChangeManager manager= new TextChangeManager();
 		
-		pm.subTask("searching for text matches...");
+		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching_text")); //$NON-NLS-1$
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
 		
-		pm.subTask("adding occurrences...");
+		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.adding_occurrences")); //$NON-NLS-1$
 		addReferenceUpdates(manager, new SubProgressMonitor(pm, 1));
 		
 		//putting it together
@@ -380,12 +386,12 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", fOccurrences.length);
+		pm.beginTask("", fOccurrences.length); //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){
 			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
 			if (!(element instanceof ICompilationUnit))
 				continue;
-			String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_reference");
+			String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_reference"); //$NON-NLS-1$
 			ICompilationUnit cu= 	WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){

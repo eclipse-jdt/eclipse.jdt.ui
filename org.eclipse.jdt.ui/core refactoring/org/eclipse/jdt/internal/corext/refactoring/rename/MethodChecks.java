@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
@@ -38,9 +39,9 @@ public class MethodChecks {
 			return null;
 
 		Context context= JavaSourceContext.create(overrides);
-		String msg= "The selected method overrides method \'" + JavaElementUtil.createMethodSignature(overrides) + "\'"
-						 + " declared in type \'" + JavaModelUtil.getFullyQualifiedName(overrides.getDeclaringType()) + "\'. Reform the operation there.";
-		return RefactoringStatus.createFatalErrorStatus(msg, context);
+		String message= RefactoringCoreMessages.getFormattedString("MethodChecks.overrides", //$NON-NLS-1$
+				new String[]{JavaElementUtil.createMethodSignature(overrides), JavaModelUtil.getFullyQualifiedName(overrides.getDeclaringType())});
+		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
 	
 	public static RefactoringStatus checkIfComesFromInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
@@ -50,19 +51,19 @@ public class MethodChecks {
 			return null;
 
 		Context context= JavaSourceContext.create(inInterface);
-		String msg= "The selected method is an implementation of method \'" + JavaElementUtil.createMethodSignature(inInterface) + "\'"
-						 + " declared in type \'" + JavaModelUtil.getFullyQualifiedName(inInterface.getDeclaringType()) + "\'.";
-		return RefactoringStatus.createFatalErrorStatus(msg, context);
+		String message= RefactoringCoreMessages.getFormattedString("MethodChecks.implements", //$NON-NLS-1$
+				new String[]{JavaElementUtil.createMethodSignature(inInterface), JavaModelUtil.getFullyQualifiedName(inInterface.getDeclaringType())});
+		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
 	
 	//works for virtual methods
 	private static IMethod isDeclaredInInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		try{	
-			pm.beginTask("", 4);
+			pm.beginTask("", 4); //$NON-NLS-1$
 			ITypeHierarchy hier= method.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(pm, 1));
 			IType[] classes= hier.getAllClasses();
 			IProgressMonitor subPm= new SubProgressMonitor(pm, 3);
-			subPm.beginTask("", classes.length);
+			subPm.beginTask("", classes.length); //$NON-NLS-1$
 			for (int i= 0; i < classes.length; i++) {
 				ITypeHierarchy superTypes= classes[i].newSupertypeHierarchy(new SubProgressMonitor(subPm, 1));
 				IType[] superinterfaces= superTypes.getAllSuperInterfaces(classes[i]);
