@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -85,33 +86,75 @@ public class PushDownTests extends RefactoringTest {
 	}
 
 	private void helper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
-											String[] selectedFieldNames,
-											String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, 
-											String[] namesOfFieldsToPullUp, String[] namesOfMethodsToDeclareAbstract, 
-											String[][] signaturesOfMethodsToDeclareAbstract) throws Exception{
-		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+						String[] selectedFieldNames,
+						String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, 
+						String[] namesOfFieldsToPullUp, String[] namesOfMethodsToDeclareAbstract, 
+						String[][] signaturesOfMethodsToDeclareAbstract, String[] additionalCuNames, String[] additionalPackNames) throws Exception{
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		
+		IPackageFragment[] addtionalPacks= createAdditionalPackages(additionalCuNames, additionalPackNames);
+		ICompilationUnit[] additonalCus= createAdditionalCus(additionalCuNames, addtionalPacks);
+		
 		try{
-			PushDownRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cu);
+			PushDownRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cuA);
 
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass but got " + checkInputResult.toString(), checkInputResult.isOK());	
 			performChange(ref.createChange(new NullProgressMonitor()));
 
 			String expected= getFileContents(getOutputTestFileName("A"));
-			String actual= cu.getSource();
+			String actual= cuA.getSource();
 			SourceCompareUtil.compare(actual, expected);
+			
+			for (int i= 0; i < additonalCus.length; i++) {
+				ICompilationUnit unit= additonalCus[i];
+				String expectedS= getFileContents(getOutputTestFileName(additionalCuNames[i]));
+				String actualS= unit.getSource();
+				SourceCompareUtil.compare(actualS, expectedS);
+			}
+			
 		} finally{
 			performDummySearch();
-			cu.delete(false, null);
+			cuA.delete(false, null);
+			for (int i= 0; i < additonalCus.length; i++) {
+				additonalCus[i].delete(false, null);
+			}
+			for (int i= 0; i < addtionalPacks.length; i++) {
+				if (! addtionalPacks[i].equals(getPackageP()))
+					addtionalPacks[i].delete(false, null);
+			}
 		}	
 	}
 
+	private ICompilationUnit[] createAdditionalCus(String[] additionalCuNames, IPackageFragment[] addtionalPacks) throws Exception {
+		ICompilationUnit[] additonalCus= new ICompilationUnit[0];
+		if (additionalCuNames != null){
+			additonalCus= new ICompilationUnit[additionalCuNames.length];
+			for (int i= 0; i < additonalCus.length; i++) {
+				additonalCus[i]= createCUfromTestFile(addtionalPacks[i], additionalCuNames[i]);
+			}
+		}
+		return additonalCus;
+	}
+
+	private IPackageFragment[] createAdditionalPackages(String[] additionalCuNames, String[] additionalPackNames) {
+		IPackageFragment[] additionalPacks= new IPackageFragment[0];
+		if (additionalPackNames != null){
+			additionalPacks= new IPackageFragment[additionalPackNames.length];
+			assertTrue(additionalPackNames.length == additionalCuNames.length);
+			for (int i= 0; i < additionalPackNames.length; i++) {
+				additionalPacks[i]= getRoot().getPackageFragment(additionalPackNames[i]);
+			}
+		}
+		return additionalPacks;
+	}
+
 	private void failActivationHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
-											String[] selectedFieldNames,
-											String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, 
-											String[] namesOfFieldsToPullUp, String[] namesOfMethodsToDeclareAbstract, 
-											String[][] signaturesOfMethodsToDeclareAbstract,
-											int expectedSeverity) throws Exception{
+										String[] selectedFieldNames,
+										String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, 
+										String[] namesOfFieldsToPullUp, String[] namesOfMethodsToDeclareAbstract, 
+										String[][] signaturesOfMethodsToDeclareAbstract,
+										int expectedSeverity) throws Exception{
 												
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
@@ -163,7 +206,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test1() throws Exception{
@@ -180,7 +223,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test2() throws Exception{
@@ -197,7 +240,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test3() throws Exception{
@@ -214,7 +257,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test4() throws Exception{
@@ -231,7 +274,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test5() throws Exception{
@@ -248,7 +291,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test6() throws Exception{
@@ -265,7 +308,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test7() throws Exception{
@@ -282,7 +325,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test8() throws Exception{
@@ -299,7 +342,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test9() throws Exception{
@@ -316,7 +359,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test10() throws Exception{
@@ -333,7 +376,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test11() throws Exception{
@@ -350,7 +393,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test12() throws Exception{
@@ -367,7 +410,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test13() throws Exception{
@@ -384,7 +427,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test14() throws Exception{
@@ -401,7 +444,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test15() throws Exception{
@@ -418,7 +461,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test16() throws Exception{
@@ -435,7 +478,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test17() throws Exception{
@@ -452,7 +495,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test18() throws Exception{
@@ -469,7 +512,7 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
 	public void test19() throws Exception{
@@ -486,7 +529,43 @@ public class PushDownTests extends RefactoringTest {
 			   selectedFieldNames,	
 			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
 			   namesOfFieldsToPushDown, 
-			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void test20() throws Exception{
+		String[] selectedMethodNames= {"f", "m"};
+		String[][] selectedMethodSignatures= {new String[0], new String[0]};
+		String[] selectedFieldNames= {"i"};
+		String[] namesOfMethodsToPushDown= {"f"};
+		String[][] signaturesOfMethodsToPushDown= {new String[0]};
+		String[] namesOfFieldsToPushDown= {"i"};
+		String[] namesOfMethodsToDeclareAbstract= {"m"};
+		String[][] signaturesOfMethodsToDeclareAbstract= {new String[0]};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, 
+			   new String[]{"B"}, new String[]{"p"});
+	}
+
+	public void test21() throws Exception{
+		String[] selectedMethodNames= {"f", "m"};
+		String[][] selectedMethodSignatures= {new String[0], new String[0]};
+		String[] selectedFieldNames= {"i"};
+		String[] namesOfMethodsToPushDown= {"f", "m"};
+		String[][] signaturesOfMethodsToPushDown= {new String[0], new String[0]};
+		String[] namesOfFieldsToPushDown= {"i"};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, 
+			   new String[]{"B", "C"}, new String[]{"p", "p"});
 	}
 	
 	public void testFail0() throws Exception {
