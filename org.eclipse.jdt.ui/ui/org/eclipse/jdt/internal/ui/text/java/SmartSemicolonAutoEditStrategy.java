@@ -107,6 +107,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		ITextEditorExtension2 extension= (ITextEditorExtension2)editor.getAdapter(ITextEditorExtension2.class);
 		if (extension != null && !extension.validateEditorInputState())
 			return;
+		if (isMultilineSelection(document, command))
+			return;
 
 		// 1: find concerned line / position in java code, location in statement
 		int pos= command.offset;
@@ -138,6 +140,23 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		command.text= adjustSpacing(document, position, fCharacter);
 		command.doit= true;
 		command.owner= null;
+	}
+
+	/**
+	 * Returns <code>true</code> if the document command is applied on a multi
+	 * line selection, <code>false</code> otherwise.
+	 * 
+	 * @param document the document
+	 * @param command the command
+	 * @return <code>true</code> if <code>command</code> is a multiline command
+	 */
+	private boolean isMultilineSelection(IDocument document, DocumentCommand command) {
+		try {
+			return document.getNumberOfLines(command.offset, command.length) > 1;
+		} catch (BadLocationException e) {
+			// ignore
+			return false;
+		}
 	}
 
 	/**
