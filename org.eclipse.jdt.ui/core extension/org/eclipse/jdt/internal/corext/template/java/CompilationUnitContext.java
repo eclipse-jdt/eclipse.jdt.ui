@@ -61,10 +61,11 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 
 		try {
 			IJavaElement element= fCompilationUnit.getElementAt(getStart());
-			while (element != null && element.getElementType() != elementType)
-				element= element.getParent();
+			if (element == null) {
+				element= fCompilationUnit;
+			}
 			
-			return element;
+			return fCompilationUnit.getAncestor(elementType);
 
 		} catch (JavaModelException e) {
 			return null;
