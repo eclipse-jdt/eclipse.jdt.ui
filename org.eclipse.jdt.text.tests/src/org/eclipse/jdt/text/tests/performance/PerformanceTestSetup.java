@@ -40,8 +40,6 @@ public class PerformanceTestSetup extends TestSetup {
 
 	private static final String PROJECT_ZIP= "/testResources/org.eclipse.swt-R3_0.zip";
 
-	private static final String INTRO_VIEW= "org.eclipse.ui.internal.introview";
-
 	private boolean fSetPerspective;
 	
 	public PerformanceTestSetup(Test test) {
@@ -61,7 +59,7 @@ public class PerformanceTestSetup extends TestSetup {
 		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
 		IWorkbenchPage activePage= activeWindow.getActivePage();
 		
-		IViewReference viewReference= activePage.findViewReference(INTRO_VIEW);
+		IViewReference viewReference= activePage.findViewReference(EditorTestHelper.INTRO_VIEW_ID);
 		if (viewReference != null)
 			activePage.hideView(viewReference);
 		

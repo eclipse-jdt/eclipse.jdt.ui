@@ -29,7 +29,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -183,19 +182,19 @@ public class ResourceTestHelper {
 	}
 
 	public static boolean disableAutoBuilding() {
-		IWorkspaceDescription description= ResourcesPlugin.getWorkspace().getDescription();
-		boolean wasOn= description.isAutoBuilding();
-		if (wasOn)
-			description.setAutoBuilding(false);
-		return wasOn;
+		Preferences preferences= ResourcesPlugin.getPlugin().getPluginPreferences();
+		boolean oldValue= preferences.getBoolean(ResourcesPlugin.PREF_AUTO_BUILDING);
+		if (oldValue)
+			preferences.setValue(ResourcesPlugin.PREF_AUTO_BUILDING, false);
+		return oldValue;
 	}
 
 	public static boolean enableAutoBuilding() {
-		IWorkspaceDescription description= ResourcesPlugin.getWorkspace().getDescription();
-		boolean wasOff= !description.isAutoBuilding();
-		if (wasOff)
-			description.setAutoBuilding(true);
-		return wasOff;
+		Preferences preferences= ResourcesPlugin.getPlugin().getPluginPreferences();
+		boolean oldValue= preferences.getBoolean(ResourcesPlugin.PREF_AUTO_BUILDING);
+		if (!oldValue)
+			preferences.setValue(ResourcesPlugin.PREF_AUTO_BUILDING, true);
+		return oldValue;
 	}
 	
 	public static boolean setAutoBuilding(boolean value) {

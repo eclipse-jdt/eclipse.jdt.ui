@@ -12,12 +12,15 @@ package org.eclipse.jdt.text.tests.performance;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Assert;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -98,6 +101,10 @@ public class EditorTestHelper {
 	public static final String OUTLINE_VIEW_ID= "org.eclipse.ui.views.ContentOutline";
 
 	public static final String PACKAGE_EXPLORER_VIEW_ID= "org.eclipse.jdt.ui.PackageExplorer";
+	
+	public static final String NAVIGATOR_VIEW_ID= "org.eclipse.ui.views.ResourceNavigator";
+
+	public static final String INTRO_VIEW_ID= "org.eclipse.ui.internal.introview";
 	
 	public static IEditorPart openInEditor(IFile file, boolean runEventLoop) throws PartInitException {
 		IEditorPart part= IDE.openEditor(getActivePage(), file);
@@ -389,5 +396,23 @@ public class EditorTestHelper {
 		Assert.assertTrue(folder.exists());
 		JavaProjectHelper.addSourceContainer(javaProject, "src");
 		return javaProject;
+	}
+
+	public static IFile[] findFiles(IResource resource) throws CoreException {
+		List files= new ArrayList();
+		findFiles(resource, files);
+		return (IFile[]) files.toArray(new IFile[files.size()]);
+	}
+
+	private static void findFiles(IResource resource, List files) throws CoreException {
+		if (resource instanceof IFile) {
+			files.add(resource);
+			return;
+		}
+		if (resource instanceof IContainer) {
+			IResource[] resources= ((IContainer) resource).members();
+			for (int i= 0; i < resources.length; i++)
+				findFiles(resources[i], files);
+		}
 	}
 }
