@@ -145,7 +145,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	
 	public void endTest(String testName){
 		TestRunInfo testInfo= fRunnerViewPart.getTestInfo(testName);
-		if(testInfo.fStatus == ITestRunListener.STATUS_OK) 
+		if(testInfo == null || testInfo.fStatus == ITestRunListener.STATUS_OK) 
 			return;
 
 		TableItem tableItem= new TableItem(fTable, SWT.NONE);
