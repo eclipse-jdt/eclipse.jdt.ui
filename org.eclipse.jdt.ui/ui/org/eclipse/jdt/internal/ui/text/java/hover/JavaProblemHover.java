@@ -48,7 +48,13 @@ public class JavaProblemHover implements IJavaEditorTextHover {
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+		if (fCompilationUnitEditor == null)
+			return null;
+			
 		List problemPositions= fCompilationUnitEditor.getProblemPositions();
+		if (problemPositions == null)
+			return null;
+			
 		for (Iterator e = problemPositions.iterator(); e.hasNext();) {
 			ProblemPosition pp = (ProblemPosition) e.next();
 			if (pp.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
@@ -57,6 +63,7 @@ public class JavaProblemHover implements IJavaEditorTextHover {
 					return formatMessage(msg);
 			}
 		}
+		
 		return null;
 	}
 	
