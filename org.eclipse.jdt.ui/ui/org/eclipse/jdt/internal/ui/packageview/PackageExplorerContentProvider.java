@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
  
 /**
  * Content provider for the PackageExplorer.
@@ -88,6 +89,8 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		if ((fInput instanceof IJavaElement) && ((IJavaElement) fInput).exists())
 			return false;
 		if ((fInput instanceof IResource) && ((IResource) fInput).exists())
+			return false;
+		if (fInput instanceof WorkingSetModel)
 			return false;
 		postRefresh(fInput);
 		return true;
@@ -555,7 +558,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		return false;
 	}
 	
-	private void postRefresh(Object root) {
+	/* package */ void postRefresh(Object root) {
 		// JFace doesn't refresh when object isn't part of the viewer
 		// Therefore move the refresh start down to the viewer's input
 		if (isParent(root, fInput)) 
@@ -572,7 +575,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		return isParent(root, parent);
 	}
 	
-	private void postRefresh(final Object root, final boolean updateLabels) {
+	/* package */ void postRefresh(final Object root, final boolean updateLabels) {
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();

@@ -16,7 +16,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecorator;
 
 /**
  * Provides the labels for the Package Explorer.
@@ -31,11 +30,11 @@ class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	private ITreeContentProvider fContentProvider;
 
 	private boolean fIsFlatLayout;
-	private TreeHierarchyLayoutProblemsDecorator fProblemDecorator;
+	private PackageExplorerProblemsDecorator fProblemDecorator;
 
 	PackageExplorerLabelProvider(long textFlags, int imageFlags, ITreeContentProvider cp) {
 		super(textFlags, imageFlags);
-		fProblemDecorator= new TreeHierarchyLayoutProblemsDecorator();
+		fProblemDecorator= new PackageExplorerProblemsDecorator();
 		addLabelDecorator(fProblemDecorator);
 		Assert.isNotNull(cp);
 		fContentProvider= cp;

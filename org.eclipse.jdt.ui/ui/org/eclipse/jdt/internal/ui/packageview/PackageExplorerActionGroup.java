@@ -13,6 +13,11 @@ package org.eclipse.jdt.internal.ui.packageview;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IOpenable;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Shell;
@@ -46,17 +51,11 @@ import org.eclipse.ui.views.framelist.FrameList;
 import org.eclipse.ui.views.framelist.GoIntoAction;
 import org.eclipse.ui.views.framelist.UpAction;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IOpenable;
-
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
@@ -87,7 +86,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	private RefactorActionGroup fRefactorActionGroup;
 	private NavigateActionGroup fNavigateActionGroup;
-	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
+	private ViewActionGroup fViewActionGroup;
 	
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
@@ -116,13 +115,13 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart),
 			new ProjectActionGroup(fPart), 
-			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(JavaUI.ID_PACKAGES, shell, workingSetListener),
+			fViewActionGroup= new ViewActionGroup(fPart.getWorkingSetModel(), fPart.getRootMode(), workingSetListener, shell),
 
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
 			new LayoutActionGroup(part)});
 		
 
-		viewer.addFilter(fWorkingSetFilterActionGroup.getWorkingSetFilter());
+		fViewActionGroup.fillFilters(viewer);
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
 		FrameList frameList= new FrameList(frameSource);
@@ -149,12 +148,12 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	//---- Persistent state -----------------------------------------------------------------------
 
 	/* package */ void restoreFilterAndSorterState(IMemento memento) {
-		fWorkingSetFilterActionGroup.restoreState(memento);
+		fViewActionGroup.restoreState(memento);
 		fCustomFiltersActionGroup.restoreState(memento);
 	}
 	
 	/* package */ void saveFilterAndSorterState(IMemento memento) {
-		fWorkingSetFilterActionGroup.saveState(memento);
+		fViewActionGroup.saveState(memento);
 		fCustomFiltersActionGroup.saveState(memento);
 	}
 
@@ -242,6 +241,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 				type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
 				type == IJavaElement.PACKAGE_FRAGMENT;
 		}
+		if (element instanceof IWorkingSet) {
+			return true;
+		}
 		return false;
 	}
 
@@ -304,22 +306,25 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	}
 	
 	private void doWorkingSetChanged(PropertyChangeEvent event) {
-		IWorkingSet workingSet= (IWorkingSet) event.getNewValue();
-		
-		String workingSetName= null;
-		if (workingSet != null)
-			workingSetName= workingSet.getName();
-		fPart.setWorkingSetName(workingSetName);
-		fPart.updateTitle();
-
-		String property= event.getProperty();
-		if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
-			TreeViewer viewer= fPart.getViewer();
-			viewer.getControl().setRedraw(false);
-			viewer.refresh();
-			viewer.getControl().setRedraw(true);
+		if (ViewActionGroup.MODE_CHANGED.equals(event.getProperty())) {
+			fPart.rootModeChanged(((Integer)event.getNewValue()).intValue());
+		} else {
+			IWorkingSet workingSet= (IWorkingSet) event.getNewValue();
+			
+			String workingSetName= null;
+			if (workingSet != null)
+				workingSetName= workingSet.getName();
+			fPart.setWorkingSetName(workingSetName);
+			fPart.updateTitle();
+	
+			String property= event.getProperty();
+			if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
+				TreeViewer viewer= fPart.getViewer();
+				viewer.getControl().setRedraw(false);
+				viewer.refresh();
+				viewer.getControl().setRedraw(true);
+			}
 		}
-		
 	}
 
 	private boolean doubleClickGoesInto() {
@@ -337,8 +342,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		return fForwardAction;
 	}
 
-	public WorkingSetFilterActionGroup getWorkingSetActionGroup() {
-	    return fWorkingSetFilterActionGroup;
+	public ViewActionGroup getWorkingSetActionGroup() {
+	    return fViewActionGroup;
 	}
 	
 	public CustomFiltersActionGroup getCustomFilterActionGroup() {

@@ -99,14 +99,17 @@ public class ProblemTreeViewer extends TreeViewer {
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
+		Object[] changed= null;
 		if (event instanceof ProblemsLabelChangedEvent) {
 			ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
 			if (!e.isMarkerChange() && canIgnoreChangesFromAnnotionModel()) {
 				return;
 			}
-		}		
+			changed= addAditionalProblemParents(event.getElements());
+		} else {
+			changed= event.getElements();
+		}
 		
-		Object[] changed= event.getElements();
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
 			ArrayList others= new ArrayList();
 			for (int i= 0; i < changed.length; i++) {
@@ -144,5 +147,9 @@ public class ProblemTreeViewer extends TreeViewer {
 		}
 		return super.isExpandable(element);
 	}
+	
+	protected Object[] addAditionalProblemParents(Object[] elements) {
+		return elements;
+	};
 }
 

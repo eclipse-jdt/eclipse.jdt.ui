@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -17,6 +18,8 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -42,10 +45,10 @@ import org.eclipse.jdt.internal.ui.search.WorkingSetComparator;
  * @since 2.0
  * 
  */
-public class WorkingSetFilterActionGroup extends ActionGroup {
+public class WorkingSetFilterActionGroup extends ActionGroup implements IWorkingSetActionGroup {
 
 	private static final String TAG_WORKING_SET_NAME= "workingSetName"; //$NON-NLS-1$
-	private static final String SEPARATOR_ID= "workingSetGroupSeparator"; //$NON-NLS-1$
+	private static final String LRU_GROUP= "workingSet_lru_group"; //$NON-NLS-1$
 
 	private WorkingSetFilter fWorkingSetFilter;
 	
@@ -62,9 +65,9 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	private int fLRUMenuCount;
 	private IMenuManager fMenuManager;
 	private IMenuListener fMenuListener;
+	private List fContributions= new ArrayList();
 
-	public WorkingSetFilterActionGroup(String viewId, Shell shell, IPropertyChangeListener changeListener) {
-		Assert.isNotNull(viewId);
+	public WorkingSetFilterActionGroup(Shell shell, IPropertyChangeListener changeListener) {
 		Assert.isNotNull(shell);
 		Assert.isNotNull(changeListener);
 
@@ -158,8 +161,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	 * @see ActionGroup#fillActionBars(IActionBars)
 	 */
 	public void fillActionBars(IActionBars actionBars) {
-		contributeToToolBar(actionBars.getToolBarManager());
-		contributeToMenu(actionBars.getMenuManager());
+		fillToolBar(actionBars.getToolBarManager());
+		fillViewMenu(actionBars.getMenuManager());
 	}
 	
 	/**
@@ -167,7 +170,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	 * 
 	 * @param tbm the tool bar manager
 	 */
-	public void contributeToToolBar(IToolBarManager tbm) {
+	private void fillToolBar(IToolBarManager tbm) {
 		// do nothing
 	}
 
@@ -176,12 +179,12 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	 * 
 	 * @param mm the menu manager
 	 */
-	public void contributeToMenu(IMenuManager mm) {
-		mm.add(fSelectWorkingSetAction);
-		mm.add(fClearWorkingSetAction);
-		mm.add(fEditWorkingSetAction);
-		mm.add(new Separator());
-		mm.add(new Separator(SEPARATOR_ID));
+	public void fillViewMenu(IMenuManager mm) {
+		add(mm, fSelectWorkingSetAction);
+		add(mm, fClearWorkingSetAction);
+		add(mm, fEditWorkingSetAction);
+		add(mm, new Separator());
+		add(mm, new Separator(LRU_GROUP));
 		addLRUWorkingSetActions(mm);
 		
 		fMenuManager= mm;
@@ -194,9 +197,23 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 		fMenuManager.addMenuListener(fMenuListener);
 	}
 	
+	private void add(IMenuManager mm, IAction action) {
+		IContributionItem item= new ActionContributionItem(action);
+		mm.appendToGroup(ACTION_GROUP, item);
+		fContributions.add(item);
+	}
+	
+	private void add(IMenuManager mm, IContributionItem item) {
+		mm.appendToGroup(ACTION_GROUP, item);
+		fContributions.add(item);
+	}
+	
 	private void removePreviousLRUWorkingSetActions(IMenuManager mm) {
-		for (int i= 1; i <= fLRUMenuCount; i++)
-			mm.remove(WorkingSetMenuContributionItem.getId(i));
+		for (int i= 1; i <= fLRUMenuCount; i++) {
+			String id= WorkingSetMenuContributionItem.getId(i);
+			IContributionItem item= mm.remove(id);
+			fContributions.remove(item);
+		}
 	}
 
 	private void addLRUWorkingSetActions(IMenuManager mm) {
@@ -210,17 +227,27 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 			IWorkingSet workingSet= (IWorkingSet)iter.next();
 			if (workingSet != null) {
 				IContributionItem item= new WorkingSetMenuContributionItem(++i, this, workingSet);
-				mm.insertBefore(SEPARATOR_ID, item);
+				mm.insertBefore(LRU_GROUP, item);
+				fContributions.add(item);
 			}
 		}
 		fLRUMenuCount= i;
+	}
+	
+	public void cleanViewMenu(IMenuManager menuManager) {
+		for (Iterator iter= fContributions.iterator(); iter.hasNext();) {
+			menuManager.remove((IContributionItem)iter.next());
+		}
+		fContributions.clear();
+		fMenuManager.removeMenuListener(fMenuListener);
+		fMenuListener= null;
 	}
 	
 	/* (non-Javadoc)
 	 * @see ActionGroup#dispose()
 	 */
 	public void dispose() {
-		if (fMenuManager != null)
+		if (fMenuManager != null && fMenuListener != null)
 			fMenuManager.removeMenuListener(fMenuListener);
 		
 		if (fWorkingSetListener != null) {

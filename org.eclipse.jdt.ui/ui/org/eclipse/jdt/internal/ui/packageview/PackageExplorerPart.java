@@ -58,8 +58,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -125,7 +125,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 import org.eclipse.jdt.ui.IPackagesViewPart;
 import org.eclipse.jdt.ui.JavaElementSorter;
@@ -165,8 +167,13 @@ public class PackageExplorerPart extends ViewPart
 	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
 	static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
 	static final String TAG_CURRENT_FRAME= "currentFramge"; //$NON-NLS-1$
+	static final String TAG_ROOT_MODE= "rootMode"; //$NON-NLS-1$
 	
 
+	private int fRootMode;
+	private WorkingSetModel fWorkingSetModel;
+	
+	private PackageExplorerLabelProvider fLabelProvider;	
 	private PackageExplorerContentProvider fContentProvider;
 	private FilterUpdater fFilterUpdater;
 	
@@ -358,10 +365,18 @@ public class PackageExplorerPart extends ViewPart
 			}
 			super.handleInvalidSelection(invalidSelection, newSelection);
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected Object[] addAditionalProblemParents(Object[] elements) {
+			if (showWorkingSets()) {
+				return fWorkingSetModel.addWorkingSets(elements);
+			}
+			return elements;
+		}
 	}
  
-	private PackageExplorerLabelProvider fLabelProvider;	
-	
 	/* (non-Javadoc)
 	 * Method declared on IViewPart.
 	 */
@@ -370,7 +385,19 @@ public class PackageExplorerPart extends ViewPart
     public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
+		restoreRootMode(fMemento);
+		fWorkingSetModel= new WorkingSetModel();
+		fWorkingSetModel.restoreState(fMemento);
 		restoreLayoutState(memento);
+	}
+
+	private void restoreRootMode(IMemento memento) {
+		if (memento != null) {
+			Integer value= fMemento.getInteger(TAG_ROOT_MODE);
+			fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue(); 
+		} else {
+			fRootMode= ViewActionGroup.SHOW_PROJECTS;
+		}
 	}
 
 	private void restoreLayoutState(IMemento memento) {
@@ -431,6 +458,8 @@ public class PackageExplorerPart extends ViewPart
 			fActionSet.dispose();
 		if (fFilterUpdater != null)
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fFilterUpdater);
+		if (fWorkingSetModel != null)
+			fWorkingSetModel.dispose();
 		super.dispose();	
 	}
 
@@ -441,9 +470,7 @@ public class PackageExplorerPart extends ViewPart
 		
 		fViewer= createViewer(parent);
 		fViewer.setUseHashlookup(true);
-		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			fViewer.setComparer(new PackageExplorerElementComparer());
-		}
+		
 		initDragAndDrop();
 		
 		setProviders();
@@ -538,6 +565,7 @@ public class PackageExplorerPart extends ViewPart
 		//content provider must be set before the label provider
 		fContentProvider= createContentProvider();
 		fContentProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
+		fViewer.setComparer(createElementComparer());
 		fViewer.setContentProvider(fContentProvider);
 	
 		fLabelProvider= createLabelProvider();
@@ -567,13 +595,28 @@ public class PackageExplorerPart extends ViewPart
 	public PackageExplorerContentProvider createContentProvider() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		boolean showCUChildren= store.getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
-		return new PackageExplorerContentProvider(this, showCUChildren);
+		if (showProjects()) 
+			return new PackageExplorerContentProvider(this, showCUChildren);
+		else
+			return new WorkingSetAwareContentProvider(this, showCUChildren, fWorkingSetModel);
 	}
 	
 	private PackageExplorerLabelProvider createLabelProvider() {
-		return new PackageExplorerLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+		if (showProjects()) 
+			return new PackageExplorerLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
+				fContentProvider);
+		else
+			return new WorkingSetAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
 				fContentProvider);			
+	}
+	
+	private IElementComparer createElementComparer() {
+		if (showProjects()) 
+			return null;
+		else
+			return WorkingSetModel.COMPARER;
 	}
 	
 	private void fillActionBars() {
@@ -582,19 +625,23 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	private Object findInputElement() {
-		Object input= getSite().getPage().getInput();
-		if (input instanceof IWorkspace) { 
-			return JavaCore.create(((IWorkspace)input).getRoot());
-		} else if (input instanceof IContainer) {
-			IJavaElement element= JavaCore.create((IContainer)input);
-			if (element != null && element.exists())
-				return element;
-			return input;
+		if (showWorkingSets()) {
+			return fWorkingSetModel;
+		} else {
+			Object input= getSite().getPage().getInput();
+			if (input instanceof IWorkspace) { 
+				return JavaCore.create(((IWorkspace)input).getRoot());
+			} else if (input instanceof IContainer) {
+				IJavaElement element= JavaCore.create((IContainer)input);
+				if (element != null && element.exists())
+					return element;
+				return input;
+			}
+			//1GERPRT: ITPJUI:ALL - Packages View is empty when shown in Type Hierarchy Perspective
+			// we can't handle the input
+			// fall back to show the workspace
+			return JavaCore.create(JavaPlugin.getWorkspace().getRoot());
 		}
-		//1GERPRT: ITPJUI:ALL - Packages View is empty when shown in Type Hierarchy Perspective
-		// we can't handle the input
-		// fall back to show the workspace
-		return JavaCore.create(JavaPlugin.getWorkspace().getRoot());	
 	}
 	
 	/**
@@ -623,10 +670,17 @@ public class PackageExplorerPart extends ViewPart
 	String getToolTipText(Object element) {
 		String result;
 		if (!(element instanceof IResource)) {
-			if (element instanceof IJavaModel) 
+			if (element instanceof IJavaModel) {
 				result= PackagesMessages.getString("PackageExplorerPart.workspace"); //$NON-NLS-1$
-			else
-				result= JavaElementLabels.getTextLabel(element, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);		
+			} else if (element instanceof IJavaElement){
+				result= JavaElementLabels.getTextLabel(element, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);
+			} else if (element instanceof IWorkingSet) {
+				result= ((IWorkingSet)element).getName();
+			} else if (element instanceof WorkingSetModel) {
+				result= PackagesMessages.getString("PackageExplorerPart.workingSetModel"); //$NON-NLS-1$
+			} else {
+				result= fLabelProvider.getText(element);
+			}
 		} else {
 			IPath path= ((IResource) element).getFullPath();
 			if (path.isRoot()) {
@@ -848,6 +902,10 @@ public class PackageExplorerPart extends ViewPart
 				memento.putMemento(fMemento);
 			return;
 		}
+		
+		memento.putInteger(TAG_ROOT_MODE, fRootMode);
+		fWorkingSetModel.saveState(memento);
+		
 // disable the persisting of state which can trigger expensive operations as
 // a side effect: see bug 52474 and 53958
 		saveCurrentFrame(memento);
@@ -875,13 +933,6 @@ public class PackageExplorerPart extends ViewPart
 		memento.putInteger(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, fLinkingEnabled ? 1 : 0);
 	}
 
-	/**
-	 * Saves the current layout state.
-	 * 
-	 * @param memento	the memento to save the state into or
-	 * 					<code>null</code> to store the state in the preferences
-	 * @since 2.1
-	 */
 	private void saveLayoutState(IMemento memento) {
 		if (memento != null) {	
 			memento.putInteger(TAG_LAYOUT, getLayoutAsInt());
@@ -1336,8 +1387,10 @@ public class PackageExplorerPart extends ViewPart
 	String getFrameName(Object element) {
 		if (element instanceof IJavaElement) {
 			return ((IJavaElement) element).getElementName();
+		} else if (element instanceof WorkingSetModel) {
+			return ""; //$NON-NLS-1$
 		} else {
-			return ((ILabelProvider) getTreeViewer().getLabelProvider()).getText(element);
+			return fLabelProvider.getText(element);
 		}
 	}
 	
@@ -1355,18 +1408,20 @@ public class PackageExplorerPart extends ViewPart
 		if (revealElementOrParent(element))
             return true;
         
-        WorkingSetFilterActionGroup workingSetGroup = fActionSet.getWorkingSetActionGroup();
-        IWorkingSet workingSet = workingSetGroup.getWorkingSet();  	    
-        if (workingSetGroup.isFiltered(getVisibleParent(element), element)) {
-            String message= PackagesMessages.getFormattedString("PackageExplorer.notFound", workingSet.getName());  //$NON-NLS-1$
-            if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.getString("PackageExplorer.filteredDialog.title"), message)) { //$NON-NLS-1$
-                workingSetGroup.setWorkingSet(null, true);		
-                if (revealElementOrParent(element))
-                    return true;
-            }
+        WorkingSetFilterActionGroup workingSetGroup= fActionSet.getWorkingSetActionGroup().getFilterGroup();
+        if (workingSetGroup != null) {
+		    IWorkingSet workingSet= workingSetGroup.getWorkingSet();  	    
+		    if (workingSetGroup.isFiltered(getVisibleParent(element), element)) {
+		        String message= PackagesMessages.getFormattedString("PackageExplorer.notFound", workingSet.getName());  //$NON-NLS-1$
+		        if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.getString("PackageExplorer.filteredDialog.title"), message)) { //$NON-NLS-1$
+		            workingSetGroup.setWorkingSet(null, true);		
+		            if (revealElementOrParent(element))
+		                return true;
+		        }
+		    }
         }
         // try to remove filters
-        CustomFiltersActionGroup filterGroup = fActionSet.getCustomFilterActionGroup();
+        CustomFiltersActionGroup filterGroup= fActionSet.getCustomFilterActionGroup();
         String[] filters= filterGroup.removeFiltersFor(getVisibleParent(element), element, getTreeViewer().getContentProvider()); 
         if (filters.length > 0) {
             String message= PackagesMessages.getString("PackageExplorer.removeFilters"); //$NON-NLS-1$
@@ -1376,7 +1431,7 @@ public class PackageExplorerPart extends ViewPart
                     return true;
             }
         }
-        FrameAction action = fActionSet.getUpAction();
+        FrameAction action= fActionSet.getUpAction();
         while (action.getFrameList().getCurrentIndex() > 0) {
         	// only try to go up if there is a parent frame
         	// fix for bug# 63769 Endless loop after Show in Package Explorer 
@@ -1441,4 +1496,31 @@ public class PackageExplorerPart extends ViewPart
     	selectReveal(new StructuredSelection(element));
     	return ! getSite().getSelectionProvider().getSelection().isEmpty();
     }
+
+	public void rootModeChanged(int newMode) {
+		fRootMode= newMode;
+		ISelection selection= fViewer.getSelection();
+		fViewer.getControl().setRedraw(false);
+		fViewer.setInput(null);
+		setProviders();
+		fViewer.setInput(findInputElement());
+		fViewer.setSelection(selection, true);
+		fViewer.getControl().setRedraw(true);
+	}
+
+	public WorkingSetModel getWorkingSetModel() {
+		return fWorkingSetModel;
+	}
+	
+	public int getRootMode() {
+		return fRootMode;
+	}
+	
+	private boolean showProjects() {
+		return fRootMode == ViewActionGroup.SHOW_PROJECTS;
+	}
+	
+	private boolean showWorkingSets() {
+		return fRootMode == ViewActionGroup.SHOW_WORKING_SETS;
+	}
 }
