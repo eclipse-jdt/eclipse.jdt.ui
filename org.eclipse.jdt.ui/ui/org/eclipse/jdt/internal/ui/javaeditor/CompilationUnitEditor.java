@@ -1312,6 +1312,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
 		configureTabConverter();
+
+		// Must inform the AST provider in UI thread to prevent other from creating the AST
+		JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
 	}
 
 	private void configureTabConverter() {
@@ -1499,13 +1502,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.0
 	 */
 	public void aboutToBeReconciled() {
-
-		// Notify listeners
-		synchronized (fReconcilingListeners) {
-			Object[] listeners = fReconcilingListeners.getListeners();
-			for (int i = 0, length= listeners.length; i < length; ++i)
-				((IJavaReconcilingListener)listeners[i]).aboutToBeReconciled();
-		}
+		// Notify AST provider
+		if (isActivePart())
+			JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
 	}
 	
 	/*
@@ -1514,13 +1513,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	public void reconciled(CompilationUnit ast) {
 
-		// Notify listeners
-		
-		synchronized (fReconcilingListeners) {
-			Object[] listeners = fReconcilingListeners.getListeners();
-			for (int i = 0, length= listeners.length; i < length; ++i)
-				((IJavaReconcilingListener)listeners[i]).reconciled(ast);
-		}
+		// Notify AST provider
+		if (isActivePart())
+			JavaPlugin.getDefault().getASTProvider().reconciled(ast, getInputJavaElement());
 		
 		// Update Java Outline page selection
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
