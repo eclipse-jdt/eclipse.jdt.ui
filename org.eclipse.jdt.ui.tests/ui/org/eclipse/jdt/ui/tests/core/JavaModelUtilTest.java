@@ -16,7 +16,6 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -34,7 +33,6 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class JavaModelUtilTest extends TestCase {
@@ -43,6 +41,8 @@ public class JavaModelUtilTest extends TestCase {
 	
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
+
+	private boolean fEnableAutoBuildAfterTesting;
 
 	private static final IPath LIB= new Path("testresources/mylib.jar");
 
@@ -56,12 +56,15 @@ public class JavaModelUtilTest extends TestCase {
 
 
 	protected void setUp() throws Exception {
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IWorkspace workspace= JavaTestPlugin.getWorkspace();
 		assertNotNull(workspace);
+
+		// disable auto-build
 		IWorkspaceDescription workspaceDesc= workspace.getDescription();
-		
-		if (workspaceDesc.isAutoBuilding())
+		if (workspaceDesc.isAutoBuilding()) {
+			fEnableAutoBuildAfterTesting= true;
 			JavaProjectHelper.setAutoBuilding(false);
+		}
 		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
@@ -94,6 +97,9 @@ public class JavaModelUtilTest extends TestCase {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);
+
+		if (fEnableAutoBuildAfterTesting)
+			JavaProjectHelper.setAutoBuilding(true);
 	}
 
 
