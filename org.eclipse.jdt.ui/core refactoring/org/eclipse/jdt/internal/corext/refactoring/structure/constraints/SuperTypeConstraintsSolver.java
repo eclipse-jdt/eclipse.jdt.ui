@@ -184,7 +184,9 @@ public final class SuperTypeConstraintsSolver {
 				estimate= declaration.getTypeEstimate();
 				if (estimate != null) {
 					type= estimate.chooseSingleType();
-					if (type.getErasure().equals(fModel.getSuperType().getErasure())) {
+					final TType typeErasure= type.getErasure();
+					final TType superErasure= fModel.getSuperType().getErasure();
+					if (!typeErasure.equals(variable.getType().getErasure()) && typeErasure.equals(superErasure)) {
 						declaration.setData(DATA_TYPE_ESTIMATE, type);
 						unit= declaration.getCompilationUnit();
 						if (unit != null) {
