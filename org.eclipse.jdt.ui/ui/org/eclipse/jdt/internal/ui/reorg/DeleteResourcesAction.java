@@ -15,10 +15,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.DeleteResourceAction;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -47,15 +49,15 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		}	
 
 		DeleteRefactoring refactoring= new DeleteRefactoring(selection.toList(), createRootManipulationQuery());
-		
+
+		try{
+					
 		if (!confirmDelete(selection))
 			return;
 
 		if (hasReadOnlyResources(selection) && !isOkToDeleteReadOnly()) 
 			return;
 
-		try{
-			
 			if (! confirmDeleteSourceFolderAsSubresource(selection))	
 				return;
 			MultiStatus status= ClipboardActionUtil.perform(refactoring);
@@ -141,14 +143,14 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 			setEnabled(ClipboardActionUtil.canActivate(new DeleteRefactoring(selection.toList(), null)));
 	}
 	
-	private static boolean confirmDelete(IStructuredSelection selection) {
+	private static boolean confirmDelete(IStructuredSelection selection) throws JavaModelException {
 		Assert.isTrue(ClipboardActionUtil.getSelectedProjects(selection).isEmpty());
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 		String label= createConfirmationString(selection);
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);
 	}
 	
-	private static String createConfirmationString(IStructuredSelection selection) {
+	private static String createConfirmationString(IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() == 1){
 			Object firstElement= selection.getFirstElement();
 			String pattern= createConfirmationStringForSingleElement(firstElement);
@@ -159,26 +161,52 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		}
 	}
 	
-	private static String createConfirmationStringForSingleElement(Object firstElement) {
-		if (isLinkedResource(firstElement))
-			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_single"); //$NON-NLS-1$
-		else
-			return ReorgMessages.getString("DeleteResourcesAction.sure_delete"); //$NON-NLS-1$
-	}
-	
-	private static String createConfirmationStringForMultipleElements(IStructuredSelection selection) {
-		if (containsLinkedResources(selection))
+	private static String createConfirmationStringForSingleElement(Object firstElement) throws JavaModelException {
+		if (isDefaultPackageWithLinkedFiles(firstElement))	
 			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_multiple"); //$NON-NLS-1$
-		else	
-			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_resources"); //$NON-NLS-1$
+	
+		if (! isLinkedResource(firstElement))
+			return ReorgMessages.getString("DeleteResourcesAction.sure_delete"); //$NON-NLS-1$
+		
+		if (! isLinkedPackage(firstElement))	
+			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_single"); //$NON-NLS-1$
+		
+		return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_single_package"); //$NON-NLS-1$
 	}
 	
-	private static boolean containsLinkedResources(IStructuredSelection selection) {
+	private static String createConfirmationStringForMultipleElements(IStructuredSelection selection) throws JavaModelException {
+		if (! containsLinkedResources(selection))
+			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_resources"); //$NON-NLS-1$
+
+		if (! containLinkedPackages(selection))	
+			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_multiple"); //$NON-NLS-1$
+
+		return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_multiple_with_packages"); //$NON-NLS-1$
+	}
+	
+	private static boolean containLinkedPackages(IStructuredSelection selection) {
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			if (isLinkedResource(iter.next()))
+			if (isLinkedPackage(iter.next()))
 				return true;
 		}
 		return false;
+	}
+
+	private static boolean containsLinkedResources(IStructuredSelection selection) throws JavaModelException {
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (isLinkedResource(element))
+				return true;
+			if (isDefaultPackageWithLinkedFiles(element))
+				return true;
+		}
+		return false;
+	}
+
+	private static boolean isLinkedPackage(Object object) {
+		if (!(object instanceof IPackageFragment))
+			return false;
+		return isLinkedResource(ResourceUtil.getResource(object));	
 	}
 	
 	private static boolean isLinkedResource(Object element) {
@@ -186,9 +214,25 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		return (resource != null && resource.isLinked());
 	}
 	
+	private static boolean isDefaultPackageWithLinkedFiles(Object firstElement) throws JavaModelException {
+		if (! isDefaultPackage(firstElement))
+			return false;
+		IPackageFragment defaultPackage= (IPackageFragment)firstElement;
+		ICompilationUnit[] cus= defaultPackage.getCompilationUnits();
+		for (int i= 0; i < cus.length; i++) {
+			if (isLinkedResource(cus[i]))
+				return true;
+		}
+		return false;
+	}
+
+	private static boolean isDefaultPackage(Object firstElement) {
+		return (firstElement instanceof IPackageFragment && ((IPackageFragment)firstElement).isDefaultPackage());
+	}
+
 	private static String getName(Object element){
 		//need to render 1 case differently
-		if (element instanceof IPackageFragment && ((IPackageFragment)element).isDefaultPackage())
+		if (isDefaultPackage(element))
 			return ReorgMessages.getString("DeleteResourcesAction.default_package"); //$NON-NLS-1$
 		else
 			return ReorgUtils.getName(element);

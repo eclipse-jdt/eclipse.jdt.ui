@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -225,8 +226,18 @@ public class DeleteRefactoring extends Refactoring {
 		if (o instanceof IPackageFragmentRoot)
 			return createDeleteChange((IPackageFragmentRoot)o);
 		
-		if (o instanceof ISourceManipulation)
-			return new DeleteSourceManipulationChange((ISourceManipulation)o);
+		if (o instanceof ISourceManipulation){
+			//XXX workaround for bug 31384, in case of linked ISourceManipulation delete the resource
+			ISourceManipulation element= (ISourceManipulation)o;
+			if (element instanceof ICompilationUnit || element instanceof IPackageFragment){
+				if (element instanceof IJavaElement){ //just to be sure
+					IResource resource= ((IJavaElement)element).getResource();
+					if (resource.isLinked())
+						return createDeleteChange(resource);
+				}
+			}
+			return new DeleteSourceManipulationChange(element);
+		}
 		
 		if (o instanceof IJavaElement)
 			return createDeleteChange(getResourceToDelete((IJavaElement)o));
