@@ -146,7 +146,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		AST creator= name.getAST();
 		boolean fullyQualified= false;
 		if (name instanceof QualifiedName) {
-			SimpleName left= ASTNodes.getLeftMostSimpleName((QualifiedName)name);
+			SimpleName left= ASTNodes.getLeftMostSimpleName(name);
 			if (left.resolveBinding() instanceof IPackageBinding)
 				fullyQualified= true;
 		}
