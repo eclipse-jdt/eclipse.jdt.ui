@@ -551,10 +551,15 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.sealedPackagesNotInSelection")); //$NON-NLS-1$
 			return false;
 		}
+		if (!fJarPackage.isMainClassValid(getContainer())) {
+			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.invalidMainClass")); //$NON-NLS-1$
+			return false;
+		}
 		if (incompleteButNotAnError) {
 			setErrorMessage(null);
 			return false;
 		}
+		
 		setErrorMessage(null);
 		return true;
 	}

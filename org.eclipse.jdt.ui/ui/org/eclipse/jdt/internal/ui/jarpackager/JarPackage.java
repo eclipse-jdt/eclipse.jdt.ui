@@ -398,9 +398,7 @@ public class JarPackage implements Serializable {
 	 * Returns <code>true</code> if no main class is specified.
 	 */
 	public boolean isMainClassValid(IRunnableContext context) {
-		if (getMainClassName().length() == 0)
-			return true;		try {				return JavaModelUtil.hasMainMethod(getMainClass());		} catch (JavaModelException e) {			JavaPlugin.log(e.getStatus());		}		return false;
-	}
+		if (getMainClass() == null)			return true;		try {				// Check if main method is in scope			IResource resource= getMainClass().getUnderlyingResource();			if (resource == null || !getSelectedResources().contains(resource))				return false;						// Test if it has a main method			return JavaModelUtil.hasMainMethod(getMainClass());		} catch (JavaModelException e) {			JavaPlugin.log(e.getStatus());		}		return false;	}
 	/**
 	 * Returns the minimal set of packages which contain all the selected Java resources.
 	 * @return	the Set of IPackageFragments which contain all the selected resources
