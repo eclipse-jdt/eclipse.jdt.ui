@@ -217,7 +217,7 @@ public class ASTView extends ViewPart {
 	public ASTView() {
 		fSuperListener= null;
 		fDoLinkWithEditor= false;
-		fCurrentASTLevel= AST.LEVEL_2_0;
+		fCurrentASTLevel= AST.JLS2;
 	}
 	
 	/*(non-Javadoc)
@@ -453,8 +453,8 @@ public class ASTView extends ViewPart {
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
 			
 		fASTVersionToggleActions= new ASTLevelToggle[] {
-				new ASTLevelToggle("AST Level 2.0", AST.LEVEL_2_0), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 3.0", AST.LEVEL_3_0) //$NON-NLS-1$
+				new ASTLevelToggle("AST Level 2.0", AST.JLS2), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level 3.0", AST.JLS3) //$NON-NLS-1$
 		};
 	}
 	
