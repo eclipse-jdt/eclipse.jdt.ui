@@ -13,12 +13,12 @@ package expression_out;
 	public void foo(Selection selection) {
 		Scanner scanner= new Scanner();
 		
-		if (/*]*/extracted(scanner, selection)/*[*/) {
+		if (/*]*/extracted(selection, scanner)/*[*/) {
 			g();
 		}
 	}
 
-	protected boolean extracted(Scanner scanner, Selection selection) {
+	protected boolean extracted(Selection selection, Scanner scanner) {
 		return scanner.x < selection.start && selection.start < scanner.y;
 	}
 	

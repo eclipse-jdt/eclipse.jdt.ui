@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.core.refactoring.code;
 import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Stack;import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;import org.eclipse.jdt.internal.compiler.ast.Argument;import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;import org.eclipse.jdt.internal.compiler.ast.NameReference;
 import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;import org.eclipse.jdt.internal.compiler.ast.TryStatement;import org.eclipse.jdt.internal.compiler.ast.TypeReference;import org.eclipse.jdt.internal.compiler.lookup.BlockScope;import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.eclipse.jdt.internal.compiler.lookup.Scope;import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 /* package */ class ExceptionAnalyzer {
 
@@ -64,6 +65,9 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 		if (exceptionType == null)		// Safety net for null bindings when compiling fails.
 			return;
 		
+		if (isRuntimeException(exceptionType, scope) && !methodThrowsException(exceptionType))
+			return;
+			
 		if (!fCurrentExceptions.contains(exceptionType))
 			fCurrentExceptions.add(exceptionType);
 		
@@ -154,5 +158,28 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.ecl
 	
 	private boolean skipNode(int mode) {
 		return mode != StatementAnalyzer.SELECTED || !fStatementAnalyzer.processesEnclosingMethod();
-	}	
+	}
+	
+	private boolean isRuntimeException(TypeBinding binding, Scope scope) {
+		if (!(binding instanceof ReferenceBinding))
+			return false;
+		
+		ReferenceBinding thrownException= (ReferenceBinding)binding;	
+		TypeBinding runTimeException= scope.getJavaLangRuntimeException();
+		while (thrownException != null) {
+			if (runTimeException == thrownException)
+				return true;
+			thrownException= thrownException.superclass();
+		}
+		return false;
+	}
+	
+	private boolean methodThrowsException(TypeBinding exception) {
+		ReferenceBinding[] methodExceptions = fStatementAnalyzer.getEnclosingMethod().binding.thrownExceptions;
+		for (int i= 0; i < methodExceptions.length; i++) {
+			if (exception == methodExceptions[i])
+				return true;
+		}
+		return false;
+	}
 }

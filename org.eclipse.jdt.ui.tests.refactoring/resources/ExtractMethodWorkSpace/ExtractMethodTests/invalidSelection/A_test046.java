@@ -5,6 +5,6 @@ public class A_test046 {
 		for (int i= 10; i < 10; i++)
 			for (int z= 10; z < 10; z++)
 				/*]*/foo();
-			foo()/*[*/;	
+		foo()/*[*/;	
 	}
 }

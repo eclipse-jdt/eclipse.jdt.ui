@@ -5,9 +5,9 @@ import java.util.ArrayList;import java.util.Iterator;import java.util.List;p
 		List allElements= new ArrayList();
 		Iterator iter= allElements.iterator();		
 
-		/*]*/extracted(iter, allElements);/*[*/
+		/*]*/extracted(allElements, iter);/*[*/
 	}
-	protected void extracted(Iterator iter, List allElements) {
+	protected void extracted(List allElements, Iterator iter) {
 		while (iter.hasNext()) {
 			allElements.add(iter.next());
 		}

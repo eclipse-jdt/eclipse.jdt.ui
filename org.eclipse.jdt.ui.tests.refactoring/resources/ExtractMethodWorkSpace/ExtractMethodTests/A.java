@@ -1,15 +1,11 @@
 public class A {
-	public interface I {
-		public boolean run();
-	}
 	public void foo() {
-		bar (this, new I() {
-			public boolean run() {
-				return true;
-			}
-		});
+		bar(baz(), baz());
 	}
-	public void bar(A a, I i) {
+	public void bar(int i, int y) {
+	}
+	public int baz() {
+		return 0;
 	}
 }
 

@@ -6,11 +6,11 @@ package locals_out;
 		int i= 37;
 		if (i == 0) {
 			int k= 17;
-			/*]*/i= extracted(k, i);/*[*/
+			/*]*/i= extracted(i, k);/*[*/
 		}
 		i++;
 	}
-	protected int extracted(int k, int i) {
+	protected int extracted(int i, int k) {
 		k= k + 1;
 		k += 2;
 		i += 2;

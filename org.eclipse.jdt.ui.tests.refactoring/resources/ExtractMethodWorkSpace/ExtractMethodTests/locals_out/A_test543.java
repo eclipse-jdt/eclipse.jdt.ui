@@ -4,11 +4,11 @@ package locals_out;
 		int i= 0;
 		int[] array= new int[10];
 		
-		/*]*/i= extracted(array, i);/*[*/
+		/*]*/i= extracted(i, array);/*[*/
 		
 		i++;
 	}
-	protected int extracted(int[] array, int i) {
+	protected int extracted(int i, int[] array) {
 		array[i++]= 10;
 		return i;
 	}

@@ -4,155 +4,83 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.IBufferChangedListener;
-import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
+import org.eclipse.jdt.internal.compiler.parser.Scanner;
+import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 public class ExtendedBuffer {
-	private IBuffer fBuffer;
+	private Scanner fScanner;
+	private int fEndPosition;
+	private int fLength;
 	
 	public ExtendedBuffer(IBuffer buffer) {
-		fBuffer= buffer;
-		Assert.isNotNull(fBuffer);
-	}
-
-	public char getChar(int position) {
-		return fBuffer.getChar(position);
-	}
-	public char[] getCharacters() {
-		return fBuffer.getCharacters();
-	}
-	public String getContents() {
-		return fBuffer.getContents();
-	}
-	public int getLength() {
-		return fBuffer.getLength();
-	}
-	public String getText(int offset, int length) {
-		return fBuffer.getText(offset, length);
-	}
-	public boolean isReadOnly() {
-		return fBuffer.isReadOnly();
+		fScanner= new Scanner(false, false);	// comments and white spaces.
+		char[] source= buffer.getCharacters();
+		fEndPosition= source.length - 1;
+		fScanner.setSourceBuffer(source);
 	}
 	
-	public boolean isLineDelimiter(int position) {
-		char c= getChar(position);
-		return c == '\n' || c == '\r';
+	public char[] getCharacters() {
+		return fScanner.source;
+	}
+	
+	public char getCharAt(int index) {
+		return fScanner.source[index];
+	}
+	
+	public int indexOf(int searchFor, int start) {
+		return indexOf(searchFor, start, fEndPosition);
+	}
+	
+	public int indexOf(int searchFor, int start, int end) {
+		try {
+			fLength= -1;
+			fScanner.resetTo(start, end);
+			int token;
+			while((token= fScanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+				if (token == searchFor) {
+					return fScanner.startPosition;
+				}
+			} 
+			return -1;
+		} catch (InvalidInputException e) {
+			return -1;
+		}
+	}
+
+	public int indexAfter(int searchFor, int start) {
+		int result= indexOf(searchFor, start);
+		if (result == -1)
+			return result;
+		return fScanner.currentPosition;
 	}
 	
 	/**
-	 * Returns the index of the given character inside the provided buffer
-	 * starting at position <code>start</code>. The method overreads comments,
-	 * meaning that the character isn't found inside a comment.
+	 * Scans for the next statement character. White spaces, comments and semicolons
+	 * (';') are not interpreted to be a statment character.
+	 * 
+	 * @return the index of the next statement character or -1 if no appropriate
+	 *  character was found.
 	 */
-	public int indexOf(char search, int start) {
-		return indexOf(search, start, getLength() - start);
-	}
-	
-	public int indexOf(char search, int start, int length) {
-		int last= start + length;
-		for (int i= start; i < last && i != -1; i++) {
-			char c= getChar(i);
-			if (c == search)
-				return i;
-				
-			switch (c) {
-				case '/':
-					int j= i + 1;
-					if (j < length) {
-						char nextChar= getChar(j);
-						if (nextChar == '*') {
-							i= getCommentEnd(j + 1);
-						} else if (nextChar == '/') {
-							i= getLineEnd(j + 1);
-						}
-					}	
-					break;
-			}
-		}
-		return -1;
-	}
-	
 	public int indexOfStatementCharacter(int start) {
-		int length= getLength();
-		for (int i= start; i < length && i != -1; i++) {
-			char c= getChar(i);
-			switch (c) {
-				case ';':
-				case ' ':
-				case '\t':
-				case '\r':
-				case '\n':
-					break;
-				case '/':
-					int j= i + 1;
-					if (j < length) {
-						char nextChar= getChar(j);
-						if (nextChar == '*') {
-							i= getCommentEnd(j + 1);
-						} else if (nextChar == '/') {
-							i= getLineEnd(j + 1);
-						}
-					}	
-					break;
-				default:
-					return i;
+		try {
+			fLength= -1;
+			fScanner.resetTo(start, fEndPosition);
+			int token;
+			while ((token= fScanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+				if (token == Scanner.TokenNameSEMICOLON)
+					continue;
+				return fScanner.startPosition;
 			}
-		}
-		return -1;
-	}
-	
-	public int indexOfLastCharacterBeforeLineBreak(int start) {
-		int length= getLength();
-		int i= start;
-		loop: for (; i < length; i++) {
-			char c= getChar(i);
-			switch (c) {
-				case '\n':
-					break loop;
-				case '\r':
-					break loop;
-			}
-		}
-		if (i == start)
 			return -1;
-			
-		return i - 1;
+		} catch (InvalidInputException e) {
+			return -1;
+		}
 	}
 	
-	private int getCommentEnd(int start) {
-		int length= getLength();
-		for (int i= start; i < length; i++) {
-			char c= getChar(i);
-			if (c == '*') {
-				int j= i + 1;
-				if (j < length && getChar(j) == '/')
-					return j;
-			} 
-		}
-		return -1;
+	public int getLastTokenLength() {
+		return fScanner.currentPosition - fScanner.startPosition;
 	}
-	
-	private int getLineEnd(int start) {
-		int length= getLength();
-		for (int i= start; i < length; i++) {
-			char c= getChar(i);
-			switch (c) {
-				case '\n':
-					return i;
-				case '\r':
-					int j= i + 1;
-					if (j < length && getChar(j) == '\n')
-						return j;
-					return i;	
-			}
-		}
-		return length - 1;
-	}	
 }

@@ -15,4 +15,8 @@ public class AstNodeData {
 	public Object get(AstNode node) {
 		return fData.get(node);
 	}
+	
+	public Object remove(AstNode node) {
+		return fData.remove(node);
+	}
 }

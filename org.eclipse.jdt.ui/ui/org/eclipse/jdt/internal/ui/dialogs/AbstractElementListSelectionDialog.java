@@ -286,13 +286,13 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 */
 	public void create() {
 		super.create();
-	     	if (isEmptyList()) {
-	     		fMessage.setEnabled(false);
-	     		fSelectionList.setEnabled(false);
-	     	} else {
-		     	verifyCurrentSelection();		
+	     if (isEmptyList()) {
+	     	fMessage.setEnabled(false);
+	     	fSelectionList.setEnabled(false);
+	     } else {
+		    verifyCurrentSelection();		
 			fSelectionList.selectFilterText();
 			fSelectionList.setFocus();
-	     	}	
+	     }	
 	}	
 }

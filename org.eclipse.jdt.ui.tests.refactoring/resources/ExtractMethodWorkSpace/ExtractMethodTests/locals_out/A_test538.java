@@ -4,9 +4,9 @@ package locals_out;
 		int i= 0;
 		int[] array= new int[10];
 		
-		/*]*/extracted(array, i);/*[*/
+		/*]*/extracted(i, array);/*[*/
 	}
-	protected void extracted(int[] array, int i) {
+	protected void extracted(int i, int[] array) {
 		array[i]= 10;
 	}
 }

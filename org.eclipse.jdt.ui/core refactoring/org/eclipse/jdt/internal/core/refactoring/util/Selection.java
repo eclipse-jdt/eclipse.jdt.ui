@@ -2,23 +2,35 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.core.refactoring.code;
-
+package org.eclipse.jdt.internal.core.refactoring.util;
+
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.Block;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
-import org.eclipse.jdt.internal.core.refactoring.Assert;
-
-/* package */ class Selection {
+import org.eclipse.jdt.internal.core.refactoring.Assert;
+public class Selection {
 	
 	public int start;		// inclusive
-	public int end;		// inclusive
+	public int end;			// inclusive
 	
-	public Selection(int s, int length) {
-		start= s;
-		end= s + length - 1;
-		Assert.isTrue(start <= end);
+	protected Selection() {
+	}
+	
+	public static Selection createFromStartLength(int s, int length) {
+		Selection result= new Selection();
+		result.start= s;
+		result.end= s + length - 1;
+		Assert.isTrue(result.start <= result.end);
+		return result;
+	}
+	
+	public static Selection createFromStartEnd(int s, int e) {
+		Selection result= new Selection();
+		result.start= s;
+		result.end= e;
+		Assert.isTrue(result.start <= result.end);
+		return result;
 	}
 	
 	// enclosed* methods do an open interval check.

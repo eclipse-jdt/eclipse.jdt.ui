@@ -22,7 +22,13 @@ import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 
 import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.AstNode;
+import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.env.IConstants;
+import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.ASTParentTrackingAdapter;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
@@ -40,29 +46,30 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public class ExtractMethodRefactoring extends Refactoring {
-
+
 	private ICompilationUnit fCUnit;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private int fSelectionStart;
 	private int fSelectionLength;
 	private int fSelectionEnd;
-	private boolean fAsymetricAssignment;
+	private String fAssignment;
 	private int fTabWidth;
 	private boolean fCallOnDecalrationLine= true;
 	
-	private StatementAnalyzer fStatementAnalyzer;
+	private ExtractMethodAnalyzer fAnalyzer;
 	private ExtendedBuffer fBuffer;
 	private String fVisibility;
 	private String fMethodName;
 	private int fMethodFlags= IConstants.AccProtected;
+
+	private static final String EMPTY= "";
+	private static final String BLANK= " ";
+	private static final String RETURN= "return";
+	private static final String RETURN_BLANK= "return ";
+	private static final String SEMICOLON= ";";
+	private static final String COMMA_BLANK= ", ";
+	private static final String STATIC= "static";
 	
-	/* (non-Javadoc)
-	 * Method declared in IRefactoring
-	 */
-	 public String getName() {
-	 	return RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.name", new String[]{fMethodName, fCUnit.getElementName()}); //$NON-NLS-1$
-	 }
-
 	/**
 	 * Creates a new extract method refactoring.
 	 *
@@ -80,10 +87,20 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fSelectionEnd= fSelectionStart + fSelectionLength - 1;
-		fAsymetricAssignment= asymetricAssignment;
+		if (asymetricAssignment)
+			fAssignment= "= ";
+		else
+			fAssignment= " = ";
 		fTabWidth= tabWidth;
 	}
 	
+	/* (non-Javadoc)
+	 * Method declared in IRefactoring
+	 */
+	 public String getName() {
+	 	return RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.name", new String[]{fMethodName, fCUnit.getElementName()}); //$NON-NLS-1$
+	 }
+
 	/**
 	 * Checks if the refactoring can be activated. Activation typically means, if a
 	 * corresponding menu entry can be added to the UI.
@@ -110,7 +127,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
 			((CompilationUnit)fCUnit).accept(createVisitor());
 			
-			fStatementAnalyzer.checkActivation(result);
+			fAnalyzer.checkActivation(result);
 			return result;
 		} finally {
 			pm.worked(1);
@@ -119,9 +136,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 
 	private IAbstractSyntaxTreeVisitor createVisitor() {
-		fStatementAnalyzer= new StatementAnalyzer(fBuffer, fSelectionStart, fSelectionLength, fAsymetricAssignment);
-		ASTParentTrackingAdapter result= new ASTParentTrackingAdapter(fStatementAnalyzer);
-		fStatementAnalyzer.setParentTracker(result);
+		fAnalyzer= new ExtractMethodAnalyzer(fBuffer, fSelectionStart, fSelectionLength, true);
+		ASTParentTrackingAdapter result= new ASTParentTrackingAdapter(fAnalyzer);
+		fAnalyzer.setParentTracker(result);
 		return result;
 	}
 	
@@ -167,25 +184,26 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= null;
-		AbstractMethodDeclaration node= fStatementAnalyzer.getEnclosingMethod();
+		AbstractMethodDeclaration node= fAnalyzer.getEnclosingMethod();
 		if (node != null) {
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 4); //$NON-NLS-1$
-			pm.subTask(""); //$NON-NLS-1$
+			pm.subTask(EMPTY);
 		
 			result= Checks.checkMethodName(fMethodName);
 			pm.worked(1);
 		
 			IMethod method= (IMethod)fCUnit.getElementAt(node.sourceStart);
 			IType type= method.getDeclaringType();
-			LocalVariableAnalyzer localAnalyzer= fStatementAnalyzer.getLocalVariableAnalyzer();
-			String[] params= localAnalyzer.getParameterTypes();
-		
-			result.merge(Checks.checkMethodInType(type, fMethodName, params, false));
-			pm.worked(1);
-		
-			result.merge(Checks.checkMethodInHierarchy(new SubProgressMonitor(pm, 1), 
-				type, fMethodName, params, false, fMethodFlags));	
-			pm.worked(1);
+			
+//			LocalVariableAnalyzer localAnalyzer= fAnalyzer.getLocalVariableAnalyzer();
+//			String[] params= localAnalyzer.getParameterTypes();
+//		
+//			result.merge(Checks.checkMethodInType(type, fMethodName, params, false));
+//			pm.worked(1);
+//		
+//			result.merge(Checks.checkMethodInHierarchy(new SubProgressMonitor(pm, 1), 
+//				type, fMethodName, params, false, fMethodFlags));	
+//			pm.worked(1);
 		
 			pm.done();
 		} else {
@@ -201,7 +219,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (fMethodName == null)
 			return null;
 		
-		AbstractMethodDeclaration method= fStatementAnalyzer.getEnclosingMethod();
+		AbstractMethodDeclaration method= fAnalyzer.getEnclosingMethod();
 		String sourceMethodName= new String(method.selector);
 		
 		ITextBufferChange result= fTextBufferChangeCreator.create(
@@ -248,15 +266,30 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/**
 	 * Returns the signature of the new method.
 	 * 
-	 * @param the method name used for the new method
+	 * @param methodName the method name used for the new method
 	 * @return the signature of the extracted method
 	 */
-	public String getSignature(String name) {
-		String s= fVisibility;
-		if (s.length() > 0)
-			s= s + " "; //$NON-NLS-1$
+	public String getSignature(String methodName) {
+		StringBuffer buffer= new StringBuffer(fVisibility);		
+		if (fVisibility.length() > 0)
+			buffer.append(BLANK);
 			
-		return s + fStatementAnalyzer.getSignature(name); 
+		if ((fAnalyzer.getEnclosingMethod().modifiers & AstNode.AccStatic) != 0) {
+			buffer.append(STATIC);
+			buffer.append(BLANK);
+		}
+		
+		TypeReference returnType= fAnalyzer.getReturnType();
+		if (returnType != null) {
+			buffer.append(returnType.toStringExpression(0));
+			buffer.append(BLANK);
+		}
+
+		buffer.append(methodName);
+
+		appendArguments(buffer);
+		appendThrownExceptions(buffer);		
+		return buffer.toString();
 	}
 	
 	//---- Helper methods ------------------------------------------------------------------------
@@ -267,8 +300,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	private String computeNewMethod(ITextBuffer buffer, int lineNumber, String indent, String delimiter) {
-		LocalVariableAnalyzer localAnalyzer= fStatementAnalyzer.getLocalVariableAnalyzer();
-		
 		StringBuffer result= new StringBuffer();
 		result.append(delimiter);
 		if (insertNewLineAfterMethodBody(buffer, lineNumber))
@@ -292,8 +323,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	private String computeSource(ITextBuffer buffer, String indent, String delimiter) {
-		LocalVariableAnalyzer localAnalyzer= fStatementAnalyzer.getLocalVariableAnalyzer();
-		final String EMPTY_LINE= ""; //$NON-NLS-1$
+		final String EMPTY_LINE= EMPTY;
 		
 		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength);
 		
@@ -327,14 +357,21 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 		
 		StringBuffer result= new StringBuffer();
-		String[] locals= localAnalyzer.getLocals();
-		for (int i= 0; i < locals.length; i++)
-			addLine(result, indent, locals[i] + ";", delimiter); //$NON-NLS-1$
 		
-		boolean isExpressionExtracting= localAnalyzer.getExpressionReturnType() != null;
-		if (isExpressionExtracting) {
+		// Locals that are not passed as an arguments since the extracted method only
+		// writes to them
+		LocalVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
+		for (int i= 0; i < methodLocals.length; i++) {
+			if (methodLocals[i] != null)
+				appendLocalDeclaration(result, indent, methodLocals[i], delimiter);
+		}
+		
+		// We extract an expression
+		boolean extractsExpression= fAnalyzer.extractsExpression();
+		if (extractsExpression) {
 			result.append(indent);
-			result.append("return "); //$NON-NLS-1$
+			if (fAnalyzer.getExpressionTypeBinding() != BaseTypeBinding.VoidBinding)
+				result.append(RETURN_BLANK); //$NON-NLS-1$
 		}
 		
 		// Reformat and add to buffer
@@ -347,29 +384,25 @@ public class ExtractMethodRefactoring extends Refactoring {
 					result.append(indent);
 				} else {
 					isFirstLine= false;
-					if (!isExpressionExtracting)
+					if (!extractsExpression)
 						result.append(indent);
 				}
 				result.append(line);
 			}
 		}
 		if (sourceNeedsSemicolon())
-			result.append(";"); //$NON-NLS-1$
+			result.append(SEMICOLON);
 		result.append(delimiter);
 		
-		if (!isExpressionExtracting) {
-			String returnStatement= localAnalyzer.getReturnStatement();
-			addLine(result, indent, returnStatement, delimiter);
+		LocalVariableBinding returnValue= fAnalyzer.getReturnValue();
+		if (returnValue != null) {
+			result.append(indent);
+			result.append(RETURN_BLANK);
+			result.append(returnValue.readableName());
+			result.append(SEMICOLON);
+			result.append(delimiter);
 		}
 		return result.toString();
-	}
-	
-	private void addLine(StringBuffer buffer, String indent, String line, String delimiter) {
-		if (line == null)
-			return;
-		buffer.append(indent);
-		buffer.append(line);
-		buffer.append(delimiter);
 	}
 	
 	private String computeCall(ITextBuffer buffer, String delimiter) {
@@ -377,40 +410,62 @@ public class ExtractMethodRefactoring extends Refactoring {
 		String firstLineIndent= TextUtilities.createIndentString(
 			TextUtilities.getIndent(buffer.getLineContentOfOffset(fSelectionStart), fTabWidth));
 		StringBuffer result= new StringBuffer(TextUtilities.createIndentString(TextUtilities.getIndent(lines[0], fTabWidth)));
-		LocalVariableAnalyzer localAnalyzer= fStatementAnalyzer.getLocalVariableAnalyzer();
-		ReturnAnalyzer returnAnalyzer= fStatementAnalyzer.getReturnAnalyzer();
 		
 		
-		String[] locals= localAnalyzer.getExtractedLocals();
+		LocalVariableBinding[] locals= fAnalyzer.getCallerLocals();
 		for (int i= 0; i < locals.length; i++) {
-			result.append(locals[i]);
-			result.append(";"); //$NON-NLS-1$
+			appendLocalDeclaration(result, locals[i]);
+			result.append(SEMICOLON);
 			result.append(delimiter);
 			result.append(firstLineIndent);
 		}
+				
+		int returnKind= fAnalyzer.getReturnKind();
+		switch (returnKind) {
+			case ExtractMethodAnalyzer.ACCESS_TO_LOCAL:
+				LocalVariableBinding binding= fAnalyzer.getReturnLocal();
+				if (binding != null) {
+					appendLocalDeclaration(result, binding);
+					result.append(fAssignment);
+				} else {
+					binding= fAnalyzer.getReturnValue();
+					result.append(binding.readableName());
+					result.append(fAssignment);
+				}
+				break;
+			case ExtractMethodAnalyzer.RETURN_STATEMENT_VALUE:
+				// We return a value. So the code must look like "return extracted();"
+				result.append(RETURN_BLANK);
+				break;
+		}
 		
-		// Note: asking for the return statement kind is ok since we can't have a local declaration
-		// and a return value generated by a return statement. This case would have been generated
-		// a fatal error during precondition checking.
-		int returnStatementKind= returnAnalyzer.getReturnStatementKind();
-		
-		// We return a value. So the code must look like "return extracted();"
-		if (returnStatementKind == ReturnAnalyzer.TYPE)
-			result.append("return "); //$NON-NLS-1$
-		result.append(localAnalyzer.getCall(fMethodName));
+		LocalVariableBinding[] arguments= fAnalyzer.getArguments();
+		result.append(fMethodName);
+		result.append("("); //$NON-NLS-1$
+		for (int i= 0; i < arguments.length; i++) {
+			if (arguments[i] == null)
+				continue;
+			if (i > 0)
+				result.append(COMMA_BLANK);
+			result.append(arguments[i].readableName());
+		}		
+		result.append(")"); //$NON-NLS-1$
+						
 		if (callNeedsSemicolon())
-			result.append(";"); //$NON-NLS-1$
+			result.append(SEMICOLON);
 			
 		// We have a void return statement. The code looks like
 		// extracted();
 		// return;	
-		if (returnStatementKind == ReturnAnalyzer.VOID) {
+		if (returnKind == ExtractMethodAnalyzer.RETURN_STATEMENT_VOID) {
 			result.append(delimiter);
 			result.append(firstLineIndent);
-			result.append("return;"); //$NON-NLS-1$
+			result.append(RETURN);
+			result.append(SEMICOLON);
 		}	
 		if (endsSelectionWithLineDelimiter(lines))
 			result.append(delimiter);
+			
 		return result.toString();
 	}
 
@@ -420,24 +475,61 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	
 	private boolean callNeedsSemicolon() {
-		// We are extracting an expression.	
-		if (fStatementAnalyzer.getLocalVariableAnalyzer().getExpressionReturnType() != null)
-			return false;
-		
-		int start= fStatementAnalyzer.getLastSelectedStatementEnd() + 1;
-		int length= fSelectionLength - (start - fSelectionStart);
-		
-		if (length < 0)
-			return false;
-		
-		// Does the source have a semicolon	
-		if (fBuffer.indexOf(';', start, length) != -1)
+		if (selectionIncludesSemicolon())
 			return true;
-		
-		return !fStatementAnalyzer.getNeedsSemicolon();
+	
+		if (fAnalyzer.isExpressionSelected()) {
+			return false;	
+		} else {
+			return !fAnalyzer.getNeedsSemicolon();				
+		}		
 	}
 	
 	private boolean sourceNeedsSemicolon() {
 		return !callNeedsSemicolon();
+	}	
+	
+	private boolean selectionIncludesSemicolon() {
+		int start= fAnalyzer.getEndOfLastSelectedNode() + 1;
+		int length= fSelectionLength - (start - fSelectionStart);
+		
+		if (length <= 0)
+			return false;
+		
+		return fBuffer.indexOf(Scanner.TokenNameSEMICOLON, start, start + length - 1) != -1;
+	}
+	
+	private void appendArguments(StringBuffer buffer) {
+		buffer.append('(');
+		LocalVariableBinding[] arguments= fAnalyzer.getArguments();
+		for (int i= 0; i < arguments.length; i++) {
+			LocalVariableBinding argument= arguments[i];
+			if (argument == null)
+				continue;
+				
+			if (i > 0)
+				buffer.append(COMMA_BLANK);
+			appendLocalDeclaration(buffer, argument);
+		}
+		buffer.append(')');
+	}
+	
+	private void appendThrownExceptions(StringBuffer buffer) {
+		buffer.append(fAnalyzer.fExceptionAnalyzer.getThrowSignature());
+	}
+	
+	private void appendLocalDeclaration(StringBuffer buffer, LocalVariableBinding local) {
+		LocalDeclaration declaration= local.declaration;
+		buffer.append(declaration.modifiersString(declaration.modifiers));
+		buffer.append(declaration.type.toStringExpression(0));
+		buffer.append(BLANK);
+		buffer.append(local.readableName());
+	}
+	
+	private void appendLocalDeclaration(StringBuffer buffer, String indent, LocalVariableBinding local, String delimiter) {
+		buffer.append(indent);
+		appendLocalDeclaration(buffer, local);
+		buffer.append(SEMICOLON);
+		buffer.append(delimiter);
 	}	
 }

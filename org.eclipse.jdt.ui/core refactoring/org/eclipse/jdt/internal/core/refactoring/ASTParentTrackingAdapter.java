@@ -4,8 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;import org.eclipse.jdt.internal.compiler.IProblem;import org.eclipse.jdt.internal.compiler.ast.*;import org.eclipse.jdt.internal.compiler.ast.AssertStatement;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;import org.eclipse.jdt.internal.compiler.lookup.ClassScope;import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
+import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;import org.eclipse.jdt.internal.compiler.IProblem;import org.eclipse.jdt.internal.compiler.ast.*;import org.eclipse.jdt.internal.compiler.lookup.BlockScope;import org.eclipse.jdt.internal.compiler.lookup.ClassScope;import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 
 public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IParentTracker {
 
@@ -19,6 +18,10 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 	
 	public AstNode getParent() {
 		return (AstNode)fParentStack.get(fParentStack.size() - 1);
+	}
+	
+	public List getParents() {
+		return fParentStack;
 	}
 	
 	private void pushParent(AstNode node) {
