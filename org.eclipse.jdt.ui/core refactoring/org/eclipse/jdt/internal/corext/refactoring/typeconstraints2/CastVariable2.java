@@ -22,7 +22,7 @@ public class CastVariable2 extends TypeConstraintVariable2 {
 	private final CompilationUnitRange fRange;
 	private TypeConstraintVariable2 fExpressionVariable;
 
-	protected CastVariable2(TType type, CompilationUnitRange range, TypeConstraintVariable2 expressionVariable) {
+	public CastVariable2(TType type, CompilationUnitRange range, TypeConstraintVariable2 expressionVariable) {
 		super(type);
 		fRange= range;
 		fExpressionVariable= expressionVariable;

@@ -24,7 +24,7 @@ public class TypeVariable2 extends TypeConstraintVariable2 implements IDeclaredC
 
 	private final CompilationUnitRange fRange;
 
-	protected TypeVariable2(TType type, CompilationUnitRange range) {
+	public TypeVariable2(TType type, CompilationUnitRange range) {
 		super(type);
 		fRange= range;
 	}
