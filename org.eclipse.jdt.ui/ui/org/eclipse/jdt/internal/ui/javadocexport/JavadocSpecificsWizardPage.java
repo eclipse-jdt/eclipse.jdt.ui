@@ -54,14 +54,15 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	private StatusInfo fOverviewStatus;
 	private StatusInfo fAntStatus;
+	
+	private JavadocTreeWizardPage fFirstPage;
 
 	private JavadocOptionsManager fStore;
 
 	private final int OVERVIEWSTATUS= 1;
 	private final int ANTSTATUS= 2;
 
-
-	protected JavadocSpecificsWizardPage(String pageName, JavadocOptionsManager store) {
+	protected JavadocSpecificsWizardPage(String pageName, JavadocTreeWizardPage firstPage, JavadocOptionsManager store) {
 		super(pageName);
 		setDescription(JavadocExportMessages.getString("JavadocSpecificsWizardPage.description")); //$NON-NLS-1$
 
@@ -69,6 +70,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		fOverviewStatus= new StatusInfo();
 		fAntStatus= new StatusInfo();
+		fFirstPage= firstPage;
 	}
 
 	/*
@@ -273,6 +275,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		if (visible) {
 			doValidation(OVERVIEWSTATUS);
 			doValidation(ANTSTATUS);
+			fCheckbrowser.setVisible(!fFirstPage.getCustom());
 		}
 	}
 

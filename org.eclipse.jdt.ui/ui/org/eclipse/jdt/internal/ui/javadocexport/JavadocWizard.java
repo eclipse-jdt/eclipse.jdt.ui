@@ -90,9 +90,9 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private boolean fWriteCustom;
 	private boolean fOpenInBrowser;
 
-	private final String TreePageDesc= "JavadocTreePage"; //$NON-NLS-1$
-	private final String SpecificsPageDesc= "JavadocSpecificsPage"; //$NON-NLS-1$
-	private final String StandardPageDesc= "JavadocStandardPage"; //$NON-NLS-1$
+	private final String TREE_PAGE_DESC= "JavadocTreePage"; //$NON-NLS-1$
+	private final String SPECIFICS_PAGE_DESC= "JavadocSpecificsPage"; //$NON-NLS-1$
+	private final String STANDARD_PAGE_DESC= "JavadocStandardPage"; //$NON-NLS-1$
 
 	private final int YES= 0;
 	private final int YES_TO_ALL= 1;
@@ -460,9 +460,9 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 */
 	public void addPages() {
 		
-		fJTWPage= new JavadocTreeWizardPage(TreePageDesc, fStore);
-		fJSWPage= new JavadocSpecificsWizardPage(SpecificsPageDesc, fStore);
-		fJSpWPage= new JavadocStandardWizardPage(StandardPageDesc, fJTWPage, fStore);
+		fJTWPage= new JavadocTreeWizardPage(TREE_PAGE_DESC, fStore);
+		fJSWPage= new JavadocSpecificsWizardPage(SPECIFICS_PAGE_DESC, fJTWPage, fStore);
+		fJSpWPage= new JavadocStandardWizardPage(STANDARD_PAGE_DESC, fJTWPage, fStore);
 
 		super.addPage(fJTWPage);
 		super.addPage(fJSpWPage);
