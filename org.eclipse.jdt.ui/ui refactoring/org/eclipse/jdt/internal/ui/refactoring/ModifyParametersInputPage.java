@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -31,6 +32,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -45,6 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersrRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class ModifyParametersInputPage extends UserInputWizardPage {
 
@@ -64,7 +67,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	
 	public ModifyParametersInputPage() {
 		super(PAGE_NAME, true);
-		setMessage("Specify the new order of parameters and/or their new names");
+		setMessage("Specify the new order of parameters and/or their new names.");
 	}
 	
 	public void createControl(Composite parent) {
@@ -76,8 +79,10 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		Label label= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 		
-		fSignaturePreview= new Label(composite, SWT.NONE);
-		fSignaturePreview.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fSignaturePreview= new Label(composite, SWT.WRAP);
+		GridData gl= new GridData(GridData.FILL_BOTH);
+		gl.widthHint= convertWidthInCharsToPixels(50);
+		fSignaturePreview.setLayoutData(gl);
 		updateSignaturePreview();
 		
 		setControl(composite);
@@ -110,7 +115,9 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		fTableViewer.setLabelProvider(new ParameterInfoLabelProvider());
 		fTableViewer.setSorter(new ParameterInfoListSorter(getModifyParametersRefactoring()));
 		
-		fTableViewer.setInput(createParameterInfos());
+		ParameterInfo[] inputElems= createParameterInfos();
+		fTableViewer.setInput(inputElems);
+		fTableViewer.setSelection(new StructuredSelection(inputElems[0]));
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 			public void selectionChanged(SelectionChangedEvent event){
 				ParameterInfo selected= getSelectedItem();
@@ -131,7 +138,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 			}
 		});
 	}
-	
+
 	private ParameterInfo[] createParameterInfos() {
 		try {
 			Map renamings= getModifyParametersRefactoring().getNewNames();
@@ -195,15 +202,17 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	private void createButtonComposite(Composite parent){
 		Composite buttonComposite= new Composite(parent, SWT.NONE);
 		buttonComposite.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-		buttonComposite.setLayout(new GridLayout());
+		GridLayout gl= new GridLayout();
+		gl.marginHeight= 0;
+		buttonComposite.setLayout(gl);
 
 		fUpButton= createButton(buttonComposite, "Move &Up", true);
 		fDownButton= createButton(buttonComposite, "Move &Down", false);
 		
+		fUpButton.setEnabled(false);
 		if (doesMethodHaveOneParameter()){
-			fUpButton.setEnabled(false);
 			fDownButton.setEnabled(false);
-		}	
+		}
 	}
 	
 	private boolean doesMethodHaveOneParameter(){
@@ -213,6 +222,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	private Button createButton(Composite buttonComposite, String text, final boolean up) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(button);
 		button.setText(text);
 		button.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
