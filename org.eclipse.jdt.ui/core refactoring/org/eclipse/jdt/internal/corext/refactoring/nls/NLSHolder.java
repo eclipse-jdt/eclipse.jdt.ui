@@ -83,19 +83,9 @@ public class NLSHolder {
 	private static String createModifiedValue(String rawValue){
 		String modifiedValue= NLSRefactoring.removeQuotes(rawValue);
 		
-		modifiedValue= removeTrailingDots(modifiedValue);
 		modifiedValue= unwindEscapeChars(modifiedValue);
 		
 		return "\"" + modifiedValue + "\""; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	
-	private static String removeTrailingDots(String s){
-		String dot= "."; //$NON-NLS-1$
-		String subString= s;
-		while (subString.endsWith(dot)){
-			subString= s.substring(0, subString.lastIndexOf(dot));
-		}
-		return subString;
 	}
 	
 	private static String unwindEscapeChars(String s){
