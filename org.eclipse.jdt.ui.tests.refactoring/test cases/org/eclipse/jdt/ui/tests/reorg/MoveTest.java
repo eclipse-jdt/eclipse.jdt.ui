@@ -557,7 +557,7 @@ public class MoveTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_yes_cuToMethod() throws Exception {
+	public void testDestination_no_cuToMethod() throws Exception {
 		IPackageFragment pack1= getRoot().createPackageFragment("q", true, new NullProgressMonitor());
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("B.java", "package p;class B{}", false, new NullProgressMonitor());
@@ -568,7 +568,7 @@ public class MoveTest extends RefactoringTest {
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= method;
-			verifyValidDestination(ref, destination);
+			verifyInvalidDestination(ref, destination);
 		} finally{
 			performDummySearch();
 			safeDelete(pack1);
@@ -1440,37 +1440,19 @@ public class MoveTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_yes_fileToMethod() throws Exception {
-		ParticipantTesting.reset();
+	public void testDestination_no_fileToMethod() throws Exception {
 		IFolder superFolder= (IFolder)getRoot().getResource();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
-		IFile newFile= null;
 		try{
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			String[] handles= ParticipantTesting.createHandles(new Object[] {file});
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= method;
-			verifyValidDestination(ref, destination);
-
-			assertTrue("source file does not exist before", file.exists());
-			
-			RefactoringStatus status= performRefactoring(ref, false);
-			assertEquals(null, status);
-			
-			assertTrue("source file not moved", ! file.exists());
-			
-			newFile= ((IFolder)getPackageP().getResource()).getFile(file.getName());
-			assertTrue("new file does not exist after", newFile.exists());
-			
-			ParticipantTesting.testMove(
-				handles,
-				new MoveArguments[] {
-					new MoveArguments(getPackageP().getResource(), ref.getUpdateReferences())});
+			verifyInvalidDestination(ref, destination);
 		} finally{
 			performDummySearch();
 			safeDelete(file);

@@ -367,12 +367,13 @@ class ReorgPolicyFactory {
 			}
 			
 			if (ReorgUtils.isInsideCompilationUnit(javaElement)) {
-				ICompilationUnit cu= ReorgUtils.getCompilationUnit(javaElement);
-				if (cu != null)
-					return verifyDestination(cu);
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.notSubCu")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.cannot")); //$NON-NLS-1$
 			}
-	
+			
+			IContainer destinationAsContainer= getDestinationAsContainer();
+			if (destinationAsContainer == null || isChildOfOrEqualToAnyFolder(destinationAsContainer))
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.not_this_resource")); //$NON-NLS-1$
+			
 			if (containsLinkedResources() && !ReorgUtils.canBeDestinationForLinkedResources(javaElement))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.linked")); //$NON-NLS-1$
 			return new RefactoringStatus();

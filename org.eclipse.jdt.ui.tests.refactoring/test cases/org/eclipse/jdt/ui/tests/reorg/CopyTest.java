@@ -833,8 +833,7 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= {};
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
-			IType classB= cu2.getType("B");
-			Object destination= classB;
+			Object destination= cu2;
 			verifyValidDestination(ref, destination);			
 		}finally{
 			performDummySearch();
@@ -1008,8 +1007,7 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= {file};
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
-			IType classB= cu2.getType("B");			
-			Object destination= classB;
+			Object destination= cu2;
 			verifyValidDestination(ref, destination);
 		} finally {
 			performDummySearch();
