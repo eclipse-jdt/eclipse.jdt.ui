@@ -51,7 +51,7 @@ public class CopyNamesToClipboardAction implements IViewActionDelegate {
 		}
 		
 		if (fLastSelection instanceof IStructuredSelection) {
-			String lineDelim= System.getProperty("line.separator");
+			String lineDelim= System.getProperty("line.separator"); //$NON-NLS-1$
 			StringBuffer buf= new StringBuffer();
 			Iterator iter= ((IStructuredSelection)fLastSelection).iterator();
 			while (iter.hasNext()) {

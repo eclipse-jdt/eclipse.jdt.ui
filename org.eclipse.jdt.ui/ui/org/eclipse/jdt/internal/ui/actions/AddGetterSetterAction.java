@@ -133,9 +133,9 @@ public class AddGetterSetterAction extends Action {
 		return new IRequestQuery() {
 			public int doQuery(IMember method) {
 				int[] returnCodes= {IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
-				String skipLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.skip.label");
-				String replaceLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.replace.label");
-				String skipAllLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.skipAll.label");
+				String skipLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.skip.label"); //$NON-NLS-1$
+				String replaceLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.replace.label"); //$NON-NLS-1$
+				String skipAllLabel= JavaUIMessages.getString("AddGetterSetterAction.SkipExistingDialog.skipAll.label"); //$NON-NLS-1$
 				String[] options= { skipLabel, replaceLabel, skipAllLabel, IDialogConstants.CANCEL_LABEL};
 				JavaTextLabelProvider lprovider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS);
 				String methodName= lprovider.getTextLabel(method);
@@ -149,7 +149,7 @@ public class AddGetterSetterAction extends Action {
 	private int showQueryDialog(final String message, final String[] buttonLabels, int[] returnCodes) {
 		final Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		if (shell == null) {
-			JavaPlugin.logErrorMessage("AddGetterSetterAction.showQueryDialog: No active shell found");
+			JavaPlugin.logErrorMessage("AddGetterSetterAction.showQueryDialog: No active shell found"); //$NON-NLS-1$
 			return IRequestQuery.CANCEL;
 		}		
 		final int[] result= { MessageDialog.CANCEL };

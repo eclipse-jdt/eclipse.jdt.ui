@@ -87,14 +87,14 @@ public class ShowTypeHierarchyAction extends Action implements IUpdate {
 				if (view instanceof TypeHierarchyViewPart) {
 					((TypeHierarchyViewPart) view).setInput(type);
 				} else {
-					JavaPlugin.logErrorMessage("ShowTypeHierarchyAction.showType: Not a TypeHierarchyViewPart");
+					JavaPlugin.logErrorMessage("ShowTypeHierarchyAction.showType: Not a TypeHierarchyViewPart"); //$NON-NLS-1$
 				}
 			} catch (PartInitException e) {
 				JavaPlugin.log(e.getStatus());
 				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaUIMessages.getString("ShowTypeHierarchyAction.error.title"), "", e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 		} else {
-			JavaPlugin.logErrorMessage("ShowTypeHierarchyAction.showType: Active page is null");
+			JavaPlugin.logErrorMessage("ShowTypeHierarchyAction.showType: Active page is null"); //$NON-NLS-1$
 		}	
 	}
 	
