@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeParametersControl;
-import org.eclipse.jdt.internal.ui.refactoring.ParameterListChangeListener;
+import org.eclipse.jdt.internal.ui.refactoring.IParameterListChangeListener;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -116,7 +116,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		if (!fRefactoring.getParameterInfos().isEmpty()) {
 			ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NULL, 
 				RefactoringMessages.getString("ExtractMethodInputPage.parameters"), //$NON-NLS-1$
-				new ParameterListChangeListener() {
+				new IParameterListChangeListener() {
 				public void parameterChanged(ParameterInfo parameter) {
 					parameterModified(parameter);
 				}

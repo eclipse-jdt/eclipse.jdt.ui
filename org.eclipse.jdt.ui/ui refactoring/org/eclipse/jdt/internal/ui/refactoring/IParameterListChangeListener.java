@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
-public interface ParameterListChangeListener {
+public interface IParameterListChangeListener {
 
 	/**
 	 * Gets fired when the given parameter has changed	 * @param parameter the parameter that has changed.	 */

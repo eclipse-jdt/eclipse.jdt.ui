@@ -159,7 +159,7 @@ public class ChangeParametersControl extends Composite {
 	private final boolean fCanChangeParameterNames;
 	private final boolean fCanChangeTypesOfOldParameters;
 	private final boolean fCanAddParameters;
-	private final ParameterListChangeListener fListener;
+	private final IParameterListChangeListener fListener;
 
 	private Button fUpButton;
 	private Button fDownButton;
@@ -170,7 +170,7 @@ public class ChangeParametersControl extends Composite {
 	private List fParameterInfos;
 	private TableCursor fTableCursor; 
 
-	public ChangeParametersControl(Composite parent, int style, String label, ParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters) {
+	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters) {
 		super(parent, style);
 		Assert.isNotNull(listener);
 		fListener= listener;
