@@ -280,7 +280,7 @@ public final class JavaModelUtil {
 		
 		int otherflags= member.getFlags();
 		IType declaringType= member.getDeclaringType();
-		if (Flags.isPublic(otherflags) || (declaringType != null && declaringType.isInterface())) { //$NON-NLS-1$
+		if (Flags.isPublic(otherflags) || (declaringType != null && declaringType.isInterface())) {
 			return true;
 		} else if (Flags.isPrivate(otherflags)) {
 			return false;
@@ -304,7 +304,8 @@ public final class JavaModelUtil {
 		
 		int otherflags= member.getFlags();
 		
-		if (Flags.isPublic(otherflags) || Flags.isProtected(otherflags) || member.getDeclaringType().isInterface()) {
+		IType declaringType= member.getDeclaringType();
+		if (Flags.isPublic(otherflags) || (declaringType != null && declaringType.isInterface())) {
 			return true;
 		} else if (Flags.isPrivate(otherflags)) {
 			return false;
