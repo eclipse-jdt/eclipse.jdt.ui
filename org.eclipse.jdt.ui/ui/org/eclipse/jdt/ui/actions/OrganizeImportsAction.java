@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,14 +31,12 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerHelper;
 import org.eclipse.jface.text.ITextViewerHelperRegistry;
 import org.eclipse.jface.text.source.ISourceViewer;
-
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -350,7 +350,13 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					monitor.subTask(cuLocation);
 
 					try {
-						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importOrder, settings.importThreshold, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, query);
+						boolean save= !cu.isWorkingCopy();
+						if (!save) {
+							ITextFileBuffer textFileBuffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(cu.getPath());
+							save= textFileBuffer != null && !textFileBuffer.isDirty(); // save when not dirty
+						}
+						
+						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importOrder, settings.importThreshold, settings.importIgnoreLowercase, save, true, query);
 						runInSync(op, cuLocation, status, monitor);
 
 						IProblem parseError= op.getParseError();
