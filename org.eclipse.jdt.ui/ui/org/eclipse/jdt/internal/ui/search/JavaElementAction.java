@@ -34,7 +34,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 public abstract class JavaElementAction extends Action {
 	
 	// A dummy which can't be selected in the UI
-	private static final IJavaElement RETURN_WITHOUT_BEEP= JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot());
+	protected static final IJavaElement RETURN_WITHOUT_BEEP= JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot());
 	
 	private Class[] fValidTypes;
 
