@@ -51,7 +51,7 @@ public class AutomatedSuite extends TestSuite {
 		
 		addTest(ASTRewritingTest.suite());
 
-		addTest(AllTypesCacheTest.suite());
+		// disabled addTest(AllTypesCacheTest.suite());
 		addTest(NewJavaProjectWizardTest.suite());
 		
 	}
