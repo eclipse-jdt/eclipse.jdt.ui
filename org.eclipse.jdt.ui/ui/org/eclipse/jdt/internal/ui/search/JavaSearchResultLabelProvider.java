@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 
-class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
+public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
 	public static final int SHOW_PATH= 3;
@@ -34,7 +34,7 @@ class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 	private StringBuffer fBufffer= new StringBuffer(50);
 	
 
-	JavaSearchResultLabelProvider() {
+	public JavaSearchResultLabelProvider() {
 		super(
 			new StandardJavaUILabelProvider(
 				StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
@@ -105,7 +105,7 @@ class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 		return getJavaElement(marker);
 	}
 
-	private IMarker getMarker(Object o) {
+	protected IMarker getMarker(Object o) {
 		if (!(o instanceof ISearchResultViewEntry))
 			return null;
 		return ((ISearchResultViewEntry)o).getSelectedMarker();
@@ -117,21 +117,5 @@ class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 			fLastMarker= marker;
 		}
 		return fLastJavaElement;
-	}
-	
-	private boolean handleContainsWrongCU(String handle, String resourceName) {
-		int start= handle.indexOf('{');
-		int end= handle.indexOf(".java"); //$NON-NLS-1$
-		if (start >= end || start == -1)
-			return false;
-		String name= handle.substring(start + 1, end + 5);
-		return !name.equals(resourceName);
-	}
-	
-	private String computeFixedHandle(String handle, String resourceName) {
-		int start= handle.indexOf('{');
-		int end= handle.indexOf(".java"); //$NON-NLS-1$
-		handle= handle.substring(0, start + 1) + resourceName + handle.substring(end + 5);
-		return handle;
 	}
 }

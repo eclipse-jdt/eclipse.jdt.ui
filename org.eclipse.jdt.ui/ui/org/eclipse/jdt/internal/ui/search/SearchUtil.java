@@ -37,9 +37,9 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * This class contains some utility methods for J Search.
  */
-class SearchUtil extends JavaModelUtil {
+public class SearchUtil extends JavaModelUtil {
 
-	static IJavaElement getJavaElement(IMarker marker) {
+	public static IJavaElement getJavaElement(IMarker marker) {
 		try {
 			IJavaElement je= JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
 			if (!marker.getAttribute(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, false))
