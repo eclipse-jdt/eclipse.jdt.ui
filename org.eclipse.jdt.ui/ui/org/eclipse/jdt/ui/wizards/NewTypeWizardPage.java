@@ -154,7 +154,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		/* package */ void removeImport(String qualifiedName) {
 			if (fAddedTypes.contains(qualifiedName)) {
-				fImportsStructure.removeImport(qualifiedName, false);
+				fImportsStructure.removeImport(qualifiedName);
 			}
 		}
 		
