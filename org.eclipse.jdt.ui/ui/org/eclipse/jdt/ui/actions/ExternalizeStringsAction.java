@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -126,7 +127,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	}
 	
 	private static Refactoring createNewRefactoringInstance(ICompilationUnit cu) {
-		return new NLSRefactoring(cu);
+		return new NLSRefactoring(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
 	/* package */ static void openExternalizeStringsWizard(ICompilationUnit unit) throws JavaModelException {

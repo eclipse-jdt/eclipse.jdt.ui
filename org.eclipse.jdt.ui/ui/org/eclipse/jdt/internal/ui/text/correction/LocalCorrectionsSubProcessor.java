@@ -286,7 +286,7 @@ public class LocalCorrectionsSubProcessor {
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 0) {
 			public void apply(IDocument document) {
 				try {
-					NLSRefactoring refactoring= new NLSRefactoring(cu);
+					NLSRefactoring refactoring= new NLSRefactoring(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 					ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
 					String dialogTitle= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.dialog.title"); //$NON-NLS-1$
 					new RefactoringStarter().activate(refactoring, wizard, JavaPlugin.getActiveWorkbenchShell(), dialogTitle, true);
