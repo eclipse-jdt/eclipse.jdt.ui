@@ -233,7 +233,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
 		
 		ContentFormatter formatter= new ContentFormatter();
-		IFormattingStrategy strategy= new JavaFormattingStrategy();
+		IFormattingStrategy strategy= new JavaFormattingStrategy(sourceViewer);
 		
 		formatter.setFormattingStrategy(strategy, IDocument.DEFAULT_CONTENT_TYPE);
 		formatter.setFormattingStrategy(strategy, JavaPartitionScanner.JAVA_DOC);
