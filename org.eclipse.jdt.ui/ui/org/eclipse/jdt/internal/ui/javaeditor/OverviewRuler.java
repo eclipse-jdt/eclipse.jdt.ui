@@ -130,7 +130,7 @@ public class OverviewRuler {
 	/** Color table */
 	private static final RGB[][] COLORS= new RGB[][] {
 								/* fill */							/* stroke */
-		/* warning */ { new RGB(248, 218, 114),	new RGB(255, 140, 106) },
+		/* warning */ { new RGB(248, 218, 114),	new RGB(139, 109, 7) },
 		/* error */     { new RGB(255, 140, 140),	new RGB(255, 0 ,0) },
 		/* temp */	{ new RGB(240, 230, 230),	new RGB(200, 100, 100) }
 	};
