@@ -105,12 +105,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		
 		initContainerPage(jelem);
 		String pName= ""; //$NON-NLS-1$
-		if (jelem != null && jelem.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			IPackageFragment pf= (IPackageFragment)jelem;
-			if (!pf.isDefaultPackage())
+		if (jelem != null) {
+			IPackageFragment pf= (IPackageFragment) jelem.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+			if (pf != null && !pf.isDefaultPackage())
 				pName= jelem.getElementName();
 		}
-		setPackageText(pName, true); //$NON-NLS-1$
+		setPackageText(pName, true);
 		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });		
 	}
 	
