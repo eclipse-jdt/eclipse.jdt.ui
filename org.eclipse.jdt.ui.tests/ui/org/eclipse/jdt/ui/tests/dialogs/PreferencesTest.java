@@ -30,8 +30,6 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.internal.IHelpContextIds;
 import org.eclipse.ui.internal.WorkbenchMessages;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.dialogs.PropertyDialog;
@@ -120,7 +118,6 @@ public class PreferencesTest extends TestCase {
 		if (manager != null) {
 			dialog = new PreferenceDialogWrapper(getShell(), manager);
 			dialog.create();	
-			WorkbenchHelp.setHelp(dialog.getShell(), IHelpContextIds.PREFERENCE_DIALOG);
 
 			for (Iterator iterator = manager.getElements(PreferenceManager.PRE_ORDER).iterator();
 			     iterator.hasNext();)
@@ -160,7 +157,6 @@ public class PreferencesTest extends TestCase {
 			dialog = new PropertyDialogWrapper(getShell(), manager, new StructuredSelection(element)); 
 			dialog.create();
 			dialog.getShell().setText(title);
-			WorkbenchHelp.setHelp(dialog.getShell(), IHelpContextIds.PROPERTY_DIALOG);
 			for (Iterator iterator = manager.getElements(PreferenceManager.PRE_ORDER).iterator();
 			     iterator.hasNext();)
 			{
