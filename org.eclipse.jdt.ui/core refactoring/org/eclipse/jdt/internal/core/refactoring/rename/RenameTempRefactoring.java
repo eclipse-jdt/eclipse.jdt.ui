@@ -128,7 +128,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm)	throws JavaModelException {
 		
-		if (fSelectionStart < 0 || fSelectionLength == 0)
+		if (fSelectionStart < 0)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
 		
 		if (!fCu.isStructureKnown())
@@ -202,7 +202,27 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private SelectionAnalyzer createSelectionValidator() 	throws JavaModelException {
-		return new SelectionAnalyzer(fCu.getBuffer(), fSelectionStart, fSelectionLength);
+		/*
+		 * overriding is needed to support activation when only a part of the LocalDeclaration node is selected
+		 */
+		return new SelectionAnalyzer(fCu.getBuffer(), fSelectionStart, fSelectionLength){
+			private AstNode fNode;
+			
+			public boolean visit(LocalDeclaration node, BlockScope scope) {
+				int start= node.declarationSourceStart;
+				int end= node.sourceEnd();
+				if (fSelection.start >= start && fSelection.end <= end ){
+					fNode= node;
+					return true;
+				}
+				return super.visit(node, scope);
+			}
+			public AstNode[] getSelectedNodes() {
+				if (fNode != null)
+					return new AstNode[]{fNode};
+				return super.getSelectedNodes();	
+			}
+		};
 	}
 	
 	/* non java-doc
