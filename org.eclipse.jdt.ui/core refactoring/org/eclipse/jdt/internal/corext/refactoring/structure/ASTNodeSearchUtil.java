@@ -85,6 +85,25 @@ public class ASTNodeSearchUtil {
 		cuNode.accept(analyzer);
 		//XXX workaround for bug 23527
 		ASTNode node= analyzer.getFirstSelectedNode();
+		if (node != null && node.getParent() instanceof MethodDeclaration){
+			MethodDeclaration md= (MethodDeclaration)node.getParent();
+			if (md.isConstructor() && 
+			    md.getBody() != null &&
+			    md.getBody().statements().size() > 0 &&
+			    md.getBody().statements().get(0) instanceof ConstructorInvocation &&
+			    ((ASTNode)md.getBody().statements().get(0)).getLength() == length + 1)
+			return (ASTNode)md.getBody().statements().get(0);
+		}
+		if (node != null && node.getParent() instanceof MethodDeclaration){
+			MethodDeclaration md= (MethodDeclaration)node.getParent();
+			if (md.isConstructor() && 
+			    md.getBody() != null &&
+			    md.getBody().statements().size() > 0 &&
+			    md.getBody().statements().get(0) instanceof SuperConstructorInvocation &&
+			    ((ASTNode)md.getBody().statements().get(0)).getLength() == length + 1)
+			    
+			return (ASTNode)md.getBody().statements().get(0);
+		}
 		if (node != null && node.getParent() instanceof SuperConstructorInvocation){
 			if (node.getParent().getLength() == length + 1)
 				return node.getParent();
