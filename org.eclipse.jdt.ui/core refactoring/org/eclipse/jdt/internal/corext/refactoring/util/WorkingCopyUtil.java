@@ -49,7 +49,18 @@ public class WorkingCopyUtil {
 		if (! member.getCompilationUnit().isWorkingCopy())
 			return member;
 		return member.getCompilationUnit().getOriginal(member);	
-	}	
-	
+	}
+
+	public static ICompilationUnit getOriginal(ICompilationUnit cu){
+		if (! cu.isWorkingCopy())
+			return cu;
+		else
+			return (ICompilationUnit)cu.getOriginalElement();	
+	}
+
+	public static ICompilationUnit getNewWorkingCopy(ICompilationUnit cu) throws JavaModelException{
+		return (ICompilationUnit)(getOriginal(cu).getWorkingCopy());
+	}
+
 }
 
