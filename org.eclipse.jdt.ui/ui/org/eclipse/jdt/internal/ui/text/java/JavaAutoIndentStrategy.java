@@ -593,12 +593,14 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			peerOffset= indenter.findReferencePosition(peerOffset);
 			refOffset= Math.min(refOffset, peerOffset);
 			
-			// eat any WS before the insertion to the beginning of the line 
+			// eat any WS before the insertion to the beginning of the line
+			int firstLine= 1; // don't format the first line per default, as it has other content before it
 			IRegion line= document.getLineInformationOfOffset(offset);
 			String notSelected= document.get(line.getOffset(), offset - line.getOffset());
 			if (notSelected.trim().length() == 0) {
 				command.length += notSelected.length();
 				command.offset= line.getOffset();
+				firstLine= 0;
 			}
 			
 			// prefix: the part we need for formatting but won't paste
@@ -618,7 +620,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			boolean isIndentDetected= false;
 			StringBuffer addition= new StringBuffer();
 			int insertLength= 0;
-			int first= document.computeNumberOfLines(prefix);
+			int first= document.computeNumberOfLines(prefix) + firstLine; // don't format first line
 			int lines= temp.getNumberOfLines();
 			for (int l= first; l < lines; l++) { // we don't change the number of lines while adding indents
 				
