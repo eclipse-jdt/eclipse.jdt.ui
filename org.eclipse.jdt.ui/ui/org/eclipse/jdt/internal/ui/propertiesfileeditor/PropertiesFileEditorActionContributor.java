@@ -17,9 +17,10 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
+
+import org.eclipse.ui.editors.text.TextEditorActionContributor;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
@@ -32,7 +33,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
  * 
  * @since 3.1
  */
-public class PropertiesFileEditorActionContributor extends BasicTextEditorActionContributor {
+public class PropertiesFileEditorActionContributor extends TextEditorActionContributor {
 	
 	protected RetargetTextEditorAction fCorrectionAssist;
 	
