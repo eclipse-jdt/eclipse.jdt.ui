@@ -137,8 +137,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 
 		initContainerPage(element);
 		initTypePage(element);
-		updateStatus(findMostSevereStatus());
-		
+		doStatusUpdate();		
 		// put default class to test		
 		if (element != null) {
 			IType classToTest= null;
@@ -183,21 +182,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 	
 	/**
-	 * Finds the most severe error (if there is one)
-	 */
-	private IStatus findMostSevereStatus() {
-		return NewTestCaseCreationWizardPage.getMostSevere(new IStatus[] {
-			fContainerStatus,
-			fPackageStatus,
-			fTestClassStatus,
-			fClassToTestStatus,
-			fModifierStatus,
-			fSuperClassStatus
-		});
-	}
-
-	/*
-	 * @see ContainerPage#handleFieldChanged
+	 * @see NewContainerWizardPage#handleFieldChanged
 	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
@@ -217,7 +202,24 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				fTestClassStatus= testClassChanged();
 			}
 		}
-		updateStatus(findMostSevereStatus());
+//		updateStatus(findMostSevereStatus());
+		doStatusUpdate();
+	}
+
+	// ------ validation --------
+	private void doStatusUpdate() {
+		// status of all used components
+		IStatus[] status= new IStatus[] {
+			fContainerStatus,
+			fPackageStatus,
+			fTestClassStatus,
+			fClassToTestStatus,
+			fModifierStatus,
+			fSuperClassStatus
+		};
+		
+		// the mode severe status will be displayed and the ok button enabled/disabled.
+		updateStatus(status);
 	}
 
 	protected void updateDefaultName() {
@@ -752,7 +754,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		if (pack != null) {
 			ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
 			if (cu.exists()) {
-				status.setError(Messages.getString("NewTestClassWizPage.error.testcase.already_exists")); //$NON-NLS-1$
+					status.setError(Messages.getString("NewTestClassWizPage.error.testcase.already_exists")); //$NON-NLS-1$
 				return status;
 			}
 		}
@@ -761,7 +763,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 
 	
 	/**
-	 * @see WizardPage#getNextPage
+	 * @see IWizardPage#canFlipToNextPage
 	 */
 	public boolean canFlipToNextPage() {
 		return isPageComplete() && getNextPage() != null && isNextPageValid();
@@ -782,7 +784,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			return status;
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(classToTestName);
-		if (!val.isOK()) {
+//		if (!val.isOK()) {
+		if (val.getSeverity() == IStatus.ERROR) {
 			status.setError(Messages.getString("NewTestClassWizPage.error.class_to_test.not_valid")); //$NON-NLS-1$
 			return status;
 		}
@@ -798,16 +801,14 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				} else {
 					if (type.isInterface()) {
 						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.is_interface",classToTestName)); //$NON-NLS-1$
-//						return status;
 					}
 					if (pack != null && !JavaModelUtil.isVisible(type, pack)) {
-						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.interface_not_visible",classToTestName));//$NON-NLS-1$
-//						return status;
+						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.not_visible",classToTestName));//$NON-NLS-1$
 					}
 				}
 				fClassToTest= type;
 			} catch (JavaModelException e) {
-			status.setError(Messages.getString("NewTestClassWizPage.error.class_to_test.not_valid")); //$NON-NLS-1$
+				status.setError(Messages.getString("NewTestClassWizPage.error.class_to_test.not_valid")); //$NON-NLS-1$
 			}							
 		} else {
 			status.setError(""); //$NON-NLS-1$
@@ -836,7 +837,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 
 	/**
-	 * Finds the most severe status from a array of stati.
+	 * Finds the most severe status from a array of statuses.
 	 * An error is more severe than a warning, and a warning is more severe
 	 * than ok.
 	 */
