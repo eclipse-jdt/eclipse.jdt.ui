@@ -98,6 +98,7 @@ public class BuildActionGroup extends ActionGroup {
 		if (!ResourcesPlugin.getWorkspace().isAutoBuilding() && isBuildTarget(selection)) {
 			appendToGroup(menu, fBuildAction);
 		}
+		appendToGroup(menu, fRefreshAction);
 		super.fillContextMenu(menu);
 	}
 	
