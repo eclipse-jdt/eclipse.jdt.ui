@@ -18,8 +18,11 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IMenuCreator;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IMethod;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 class HistoryDropDownAction extends Action implements IMenuCreator {
@@ -32,6 +35,9 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         fMenu = null;
         setToolTipText(CallHierarchyMessages.getString("HistoryDropDownAction.tooltip")); //$NON-NLS-1$
         JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
+
+        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_HISTORY_DROP_DOWN_ACTION);
+
         setMenuCreator(this);
     }
 

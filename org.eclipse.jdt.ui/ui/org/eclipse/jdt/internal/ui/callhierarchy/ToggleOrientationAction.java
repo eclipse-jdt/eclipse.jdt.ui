@@ -49,7 +49,7 @@ class ToggleOrientationAction extends Action {
         }
         fView= v;
         fOrientation= orientation;
-        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_ORIENTATION_ACTION);
+        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION);
     }
     
     public int getOrientation() {

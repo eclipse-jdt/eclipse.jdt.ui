@@ -17,10 +17,13 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
@@ -33,6 +36,7 @@ class FocusOnSelectionAction extends Action {
         fPart= part;
         setDescription(CallHierarchyMessages.getString("FocusOnSelectionAction.focusOnSelection.description")); //$NON-NLS-1$
         setToolTipText(CallHierarchyMessages.getString("FocusOnSelectionAction.focusOnSelection.tooltip")); //$NON-NLS-1$
+        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_FOCUS_ON_SELECTION_ACTION);
     }
 
     public boolean canActionBeAdded() {

@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class SearchScopeActionGroup extends ActionGroup {
@@ -67,6 +69,7 @@ class SearchScopeActionGroup extends ActionGroup {
         public SearchScopeHierarchyAction() {
             super(CallHierarchyMessages.getString("SearchScopeActionGroup.hierarchy.text")); //$NON-NLS-1$
             setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.hierarchy.tooltip")); //$NON-NLS-1$
+            WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
         }
 
         public IJavaSearchScope getSearchScope() {
@@ -90,6 +93,7 @@ class SearchScopeActionGroup extends ActionGroup {
         public SearchScopeProjectAction() {
             super(CallHierarchyMessages.getString("SearchScopeActionGroup.project.text")); //$NON-NLS-1$
             setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.project.tooltip")); //$NON-NLS-1$
+            WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
         }
 
         public IJavaSearchScope getSearchScope() {
@@ -115,6 +119,7 @@ class SearchScopeActionGroup extends ActionGroup {
         public SearchScopeWorkingSetAction(IWorkingSet workingSet) {
             super(workingSet.getName());
             setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.workingset.tooltip")); //$NON-NLS-1$
+            WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 
             this.mWorkingSet = workingSet;
         }
@@ -154,6 +159,7 @@ class SearchScopeActionGroup extends ActionGroup {
         public SearchScopeWorkspaceAction() {
             super(CallHierarchyMessages.getString("SearchScopeActionGroup.workspace.text")); //$NON-NLS-1$
             setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.workspace.tooltip")); //$NON-NLS-1$
+            WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
         }
 
         public IJavaSearchScope getSearchScope() {
@@ -165,6 +171,7 @@ class SearchScopeActionGroup extends ActionGroup {
         public SelectWorkingSetAction() {
             super(CallHierarchyMessages.getString("SearchScopeActionGroup.workingset.select.text")); //$NON-NLS-1$
             setToolTipText(CallHierarchyMessages.getString("SearchScopeActionGroup.workingset.select.tooltip")); //$NON-NLS-1$
+            WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
         }
 
         /* (non-Javadoc)
@@ -217,18 +224,6 @@ class SearchScopeActionGroup extends ActionGroup {
     }
 
     public void fillContextMenu(IMenuManager menu) {
-        //        MenuManager javaSearchMM = new MenuManager(MENU_TEXT,
-        //                ICallHierarchyConstants.GROUP_SEARCH_SCOPE);
-        //
-        //        javaSearchMM.addMenuListener(new IMenuListener() {
-        //                /* (non-Javadoc)
-        //                 * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
-        //                 */
-        //                public void menuAboutToShow(IMenuManager manager) {
-        //                    fillSearchActions(manager);
-        //                }
-        //            });
-        //        menu.appendToGroup(ICallHierarchyConstants.GROUP_SEARCH_SCOPE, javaSearchMM);
     }
 
     /**

@@ -28,6 +28,10 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 
 public class FiltersDialog extends Dialog {
@@ -77,7 +81,7 @@ public class FiltersDialog extends Dialog {
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
         newShell.setText(CallHierarchyMessages.getString("FiltersDialog.filter")); //$NON-NLS-1$
-//      TODO: WorkbenchHelp.setHelp(newShell, ITaskListHelpContextIds.FILTERS_DIALOG);
+        WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
     }
     
     void createMaxCallDepthArea(Composite parent) {

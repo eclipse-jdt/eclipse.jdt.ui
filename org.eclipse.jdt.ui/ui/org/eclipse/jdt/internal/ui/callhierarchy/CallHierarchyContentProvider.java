@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
-class CallHierarchyContentProvider implements ITreeContentProvider {
+public class CallHierarchyContentProvider implements ITreeContentProvider {
     private final static Object[] EMPTY_ARRAY = new Object[0];
     private TreeViewer fViewer;
 

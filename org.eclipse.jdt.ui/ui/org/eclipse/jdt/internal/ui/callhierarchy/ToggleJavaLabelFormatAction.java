@@ -49,7 +49,7 @@ class ToggleJavaLabelFormatAction extends Action {
         }
         fView= v;
         fFormat= format;
-        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_ORIENTATION_ACTION); // TODO
+        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_JAVA_LABEL_FORMAT_ACTION);
     }
     
     public int getFormat() {

@@ -51,6 +51,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -65,9 +66,11 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
@@ -287,6 +290,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
         showPage(PAGE_EMPTY);
 
+        WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
+        
         fSelectionProviderMediator = new SelectionProviderMediator(new Viewer[] {
                     fCallHierarchyViewer, fLocationViewer
                 });
@@ -715,6 +720,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         fLocationViewer.setLabelProvider(new LocationLabelProvider());
         fLocationViewer.setInput(new ArrayList());
         fLocationViewer.getControl().addKeyListener(createKeyListener());
+
+        JavaUIHelp.setHelp(fLocationViewer, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
 
         fOpenLocationAction = new OpenLocationAction(getSite());
         fLocationViewer.addOpenListener(new IOpenListener() {

@@ -15,11 +15,14 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -43,6 +46,8 @@ class HistoryAction extends Action {
 
         setDescription(CallHierarchyMessages.getFormattedString(CallHierarchyMessages.getString("HistoryAction.description"), elementName)); //$NON-NLS-1$
         setToolTipText(CallHierarchyMessages.getFormattedString(CallHierarchyMessages.getString("HistoryAction.tooltip"), elementName)); //$NON-NLS-1$
+        
+        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_HISTORY_ACTION);
     }
 
     private ImageDescriptor getImageDescriptor(IJavaElement elem) {

@@ -44,7 +44,7 @@ class ToggleCallModeAction extends Action {
         }
         fView= v;
         fMode= mode;
-        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_ORIENTATION_ACTION); // TODO
+        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_CALL_MODE_ACTION);
     }
     
     public int getMode() {
