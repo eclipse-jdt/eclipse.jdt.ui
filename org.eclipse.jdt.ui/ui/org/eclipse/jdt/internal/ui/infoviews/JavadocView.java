@@ -47,6 +47,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -414,7 +416,11 @@ public class JavadocView extends AbstractInfoView {
 				JavaEditor editor= (JavaEditor)part;
 				ITextSelection textSelection= (ITextSelection)selection;
 
-				IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+				IDocumentProvider documentProvider= editor.getDocumentProvider();
+				if (documentProvider == null)
+					return null;
+				
+				IDocument document= documentProvider.getDocument(editor.getEditorInput());
 				if (document == null)
 					return null;
 				
