@@ -151,5 +151,18 @@
    			class="org.eclipse.jsp.launching.TomcatClasspathProvider">
    		</classpathProvider>
    </extension>
+   <extension
+         point="org.eclipse.ui.editorActions">
+      <editorContribution
+            targetID="org.eclipse.jdt.ui.examples.JSPEditor"
+            id="org.eclipse.jsp.BreakpointRulerActions">
+         <action
+               label="%Dummy.label"
+               class="org.eclipse.jsp.launching.ToggleJspBreakpointRulerActionDelegate"
+               actionID="RulerDoubleClick"
+               id="org.eclipse.jsp.actions.ToggleJspBreakpointAction">
+         </action>
+      </editorContribution>
+   </extension>   
    
 </plugin>
