@@ -68,7 +68,6 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -189,8 +188,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 	
 	private void run(IType type, IField[] preselected) throws CoreException{
-		ILabelProvider lp= new AddGetterSetterLabelProvider(createNameProposer());
-		Map entries= createGetterSetterMapping(type);
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		ILabelProvider lp= new AddGetterSetterLabelProvider(createNameProposer(settings));
+		Map entries= createGetterSetterMapping(type, settings);
 		if (entries.isEmpty()){
 			MessageDialog.openInformation(getShell(), dialogTitle, ActionMessages.getString("AddGettSetterAction.typeContainsNoFields.message")); //$NON-NLS-1$
 			return;
@@ -266,16 +266,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return (IField[]) list.toArray(new IField[list.size()]);			
 	}
 	
-	private static NameProposer createNameProposer(){
-		return new NameProposer(getGetterSetterPrefixes(), getGetterSetterSuffixes());
-	}
-	
-	private static String[] getGetterSetterPrefixes(){
-		return CodeGenerationPreferencePage.getGetterStetterPrefixes();
-	}
-	
-	private static String[] getGetterSetterSuffixes(){
-		return CodeGenerationPreferencePage.getGetterStetterSuffixes();
+	private static NameProposer createNameProposer(CodeGenerationSettings settings) {
+		return new NameProposer(settings);
 	}
 	
 	private void generate(IField[] getterFields, IField[] setterFields) throws CoreException{
@@ -403,8 +395,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private AddGetterSetterOperation createAddGetterSetterOperation(IField[] getterFields, IField[] setterFields) {
 		IRequestQuery skipSetterForFinalQuery= skipSetterForFinalQuery();
 		IRequestQuery skipReplaceQuery= skipReplaceQuery();
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();		
-		return new AddGetterSetterOperation(getterFields, setterFields, createNameProposer(), settings, skipSetterForFinalQuery, skipReplaceQuery);
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		return new AddGetterSetterOperation(getterFields, setterFields, createNameProposer(settings), settings, skipSetterForFinalQuery, skipReplaceQuery);
 	}
 	
 	private IRequestQuery skipSetterForFinalQuery() {
@@ -562,11 +554,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	/**
 	 * @return map IField -> GetterSetterEntry[]
 	 */
-	private static Map createGetterSetterMapping(IType type) throws JavaModelException{
+	private static Map createGetterSetterMapping(IType type, CodeGenerationSettings settings) throws JavaModelException{
 		IField[] fields= type.getFields();
 		Map result= new HashMap();
-		String[] prefixes= AddGetterSetterAction.getGetterSetterPrefixes();
-		String[] suffixes= AddGetterSetterAction.getGetterSetterSuffixes();
+		String[] prefixes= settings.fieldPrefixes;
+		String[] suffixes= settings.fieldSuffixes;
 		for (int i= 0; i < fields.length; i++) {
 			List l= new ArrayList(2);
 			if (GetterSetterUtil.getGetter(fields[i], prefixes, suffixes) == null)

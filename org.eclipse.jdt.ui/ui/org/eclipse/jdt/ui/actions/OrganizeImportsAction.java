@@ -28,6 +28,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -52,6 +53,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
@@ -65,7 +67,7 @@ import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
@@ -290,9 +292,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	
 		monitor.beginTask(ActionMessages.getString("OrganizeImportsAction.multi.op.description"), cus.length); //$NON-NLS-1$
 		try {
-			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();
-			boolean ignoreLowerCaseNames= ImportOrganizePreferencePage.doIgnoreLowerCaseNames();
+			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
+			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);
+			boolean ignoreLowerCaseNames= store.getBoolean(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
 	
 			IChooseImportQuery query= new IChooseImportQuery() {
 				public TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges) {
@@ -341,9 +344,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 
 	private void runOnSingle(ICompilationUnit cu, boolean doResolve) {
 		try {
-			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();
-			boolean ignoreLowerCaseNames= ImportOrganizePreferencePage.doIgnoreLowerCaseNames();
+			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
+			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);
+			boolean ignoreLowerCaseNames= store.getBoolean(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
 			
 			if (!cu.isWorkingCopy()) {
 				IEditorPart editor= EditorUtility.openInEditor(cu);
