@@ -13,9 +13,11 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -32,6 +34,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -239,7 +242,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 							ProposalPosition proposalPosition= new ProposalPosition(document, pos.getStartPosition(), pos.getLength(), fPositionOrder.indexOf(pos), linkedModeProposals);
 							for (int j= 0; j < linkedModeProposals.length; j++) {
 								if (linkedModeProposals[j] instanceof LinkedModeProposal)
-									((LinkedModeProposal)linkedModeProposals[j]).setPosition(proposalPosition);
+									((LinkedModeProposal)linkedModeProposals[j]).addPosition(proposalPosition);
 							}
 							group.addPosition(proposalPosition);
 						}
@@ -293,7 +296,8 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		private String fProposal;
 		private ITypeBinding fTypeProposal;
 		private ICompilationUnit fCompilationUnit;
-		private Position fPosition;
+		/** The set of positions that share this proposal */
+		private Set fPositions;
 
 		public LinkedModeProposal(String proposal) {
 			fProposal= proposal;
@@ -305,8 +309,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			fCompilationUnit= unit;
 		}
 	
-		public void setPosition(Position position) {
-			fPosition= position;
+		public void addPosition(Position position) {
+			if (fPositions == null)
+				fPositions= new HashSet();
+			fPositions.add(position);
 		}
 	
 		private ImportsStructure getImportStructure() throws CoreException {
@@ -329,16 +335,8 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 					impStructure= getImportStructure();
 					replaceString= impStructure.addImport(fTypeProposal);
 				}
-				int off, length;
-				if (fPosition != null) {
-					off= fPosition.getOffset();
-					length= fPosition.getLength();
-				} else {
-					Point point= viewer.getSelectedRange();
-					off= point.x;
-					length= point.y;
-				}
-				document.replace(off, length, replaceString);
+				IRegion region= getReplaceRegion(viewer, offset);
+				document.replace(region.getOffset(), region.getLength(), replaceString);
 			
 				if (impStructure != null) {
 					impStructure.create(false, null);
@@ -349,6 +347,33 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				JavaPlugin.log(e);
 			}
 		}	
+		
+		/*
+		 * Returns the registered position for a given offset. 
+		 */
+		private Position getCurrentPosition(int offset) {
+			if (fPositions != null) {
+				for (Iterator it= fPositions.iterator(); it.hasNext();) {
+					Position position= (Position) it.next();
+					if (position.overlapsWith(offset, 0)) {
+						return position;
+					}
+				}
+			}
+			return null;
+		}
+		
+		/*
+		 * Returns the region to be replaced by this proposal.
+		 */
+		private IRegion getReplaceRegion(ITextViewer viewer, int offset) {
+			Position pos= getCurrentPosition(offset);
+			if (pos != null)
+				return new Region(pos.getOffset(), pos.getLength());
+			
+			Point point= viewer.getSelectedRange();
+			return new Region(point.x, point.y);
+		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
@@ -417,8 +442,9 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				return false;
 			
 			int off;
-			if (fPosition != null) {
-				off= fPosition.getOffset();
+			Position pos= getCurrentPosition(offset);
+			if (pos != null) {
+				off= pos.getOffset();
 			} else {
 				off= Math.max(0, offset - insert.length());
 			}
