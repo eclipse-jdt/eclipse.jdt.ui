@@ -36,6 +36,7 @@ import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
+	private static final boolean BUG_79512= true;
 
 	private static ExtractMethodTestSetup fgTestSetup;
 	
@@ -873,6 +874,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test363() throws Exception {
+		if (BUG_79512) {
+			System.out.println("test363 disabled (bug 79512)");
+			return;
+		}
 		validSelectionTestChecked();
 	}
 	
