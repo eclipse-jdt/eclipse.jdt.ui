@@ -70,7 +70,6 @@ public class SemanticHighlightingTest extends TestCase {
 			assertTrue(folder.exists());
 			JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 			
-			
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			if (!store.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED))
 				store.setValue(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, true);
@@ -82,6 +81,8 @@ public class SemanticHighlightingTest extends TestCase {
 		}
 
 		protected void tearDown () throws Exception {
+			EditorTestHelper.closeEditor(fEditor);
+			
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			if (!store.isDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED))
 				store.setToDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
