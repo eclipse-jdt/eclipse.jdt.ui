@@ -399,7 +399,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 
 				public String getText(Object element) {
 					NonNLSElement nlsel= (NonNLSElement)element;
-					String elementName= ResourceUtil.getResource(nlsel.cu).getProjectRelativePath().toString();
+					String elementName= ResourceUtil.getResource(nlsel.cu).getFullPath().toString();
 					return ActionMessages.getFormattedString(
 						"FindStringsToExternalizeAction.foundStrings", //$NON-NLS-1$
 						new Object[] {new Integer(nlsel.count), elementName} );
