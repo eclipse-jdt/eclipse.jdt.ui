@@ -468,6 +468,23 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
 	}	
 	
+	public void testFailDoAll8()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {};
+		String[] newTypes= {};
+		String[] newDefaultValues= {};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= {0};
+		
+		String[] oldParamNames= {"I"};
+		String[] newParamNames= {};
+		int[] permutation= {};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.NONE;
+		int expectedSeverity= RefactoringStatus.ERROR;
+		helperDoAllFail("run", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+	}	
+
 	//---------
 	public void test0() throws Exception{
 		helper1(new String[]{"j", "i"}, new String[]{"I", "I"});
@@ -1057,6 +1074,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll51()throws Exception{
+		if (true) {
+			printTestDisabledMessage("disabled testAll51() until bug 53477 has been fixed");
+			return;
+		}
+		
 		if (! RUN_CONSTRUCTOR_TEST){
 			printTestDisabledMessage("disabled for constructors for now");
 			return;
