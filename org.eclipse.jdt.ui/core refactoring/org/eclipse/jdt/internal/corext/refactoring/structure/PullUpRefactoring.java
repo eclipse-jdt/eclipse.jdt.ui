@@ -603,6 +603,8 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 					final String[] unmapped= TypeVariableUtil.getUnmappedVariables(mapping, declaring, member);
 					length= unmapped.length;
 					switch (length) {
+						case 0:
+							break;
 						case 1:
 							status.addError(RefactoringCoreMessages.getFormattedString("PullUpRefactoring.Type_variable_not_available", new String[] { unmapped[0], declaring.getSuperclassName()}), JavaStatusContext.create(member)); //$NON-NLS-1$
 							break;
@@ -611,6 +613,9 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 							break;
 						case 3:
 							status.addError(RefactoringCoreMessages.getFormattedString("PullUpRefactoring.Type_variable3_not_available", new String[] { unmapped[0], unmapped[1], unmapped[2], declaring.getSuperclassName()}), JavaStatusContext.create(member)); //$NON-NLS-1$
+							break;
+						default:
+							status.addError(RefactoringCoreMessages.getFormattedString("PullUpRefactoring.Type_variables_not_available", new String[] { declaring.getSuperclassName()}), JavaStatusContext.create(member)); //$NON-NLS-1$
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled())
