@@ -43,11 +43,6 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	private static final Class clazz= IntroduceFactoryTests.class;
 	private static final String REFACTORING_PATH= "IntroduceFactory/";
 
-	/**
-	 * JDT/Core search engine bug: fails to locate calls to varargs methods
-	 */
-	private static final boolean BUG_84724= true;
-
 	public IntroduceFactoryTests(String name) {
 		super(name);
 	} 
@@ -660,10 +655,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 	public void testVarArgsCtor() throws Exception {
 	    // RMF - As of I20050202, search engine doesn't reliably find call sites to varargs methods
-		if (BUG_84724)
-			System.err.println("Test " + getName() + " disabled due to JDT/Core bug #84724.");
-		else
-			singleUnitHelper(true);
+		singleUnitHelper(true);
 	}
     //
 	// ================================================================================
