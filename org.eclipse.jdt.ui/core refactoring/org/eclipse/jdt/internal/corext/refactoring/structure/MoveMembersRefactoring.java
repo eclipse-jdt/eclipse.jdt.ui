@@ -103,6 +103,19 @@ public class MoveMembersRefactoring extends Refactoring {
 		return JavaModelUtil.findType(jproject, fullyQualifiedTypeName);
 	}
 
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+			
+		result.merge(checkAllElements());
+		if (result.hasFatalError())
+			return result;
+			
+		if (! haveCommonDeclaringType())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.same_type"));			 //$NON-NLS-1$
+		
+		return new RefactoringStatus();
+	}
+	
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
@@ -110,15 +123,6 @@ public class MoveMembersRefactoring extends Refactoring {
 		try{
 			pm.beginTask("", 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			
-			result.merge(checkAllElements());
-			pm.worked(1);
-			if (result.hasFatalError())
-				return result;
-			
-			if (! haveCommonDeclaringType())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.same_type"));			 //$NON-NLS-1$
-			pm.worked(1);
 			
 			result.merge(checkDeclaringType());
 			pm.worked(1);
