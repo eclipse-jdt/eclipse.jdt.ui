@@ -4,8 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -22,6 +23,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
@@ -32,12 +38,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog2;
-
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * A helper class to activate the UI of a refactoring
@@ -49,8 +51,10 @@ public class RefactoringStarter {
 	public Object activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
 		if (! canActivate(mustSaveEditors))
 			return null;
-		RefactoringStatus activationStatus= refactoring.checkActivation(new NullProgressMonitor());
-		if (! activationStatus.hasFatalError()){
+		RefactoringStatus activationStatus= checkActivation(refactoring, dialogTitle);
+		if (activationStatus.hasFatalError()){
+			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
+		} else {
 			wizard.setActivationStatus(activationStatus);
 			Dialog dialog;
 			if (wizard.hasMultiPageUserInput())
@@ -60,9 +64,7 @@ public class RefactoringStarter {
 			if (dialog.open() == Dialog.CANCEL)
 				fSaveHelper.triggerBuild();
 			return null;	
-		} else{
-			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
-		}	
+		} 
 	}
 		
 	public Object activate(final IRenameRefactoring renameRefactoring, Shell parent, String dialogTitle, String dialogMessage, boolean mustSaveEditors, Object element) throws JavaModelException {
@@ -72,9 +74,9 @@ public class RefactoringStarter {
 		if (! checkReadOnly(element))
 			return null;
 		Refactoring refactoring= (Refactoring)renameRefactoring;
-		RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor()); 
-		if (status.hasFatalError()){
-			return RefactoringErrorDialogUtil.open(dialogTitle, status);
+		RefactoringStatus activationStatus= checkActivation(refactoring, dialogTitle);
+		if (activationStatus.hasFatalError()){
+			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
 		} else{
 			IInputValidator validator= new IInputValidator(){
 				public String isValid(String newText){
@@ -101,6 +103,21 @@ public class RefactoringStarter {
 			PerformRefactoringUtil.performRefactoring(pco, refactoring, context, parent);
 			return null;
 		} 		
+	}
+	
+	private RefactoringStatus checkActivation(Refactoring refactoring, String errorDialogTitle){		
+		try {
+			CheckConditionsOperation cco= new CheckConditionsOperation(refactoring, CheckConditionsOperation.ACTIVATION);
+			IRunnableContext context= new BusyIndicatorRunnableContext();
+			context.run(false, false, cco);
+			return cco.getStatus();
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, "Error", RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$
+		} catch (InterruptedException e) {
+			Assert.isTrue(false);
+			return null;
+		}
 	}
 	
 	private boolean checkReadOnly(Object element) throws JavaModelException{
