@@ -174,7 +174,7 @@ public class DynamicWorkingSet extends AbstractWorkingSet implements IDynamicWor
 	
 	public void contentChanged() {
         WorkingSetManager workingSetManager = (WorkingSetManager)WorkbenchPlugin.getDefault().getWorkingSetManager();
-        workingSetManager.workingSetChanged(this, IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE);
+        workingSetManager.workingSetChanged(this, IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE, null);
 	}
 
 	public boolean isEditable() {

@@ -46,7 +46,7 @@ public abstract class AbstractWorkingSet implements IAdaptable, IWorkingSet {
 	    WorkingSetManager workingSetManager = (WorkingSetManager) WorkbenchPlugin
 	            .getDefault().getWorkingSetManager();
 	    workingSetManager.workingSetChanged(this,
-	            IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE);
+	            IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE, null);
 	}
 
 	public String getName() {
