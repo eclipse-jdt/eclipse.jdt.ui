@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
 
@@ -84,11 +85,18 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 */
 	protected void performChange(IEditorPart activeEditor, IDocument document) throws CoreException {
 		Change change= null;
+		IRewriteTarget rewriteTarget= null;
 		try {
 			change= getChange();
 			if (change != null) {
 				if (document != null) {
 					LinkedModeModel.closeAllModels(document);
+				}
+				if (activeEditor != null) {
+					rewriteTarget= (IRewriteTarget) activeEditor.getAdapter(IRewriteTarget.class);
+					if (rewriteTarget != null) {
+						rewriteTarget.beginCompoundChange();
+					}
 				}
 				
 				change.initializeValidationData(new NullProgressMonitor());
@@ -102,6 +110,10 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 				}
 			}
 		} finally {
+			if (rewriteTarget != null) {
+				rewriteTarget.endCompoundChange();
+			}
+			
 			if (change != null) {
 				change.dispose();
 			}
