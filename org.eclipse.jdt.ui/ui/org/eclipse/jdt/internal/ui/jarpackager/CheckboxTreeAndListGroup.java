@@ -786,7 +786,6 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	
 	/**
 	 * Checks if an element is grey checked.
-	 * @param
 	 */
 	public boolean isTreeItemGreyChecked(Object object) {
 		return fTreeViewer.getGrayed(object);	
