@@ -294,7 +294,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 				} else
 					fPredecessor= fNext;
 
-			} else if (fContent.charAt(fPrevious) == HTML_TAG_PREFIX && (Character.isLetter(fContent.charAt(fNext)) || fContent.charAt(fNext) == '/') && fSuccessor != BreakIterator.DONE) {
+			} else if (fContent.charAt(fPrevious) == HTML_TAG_PREFIX && fSuccessor != BreakIterator.DONE && (Character.isLetter(fContent.charAt(fNext)) || fContent.charAt(fNext) == '/')) {
 
 				if (fContent.startsWith(HTML_CLOSE_PREFIX, fPrevious))
 					nextBreak();
