@@ -13,7 +13,6 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
 
@@ -24,11 +23,6 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.perfmsr.core.IPerformanceMonitor;
-import org.eclipse.perfmsr.core.LoadValueConstants;
-import org.eclipse.perfmsr.core.PerfMsrCorePlugin;
-import org.eclipse.perfmsr.core.Upload;
-
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -37,40 +31,43 @@ import org.eclipse.ui.ide.IDE;
 
 public class OpenEditorTest extends TestCase {
 	
-	private IPerformanceMonitor fPerformanceMonitor;
+	public static final int N_OF_COPIES= 20;
+
+	public static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
 	
-	private static final int N_OF_COPIES= 20;
+	public static final String FILE_PREFIX= "TextLayout";
 
-	private static final String FILE_PREFIX= "org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout";
-
-	private static final String FILE_SUFFIX= ".java";
-
-	private static final String LOG_FILE= "timer-OpenEditorTest.xml";
+	public static final String FILE_SUFFIX= ".java";
+	
+	private PerformanceMeterFactory fPerformanceMeterFactory= new OSPerformanceMeterFactory();
 
 	protected void setUp() {
-		fPerformanceMonitor= PerfMsrCorePlugin.getPerformanceMonitor(false);
-		fPerformanceMonitor.setLogFile(getLogFile());
-		fPerformanceMonitor.setVar("50");
-
 		runEventQueue(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 	}
 	
-	protected void tearDown() {
-		Upload.Status status= fPerformanceMonitor.upload(null);
-		System.out.println(status.message);
+	public void testOpenJavaEditor1() throws PartInitException {
+		// cold run
+		measure();
 	}
-	
-	public void testOpenJavaEditor() throws PartInitException {
+
+	public void testOpenJavaEditor2() throws PartInitException {
+		// warm run
+		measure();
+	}
+
+	private void measure() throws PartInitException {
+		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
 		try {
-			IFile[] files= findFiles(FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES);
+			IFile[] files= findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES);
 			for (int i= 0, n= files.length; i < n; i++) {
-				fPerformanceMonitor.snapshot(1);
+				performanceMeter.start();
 				openInEditor(files[i]);
-				fPerformanceMonitor.snapshot(2);
+				performanceMeter.stop();
 				sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 			}
 		} finally {
 			getActivePage().closeAllEditors(false);
+			performanceMeter.commit();
 		}
 	}
 
@@ -101,23 +98,4 @@ public class OpenEditorTest extends TestCase {
 		} catch (InterruptedException e) {
 		}
 	}
-	
-	private String getLogFile() {
-		String ctrl= System.getProperty(LoadValueConstants.ENV_PERF_CTRL);
-		if (ctrl == null)
-			return LOG_FILE;
-		
-		StringTokenizer st= new StringTokenizer(ctrl, ";");
-		while(st.hasMoreTokens()) {
-			String token= st.nextToken();
-			int i= token.indexOf('=');
-			if (i < 1)
-				continue;
-			String value= token.substring(i+1);
-			String parm= token.substring(0,i);
-			if (parm.equals(LoadValueConstants.PerfCtrl.log))
-				return value + "/" + LOG_FILE;
-		}
-		return LOG_FILE;
-	}	
 }

@@ -44,45 +44,41 @@ import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 public class OpenEditorTestSetup extends TestCase {
 
-	private static final String SWT_ZIP= "/testResources/org.eclipse.swt-R3_0.zip";
+	public static final String PROJECT= "org.eclipse.swt";
+	
+	private static final String PROJECT_ZIP= "/testResources/org.eclipse.swt-R3_0.zip";
 
-	private static final String SWT_PROJECT= "org.eclipse.swt";
+	private static final String PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
 
-	private static final int N_OF_COPIES= 20;
-
-	public void testSetup() {
-		try {
-			IWorkbench workbench= PlatformUI.getWorkbench();
-			IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
-			IWorkbenchPage activePage= activeWindow.getActivePage();
-			
-			activePage.hideView(activePage.findViewReference("org.eclipse.ui.internal.introview"));
-			
-			workbench.showPerspective("org.eclipse.jdt.ui.JavaPerspective", activeWindow);
-			
+	private static final String INTRO_VIEW= "org.eclipse.ui.internal.introview";
+	
+	public void testSetup() throws IOException, CoreException {
+		IWorkbench workbench= PlatformUI.getWorkbench();
+		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
+		IWorkbenchPage activePage= activeWindow.getActivePage();
+		
+		activePage.hideView(activePage.findViewReference(INTRO_VIEW));
+		
+		workbench.showPerspective(PERSPECTIVE, activeWindow);
+		
+		boolean autobuild= ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding();
+		if (autobuild)
 			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(false);
-			
-			String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
-			FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(JdtTextTestPlugin.getDefault(), new Path(SWT_ZIP))), new File(workspacePath));
-			File oldFile= new File(workspacePath + SWT_PROJECT + "/.classpath_win32");
-			File newFile= new File(workspacePath + SWT_PROJECT + "/.classpath");
-			assertTrue(oldFile.renameTo(newFile));
-			String origPrefix= workspacePath + SWT_PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
-			String origName= "TextLayout";
-			String origPostfix= ".java";
-			duplicate(origPrefix, origName, origPostfix, N_OF_COPIES);
-			IProject project= createExistingProject(SWT_PROJECT);
-			assertTrue(JavaCore.create(project).exists());
-			
-			ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		
+		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
+		FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(JdtTextTestPlugin.getDefault(), new Path(PROJECT_ZIP))), new File(workspacePath));
+		File oldFile= new File(workspacePath + PROJECT + "/.classpath_win32");
+		File newFile= new File(workspacePath + PROJECT + "/.classpath");
+		assertTrue(oldFile.renameTo(newFile));
+		duplicate(workspacePath + PROJECT + OpenEditorTest.PATH, OpenEditorTest.FILE_PREFIX, OpenEditorTest.FILE_SUFFIX, OpenEditorTest.N_OF_COPIES);
+		IProject project= createExistingProject(PROJECT);
+		assertTrue(JavaCore.create(project).exists());
+		
+		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		if (autobuild)
 			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(true);
-			
-			workbench.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
+		
+		workbench.close();
 	}
 	
 	private void duplicate(String origPrefix, String origName, String origPostfix, int n) throws IOException {
