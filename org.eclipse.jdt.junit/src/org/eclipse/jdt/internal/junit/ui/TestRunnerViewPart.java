@@ -209,6 +209,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private Composite fCounterComposite;
 	private Composite fParent;
 	private UpdateUIJob fUpdateJob;
+
+	private StopAction fStopAction;
 	
 	private class StopAction extends Action {
 		public StopAction() {
@@ -427,6 +429,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			public void run() {
 				if(isDisposed()) 
 					return;	
+				fStopAction.setEnabled(false);
 				if (fFailures.size() > 0) {
 					selectFirstFailure();
 				}
@@ -483,6 +486,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				if(isDisposed()) 
 					return;	
 				resetViewIcon();
+				fStopAction.setEnabled(false);
 				fProgressBar.stopped();
 			}
 		});	
@@ -937,6 +941,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				fCounterPanel.reset();
 				fFailureView.clear();
 				fProgressBar.reset();
+				fStopAction.setEnabled(true);
 				clearStatus();
 				start(testCount);
 			}
@@ -1048,14 +1053,16 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				new ToggleOrientationAction(this, VIEW_ORIENTATION_AUTOMATIC)};
 		fNextAction= new ShowNextFailureAction(this);
 		fPreviousAction= new ShowPreviousFailureAction(this);
+		fStopAction= new StopAction();
 		fNextAction.setEnabled(false);
 		fPreviousAction.setEnabled(false);
+		fStopAction.setEnabled(false);
 		actionBars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAction);
 		actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPreviousAction);
 		
 		toolBar.add(fNextAction);
 		toolBar.add(fPreviousAction);
-		toolBar.add(new StopAction());
+		toolBar.add(fStopAction);
 		toolBar.add(new Separator());
 		toolBar.add(fRerunLastTestAction);
 		toolBar.add(fScrollLockAction);
