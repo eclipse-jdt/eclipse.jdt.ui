@@ -33,7 +33,7 @@ public abstract class Refactoring implements IRefactoring {
 
 	private static IUndoManager fgUndoManager= new UndoManager();
 	
-	private IFile[] fUnsavedFiles;
+	private IFile[] fUnsavedFiles= new IFile[0];
 		
 	public static IUndoManager getUndoManager() {
 		return fgUndoManager;
