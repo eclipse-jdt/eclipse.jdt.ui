@@ -55,9 +55,26 @@ public class RefactoringGroup extends ContextMenuGroup {
 	
 	private boolean fIntitialized= false;
 	
+	private boolean isSelectionOk(ISelectionProvider selectionProvider){
+		if (selectionProvider == null)
+			return false;	
+		
+		ISelection selection= selectionProvider.getSelection();
+		if (! (selection instanceof IStructuredSelection))
+			return false;
+		else if (((IStructuredSelection)selection).size() != 1)
+			return false;
+		else
+			return true;		
+	}
+	
 	public void fill(IMenuManager manager, GroupContext context) {
 	
-		createActions(context.getSelectionProvider());
+		ISelectionProvider selectionProvider= context.getSelectionProvider();
+		if (!isSelectionOk())
+			return;
+		
+		createActions(selectionProvider);
 		
 		for (int i= 0; i < openWizardActions.length; i++) {
 			AbstractOpenWizardAction action= openWizardActions[i];
