@@ -301,8 +301,7 @@
 	</page>	
 </extension>
 
-<extension
-	point="org.eclipse.ui.actionSets">
+<extension point="org.eclipse.ui.actionSets">
 	<actionSet
 		id="org.eclipse.jdt.ui.JavaActionSet"
         label="%JavaActionSet.label"
@@ -315,6 +314,12 @@
 			tooltip="%OpenTypeAction.tooltip"
 			icon="icons/full/ctool16/opentype.gif"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
+    </actionSet>
+	<actionSet
+		id="org.eclipse.jdt.ui.JavaElementCreationActionSet"
+        label="%JavaElementCreationActionSet.label"
+		visible="false"
+		description="%JavaElementCreationActionSet.description">
 		<action id="org.eclipse.jdt.ui.actions.OpenSnippetWizard"	
 			toolbarPath="Normal/JavaWizards"			
 			label="%OpenSnippetWizardAction.label"
@@ -345,7 +350,7 @@
 			tooltip="%OpenProjectWizardAction.tooltip"
 			icon="icons/full/ctool16/newjprj_wiz.gif"
 			class="org.eclipse.jdt.internal.ui.wizards.OpenProjectWizardAction"/>
-     </actionSet>
+    </actionSet>
 </extension>
 
 <extension point="org.eclipse.ui.popupMenus">

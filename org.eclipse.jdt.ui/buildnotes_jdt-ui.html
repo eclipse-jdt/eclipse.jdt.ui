@@ -13,13 +13,26 @@ Java Development Tooling UI</h1>
 Eclipse Build Input January ??? 2002
 <h2>
 What's new in this drop</h2>
+<p>
+Due to bug report <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6185">6185</a>
+we had to split the Java action set into two actions sets. The are now named
+Java and Java Element Creation. Since the state of a perspective instance is
+stored in the metadata directory starting this build on an existing workspace
+leads to missing Java Element creation actions in the tool bar of a Java
+perspective. The actions can be restored by either closing and reopening the
+perspective or by checking the &quot;Java Element Creation&quot; action set in
+Perspective-&gt;Customize...-&gt;Others.</p>
 <h3>
 Problem Reports Fixed</h3>
 <p>
 <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=7229">7229</a> surround try/catch block throws NPE
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=7598">7598</a> extract method: icorrect title of error dialog
 <br><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=6457">6457</a> Rename project changes project location<br>
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=7023">7023</a> Refactoring too many builds when auto build is on
+<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=7023">7023</a> Refactoring too many builds when auto build is on<br>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=7127">7127</a> 'refactor'
+menu missing from the type hierarchy perspective<br>
+<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6185">6185</a> Java icons in Debug View<br>
+<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6704">6704</a> "MyCorporation" copyright in jdt.ui
 </p>
 <h3>
 Problem Reports Closed</h3>

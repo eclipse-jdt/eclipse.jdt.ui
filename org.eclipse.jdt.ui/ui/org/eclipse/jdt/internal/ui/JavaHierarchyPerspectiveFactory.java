@@ -29,8 +29,10 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea); //$NON-NLS-1$
 		folder.addView(JavaUI.ID_TYPE_HIERARCHY); 
 		
-		layout.addActionSet(IDebugUIConstants.DEBUG_ACTION_SET);
+		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
+		layout.addActionSet(JavaUI.ID_ELEMENT_CREATION_ACTION_SET);		
+		layout.addActionSet(IUIConstants.ID_REFACTORING_ACTION_SET);
 		
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
