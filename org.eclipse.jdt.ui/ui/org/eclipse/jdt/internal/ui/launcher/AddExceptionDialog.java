@@ -35,7 +35,7 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 	/**
 	 * Constructor for AddExceptionDialog
 	 */
-	protected AddExceptionDialog(Shell parentShell) {
+	public AddExceptionDialog(Shell parentShell) {
 		super(parentShell);
 		setTitle(LauncherMessages.getString("AddExceptionDialog.title")); //$NON-NLS-1$
 	}
