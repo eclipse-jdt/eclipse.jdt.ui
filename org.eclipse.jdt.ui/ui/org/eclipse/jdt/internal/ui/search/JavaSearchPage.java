@@ -50,6 +50,7 @@ import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.IWorkingSet;
+import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -145,8 +146,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	//---- Action Handling ------------------------------------------------
 	
 	public boolean performAction() {
-		SearchPatternData data= getPatternData();
+		SearchUI.activateSearchResultView();
 
+		SearchPatternData data= getPatternData();
 		IWorkspace workspace= JavaPlugin.getWorkspace();
 
 		// Setup search scope

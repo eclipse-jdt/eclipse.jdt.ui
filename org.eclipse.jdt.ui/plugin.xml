@@ -391,6 +391,7 @@
          label="%JavaSearchPage.label"
 		 sizeHint="460,160"
 		 extensions="java:90, jav:90"
+		 showScopeSection="true"
 		 class="org.eclipse.jdt.internal.ui.search.JavaSearchPage">
    </page>
 </extension>
