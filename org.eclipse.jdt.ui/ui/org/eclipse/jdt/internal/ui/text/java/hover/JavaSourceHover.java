@@ -134,7 +134,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				int shellStyle= SWT.RESIZE;
+				int shellStyle= SWT.RESIZE | SWT.TOOL;
 				int style= SWT.V_SCROLL | SWT.H_SCROLL;				
 				return new SourceViewerInformationControl(parent, shellStyle, style);
 			}

@@ -2669,7 +2669,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			public IInformationControl createInformationControl(Shell shell) {
 				boolean cutDown= false;
 				int style= cutDown ? SWT.NONE : (SWT.V_SCROLL | SWT.H_SCROLL);
-				return new DefaultInformationControl(shell, SWT.RESIZE, style, new HTMLTextPresenter(cutDown));
+				return new DefaultInformationControl(shell, SWT.RESIZE | SWT.TOOL, style, new HTMLTextPresenter(cutDown));
 			}
 		};
 

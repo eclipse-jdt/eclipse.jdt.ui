@@ -65,7 +65,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				int shellStyle= SWT.RESIZE;
+				int shellStyle= SWT.RESIZE | SWT.TOOL;
 				int style= SWT.V_SCROLL | SWT.H_SCROLL;
 				if (BrowserInformationControl.isAvailable(parent))
 					return new BrowserInformationControl(parent, shellStyle, style);

@@ -191,7 +191,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @param style the additional styles for the styled text widget
 	 */	
 	public SourceViewerInformationControl(Shell parent,int style) {
-		this(parent, SWT.NO_TRIM, style);
+		this(parent, SWT.NO_TRIM | SWT.TOOL, style);
 	}
 	
 	/**
@@ -206,7 +206,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.0
 	 */	
 	public SourceViewerInformationControl(Shell parent,int style, String statusFieldText) {
-		this(parent, SWT.NO_TRIM, style, statusFieldText);
+		this(parent, SWT.NO_TRIM | SWT.TOOL, style, statusFieldText);
 	}
 
 	/**

@@ -493,7 +493,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
 		
 		IJavaProject project= getProject();
-		int tabWidth= CodeFormatterUtil.getTabWidth(project);
+		int tabWidth= CodeFormatterUtil.getIndentWidth(project);
 		boolean useSpaces;
 		if (project == null)
 			useSpaces= JavaCore.SPACE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
@@ -683,7 +683,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	private IInformationControlCreator getInformationPresenterControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				int shellStyle= SWT.RESIZE;
+				int shellStyle= SWT.RESIZE | SWT.TOOL;
 				int style= SWT.V_SCROLL | SWT.H_SCROLL;
 				return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
 			}
