@@ -120,6 +120,9 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		return null;
 	}
 
+	/*
+	 * @see ITextHoverExtension#getInformationControlCreator()
+	 */
 	public IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
