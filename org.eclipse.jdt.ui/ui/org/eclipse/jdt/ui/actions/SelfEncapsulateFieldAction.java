@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -90,7 +92,10 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection));
 		} catch (JavaModelException e) {
-			setEnabled(false);
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
+			setEnabled(false);//no ui
 		}
 	}
 	
@@ -124,16 +129,27 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection));
+		try {
+			setEnabled(RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection));
+		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
+			setEnabled(false);//no ui
+		}
 	}
 	
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(IStructuredSelection selection) {
-		if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection))
-			return;
-		run((IField)selection.getFirstElement());
+		try {
+			if (RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection))
+				run((IField) selection.getFirstElement());
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 	
 	//---- private helpers --------------------------------------------------------
