@@ -140,22 +140,25 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		}
 	}
 
-	private Object[] rootsAndContainers(IJavaProject project, Object[] roots) { 
+	private Object[] rootsAndContainers(IJavaProject project, Object[] roots) throws JavaModelException { 
 		List result= new ArrayList(roots.length);
 		Set containers= new HashSet(roots.length);
+		Set containedRoots= new HashSet(roots.length); 
+		
+		IClasspathEntry[] entries= project.getRawClasspath();
+		for (int i= 0; i < entries.length; i++) {
+			IClasspathEntry entry= entries[i];
+			if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) { 
+				IPackageFragmentRoot[] roots1= project.findPackageFragmentRoots(entry);
+				containedRoots.addAll(Arrays.asList(roots1));
+				containers.add(entry);
+			}
+		}
 		for (int i= 0; i < roots.length; i++) {
 			if (roots[i] instanceof IPackageFragmentRoot) {
-				IPackageFragmentRoot root= (IPackageFragmentRoot)roots[i];
-				IClasspathEntry entry= null;
-				try {
-					entry= root.getRawClasspathEntry();
-				} catch (JavaModelException e) {
-					continue;
+				if (!containedRoots.contains(roots[i])) {
+					result.add(roots[i]);
 				}
-				if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) 
-					containers.add(entry);
-				else
-					result.add(root);
 			} else {
 				result.add(roots[i]);
 			}
