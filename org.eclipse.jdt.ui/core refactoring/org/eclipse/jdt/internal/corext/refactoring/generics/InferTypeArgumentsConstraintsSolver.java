@@ -21,14 +21,13 @@ import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
 
 
@@ -67,19 +66,19 @@ public class InferTypeArgumentsConstraintsSolver {
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			ConstraintVariable2 cv= allConstraintVariables[i];
 			//TODO: not necessary for types that are not used in a TypeConstraint but only as type in CollectionElementVariable
-			EquivalenceRepresentative representative= cv.getRepresentative();
-			if (representative == null) {
-				representative= new EquivalenceRepresentative(cv);
-				representative.setTypeEstimate(TypeSet.create(cv.getType()));
-				cv.setRepresentative(representative);
+			TypeEquivalenceSet set= cv.getTypeEquivalenceSet();
+			if (set == null) {
+				set= new TypeEquivalenceSet(cv);
+				set.setTypeEstimate(TypeSet.create(cv.getType()));
+				cv.setTypeEquivalenceSet(set);
 			} else {
 				ITypeSet typeEstimate= cv.getTypeEstimate();
 				if (typeEstimate == null) {
-					ConstraintVariable2[] cvs= representative.getElements();
+					ConstraintVariable2[] cvs= set.getContributingVariables();
 					typeEstimate= TypeSet.getTypeUniverse();
 					for (int j= 0; j < cvs.length; j++)
 						typeEstimate= typeEstimate.restrictedTo(TypeSet.create(cvs[j].getType()));
-					representative.setTypeEstimate(typeEstimate);
+					set.setTypeEstimate(typeEstimate);
 				}
 			}
 		}
@@ -111,7 +110,7 @@ public class InferTypeArgumentsConstraintsSolver {
 	private void processConstraints(List/*<ITypeConstraint2>*/ usedIn, ConstraintVariable2 changedCv) {
 		int i= 0;
 		for (Iterator iter= usedIn.iterator(); iter.hasNext(); i++) {
-			TypeConstraint2 tc= (TypeConstraint2) iter.next();
+			ITypeConstraint2 tc= (ITypeConstraint2) iter.next();
 
 				maintainSimpleConstraint(changedCv, tc);
 				//TODO: prune tcs which cannot cause further changes
@@ -122,19 +121,17 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 	
-	private void maintainSimpleConstraint(ConstraintVariable2 changedCv, TypeConstraint2 stc) {
+	private void maintainSimpleConstraint(ConstraintVariable2 changedCv, ITypeConstraint2 stc) {
 		ConstraintVariable2 left= stc.getLeft();
 		ConstraintVariable2 right= stc.getRight();
-		
-		Assert.isTrue(stc.getOperator().isSubtypeOperator()); // left <= right
 
-			EquivalenceRepresentative rightRep= right.getRepresentative();
+			TypeEquivalenceSet set= right.getTypeEquivalenceSet();
 			ITypeSet rightEstimate= right.getTypeEstimate();
 			ITypeSet leftEstimate= left.getTypeEstimate();
 			ITypeSet newRightEstimate= rightEstimate.restrictedTo(leftEstimate);
 			if (rightEstimate != newRightEstimate) {
-				rightRep.setTypeEstimate(newRightEstimate);
-				fWorkList.addAll(Arrays.asList(rightRep.getElements()));
+				set.setTypeEstimate(newRightEstimate);
+				fWorkList.addAll(Arrays.asList(set.getContributingVariables()));
 			}
 	}
 
@@ -152,8 +149,8 @@ public class InferTypeArgumentsConstraintsSolver {
 			ConstraintVariable2 cv= allConstraintVariables[i];
 			if (cv instanceof CollectionElementVariable2) {
 				CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
-				EquivalenceRepresentative representative= elementCv.getRepresentative();
-				if (representative == null)
+				TypeEquivalenceSet set= elementCv.getTypeEquivalenceSet();
+				if (set == null)
 					continue; //TODO: should not happen iff all unused constraint variables got pruned
 				//TODO: should calculate only once per EquivalenceRepresentative; can throw away estimate TypeSet afterwards
 				TType type= elementCv.getTypeEstimate().chooseSingleType(); //TODO: is null for Universe TypeSet
@@ -204,12 +201,12 @@ public class InferTypeArgumentsConstraintsSolver {
 	public static TType getChosenType(ConstraintVariable2 cv) {
 		if (cv instanceof CollectionElementVariable2) {
 			CollectionElementVariable2 collectionElementCv= (CollectionElementVariable2) cv;
-			EquivalenceRepresentative representative= collectionElementCv.getRepresentative();
-			if (representative == null) { //TODO: should not have to set this here. Clean up when caching chosen type
+			TypeEquivalenceSet set= collectionElementCv.getTypeEquivalenceSet();
+			if (set == null) { //TODO: should not have to set this here. Clean up when caching chosen type
 				// no representative == no restriction
-				representative= new EquivalenceRepresentative(collectionElementCv);
-				representative.setTypeEstimate(TypeSet.getTypeUniverse());
-				collectionElementCv.setRepresentative(representative);
+				set= new TypeEquivalenceSet(collectionElementCv);
+				set.setTypeEstimate(TypeSet.getTypeUniverse());
+				collectionElementCv.setTypeEquivalenceSet(set);
 			}
 			return collectionElementCv.getTypeEstimate().chooseSingleType();
 		}
