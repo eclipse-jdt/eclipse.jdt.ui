@@ -80,7 +80,7 @@ public class JavaPairMatcher {
 		// get the chars preceding and following the start position
 		try {
 
-			char prevChar= fDocument.getChar(fOffset - 1);
+			char prevChar= fDocument.getChar(Math.max(fOffset - 1, 0));
 			char nextChar= fDocument.getChar(fOffset);
 
 			// search for opening peer character next to the activation point

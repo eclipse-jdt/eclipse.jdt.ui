@@ -2067,14 +2067,28 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				
 			IJavaElement newElement= findElement(fRememberedElement);
 			int newOffset= getOffset(newElement);
-			int offset= (newOffset > -1 && fRememberedElementOffset > -1) ? newOffset - fRememberedElementOffset : 0;
-			selectAndReveal(offset + fRememberedSelection.getOffset(), fRememberedSelection.getLength());			
+			int delta= (newOffset > -1 && fRememberedElementOffset > -1) ? newOffset - fRememberedElementOffset : 0;
+			if (isValidSelection(delta + fRememberedSelection.getOffset(), fRememberedSelection.getLength()))
+				selectAndReveal(delta + fRememberedSelection.getOffset(), fRememberedSelection.getLength());			
 			
 		} finally {
 			fRememberedSelection= null;
 			fRememberedElement= null;
 			fRememberedElementOffset= -1;
 		}
+	}
+	
+	private boolean isValidSelection(int offset, int length) {
+		IDocumentProvider provider= getDocumentProvider();
+		if (provider != null) {
+			IDocument document= provider.getDocument(getEditorInput());
+			if (document != null) {
+				int end= offset + length;
+				int documentLength= document.getLength();
+				return 0 <= offset  && offset <= documentLength && 0 <= end && end <= documentLength;
+			}
+		}
+		return false;
 	}
 	
 	/*
