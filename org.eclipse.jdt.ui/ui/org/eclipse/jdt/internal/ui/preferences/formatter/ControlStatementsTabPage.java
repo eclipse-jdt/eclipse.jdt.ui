@@ -26,11 +26,12 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
-	private final static String PREVIEW=
+	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.getString("ControlStatementsTabPage.preview.header")) + //$NON-NLS-1$
 	"class Example {" +	//$NON-NLS-1$	
 	"  void bar() {" +	//$NON-NLS-1$
 	"    do {} while (true);" +	//$NON-NLS-1$
+	"    try {} catch (Exception e) { }" +	//$NON-NLS-1$
 	"  }" +	//$NON-NLS-1$
 	"  void foo2() {" +	//$NON-NLS-1$
 	"    if (true) { " + //$NON-NLS-1$
