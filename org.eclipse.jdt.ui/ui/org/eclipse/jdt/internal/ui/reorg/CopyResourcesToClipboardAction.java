@@ -44,6 +44,9 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 		fPasteAction= pasteAction;
 	}
 
+	/*
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
 	protected void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
