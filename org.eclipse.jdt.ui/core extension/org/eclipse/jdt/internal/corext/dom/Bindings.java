@@ -523,7 +523,15 @@ public class Bindings {
 	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findMethodDefininition(IMethodBinding method, boolean testVisibility) {
+		int modifiers= method.getModifiers();
+		if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) || method.isConstructor()) {
+			return null;
+		}
+		
 		ITypeBinding type= method.getDeclaringClass();
+		if (type.isInterface()) {
+			return null;
+		}
 		
 		if (type.getSuperclass() != null) {
 			IMethodBinding res= findOverriddenMethodInHierarchy(type.getSuperclass(), method);
