@@ -101,10 +101,10 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			case '\r':
 			case '\n':
 			case '\t':
-				fRelevance= 90;
+				fRelevance= 2000;
 				break;
 			default:
-				fRelevance= 0;
+				fRelevance= 2000;
 			}
 		} else {
 			fRelevance= 90;			
