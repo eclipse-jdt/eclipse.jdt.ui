@@ -76,7 +76,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private boolean fUpdateStrings;
 
 	public RenameTypeRefactoring(IType type) {
-		Assert.isTrue(type.exists());
 		fType= type;
 		fNewName= type.getElementName();
 		fUpdateReferences= true; //default is yes

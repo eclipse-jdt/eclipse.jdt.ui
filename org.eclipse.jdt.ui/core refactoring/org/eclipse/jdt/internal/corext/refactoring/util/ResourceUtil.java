@@ -68,20 +68,19 @@ public class ResourceUtil {
 		return null;	
 	}
 
-	public static IResource getResource(IJavaElement element){
+	private static IResource getResource(IJavaElement element){
 		try {
-			if (! element.exists())
-				return null;
-			if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
+			if (element.getElementType() == IJavaElement.COMPILATION_UNIT) 
 				return getResource((ICompilationUnit) element);
-			}
-			if (element instanceof IOpenable) {
+			else if (element instanceof IOpenable) 
 				return element.getResource();
-			}
+			else	
+				return null;	
 		} catch (JavaModelException e) {
+			if (e.isDoesNotExist())
+				return null;
 			JavaPlugin.log(e);
+			return null;	
 		}
-		return null;	
 	}
-
 }

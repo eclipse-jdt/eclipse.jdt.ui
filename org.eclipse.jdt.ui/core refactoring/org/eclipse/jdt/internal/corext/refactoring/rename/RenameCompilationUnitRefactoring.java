@@ -203,20 +203,24 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	 * @see IPreactivatedRefactoring#checkPreactivation
 	 */
 	public RefactoringStatus checkPreactivation() throws JavaModelException {
-		ICompilationUnit cu= fCu;
-		if (! cu.exists())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-		
-		if (cu.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-		
-		if (mustCancelRenamingType())
-			fWillRenameType= false;
-		
-		if (fWillRenameType)
-			return fRenameTypeRefactoring.checkPreactivation();
-		else	
-			return new RefactoringStatus();
+		try{
+			ICompilationUnit cu= fCu;
+			
+			if (cu.isReadOnly())
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
+			
+			if (mustCancelRenamingType())
+				fWillRenameType= false;
+			
+			if (fWillRenameType)
+				return fRenameTypeRefactoring.checkPreactivation();
+			else	
+				return new RefactoringStatus();
+		} catch (JavaModelException e){
+			if (e.isDoesNotExist())
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
+			throw e;
+		}		
 	}
 	
 	/* non java-doc
@@ -264,12 +268,26 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 			fWillRenameType= false;
 			return;
 		}
-		IType type= fCu.getType(getSimpleCUName());
-		if (type.exists())
+		IType type= getTypeWithTheSameName();
+		if (type != null)
 			fRenameTypeRefactoring= new RenameTypeRefactoring(type);
 		else
 			fRenameTypeRefactoring= null;
 		fWillRenameType= (fRenameTypeRefactoring != null);	
+	}
+
+	private IType getTypeWithTheSameName() {
+		try {
+			IType[] topLevelTypes= fCu.getTypes();
+			String name= getSimpleCUName();
+			for (int i = 0; i < topLevelTypes.length; i++) {
+				if (name.equals(topLevelTypes[i].getElementName()))
+					return topLevelTypes[i];
+			}
+			return null; 
+		} catch (JavaModelException e) {
+			return null;
+		}
 	}
 	
 	private boolean mustCancelRenamingType() throws JavaModelException {
