@@ -71,7 +71,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -780,9 +779,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			SearchMatch[] results= fReferences[i].getSearchResults();
 
 			for (int j= 0; j < results.length; j++){
-				SearchMatch searchResult= results[j];
+				SearchMatch match= results[j];
 				String oldName= fType.getElementName();
-				int offset= SearchUtils.getEnd(searchResult) - oldName.length();
+				int offset= match.getOffset() + match.getLength() - oldName.length(); // reference may be qualified
 				TextChangeCompatibility.addTextEdit(manager.get(cu), name, new ReplaceEdit(offset, oldName.length(), getNewElementName()));
 			}
 			pm.worked(1);
