@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -72,6 +75,13 @@ import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
 import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
+import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
+import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
@@ -746,6 +756,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				handleKeyReleased(e);
 			}
 		});
+		initDragAndDrop();
 	}
 
 	public void dispose() {
@@ -809,6 +820,28 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		return (IAction) fActions.get(actionID);
 	}
 	
+	private void initDragAndDrop() {
+		int ops= DND.DROP_COPY | DND.DROP_MOVE;
+		Transfer[] transfers= new Transfer[] {
+			LocalSelectionTransfer.getInstance()
+			};
+		
+		// Drop Adapter
+		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
+			new SelectionTransferDropAdapter(fOutlineViewer)
+		};
+		fOutlineViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
+		
+		// Drag Adapter
+		Control control= fOutlineViewer.getControl();
+		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
+			new SelectionTransferDragAdapter(fOutlineViewer)
+		};
+		DragSource source= new DragSource(control, ops);
+		// Note, that the transfer agents are set by the delegating drag adapter itself.
+		source.addDragListener(new DelegatingDragAdapter(dragListeners));
+	}
+
 	/**
 	 * Convenience method to add the action installed under the given actionID to the
 	 * specified group of the menu.
