@@ -200,14 +200,15 @@ public class ProjectsView extends JavaBrowsingPart {
 		if (!needsToProcessSelectionChanged(part, selection))
 			return;
 
-		// above call ensures structured selection
-		IStructuredSelection sel= (IStructuredSelection)selection;
-		Iterator iter= sel.iterator();
-		while (iter.hasNext()) {
-			Object selectedElement= iter.next();
-			if (selectedElement instanceof LogicalPackage) {
-				selection= new StructuredSelection(((LogicalPackage)selectedElement).getJavaProject());
-				break;
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection sel= (IStructuredSelection)selection;
+			Iterator iter= sel.iterator();
+			while (iter.hasNext()) {
+				Object selectedElement= iter.next();
+				if (selectedElement instanceof LogicalPackage) {
+					selection= new StructuredSelection(((LogicalPackage)selectedElement).getJavaProject());
+					break;
+				}
 			}
 		}
 		super.selectionChanged(part, selection);

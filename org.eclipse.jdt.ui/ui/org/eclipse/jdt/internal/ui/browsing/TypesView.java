@@ -180,21 +180,22 @@ public class TypesView extends JavaBrowsingPart {
 		if (!needsToProcessSelectionChanged(part, selection))
 			return;
 
-		// above call ensures structured selection
-		IStructuredSelection sel= (IStructuredSelection) selection;
-		Object selectedElement= sel.getFirstElement();
-		if (sel.size() == 1 && (selectedElement instanceof LogicalPackage)) {
-			IPackageFragment[] fragments= ((LogicalPackage)selectedElement).getFragments();
-			List selectedElements= Arrays.asList(fragments);
-			if (selectedElements.size() > 1) {
-				adjustInput(part, selectedElements);
-				fPreviousSelectedElement= selectedElements;
-				fPreviousSelectionProvider= part;
-			} else if (selectedElements.size() == 1)
-				super.selectionChanged(part, new StructuredSelection(selectedElements.get(0)));
-			else
-				Assert.isLegal(false);
-			return;
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection sel= (IStructuredSelection) selection;
+			Object selectedElement= sel.getFirstElement();
+			if (sel.size() == 1 && (selectedElement instanceof LogicalPackage)) {
+				IPackageFragment[] fragments= ((LogicalPackage)selectedElement).getFragments();
+				List selectedElements= Arrays.asList(fragments);
+				if (selectedElements.size() > 1) {
+					adjustInput(part, selectedElements);
+					fPreviousSelectedElement= selectedElements;
+					fPreviousSelectionProvider= part;
+				} else if (selectedElements.size() == 1)
+					super.selectionChanged(part, new StructuredSelection(selectedElements.get(0)));
+				else
+					Assert.isLegal(false);
+				return;
+			}
 		}
 		super.selectionChanged(part, selection);
 	}
