@@ -265,7 +265,10 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 							IRegion line= document.getLineInformation(i);
 							int paintStart= Math.max(line.getOffset(), p1);
 							int paintEnd= Math.min(line.getOffset() + line.getLength(), p2);
-							draw(gc, paintStart - offset, paintEnd - paintStart, pp.fColor);
+							if (paintEnd > paintStart) {
+								// otherwise inside a line delimiter
+								draw(gc, paintStart - offset, paintEnd - paintStart, pp.fColor);
+							}
 						}
 					
 					} catch (BadLocationException x) {
