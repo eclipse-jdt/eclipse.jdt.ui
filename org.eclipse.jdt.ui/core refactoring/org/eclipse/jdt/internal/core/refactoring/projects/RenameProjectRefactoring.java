@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.core.refactoring.packages;
+package org.eclipse.jdt.internal.core.refactoring.projects;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -15,6 +15,8 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.core.refactoring.projects.*;
+
 
 public class RenameProjectRefactoring extends Refactoring implements IRenameRefactoring {
 

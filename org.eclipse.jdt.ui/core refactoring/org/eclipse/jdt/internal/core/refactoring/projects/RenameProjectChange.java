@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.core.refactoring.packages;
+package org.eclipse.jdt.internal.core.refactoring.projects;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -15,6 +15,8 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.packageroots.*;
+
 
 public class RenameProjectChange extends AbstractRenameChange {
 
@@ -71,7 +73,7 @@ public class RenameProjectChange extends AbstractRenameChange {
 					
 				pm.beginTask("", roots.length); //$NON-NLS-1$
 				for (int i= 0; i < roots.length; i++) {
-					result.merge(RenameSourceFolderChange.checkPackageRoot(roots[i], context, new SubProgressMonitor(pm, 1)));
+					result.merge(checkIfUnsaved(roots[i], context, new SubProgressMonitor(pm, 1)));
 				}	
 				pm.done();
 			} catch (JavaModelException e) {

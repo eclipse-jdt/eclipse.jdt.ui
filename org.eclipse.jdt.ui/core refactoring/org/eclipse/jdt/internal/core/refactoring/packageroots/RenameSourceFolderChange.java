@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.core.refactoring.packages;
+package org.eclipse.jdt.internal.core.refactoring.packageroots;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -62,56 +62,8 @@ public class RenameSourceFolderChange extends AbstractRenameChange {
 		if (context.getUnsavedFiles().length == 0)
 			return result;
 		
-		result.merge(checkPackageRoot((IPackageFragmentRoot)getCorrespondingJavaElement(), context, pm));
+		result.merge(checkIfUnsaved((IPackageFragmentRoot)getCorrespondingJavaElement(), context, pm));
 		
-		return result;
-	}
-	
-	/*package*/ static RefactoringStatus checkPackageRoot(IPackageFragmentRoot root, ChangeContext context, IProgressMonitor pm){
-		if (root == null)
-			return null;
-		
-		if (! root.exists())
-			return null;
-		
-		if (root.isArchive())
-			return null;	
-		
-		if (root.isExternal())
-			return null;
-		
-		RefactoringStatus result= new RefactoringStatus();
-				
-		try {
-			IJavaElement[] packs= root.getChildren();
-			if (packs == null || packs.length == 0)
-				return null;
-			
-			pm.beginTask("", packs.length); //$NON-NLS-1$
-			for (int i= 0; i < packs.length; i++) {
-				result.merge(checkPackage((IPackageFragment)packs[i], context, new SubProgressMonitor(pm, 1)));
-			}	
-			pm.done();
-		} catch (JavaModelException e) {
-			handleJavaModelException(e, result);
-		}
-		return result;
-	}
-	
-	/*package*/ static RefactoringStatus checkPackage(IPackageFragment pack, ChangeContext context, IProgressMonitor pm) throws JavaModelException{
-		ICompilationUnit[] units= pack.getCompilationUnits();
-		if (units == null || units.length == 0)
-			return null;
-		
-		RefactoringStatus result= new RefactoringStatus();
-		
-		pm.beginTask("", units.length); //$NON-NLS-1$
-		for (int i= 0; i < units.length; i++) {
-			pm.subTask("Checking change for:" + pack.getElementName());
-			checkIfResourceIsUnsaved(units[i], result, context);
-			pm.worked(1);
-		}
-		pm.done();		
 		return result;
 	}
 }

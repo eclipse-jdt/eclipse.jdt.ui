@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.core.refactoring.packages;
+package org.eclipse.jdt.internal.core.refactoring.packageroots;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
@@ -14,6 +14,8 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jdt.internal.core.refactoring.packageroots.*;
+
 
 public class RenameSourceFolderRefactoring	extends Refactoring implements IRenameRefactoring {
 
