@@ -292,7 +292,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
 		List rejectedJARs= getFilteredExistingJAREntries();
 		
-		ViewerFilter filter= new ResourceFilter(new String[] { ".jar", ".zip" }, rejectedJARs); //$NON-NLS-2$ //$NON-NLS-1$
+		ViewerFilter filter= new ResourceFilter(new String[] { "jar", "zip" }, false, rejectedJARs); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();

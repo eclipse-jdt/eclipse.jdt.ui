@@ -6,22 +6,26 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.Collection;
 
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 public class ResourceFilter extends ViewerFilter {
-	protected String[] fExtensions;
-	protected Collection fExcludes;
+	private String[] fExtensions;
+	private Collection fExcludes;
+	private boolean fCaseSensitive;
 	
-	public ResourceFilter(String[] extensions, Collection exclude) {
+	public ResourceFilter(String[] extensions, boolean caseSensitive, Collection exclude) {
 		fExtensions= extensions;
 		fExcludes= exclude;
+		fCaseSensitive= caseSensitive;		
 	}
 	
 	public boolean select(Viewer viewer, Object parent, Object element) {
@@ -29,11 +33,20 @@ public class ResourceFilter extends ViewerFilter {
 			if (fExcludes != null && fExcludes.contains(element)) {
 				return false;
 			}
-			String name= ((IFile)element).getName();
-			for (int i= 0; i < fExtensions.length; i++) {
-				if (name.endsWith(fExtensions[i]))
-					return true;
-			} 
+			String ext= ((IFile)element).getFullPath().getFileExtension();
+			if (fCaseSensitive) {
+				for (int i= 0; i < fExtensions.length; i++) {
+					if (ext.equals(fExtensions[i])) {
+						return true;
+					}
+				}
+			} else {
+				for (int i= 0; i < fExtensions.length; i++) {
+					if (ext.equalsIgnoreCase(fExtensions[i])) {
+						return true;
+					}
+				}
+			}
 			return false;
 		} else if (element instanceof IContainer) { // IProject, IFolder
 			try {
@@ -45,6 +58,7 @@ public class ResourceFilter extends ViewerFilter {
 					}
 				}
 			} catch (CoreException e) {
+				JavaPlugin.log(e.getStatus());
 			}				
 		}
 		return false;

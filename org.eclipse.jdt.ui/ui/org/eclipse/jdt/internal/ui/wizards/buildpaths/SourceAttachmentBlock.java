@@ -525,7 +525,7 @@ public class SourceAttachmentBlock {
 		Class[] acceptedClasses= new Class[] { IFile.class };
 		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 	
-		ViewerFilter filter= new ResourceFilter(new String[] { ".jar", ".zip" }, null); //$NON-NLS-2$ //$NON-NLS-1$
+		ViewerFilter filter= new ResourceFilter(new String[] { "jar", "zip" }, false, null); //$NON-NLS-2$ //$NON-NLS-1$
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
