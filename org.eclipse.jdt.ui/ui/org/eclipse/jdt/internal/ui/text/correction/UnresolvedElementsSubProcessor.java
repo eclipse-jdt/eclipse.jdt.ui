@@ -380,9 +380,7 @@ public class UnresolvedElementsSubProcessor {
 			proposals.add(new ReplaceCorrectionProposal(label, context.getCompilationUnit(), context.getOffset(), context.getLength(), curr, 2));
 		}
 		
-		if (parameterMismatchs.size() == 1) {
-			addParameterMissmatchProposals(context, (SimilarElement) parameterMismatchs.get(0), arguments, proposals);
-		}
+		addParameterMissmatchProposals(context, parameterMismatchs, arguments, proposals);
 		
 		// new method
 		ITypeBinding binding= null;
@@ -424,48 +422,61 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	private static void addParameterMissmatchProposals(ICorrectionContext context, SimilarElement elem, List arguments, List proposals) throws CoreException {
-		String[] paramTypes= elem.getParameterTypes();
+	private static void addParameterMissmatchProposals(ICorrectionContext context, List similarElements, List arguments, List proposals) throws CoreException {
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
-		if (paramTypes == null || argTypes == null) {
+		if (argTypes == null) {
 			return;
 		}
-		if (paramTypes.length == argTypes.length) {
-			int[] indexOfDiff= new int[paramTypes.length];
-			int nDiffs= 0;
-			for (int i= 0; i < argTypes.length; i++) {
-				if (!ASTResolving.canAssign(argTypes[i], paramTypes[i])) {
-					indexOfDiff[nDiffs++]= i;
-				}
+		
+		for (int i= 0; i < similarElements.size(); i++) {
+			SimilarElement elem = (SimilarElement) similarElements.get(i);
+
+			String[] paramTypes= elem.getParameterTypes();
+			if (paramTypes == null) {
+				continue;
 			}
-			for (int k= 0; k < nDiffs; k++) {
-				int idx= indexOfDiff[k];
-				Expression nodeToCast= (Expression) arguments.get(idx);
-				String castType= paramTypes[idx];
-				if (nodeToCast.getNodeType() != ASTNode.CAST_EXPRESSION) {
-					ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.getCastProposal(context, castType, nodeToCast);
-					if (proposal != null) {
-						proposals.add(proposal);	
-						proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparametercast.description", castType)); //$NON-NLS-1$
-					}
-				}					
-			}
-			if (nDiffs == 2) { // try to swap
-				int idx1= indexOfDiff[0];
-				int idx2= indexOfDiff[1];
-				if (ASTResolving.canAssign(argTypes[idx1], paramTypes[idx2]) && ASTResolving.canAssign(argTypes[idx2], paramTypes[idx1])) {
-					Expression arg1= (Expression) arguments.get(idx1);
-					Expression arg2= (Expression) arguments.get(idx2);
-					
-					ASTRewrite rewrite= new ASTRewrite(arg1.getParent());
-					rewrite.markAsReplaced(arg1, rewrite.createCopy(arg2));
-					rewrite.markAsReplaced(arg2, rewrite.createCopy(arg1));
 			
-					String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.swapparameters.description"); //$NON-NLS-1$
-					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
-					proposal.ensureNoModifications();
-					proposals.add(proposal);		
+			if (paramTypes.length == argTypes.length) {
+				int nProposals= proposals.size();
+				int[] indexOfDiff= new int[paramTypes.length];
+				int nDiffs= 0;
+				for (int n= 0; n < argTypes.length; n++) {
+					if (!ASTResolving.canAssign(argTypes[n], paramTypes[n])) {
+						indexOfDiff[nDiffs++]= n;
+					}
+				}
+				for (int k= 0; k < nDiffs; k++) {
+					int idx= indexOfDiff[k];
+					Expression nodeToCast= (Expression) arguments.get(idx);
+					String castType= paramTypes[idx];
+					if (nodeToCast.getNodeType() != ASTNode.CAST_EXPRESSION) {
+						ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.getCastProposal(context, castType, nodeToCast);
+						if (proposal != null) {
+							proposals.add(proposal);	
+							proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparametercast.description", castType)); //$NON-NLS-1$
+						}
+					}					
+				}
+				if (nDiffs == 2) { // try to swap
+					int idx1= indexOfDiff[0];
+					int idx2= indexOfDiff[1];
+					if (ASTResolving.canAssign(argTypes[idx1], paramTypes[idx2]) && ASTResolving.canAssign(argTypes[idx2], paramTypes[idx1])) {
+						Expression arg1= (Expression) arguments.get(idx1);
+						Expression arg2= (Expression) arguments.get(idx2);
+						
+						ASTRewrite rewrite= new ASTRewrite(arg1.getParent());
+						rewrite.markAsReplaced(arg1, rewrite.createCopy(arg2));
+						rewrite.markAsReplaced(arg2, rewrite.createCopy(arg1));
+				
+						String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.swapparameters.description"); //$NON-NLS-1$
+						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+						ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
+						proposal.ensureNoModifications();
+						proposals.add(proposal);		
+					}
+				}
+				if (nProposals != proposals.size()) {
+					return; // only suggest for one method (avoid duplicated proposals)
 				}
 			}
 		}
