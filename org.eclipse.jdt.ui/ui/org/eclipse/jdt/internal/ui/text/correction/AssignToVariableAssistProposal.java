@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -41,8 +42,11 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -131,8 +135,16 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		newDecl.setModifiers(Modifier.PRIVATE);
 		
 		Assignment assignment= ast.newAssignment();
-		assignment.setLeftHandSide(ast.newSimpleName(varName));
 		assignment.setRightHandSide((Expression) rewrite.createCopy(expression));
+
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS)) {
+			FieldAccess fieldAccess= ast.newFieldAccess();
+			fieldAccess.setName(ast.newSimpleName(varName));
+			fieldAccess.setExpression(ast.newThisExpression());
+			assignment.setLeftHandSide(fieldAccess);
+		} else {
+			assignment.setLeftHandSide(ast.newSimpleName(varName));
+		}
 
 		rewrite.markAsReplaced(expression, assignment, "ID"); //$NON-NLS-1$
 		
@@ -148,7 +160,7 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		IPackageBinding packBinding= base.getPackage();
 		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
 		
-		String[] excludedNames= new String[0];
+		String[] excludedNames= getUsedVariableNames();
 		String typeName= base.getName();
 		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
 		if (names.length == 0) {
@@ -163,14 +175,25 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		IPackageBinding packBinding= base.getPackage();
 		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
 		
-		String[] excludedNames= new String[0];
+		String[] excludedNames= getUsedVariableNames();
 		String typeName= base.getName();
 		String[] names= NamingConventions.suggestFieldNames(project, packName, typeName, binding.getDimensions(), binding.getModifiers(), excludedNames);
 		if (names.length == 0) {
 			return "class1"; // fix for pr, remoev after 20030127 //$NON-NLS-1$
 		}
 		return names[0];		
-	}	
+	}
+	
+	private String[] getUsedVariableNames() {
+		CompilationUnit root= (CompilationUnit) fExpressionStatement.getRoot();
+		IBinding[] bindings= (new ScopeAnalyzer(root)).getDeclarationsInScope(fExpressionStatement.getStartPosition(), ScopeAnalyzer.VARIABLES);
+		String[] names= new String[bindings.length];
+		for (int i= 0; i < names.length; i++) {
+			names[i]= bindings[i].getName();
+		}
+		return names;
+	}
+		
 	
 	private int findInsertIndex(List decls, int currPos) {
 		for (int i= decls.size() - 1; i >= 0; i--) {
