@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -384,8 +385,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				continue;
 			}
 			Expression coveredExpression = (Expression) covered;
-			ITypeBinding typeBinding = coveredExpression.resolveTypeBinding();
-			if ((typeBinding == null) || !typeBinding.getName().equals("boolean")) { //$NON-NLS-1$
+			if (!isBoolean(ast, coveredExpression)) {
 				continue;
 			}
 			//
@@ -409,8 +409,35 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	private static Expression getInversedBooleanExpression(AST ast, ASTRewrite rewrite, Expression expression) {
+		return getInversedBooleanExpression(ast, rewrite, expression, null);
+	}
+	private interface SimpleNameRenameProvider {
+		SimpleName getRenamed(SimpleName name);
+	}
+	private static Expression getRenamedNameCopy(SimpleNameRenameProvider provider,
+			ASTRewrite rewrite,
+			Expression expression) {
+		if (provider != null) {
+			if (expression instanceof SimpleName) {
+				SimpleName name= (SimpleName) expression;
+				SimpleName newName= provider.getRenamed(name);
+				if (newName != null) {
+					return newName;
+				}
+			}
+		}
+		return (Expression) rewrite.createCopyTarget(expression);
+	}
+	private static Expression getInversedBooleanExpression(AST ast,
+			ASTRewrite rewrite,
+			Expression expression,
+			SimpleNameRenameProvider provider) {
+		if (!isBoolean(ast, expression)) {
+			return (Expression) rewrite.createCopyTarget(expression);
+		}
+		//
 		if (expression instanceof BooleanLiteral) {
-			BooleanLiteral booleanLiteral = (BooleanLiteral) expression;
+			BooleanLiteral booleanLiteral= (BooleanLiteral) expression;
 			if (booleanLiteral.booleanValue()) {
 				return ast.newBooleanLiteral(false);
 			} else {
@@ -418,101 +445,122 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		if (expression instanceof InfixExpression) {
-			InfixExpression infixExpression = (InfixExpression) expression;
-			InfixExpression.Operator operator = infixExpression.getOperator();
+			InfixExpression infixExpression= (InfixExpression) expression;
+			InfixExpression.Operator operator= infixExpression.getOperator();
 			if (operator == InfixExpression.Operator.LESS) {
 				return getInversedInfixBooleanExpression(ast,
 					rewrite,
 					infixExpression,
-					InfixExpression.Operator.GREATER_EQUALS);
+					InfixExpression.Operator.GREATER_EQUALS,
+					provider);
 			}
 			if (operator == InfixExpression.Operator.GREATER) {
 				return getInversedInfixBooleanExpression(ast,
 					rewrite,
 					infixExpression,
-					InfixExpression.Operator.LESS_EQUALS);
+					InfixExpression.Operator.LESS_EQUALS,
+					provider);
 			}
 			if (operator == InfixExpression.Operator.LESS_EQUALS) {
 				return getInversedInfixBooleanExpression(ast,
 					rewrite,
 					infixExpression,
-					InfixExpression.Operator.GREATER);
+					InfixExpression.Operator.GREATER,
+					provider);
 			}
 			if (operator == InfixExpression.Operator.GREATER_EQUALS) {
-				return getInversedInfixBooleanExpression(ast, rewrite, infixExpression, InfixExpression.Operator.LESS);
+				return getInversedInfixBooleanExpression(ast,
+					rewrite,
+					infixExpression,
+					InfixExpression.Operator.LESS,
+					provider);
 			}
 			if (operator == InfixExpression.Operator.EQUALS) {
 				return getInversedInfixBooleanExpression(ast,
 					rewrite,
 					infixExpression,
-					InfixExpression.Operator.NOT_EQUALS);
+					InfixExpression.Operator.NOT_EQUALS,
+					provider);
 			}
 			if (operator == InfixExpression.Operator.NOT_EQUALS) {
-				return getInversedInfixBooleanExpression(ast, rewrite, infixExpression, InfixExpression.Operator.EQUALS);
+				return getInversedInfixBooleanExpression(ast,
+					rewrite,
+					infixExpression,
+					InfixExpression.Operator.EQUALS,
+					provider);
 			}
 			if (operator == InfixExpression.Operator.CONDITIONAL_AND) {
-				Operator newOperator = InfixExpression.Operator.CONDITIONAL_OR;
-				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator);
+				Operator newOperator= InfixExpression.Operator.CONDITIONAL_OR;
+				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator, provider);
 			}
 			if (operator == InfixExpression.Operator.CONDITIONAL_OR) {
-				Operator newOperator = InfixExpression.Operator.CONDITIONAL_AND;
-				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator);
+				Operator newOperator= InfixExpression.Operator.CONDITIONAL_AND;
+				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator, provider);
+			}
+			if (operator == InfixExpression.Operator.AND) {
+				Operator newOperator= InfixExpression.Operator.OR;
+				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator, provider);
+			}
+			if (operator == InfixExpression.Operator.OR) {
+				Operator newOperator= InfixExpression.Operator.AND;
+				return getInversedAndOrExpression(ast, rewrite, infixExpression, newOperator, provider);
 			}
 		}
 		if (expression instanceof PrefixExpression) {
-			PrefixExpression prefixExpression = (PrefixExpression) expression;
+			PrefixExpression prefixExpression= (PrefixExpression) expression;
 			if (prefixExpression.getOperator() == PrefixExpression.Operator.NOT) {
-				return (Expression) rewrite.createCopyTarget(prefixExpression.getOperand());
+				return getRenamedNameCopy(provider, rewrite, prefixExpression.getOperand());
 			}
 		}
 		if (expression instanceof InstanceofExpression) {
-			PrefixExpression prefixExpression = ast.newPrefixExpression();
+			PrefixExpression prefixExpression= ast.newPrefixExpression();
 			prefixExpression.setOperator(PrefixExpression.Operator.NOT);
-			ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
+			ParenthesizedExpression parenthesizedExpression= ast.newParenthesizedExpression();
 			parenthesizedExpression.setExpression((Expression) rewrite.createCopyTarget(expression));
 			prefixExpression.setOperand(parenthesizedExpression);
 			return prefixExpression;
 		}
 		if (expression instanceof ParenthesizedExpression) {
-			ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression) expression;
-			Expression innerExpression = parenthesizedExpression.getExpression();
+			ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression) expression;
+			Expression innerExpression= parenthesizedExpression.getExpression();
 			while (innerExpression instanceof ParenthesizedExpression) {
-				innerExpression = ((ParenthesizedExpression) innerExpression).getExpression();
+				innerExpression= ((ParenthesizedExpression) innerExpression).getExpression();
 			}
 			if (innerExpression instanceof InstanceofExpression) {
-				return getInversedBooleanExpression(ast, rewrite, innerExpression);
+				return getInversedBooleanExpression(ast, rewrite, innerExpression, provider);
 			}
-			parenthesizedExpression = ast.newParenthesizedExpression();
-			parenthesizedExpression.setExpression(getInversedBooleanExpression(ast, rewrite, innerExpression));
+			parenthesizedExpression= ast.newParenthesizedExpression();
+			parenthesizedExpression.setExpression(getInversedBooleanExpression(ast, rewrite, innerExpression, provider));
 			return parenthesizedExpression;
 		}
-		if (expression.resolveTypeBinding() == ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
-			PrefixExpression prefixExpression = ast.newPrefixExpression();
-			prefixExpression.setOperator(PrefixExpression.Operator.NOT);
-			prefixExpression.setOperand((Expression) rewrite.createMoveTarget(expression));
-			return prefixExpression;
-		}
-		return (Expression) rewrite.createCopyTarget(expression);
+		//
+		PrefixExpression prefixExpression= ast.newPrefixExpression();
+		prefixExpression.setOperator(PrefixExpression.Operator.NOT);
+		prefixExpression.setOperand(getRenamedNameCopy(provider, rewrite, expression));
+		return prefixExpression;
+	}
+	private static boolean isBoolean(AST ast, Expression expression) {
+		return expression.resolveTypeBinding() == ast.resolveWellKnownType("boolean"); //$NON-NLS-1$
 	}
 	private static Expression getInversedInfixBooleanExpression(AST ast, ASTRewrite rewrite,
-			InfixExpression expression, InfixExpression.Operator newOperator) {
+			InfixExpression expression, InfixExpression.Operator newOperator, SimpleNameRenameProvider provider) {
 		InfixExpression newExpression = ast.newInfixExpression();
 		newExpression.setOperator(newOperator);
-		newExpression.setLeftOperand(getInversedBooleanExpression(ast, rewrite, expression.getLeftOperand()));
-		newExpression.setRightOperand(getInversedBooleanExpression(ast, rewrite, expression.getRightOperand()));
+		newExpression.setLeftOperand(getInversedBooleanExpression(ast, rewrite, expression.getLeftOperand(), provider));
+		newExpression.setRightOperand(getInversedBooleanExpression(ast, rewrite, expression.getRightOperand(), provider));
 		return newExpression;
 	}
 	private static Expression getInversedAndOrExpression(AST ast, ASTRewrite rewrite, InfixExpression infixExpression,
-			Operator newOperator) {
+			Operator newOperator, SimpleNameRenameProvider provider) {
 		int newOperatorPrecedence = getInfixOperatorPrecedence(newOperator);
 		//
-		Expression leftOperand = getInversedBooleanExpression(ast, rewrite, infixExpression.getLeftOperand());
+		Expression leftOperand = getInversedBooleanExpression(ast, rewrite, infixExpression.getLeftOperand(), provider);
 		int leftPrecedence = getExpressionPrecedence(leftOperand);
 		if (newOperatorPrecedence < leftPrecedence) {
 			leftOperand = getParenthesizedExpression(ast, leftOperand);
 		}
 		//
-		Expression rightOperand = getInversedBooleanExpression(ast, rewrite, infixExpression.getRightOperand());
+		Expression rightOperand = getInversedBooleanExpression(ast, rewrite, infixExpression.getRightOperand(), provider);
 		int rightPrecedence = getExpressionPrecedence(rightOperand);
 		if (newOperatorPrecedence < rightPrecedence) {
 			rightOperand = getParenthesizedExpression(ast, rightOperand);
@@ -1692,9 +1740,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (!(variableBinding instanceof IVariableBinding) || ((IVariableBinding) variableBinding).isField()) {
 			return false;
 		}
-		final ITypeBinding variableTypeBinding= coveringName.resolveTypeBinding();
 		// we operate only on boolean variable
-		if (variableTypeBinding != ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
+		if (!isBoolean(ast, coveringName)) {
 			return false;
 		}
 		// ok, we could produce quick assist
@@ -1716,38 +1763,79 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			1,
 			image);
 		// prepare new variable identifier
-		String oldIdentifier= coveringName.getIdentifier();
-		String newIdentifier= CorrectionMessages.getFormattedString("AdvancedQuickAssistProcessor.negatedVariableName", Character.toUpperCase(oldIdentifier.charAt(0)) + oldIdentifier.substring(1)); //$NON-NLS-1$
+		final String oldIdentifier= coveringName.getIdentifier();
+		final String newIdentifier= CorrectionMessages.getFormattedString("AdvancedQuickAssistProcessor.negatedVariableName", Character.toUpperCase(oldIdentifier.charAt(0)) + oldIdentifier.substring(1)); //$NON-NLS-1$
 		proposal.addLinkedPositionProposal(KEY_NAME, newIdentifier, null);
 		proposal.addLinkedPositionProposal(KEY_NAME, oldIdentifier, null);
 		// iterate over linked nodes and replace variable references with negated reference
+		final HashSet renamedNames= new HashSet();
 		for (int i= 0; i < linkedNodes.length; i++) {
 			SimpleName name= linkedNodes[i];
+			if (renamedNames.contains(name)) {
+				continue;
+			}
 			// prepare new name with new identifier
 			SimpleName newName= ast.newSimpleName(newIdentifier);
 			proposal.addLinkedPosition(rewrite.track(newName), name == coveringName, KEY_NAME);
 			//
 			StructuralPropertyDescriptor location= name.getLocationInParent();
-			if (location == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+			if (location == SingleVariableDeclaration.NAME_PROPERTY) {
+				// set new name
+				rewrite.replace(name, newName, null);
+			} else if (location == Assignment.LEFT_HAND_SIDE_PROPERTY) {
 				Assignment assignment= (Assignment) name.getParent();
 				Expression expression= assignment.getRightHandSide();
 				int exStart= expression.getStartPosition();
 				int exEnd= exStart + expression.getLength();
-				// check that variable is not used in right hand side
-				boolean used= false;
+				// collect all names that are used in assignments
+				HashSet overlapNames= new HashSet();
 				for (int j= 0; j < linkedNodes.length; j++) {
 					SimpleName name2= linkedNodes[j];
+					if (name2 == null) {
+						continue;
+					}
 					int name2Start= name2.getStartPosition();
 					if (exStart <= name2Start && name2Start < exEnd) {
-						used= true;
+						overlapNames.add(name2);
 					}
 				}
-				// replace assigned expression
-				if (!used) {
-					rewrite.replace(expression, getInversedBooleanExpression(ast, rewrite, expression), null);
+				// prepare inversed expression
+				SimpleNameRenameProvider provider= new SimpleNameRenameProvider() {
+					public SimpleName getRenamed(SimpleName simpleName) {
+						if (simpleName.resolveBinding() == variableBinding) {
+							renamedNames.add(simpleName);
+							return ast.newSimpleName(newIdentifier);
+						}
+						return null;
+					}
+				};
+				Expression inversedExpression= getInversedBooleanExpression(ast, rewrite, expression, provider);
+				// if any name was not renamed during expression inversing, we can not already renate it, so fail to create assist
+				for (Iterator I= overlapNames.iterator(); I.hasNext();) {
+					Object o= I.next();
+					if (!renamedNames.contains(o)) {
+						return false;
+					}
 				}
-				// set new name
-				rewrite.replace(name, newName, null);
+				// check operator and replace if needed
+				Assignment.Operator operator= assignment.getOperator();
+				if (operator == Assignment.Operator.BIT_AND_ASSIGN) {
+					Assignment newAssignment= ast.newAssignment();
+					newAssignment.setLeftHandSide(newName);
+					newAssignment.setRightHandSide(inversedExpression);
+					newAssignment.setOperator(Assignment.Operator.BIT_OR_ASSIGN);
+					rewrite.replace(assignment, newAssignment, null);
+				} else if (operator == Assignment.Operator.BIT_OR_ASSIGN) {
+					Assignment newAssignment= ast.newAssignment();
+					newAssignment.setLeftHandSide(newName);
+					newAssignment.setRightHandSide(inversedExpression);
+					newAssignment.setOperator(Assignment.Operator.BIT_AND_ASSIGN);
+					rewrite.replace(assignment, newAssignment, null);
+				} else {
+					rewrite.replace(expression, inversedExpression, null);
+					// set new name
+					rewrite.replace(name, newName, null);
+				}
 			} else if (location == VariableDeclarationFragment.NAME_PROPERTY) {
 				// replace initializer for variable
 				VariableDeclarationFragment vdf= (VariableDeclarationFragment) name.getParent();
@@ -1760,7 +1848,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			} else if ((name.getParent() instanceof PrefixExpression)
 				&& (((PrefixExpression) name.getParent()).getOperator() == PrefixExpression.Operator.NOT)) {
 				rewrite.replace(name.getParent(), newName, null);
-				proposal.addLinkedPosition(rewrite.track(newName), false, KEY_NAME);
 			} else {
 				PrefixExpression expression= ast.newPrefixExpression();
 				expression.setOperator(PrefixExpression.Operator.NOT);
@@ -1844,9 +1931,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		Expression expression= (Expression) fullyCoveredNode;
 		// we operate only on boolean variable
-		final ITypeBinding variableBinding= expression.resolveTypeBinding();
 		final AST ast= covering.getAST();
-		if (variableBinding != ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
+		if (!isBoolean(ast, expression)) {
 			return false;
 		}
 		// ok, we could produce quick assist
