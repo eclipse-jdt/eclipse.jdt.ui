@@ -139,7 +139,7 @@ public class Binding2JavaModel {
 			type= type.getElementType();
 		candidate= Signature.getElementType(candidate);
 		
-		if (isPrimitiveType(candidate)) {
+		if (isPrimitiveType(candidate) || type.isPrimitive()) {
 			return type.getName().equals(Signature.toString(candidate));
 		} else {
 			if (isResolvedType(candidate)) {
