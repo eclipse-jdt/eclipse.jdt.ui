@@ -230,18 +230,27 @@ public class NLSHintHelper {
 	}
 	
 	public static Properties getProperties(IJavaProject project, ITypeBinding accessorBinding) {
+		try {
+			IStorage storage= NLSHintHelper.getResourceBundle(project, accessorBinding);
+			return getProperties(storage);
+		} catch (JavaModelException ex) {
+			// sorry no properties
+			return null;
+		}
+	}
+	
+	public static Properties getProperties(IStorage storage) {
 		Properties props= new Properties();
 		InputStream is= null;
 		try {
-			IStorage storage= NLSHintHelper.getResourceBundle(project, accessorBinding);
 			if (storage != null) {
 				is= storage.getContents();
 				props.load(is);
 			}
 		} catch (IOException e) {
-			// sorry no property         
+			// sorry no properties
 		} catch (CoreException e) {
-			// sorry no property         
+			// sorry no properties
 		} finally {
 			if (is != null) try {
 				is.close();
