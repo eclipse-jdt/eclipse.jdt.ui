@@ -1357,7 +1357,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				ASTNode newNode= (ASTNode) newIter.next();
 				listRewrite.replace(node, newNode, fDescription);
 			}
-			//remove remaining exixting nodes:
+			//remove remaining existing nodes:
 			while (nodesIter.hasNext()) {
 				ASTNode node= (ASTNode) nodesIter.next();
 				listRewrite.remove(node, fDescription);
@@ -1787,6 +1787,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 								if (oldName.equals(tagName.getIdentifier())) {
 									tagIter.remove();
 									TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
+									getASTRewrite().remove(tag, fDescription);
 									insertTag(movedTag, previousTag, tagsRewrite);
 									previousTag= movedTag;
 								}
@@ -1797,6 +1798,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					for (Iterator iter= paramTags.iterator(); iter.hasNext();) {
 						TagElement tag= (TagElement) iter.next();
 						TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
+						getASTRewrite().remove(tag, fDescription);
 						insertTag(movedTag, previousTag, tagsRewrite);
 						previousTag= movedTag;
 					}
@@ -1845,6 +1847,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 							if (Bindings.equals(info.getTypeBinding(), tagName.resolveTypeBinding())) {
 								tagIter.remove();
 								TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
+								getASTRewrite().remove(tag, fDescription);
 								insertTag(movedTag, previousTag, tagsRewrite);
 								previousTag= movedTag;
 							}
@@ -1855,6 +1858,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				for (Iterator iter= exceptionTags.iterator(); iter.hasNext();) {
 					TagElement tag= (TagElement) iter.next();
 					TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
+					getASTRewrite().remove(tag, fDescription);
 					insertTag(movedTag, previousTag, tagsRewrite);
 					previousTag= movedTag;
 				}
