@@ -15,11 +15,9 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextOperationTarget;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
-import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -35,8 +33,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.QuickAssistLightBulbUpdater.AssistAnnotation;
 
 /**
  * A special select marker ruler action which activates quick fix if clicked on a quick fixable problem.
@@ -90,6 +88,9 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 		if (cu == null) {
 			return null;
 		}
+		
+		boolean hasAssistLightbulb= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB);
+		Annotation assistAnnotation= null;
 			
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
@@ -101,21 +102,17 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 					if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections(javaAnnotation))
 						return position;
 				}
+			} else if (hasAssistLightbulb && annotation instanceof AssistAnnotation) {
+				// there is only one AssistAnnotation at a time
+				assistAnnotation= annotation; 
 			}
 		}
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB)) {
-			ISelection sel= fTextEditor.getSelectionProvider().getSelection();
-			if (sel instanceof ITextSelection) {
-				ITextSelection selection= (ITextSelection) sel;
-				Position position= new Position(selection.getOffset(), selection.getLength());
-				if (!includesRulerLine(position, document)) {
-					return null;
-				}
-				AssistContext context= new AssistContext(cu, position.getOffset(), position.getLength());
-				if (JavaCorrectionProcessor.hasAssists(context)) {
-					return position;
-				}
-			}
+		if (assistAnnotation != null) {
+			Position position= model.getPosition(assistAnnotation);
+			// no need to check 'JavaCorrectionProcessor.hasAssists': annotation only created when
+			// there are assists
+			if (includesRulerLine(position, document))
+				return position;
 		}
 		return null;
 	}

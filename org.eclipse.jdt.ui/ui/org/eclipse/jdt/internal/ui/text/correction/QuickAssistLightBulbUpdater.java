@@ -61,7 +61,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
  */
 public class QuickAssistLightBulbUpdater {
 
-	private static class AssistAnnotation extends Annotation {
+	public static class AssistAnnotation extends Annotation {
 		
 		private Image fImage;
 		
