@@ -871,6 +871,17 @@
 			class="org.eclipse.jdt.internal.debug.ui.ToggleStepFilterAction">
 		</action>
 	</viewerContribution>
+	<viewerContribution
+		id="org.eclipse.jdt.debug.OpenOnConsoleTypeActions"
+		targetID="org.eclipse.debug.ui.ConsoleView">
+		<action
+			id="org.eclipse.jdt.ui.actions.OpenOnConsoleType"
+			label="%openOnConsoleTypeAction.label"
+			tooltip="%openOnConsoleTypeAction.tooltip"
+			menubarPath="additions"
+			class="org.eclipse.jdt.internal.debug.ui.OpenOnConsoleTypeAction">
+		</action>
+	</viewerContribution>
 </extension>
 
 <!--example model presentation -->
