@@ -39,15 +39,14 @@ public class SourceActionLabelProvider extends LabelProvider {
 			adornments|= JavaElementImageDescriptor.CONSTRUCTOR;
 
 		int modifiers= binding.getModifiers();
-		if (Modifier.isAbstract(modifiers) && isAbstract(binding))
+		if (Modifier.isAbstract(modifiers))
 			adornments|= JavaElementImageDescriptor.ABSTRACT;
-		if (Modifier.isFinal(modifiers) || isInterfaceField(binding))
+		if (Modifier.isFinal(modifiers))
 			adornments|= JavaElementImageDescriptor.FINAL;
-		if (Modifier.isSynchronized(modifiers) && isSynchronized(binding))
+		if (Modifier.isSynchronized(modifiers))
 			adornments|= JavaElementImageDescriptor.SYNCHRONIZED;
-		if (Modifier.isStatic(modifiers) || isInterfaceField(binding))
+		if (Modifier.isStatic(modifiers))
 			adornments|= JavaElementImageDescriptor.STATIC;
-
 		if (binding.isDeprecated())
 			adornments|= JavaElementImageDescriptor.DEPRECATED;
 		return adornments;
@@ -58,13 +57,12 @@ public class SourceActionLabelProvider extends LabelProvider {
 			return getTypeImageDescriptor((ITypeBinding) binding, flags);
 		else if (binding instanceof IMethodBinding) {
 			ITypeBinding type= ((IMethodBinding) binding).getDeclaringClass();
-			if (type.isEnum() && isDefaultModifier(binding.getModifiers()) && ((IMethodBinding) binding).isConstructor())
+			int modifiers= binding.getModifiers();
+			if (type.isEnum() && (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers) && !Modifier.isPrivate(modifiers)) && ((IMethodBinding) binding).isConstructor())
 				return JavaPluginImages.DESC_MISC_PRIVATE;
-			return getMethodImageDescriptor(type.isAnnotation() || type.isInterface(), binding.getModifiers());
-		} else if (binding instanceof IVariableBinding) {
-			ITypeBinding type= ((IVariableBinding) binding).getDeclaringClass();
-			return getFieldImageDescriptor((IVariableBinding) binding, type.isAnnotation() || type.isInterface());
-		}
+			return getMethodImageDescriptor(binding.getModifiers());
+		} else if (binding instanceof IVariableBinding)
+			return getFieldImageDescriptor((IVariableBinding) binding);
 		return JavaPluginImages.DESC_OBJS_UNKNOWN;
 	}
 
@@ -75,9 +73,9 @@ public class SourceActionLabelProvider extends LabelProvider {
 			return JavaPluginImages.DESC_OBJS_CLASS_DEFAULT;
 	}
 
-	static ImageDescriptor getFieldImageDescriptor(IVariableBinding binding, boolean deferred) {
+	static ImageDescriptor getFieldImageDescriptor(IVariableBinding binding) {
 		int modifiers= binding.getModifiers();
-		if (Modifier.isPublic(modifiers) || deferred || binding.isEnumConstant())
+		if (Modifier.isPublic(modifiers) || binding.isEnumConstant())
 			return JavaPluginImages.DESC_FIELD_PUBLIC;
 		if (Modifier.isProtected(modifiers))
 			return JavaPluginImages.DESC_FIELD_PROTECTED;
@@ -113,8 +111,8 @@ public class SourceActionLabelProvider extends LabelProvider {
 		return (flags & flag) != 0;
 	}
 
-	static ImageDescriptor getInnerClassImageDescriptor(boolean isInInterface, int modifiers) {
-		if (Modifier.isPublic(modifiers) || isInInterface)
+	static ImageDescriptor getInnerClassImageDescriptor(int modifiers) {
+		if (Modifier.isPublic(modifiers))
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PUBLIC;
 		else if (Modifier.isPrivate(modifiers))
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PRIVATE;
@@ -124,8 +122,8 @@ public class SourceActionLabelProvider extends LabelProvider {
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_DEFAULT;
 	}
 
-	static ImageDescriptor getInnerInterfaceImageDescriptor(boolean isInInterface, int modifiers) {
-		if (Modifier.isPublic(modifiers) || isInInterface)
+	static ImageDescriptor getInnerInterfaceImageDescriptor(int modifiers) {
+		if (Modifier.isPublic(modifiers))
 			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PUBLIC;
 		else if (Modifier.isPrivate(modifiers))
 			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PRIVATE;
@@ -142,12 +140,8 @@ public class SourceActionLabelProvider extends LabelProvider {
 			return JavaPluginImages.DESC_OBJS_INTERFACE_DEFAULT;
 	}
 
-	public static ImageDescriptor getJavaImageDescriptor(IBinding binding, int flags) {
-		return new JavaElementImageDescriptor(getBaseImageDescriptor(binding, flags), computeJavaAdornmentFlags(binding, flags), useSmallSize(flags) ? JavaElementImageProvider.SMALL_SIZE : JavaElementImageProvider.BIG_SIZE);
-	}
-
-	static ImageDescriptor getMethodImageDescriptor(boolean deferred, int modifiers) {
-		if (Modifier.isPublic(modifiers) || deferred)
+	static ImageDescriptor getMethodImageDescriptor(int modifiers) {
+		if (Modifier.isPublic(modifiers))
 			return JavaPluginImages.DESC_MISC_PUBLIC;
 		if (Modifier.isProtected(modifiers))
 			return JavaPluginImages.DESC_MISC_PROTECTED;
@@ -253,35 +247,32 @@ public class SourceActionLabelProvider extends LabelProvider {
 		}
 	}
 
-	static ImageDescriptor getTypeImageDescriptor(boolean isInner, boolean isInInterface, ITypeBinding binding, int flags) {
+	static ImageDescriptor getTypeImageDescriptor(boolean isInner, ITypeBinding binding, int flags) {
 		if (binding.isEnum()) {
 			return JavaPluginImages.DESC_OBJS_ENUM;
 		} else if (binding.isAnnotation()) {
 			return JavaPluginImages.DESC_OBJS_ANNOTATION;
 		} else if (binding.isInterface()) {
-			if (useLightIcons(flags)) {
+			if ((flags & JavaElementImageProvider.LIGHT_TYPE_ICONS) != 0) {
 				return JavaPluginImages.DESC_OBJS_INTERFACEALT;
 			}
 			if (isInner) {
-				return getInnerInterfaceImageDescriptor(isInInterface, binding.getModifiers());
+				return getInnerInterfaceImageDescriptor(binding.getModifiers());
 			}
 			return getInterfaceImageDescriptor(binding.getModifiers());
 		} else {
-			if (useLightIcons(flags)) {
+			if ((flags & JavaElementImageProvider.LIGHT_TYPE_ICONS) != 0) {
 				return JavaPluginImages.DESC_OBJS_CLASSALT;
 			}
 			if (isInner) {
-				return getInnerClassImageDescriptor(isInInterface, binding.getModifiers());
+				return getInnerClassImageDescriptor(binding.getModifiers());
 			}
 			return getClassImageDescriptor(binding.getModifiers());
 		}
 	}
 
 	static ImageDescriptor getTypeImageDescriptor(ITypeBinding binding, int flags) {
-		ITypeBinding declaring= binding.getDeclaringClass();
-		boolean isInner= declaring != null;
-		boolean isInInterface= isInner && (declaring.isInterface() || declaring.isAnnotation());
-		return getTypeImageDescriptor(isInner, isInInterface, binding, flags);
+		return getTypeImageDescriptor(binding.getDeclaringClass() != null, binding, flags);
 	}
 
 	static void getTypeLabel(ITypeBinding binding, long flags, StringBuffer buffer) {
@@ -301,53 +292,17 @@ public class SourceActionLabelProvider extends LabelProvider {
 		buffer.append(name);
 	}
 
-	static boolean isAbstract(IBinding binding) {
-		if (binding instanceof ITypeBinding) {
-			ITypeBinding type= (ITypeBinding) binding;
-			return !type.isInterface() && !type.isAnnotation();
-		}
-		if (binding instanceof IMethodBinding) {
-			ITypeBinding type= ((IMethodBinding) binding).getDeclaringClass();
-			return !type.isInterface() && !type.isAnnotation();
-		} else if (binding instanceof IVariableBinding) {
-			ITypeBinding type= ((IVariableBinding) binding).getDeclaringClass();
-			return !type.isInterface() && !type.isAnnotation();
-		}
-		return false;
-	}
-
-	static boolean isDefaultModifier(int modifiers) {
-		return !Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers) && !Modifier.isPrivate(modifiers);
-	}
-
-	static boolean isInterfaceField(IBinding binding) {
-		if (binding instanceof IVariableBinding) {
-			ITypeBinding type= ((IVariableBinding) binding).getDeclaringClass();
-			return type.isInterface() || type.isAnnotation();
-		}
-		return false;
-	}
-
-	static boolean isSynchronized(IBinding binding) {
-		return binding instanceof ITypeBinding;
-	}
-
-	static boolean useLightIcons(int flags) {
-		return (flags & JavaElementImageProvider.LIGHT_TYPE_ICONS) != 0;
-	}
-
-	static boolean useSmallSize(int flags) {
-		return (flags & JavaElementImageProvider.SMALL_ICONS) != 0;
-	}
-
 	private ImageDescriptorRegistry fRegistry= null;
 
 	/*
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 	 */
 	public Image getImage(Object element) {
-		if (element instanceof IBinding)
-			return getImageLabel(getJavaImageDescriptor((IBinding) element, JavaElementLabelProvider.SHOW_DEFAULT));
+		if (element instanceof IBinding) {
+			IBinding binding= (IBinding) element;
+			int flags= JavaElementLabelProvider.SHOW_DEFAULT;
+			return getImageLabel(new JavaElementImageDescriptor(getBaseImageDescriptor(binding, flags), computeJavaAdornmentFlags(binding, flags), ((flags & JavaElementImageProvider.SMALL_ICONS) != 0) ? JavaElementImageProvider.SMALL_SIZE : JavaElementImageProvider.BIG_SIZE));
+		}
 		return null;
 	}
 
