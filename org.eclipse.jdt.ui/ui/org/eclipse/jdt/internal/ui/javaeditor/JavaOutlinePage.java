@@ -40,6 +40,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -63,6 +65,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
@@ -72,7 +75,6 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -82,6 +84,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * The content outline page of the Java editor. The viewer implements a proprietary
  * update mechanism based on Java model deltas. It does not react on domain changes.
  * It is specified to show the content of ICompilationUnits and IClassFiles.
+ * Pulishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outliner"</code>.
  */
 class JavaOutlinePage extends Page implements IContentOutlinePage {
 	
@@ -228,7 +231,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					}					
 				}
 				
-				/**
+				/*
 				 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 				 */
 				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -282,7 +285,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					}
 				}
 				
-				/**
+				/*
 				 * @see TreeViewer#internalExpandToLevel
 				 */
 				protected void internalExpandToLevel(Widget node, int level) {
@@ -324,7 +327,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					fReusedExpandedItem= null;
 				}
 				
-				/**
+				/*
 				 * @see TreeViewer#createTreeItem
 				 */
 				protected void createTreeItem(Widget parent, Object element, int ix) {
@@ -719,14 +722,66 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fEditor= editor;
 	}
 	
-	private void fireSelectionChanged(ISelection selection) {
-		SelectionChangedEvent event= new SelectionChangedEvent(this, selection);
-		Object[] listeners= fSelectionChangedListeners.getListeners();
-		for (int i= 0; i < listeners.length; ++i)
-			((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+	/*
+	 * @see ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
+	 */
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+		if (fOutlineViewer != null)
+			fOutlineViewer.addSelectionChangedListener(listener);
+		else
+			fSelectionChangedListeners.add(listener);
 	}
 	
-	/**
+	/*
+	 * @see ISelectionProvider#removeSelectionChangedListener(ISelectionChangedListener)
+	 */
+	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+		if (fOutlineViewer != null)
+			fOutlineViewer.removeSelectionChangedListener(listener);
+		else
+			fSelectionChangedListeners.remove(listener);
+	}
+	
+	/*
+	 * @see ISelectionProvider#setSelection(ISelection)
+	 */
+	public void setSelection(ISelection selection) {
+		if (fOutlineViewer != null)
+			fOutlineViewer.setSelection(selection);		
+	}	
+	
+	/*
+	 * @see ISelectionProvider#getSelection()
+	 */
+	public ISelection getSelection() {
+		if (fOutlineViewer == null)
+			return StructuredSelection.EMPTY;
+		return fOutlineViewer.getSelection();
+	}
+	
+	private void registerToolbarActions() {
+		
+		IToolBarManager toolBarManager= getSite().getActionBars().getToolBarManager();
+		if (toolBarManager != null) {
+			
+			Action action= new LexicalSortingAction();
+			toolBarManager.add(action);		
+			
+			action= new FilterAction(new FieldFilter(), JavaEditorMessages.getString("JavaOutlinePage.HideFields.label"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.unchecked"), "HideFields.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(action, "fields_co.gif"); //$NON-NLS-1$
+			toolBarManager.add(action);
+						
+			action= new FilterAction(new VisibilityFilter(VisibilityFilter.NOT_STATIC), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.unchecked"), "HideStaticMembers.isChecked");		 //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(action, "static_co.gif"); //$NON-NLS-1$
+			toolBarManager.add(action);
+					
+			action= new FilterAction(new VisibilityFilter(VisibilityFilter.PUBLIC), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.unchecked"), "HideNonePublicMembers.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(action, "public_co.gif"); //$NON-NLS-1$
+			toolBarManager.add(action);
+		}
+	}
+	
+	/*
 	 * @see IPage#createControl
 	 */
 	public void createControl(Composite parent) {
@@ -738,7 +793,13 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fOutlineViewer= new JavaOutlineViewer(tree);		
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(lprovider);
-			
+		
+		Object[] listeners= fSelectionChangedListeners.getListeners();
+		for (int i= 0; i < listeners.length; i++) {
+			fSelectionChangedListeners.remove(listeners[i]);
+			fOutlineViewer.addSelectionChangedListener((ISelectionChangedListener) listeners[i]);
+		}
+				
 		MenuManager manager= new MenuManager(fContextMenuID, fContextMenuID);
 		manager.setRemoveAllWhenShown(true);
 		manager.addMenuListener(new IMenuListener() {
@@ -749,21 +810,25 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fMenu= manager.createContextMenu(tree);
 		tree.setMenu(fMenu);
 		
-		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup(), new ReorgGroup() };
-					
-		fOutlineViewer.setInput(fInput);	
-		fOutlineViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent e) {
-				fireSelectionChanged(e.getSelection());
-			}
-		});
+		getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer);
+		getSite().setSelectionProvider(fOutlineViewer);
 		
+		IStatusLineManager statusLineManager= getSite().getActionBars().getStatusLineManager();
+		if (statusLineManager != null) {
+			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
+			fOutlineViewer.addSelectionChangedListener(updater);
+		}
+		
+		registerToolbarActions();
+				
+		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup(), new ReorgGroup() };
+		
+		fOutlineViewer.setInput(fInput);	
 		fOutlineViewer.getControl().addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				handleKeyPressed(e);
 			}
 		});
-	
 	}
 	
 	public void dispose() {
@@ -778,8 +843,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		for (int i= 0; i < listeners.length; i++)
 			fSelectionChangedListeners.remove(listeners[i]);
 		fSelectionChangedListeners= null;
-		
-
 		
 		if (fMenu != null && !fMenu.isDisposed()) {
 			fMenu.dispose();
@@ -865,8 +928,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		if (!(element instanceof IType))
 			return;
 		IType[] input= {(IType)element};
-		// XXX should get the workbench window form the PartSite
-		IWorkbenchWindow w= JavaPlugin.getActiveWorkbenchWindow();
+		IWorkbenchWindow w= getSite().getWorkbenchWindow();
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, new OpenHierarchyPerspectiveItem(w, input));
 	}
 
@@ -892,69 +954,12 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		addOpenPerspectiveItem(menu);	
 	}
 	
-	/**
+	/*
 	 * @see Page#setFocus()
 	 */
 	public void setFocus() {
 		if (fOutlineViewer != null)
 			fOutlineViewer.getControl().setFocus();
-	}
-	
-	/**
-	 * @see Page#makeContributions(IMenuManager, IToolBarManager, IStatusLineManager)
-	 */
-	public void makeContributions(IMenuManager menuManager, IToolBarManager toolBarManager, IStatusLineManager statusLineManager) {
-		
-		if (statusLineManager != null) {
-			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
-			addSelectionChangedListener(updater);
-		}
-		
-		Action action= new LexicalSortingAction();
-		toolBarManager.add(action);		
-		
-		action= new FilterAction(new FieldFilter(), JavaEditorMessages.getString("JavaOutlinePage.HideFields.label"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.unchecked"), "HideFields.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(action, "fields_co.gif"); //$NON-NLS-1$
-		toolBarManager.add(action);
-					
-		action= new FilterAction(new VisibilityFilter(VisibilityFilter.NOT_STATIC), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.unchecked"), "HideStaticMembers.isChecked");		 //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(action, "static_co.gif"); //$NON-NLS-1$
-		toolBarManager.add(action);
-				
-		action= new FilterAction(new VisibilityFilter(VisibilityFilter.PUBLIC), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.unchecked"), "HideNonePublicMembers.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(action, "public_co.gif"); //$NON-NLS-1$
-		toolBarManager.add(action);
-	}	
-	
-	/**
-	 * @see ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
-	 */
-	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		fSelectionChangedListeners.add(listener);
-	}
-	
-	/**
-	 * @see ISelectionProvider#removeSelectionChangedListener(ISelectionChangedListener)
-	 */
-	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-		fSelectionChangedListeners.remove(listener);
-	}
-	
-	/**
-	 * @see ISelectionProvider#getSelection()
-	 */
-	public ISelection getSelection() {
-		if (fOutlineViewer == null)
-			return StructuredSelection.EMPTY;
-		return fOutlineViewer.getSelection();
-	}
-	
-	/**
-	 * @see ISelectionProvider#setSelection(ISelection)
-	 */
-	public void setSelection(ISelection selection) {
-		if (fOutlineViewer != null)
-			fOutlineViewer.setSelection(selection);		
 	}
 	
 	/**
@@ -990,8 +995,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					deleteAction.run();
 				return;
 			}
-		}	
-		else if (event.keyCode == SWT.F4) {
+		} else if (event.keyCode == SWT.F4) {
 			// Special case since Open Type Hierarchy is no action.
 			OpenTypeHierarchyUtil.open(getSelection(), fEditor.getSite().getWorkbenchWindow());
 		}
