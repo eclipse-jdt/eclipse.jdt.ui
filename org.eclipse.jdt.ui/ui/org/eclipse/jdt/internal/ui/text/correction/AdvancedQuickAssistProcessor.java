@@ -47,8 +47,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	 */
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode = context.getCoveringNode();
-		ArrayList coveredNodes = getFullyCoveredNodes(context, coveringNode);
 		if (coveringNode != null) {
+			ArrayList coveredNodes= getFullyCoveredNodes(context, coveringNode);
 			return getInverseIfProposals(context, coveringNode, null)
 					|| getIfReturnIntoIfElseAtEndOfVoidMethodProposals(context, coveringNode, null)
 					|| getInverseIfContinueIntoIfThenInLoopsProposals(context, coveringNode, null)
