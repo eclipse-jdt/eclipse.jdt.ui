@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.javadocexport;
@@ -24,16 +24,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.debug.core.DebugEvent;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventSetListener;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.Launch;
-import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -51,17 +41,29 @@ import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
 
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.Launch;
+import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.ui.IDebugUIConstants;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
+
 import org.eclipse.jdt.internal.ui.jarpackager.ConfirmSaveModifiedResourcesDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -188,7 +190,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			IJavaProject iJavaProject= projects[j];
 			String message= JavadocExportMessages.getFormattedString("JavadocWizard.updatejavadoclocation.message", new String[] { iJavaProject.getElementName(), fDestination.toOSString()}); //$NON-NLS-1$
 			String[] buttonlabels= new String[] { IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.NO_TO_ALL_LABEL };
-			MessageDialog dialog= new MessageDialog(getShell(), JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), MessageDialog.getImage(MessageDialog.DLG_IMG_QUESTION), message, 4, buttonlabels, 1);
+			MessageDialog dialog= new MessageDialog(getShell(), JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), MessageDialog.getImage(MessageDialog.DLG_IMG_QUESTION), message, 4, buttonlabels, 1);//$NON-NLS-1$
 
 			switch (dialog.open()) {
 				case YES :
@@ -235,7 +237,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 					ILaunch newLaunch= new Launch(wc, ILaunchManager.RUN_MODE, null);
 					IProcess iprocess= DebugPlugin.newProcess(newLaunch, process, JavadocExportMessages.getString("JavadocWizard.javadocprocess.label")); //$NON-NLS-1$
-					iprocess.setAttribute(JavaRuntime.ATTR_CMDLINE, buf.toString());
+					iprocess.setAttribute(IProcess.ATTR_CMDLINE, buf.toString());
 
 					DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
 
@@ -502,5 +504,9 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	protected void removeSelectedProject(IJavaProject project) {
 		if (fSelectedProjects.contains(project))
 			fSelectedProjects.remove(project);
+	}
+	
+	void removeAllProjects() {
+		fSelectedProjects.clear();	
 	}
 }
