@@ -70,6 +70,8 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_CFILE= NAME_PREFIX + "classf_obj.gif";  			//$NON-NLS-1$
 	public static final String IMG_OBJS_CFILECLASS= NAME_PREFIX + "class_obj.gif";  		//$NON-NLS-1$
 	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "int_obj.gif";  			//$NON-NLS-1$
+	public static final String IMG_OBJS_COMPOUND_PACKAGE= NAME_PREFIX + "compound_package_obj.gif";//$NON-NLS-1$
+	public static final String IMG_OJS_COMPOUND_EMPTY_PACKAGE= NAME_PREFIX + "compound_empty_pack_obj.gif";//$NON-NLS-1$
 	public static final String IMG_OBJS_PACKAGE= NAME_PREFIX + "package_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_EMPTY_PACK_RESOURCE= NAME_PREFIX + "empty_pack_fldr_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_EMPTY_PACKAGE= NAME_PREFIX + "empty_pack_obj.gif"; //$NON-NLS-1$
@@ -151,6 +153,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_CFILECLASS= createManaged(T_OBJ, IMG_OBJS_CFILECLASS); 
 	public static final ImageDescriptor DESC_OBJS_CFILEINT= createManaged(T_OBJ, IMG_OBJS_CFILEINT); 
 	public static final ImageDescriptor DESC_OBJS_PACKAGE= createManaged(T_OBJ, IMG_OBJS_PACKAGE);
+	public static final ImageDescriptor DESC_OBJS_COMPOUND_EMPTY_PACKAGE= createManaged(T_OBJ, IMG_OJS_COMPOUND_EMPTY_PACKAGE);
+	public static final ImageDescriptor DESC_OBJS_COMPOUND_PACKAGE= createManaged(T_OBJ, IMG_OBJS_COMPOUND_PACKAGE);
 	public static final ImageDescriptor DESC_OBJS_EMPTY_PACKAGE_RESOURCES= createManaged(T_OBJ, IMG_OBJS_EMPTY_PACK_RESOURCE);
 	public static final ImageDescriptor DESC_OBJS_EMPTY_PACKAGE= createManaged(T_OBJ, IMG_OBJS_EMPTY_PACKAGE);	
 	public static final ImageDescriptor DESC_OBJS_PACKFRAG_ROOT= createManaged(T_OBJ, IMG_OBJS_PACKFRAG_ROOT);
