@@ -5,6 +5,9 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -17,6 +20,34 @@ public class ExperimentalResultCollector extends ResultCollector {
 
 	/** The text viewer. */
 	private ITextViewer fViewer;
+
+	private static boolean appendArguments(ITextViewer viewer, int offset) {
+		
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		if (preferenceStore.getBoolean(ContentAssistPreference.INSERT_COMPLETION))
+			return true;
+
+		if (viewer == null)
+			return true;
+							
+		try {
+			IDocument document= viewer.getDocument();		
+			IRegion region= document.getLineInformationOfOffset(offset);
+			String line= document.get(region.getOffset(), region.getLength());
+			
+			int index= offset - region.getOffset();
+			while (index != line.length() && Character.isUnicodeIdentifierPart(line.charAt(index)))
+				++index;
+			
+			if (index == line.length())
+				return true;
+				
+			return line.charAt(index) != '(';
+		
+		} catch (BadLocationException e) {
+			return true;
+		}
+	}
 	
 	/**
 	 * Creates a proposal that includes a best guess for each parameter. Best guesses are computed by the 
@@ -44,23 +75,35 @@ public class ExperimentalResultCollector extends ResultCollector {
 				fCodeAssistOffset, fCompilationUnit);
 				
 		} else {
-			int count= parameterNames.length;
-			int[] offsets= new int[count];
-			int[] lengths= new int[count];
+			int count;
+			int[] offsets;
+			int[] lengths;
 	
 			StringBuffer buffer= new StringBuffer();	
 			buffer.append(name);
-			buffer.append('(');
-			for (int i= 0; i != count; i++) {
-				if (i != 0)
-					buffer.append(", "); //$NON-NLS-1$
-					
-				offsets[i]= buffer.length();
-				buffer.append(parameterNames[i]);
-				lengths[i]= buffer.length() - offsets[i];
+			
+			if (appendArguments(fViewer, start)) {				
+				count= parameterNames.length;
+				offsets= new int[count];
+				lengths= new int[count];
+				
+				buffer.append('(');
+				for (int i= 0; i != count; i++) {
+					if (i != 0)
+						buffer.append(", "); //$NON-NLS-1$
+						
+					offsets[i]= buffer.length();
+					buffer.append(parameterNames[i]);
+					lengths[i]= buffer.length() - offsets[i];
+				}
+				buffer.append(')');
+
+			} else {
+				count= 0;
+				offsets= new int[0];
+				lengths= new int[0];				
 			}
-			buffer.append(')');
-	
+			
 			return new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(), original.getDisplayString(), offsets, lengths, fViewer, relevance);
 		}
 	}

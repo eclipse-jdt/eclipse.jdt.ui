@@ -9,6 +9,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -20,6 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 
@@ -64,17 +66,56 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		fCompilationUnit= compilationUnit;
 	}
  
+ 	private static boolean appendArguments(IDocument document, int offset) {
+		
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		if (preferenceStore.getBoolean(ContentAssistPreference.INSERT_COMPLETION))
+			return true;
+							
+		try {
+			IRegion region= document.getLineInformationOfOffset(offset);
+			String line= document.get(region.getOffset(), region.getLength());
+			
+			int index= offset - region.getOffset();
+			while (index != line.length() && Character.isUnicodeIdentifierPart(line.charAt(index)))
+				++index;
+			
+			if (index == line.length())
+				return true;
+				
+			return line.charAt(index) != '(';
+		
+		} catch (BadLocationException e) {
+			return true;
+		}
+	}
+ 
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 
 		try {
-			final int parameterCount= fParameterNames.length;
+			int parameterCount= fParameterNames.length;
 			int[] positionOffsets= new int[parameterCount];
 			int[] positionLengths= new int[parameterCount];
+			String replacementString;
+			
+			if (appendArguments(document, offset)) {
+				parameterCount= fParameterNames.length;
+				positionOffsets= new int[parameterCount];
+				positionLengths= new int[parameterCount];
 
-			String replacementString= computeGuessingCompletion(positionOffsets, positionLengths);
+				replacementString= computeGuessingCompletion(positionOffsets, positionLengths);
+				
+			} else {
+				parameterCount= 0;
+				positionOffsets= new int[0];
+				positionLengths= new int[0];
+				
+				replacementString= new String(fName);
+			}		
+
 			setReplacementString(replacementString);
 		
 			super.apply(document, trigger, offset);

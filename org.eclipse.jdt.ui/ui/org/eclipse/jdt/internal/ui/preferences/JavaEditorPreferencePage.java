@@ -978,8 +978,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		boolean closeJavaDocs= fOverlayStore.getBoolean(CompilationUnitEditor.CLOSE_JAVADOCS);
 		fAddJavaDocTagsButton.setEnabled(closeJavaDocs);
 
-		boolean guessMethodArguments= fOverlayStore.getBoolean(ContentAssistPreference.GUESS_METHOD_ARGUMENTS);
-		fGuessMethodArgumentsButton.setEnabled(guessMethodArguments);
+		boolean fillMethodArguments= fOverlayStore.getBoolean(ContentAssistPreference.FILL_METHOD_ARGUMENTS);
+		fGuessMethodArgumentsButton.setEnabled(fillMethodArguments);
 		
         updateAutoactivationControls();
 	}
