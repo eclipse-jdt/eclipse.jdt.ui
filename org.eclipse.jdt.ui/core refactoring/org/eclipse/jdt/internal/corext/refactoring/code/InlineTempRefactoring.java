@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -90,7 +91,7 @@ public class InlineTempRefactoring extends Refactoring {
 			fAST= new AST(fCu);
 			
 			if (fAST.hasProblems()){
-				RefactoringStatus compileErrors= checkCompileErrors();
+				RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
 				if (compileErrors.hasFatalError())
 					return compileErrors;
 			}
@@ -122,23 +123,6 @@ public class InlineTempRefactoring extends Refactoring {
 	
 	private void initializeSelection() throws JavaModelException {
 		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fAST, fCu, fSelectionStart, fSelectionLength);
-	}
-	
-	private RefactoringStatus checkCompileErrors() {
-		IProblem[] problems= fAST.getProblems();
-		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < problems.length; i++) {
-			IProblem problem= problems[i];
-			if (! problem.isWarning()){
-				String message= "Compilation error in line: " + problem.getSourceLineNumber() 
-										+ " : " + problem.getMessage();
-				int start= problem.getSourceStart();
-				int length= problem.getSourceEnd() - start + 1;
-				Context context= JavaSourceContext.create(fCu, new SourceRange(start, length));
-				result.addFatalError(message, context);
-			}		
-		}
-		return result;
 	}
 	
 	private RefactoringStatus checkSelection() throws JavaModelException {
