@@ -30,8 +30,12 @@ public class HierarchyViewerSorter extends JavaElementSorter {
 		int cat= super.category(element) * 2;
 		if (element instanceof IType) {
 			ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
-			if (hierarchy != null && Flags.isInterface(hierarchy.getCachedFlags((IType)element))) {
-				cat++;
+			
+			if (hierarchy != null) {
+				IType type= (IType) JavaModelUtil.toOriginal((IType) element);
+				if (Flags.isInterface(hierarchy.getCachedFlags(type))) {
+					cat++;
+				}
 			}
 		}
 		return cat;

@@ -186,12 +186,13 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	private ImageDescriptor getTypeImageDescriptor(IType type) {
 		ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
 		if (hierarchy == null) {
-			return JavaPluginImages.DESC_OBJS_CLASS;
+			return new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_CLASS, 0, JavaElementImageProvider.BIG_SIZE);
 		}
 		
-		int flags= hierarchy.getCachedFlags(type);
+		IType originalType= (IType) JavaModelUtil.toOriginal(type);
+		int flags= hierarchy.getCachedFlags(originalType);
 		if (flags == -1) {
-			return JavaPluginImages.DESC_OBJS_CLASS;
+			return new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_CLASS, 0, JavaElementImageProvider.BIG_SIZE);
 		}
 		
 		boolean isInterface= Flags.isInterface(flags);
