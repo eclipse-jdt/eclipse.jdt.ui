@@ -1,5 +1,6 @@
-<!-- build script to create a plugin from org.eclipse.jdt.ui -->
 <project name="org.eclipse.jdt.ui" default="export" basedir="..">
+<!-- build script to create a plugin from org.eclipse.jdt.ui -->
+
 	<target name="init">
 		<tstamp/>
 		<property name="destdir" value="../../plugin-export" />
