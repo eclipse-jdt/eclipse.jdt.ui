@@ -16,11 +16,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
-
 import org.eclipse.jdi.Bootstrap;
-
 import org.eclipse.jdt.debug.core.JDIDebugModel;
-
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
@@ -30,10 +27,9 @@ import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.ListeningConnector;
-import com.sun.jdi.connect.Connector.IntegerArgument;
 
 /**
- * A launcher for running java main classes. Uses JDI to launch a vm in debug 
+ * A launcher for running Java main classes. Uses JDI to launch a vm in debug 
  * mode.
  */
 public class JDK12DebugLauncher extends JDK12Launcher {
@@ -57,7 +53,7 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 	 * @see IVMRunner#run
 	 */
 	public VMRunnerResult run(VMRunnerConfiguration config) throws CoreException {
-		int port= SocketUtil.findUnusedLocalPort(null, 5000, 15000);
+		int port= SocketUtil.findUnusedLocalPort("", 5000, 15000);
 		if (port == -1) {
 			throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.noPort"), null)); //$NON-NLS-1$
 		}
@@ -125,10 +121,7 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 		
 				IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
 				process.setAttribute(JavaRuntime.ATTR_CMDLINE, renderCommandLine(cmdLine));
-				//try {
-				//	Thread.currentThread().sleep(5000);
-				//} catch (InterruptedException e) {
-				//}
+				
 				boolean retry= false;
 				do  {
 					try {
