@@ -404,6 +404,9 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	}
 
 	private void enterEditor(Template template) {
+		if (template == fCurrent) // #4916
+			return;
+		
 		fCurrent= template;
 	
 		fNameText.setText(template.getName());
