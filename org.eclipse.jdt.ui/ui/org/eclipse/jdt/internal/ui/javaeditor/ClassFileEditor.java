@@ -151,17 +151,15 @@ public class ClassFileEditor extends JavaEditor {
 		}
 	}
 	
-	/**
-	 * @see AbstractTextEditor#isDirty()
+	/*
+	 * 1GEPKT5: ITPJUI:Linux - Source in editor for external classes is editable
+	 * Removed methods isSaveOnClosedNeeded and isDirty.
+	 * Added method isEditable.
 	 */
-	public boolean isDirty() {
-		return false;
-	}
-	
 	/**
-	 * @see AbstractTextEditor#isSaveOnCloseNeeded()
+	 * @see AbstractTextEditor#isEditable()
 	 */
-	public boolean isSaveOnCloseNeeded() {
+	public boolean isEditable() {
 		return false;
 	}
 }

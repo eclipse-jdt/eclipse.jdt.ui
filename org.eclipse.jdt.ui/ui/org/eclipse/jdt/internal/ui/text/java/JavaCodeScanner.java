@@ -72,7 +72,7 @@ public class JavaCodeScanner extends RuleBasedScanner {
 		
 				
 		List rules= new ArrayList();
-		
+				
 		// Add rule for single line comments.
 		rules.add(new EndOfLineRule("//", comment));
 		

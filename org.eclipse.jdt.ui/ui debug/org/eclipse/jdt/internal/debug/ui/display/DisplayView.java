@@ -16,7 +16,7 @@ public class DisplayView extends ViewPart {		/**	 * Display view identifier (
 	/**
 	 * @see ViewPart#createChild(IWorkbenchPartContainer)
 	 */
-	public void createPartControl(Composite parent) {				int styles= SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION;
+	public void createPartControl(Composite parent) {				/*		 * 1GETEAF: ITPDUI:WIN2000 - Display view looks recessed		 * Removed SWT.BORDER from styles		 */		int styles= SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION;
 		fSourceViewer= new SourceViewer(parent, null, styles);		fSourceViewer.configure(new SourceViewerConfiguration());		fSourceViewer.setDocument(new Document());		
 		initializeActions();
 		initializeToolBar();
@@ -47,7 +47,7 @@ public class DisplayView extends ViewPart {		/**	 * Display view identifier (
 	 * Initialize the actions of this view
 	 */
 	private void initializeActions() {
-				ResourceBundle bundle= JavaPlugin.getDefault().getResourceBundle();				fClearDisplayAction= new ClearDisplayAction(bundle, "Display.Clear.", this);		JavaPluginImages.setImageDescriptors(fClearDisplayAction, "lcl16", "removea_exc.gif");			fDisplayAction= new DisplayAction(bundle, "Editor.Display.", this);		JavaPluginImages.setImageDescriptors(fDisplayAction, "tool16", "disp_sbook.gif");		fInspectAction= new InspectAction(bundle, "Editor.Inspect.", this);		JavaPluginImages.setImageDescriptors(fInspectAction, "tool16", "insp_sbook.gif");
+				ResourceBundle bundle= JavaPlugin.getDefault().getResourceBundle();				fClearDisplayAction= new ClearDisplayAction(bundle, "Display.Clear.", this);		/*		 * 1GEULHD: ITPJUI:ALL - Display 'clear' action should use the same icon as Console		 * Subsituted "clear_co.gif" for "removea_exc.gif".		 * Copied icons to /icons.		 */		JavaPluginImages.setImageDescriptors(fClearDisplayAction, "lcl16", "clear_co.gif");					fDisplayAction= new DisplayAction(bundle, "Editor.Display.", this);		JavaPluginImages.setImageDescriptors(fDisplayAction, "tool16", "disp_sbook.gif");		fInspectAction= new InspectAction(bundle, "Editor.Inspect.", this);		JavaPluginImages.setImageDescriptors(fInspectAction, "tool16", "insp_sbook.gif");
 
 
 		IActionBars actionBars = getViewSite().getActionBars();		
