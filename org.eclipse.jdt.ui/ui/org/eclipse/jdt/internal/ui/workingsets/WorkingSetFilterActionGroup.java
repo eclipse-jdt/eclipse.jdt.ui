@@ -180,6 +180,9 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 * @param mm the menu manager
 	 */
 	public void fillViewMenu(IMenuManager mm) {
+		if (mm.find(IWorkingSetActionGroup.ACTION_GROUP) == null) {
+			mm.add(new Separator(IWorkingSetActionGroup.ACTION_GROUP));			
+		}
 		add(mm, fSelectWorkingSetAction);
 		add(mm, fClearWorkingSetAction);
 		add(mm, fEditWorkingSetAction);
