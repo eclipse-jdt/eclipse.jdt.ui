@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.reorg.CopyAction;
 import org.eclipse.jdt.internal.ui.reorg.MoveAction;
@@ -123,9 +124,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	
 	private boolean handleValidateMove(Object target, DropTargetEvent event) throws JavaModelException{
 		if (fMoveRefactoring == null){
-			IDocumentProvider documentProvider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-			ITextBufferChangeCreator changeCreator= new DocumentTextBufferChangeCreator(documentProvider);
-			fMoveRefactoring= new MoveRefactoring(fElements, changeCreator);
+			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		}	
 		
 		if (!canMoveElements())
