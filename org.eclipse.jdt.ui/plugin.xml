@@ -812,4 +812,8 @@
 	</objectContribution>			
 </extension>
 
+<extension point="org.eclipse.vcm.core.ignore">
+	<ignore pattern = "*.class" selected = "true"/>
+</extension>
+
 </plugin>
