@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -32,8 +34,8 @@ public class RenameMethodWithHidingPerfTests extends RefactoringPerformanceTestC
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
 		TestSuite suite= new TestSuite("RenameMethodWithHidingPerfTests");
-		suite.addTest(new RenameMethodWithHidingPerfTests("testCold_10_10"));
-		suite.addTest(new RenameMethodWithHidingPerfTests("test_10_10"));
+		suite.addTest(new RenameMethodWithHidingPerfTests("testCold"));
+		suite.addTest(new RenameMethodWithHidingPerfTests("testWarm"));
 		return new AbstractRefactoringTestSetup(suite);
 	}
 
@@ -55,12 +57,12 @@ public class RenameMethodWithHidingPerfTests extends RefactoringPerformanceTestC
 		super.tearDown();
 	}
 	
-	public void testCold_10_10() throws Exception {
-		// 100 referencing CUs each containing 10 references
+	public void testCold() throws Exception {
 		executeRefactoring(generateSources(fTestProject));
 	}
 	
-	public void test_10_10() throws Exception {
+	public void testWarm() throws Exception {
+		tagAsSummary("Rename method with hiding", Dimension.CPU_TIME);
 		executeRefactoring(generateSources(fTestProject));
 	}
 	

@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
 
 public class MoveStaticMembersPerfTests1 extends AbstractMoveCompilationUnitPrefTest {
@@ -44,6 +46,7 @@ public class MoveStaticMembersPerfTests1 extends AbstractMoveCompilationUnitPref
 	}
 	
 	public void test_100_10() throws Exception {
+		tagAsSummary("Move static member", Dimension.CPU_TIME);
 		executeRefactoring(generateSources(100, 10));
 	}
 	

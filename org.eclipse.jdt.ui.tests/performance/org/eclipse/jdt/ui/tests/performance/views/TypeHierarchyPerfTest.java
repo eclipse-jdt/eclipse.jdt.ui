@@ -16,6 +16,8 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -73,6 +75,7 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 	
 	public void testOpenObjectHierarchy2() throws Exception {
 		//warm
+		tagAsSummary("Open type hierarchy on Object", Dimension.CPU_TIME);
 		measureOpenHierarchy(MyTestSetup.fJProject1.findType("java.lang.Object"));
 	}
 	

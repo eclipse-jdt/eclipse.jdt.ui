@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -66,6 +68,7 @@ public class RenameMethodWithOverloadPerfTests extends RefactoringPerformanceTes
 	}
 	
 	public void test_100_10() throws Exception {
+		tagAsSummary("Rename method with overloading", Dimension.CPU_TIME);
 		executeRefactoring(generateSources(fTestProject, 100, 10));
 	}
 	
