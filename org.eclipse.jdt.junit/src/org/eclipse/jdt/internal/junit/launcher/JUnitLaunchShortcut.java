@@ -39,6 +39,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -181,13 +182,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 
 
 	protected void launchConfiguration(String mode, ILaunchConfiguration config) {
-		try { 
-			if (config != null) {
-				DebugUITools.saveAndBuildBeforeLaunch();
-				config.launch(mode, null);
-			}			
-		} catch (CoreException e) {
-			ErrorDialog.openError(getShell(), JUnitMessages.getString("LaunchTestAction.message.launchFailed"), e.getMessage(), e.getStatus());  //$NON-NLS-1$
+		if (config != null) {
+			DebugUITools.launch(config, mode);
 		}
 	}
 	
@@ -206,7 +202,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			dialog.setMessage(JUnitMessages.getString("LaunchTestAction.message.selectTestToDebug")); //$NON-NLS-1$
 		}
 		dialog.setMultipleSelection(false);
-		if (dialog.open() == ElementListSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			return (IType)dialog.getFirstResult();
 		}
 		return null;
