@@ -54,7 +54,7 @@ public class GotoPackageAction extends JavaUIAction {
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER;
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
 		dialog.setIgnoreCase(false);
-		dialog.setElements(allPackages);
+		dialog.setElements(allPackages.toArray()); // XXX inefficient
 		return dialog;
 	}
 	

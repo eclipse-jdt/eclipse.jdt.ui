@@ -197,7 +197,7 @@ public final class JavaUI {
 		}			
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags));
 		dialog.setIgnoreCase(false);
-		dialog.setElements(packages);
+		dialog.setElements(packages.toArray()); // XXX inefficient
 		return dialog;
 	}
 	
@@ -214,12 +214,11 @@ public final class JavaUI {
 	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root) throws JavaModelException {
-		List packages= new ArrayList();
-		packages.addAll(Arrays.asList(root.getChildren()));
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		dialog.setIgnoreCase(false);
-		dialog.setElements(packages);
-		return dialog;		
+		dialog.setElements(root.getChildren());
+		return dialog;
+
 	}
 
 	/**

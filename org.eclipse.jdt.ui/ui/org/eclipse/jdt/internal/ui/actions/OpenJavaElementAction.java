@@ -79,7 +79,7 @@ public abstract class OpenJavaElementAction extends Action {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
 		dialog.setTitle(title);
 		dialog.setMessage(message);
-		dialog.setElements(sourceReferences);
+		dialog.setElements(sourceReferences.toArray());
 		
 		if (dialog.open() == dialog.OK) {
 			Object[] elements= dialog.getResult();

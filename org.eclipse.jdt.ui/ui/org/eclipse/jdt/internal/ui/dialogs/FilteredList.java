@@ -121,6 +121,36 @@ public class FilteredList extends Composite {
 	/**
 	 * Sets the list of elements presented in the widget.
 	 */
+	public void setElements(Object[] elements) {
+		if (elements == null) {
+			fElements= new Object[0];
+		} else {
+			// copy list for sorting
+			fElements= new Object[elements.length];
+			System.arraycopy(elements, 0, fElements, 0, elements.length);
+		}
+			
+		int length= fElements.length;
+
+		// fill labels			
+		fLabels= new Label[length];
+		for (int i= 0; i != length; i++)
+			fLabels[i]= new Label(
+				fRenderer.getText(fElements[i]),
+				fRenderer.getImage(fElements[i]));
+
+		fSorter.sort(fLabels, fElements);
+		
+		fFoldedIndices= new int[length];
+		fFoldedCount= fold();
+
+		fFilteredIndices= new int[length];	
+		fFilteredCount= filter();
+
+		updateListWidget();
+	}
+	
+/*	
 	public void setElements(List elements) {
 		// copy list for sorting
 		if (elements == null)
@@ -147,7 +177,7 @@ public class FilteredList extends Composite {
 
 		updateListWidget();
 	}
-
+*/
 	/**
 	 * Returns <code>true</code> if the list is empty, <code>false</code> otherwise.
 	 */

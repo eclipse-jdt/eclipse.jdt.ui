@@ -4,8 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.util.Arrays;
-import java.util.List;
+//import java.util.Arrays;
+//import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -20,7 +20,8 @@ import org.eclipse.jface.viewers.ILabelProvider;
  */
 public class ElementListSelectionDialog extends AbstractElementListSelectionDialog {
 	
-	private List fElements;
+//	private List fElements;
+	private Object[] fElements;
 	
 	/**
 	 * Constructs a list selection dialog.
@@ -36,16 +37,23 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 	/**
 	 * Sets the elements presented by this dialog.
 	 */
+/*	
 	public void setElements(List elements) {
 		fElements= elements;	
 	}
+*/	
 
 	/**
 	 * Sets the elements presented by this dialog.
 	 * Convenience method.
 	 */
+/*	
 	public void setElements(Object[] elements) {
 		fElements= Arrays.asList(elements);
+	}
+*/	
+	public void setElements(Object[] elements) {
+		fElements= elements;
 	}
 	
 	/*

@@ -89,7 +89,8 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 
 		initFilteredList();
 		initFilterText();		
-		setSelectionListElements(Arrays.asList(fElements));
+//		setSelectionListElements(Arrays.asList(fElements));
+		setSelectionListElements(fElements);
 		
 		return contents;
 	}
@@ -138,26 +139,7 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 		fLowerList= list;
 		
 		return list;
-	}
-
-/*	
-	public void create() {
-		super.create();
-		
-		setResult(null);
-		updateOkState();
-	}
-*/	
-
-	/**
-	 * @private
-	 */
-/*	
-	protected void cancelPressed() {
-		setResult(null);
-		super.cancelPressed();
-	}
-*/		
+	}	
 
 	/**
 	 * @private

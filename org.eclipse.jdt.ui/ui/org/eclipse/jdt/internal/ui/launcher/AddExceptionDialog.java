@@ -153,7 +153,7 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 					IJavaElementSearchConstants.CONSIDER_CLASSES |
 					IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS;
 		List result= searchEngine.searchTypes(new ProgressMonitorDialog(getShell()), SearchEngine.createWorkspaceScope(), flags);
-		fTypeList.setElements(result);
+		fTypeList.setElements(result.toArray()); // XXX inefficient
 		fFilterText.setText("*Exception*"); //$NON-NLS-1$
 		fTypeListInitialized= true;
 	}

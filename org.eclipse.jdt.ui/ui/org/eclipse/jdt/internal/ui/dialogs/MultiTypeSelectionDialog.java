@@ -58,7 +58,8 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 		if (typesFound.size() == 0)
 			return CANCEL;
 		
-		setElements(typesFound);
+		setElements(typesFound.toArray());
+//		setElements(typesFound);
 		setFilter("A"); //$NON-NLS-1$
 		
 		return super.open();
