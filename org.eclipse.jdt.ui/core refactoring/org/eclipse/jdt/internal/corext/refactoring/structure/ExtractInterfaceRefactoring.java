@@ -184,8 +184,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			}	
 				
 			result.merge(checkNewInterfaceName(fNewInterfaceName));
-			
 			result.merge(checkInterfaceTypeName());
+			if (result.hasFatalError())
+				return result;
 			
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
