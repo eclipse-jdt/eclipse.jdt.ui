@@ -70,7 +70,7 @@ public class ASTNodeDeleteUtil {
 			case IJavaElement.TYPE:
 				return new ASTNode[]{ASTNodeSearchUtil.getTypeDeclarationNode((IType)element, cuNode)};
 			default:
-				Assert.isTrue(false);
+				Assert.isTrue(false, String.valueOf(element.getElementType()));
 				return null;
 		}
 	}
