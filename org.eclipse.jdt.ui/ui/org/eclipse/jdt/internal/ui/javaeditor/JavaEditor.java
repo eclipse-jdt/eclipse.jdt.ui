@@ -1668,10 +1668,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		action= GoToNextPreviousMemberAction.newGoToPreviousMemberAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);				
-		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
-		
-		if (isBrowserLikeLinks())
-			enableBrowserLikeLinks();
+		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);		
 	}
 	
 	public void updatedTitleImage(Image image) {
@@ -1735,7 +1732,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					disableBrowserLikeLinks();
 				return;
 			}
-			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(event.getProperty())) {
+			
+			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(property)) {
 				if ((event.getNewValue() instanceof Boolean) && ((Boolean)event.getNewValue()).booleanValue()) {
 					fOutlinePageUpdater= new EditorSelectionChangedListener();
 					getSelectionProvider().addSelectionChangedListener(fOutlinePageUpdater);
@@ -1745,6 +1743,13 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					fOutlinePageUpdater= null;
 				}
 				return;
+			}
+			
+			if (PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE.equals(property)) {
+				if (event.getNewValue() instanceof Boolean) {
+					Boolean disable= (Boolean) event.getNewValue();
+					configureInsertMode(OVERWRITE, !disable.booleanValue());
+				}
 			}
 			
 			
@@ -2064,6 +2069,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			fOutlinePageUpdater= new EditorSelectionChangedListener();
 			getSelectionProvider().addSelectionChangedListener(fOutlinePageUpdater);
 		}
+		
+		if (isBrowserLikeLinks())
+			enableBrowserLikeLinks();
+
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE))
+			configureInsertMode(OVERWRITE, false);
 	}
 	
 	protected void showOverviewRuler() {

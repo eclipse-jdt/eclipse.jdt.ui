@@ -1406,14 +1406,14 @@ public class PreferenceConstants {
 	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK= "browserLikeLinksKeyModifierMask"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls the smart typing input mode.
+	 * A named preference that controls disabling of the overwrite mode.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 *
 	 * @since 3.0
 	 */	
-	public static final String EDITOR_SMART_TYPING= "smart_typing"; //$NON-NLS-1$
+	public static final String EDITOR_DISABLE_OVERWRITE_MODE= "disable_overwrite_mode"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls the "smart semicolon" smart typing handler
@@ -1913,7 +1913,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.CTRL);
 		
 		// work in progress
-		store.setDefault(PreferenceConstants.EDITOR_SMART_TYPING, true);
+		store.setDefault(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE, false);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_SEMICOLON, false);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
 

@@ -12,13 +12,10 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -36,9 +33,9 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Preference page for work in progress.
@@ -56,8 +53,8 @@ public class WorkInProgressPreferencePage
 	 */
 	private Set fSmartTypingItems= new HashSet();
 	
-	/** The controlling smartTyping field */
-	private Button fSmartTyping;
+	/** The field controlling the overwrite mode*/
+	private Button fDisableOverwriteMode;
 
 	private List fCheckBoxes;
 	private List fRadioButtons;
@@ -111,12 +108,7 @@ public class WorkInProgressPreferencePage
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
 		
-		fSmartTyping= addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping"), PreferenceConstants.EDITOR_SMART_TYPING); //$NON-NLS-1$
-		fSmartTyping.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				updateSmartTyping();
-			}
-		});
+		fDisableOverwriteMode= addCheckBox(group, PreferencesMessages.getString(PREFIX + "overwriteMode"), PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE); //$NON-NLS-1$
 		createSpacer(group, 1);
 
 		Label label= new Label(group, SWT.NONE);
@@ -134,7 +126,6 @@ public class WorkInProgressPreferencePage
 		group.setText(PreferencesMessages.getString(PREFIX + "refactoring")); //$NON-NLS-1$
 		
 		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "refactoring.participants"), "org.eclipse.jdt.refactoring.participants"); //$NON-NLS-1$ //$NON-NLS-2$
-		updateSmartTyping();
 		return result;
 	}
 
@@ -156,18 +147,6 @@ public class WorkInProgressPreferencePage
 	 */
 	protected IPreferenceStore doGetPreferenceStore() {
 		return JavaPlugin.getDefault().getPreferenceStore();
-	}
-	
-	/**
-	 * Sets all field editors in <code>fSmartTypingItems</code> to <code>enabled</code>.
-	 * @param enabled the new state for the smart typing field editors.
-	 */
-	private void updateSmartTyping() {
-		boolean enabled= fSmartTyping.getSelection();
-		for (Iterator it= fSmartTypingItems.iterator(); it.hasNext();) {
-			Button button= (Button)it.next();
-			button.setEnabled(enabled);
-		}
 	}
 
 	/*
@@ -191,8 +170,6 @@ public class WorkInProgressPreferencePage
 			text.setText(store.getDefaultString(key));
 		}
 		super.performDefaults();
-		// enable depending controls
-		updateSmartTyping();
 	}
 
 	/*
