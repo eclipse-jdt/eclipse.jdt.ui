@@ -65,7 +65,7 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_block", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK, NOTINSERT_INSERT); //$NON-NLS-1$
 		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_enum_declaration", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_DECLARATION, NOTINSERT_INSERT); //$NON-NLS-1$
 		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_enum_constant", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT, NOTINSERT_INSERT); //$NON-NLS-1$
-
+		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_end_of_file", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AT_END_OF_FILE_IF_MISSING, NOTINSERT_INSERT); //$NON-NLS-1$
 		
 		final Group arrayInitializerGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.arrayInitializer_group.title")); //$NON-NLS-1$
 		createPref(arrayInitializerGroup, numColumns, "NewLinesTabPage.array_group.option.after_opening_brace_of_array_initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, NOTINSERT_INSERT); //$NON-NLS-1$

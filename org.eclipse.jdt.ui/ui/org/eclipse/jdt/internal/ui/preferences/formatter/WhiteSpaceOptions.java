@@ -287,6 +287,11 @@ public final class WhiteSpaceOptions {
             "class MyGenericType<S, T extends Element & List> { }" //$NON-NLS-1$
         );
     
+    private final static PreviewSnippet VARARG_PARAMETER_PREVIEW= new PreviewSnippet(
+    		CodeFormatter.K_CLASS_BODY_DECLARATIONS,
+			"void format(String s, Object ... args) {}" //$NON-NLS-1$
+		);
+    
     private final static PreviewSnippet WILDCARD_PREVIEW= new PreviewSnippet(
             CodeFormatter.K_CLASS_BODY_DECLARATIONS,
             "Map<? extends K, ? super V> t;" //$NON-NLS-1$
@@ -536,12 +541,18 @@ public final class WhiteSpaceOptions {
         createBeforeAndTree(workingValues, parent); 
         
         parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_and"); //$NON-NLS-1$
-        createAfterAndTree(workingValues, parent);      
+        createAfterAndTree(workingValues, parent);
+        
+        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_ellipsis"); //$NON-NLS-1$
+        createBeforeEllipsis(workingValues, parent);
+        
+        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_ellipsis"); //$NON-NLS-1$
+        createAfterEllipsis(workingValues, parent);
         
         return roots;
 	}
-    
-    private static InnerNode createParentNode(List roots, Map workingValues, String text) {
+
+	private static InnerNode createParentNode(List roots, Map workingValues, String text) {
         final InnerNode parent= new InnerNode(null, workingValues, text);
         roots.add(parent);
         return parent;
@@ -780,6 +791,15 @@ public final class WhiteSpaceOptions {
         createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
  	}
 	
+	private static void createBeforeEllipsis(Map workingValues, InnerNode parent) {
+		createOption(parent, workingValues, "WhiteSpaceOptions.vararg_parameter", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$
+		
+	}
+	
+	private static void createAfterEllipsis(Map workingValues, InnerNode parent) {
+		createOption(parent, workingValues, "WhiteSpaceOptions.vararg_parameter", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$		
+	}
+	
     private static void createAfterSemicolonTree(Map workingValues, final InnerNode parent) {
         createOption(parent, workingValues, "WhiteSpaceOptions.for", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
     }
@@ -953,8 +973,11 @@ public final class WhiteSpaceOptions {
         
         createOption(root, workingValues, "WhiteSpaceTabPage.before_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.after_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_PARAMETERS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.before_ellipsis", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.after_ellipsis", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ELLIPSIS, VARARG_PARAMETER_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.before_comma_in_throws", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.after_comma_in_throws", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_THROWS, METHOD_DECL_PREVIEW); //$NON-NLS-1$
+        
         return root;
     }
     
