@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
@@ -67,6 +68,13 @@ class CopyResourcesToClipboardAction extends Action implements IRefactoringActio
 	public static boolean canOperateOn(IStructuredSelection selection){
 		if (StructuredSelectionUtil.hasNonResources(selection)) 
 			return false;
+		
+		//XXX must exclude it here - nasty
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object each= iter.next();
+			if (each instanceof IPackageFragment && ((IPackageFragment)each).isDefaultPackage())
+				return false;
+		}
 		
 		IResource[] selectedResources= StructuredSelectionUtil.getResources(selection);
 		if (selectedResources.length == 0)

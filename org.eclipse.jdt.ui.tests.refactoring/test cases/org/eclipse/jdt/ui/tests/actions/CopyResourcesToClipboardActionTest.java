@@ -31,6 +31,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	
 	private IPackageFragment fPackageQ;
 	private IPackageFragment fPackageQ_R;
+	private IPackageFragment fDefaultPackage;
 	private static final String CU_A_NAME= "A";
 	private static final String CU_B_NAME= "B";
 	private IFile faTxt;
@@ -55,6 +56,8 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	
 	protected void setUp() throws Exception {
 		super.setUp();
+		
+		fDefaultPackage= MySetup.getDefaultSourceFolder().createPackageFragment("", true, null);
 		
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java", "package p; class A{}");
 		
@@ -177,5 +180,10 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	public void testDisabled10() throws Exception{
 		checkDisabled(new Object[]{fCuA, fCuB});
 	}
+	
+	public void testDisabled11() throws Exception{
+		checkDisabled(new Object[]{fDefaultPackage});
+	}
+	
 
 }
