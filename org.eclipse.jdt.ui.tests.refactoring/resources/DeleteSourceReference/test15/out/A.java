@@ -1,5 +1,3 @@
 package p;
 class A{
-
-	
 }
