@@ -1,6 +1,6 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 
 public class JavaPreferencesSettings  {
 	

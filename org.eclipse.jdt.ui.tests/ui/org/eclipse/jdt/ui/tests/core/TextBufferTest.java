@@ -8,13 +8,13 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite; 
 
-import org.eclipse.jdt.internal.corext.codemanipulation.MoveTextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.SwapTextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
-import org.eclipse.jdt.internal.corext.codemanipulation.UndoMemento;
+import org.eclipse.jdt.internal.corext.textmanipulation.MoveTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.SwapTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 

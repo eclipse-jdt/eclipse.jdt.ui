@@ -3,16 +3,27 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.corext.codemanipulation;
+
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.corext.codemanipulation.*;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
-import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
-
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.formatter.CodeFormatter;
 
 public class MemberEdit extends SimpleTextEdit {
 	
@@ -28,7 +39,6 @@ public class MemberEdit extends SimpleTextEdit {
 	private int fTabWidth;
 	private boolean fUseFormatter= false;
 	private int fEmptyLinesBetweenMembers= 1;
-
 
 	public MemberEdit(IJavaElement member, int insertionKind, String[] source, int tabWidth) {
 		Assert.isNotNull(member);
@@ -52,7 +62,9 @@ public class MemberEdit extends SimpleTextEdit {
 	 * @see TextEdit#getCopy
 	 */
 	public TextEdit copy() {
-		return new MemberEdit(fMember, fInsertionKind, fSource, fTabWidth);
+		MemberEdit result= new MemberEdit(fMember, fInsertionKind, fSource, fTabWidth);
+		result.setUseFormatter(fUseFormatter);
+		return result;
 	}
 	
 	/* non Java-doc
@@ -200,7 +212,7 @@ public class MemberEdit extends SimpleTextEdit {
 		setTextRange(new TextRange(offset, length));
 		setText(sb.toString());
 		
-		super.connect(buffer);
+		super.connect(editor);
 	}
 	
 	private static String extract(TextBuffer buffer, int offset, Scanner scanner) {

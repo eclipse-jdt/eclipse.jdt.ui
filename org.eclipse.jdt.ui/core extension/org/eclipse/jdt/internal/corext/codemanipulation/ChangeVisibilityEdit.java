@@ -14,6 +14,11 @@ import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 import org.eclipse.jdt.internal.core.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
  * Changes the visibility of a <code>IMember</code> instance.
@@ -76,7 +81,7 @@ public class ChangeVisibilityEdit extends SimpleTextEdit {
 			text+= " ";
 		setTextRange(new TextRange(offset, length));
 		setText(text);
-		super.connect(buffer);
+		super.connect(editor);
 	}	
 }
 

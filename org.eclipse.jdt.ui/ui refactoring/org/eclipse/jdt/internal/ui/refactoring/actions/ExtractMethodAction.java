@@ -5,22 +5,23 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
-import org.eclipse.jface.text.ITextSelection;
 
 /**
  * Extracts a new method from the text editor's text selection by using the
  * extract method refactoing.
  */
-public class ExtractMethodAction extends TextSelectionBasedRefactoringAction{
+public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 
 	/**
 	 * Creates a new extract method action when used as an action delegate.
@@ -43,9 +44,9 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction{
 	/*
 	 * @see TextSelectionBasedRefactoringAction#createRefactoring
 	 */	
-	Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection, ITextBufferChangeCreator changeCreator) {
+	Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return new ExtractMethodRefactoring(
-			cunit, changeCreator, 
+			cunit, 
 			selection.getOffset(), selection.getLength(),
 			CodeFormatterPreferencePage.isCompactingAssignment(),
 			CodeFormatterPreferencePage.getTabSize());

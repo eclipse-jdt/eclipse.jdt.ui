@@ -4,11 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;
@@ -21,6 +20,11 @@ import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
@@ -29,11 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBuffer;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.corext.refactoring.text.SimpleReplaceTextChange;
-import org.eclipse.jdt.internal.corext.refactoring.text.SimpleTextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ASTParentTrackingAdapter;
 
 /**
@@ -47,7 +47,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ASTParentTrackingAdapter
 public class ExtractMethodRefactoring extends Refactoring {
 
 	private ICompilationUnit fCUnit;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private int fSelectionStart;
 	private int fSelectionLength;
 	private int fSelectionEnd;
@@ -69,18 +68,53 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private static final String COMMA_BLANK= ", ";
 	private static final String STATIC= "static";
 	
+	private class InsertNewMethod extends SimpleTextEdit {
+		private int fMethodStart;
+		private int fMethodEnd;
+		public InsertNewMethod(int offset, int methodStart, int methodEnd) {
+			super(offset, 0, "");
+			fMethodStart= methodStart;
+			fMethodEnd= methodEnd;
+		}
+		public void connect(TextBufferEditor editor) {
+			TextBuffer buffer= editor.getTextBuffer();
+			int startLine= buffer.getLineOfOffset(fMethodStart);
+			int endLine= buffer.getLineOfOffset(fMethodEnd);
+			String delimiter= buffer.getLineDelimiter(startLine);
+			int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(fMethodStart), fTabWidth);	
+			setText(computeNewMethod(buffer, endLine, TextUtilities.createIndentString(indent), delimiter));
+		}
+		public TextEdit copy() {
+			return new InsertNewMethod(getTextRange().getOffset(), fMethodStart, fMethodEnd);
+		}
+	}
+	
+	private class ReplaceCall extends SimpleTextEdit {
+		private int fMethodStart;
+		public ReplaceCall(int offset, int length, int methodStart) {
+			super(offset, length, "");
+			fMethodStart= methodStart;
+		}
+		public void connect(TextBufferEditor editor) {
+			TextBuffer buffer= editor.getTextBuffer();
+			String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(fMethodStart));
+			setText(computeCall(buffer, delimiter));
+		}
+		public TextEdit copy() {
+			TextRange range= getTextRange();
+			return new ReplaceCall(range.getOffset(), range.getLength(), fMethodStart);
+		}
+	}
+	
 	/**
 	 * Creates a new extract method refactoring.
 	 *
 	 * @param cu the compilation unit which is going to be modified.
 	 * @param accessor a callback object to access the source this refactoring is working on.
 	 */
-	public ExtractMethodRefactoring(ICompilationUnit cu, ITextBufferChangeCreator creator,
-			int selectionStart, int selectionLength, boolean asymetricAssignment, int tabWidth) {
+	public ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, boolean asymetricAssignment, int tabWidth) {
 		fCUnit= cu;
 		Assert.isNotNull(fCUnit);
-		fTextBufferChangeCreator= creator;
-		Assert.isNotNull(fTextBufferChangeCreator);
 		fVisibility= "protected"; //$NON-NLS-1$
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
@@ -212,35 +246,27 @@ public class ExtractMethodRefactoring extends Refactoring {
 		AbstractMethodDeclaration method= fAnalyzer.getEnclosingMethod();
 		String sourceMethodName= new String(method.selector);
 		
-		ITextBufferChange result= fTextBufferChangeCreator.create(
-			RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.change_name", new String[]{fMethodName, sourceMethodName}),  //$NON-NLS-1$
-			fCUnit);
+		CompilationUnitChange result= null;
+		try {
+			result= new CompilationUnitChange(
+				RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.change_name", new String[]{fMethodName, sourceMethodName}),  //$NON-NLS-1$
+				fCUnit);
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
+		}
 		
 		final int methodStart= method.declarationSourceStart;
 		final int methodEnd= method.declarationSourceEnd;			
 		final int insertPosition= methodEnd + 1;
 		
 		// Inserting the new method
-		result.addSimpleTextChange(new SimpleReplaceTextChange(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName), insertPosition) { //$NON-NLS-1$
-			public SimpleTextChange[] adjust(ITextBuffer buffer) {
-				int startLine= buffer.getLineOfOffset(methodStart);
-				int endLine= buffer.getLineOfOffset(methodEnd);
-				String delimiter= buffer.getLineDelimiter(startLine);
-				int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(methodStart), fTabWidth);	
-				setText(computeNewMethod(buffer, endLine, TextUtilities.createIndentString(indent), delimiter));
-				return null;
-			}
-		});
+		result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName), //$NON-NLS-1$
+			new InsertNewMethod(insertPosition, methodStart, methodEnd));
 		
 		// Replacing the old statements with the new method call.
-		result.addSimpleTextChange(new SimpleReplaceTextChange(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName), fSelectionStart, fSelectionLength, null) { //$NON-NLS-1$
-			public SimpleTextChange[] adjust(ITextBuffer buffer) {
-				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(methodStart));
-				setText(computeCall(buffer, delimiter));
-				return null;
-			}
-		});
-		
+		result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName), //$NON-NLS-1$
+			new ReplaceCall(fSelectionStart, fSelectionLength, methodStart));
+			
 		return result;
 	}
 	
@@ -289,7 +315,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return status;	
 	}
 	
-	private String computeNewMethod(ITextBuffer buffer, int lineNumber, String indent, String delimiter) {
+	private String computeNewMethod(TextBuffer buffer, int lineNumber, String indent, String delimiter) {
 		StringBuffer result= new StringBuffer();
 		result.append(delimiter);
 		if (insertNewLineAfterMethodBody(buffer, lineNumber))
@@ -304,7 +330,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return result.toString();
 	}
 	
-	private boolean insertNewLineAfterMethodBody(ITextBuffer buffer, int lineNumber) {
+	private boolean insertNewLineAfterMethodBody(TextBuffer buffer, int lineNumber) {
 		String line= buffer.getLineContent(lineNumber + 1);
 		if (line != null) {
 			return TextUtilities.containsOnlyWhiteSpaces(line);
@@ -312,7 +338,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return true;
 	}
 	
-	private String computeSource(ITextBuffer buffer, String indent, String delimiter) {
+	private String computeSource(TextBuffer buffer, String indent, String delimiter) {
 		final String EMPTY_LINE= EMPTY;
 		
 		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength);
@@ -395,7 +421,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return result.toString();
 	}
 	
-	private String computeCall(ITextBuffer buffer, String delimiter) {
+	private String computeCall(TextBuffer buffer, String delimiter) {
 		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength);
 		String firstLineIndent= TextUtilities.createIndentString(
 			TextUtilities.getIndent(buffer.getLineContentOfOffset(fSelectionStart), fTabWidth));

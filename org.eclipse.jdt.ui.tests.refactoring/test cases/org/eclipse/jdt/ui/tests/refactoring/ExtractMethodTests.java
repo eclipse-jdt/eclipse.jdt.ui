@@ -63,7 +63,7 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 	}
 	
 	private String getTestFileName(String packageName, String id) {
-		String result= getResourceLocation() + packageName + "/" + id + "_" + name() + ".java";
+		String result= getResourceLocation() + packageName + "/" + id + "_" + getName() + ".java";
 		return result;
 	}
 	
@@ -76,7 +76,7 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 	}	
 	
 	private String createCUName(String id) {
-		return id + "_" + name() + ".java";
+		return id + "_" + getName() + ".java";
 	}
 
 	protected static int[] getSelection(String source) {
@@ -111,7 +111,7 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 			end= includingEnd + SQUARE_BRACKET_CLOSE_LENGTH;
 		}
 		
-		assert("Selection invalid", start >= 0 && end >= 0 && end >= start);
+		assertTrue("Selection invalid", start >= 0 && end >= 0 && end >= start);
 		
 		int[] result= new int[] { start, end - start }; 
 		// System.out.println("|"+ source.substring(result[0], result[0] + result[1]) + "|");
@@ -136,21 +136,21 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
 		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(
-			unit, new TextBufferChangeCreator(), selection[0], selection[1],
+			unit, selection[0], selection[1],
 			true, 4);
 		refactoring.setMethodName("extracted");
 		RefactoringStatus status= refactoring.checkPreconditions(pm);
 		switch (mode) {
 			case VALID_SELECTION:
 				// System.out.println(status);
-				assert(status.isOK());
+				assertTrue(status.isOK());
 				break;
 			case INVALID_SELECTION:
 				// System.out.println(status);
-				assert(!status.isOK());
+				assertTrue(!status.isOK());
 				break;
 			case COMPARE_WITH_OUTPUT:
-				assert(!status.hasFatalError());
+				assertTrue(!status.hasFatalError());
 				IChange change= refactoring.createChange(pm);
 				assertNotNull(change);
 				ChangeContext context= new ChangeContext(new TestExceptionHandler());
@@ -160,7 +160,7 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 				assertNotNull(change.getUndoChange());
 				source= unit.getSource();
 				String out= getFileContents(getFileInputStream(getTestFileName(outputFolder, id)));
-				assert(compareSource(source, out));
+				assertTrue(compareSource(source, out));
 				break;		
 		}
 	}

@@ -4,26 +4,27 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
+
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.IUpdate;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public abstract class TextSelectionBasedRefactoringAction extends Action implements IUpdate, IWorkbenchWindowActionDelegate {
 	private JavaEditor fEditor;
@@ -54,14 +55,14 @@ public abstract class TextSelectionBasedRefactoringAction extends Action impleme
 	 */
 	public void run() {
 	try{
-			Refactoring refactoring=  createRefactoring(getCompilationUnit(), getTextSelection(),  new DocumentTextBufferChangeCreator(fEditor.getDocumentProvider()));
+			Refactoring refactoring=  createRefactoring(getCompilationUnit(), getTextSelection());
 			RefactoringAction.activateRefactoringWizard(refactoring, createWizard(refactoring), getDialogTitle(), false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, getDialogTitle(), "Unexpected exception occurred. See log for details.");
 		}	
 	}
 	
-	abstract Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection, ITextBufferChangeCreator changeCreator);
+	abstract Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection);
 	abstract RefactoringWizard createWizard(Refactoring refactoring);
 	
 	//---- IWorkbenchWindowActionDelegate stuff ----------------------------------------------------

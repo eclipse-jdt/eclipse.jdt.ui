@@ -10,7 +10,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 import org.eclipse.compare.*;
 

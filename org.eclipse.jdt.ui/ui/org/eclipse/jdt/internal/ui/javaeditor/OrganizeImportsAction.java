@@ -25,8 +25,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.compiler.IProblem;
-import org.eclipse.jdt.internal.corext.codegeneration.OrganizeImportsOperation;
-import org.eclipse.jdt.internal.corext.codegeneration.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableWrapper;

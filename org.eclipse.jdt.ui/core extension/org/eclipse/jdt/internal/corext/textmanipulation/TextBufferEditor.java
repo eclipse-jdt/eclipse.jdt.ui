@@ -2,7 +2,7 @@
  * (c) Copyright 2001 MyCorporation.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.corext.codemanipulation;
+package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextEditNode.RootNode;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditNode.RootNode;
 
 /**
  * A <code>TextBufferEditor</code> manages a set of <code>TextEdit</code>s and applies

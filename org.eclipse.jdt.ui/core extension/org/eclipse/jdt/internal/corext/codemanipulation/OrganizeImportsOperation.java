@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.corext.codegeneration;
+package org.eclipse.jdt.internal.corext.codemanipulation;
 
 /*
  * (c) Copyright IBM Corp. 2000, 2001.

@@ -6,8 +6,8 @@ package org.eclipse.jdt.internal.corext.refactoring.sef;
 
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
-import org.eclipse.jdt.internal.corext.codemanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 final class EncapsulateWriteAccess extends MultiTextEdit {
 

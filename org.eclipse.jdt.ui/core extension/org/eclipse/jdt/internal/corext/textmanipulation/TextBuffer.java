@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.corext.codemanipulation;
+package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -241,7 +241,7 @@ public class TextBuffer {
 			String result[]= new String[size];
 			for (int i= 0; i < size; i++) {
 				IRegion region= tracker.getLineInformation(i);
-				result[i]= getContent(region.getOffset(), region.getLength());
+				result[i]= getContent(offset + region.getOffset(), region.getLength());
 			}
 			return result;
 		} catch (BadLocationException e) {

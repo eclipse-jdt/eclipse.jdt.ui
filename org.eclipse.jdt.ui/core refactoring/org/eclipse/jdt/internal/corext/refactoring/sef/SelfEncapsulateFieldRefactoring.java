@@ -28,9 +28,8 @@ import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.corext.codemanipulation.AddMemberEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.ChangeVisibilityEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -40,10 +39,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.AST;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
@@ -289,13 +288,13 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 	
 	private void addChanges(CompositeChange parent, IProgressMonitor pm) throws CoreException {
-		int insertionKind= AddMemberEdit.INSERT_AFTER;
+		int insertionKind= MemberEdit.INSERT_AFTER;
 		IMember sibling= null;
 		IMethod[] methods= fField.getDeclaringType().getMethods();
 		if (fInsertionIndex < 0) {
 			if (methods.length > 0) {
 				sibling= methods[0];
-				insertionKind= AddMemberEdit.INSERT_BEFORE;
+				insertionKind= MemberEdit.INSERT_BEFORE;
 			} else {
 				IField[] fields= fField.getDeclaringType().getFields();
 				sibling= fields[fields.length - 1];
@@ -317,7 +316,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	private TextEdit createSetterMethod(int insertionKind, IMember sibling, String modifiers, String type) throws JavaModelException {
 		String argname= createArgName();
-		return new AddMemberEdit(
+		MemberEdit result= new MemberEdit(
 			sibling,
 			insertionKind,
 			new String[] {
@@ -328,18 +327,22 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				"}"
 			},
 			fTabWidth);
+		result.setUseFormatter(true);
+		return result;
 	}
 	
 	private TextEdit createGetterMethod(int insertionKind, IMember sibling, String modifiers, String type) {
-		return new AddMemberEdit(
+		MemberEdit result= new MemberEdit(
 			sibling,
 			insertionKind,
 			new String[] {
 				modifiers + " " + type + " " + getGetterName() + "() {",
-				"return ", fField.getElementName() + ";",
+				"return " + fField.getElementName() + ";",
 				"}"
 			},
 			fTabWidth);
+		result.setUseFormatter(true);
+		return result;
 	}
 
 	private String createArgName() {

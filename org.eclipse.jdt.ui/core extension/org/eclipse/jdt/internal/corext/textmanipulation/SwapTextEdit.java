@@ -2,7 +2,7 @@
  * (c) Copyright 2001 MyCorporation.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.corext.codemanipulation;
+package org.eclipse.jdt.internal.corext.textmanipulation;
 
 /**
  * A <code>SwapTextEdit</code> exchanges to text ranges.

@@ -2,11 +2,11 @@
  * (c) Copyright 2001 MyCorporation.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.corext.codemanipulation;
+package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.Comparator;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.TextEditNode.TargetMarkNode;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditNode.TargetMarkNode;
 
 /**
  * A special comparator to comapre <code>TextRange</code>s.
