@@ -293,13 +293,13 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 	
 	public void test40() throws Exception{
-		printTestDisabledMessage("test for bug 21815");
-//		helper1(4, 9, 4, 16, true, false, "temp");
+//		printTestDisabledMessage("test for bug 21815");
+		helper1(4, 9, 4, 16, true, false, "temp");
 	}
 
 	public void test41() throws Exception{
-		printTestDisabledMessage("test for bug 21815");
-//		helper1(4, 9, 4, 36, true, false, "temp");
+//		printTestDisabledMessage("test for bug 21815");
+		helper1(4, 9, 4, 36, true, false, "temp");
 	}
 
 	public void test42() throws Exception{
@@ -320,6 +320,15 @@ public class ExtractTempTests extends RefactoringTest {
 	public void test45() throws Exception{
 		//21939
 		helper1(4, 16, 4, 19, true, false, "temp");
+	}
+
+	public void test46() throws Exception{
+//		printTestDisabledMessage("test for bug 21815");
+		helper1(4, 9, 4, 12, true, false, "temp");
+	}
+
+	public void test47() throws Exception{
+		helper1(5, 9, 5, 12, true, false, "temp");
 	}
 
 	
@@ -393,13 +402,14 @@ public class ExtractTempTests extends RefactoringTest {
 //		failHelper1(4, 19, 4, 22, false, false, "temp");
 //	}	
 
-	public void testFail16() throws Exception{
-		failHelper1(5, 9, 5, 12, false, false, "temp");
-	}	
-
-	public void testFail17() throws Exception{
-		failHelper1(6, 13, 6, 16, false, false, "temp");
-	}	
+//removed - allowed now (see bug 21815)
+//	public void testFail16() throws Exception{
+//		failHelper1(5, 9, 5, 12, false, false, "temp");
+//	}	
+//
+//	public void testFail17() throws Exception{
+//		failHelper1(6, 13, 6, 16, false, false, "temp");
+//	}	
 
 	public void testFail18() throws Exception{
 //		printTestDisabledMessage("regression test for bug#8149");
