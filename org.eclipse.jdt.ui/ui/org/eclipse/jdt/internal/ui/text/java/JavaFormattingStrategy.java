@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.text.java;
  */
  
 
-import org.eclipse.jface.text.formatter.IFormattingStrategy;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin; 
+import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.formatter.IFormattingStrategy;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility; 
 
 
 
@@ -38,6 +38,10 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 	public String format(String content, boolean isLineStart, String indentation, int[] positions) {
 		ConfigurableOption[] options= JavaPlugin.getDefault().getCodeFormatterOptions();
 		CodeFormatter formatter= new CodeFormatter(options);
+		
+		IDocument doc= fViewer.getDocument();
+		String lineDelimiter= StubUtility.getLineDelimiterFor(doc);
+		formatter.options.setLineSeparator(lineDelimiter);
 
 		formatter.setPositionsToMap(positions);
 		formatter.setInitialIndentationLevel(fInitialIndentation == null ? 0 : fInitialIndentation.length());

@@ -251,25 +251,7 @@ public class ImportsStructure implements IImportsStructure {
 		int importsStart, importsLen;
 		
 		// 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
-		String lineDelim= null;
-		try {
-			lineDelim= doc.getLineDelimiter(0);
-		} catch (BadLocationException e) {
-		}
-		if (lineDelim == null) {
-			String systemDelimiter= System.getProperty("line.separator", "\n");
-			String[] lineDelims= doc.getLegalLineDelimiters();
-			for (int i= 0; i < lineDelims.length; i++) {
-				if (lineDelims[i].equals(systemDelimiter)) {
-					lineDelim= systemDelimiter;
-					break;
-				}
-			}
-			if (lineDelim == null) {
-				lineDelim= lineDelims.length > 0 ? lineDelims[0] : systemDelimiter;
-			}
-		}
-		// end fix.
+		String lineDelim= StubUtility.getLineDelimiterFor(doc);
 		
 		int lastPos;
 		StringBuffer buf= new StringBuffer();
@@ -345,6 +327,7 @@ public class ImportsStructure implements IImportsStructure {
 			}
 		}
 	}
+
 	
 	private boolean isImportNeeded(String packName, IType[] cuTypes) {
 		if (packName.length() == 0 || "java.lang".equals(packName)) {
