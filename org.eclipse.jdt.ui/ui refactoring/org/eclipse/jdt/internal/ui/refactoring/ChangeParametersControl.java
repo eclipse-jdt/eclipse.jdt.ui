@@ -65,7 +65,16 @@ public class ChangeParametersControl extends Composite {
 
 	private static class ParameterInfoContentProvider implements IStructuredContentProvider {
 		public Object[] getElements(Object inputElement) {
-			return ((List) inputElement).toArray();
+			return removeMarkedAsDeleted((List) inputElement);
+		}
+		private ParameterInfo[] removeMarkedAsDeleted(List paramInfos){
+			List result= new ArrayList(paramInfos.size());
+			for (Iterator iter= paramInfos.iterator(); iter.hasNext();) {
+				ParameterInfo info= (ParameterInfo) iter.next();
+				if (! info.isDeleted())
+					result.add(info);
+			}
+			return (ParameterInfo[]) result.toArray(new ParameterInfo[result.size()]);
 		}
 		public void dispose() {
 			// do nothing
@@ -276,27 +285,21 @@ public class ChangeParametersControl extends Composite {
 		if (fAddButton != null)
 			fAddButton.setEnabled(true);	
 		if (fRemoveButton != null)
-			fRemoveButton.setEnabled(getTableSelectionCount() != 0 && areAllSelectedNew());
+			fRemoveButton.setEnabled(getTableSelectionCount() != 0);
 	}
 
 	private int getTableSelectionCount() {
 		return getTable().getSelectionCount();
 	}
 
+	private int getTableItemCount() {
+		return getTable().getItemCount();
+	}
+
 	private Table getTable() {
 		return fTableViewer.getTable();
 	}
-
-	private boolean areAllSelectedNew() {
-		ParameterInfo[] selected= getSelectedItems();
-		for (int i = 0; i < selected.length; i++) {
-			if (! selected[i].isAdded())
-				return false;
-		}
-		return true;
-	}
-
-
+	
 	private Button createEditButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
 		button.setText(RefactoringMessages.getString("ChangeParametersControl.buttons.edit")); //$NON-NLS-1$
@@ -340,7 +343,7 @@ public class ChangeParametersControl extends Composite {
 				fParameterInfos.add(ParameterInfo.createInfoForAddedParameter());
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
-				getTable().setSelection(fParameterInfos.size() - 1);
+				getTable().setSelection(getTableItemCount() - 1);
 				fListener.parameterListChanged();
 				updateButtonsEnabledState();
 			}
@@ -356,14 +359,19 @@ public class ChangeParametersControl extends Composite {
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				int index= getTable().getSelectionIndices()[0];
-				Assert.isTrue(areAllSelectedNew());
 				ParameterInfo[] selected= getSelectedItems();
 				for (int i= 0; i < selected.length; i++) {
-					fParameterInfos.remove(selected[i]);
+					if (selected[i].isAdded())
+						fParameterInfos.remove(selected[i]);
+					else
+						selected[i].markAsDeleted();	
 				}
+				restoreSelection(index);
+			}
+			private void restoreSelection(int index) {
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
-				int itemCount= getTable().getItemCount();
+				int itemCount= getTableItemCount();
 				if (itemCount != 0){
 					if (index < itemCount)
 						getTable().setSelection(index);
