@@ -261,10 +261,10 @@ public class Checks {
 					result.addFatalError(status.getMessage());
 					break;
 				case IStatus.WARNING: 
-					result.addError(status.getMessage());
+					result.addWarning(status.getMessage());
 					break;
 				case IStatus.INFO:
-					result.addWarning(status.getMessage());
+					result.addInfo(status.getMessage());
 					break;	
 				default: //no nothing
 					break;
