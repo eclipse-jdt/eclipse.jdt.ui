@@ -319,8 +319,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void test22() throws Exception{
-		printTestDisabledMessage("must fix");
-		//helper2();
+		helper2();
 	}		
 	
 	//anonymous inner class
