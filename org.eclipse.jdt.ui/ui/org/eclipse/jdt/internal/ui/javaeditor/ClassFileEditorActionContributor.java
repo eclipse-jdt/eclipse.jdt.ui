@@ -27,6 +27,9 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	protected OpenOnSelectionAction fOpenHierarchyOnSelection;
 	protected TogglePresentationAction fTogglePresentationAction;
 	
+	/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
+	protected ToggleTextHoverAction fToggleTextHover;
+	
 	
 	public ClassFileEditorActionContributor() {
 		super();
@@ -36,6 +39,9 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		fOpenOnSelection= new OpenOnSelectionAction(bundle, "Editor.OpenOnSelection.");
 		fOpenHierarchyOnSelection= new OpenHierarchyOnSelectionAction(bundle, "Editor.OpenHierarchyOnSelection.");
 		fTogglePresentationAction= new TogglePresentationAction(bundle, "Editor.TogglePresentation.");
+		
+		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
+		fToggleTextHover= new ToggleTextHoverAction(bundle, "Editor.ToggleTextHover.");
 	}
 	
 	/**
@@ -61,6 +67,9 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	public void contributeToToolBar(IToolBarManager tbm) {
 		tbm.add(new Separator());
 		tbm.add(fTogglePresentationAction);
+		
+		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
+		tbm.add(fToggleTextHover);
 	}
 	
 	/**
@@ -78,5 +87,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		fOpenHierarchyOnSelection.setContentEditor(textEditor);
 		
 		fTogglePresentationAction.setEditor(textEditor);
+
+		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
+		fToggleTextHover.setEditor(textEditor);
 	}
 }

@@ -144,7 +144,12 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			if (isSaveAsAllowed()) {
 				
-				doSaveAs();
+				/*
+				 * 1GEUSSR: ITPUI:ALL - User should never loose changes made in the editors.
+				 * Changed Behavior to make sure that if called inside a regular save (because
+				 * of deletion of input element) there is a way to report back to the caller.
+				 */
+				 performSaveAs(progressMonitor);
 			
 			} else {
 				
@@ -285,23 +290,37 @@ public class CompilationUnitEditor extends JavaEditor {
 		return true;
 	}
 	
-	public void doSaveAs() {
+	/*
+	 * 1GEUSSR: ITPUI:ALL - User should never loose changes made in the editors.
+	 * Changed Behavior to make sure that if called inside a regular save (because
+	 * of deletion of input element) there is a way to report back to the caller.
+	 */	
+	protected void performSaveAs(IProgressMonitor progressMonitor) {
 		
 		Shell shell= getSite().getShell();
 		
 		SaveAsDialog dialog= new SaveAsDialog(shell);
-		if (dialog.open() == Dialog.CANCEL)
+		if (dialog.open() == Dialog.CANCEL) {
+			if (progressMonitor != null)
+				progressMonitor.setCanceled(true);
 			return;
+		}
 			
 		IPath filePath= dialog.getResult();
-		if (filePath == null)
+		if (filePath == null) {
+			if (progressMonitor != null)
+				progressMonitor.setCanceled(true);
 			return;
+		}
 			
 		filePath= filePath.removeTrailingSeparator();
 		final String fileName= filePath.lastSegment();
 		IPath folderPath= filePath.removeLastSegments(1);
-		if (folderPath == null)
+		if (folderPath == null) {
+			if (progressMonitor != null)
+				progressMonitor.setCanceled(true);			
 			return;
+		}
 			
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IFolder folder= workspace.getRoot().getFolder(folderPath);
@@ -327,7 +346,8 @@ public class CompilationUnitEditor extends JavaEditor {
 				}
 			}
 		};
-				
+		
+		boolean success= false;
 		try {
 			
 			if (fragment == null)
@@ -335,6 +355,7 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			new ProgressMonitorDialog(shell).run(false, true, op);
 			setInput(newInput);
+			success= true;
 			
 		} catch (InterruptedException x) {
 		} catch (InvocationTargetException x) {
@@ -349,9 +370,14 @@ public class CompilationUnitEditor extends JavaEditor {
 			} else {
 				MessageDialog.openError(shell, title, msg + t.getMessage());
 			}
+			
 		} finally {
+			
 			if (fragment == null)
 				getDocumentProvider().changed(newInput);
+				
+			if (progressMonitor != null)
+				progressMonitor.setCanceled(!success);
 		}
 	}
 }

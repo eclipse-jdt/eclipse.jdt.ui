@@ -521,11 +521,29 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					fVisibility= visibility;
 				}
 				
+				/* 
+				 * 1GEWBY4: ITPJUI:ALL - filtering incorrect on interfaces.
+				 */
+				private boolean belongsToInterface(IMember member) {
+					
+					IType type= member.getDeclaringType();
+					
+					if (type != null) {
+						try {
+							return type.isInterface();
+						} catch (JavaModelException x) {
+							// ignore
+						}
+					}
+					
+					return false;
+				}
+				
 				public boolean select(Viewer viewer, Object parentElement, Object element) {
 					
 					if ( !(element instanceof IMember))
 						return true;
-						
+					
 					if (element instanceof IType) {
 						IType type= (IType) element;
 						IJavaElement parent= type.getParent();
@@ -542,13 +560,17 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						int flags= member.getFlags();
 						switch (fVisibility) {
 							case PUBLIC:
-								return Flags.isPublic(flags);
+							    /* 1GEWBY4: ITPJUI:ALL - filtering incorrect on interfaces */
+								return Flags.isPublic(flags) || belongsToInterface(member);
 							case PROTECTED:
 								return Flags.isProtected(flags);
 							case PRIVATE:
 								return Flags.isPrivate(flags);
-							case DEFAULT:
-								return !(Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags));
+							case DEFAULT: {
+								/* 1GEWBY4: ITPJUI:ALL - filtering incorrect on interfaces */
+								boolean dflt= !(Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags));
+								return dflt ? !belongsToInterface(member) : dflt;
+							}
 							case NOT_STATIC:
 								return !Flags.isStatic(flags);
 						}
