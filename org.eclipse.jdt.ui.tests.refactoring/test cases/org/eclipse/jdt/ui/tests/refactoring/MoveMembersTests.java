@@ -252,6 +252,17 @@ public class MoveMembersTests extends RefactoringTest {
 		fieldMethodHelper_passingTest(new String[]{"FRED"}, new String[0], new String[0][0]);
 	}
 	
+	public void test26() throws Exception{
+		IPackageFragment packageForB= null;
+		try{
+			packageForB= getRoot().createPackageFragment("r", false, null);
+			fieldMethodHelper_passingTest(new String[0], new String[]{"n"}, new String[][]{new String[0]}, getPackageP(), packageForB);
+		} finally{
+			performDummySearch();
+			if (packageForB != null)
+				packageForB.delete(true, null);
+		}	
+	}
 	
 	//---
 	public void testFail0() throws Exception{
