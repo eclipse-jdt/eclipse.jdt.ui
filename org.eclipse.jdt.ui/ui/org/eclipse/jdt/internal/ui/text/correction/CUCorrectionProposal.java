@@ -134,7 +134,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			IDocument document= textChange.getCurrentDocument(new NullProgressMonitor());
 			addEdits(document, rootEdit);
 			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
-				rootEdit.addChild(fImportRewrite.createEdit(document));
+				rootEdit.addChild(fImportRewrite.createEdit(document, new NullProgressMonitor()));
 			}
 		}
 	}
