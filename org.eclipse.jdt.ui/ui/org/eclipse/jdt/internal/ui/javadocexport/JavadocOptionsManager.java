@@ -477,7 +477,7 @@ public class JavadocOptionsManager {
 				args.add("-splitindex");
 
 			if(!fTitle.equals("")) {				args.add("-doctitle");				args.add(fTitle);			}			if (!fStylesheet.equals("")) {
-				args.add("-stylsheet");
+				args.add("-stylesheetfile");
 				args.add(fStylesheet);
 			}
 			if (fFromStandard) {				if (!fAdditionalParams.equals("")) {					ExecutionArguments tokens = new ExecutionArguments("", fAdditionalParams);					String[] argsArray = tokens.getProgramArgumentsArray();					for (int i = 0; i < argsArray.length; i++) {						args.add(argsArray[i]);					}				}
