@@ -1312,10 +1312,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private static String createDeclarationString(ParameterInfo info) {
 		return info.getNewTypeName() + " " + info.getNewName(); //$NON-NLS-1$
 	}
-
+	
+	private static final boolean BUG_83693= true; //see bug 83693: Search for References to methods/constructors: do ranges include parameter lists?
+	
 	private OccurrenceUpdate createOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-		//see bug 83693: Search for References to methods/constructors: do ranges include parameter lists?
-		if (node instanceof SimpleName && node.getParent() instanceof EnumConstantDeclaration)
+		if (BUG_83693 && node instanceof SimpleName && node.getParent() instanceof EnumConstantDeclaration)
 			node= node.getParent();
 		
 		if (isReferenceNode(node))
@@ -1324,9 +1325,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		else if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration)
 			return new DeclarationUpdate((MethodDeclaration) node.getParent(), cuRewrite, result);
 		
-		else if (node instanceof SimpleName && 
+		else if (BUG_83693 && node instanceof SimpleName && 
 				(node.getParent() instanceof MemberRef || node.getParent() instanceof MethodRef))
 			return new DocReferenceUpdate(node.getParent(), cuRewrite, result);
+		
+		else if (node instanceof MemberRef || node instanceof MethodRef)
+			return new DocReferenceUpdate(node, cuRewrite, result);
 		
 		else if (ASTNodes.getParent(node, ImportDeclaration.class) != null)
 			return new StaticImportUpdate((ImportDeclaration) ASTNodes.getParent(node, ImportDeclaration.class), cuRewrite, result);
