@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -25,6 +27,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
  
 /**
  * This class triggers a code-completion that will track all local ane member variables for later
@@ -41,7 +44,9 @@ public class ParameterGuesser {
 		 */
 		public static final int LOCAL= 0;	
 		public static final int FIELD= 1;
-		public static final int INHERITED_FIELD= 2;
+		public static final int METHOD= 1;
+		public static final int INHERITED_FIELD= 3;
+		public static final int INHERITED_METHOD= 3;
 
 		public final String typePackage;
 		public final String typeName;
@@ -109,9 +114,25 @@ public class ParameterGuesser {
 			
 			compilationUnit.codeComplete(completionOffset, this);
 			
+			// add this, true, false
+			int dotPos= fEnclosingTypeName.lastIndexOf('.');
+			String thisType;
+			String thisPkg;
+			if (dotPos != -1) {
+				thisType= fEnclosingTypeName.substring(dotPos + 1);
+				thisPkg= fEnclosingTypeName.substring(0, dotPos);
+			} else {
+				thisPkg= new String();
+				thisType= fEnclosingTypeName;
+			}
+			addVariable(Variable.FIELD, thisPkg.toCharArray(), thisType.toCharArray(), "this".toCharArray()); //$NON-NLS-1$
+			addVariable(Variable.FIELD, "java.lang".toCharArray(), "Object".toCharArray(), "null".toCharArray()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "true".toCharArray());  //$NON-NLS-1$//$NON-NLS-2$
+			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "false".toCharArray());  //$NON-NLS-1$//$NON-NLS-2$
+			
 			return fVariables;
 		}
-
+		
 		private static String getEnclosingTypeName(int codeAssistOffset, ICompilationUnit compilationUnit) throws JavaModelException {
 
 			IJavaElement element= compilationUnit.getElementAt(codeAssistOffset);
@@ -164,6 +185,16 @@ public class ParameterGuesser {
 		{
 			addVariable(Variable.LOCAL, typePackageName, typeName, name);
 		}
+		
+		/*
+		 * @see org.eclipse.jdt.core.CompletionRequestorAdapter#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int, int)
+		 */
+		public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
+			// TODO: for now: only add zero-arg methods.
+			if (parameterNames.length == 0) {
+				addVariable(isInherited(new String(declaringTypeName)) ? Variable.INHERITED_METHOD : Variable.METHOD, returnTypePackageName, returnTypeName, completionName);
+			}
+		}
 	}
 	
 	/** The compilation unit we are computing the completion for */
@@ -178,6 +209,7 @@ public class ParameterGuesser {
 	 * 
 	 * @param codeAssistOffset the offset at which to perform code assist
 	 * @param compilationUnit the compilation unit in which code assist is performed
+	 * @param offset the replacement offset at which the returned proposals start
 	 */
 	public ParameterGuesser(int codeAssistOffset, ICompilationUnit compilationUnit) {
 		Assert.isTrue(codeAssistOffset >= 0);
@@ -218,6 +250,61 @@ public class ParameterGuesser {
 		
 		List typeMatches= findFieldsMatchingType(fVariables, paramPackage, paramType);
 		return chooseBestMatch(typeMatches, paramName);
+	}
+	
+	/**
+	 * Returns the matches for the type and name argument, ordered by match quality.
+	 * 
+	 * @param paramPackage - the package of the parameter we are trying to match
+	 * @param paramType - the qualified name of the parameter we are trying to match
+	 * @param paramName - the name of the paramater (used to find similarly named matches)
+	 * @return returns the name of the best match, or <code>null</code> if no match found
+	 */
+	public String[] parameterMatches(String paramPackage, String paramType, String paramName) throws JavaModelException {
+		
+		if (fVariables == null) {
+			VariableCollector variableCollector= new VariableCollector();
+			fVariables= variableCollector.collect(fCodeAssistOffset, fCompilationUnit);
+		}
+		
+		List typeMatches= findFieldsMatchingType(fVariables, paramPackage, paramType);
+		orderMatches(typeMatches, paramName);
+		if (typeMatches == null) return new String[0];
+		String[] ret= new String[typeMatches.size()];
+		int i= 0;
+		for (Iterator it= typeMatches.iterator(); it.hasNext();) {
+			Variable v= (Variable)it.next();
+			ret[i++]= v.name;
+		}
+		return ret;
+	}
+	
+	/**
+	 * Returns the matches for the type and name argument, ordered by match quality.
+	 * 
+	 * @param paramPackage - the package of the parameter we are trying to match
+	 * @param paramType - the qualified name of the parameter we are trying to match
+	 * @param paramName - the name of the paramater (used to find similarly named matches)
+	 * @return returns the name of the best match, or <code>null</code> if no match found
+	 */
+	public ICompletionProposal[] parameterProposals(String paramPackage, String paramType, String paramName, int offset) throws JavaModelException {
+		
+		if (fVariables == null) {
+			VariableCollector variableCollector= new VariableCollector();
+			fVariables= variableCollector.collect(fCodeAssistOffset, fCompilationUnit);
+		}
+		
+		List typeMatches= findFieldsMatchingType(fVariables, paramPackage, paramType);
+		orderMatches(typeMatches, paramName);
+		if (typeMatches == null) return new ICompletionProposal[0];
+		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size()];
+		int i= 0;
+		for (Iterator it= typeMatches.iterator(); it.hasNext();) {
+			Variable v= (Variable)it.next();
+			if (i == 0) v.alreadyMatched= true;
+			ret[i++]= new JavaCompletionProposal(v.name, offset, paramName.length(), null, null, ret.length - i);
+		}
+		return ret;
 	}
 	
 	/**
@@ -278,6 +365,60 @@ public class ParameterGuesser {
 		
 		bestMatch.alreadyMatched= true;
 		return bestMatch.name;
+	}
+	
+	private static class MatchComparator implements Comparator {
+
+		private String fParamName;
+
+		MatchComparator(String paramName) {
+			fParamName= paramName;
+		}
+		public int compare(Object o1, Object o2) {
+			Variable one= (Variable)o1;
+			Variable two= (Variable)o2;
+			
+			return score(two) - score(one);
+		}
+		
+		/**
+		 * The four order criteria as described below - put already used into bit 10, all others into
+		 * bits 0-9, 11-20, 21-30; 31 is sign - always 0
+		 * @param v
+		 * @return
+		 */
+		private int score(Variable v) {
+			int variableScore= 10 - v.variableType; // since these are increasing with distance
+			int subStringScore= getLongestCommonSubstring(v.name, fParamName).length();
+			int positionScore= v.positionScore; // since ???
+			int matchedScore= v.alreadyMatched ? 0 : 1;
+			
+			int score= variableScore << 21 | subStringScore << 11 | matchedScore << 10 | positionScore;
+			return score;	
+		}
+		
+	}
+
+	/**
+	 * Determine the best match of all possible type matches.  The input into this method is all 
+	 * possible completions that match the type of the argument. The purpose of this method is to
+	 * choose among them based on the following simple rules:
+	 * 
+	 * 	1) Local Variables > Instance/Class Variables > Inherited Instance/Class Variables
+	 * 
+	 * 	2) A longer case insensitive substring match will prevail
+	 * 
+	 *  3) Variables that have not been used already during this completion will prevail over 
+	 * 		those that have already been used (this avoids the same String/int/char from being passed
+	 * 		in for multiple arguments)
+	 * 
+	 * 	4) A better source position score will prevail (the declaration point of the variable, or
+	 * 		"how close to the point of completion?"
+	 * 
+	 * @return returns <code>null</code> if no match is found
+	 */
+	private static void orderMatches(List typeMatches, String paramName) {
+		if (typeMatches != null) Collections.sort(typeMatches, new MatchComparator(paramName));
 	}
 
 	/**
@@ -368,7 +509,7 @@ public class ParameterGuesser {
 	/**
 	 * Returns the longest common substring of two strings.
 	 */
-	private static String getLongestCommonSubstring(String first, String second) {
+	static String getLongestCommonSubstring(String first, String second) {
 		
 		String shorter= (first.length() <= second.length()) ? first : second;
 		String longer= shorter == first ? second : first;

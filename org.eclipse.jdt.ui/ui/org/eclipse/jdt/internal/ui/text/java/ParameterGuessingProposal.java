@@ -6,7 +6,8 @@
  * http://www.eclipse.org/legal/cpl-v10.html
  * 
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *		Andrew McCullough - initial API and implementation
+ *		IBM Corporation  - general improvement and bug fixes, partial reimplementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -16,11 +17,14 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.CompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -35,8 +39,6 @@ import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 /**
  * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates 
  * that represent the best guess completion for each parameter of a method.
- * 
- * @author Andrew McCullough
  */
 public class ParameterGuessingProposal extends JavaCompletionProposal {
 
@@ -48,6 +50,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	private final ICompilationUnit fCompilationUnit;
 	private final ITextViewer fViewer;
 	private IRegion fSelectedRegion; // initialized by apply()
+	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
 		
 	/**
 	 * Creates a template proposal with a template and its context.
@@ -104,16 +107,17 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 
 		try {
 			int parameterCount= fParameterNames.length;
-			int[] positionOffsets= new int[parameterCount];
-			int[] positionLengths= new int[parameterCount];
+			int[] positionOffsets;
+			int[] positionLengths;
 			String replacementString;
+			int baseOffset= getReplacementOffset();
 			
 			if (appendArguments(document, offset)) {
 				parameterCount= fParameterNames.length;
 				positionOffsets= new int[parameterCount];
 				positionLengths= new int[parameterCount];
 
-				replacementString= computeGuessingCompletion(positionOffsets, positionLengths);
+				replacementString= computeGuessingCompletion(baseOffset, positionOffsets, positionLengths);
 				
 			} else {
 				parameterCount= 0;
@@ -127,20 +131,24 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		
 			super.apply(document, trigger, offset);
 
-			int replacementOffset= getReplacementOffset();
-
 			if (LinkedPositionManager.hasActiveManager(document)) {
 				fSelectedRegion= (positionOffsets.length == 0)
-					? new Region(replacementOffset + replacementString.length(), 0)
-					: new Region(replacementOffset + positionOffsets[0], positionLengths[0]);
+					? new Region(baseOffset + replacementString.length(), 0)
+					: new Region(baseOffset + positionOffsets[0], positionLengths[0]);
 			
 			} else {
 				LinkedPositionManager manager= new LinkedPositionManager(document);
-				for (int i= 0; i != positionOffsets.length; i++)
-					manager.addPosition(replacementOffset + positionOffsets[i], positionLengths[i]);
+				for (int i= 0; i != parameterCount; i++) {
+					int positionOffset= baseOffset + positionOffsets[i];
+					if (fChoices[i].length == 0) {
+						manager.addPosition(positionOffset, positionLengths[i]);
+					} else {
+						manager.addPosition(positionOffset, positionLengths[i], fChoices[i]);
+					}
+				}
 				
 				LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
-				editor.setFinalCaretOffset(replacementOffset + replacementString.length());
+				editor.setFinalCaretOffset(baseOffset + replacementString.length());
 				editor.enter();
 	
 				fSelectedRegion= editor.getSelectedRegion();	
@@ -156,7 +164,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		}
 	}
 	
-	private String[] guessParameters() throws JavaModelException {
+	private ICompletionProposal[][] guessParameters(int offset) throws JavaModelException {
 		// find matches in reverse order.  Do this because people tend to declare the variable meant for the last
 		// parameter last.  That is, local variables for the last parameter in the method completion are more
 		// likely to be closer to the point of codecompletion. As an example consider a "delegation" completion:
@@ -168,12 +176,16 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		// The other consideration is giving preference to variables that have not previously been used in this
 		// code completion (which avoids "someOtherObject.yourMethod(param1, param1, param1)";
 
-		String[] parameters= new String[fParameterNames.length];
+		fChoices= new ICompletionProposal[fParameterNames.length][];
 
 		if (fCompilationUnit == null) {
-			for (int i= 0; i != fParameterNames.length; i++)
-				parameters[i]= new String(fParameterNames[i]);
-			return parameters;
+			for (int i= 0; i != fParameterNames.length; i++) {
+				String name= new String(fParameterNames[i]);
+				int length= name.length();
+				fChoices[i]= new ICompletionProposal[] {new CompletionProposal(name, offset, length, length)};
+				offset+= length + 2;
+			}
+			return fChoices;
 
 		} else {
 			
@@ -183,15 +195,19 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			
 			ParameterGuesser guesser= new ParameterGuesser(fCodeAssistOffset, fCompilationUnit);
 			for (int i= fParameterNames.length - 1; i >= 0; i--) {
-				String parameter= guesser.guessParameterName(
+				String paramName= new String(fParameterNames[i]);
+				ICompletionProposal[] parameter= guesser.parameterProposals(
 					new String(fParamaterTypePackageNames[i]),
 					new String(fParameterTypeNames[i]),
-					new String(fParameterNames[i]));
+					paramName,
+					offset);
 
-				parameters[i]= (parameter == null) ? new String(fParameterNames[i]) : parameter;
+				int paramLength= paramName.length();
+				fChoices[i]= (parameter == null) ? new ICompletionProposal[] {new CompletionProposal(paramName, offset, paramLength, paramLength)} : parameter;
+				offset+= paramLength + 2;
 			}
 
-			return parameters;
+			return fChoices;
 		}		
 	}
 	
@@ -199,18 +215,18 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	 * Creates the completion string. Offsets and Lengths are set to the offsets and lengths
 	 * of the parameters.
 	 */
-	private String computeGuessingCompletion(int[] offsets, int[] lengths) throws JavaModelException {
+	private String computeGuessingCompletion(int startOffset, int[] offsets, int[] lengths) throws JavaModelException {
 	
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(fName);
 		buffer.append('(');
 
-		String[] parameters= guessParameters();
-		for (int i= 0; i < parameters.length; i++) {
+		fChoices= guessParameters(startOffset+buffer.length());
+		for (int i= 0; i < fChoices.length; i++) {
 			if (i != 0)
 				buffer.append(", "); //$NON-NLS-1$
 			offsets[i]= buffer.length();
-			buffer.append(parameters[i]);
+			buffer.append(fParameterNames[i]);
 			lengths[i]= buffer.length() - offsets[i];			
 		}
 
