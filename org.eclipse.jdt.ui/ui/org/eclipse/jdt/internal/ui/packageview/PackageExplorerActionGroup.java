@@ -132,7 +132,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		fGotoResourceAction= new GotoResourceAction(fPart);
 		fCollapseAllAction= new CollapseAllAction(fPart);
 		
-		fMemberFilterActionGroup= new MemberFilterActionGroup(fPart.getViewer(), "PackageView");  //$NON-NLS-1$
+		fMemberFilterActionGroup= new MemberFilterActionGroup(fPart.getViewer(), "PackageView", true);  //$NON-NLS-1$
 		
 		provider.addSelectionChangedListener(this);
 		update(selection);
@@ -205,6 +205,13 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		fillViewMenu(actionBars.getMenuManager());		
 	}
 
+	/* package  */ void updateActionBars(IActionBars actionBars) {
+		actionBars.getToolBarManager().removeAll();
+		actionBars.getMenuManager().removeAll();
+		fillActionBars(actionBars);
+		actionBars.updateActionBars();
+	}
+
 	private void setGlobalActionHandlers(IActionBars actionBars) {
 		// Navigate Go Into and Go To actions.
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_INTO, fZoomInAction);
@@ -217,22 +224,18 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	}
 
 	/* package */ void fillToolBar(IToolBarManager toolBar) {
-		toolBar.removeAll();
-		
 		toolBar.add(fBackAction);
 		toolBar.add(fForwardAction);
 		toolBar.add(fUpAction);
 		
-		if (showCompilationUnitChildren()) {
-			toolBar.add(new Separator());
-			fMemberFilterActionGroup.contributeToToolBar(toolBar);
-		}
 		toolBar.add(new Separator());
 		toolBar.add(fCollapseAllAction);
 	}
 	
 	/* package */ void fillViewMenu(IMenuManager menu) {
-	
+		if (showCompilationUnitChildren()) {
+			fMemberFilterActionGroup.contributeToViewMenu(menu);
+		}
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$		
 	}

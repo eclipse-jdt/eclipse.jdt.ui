@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.swt.custom.BusyIndicator;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
@@ -60,6 +61,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 	
 	private StructuredViewer fViewer;
 	private String fViewerId;
+	private boolean fInViewMenu;
 	
 	
 	/**
@@ -70,8 +72,24 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * the last used filter settings in the preference store
 	 */
 	public MemberFilterActionGroup(StructuredViewer viewer, String viewerId) {
+		this(viewer, viewerId, false);
+	}
+	
+	/**
+	 * Creates a new <code>MemberFilterActionGroup</code>.
+	 * 
+	 * @param viewer the viewer to be filtered
+	 * @param viewerId a unique id of the viewer. Used as a key to to store 
+	 * the last used filter settings in the preference store
+	 * @param inViewMenu if <code>true</code> the actions are added to the view
+	 * menu. If <code>false</code> they are added to the toobar.
+	 * 
+	 * @since 2.1
+	 */
+	public MemberFilterActionGroup(StructuredViewer viewer, String viewerId, boolean inViewMenu) {
 		fViewer= viewer;
 		fViewerId= viewerId;
+		fInViewMenu= inViewMenu;
 		
 		// get initial values
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -221,9 +239,26 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * @param tbm the tool bar to which the actions are added
 	 */
 	public void contributeToToolBar(IToolBarManager tbm) {
+		if (fInViewMenu)
+			return;
 		tbm.add(fFilterActions[0]); // fields
 		tbm.add(fFilterActions[1]); // static
 		tbm.add(fFilterActions[2]); // public
+	}
+	
+	public void contributeToViewMenu(IMenuManager menu) {
+		if (!fInViewMenu)
+			return;
+		final String filters= "filters";
+		if (menu.find(filters) != null) {
+			menu.prependToGroup(filters, fFilterActions[0]); // fields
+			menu.prependToGroup(filters, fFilterActions[1]); // static
+			menu.prependToGroup(filters, fFilterActions[2]); // public
+		} else {
+			menu.add(fFilterActions[0]); // fields
+			menu.add(fFilterActions[1]); // static
+			menu.add(fFilterActions[2]); // public
+		}
 	}
 	
 	/* (non-Javadoc)

@@ -29,6 +29,7 @@ import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -146,6 +147,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 
 	private void fillViewMenu(IMenuManager viewMenu) {
+		viewMenu.add(new Separator("filters")); //$NON-NLS-1$
 		viewMenu.add(new ContributionItem() {
 			public void fill(Menu menu, int index) {
 				MenuItem mi= new MenuItem(menu, SWT.CHECK, index);

@@ -165,6 +165,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 		mm.add(fEditWorkingSetAction);
 		mm.add(new Separator());
 		mm.add(new Separator(SEPARATOR_ID));
+		addLRUWorkingSetActions(mm);
 		
 		fMenuManager= mm;
 		fMenuListener= new IMenuListener() {
