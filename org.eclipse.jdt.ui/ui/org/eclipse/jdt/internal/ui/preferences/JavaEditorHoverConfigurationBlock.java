@@ -26,6 +26,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -33,11 +34,22 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jface.text.Assert;
 
@@ -48,6 +60,8 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 /**
  * Configures Java Editor hover preferences.
@@ -57,6 +71,9 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 class JavaEditorHoverConfigurationBlock {
 
 	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.delimiter"); //$NON-NLS-1$
+
+	private static final int ENABLED_PROP= 0;
+	private static final int MODIFIER_PROP= 1;
 
 	// Data structure to hold the values which are edited by the user
 	private static class HoverConfig {
@@ -71,12 +88,69 @@ class JavaEditorHoverConfigurationBlock {
 			fStateMask= stateMask;
 		}
 	}
+	
+	
+	private static class JavaEditorTextHoverDescriptorLabelProvider implements ITableLabelProvider {
 
+		public Image getColumnImage(Object element, int columnIndex) {
+			return null;
+		}
+		
+		public String getColumnText(Object element, int columnIndex) {
+			switch (columnIndex) {
+			case ENABLED_PROP:
+				return ((JavaEditorTextHoverDescriptor)element).getLabel();
+
+			case MODIFIER_PROP:
+				return ((JavaEditorTextHoverDescriptor)element).getModifierString();
+
+			default:
+				break;
+			}
+			return null;
+		}
+
+		public void addListener(ILabelProviderListener listener) {
+		}
+		
+		public void dispose() {
+		}
+
+		public boolean isLabelProperty(Object element, String property) {
+			return false;
+		}
+
+		public void removeListener(ILabelProviderListener listener) {
+		}
+	}
+	
+	
+	private class JavaEditorTextHoverDescriptorContentProvider implements IStructuredContentProvider {
+		
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			// Do nothing since the viewer listens to resource deltas
+		}
+		
+		public void dispose() {
+		}
+		
+		public boolean isDeleted(Object element) {
+			return false;
+		}
+		
+		public Object[] getElements(Object element) {
+			return (Object[])element;
+		}
+	}
+
+	
 	private OverlayPreferenceStore fStore;
 	private HoverConfig[] fHoverConfigs;
 	private Text fModifierEditor;
-	private Button fEnableField;
-	private List fHoverList;
+	private Table fHoverTable;
+	private TableViewer fHoverTableViewer;
+	private TableColumn fNameColumn;
+	private TableColumn fModifierColumn;
 	private Text fDescription;
 	private Button fShowHoverAffordanceCheckbox;
 	
@@ -87,6 +161,8 @@ class JavaEditorHoverConfigurationBlock {
 	private Map fCheckBoxes= new HashMap();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
 		public void widgetDefaultSelected(SelectionEvent e) {
+			Button button= (Button) e.widget;
+			fStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
 		}
 		public void widgetSelected(SelectionEvent e) {
 			Button button= (Button) e.widget;
@@ -127,18 +203,24 @@ class JavaEditorHoverConfigurationBlock {
 	 */
 	public Control createControl(Composite parent) {
 
-		PixelConverter pixelConverter= new PixelConverter(parent);
-
-		Composite hoverComposite= new Composite(parent, SWT.NULL);
+		Composite hoverComposite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		hoverComposite.setLayout(layout);
-		GridData gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
+		GridData gd= new GridData(GridData.FILL_BOTH);
 		hoverComposite.setLayoutData(gd);
 
 		String rollOverLabel= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.annotationRollover"); //$NON-NLS-1$
 		addCheckBox(hoverComposite, rollOverLabel, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, 0); //$NON-NLS-1$
-		
+
+		// Affordance checkbox
+		fShowHoverAffordanceCheckbox= new Button(hoverComposite, SWT.CHECK);
+		fShowHoverAffordanceCheckbox.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.showAffordance")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= 0;
+		gd.horizontalSpan= 2;
+		fShowHoverAffordanceCheckbox.setLayoutData(gd);
+
 		addFiller(hoverComposite);
 
 		Label label= new Label(hoverComposite, SWT.NONE);
@@ -147,56 +229,70 @@ class JavaEditorHoverConfigurationBlock {
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
-		gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
 
-		// Hover list
-		fHoverList= new List(hoverComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		int listHeight= 10 * fHoverList.getItemHeight();
-		gd.heightHint= listHeight;
-		fHoverList.setLayoutData(gd);
-		fHoverList.addSelectionListener(new SelectionListener() {
+		TableLayoutComposite layouter= new TableLayoutComposite(hoverComposite, SWT.NONE);
+		addColumnLayoutData(layouter);
+		
+		// Hover table
+		fHoverTable= new Table(layouter, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
+		fHoverTable.setHeaderVisible(true);
+		fHoverTable.setLinesVisible(true);
+		
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.heightHint= SWTUtil.getTableHeightHint(fHoverTable, 10);
+		gd.horizontalSpan= 2;
+		gd.widthHint= new PixelConverter(parent).convertWidthInCharsToPixels(30);
+		layouter.setLayoutData(gd);
+
+		fHoverTable.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				handleHoverListSelection();
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+		
+		TableLayout tableLayout= new TableLayout();
+		fHoverTable.setLayout(tableLayout);
 
+		fNameColumn= new TableColumn(fHoverTable, SWT.NONE);
+		fNameColumn.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.nameColumnTitle")); //$NON-NLS-1$
+		fNameColumn.setResizable(true);
+		
+		fModifierColumn= new TableColumn(fHoverTable, SWT.NONE);
+		fModifierColumn.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifierColumnTitle")); //$NON-NLS-1$
+		fModifierColumn.setResizable(true);
 
-		Composite stylesComposite= new Composite(hoverComposite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.numColumns= 2;
-		stylesComposite.setLayout(layout);
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.heightHint= listHeight + (2 * fHoverList.getBorderWidth());
-		stylesComposite.setLayoutData(gd);
-
-		// Enabled checkbox		
-		fEnableField= new Button(stylesComposite, SWT.CHECK);
-		fEnableField.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.enabled")); //$NON-NLS-1$
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		gd.horizontalSpan= 2;
-		fEnableField.setLayoutData(gd);
-		fEnableField.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {
-				int i= fHoverList.getSelectionIndex();
-				boolean state= fEnableField.getSelection();
-				fModifierEditor.setEnabled(state);
-				fHoverConfigs[i].fIsEnabled= state;
-				handleModifierModified();
-			}
-			public void widgetDefaultSelected(SelectionEvent e) {
+		fHoverTableViewer= new CheckboxTableViewer(fHoverTable);
+		fHoverTableViewer.setUseHashlookup(true);
+		fHoverTableViewer.setContentProvider(new JavaEditorTextHoverDescriptorContentProvider());
+		fHoverTableViewer.setLabelProvider(new JavaEditorTextHoverDescriptorLabelProvider());
+		
+		((CheckboxTableViewer)fHoverTableViewer).addCheckStateListener(new ICheckStateListener() {
+			/*
+			 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
+			 */
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				String id= ((JavaEditorTextHoverDescriptor)event.getElement()).getId();
+				if (id == null)
+					return;
+				JavaEditorTextHoverDescriptor[] descriptors= getContributedHovers();
+				int i= 0, length= fHoverConfigs.length;
+				while (i < length) {
+					if (id.equals(descriptors[i].getId())) {
+						fHoverConfigs[i].fIsEnabled= event.getChecked();
+						fModifierEditor.setEnabled(event.getChecked());
+						return;
+					}
+					i++;
+				}
 			}
 		});
-
+		
 		// Text field for modifier string
-		label= new Label(stylesComposite, SWT.LEFT);
+		label= new Label(hoverComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.keyModifier")); //$NON-NLS-1$
-		fModifierEditor= new Text(stylesComposite, SWT.BORDER);
+		fModifierEditor= new Text(hoverComposite, SWT.BORDER);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		fModifierEditor.setLayoutData(gd);
 
@@ -246,59 +342,62 @@ class JavaEditorHoverConfigurationBlock {
 		});
 
 		// Description
-		Label descriptionLabel= new Label(stylesComposite, SWT.LEFT);
+		Label descriptionLabel= new Label(hoverComposite, SWT.LEFT);
 		descriptionLabel.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.description")); //$NON-NLS-1$
 		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
 		gd.horizontalSpan= 2;
 		descriptionLabel.setLayoutData(gd);
-		fDescription= new Text(stylesComposite, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER);
+		fDescription= new Text(hoverComposite, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan= 2;
 		fDescription.setLayoutData(gd);
-
-		// Vertical filler
-		Label filler= new Label(hoverComposite, SWT.LEFT);
-		gd= new GridData(GridData.BEGINNING | GridData.VERTICAL_ALIGN_FILL);
-		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 3;
-		filler.setLayoutData(gd);
-
-		// Affordance checkbox
-		fShowHoverAffordanceCheckbox= new Button(hoverComposite, SWT.CHECK);
-		fShowHoverAffordanceCheckbox.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.showAffordance")); //$NON-NLS-1$
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 0;
-		gd.horizontalSpan= 2;
-		fShowHoverAffordanceCheckbox.setLayoutData(gd);
-
+		
 		initialize();
 
 		Dialog.applyDialogFont(hoverComposite);
 		return hoverComposite;
 	}
+	
+	private void addColumnLayoutData(TableLayoutComposite layouter) {
+		layouter.addColumnData(new ColumnWeightData(40, true));
+		layouter.addColumnData(new ColumnWeightData(60, true));
+	}
 
 	private JavaEditorTextHoverDescriptor[] getContributedHovers() {
-		return JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();		
+		JavaEditorTextHoverDescriptor[] hoverDescriptors= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
+
+		// Move Best Match hover to front
+		JavaEditorTextHoverDescriptor currentHover= hoverDescriptors[0];
+		boolean done= false;
+		for (int i= 0; !done && i < hoverDescriptors.length; i++) {
+			if (PreferenceConstants.ID_BESTMATCH_HOVER.equals(hoverDescriptors[i].getId())) {
+				// Swap with first one
+				hoverDescriptors[0]= hoverDescriptors[i];
+				hoverDescriptors[i]= currentHover;
+				return hoverDescriptors;
+			}
+			if (i > 0) {
+				currentHover= hoverDescriptors[i]; 
+				hoverDescriptors[i]= hoverDescriptors[i-1];
+			}
+		}
+		
+		// return unchanged array if best match hover can't be found
+		return JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
 	}
 
 	void initialize() {
 		JavaEditorTextHoverDescriptor[] hoverDescs= getContributedHovers();
 		fHoverConfigs= new HoverConfig[hoverDescs.length];
+		fHoverTableViewer.setInput(hoverDescs);
 		for (int i= 0; i < hoverDescs.length; i++) {
 			fHoverConfigs[i]= new HoverConfig(hoverDescs[i].getModifierString(), hoverDescs[i].getStateMask(), hoverDescs[i].isEnabled());
-			fHoverList.add(hoverDescs[i].getLabel());
+			fHoverTable.getItem(i).setChecked(hoverDescs[i].isEnabled());
 		}
 		initializeFields();
 	}
 
 	void initializeFields() {
-		fHoverList.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (fHoverList != null && !fHoverList.isDisposed()) {
-					fHoverList.select(0);
-					handleHoverListSelection();
-				}
-			}
-		});
 		fShowHoverAffordanceCheckbox.setSelection(fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
 
 		Iterator e= fCheckBoxes.keySet().iterator();
@@ -396,7 +495,7 @@ class JavaEditorHoverConfigurationBlock {
 	}
 
 	private void handleModifierModified() {
-		int i= fHoverList.getSelectionIndex();
+		int i= fHoverTable.getSelectionIndex();
 		String modifiers= fModifierEditor.getText();
 		fHoverConfigs[i].fModifierString= modifiers;
 		fHoverConfigs[i].fStateMask= JavaEditorTextHoverDescriptor.computeStateMask(modifiers);
@@ -408,9 +507,12 @@ class JavaEditorHoverConfigurationBlock {
 	}
 
 	private void handleHoverListSelection() {	
-		int i= fHoverList.getSelectionIndex();
+		int i= fHoverTable.getSelectionIndex();
+		
+		if (i < 0)
+			return;
+		
 		boolean enabled= fHoverConfigs[i].fIsEnabled;
-		fEnableField.setSelection(enabled);
 		fModifierEditor.setEnabled(enabled);
 		fModifierEditor.setText(fHoverConfigs[i].fModifierString);
 		String description= getContributedHovers()[i].getDescription();
