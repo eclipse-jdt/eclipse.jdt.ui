@@ -101,9 +101,11 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPUserLibraryElement;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.*;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -200,7 +202,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		
 	}
 	
-	public static class LoadSaveDialog extends StatusDialog implements IStringButtonAdapter, IDialogFieldListener {
+	public static class LoadSaveDialog extends StatusDialog implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
 		
 		
 		private static final String CURRENT_VERSION= "1"; //$NON-NLS-1$
@@ -226,8 +228,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		private StringButtonDialogField fLocationField;
 		private CheckedListDialogField fExportImportList;
 		private Point fInitialSize;
+		private final boolean fIsSave;
 
-		public LoadSaveDialog(Shell shell, List existingLibraries, IDialogSettings dialogSettings) {
+		public LoadSaveDialog(Shell shell, boolean isSave, List existingLibraries, IDialogSettings dialogSettings) {
 			super(shell);
 			setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
 			
@@ -236,6 +239,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			fExistingLibraries= existingLibraries;
 			fSettings= dialogSettings;
 			fLastFile= null;
+			fIsSave= isSave;
 			
 			int defaultWidth= converter.convertWidthInCharsToPixels(80);
 			int defaultHeigth= converter.convertHeightInCharsToPixels(34);
@@ -261,7 +265,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.list.selectall.button"), //$NON-NLS-1$
 					PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.list.deselectall.button") //$NON-NLS-1$
 			};
-			fExportImportList= new CheckedListDialogField(null, buttonNames, new CPListLabelProvider());
+			fExportImportList= new CheckedListDialogField(this, buttonNames, new CPListLabelProvider());
 			fExportImportList.setCheckAllButtonIndex(0);
 			fExportImportList.setUncheckAllButtonIndex(1);
 			fExportImportList.setViewerSorter(new CPListElementSorter());
@@ -285,7 +289,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 		
 		private boolean isSave() {
-			return fExistingLibraries != null;
+			return fIsSave;
 		}
 		
 		/* (non-Javadoc)
@@ -372,6 +376,29 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				updateStatus(validateSettings());
 			}
 		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
+		 */
+		public void customButtonPressed(ListDialogField field, int index) {
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
+		 */
+		public void selectionChanged(ListDialogField field) {
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
+		 */
+		public void doubleClicked(ListDialogField field) {
+			List selectedElements= fExportImportList.getSelectedElements();
+			if (selectedElements.size() == 1) {
+				Object elem= selectedElements.get(0);
+				fExportImportList.setChecked(elem, !fExportImportList.isChecked(elem));
+			}
+		}
 	
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
@@ -404,9 +431,39 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					String errorTitle= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.save.errordialog.title"); //$NON-NLS-1$
 					String errorMessage= PreferencesMessages.getFormattedString("UserLibraryPreferencePage.LoadSaveDialog.save.errordialog.message", e.getMessage()); //$NON-NLS-1$
 					ExceptionHandler.handle(e, getShell(), errorTitle, errorMessage);
+					return;
 				} catch (InterruptedException e) {
 					// cancelled
 					return;
+				}
+				String savedTitle= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.save.ok.title"); //$NON-NLS-1$
+				String savedMessage= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.save.ok.message"); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), savedTitle, savedMessage);
+			} else {
+				HashSet map= new HashSet(fExistingLibraries.size());
+				for (int k= 0; k < fExistingLibraries.size(); k++) {
+					CPUserLibraryElement elem= (CPUserLibraryElement) fExistingLibraries.get(k);
+					map.add(elem.getName());
+				}
+				int nReplaced= 0;
+				List elements= getLoadedLibraries();
+				for (int i= 0; i < elements.size(); i++) {
+					CPUserLibraryElement curr= (CPUserLibraryElement) elements.get(i);
+					if (map.contains(curr.getName())) {
+						nReplaced++;
+					}
+				}
+				if (nReplaced > 0) {
+					String replaceTitle= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.load.replace.title"); //$NON-NLS-1$
+					String replaceMessage;
+					if (nReplaced == 1) {
+						replaceMessage= PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.load.replace.message"); //$NON-NLS-1$
+					} else {
+						replaceMessage= PreferencesMessages.getFormattedString("UserLibraryPreferencePage.LoadSaveDialog.load.replace.multiple.message", String.valueOf(nReplaced)); //$NON-NLS-1$
+					}
+					if (!MessageDialog.openConfirm(getShell(), replaceTitle, replaceMessage)) {
+						return;
+					}
 				}
 			}
 			super.okPressed();
@@ -584,7 +641,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		public List getLoadedLibraries() {
 			return fExportImportList.getCheckedElements();
 		}
-		
 	}
 	
 	private IDialogSettings fDialogSettings;
@@ -947,10 +1003,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 	
 	private void doLoad() {
-		LoadSaveDialog dialog= new LoadSaveDialog(getShell(), null, fDialogSettings);
+		List existing= fLibraryList.getElements();
+		LoadSaveDialog dialog= new LoadSaveDialog(getShell(), false, existing, fDialogSettings);
 		if (dialog.open() == Window.OK) {
-
-			List existing= fLibraryList.getElements();
 			HashMap map= new HashMap(existing.size());
 			for (int k= 0; k < existing.size(); k++) {
 				CPUserLibraryElement elem= (CPUserLibraryElement) existing.get(k);
@@ -974,7 +1029,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 	
 	private void doSave() {
-		LoadSaveDialog dialog= new LoadSaveDialog(getShell(), fLibraryList.getElements(), fDialogSettings);
+		LoadSaveDialog dialog= new LoadSaveDialog(getShell(), true, fLibraryList.getElements(), fDialogSettings);
 		dialog.open();
 	}
 	
