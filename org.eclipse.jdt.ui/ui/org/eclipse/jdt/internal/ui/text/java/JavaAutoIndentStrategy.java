@@ -389,9 +389,8 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * Finds a closing parenthesis to the left of <code>position</code> in document, where that parenthesis is only
 	 * separated by whitespace from <code>position</code>. If no such parenthesis can be found, <code>position</code> is returned.
 	 * 
-	 * @param document the document being modified
+	 * @param scanner the java heuristic scanner set up on the document
 	 * @param position the first character position in <code>document</code> to be considered
-	 * @param partitioning the document partitioning
 	 * @return the position of a closing parenthesis left to <code>position</code> separated only by whitespace, or <code>position</code> if no parenthesis can be found
 	 */
 	private static int findClosingParenToLeft(JavaHeuristicScanner scanner, int position) {
@@ -1009,11 +1008,110 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		return false;
 	}
 
-	private void smartIndentAfterBlockDelimiter(IDocument document, DocumentCommand command) {
-		if (command.text.charAt(0) == '}')
-			smartIndentAfterClosingBracket(document, command);
-		else if (command.text.charAt(0) == '{')
-			smartIndentAfterOpeningBracket(document, command);
+	private void smartIndentOnKeypress(IDocument document, DocumentCommand command) {
+		switch (command.text.charAt(0)) {
+			case '}':
+				smartIndentAfterClosingBracket(document, command);
+				break;
+			case '{':
+				smartIndentAfterOpeningBracket(document, command);
+				break;
+			case 'e':
+				smartIndentUponE(document, command);
+				break;
+		}
+	}
+
+	private void smartIndentUponE(IDocument d, DocumentCommand c) {
+		if (c.offset < 4 || d.getLength() == 0)
+			return;
+		
+		try {
+			String content= d.get(c.offset - 3, 3);
+			if (content.equals("els")) { //$NON-NLS-1$
+				JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
+				int p= c.offset - 3;
+
+				// current line
+				int line= d.getLineOfOffset(p);
+				int lineOffset= d.getLineOffset(line);
+				
+				// make sure we don't have any leading comments etc.
+				if (d.get(lineOffset, p - lineOffset).trim().length() != 0)
+					return;
+				
+				// line of last javacode
+				int pos= scanner.findNonWhitespaceBackward(p - 1, JavaHeuristicScanner.UNBOUND);
+				if (pos == -1)
+					return;
+				int lastLine= d.getLineOfOffset(pos);
+				
+				// only shift if the last java line is further up and is a braceless block candidate
+				if (lastLine < line) {
+					
+					JavaIndenter indenter= new JavaIndenter(d, scanner);
+					int ref= indenter.findReferencePosition(p, true, false, false, false);
+					if (ref == JavaHeuristicScanner.NOT_FOUND)
+						return;
+					int refLine= d.getLineOfOffset(ref);
+					String indent= getIndentOfLine(d, refLine);
+					
+					if (indent != null) {
+						c.text= indent.toString() + "else"; //$NON-NLS-1$
+						c.length += c.offset - lineOffset;
+						c.offset= lineOffset;
+					}
+				}
+			
+				return;
+			}
+			
+			if (content.equals("cas")) { //$NON-NLS-1$
+				JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
+				int p= c.offset - 3;
+
+				// current line
+				int line= d.getLineOfOffset(p);
+				int lineOffset= d.getLineOffset(line);
+				
+				// make sure we don't have any leading comments etc.
+				if (d.get(lineOffset, p - lineOffset).trim().length() != 0)
+					return;
+				
+				// line of last javacode
+				int pos= scanner.findNonWhitespaceBackward(p - 1, JavaHeuristicScanner.UNBOUND);
+				if (pos == -1)
+					return;
+				int lastLine= d.getLineOfOffset(pos);
+				
+				// only shift if the last java line is further up and is a braceless block candidate
+				if (lastLine < line) {
+					
+					JavaIndenter indenter= new JavaIndenter(d, scanner);
+					int ref= indenter.findReferencePosition(p, false, false, false, true);
+					if (ref == JavaHeuristicScanner.NOT_FOUND)
+						return;
+					int refLine= d.getLineOfOffset(ref);
+					int nextToken= scanner.nextToken(ref, JavaHeuristicScanner.UNBOUND);
+					String indent;
+					if (nextToken == Symbols.TokenCASE || nextToken == Symbols.TokenDEFAULT)
+						indent= getIndentOfLine(d, refLine);
+					else // at the brace of the switch
+						indent= indenter.computeIndentation(p).toString();
+					
+					if (indent != null) {
+						c.text= indent.toString() + "case"; //$NON-NLS-1$
+						c.length += c.offset - lineOffset;
+						c.offset= lineOffset;
+					}
+				}
+			
+				return;
+			}
+			
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
 	}
 
 	/*
@@ -1033,7 +1131,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
 		else if (c.text.length() == 1)
-			smartIndentAfterBlockDelimiter(d, c);
+			smartIndentOnKeypress(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
 			smartPaste(d, c); // no smart backspace for paste
 		

@@ -373,7 +373,6 @@ public class JavaIndenter {
 				boolean bracelessBlockStart= fScanner.isBracelessBlockStart(prevPos, JavaHeuristicScanner.UNBOUND);
 				
 				switch (nextToken) {
-					case Symbols.TokenEOF:
 					case Symbols.TokenELSE:
 						danglingElse= true;
 						break;
@@ -402,8 +401,8 @@ public class JavaIndenter {
 			} catch (BadLocationException e) {
 			}
 		} else {
-			// assume an else could come if we are at the end of file
-			danglingElse= true; 
+			// don't assume an else could come if we are at the end of file
+			danglingElse= false; 
 		}
 		
 		int ref= findReferencePosition(offset, danglingElse, matchBrace, matchParen, matchCase);

@@ -542,7 +542,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 			"");	
 		
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
-		Assert.assertEquals("\t\t", indent); // because of possible dangling else
+		Assert.assertEquals("\t", indent); // because of possible dangling else
 	}
 
 	public void testIndentation22a() {
