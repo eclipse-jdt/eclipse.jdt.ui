@@ -75,25 +75,6 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 				fLastJavaElement= JavaCore.create(handle);
 			else
 				fLastJavaElement= null;
-			
-			// FIXME: This is a dirty fix for 1GCE1EI: ITPJUI:WINNT - Can't handle rename of resource
-			if (handle != null && fLastJavaElement != null) {
-				org.eclipse.core.resources.IResource resource= null;
-				try {
-					resource= fLastJavaElement.getUnderlyingResource();
-				} catch (org.eclipse.jdt.core.JavaModelException ex) {
-					// resource= null;
-				}
-				String resourceName= ""; //$NON-NLS-1$
-				if (marker.getResource() != null)
-					resourceName= marker.getResource().getName();
-				if (resource == null && handleContainsWrongCU(handle, resourceName)) {
-				 	handle= computeFixedHandle(handle, resourceName);
-				 	fLastJavaElement= JavaCore.create(handle);
-				}
-			}
-			// END OF FIX
-
 			fLastMarker= marker;
 		}
 		return fLastJavaElement;
