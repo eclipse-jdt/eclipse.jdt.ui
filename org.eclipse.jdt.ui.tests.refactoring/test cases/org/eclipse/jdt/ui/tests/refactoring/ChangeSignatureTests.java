@@ -57,9 +57,13 @@ public class ChangeSignatureTests extends RefactoringTest {
 		} else {
 			System.err.println("*** Running only parts of " + clazz.getName() + "!");
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ChangeSignatureTests("testException01"));
+			suite.addTest(new ChangeSignatureTests("testAll58"));
 			return new MySetup(suite);
 		}
+	}
+	
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
 	}
 	
 	private String getSimpleTestFileName(boolean canReorder, boolean input){
