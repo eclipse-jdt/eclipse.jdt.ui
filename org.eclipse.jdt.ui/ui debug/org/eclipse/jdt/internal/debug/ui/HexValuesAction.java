@@ -6,14 +6,7 @@ package org.eclipse.jdt.internal.debug.ui;
  * (c) Copyright IBM Corp 2001
  */
 
-import org.eclipse.debug.ui.IDebugModelPresentation;
-import org.eclipse.debug.ui.IDebugViewAdapter;
-import org.eclipse.jdt.debug.core.JDIDebugModel;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewPart;
+import org.eclipse.debug.ui.IDebugModelPresentation;import org.eclipse.debug.ui.IDebugViewAdapter;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IAction;import org.eclipse.jface.viewers.ISelection;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.ui.IViewActionDelegate;import org.eclipse.ui.IViewPart;
 
 /**
  * An action that toggles the state of its viewer to
@@ -52,7 +45,11 @@ public class HexValuesAction extends Action implements IViewActionDelegate {
 	private void valueChanged(boolean on) {
 		IDebugModelPresentation presentation= fAdapter.getPresentation(JDIDebugModel.getPluginIdentifier());
 		presentation.setAttribute(JDIModelPresentation.DISPLAY_HEX_VALUES, new Boolean(on));
-		fAdapter.getViewer().refresh();
+		BusyIndicator.showWhile(fAdapter.getViewer().getControl().getDisplay(), new Runnable() {
+			public void run() {
+				fAdapter.getViewer().refresh();					
+			}
+		});
 		setToolTipText(on ? DebugUIUtils.getResourceString(HIDE) : DebugUIUtils.getResourceString(SHOW));
 	}
 

@@ -6,14 +6,7 @@ package org.eclipse.jdt.internal.debug.ui;
  * (c) Copyright IBM Corp 2000
  */
 
-import org.eclipse.debug.ui.IDebugViewAdapter;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.ui.IViewActionDelegate;
-import org.eclipse.ui.IViewPart;
+import org.eclipse.debug.ui.IDebugViewAdapter;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IAction;import org.eclipse.jface.viewers.*;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.ui.IViewActionDelegate;import org.eclipse.ui.IViewPart;
 
 /**
  * A generic Toggle filter action, meant to be subclassed to provide
@@ -51,26 +44,31 @@ public abstract class ToggleFilterAction extends Action implements IViewActionDe
 	 * Adds or removes the viewer filter depending
 	 * on the value of the parameter.
 	 */
-	protected void valueChanged(boolean on) {
-		if (on) {
-			ViewerFilter filter= getViewerFilter();
-			ViewerFilter[] filters= fViewer.getFilters();
-			boolean alreadyAdded= false;
-			for (int i= 0; i < filters.length; i++) {
-				ViewerFilter addedFilter= filters[i];
-				if (addedFilter.equals(filter)) {
-					alreadyAdded= true;
-					break;
+	protected void valueChanged(final boolean on) {
+		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
+			public void run() {
+				if (on) {
+					ViewerFilter filter= getViewerFilter();
+					ViewerFilter[] filters= fViewer.getFilters();
+					boolean alreadyAdded= false;
+					for (int i= 0; i < filters.length; i++) {
+						ViewerFilter addedFilter= filters[i];
+						if (addedFilter.equals(filter)) {
+							alreadyAdded= true;
+							break;
+						}
+					}
+					if (!alreadyAdded) {
+						fViewer.addFilter(filter);
+					}
+					
+				} else {
+					fViewer.removeFilter(getViewerFilter());
 				}
+				setToolTipText(getToolTipText(on));									
 			}
-			if (!alreadyAdded) {
-				fViewer.addFilter(filter);
-			}
-			
-		} else {
-			fViewer.removeFilter(getViewerFilter());
-		}
-		setToolTipText(getToolTipText(on));
+		});
+
 	}
 
 	/**
