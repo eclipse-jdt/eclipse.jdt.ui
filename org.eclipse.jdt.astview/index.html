@@ -8,12 +8,12 @@
   <link rel="stylesheet" href="http://dev.eclipse.org/default_style.css"
  type="text/css">
 </head>
-<body text="#000000" bgcolor="#ffffff">
+<body style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
 &nbsp;
-<table border="0" cellspacing="5" cellpadding="2" width="100%">
+<table border="0" cellpadding="2" cellspacing="5" width="100%">
   <tbody>
     <tr>
-      <td align="left" valign="top" colspan="2" bgcolor="#0080c0"><b><font
+      <td colspan="2" align="left" bgcolor="#0080c0" valign="top"><b><font
  face="Arial,Helvetica"><font color="#ffffff">org.eclipse.jdt.astview
 - AST View<br>
       </font></font></b></td>
@@ -31,21 +31,13 @@ from nodes to selections.<br>
     <tr>
       <td align="right" valign="top" width="2%"><img src="Adarrow.gif"
  border="0" height="16" width="16"></td>
-      <td width="98%"><b>Install</b>
-      <p><b><i>Eclipse 3.0</i></b></p>
-      <ul>
-        <li>requires a SDK build &gt; <span style="font-weight: bold;">I20040309</span></li>
-        <li>manually download the plugin <a
- href="AST-View-Site/plugins/org.eclipse.jdt.astview_1.0.0.jar">org.eclipse.jdt.astview</a>
-and extract the plugins into the plugins directory of your Eclipse
-install.<br>
-&nbsp; or<br>
-        </li>
-        <li>use the update feature and go to the AST View Update Site:<br>
-          <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
-http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/jdt-ui-home/plugins/org.eclipse.jdt.astview/AST-View-Site</span></li>
-      </ul>
+      <td width="98%"><b>Install</b><br>
+      <p>requires<b> Eclipse 3.0</b> or greater<br>
+      </p>
+      <div style="margin-left: 40px;">use the update feature and go to
+the AST View Update Site:<br>
       <br>
+      <span style="font-weight: bold;">http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/jdt-ui-home/plugins/org.eclipse.jdt.astview/AST-View-Site</span></div>
       </td>
     </tr>
     <tr>
@@ -80,9 +72,8 @@ mapper heuristic).</li>
       </ol>
       <b>AST View Elements</b><br>
       <br>
-There are three kinds of elements shown in the AST view<br>
-      <img style="width: 449px; height: 315px;" alt="AST View"
- src="view.gif"><br>
+The AST view shows the following nodes<br>
+      <img alt="AST View" src="view.gif"><br>
       <ul>
         <li>AST nodes are shown in gray color and with source range
 information. Children of AST nodes are the node properties.<br>
@@ -91,16 +82,21 @@ information. Children of AST nodes are the node properties.<br>
 Node properties represent lists of child nodes, a child node or a
 primitive node attribute (String, int or boolean)<br>
         </li>
-        <li>bindings are shown in brackets. Only selected bindings are
-shown,</li>
+        <li>bindings are shown in blue. Only selected bindings are
+shown</li>
       </ul>
+      <img alt="New" src="new.gif" style="width: 31px; height: 14px;">ASTView
+version 1.0.1 additionaly shows all binding properties, comment nodes
+attached to the root compilation unit and compiler problems detected in
+the AST.<br>
+      <br>
       <span style="font-weight: bold;">Advanced Features</span><br>
       <ul>
         <li>You can toggle between the AST Level 2 and AST level 3 in
 the view menu (triangle). AST level 3 is the extended and modified AST
-that includes the new 1.5 language constructs. In <span
- style="font-weight: bold;">I20040309</span>, the level 3 AST is not
-yet available.<br>
+that includes the new 1.5 language constructs. Note that the AST level
+3 is only available in builds greater than 3.0 (e.g. the Cheetah
+previews).<br>
         </li>
       </ul>
       <span style="font-weight: bold;">Comments and Requests</span><br>
