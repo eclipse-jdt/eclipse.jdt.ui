@@ -101,7 +101,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		boolean enabled= false;
 		try {
 			enabled= getSelectedType(selection) != null;
@@ -116,7 +116,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		Shell shell= getShell();
 		try {
 			IType type= getSelectedType(selection);
@@ -144,7 +144,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 	
 	private boolean checkEnabledEditor() {
@@ -154,7 +154,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		Shell shell= getShell();
 		try {
 			IType type= SelectionConverter.getTypeAtOffset(fEditor);

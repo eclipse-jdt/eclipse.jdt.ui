@@ -130,7 +130,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
 		} catch (JavaModelException e) {
@@ -144,7 +144,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		try {
 			IField[] selectedFields = getSelectedFields(selection);
 			if (canEnableOn(selectedFields)) {
@@ -257,13 +257,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		try {
 			IJavaElement input= SelectionConverter.getInput(fEditor);
 			if (!ActionUtil.isProcessable(getShell(), input))

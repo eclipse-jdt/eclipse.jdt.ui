@@ -115,7 +115,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * 
 	 * @param selection the new selection
  	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		selectionChanged((ISelection)selection);
 	}
 
@@ -123,7 +123,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * Executes this actions with the given structured selection. This default implementation
 	 * calls <code>run(ISelection selection)</code>.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		run((ISelection)selection);
 	}
 	
@@ -133,7 +133,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * 
 	 * @param selection the new selection
  	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 		selectionChanged((ISelection)selection);
 	}
 	
@@ -141,7 +141,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * Executes this actions with the given text selection. This default implementation
 	 * calls <code>run(ISelection selection)</code>.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		run((ISelection)selection);
 	}
 	
@@ -151,7 +151,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * 
 	 * @param selection the new selection
  	 */
-	protected void selectionChanged(ISelection selection) {
+	public void selectionChanged(ISelection selection) {
 		setEnabled(false);
 	}
 	
@@ -159,7 +159,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * Executes this actions with the given selection. This default implementation
 	 * does nothing.
 	 */
-	protected void run(ISelection selection) {
+	public void run(ISelection selection) {
 	}
 
 	/* (non-Javadoc)

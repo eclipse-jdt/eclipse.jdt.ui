@@ -98,7 +98,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(computeEnablementState(selection));
 	}
 	
@@ -120,7 +120,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(final IStructuredSelection selection) {
+	public void run(final IStructuredSelection selection) {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, createRunnable(selection));
 		} catch(InvocationTargetException e) {

@@ -45,7 +45,7 @@ public class JdtCopyAction extends ReorgDestinationAction {
 		return ReorgMessages.getString("copyAction.destination.label"); //$NON-NLS-1$
 	}
 	
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (ClipboardActionUtil.hasOnlyProjects(selection)){
 			copyProject(selection);
 		}	else {

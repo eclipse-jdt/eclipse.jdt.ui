@@ -208,7 +208,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	/* 
 	 * Method declared on SelectionChangedAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		IJavaElement element= getJavaElement(selection, false);
 		if (element == null || !element.exists()) {
 			showOperationUnavailableDialog();
@@ -223,7 +223,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	/* 
 	 * Method declared on SelectionChangedAction.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try {
@@ -250,17 +250,17 @@ public abstract class FindAction extends SelectionDispatchAction {
 	/* 
 	 * Method declared on SelectionChangedAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
 
 	/* 
 	 * Method declared on SelectionChangedAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
-	void run(IJavaElement element) {
+	public void run(IJavaElement element) {
 		
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;

@@ -88,13 +88,13 @@ public class OpenAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
 	
@@ -117,7 +117,7 @@ public class OpenAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.codeResolve(fEditor, getShell(), getDialogTitle(), 
 				ActionMessages.getString("OpenAction.select_element")); //$NON-NLS-1$
@@ -141,13 +141,13 @@ public class OpenAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))
 			return;
 		run(selection.toArray());
 	}
 	
-	private void run(Object[] elements) {
+	public void run(Object[] elements) {
 		if (elements == null)
 			return;
 		for (int i= 0; i < elements.length; i++) {

@@ -65,14 +65,14 @@ public class InlineTempAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 		//do nothing
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		try{
 			ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
 			if (!ActionUtil.isProcessable(getShell(), input))
@@ -105,14 +105,14 @@ public class InlineTempAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		//do nothing
 	}
 
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
 	}
 

@@ -54,7 +54,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
 			return;
@@ -68,7 +68,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		setEnabled(false);
 	}
 	
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return;
@@ -79,7 +79,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		}	
 	}
 
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 		
 	private static boolean canEnable(IStructuredSelection selection) throws CoreException {
@@ -101,7 +101,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		return (IJavaElement)first;
 	}
 	
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		try {
 			IJavaElement element= getJavaElement();
 			if (element != null) {

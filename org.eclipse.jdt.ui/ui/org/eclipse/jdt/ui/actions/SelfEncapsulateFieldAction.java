@@ -78,13 +78,13 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
 	
@@ -100,7 +100,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), getDialogTitle());
@@ -117,13 +117,13 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))
 			return;
 		run((IField)selection.getFirstElement());
 	}
 	
-	private void run(IField selectedField) {
+	public void run(IField selectedField) {
 		if (!ActionUtil.isProcessable(getShell(), selectedField))
 			return;
 		IField field= null;

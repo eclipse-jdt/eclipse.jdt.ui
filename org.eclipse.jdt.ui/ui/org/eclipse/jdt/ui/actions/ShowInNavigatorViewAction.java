@@ -77,20 +77,20 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getResource(selection) != null); 
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		IJavaElement input= SelectionConverter.getInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
 			return;		
@@ -105,11 +105,11 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		run(getResource(selection));
 	}
 	
-	private void run(IResource resource) {
+	public void run(IResource resource) {
 		if (resource == null)
 			return;
 		try {

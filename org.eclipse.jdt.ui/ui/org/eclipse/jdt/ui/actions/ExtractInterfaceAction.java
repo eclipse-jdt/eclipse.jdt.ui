@@ -78,7 +78,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection));
 		if (! isEnabled())
 			fRefactoring= null;
@@ -87,13 +87,13 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
     /*
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 	
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (fRefactoring == null)
 			selectionChanged(selection);
 		if (isEnabled())
@@ -105,7 +105,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
     /*
      * @see SelectionDispatchAction#run(ITextSelection)
      */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		if (canRun()){

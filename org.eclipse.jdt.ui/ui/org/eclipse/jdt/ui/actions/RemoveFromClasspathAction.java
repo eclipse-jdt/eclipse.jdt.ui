@@ -64,7 +64,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
 	
@@ -81,7 +81,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
-	protected void run(final IStructuredSelection selection) {
+	public void run(final IStructuredSelection selection) {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
 				public void run(IProgressMonitor pm) throws CoreException {

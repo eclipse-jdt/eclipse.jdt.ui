@@ -87,7 +87,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		super(site);
 	}
 
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
 
@@ -108,7 +108,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		}
 	}
 
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (!needsSaving(selection)) {
 			doRun(selection);
 		} else {

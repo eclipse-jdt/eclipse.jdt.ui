@@ -69,7 +69,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
 		} catch (JavaModelException e) {
@@ -80,7 +80,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
     /*
      * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.text.ITextSelection)
      */
-    protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
        //do nothing
     }
 
@@ -99,7 +99,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {		
+	public void run(IStructuredSelection selection) {		
 		try {
 			Assert.isTrue(canEnable(selection));
 			
@@ -116,7 +116,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		run(selection.getOffset(), selection.getLength(), getCompilationUnitForTextSelection());
 	}
 	

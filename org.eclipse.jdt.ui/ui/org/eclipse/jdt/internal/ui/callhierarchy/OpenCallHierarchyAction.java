@@ -76,13 +76,13 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
     /* (non-Javadoc)
      * Method declared on SelectionDispatchAction.
      */
-    protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
     }
 
     /* (non-Javadoc)
      * Method declared on SelectionDispatchAction.
      */
-    protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
         setEnabled(isEnabled(selection));
     }
     
@@ -103,7 +103,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
     /* (non-Javadoc)
      * Method declared on SelectionDispatchAction.
      */
-    protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
         IJavaElement input= SelectionConverter.getInput(fEditor);
         if (!ActionUtil.isProcessable(getShell(), input))
             return;     
@@ -156,7 +156,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
     /* (non-Javadoc)
      * Method declared on SelectionDispatchAction.
      */
-    protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
         if (selection.size() != 1)
             return;
         Object input= selection.getFirstElement();
@@ -179,7 +179,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
         }
     }
     
-    private void run(IJavaElement[] elements) {
+    public void run(IJavaElement[] elements) {
         if (elements.length == 0) {
             getShell().getDisplay().beep();
             return;

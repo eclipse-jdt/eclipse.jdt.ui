@@ -31,11 +31,11 @@ public class AddTaskAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_TASK_ACTION);
 	}
 
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getElement(selection) != null);
 	}
 
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		IResource resource= getElement(selection);
 		if (resource == null)
 			return;

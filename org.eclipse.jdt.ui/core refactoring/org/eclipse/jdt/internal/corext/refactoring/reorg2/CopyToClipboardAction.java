@@ -88,7 +88,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils2.getResources(elements);
@@ -106,7 +106,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		try {
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils2.getResources(elements);

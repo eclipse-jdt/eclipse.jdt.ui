@@ -59,7 +59,7 @@ class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
 

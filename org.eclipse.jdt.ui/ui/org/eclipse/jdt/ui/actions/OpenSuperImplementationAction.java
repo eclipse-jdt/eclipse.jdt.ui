@@ -80,13 +80,13 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		IMethod method= getMethod(selection);
 		
 		setEnabled(method != null && checkMethod(method));
@@ -95,7 +95,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		IJavaElement element= elementAtOffset();
@@ -109,11 +109,11 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		run(getMethod(selection));
 	}
 	
-	private void run(IMethod method) {
+	public void run(IMethod method) {
 		if (method == null)
 			return;		
 		if (!ActionUtil.isProcessable(getShell(), method))

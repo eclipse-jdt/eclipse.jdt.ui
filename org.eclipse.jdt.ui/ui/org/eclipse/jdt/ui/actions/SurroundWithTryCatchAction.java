@@ -96,7 +96,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SURROUND_WITH_TRY_CATCH_ACTION);
 	}
 
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		ICompilationUnit cu= getCompilationUnit();
@@ -134,7 +134,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		}
 	}
 
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 		setEnabled(selection.getLength() > 0 && checkEditor());
 	}
 	

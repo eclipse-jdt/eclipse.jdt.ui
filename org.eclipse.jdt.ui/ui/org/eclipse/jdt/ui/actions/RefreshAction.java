@@ -79,7 +79,7 @@ public class RefreshAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
 
@@ -104,7 +104,7 @@ public class RefreshAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		final IResource[] resources= getResources(selection);
 		IWorkspaceRunnable operation= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {

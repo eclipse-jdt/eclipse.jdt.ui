@@ -60,7 +60,7 @@ public class DeleteAction extends SelectionDispatchAction{
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		if (canDelegateToWorkbenchAction(selection)){
 			setEnabled(createWorkbenchAction(selection).isEnabled());
 			return;
@@ -96,7 +96,7 @@ public class DeleteAction extends SelectionDispatchAction{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (canDelegateToWorkbenchAction(selection)){
 			createWorkbenchAction(selection).run();
 			return;

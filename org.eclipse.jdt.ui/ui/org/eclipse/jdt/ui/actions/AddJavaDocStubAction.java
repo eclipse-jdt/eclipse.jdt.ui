@@ -95,7 +95,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		IMember[] members= getSelectedMembers(selection);
 		setEnabled(members != null && members.length > 0);
 	}
@@ -103,7 +103,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		IMember[] members= getSelectedMembers(selection);
 		if (members == null || members.length == 0) {
 			return;
@@ -163,7 +163,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
 	private boolean checkEnabledEditor() {
@@ -173,7 +173,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 			if (!ActionUtil.isProcessable(getShell(), element))
@@ -197,7 +197,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 
 	//---- Helpers -------------------------------------------------------------------
 	
-	private void run(IMember[] members) {
+	public void run(IMember[] members) {
 		try {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 

@@ -62,7 +62,7 @@ public class WorkingSetFindAction extends FindAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
 	}
 
-	void run(IJavaElement element) {
+	public void run(IJavaElement element) {
 		fAction.run(element);
 	}
 

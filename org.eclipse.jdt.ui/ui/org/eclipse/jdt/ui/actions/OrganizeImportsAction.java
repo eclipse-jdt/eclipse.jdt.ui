@@ -140,14 +140,14 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 		// do nothing
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(isEnabled(selection));
 	}
 	
@@ -244,7 +244,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		run(getCompilationUnit(fEditor));
 	}
 
@@ -257,7 +257,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
 		if (cus.length == 1) {
 			run(cus[0]);

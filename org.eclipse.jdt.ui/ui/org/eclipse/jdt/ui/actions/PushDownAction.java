@@ -83,7 +83,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(getSelectedMembers(selection)));
 		} catch (JavaModelException e) {
@@ -94,14 +94,14 @@ public class PushDownAction extends SelectionDispatchAction{
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(ITextSelection)
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 		//do nothing, this happens too often
 	}
 	
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		try {
 			IMember[] members= getSelectedMembers(selection);
 			if (canEnable(members))
@@ -114,7 +114,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(ITextSelection)
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
 				return;

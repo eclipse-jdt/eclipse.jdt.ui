@@ -84,7 +84,7 @@ public class InlineAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.ISelection)
 	 */
-	protected void selectionChanged(ISelection selection) {
+	public void selectionChanged(ISelection selection) {
 		fInlineConstant.update(selection);
 		fInlineMethod.update(selection);
 		fInlineTemp.update(selection);
@@ -98,7 +98,7 @@ public class InlineAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit();
 		if (cu == null || !ActionUtil.isProcessable(getShell(), cu))
 			return;
@@ -150,7 +150,7 @@ public class InlineAction extends SelectionDispatchAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (fInlineConstant.isEnabled())
 			fInlineConstant.run(selection);
 		else if (fInlineMethod.isEnabled())

@@ -113,7 +113,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.ISelection)
 	 */
-	protected void selectionChanged(ISelection selection) {
+	public void selectionChanged(ISelection selection) {
 		setEnabled(hasCloseProjects());
 		fMode= EMPTY_SELECTION;
 	}
@@ -121,7 +121,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.ISelection)
 	 */
-	protected void run(ISelection selection) {
+	public void run(ISelection selection) {
 		internalRun();
 	}
 	
@@ -130,7 +130,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		if (selection.isEmpty()) {
 			setEnabled(hasCloseProjects());
 			fMode= EMPTY_SELECTION;
@@ -145,7 +145,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (selection.isEmpty()) {
 			internalRun();
 			return;

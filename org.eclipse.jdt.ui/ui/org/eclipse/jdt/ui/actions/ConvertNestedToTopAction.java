@@ -77,7 +77,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(selection));
 		} catch (JavaModelException e) {
@@ -88,14 +88,14 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
     /*
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 		//do nothing, this happens too often
 	}
 	
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		try {
 			//we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
 			if (canEnable(selection)) 
@@ -108,7 +108,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
     /*
      * @see SelectionDispatchAction#run(ITextSelection)
      */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
 				return;

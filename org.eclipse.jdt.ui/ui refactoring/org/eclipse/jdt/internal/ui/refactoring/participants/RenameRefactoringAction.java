@@ -35,7 +35,7 @@ public class RenameRefactoringAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(selection.size() == 1);
 	}
 
@@ -43,7 +43,7 @@ public class RenameRefactoringAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		Object element= selection.getFirstElement();
 		try {
 			RenameRefactoring refactoring= new RenameRefactoring(element);

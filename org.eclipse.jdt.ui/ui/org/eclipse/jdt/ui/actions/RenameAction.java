@@ -111,14 +111,14 @@ public class RenameAction extends SelectionDispatchAction {
 		}
 	}
 	
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		 if (fRenameJavaElement.isEnabled())
 			fRenameJavaElement.run(selection);
 		if (fRenameResource != null && fRenameResource.isEnabled())
 			fRenameResource.run(selection);
 	}
 
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		if (fRenameTemp != null && fRenameTemp.canRun(selection))

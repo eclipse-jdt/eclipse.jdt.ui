@@ -107,7 +107,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getMember(selection) != null);
 	}
 	
@@ -137,7 +137,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		IMember member= getMember(selection);
 		if (!ActionUtil.isProcessable(getShell(), member))
 			return;
@@ -164,13 +164,13 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
-	protected final void run(ITextSelection ts) {
+	public final void run(ITextSelection ts) {
 		IJavaElement input= getEditorInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
 			return;

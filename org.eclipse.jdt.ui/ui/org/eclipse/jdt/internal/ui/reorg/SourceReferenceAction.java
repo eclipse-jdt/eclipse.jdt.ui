@@ -188,7 +188,7 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
 

@@ -52,7 +52,7 @@ class OpenLocationAction extends SelectionDispatchAction {
     /* (non-Javadoc)
  * Method declared on SelectionDispatchAction.
  */
-    protected void run(IStructuredSelection selection) {
+    public void run(IStructuredSelection selection) {
         if (!checkEnabled(selection)) {
             return;
         }
@@ -60,7 +60,7 @@ class OpenLocationAction extends SelectionDispatchAction {
         run(selection.getFirstElement());
     }
 
-    private void run(Object element) {
+    public void run(Object element) {
         CallHierarchyUI.openInEditor(element, getShell(), getDialogTitle());
     }
 

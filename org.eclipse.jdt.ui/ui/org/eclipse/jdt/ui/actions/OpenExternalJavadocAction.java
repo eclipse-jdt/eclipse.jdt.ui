@@ -87,13 +87,13 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
 	
@@ -106,7 +106,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		IJavaElement element= SelectionConverter.getInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
@@ -121,7 +121,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))
 			return;
 		IJavaElement element= (IJavaElement)selection.getFirstElement();
@@ -130,7 +130,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		run(element);
 	}
 	
-	private void run(IJavaElement element) {
+	public void run(IJavaElement element) {
 		if (element == null)
 			return;
 		Shell shell= getShell();

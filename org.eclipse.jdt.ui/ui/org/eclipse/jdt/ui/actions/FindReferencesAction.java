@@ -78,7 +78,7 @@ public class FindReferencesAction extends FindAction {
 		return IJavaSearchConstants.REFERENCES;
 	}	
 
-	void run(IJavaElement element) {
+	public void run(IJavaElement element) {
 		SearchUtil.warnIfBinaryConstant(element, getShell());
 		super.run(element);
 	}

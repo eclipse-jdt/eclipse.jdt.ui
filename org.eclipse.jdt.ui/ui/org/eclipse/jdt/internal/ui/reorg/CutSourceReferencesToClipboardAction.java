@@ -85,7 +85,7 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 		fDelete.perform(selection);
 	}
 
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		/*
 		 * cannot cut top-level types. this deltes the cu and then you cannot paste because the cu is gone. 
 		 */

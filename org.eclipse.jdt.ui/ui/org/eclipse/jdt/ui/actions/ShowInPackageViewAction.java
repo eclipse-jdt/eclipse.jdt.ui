@@ -76,13 +76,13 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
 	
@@ -95,7 +95,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 			if (element != null)
@@ -110,13 +110,13 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))
 			return;
 		run((IJavaElement)selection.getFirstElement());
 	}
 	
-	private void run(IJavaElement element) {
+	public void run(IJavaElement element) {
 		if (element == null)
 			return;
 			

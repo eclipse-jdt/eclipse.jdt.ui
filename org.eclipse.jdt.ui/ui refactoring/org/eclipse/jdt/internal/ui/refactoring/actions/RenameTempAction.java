@@ -54,7 +54,7 @@ public class RenameTempAction extends SelectionDispatchAction {
 		return new RenameRefactoringWizard(refactoring, pageTitle, message, wizardPageHelp, errorPageHelp);
 	}
 	
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 	
 	public boolean canRun(ITextSelection selection) {
@@ -75,7 +75,7 @@ public class RenameTempAction extends SelectionDispatchAction {
 		}
 	}
 	
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		try{
 			ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
 			if (!ActionUtil.isProcessable(getShell(), input))

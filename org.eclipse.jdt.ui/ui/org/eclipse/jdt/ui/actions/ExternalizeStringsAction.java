@@ -77,7 +77,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 	
 	private boolean checkEnabledEditor() {
@@ -87,7 +87,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection));
 	}
 
@@ -98,7 +98,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		IJavaElement element= SelectionConverter.getInput(fEditor);
 		if (!(element instanceof ICompilationUnit))
 			return;
@@ -108,12 +108,12 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (canEnable(selection)) 
 			run(getCompilationUnit(selection));
 	}	
 	
-	private void run(ICompilationUnit unit) {
+	public void run(ICompilationUnit unit) {
 		if (!ActionUtil.isProcessable(getShell(), unit))
 			return;
 		try {

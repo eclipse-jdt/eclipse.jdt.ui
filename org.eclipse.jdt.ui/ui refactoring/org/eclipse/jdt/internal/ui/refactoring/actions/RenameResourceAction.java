@@ -42,7 +42,7 @@ public class RenameResourceAction extends SelectionDispatchAction {
 		run((IResource)element);
 	}
 
-	private void run(IResource element) {
+	public void run(IResource element) {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
@@ -56,7 +56,7 @@ public class RenameResourceAction extends SelectionDispatchAction {
 		}	
 	}
 	
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			IResource element= getResource(selection);
 			if (element == null)

@@ -103,7 +103,7 @@ public class MoveAction extends SelectionDispatchAction{
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		assertThatExactlyOneIsEnabled();
 		
 		if (fJdtMoveAction != null && fJdtMoveAction.isEnabled())
@@ -127,7 +127,7 @@ public class MoveAction extends SelectionDispatchAction{
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		if (fJdtMoveAction != null && fJdtMoveAction.isEnabled()){

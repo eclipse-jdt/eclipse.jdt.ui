@@ -104,7 +104,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void selectionChanged(IStructuredSelection selection) {
+	public void selectionChanged(IStructuredSelection selection) {
 		boolean enabled= false;
 		try {
 			enabled= getSelectedCompilationUnit(selection) != null;
@@ -119,7 +119,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		Shell shell= getShell();
 		try {
 			ICompilationUnit cu= getSelectedCompilationUnit(selection);
@@ -142,13 +142,13 @@ public class SortMembersAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void run(ITextSelection selection) {
+	public void run(ITextSelection selection) {
 		Shell shell= getShell();
 		IJavaElement input= SelectionConverter.getInput(fEditor);
 		if (input instanceof ICompilationUnit) {

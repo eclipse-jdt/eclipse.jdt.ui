@@ -75,7 +75,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		setText(ReorgMessages.getString("moveAction.label"));//$NON-NLS-1$
 	}
 
-	protected void run(IStructuredSelection selection) {
+	public void run(IStructuredSelection selection) {
 		if (ClipboardActionUtil.hasOnlyProjects(selection)){
 			moveProject(selection);
 		}	else {
