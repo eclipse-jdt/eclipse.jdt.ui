@@ -113,15 +113,24 @@ public class RefactoringStatus {
 		if (status.isOK())
 			return new RefactoringStatus();
 		
-		switch (status.getSeverity()){
-			case IStatus.INFO:
-				return RefactoringStatus.createWarningStatus(status.getMessage());
-			case IStatus.WARNING:
-				return RefactoringStatus.createErrorStatus(status.getMessage());
-			case IStatus.ERROR:
-				return RefactoringStatus.createFatalErrorStatus(status.getMessage());
-			default:	
-				return new RefactoringStatus();
+		if (! status.isMultiStatus()){
+			switch (status.getSeverity()){
+				case IStatus.INFO:
+					return RefactoringStatus.createWarningStatus(status.getMessage());
+				case IStatus.WARNING:
+					return RefactoringStatus.createErrorStatus(status.getMessage());
+				case IStatus.ERROR:
+					return RefactoringStatus.createFatalErrorStatus(status.getMessage());
+				default:	
+					return new RefactoringStatus();
+			}
+		} else {
+			IStatus[] children= status.getChildren();
+			RefactoringStatus result= new RefactoringStatus();
+			for (int i= 0; i < children.length; i++) {
+				result.merge(RefactoringStatus.create(children[i]));
+			}
+			return result;
 		}
 	}
 	
