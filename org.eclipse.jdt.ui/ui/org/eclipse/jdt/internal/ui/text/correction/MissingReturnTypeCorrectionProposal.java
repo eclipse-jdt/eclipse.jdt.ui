@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
@@ -22,7 +20,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposal {
@@ -49,7 +46,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected ASTRewrite getRewrite() {
 		AST ast= fMethodDecl.getAST();
 		
 		ITypeBinding returnBinding= getReturnTypeBinding();
@@ -85,7 +82,6 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 					
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(placeHolder);
-					rewrite.markAsInserted(placeHolder);
 					
 					rewrite.markAsReplaced(lastStatement, returnStatement);
 					return rewrite;
@@ -118,7 +114,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 	}
 	
 	
-	/**
+	/*
 	 * Evaluates possible return expressions. The favourite expression is returned.
 	 */
 	private Expression evaluateReturnExpressions(AST ast, ITypeBinding returnBinding, int returnOffset) {
