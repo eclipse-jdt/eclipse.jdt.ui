@@ -750,8 +750,14 @@
             id="org.eclipse.jdt.ui.preferences.AppearancePreferencePage">
       </page>
       <page
-            name="%organizeImportsPrefName"
+            name="%codeStylePreferencePageName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeStylePreferencePage"
+            id="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage">
+      </page>
+      <page
+            name="%organizeImportsPrefName"
+            category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"
             id="org.eclipse.jdt.ui.preferences.ImportOrganizePreferencePage">
       </page>
@@ -763,7 +769,7 @@
       </page>
       <page
             name="%codeFormatterPrefName"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
             id="org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage">
       </page>
@@ -793,6 +799,7 @@
             id="org.eclipse.jdt.ui.preferences.NewJavaProjectPreferencePage">
       </page>
       
+      
       <page
             name="%editorPrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
@@ -817,13 +824,13 @@
             class="org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage"
             id="org.eclipse.jdt.ui.preferences.TemplatePreferencePage">
       </page>
-      <page
-            name="%codeGenerationPreferencePageName"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.CodeGenerationPreferencePage">
-      </page>
 
+      <page
+            name="%codeTemplatePreferencePageName"
+            category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage"
+            id="org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage">
+      </page>
       <page
             name="%memberSortPrefName"
             category="org.eclipse.jdt.ui.preferences.AppearancePreferencePage"

@@ -12,13 +12,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferencePage;
@@ -30,25 +25,21 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /*
  * The page to configure the code formatter options.
  */
-public class CodeGenerationPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
+public class CodeTemplatePreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
 
-	private NameConventionConfigurationBlock fNamesConfigurationBlock;
 	private CodeTemplateBlock fCodeTemplateConfigurationBlock;
 
-	public CodeGenerationPreferencePage() {
+	public CodeTemplatePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("CodeGenerationPreferencePage.description")); //$NON-NLS-1$
+		//setDescription(PreferencesMessages.getString("CodeTemplatesPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CodeGenerationPreferencePage.title"));		 //$NON-NLS-1$
-		
-		fNamesConfigurationBlock= new NameConventionConfigurationBlock(this, null);
+		setTitle(PreferencesMessages.getString("CodeTemplatesPreferencePage.title"));		 //$NON-NLS-1$
 		
 		fCodeTemplateConfigurationBlock= new CodeTemplateBlock();
 	}
@@ -71,30 +62,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		initializeDialogUnits(parent);
-		
-		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		composite.setLayout(layout);
-		
-		TabFolder folder= new TabFolder(composite, SWT.NONE);
-		folder.setLayout(new TabFolderLayout());	
-		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
-	
-		Control namesControl= fNamesConfigurationBlock.createContents(folder);
-		
-		Control templateControl= fCodeTemplateConfigurationBlock.createContents(folder);
-
-		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("CodeGenerationPreferencePage.tab.names.tabtitle")); //$NON-NLS-1$
-		item.setControl(namesControl);
-
-		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("CodeGenerationPreferencePage.tab.templates.tabtitle")); //$NON-NLS-1$
-		item.setControl(templateControl);
-		
+		Control composite= fCodeTemplateConfigurationBlock.createContents(parent);
 		Dialog.applyDialogFont(composite);
 		return composite;
 	}
@@ -103,9 +71,6 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	 * @see IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		if (!fNamesConfigurationBlock.performOk(true)) {
-			return false;
-		}
 		if (!fCodeTemplateConfigurationBlock.performOk(true)) {
 			return false;
 		}			
@@ -116,7 +81,6 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		fNamesConfigurationBlock.performDefaults();
 		fCodeTemplateConfigurationBlock.performDefaults();
 		super.performDefaults();
 	}

@@ -234,8 +234,8 @@ public class CodeTemplateBlock {
 		
 		Composite composite=  new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		//layout.marginHeight= 0;
-		//layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		composite.setLayout(layout);
 		

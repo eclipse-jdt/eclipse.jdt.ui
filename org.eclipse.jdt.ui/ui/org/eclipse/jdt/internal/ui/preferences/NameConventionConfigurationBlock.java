@@ -344,6 +344,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(layout);
