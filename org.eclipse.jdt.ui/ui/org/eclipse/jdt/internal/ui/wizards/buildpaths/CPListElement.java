@@ -28,19 +28,19 @@ public class CPListElement {
 	
 	///private URL fJavaDocLocation;
 	
-	public CPListElement(int entryKind, IPath path, IResource res, IPath attachPath, IPath attachRoot) {
+	public CPListElement(int entryKind, IPath path, IResource res, IPath attachPath, IPath attachRoot, boolean isExported) {
 		fEntryKind= entryKind;
 		fPath= path;
 		fSourceAttachmentPath= attachPath;
 		fSourceAttachmentPrefix= attachRoot;	
 		fResource= res;
 		fIsMissing= false;
-		
+		fIsExported= isExported;
 		fCachedEntry= null;
 	}
 
 	public CPListElement(int entryKind, IPath path, IResource res) {
-		this(entryKind, path, res, null, null);
+		this(entryKind, path, res, null, null, false);
 	}
 
 	

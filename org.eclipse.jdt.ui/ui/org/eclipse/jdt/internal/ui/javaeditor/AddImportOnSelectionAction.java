@@ -80,10 +80,6 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
 		return manager.getWorkingCopy(fEditor.getEditorInput());
 	}
-
-
-	private void addImport(IJavaElement imp, ICompilationUnit cu) {
-	}
 	
 	/**
 	 * @see IAction#actionPerformed

@@ -275,4 +275,13 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		setResult(result);
 	}
 	
+	/**
+	 * Gets the current Page.
+	 * @return Returns a int
+	 */
+	public int getCurrentPage() {
+		return fCurrentPage;
+	}
+
+
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -21,6 +21,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
@@ -32,6 +33,7 @@ import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
@@ -73,8 +75,8 @@ public class OrganizeImportsAction extends Action {
 			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();	
 			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, false, createChooseImportQuery());
 			try {
-				ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
-				dialog.run(false, true, new WorkbenchRunnableWrapper(op));
+				BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+				context.run(false, true, new WorkbenchRunnableWrapper(op));
 			} catch (InvocationTargetException e) {
 				JavaPlugin.log(e);
 				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaEditorMessages.getString("OrganizeImportsAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
@@ -96,32 +98,54 @@ public class OrganizeImportsAction extends Action {
 	
 	private IChooseImportQuery createChooseImportQuery() {
 		return new IChooseImportQuery() {
-			public TypeInfo[] chooseImports(TypeInfo[][] openChoices) {
-				return doChooseImports(openChoices);
+			public TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges) {
+				return doChooseImports(openChoices, ranges);
 			}
 		};
 	}
 	
-	private TypeInfo[] doChooseImports(TypeInfo[][] openChoices) {
+	private TypeInfo[] doChooseImports(TypeInfo[][] openChoices, final ISourceRange[] ranges) {
+		// remember selection
+		ISelection sel= fEditor.getSelectionProvider().getSelection();
+		TypeInfo[] result= null;;
 		ILabelProvider labelProvider= new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED);
 		
-		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider);
+		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider) {
+			protected void handleSelectionChanged() {
+				super.handleSelectionChanged();
+				// show choices in editor
+				doListSelectionChanged(getCurrentPage(), ranges);
+			}
+		};
 		dialog.setTitle(JavaEditorMessages.getString("OrganizeImportsAction.selectiondialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JavaEditorMessages.getString("OrganizeImportsAction.selectiondialog.message")); //$NON-NLS-1$
 		dialog.setElements(openChoices);
 		if (dialog.open() == dialog.OK) {
-			Object[] result= dialog.getResult();
-			ArrayList refs= new ArrayList(result.length);
-			for (int i= 0; i < result.length; i++) {
-				List types= (List) result[i];
+			Object[] res= dialog.getResult();
+			ArrayList refs= new ArrayList(res.length);
+			for (int i= 0; i < res.length; i++) {
+				List types= (List) res[i];
 				if (types.size() > 0) {
 					refs.add(types.get(0));
 				}
 			}				
-			return (TypeInfo[]) refs.toArray(new TypeInfo[refs.size()]);
+			result= (TypeInfo[]) refs.toArray(new TypeInfo[refs.size()]);
 		}
-		return null;
+		// restore selection
+		if (sel instanceof ITextSelection) {
+			ITextSelection textSelection= (ITextSelection) sel;
+			fEditor.selectAndReveal(textSelection.getOffset(), textSelection.getLength());
+		}
+		return result;
 	}
+	
+	private void doListSelectionChanged(int page, ISourceRange[] ranges) {
+		if (page >= 0 && page < ranges.length) {
+			ISourceRange range= ranges[page];
+			fEditor.selectAndReveal(range.getOffset(), range.getLength());
+		}
+	}
+	
 	
 	public void setContentEditor(ITextEditor editor) {
 		fEditor= editor;

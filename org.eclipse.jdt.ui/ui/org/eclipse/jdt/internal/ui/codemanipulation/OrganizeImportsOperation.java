@@ -5,6 +5,8 @@ package org.eclipse.jdt.internal.ui.codemanipulation;
  * All Rights Reserved.
  */
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -41,10 +43,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		/**
 		 * Selects imports from a list of choices.
 		 * @param openChoices From each array, a type ref has to be selected
+		 * @param ranges For each choice the range of the corresponding  type reference.
 		 * @return Returns <code>null</code> to cancel the operation, or the
 		 *         selected imports.
 		 */
-		TypeInfo[] chooseImports(TypeInfo[][] openChoices);
+		TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges);
 	}
 				
 	private static class TypeReferenceProcessor {
@@ -57,26 +60,18 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private ArrayList fTypeRefsFound;
 		private ArrayList fAllTypes;
 		
-		private ArrayList fOpenChoices;
-		
 		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, IProgressMonitor monitor) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
-						
+					
 			fTypeRefsFound= new ArrayList();  	// cached array list for reuse			
 			
 			fAllTypes= new ArrayList(500);
 			IProject project= impStructure.getCompilationUnit().getJavaProject().getProject();
 			fetchAllTypes(fAllTypes, project, monitor);
-			
-			fOpenChoices= new ArrayList();
 		}
-		
-		public TypeInfo[][] getOpenChoices() {
-			return (TypeInfo[][]) fOpenChoices.toArray(new TypeInfo[fOpenChoices.size()][]);
-		}
-		
+	
 		
 		private void fetchAllTypes(ArrayList list, IProject project, IProgressMonitor monitor) {
 			IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { project });		
@@ -85,19 +80,23 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		
-		public void process(String typeName) throws CoreException {
+		/**
+		 * Tries to find the given type name and add it to the import structure.
+		 * Returns array of coices if user needs to select a type.
+		 */
+		public TypeInfo[] process(String typeName) throws CoreException {
 			try {
 				ArrayList typeRefsFound= fTypeRefsFound; // reuse
-			
+						
 				findTypeRefs(typeName, typeRefsFound);				
 				int nFound= typeRefsFound.size();
 				if (nFound == 0) {
 					// nothing found
-					return;
+					return null;
 				} else if (nFound == 1) {
 					TypeInfo typeRef= (TypeInfo) typeRefsFound.get(0);
 					fImpStructure.addImport(typeRef.getTypeContainerName(), typeRef.getTypeName());
-					return;
+					return null;
 				} else {
 					String containerToImport= null;
 					boolean ambiguousImports= false;
@@ -110,7 +109,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						if (fOldSingleImports.contains(fullName)) {
 							// was single-imported
 							fImpStructure.addImport(containerName, typeRef.getTypeName());
-							return;
+							return null;
 						} else if (fOldDemandImports.contains(containerName)) {
 							if (containerToImport == null) {
 								containerToImport= containerName;
@@ -123,13 +122,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					if (containerToImport != null && !ambiguousImports) {
 						fImpStructure.addImport(containerToImport, typeName);
 					} else {
-						// remember. Need to ask the client
-						fOpenChoices.add(typeRefsFound.toArray(new TypeInfo[nFound]));
+						// return the open choices
+						return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[nFound]);
 					}
 				}
 			} finally {
 				fTypeRefsFound.clear();
 			}
+			return null;
 		}
 
 		private void findTypeRefs(String simpleTypeName, ArrayList typeRefsFound) {
@@ -157,15 +157,32 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}
 	
 	private static class TypeReferenceRequestor implements ISourceElementRequestor {
-		private ArrayList fTypeRefs;
-		private ArrayList fPositions;
 		
-		private ISourceRange fImportRange;
+		private static class RefSourceRange implements ISourceRange {
+			private int fOffset;
+			private int fLength;
+			
+			public RefSourceRange(int offset, int length) {
+				fOffset= offset;
+				fLength= length;
+			}
+			
+			public int getOffset() { 
+				return fOffset;
+			}
+			
+			public int getLength() {
+				return fLength;
+			}
+		}
 		
-		public TypeReferenceRequestor(ArrayList references, ISourceRange importRange) {
-			fTypeRefs= references;
-			fImportRange= importRange;
-			fPositions= new ArrayList(references);
+		private HashMap fTypeRefs;
+		
+		private int fImportEnd;
+		
+		public TypeReferenceRequestor(HashMap result, int importEndPos) {
+			fTypeRefs= result;
+			fImportEnd= importEndPos;
 		}
 		
 		public void acceptProblem(IProblem problem) {
@@ -201,10 +218,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 
 		public void acceptTypeReference(char[][] typeName, int sourceStart, int sourceEnd) {
-			for (int i= 0; i < typeName.length - 1; i++) {
-				unknownRefFound(typeName[i], sourceStart);
+			if (typeName.length > 0) {
+				typeRefFound(typeName[0], sourceStart);
 			}
-			typeRefFound(typeName[typeName.length - 1], sourceStart);
 		}
 		
 		public void acceptTypeReference(char[] typeName, int sourcePosition) {
@@ -212,47 +228,56 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	
 		public void acceptUnknownReference(char[][] name, int sourceStart, int sourceEnd) {
-			for (int i= 0; i < name.length; i++) {
-				unknownRefFound(name[i], sourceStart);
+			if (name.length > 0) {
+				typeRefFound(name[0], sourceStart);
 			}
 		}
 	
 		public void acceptUnknownReference(char[] name, int sourcePosition) {
-			unknownRefFound(name, sourcePosition);
+			typeRefFound(name, sourcePosition);
 		}	
+	
+		public void acceptImport(int declarationStart, int declarationEnd, char[] name, boolean onDemand) {
+		}
 		
 		private void typeRefFound(char[] typeRef, int pos) {
-			String typeRefName= new String(typeRef);
-			int idx= fTypeRefs.indexOf(typeRefName);
-			if (idx == -1) {
-				fTypeRefs.add(typeRefName);
-				fPositions.add(new Integer(pos));
-			} else {
-				fPositions.set(idx, new Integer(pos));
-			}
-		}
-			
-		private void unknownRefFound(char[] unknownRef, int pos) {
-			if (unknownRef.length > 0) {
-				if (Character.isUpperCase(unknownRef[0])) {
-					typeRefFound(unknownRef, pos);
+			if (pos >= fImportEnd) {
+				int len= getIdLen(typeRef);
+				String name= new String(typeRef, 0, len);
+				if (!fTypeRefs.containsKey(name)) {
+					fTypeRefs.put(name, new RefSourceRange(pos, len));
 				}
-			}			
+			}
 		}
 		
-		public void acceptImport(int declarationStart, int declarationEnd, char[] name, boolean onDemand) {
-			// remove all type references that came from the import statements
-			for (int i= fTypeRefs.size()-1; i >= 0; i--) {
-				int pos= ((Integer)fPositions.get(i)).intValue();
-				if (declarationStart <= pos && declarationEnd > pos) {
-					fTypeRefs.remove(i);
-					fPositions.remove(i);
+		private int getIdLen(char[] str) {
+			for (int i= 0; i < str.length; i++) {
+				if (str[i] == '.') {
+					return i;
 				}
 			}
+			return str.length;
 		}
-
-
-}	
+	}
+	
+	// find type references in a compilation unit
+	private static HashMap findTypeReferences(ICompilationUnit cu) throws JavaModelException, ParsingError {
+		HashMap references= new HashMap();
+		int inportEndPos= 0;
+		IImportContainer importContainer= cu.getImportContainer();
+		if (importContainer.exists()) {
+			ISourceRange importRange= importContainer.getSourceRange();
+			inportEndPos= importRange.getOffset() + importRange.getLength();
+		}		
+	
+		TypeReferenceRequestor requestor= new TypeReferenceRequestor(references, inportEndPos);
+		SourceElementParser parser= new SourceElementParser(requestor, new DefaultProblemFactory());
+		if (cu instanceof org.eclipse.jdt.internal.compiler.env.ICompilationUnit) {
+			parser.parseCompilationUnit((org.eclipse.jdt.internal.compiler.env.ICompilationUnit)cu, true);
+		}	
+		return references;
+	}
+	
 
 	private ICompilationUnit fCompilationUnit;	
 	private IImportDeclaration[] fCreatedImports;
@@ -292,7 +317,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			
 			monitor.beginTask(CodeManipulationMessages.getString("OrganizeImportsOperation.description"), 3); //$NON-NLS-1$
 			
-			String[] references;
+			HashMap references;
 			try {
 				references= findTypeReferences(fCompilationUnit);
 			} catch (ParsingError e) {
@@ -323,14 +348,24 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, fOrderPreference, fImportThreshold);
 			
 			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, impStructure, new SubProgressMonitor(monitor, 1));
-			for (int i= 0; i < references.length; i++) {
-				processor.process(references[i]);
+			ArrayList openChoices= new ArrayList();
+			ArrayList sourceRanges= new ArrayList();
+			Iterator iter= references.keySet().iterator();
+			while (iter.hasNext()) {
+				String typeName= (String) iter.next();
+				TypeInfo[] openChoice= processor.process(typeName);
+				if (openChoice != null) {
+					openChoices.add(openChoice);
+					sourceRanges.add(references.get(typeName));
+				}	
 			}
-			TypeInfo[][] openChoices= processor.getOpenChoices();
+			
 			processor= null;
 			
-			if (openChoices.length > 0) {
-				TypeInfo[] chosen= fChooseImportQuery.chooseImports(openChoices);
+			if (openChoices.size() > 0) {
+				TypeInfo[][] choices= (TypeInfo[][]) openChoices.toArray(new TypeInfo[openChoices.size()][]);
+				ISourceRange[] ranges= (ISourceRange[]) sourceRanges.toArray(new ISourceRange[sourceRanges.size()]);
+				TypeInfo[] chosen= fChooseImportQuery.chooseImports(choices, ranges);
 				if (chosen == null) {
 					// cancel pressed by the user
 					throw new OperationCanceledException();
@@ -347,24 +382,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	}
 	
-	// find type references in a compilation unit
-	private static String[] findTypeReferences(ICompilationUnit cu) throws JavaModelException, ParsingError {
-		ArrayList references= new ArrayList();
-		IImportContainer importContainer= cu.getImportContainer();
-		ISourceRange importRange= null;
-		if (importContainer.exists()) {
-			importRange= importContainer.getSourceRange();
-		}
-		
-		TypeReferenceRequestor requestor= new TypeReferenceRequestor(references, importRange);
-		SourceElementParser parser= new SourceElementParser(requestor, new DefaultProblemFactory());
-		if (cu instanceof org.eclipse.jdt.internal.compiler.env.ICompilationUnit) {
-			parser.parseCompilationUnit((org.eclipse.jdt.internal.compiler.env.ICompilationUnit)cu, true);
-		}	
-		String[] res= new String[references.size()];
-		references.toArray(res);
-		return res;
-	}
 	/**
 	 * Can be called after executing to get the created imports
 	 * Return null if the compilation unit had a compilation error and

@@ -288,6 +288,7 @@ public class BuildPathsBlock {
 				IClasspathEntry curr= classpathEntries[i];
 				int entryKind= curr.getEntryKind();
 				IPath path= curr.getPath();
+				boolean isExported= curr.isExported();
 				// get the resource
 				IResource res= null;
 				boolean isMissing= false;
@@ -301,7 +302,7 @@ public class BuildPathsBlock {
 					IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
 					isMissing= (resolvedPath == null) || !resolvedPath.toFile().isFile();
 				}												
-				CPListElement elem= new CPListElement(entryKind, path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath());
+				CPListElement elem= new CPListElement(entryKind, path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath(), isExported);
 				if (projExists) {
 					elem.setIsMissing(isMissing);
 				}
@@ -371,7 +372,7 @@ public class BuildPathsBlock {
 		IPath libPath= new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);
 		IPath attachPath= new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
 		IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
-		CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, libPath, null, attachPath, attachRoot);
+		CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, libPath, null, attachPath, attachRoot, false);
 		list.add(elem);
 
 		return list;
