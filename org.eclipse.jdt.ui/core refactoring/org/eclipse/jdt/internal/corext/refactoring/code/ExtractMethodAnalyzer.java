@@ -200,7 +200,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 					fExpressionBinding= expression.resolveTypeBinding();
 				}
 				if (fExpressionBinding != null) {
-					fReturnType= Bindings.createType(fExpressionBinding, ast);
+					fReturnType= Bindings.createType(fExpressionBinding, ast, true);
 					break;
 				}
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
