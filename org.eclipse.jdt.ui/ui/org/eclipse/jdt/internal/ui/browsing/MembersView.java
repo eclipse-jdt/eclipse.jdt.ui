@@ -286,6 +286,10 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#dispose()
 	 */
 	public void dispose() {
+		if (fMemberFilterActionGroup != null) {
+			fMemberFilterActionGroup.dispose();
+			fMemberFilterActionGroup= null;
+		}
 		super.dispose();
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 	}

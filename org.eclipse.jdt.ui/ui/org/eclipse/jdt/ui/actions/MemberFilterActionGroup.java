@@ -230,7 +230,6 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * @see ActionGroup#dispose()
 	 */
 	public void dispose() {
-		fViewer.removeFilter(fFilter);
 		super.dispose();
 	}
 

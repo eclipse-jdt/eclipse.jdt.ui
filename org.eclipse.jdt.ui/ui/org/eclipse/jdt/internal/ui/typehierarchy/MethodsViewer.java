@@ -192,6 +192,13 @@ public class MethodsViewer extends ProblemTableViewer {
 		tbm.add(new Separator());
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
 	}
+	
+	public void dispose() {
+		if (fMemberFilterActionGroup != null) {
+			fMemberFilterActionGroup.dispose();
+			fMemberFilterActionGroup= null;
+		}
+	}
 
 	/*
 	 * @see StructuredViewer#handleInvalidSelection(ISelection, ISelection)

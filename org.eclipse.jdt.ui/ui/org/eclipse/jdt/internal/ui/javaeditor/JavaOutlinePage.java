@@ -954,6 +954,12 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		if (fEditor == null)
 			return;
 			
+		if (fMemberFilterActionGroup != null) {
+			fMemberFilterActionGroup.dispose();
+			fMemberFilterActionGroup= null;
+		}
+			
+			
 		fEditor.outlinePageClosed();
 		fEditor= null;
 

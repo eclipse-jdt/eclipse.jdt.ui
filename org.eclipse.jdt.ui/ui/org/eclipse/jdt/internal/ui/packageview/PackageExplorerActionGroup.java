@@ -143,6 +143,16 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	}
 
 	public void dispose() {
+		if (fMemberFilterActionGroup != null) {
+			fMemberFilterActionGroup.dispose();
+			fMemberFilterActionGroup= null;
+		}
+		
+		if (fCustomFiltersActionGroup != null) {
+			fCustomFiltersActionGroup.dispose();
+			fCustomFiltersActionGroup= null;
+		}
+		
 		ISelectionProvider provider= fPart.getSite().getSelectionProvider();
 		provider.removeSelectionChangedListener(this);
 		super.dispose();
