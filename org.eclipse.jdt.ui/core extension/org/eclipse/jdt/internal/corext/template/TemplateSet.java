@@ -35,6 +35,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
@@ -122,15 +123,21 @@ public class TemplateSet {
 				}
 				String pattern= buffer.toString().trim();
 
-				Template template= new Template(name, description, context, pattern);	
-				template.setEnabled(enabled);
-				if (!allowDuplicates) {
-					Template[] templates= getTemplates(name);
-					for (int k= 0; k < templates.length; k++) {
-						remove(templates[k]);
+				Template template= new Template(name, description, context, pattern);
+				
+				String message= validateTemplate(template);
+				if (message == null) {
+					template.setEnabled(enabled);
+					if (!allowDuplicates) {
+						Template[] templates= getTemplates(name);
+						for (int k= 0; k < templates.length; k++) {
+							remove(templates[k]);
+						}
 					}
+					add(template);					
+				} else {
+					JavaPlugin.logErrorMessage("Template " + name + " not added: " + message);
 				}
-				add(template);
 			}
 		} catch (ParserConfigurationException e) {
 			throwReadException(e);
@@ -140,6 +147,15 @@ public class TemplateSet {
 			throwReadException(e);
 		}
 	}
+	
+	protected String validateTemplate(Template template) throws CoreException {
+		ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
+		if (type == null) {
+			return "Unknown context type: " + template.getContextTypeName(); //$NON-NLS-1$
+		}
+		return type.validate(template.getPattern());
+	}
+	
 
 	
 	private String getAttributeValue(NamedNodeMap attributes, String name) {
