@@ -390,7 +390,35 @@ public class RenameTempTests extends RefactoringTest{
 //		printTestDisabledMessage("bug#19851");
 		helper1("locker");
 	}
-
+	
+	public void test54() throws Exception{
+		helper1("obj");
+	}
+	
+	public void test55() throws Exception{
+		helper1("t");
+	}
+	
+	public void test56() throws Exception{
+		helper1("param");
+	}
+	
+	public void test57() throws Exception{
+		helper1("param");
+	}
+	
+	public void test58() throws Exception{
+		helper1("param");
+	}
+	
+	public void test59() throws Exception{
+		helper1("thing");
+	}
+	
+	public void test60() throws Exception{
+		helper1("param");
+	}
+	
 // -----
 	public void testFail0() throws Exception{
 		if (BUG_checkDeclInNestedClass) {
