@@ -30,6 +30,10 @@ public abstract class TypeSet implements ITypeSet {
 		public String toString() {
 			return "UNIVERSE"; //$NON-NLS-1$
 		}
+
+		public boolean isEmpty() {
+			return false;
+		}
 	}
 	
 	private static class SingleTypeSet extends TypeSet {
@@ -79,9 +83,17 @@ public abstract class TypeSet implements ITypeSet {
 		public String toString() {
 			return fType.getPrettySignature();
 		}
+
+		public boolean isEmpty() {
+			return false;
+		}
 	}
 	
 	public static class EmptyTypeSet extends TypeSet {
+
+		public String toString() {
+			return "EMPTY"; //$NON-NLS-1$
+		}
 
 		public TType chooseSingleType() {
 			return null;
@@ -89,6 +101,10 @@ public abstract class TypeSet implements ITypeSet {
 
 		public ITypeSet restrictedTo(ITypeSet restrictionSet) {
 			return this;
+		}
+
+		public boolean isEmpty() {
+			return true;
 		}
 	}
 
@@ -167,6 +183,10 @@ public abstract class TypeSet implements ITypeSet {
 			}
 			return names.toString();
 		}
+
+		public boolean isEmpty() {
+			return fTypes.length == 0;
+		}
 	}
 
 	private final static EmptyTypeSet fgEmpty= new EmptyTypeSet();
@@ -186,5 +206,12 @@ public abstract class TypeSet implements ITypeSet {
 			return fgUniverse;
 		else
 			return new SingleTypeSet(type);
+	}
+
+	public static ITypeSet create(TType[] types) {
+		if (types == null)
+			return fgUniverse;
+		else
+			return new MultiTypeSet(types);
 	}
 }
