@@ -308,6 +308,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter));
 			createEdits(owner, fRewriter, ownerDescriptions);			
 			sub.done();
+			result.merge(validateModifiesFiles());
 			return result;
 		} catch (JavaModelException e){
 			throw e;
@@ -525,6 +526,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	private static IFile getFile(ICompilationUnit cu) throws CoreException {
 		return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
-	}		
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
+	}			
+
+	private IFile[] getAllFilesToModify() throws CoreException{
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+	}
 }
 
