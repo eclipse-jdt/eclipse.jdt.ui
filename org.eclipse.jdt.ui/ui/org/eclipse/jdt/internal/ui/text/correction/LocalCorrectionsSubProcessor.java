@@ -361,9 +361,8 @@ public class LocalCorrectionsSubProcessor {
         CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
         ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
 
-        if (selectedNode != null) {        
-            Name qualifier= getQualifier(selectedNode);
-            
+        if (selectedNode != null) {
+        	Expression qualifier= getQualifier(selectedNode);
             if (qualifier != null) {                
                 ITypeBinding type= qualifier.resolveTypeBinding();
                 
@@ -387,15 +386,19 @@ public class LocalCorrectionsSubProcessor {
         proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
 	}
 
-    private static Name getQualifier(ASTNode node) {
+    private static Expression getQualifier(ASTNode node) {
         if (node instanceof QualifiedName) {
-            QualifiedName qn= (QualifiedName) node;
-            return qn.getQualifier();
-        } else if (node instanceof MethodInvocation) {
-            MethodInvocation mi= (MethodInvocation) node;
-            if (mi.getExpression() instanceof Name) {
-				return (Name) mi.getExpression();
-			}
+            return ((QualifiedName) node).getQualifier();
+        }
+        if (node instanceof SimpleName) {
+        	ASTNode parent= node.getParent();
+        	if (parent instanceof FieldAccess) {
+        		return ((FieldAccess) parent).getExpression();
+        	}
+        	return null;
+        }
+        if (node instanceof MethodInvocation) {
+        	return ((MethodInvocation) node).getExpression();
         }
         return null;
     }
