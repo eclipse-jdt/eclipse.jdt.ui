@@ -38,11 +38,6 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	public JavaAddElementFromHistory() {
 	}
 	
-	// CompareMessages.getString("AddFromHistory.action.label")
-	
-	/**
-	 * @see Action#run
-	 */
 	public void run(IAction action) {
 		
 		String errorTitle= CompareMessages.getString("AddFromHistory.title"); //$NON-NLS-1$
