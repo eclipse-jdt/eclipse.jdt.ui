@@ -49,7 +49,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -521,9 +520,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		}
 	}
 	
-	private TextEdit createTextChange(SearchMatch searchResult) {
+	private TextEdit createTextChange(SearchMatch match) {
 		String oldName= fField.getElementName();
-		int offset= SearchUtils.getEnd(searchResult) - oldName.length();
+		int offset= match.getOffset() + match.getLength() - oldName.length(); // could be qualified
 		return new ReplaceEdit(offset, oldName.length(), getNewElementName());
 	}
 	
@@ -564,9 +563,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 2); //$NON-NLS-1$
-			SearchResultGroup[] oldOccurrences= getOldOccurrences(new SubProgressMonitor(pm, 1));
-			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), fChangeManager);
-			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(fChangeManager, oldOccurrences, newOccurrences);
+			SearchResultGroup[] oldReferences= fReferences;
+			SearchResultGroup[] newReferences= getNewReferences(new SubProgressMonitor(pm, 1), fChangeManager);
+			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, oldReferences, newReferences, getNewElementName());
 			return result;
 		} finally{
 			pm.done();
@@ -578,13 +577,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		}
 	}
 
-	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws CoreException {
-		//TODO: repeats the search for fReferences, only to get the declaration too.
-		SearchPattern oldPattern= SearchPattern.createPattern(fField, IJavaSearchConstants.ALL_OCCURRENCES);
-		return RefactoringSearchEngine.search(oldPattern, createRefactoringScope(), pm);
-	}
-	
-	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
+	private SearchResultGroup[] getNewReferences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
 		fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
@@ -597,7 +590,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		if (field == null || ! field.exists())
 			return new SearchResultGroup[0];
 		
-		SearchPattern newPattern= SearchPattern.createPattern(field, IJavaSearchConstants.ALL_OCCURRENCES);			
+		SearchPattern newPattern= SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES);			
 		return RefactoringSearchEngine.search(newPattern, createRefactoringScope(), new SubProgressMonitor(pm, 1), fNewWorkingCopies);
 	}
 
