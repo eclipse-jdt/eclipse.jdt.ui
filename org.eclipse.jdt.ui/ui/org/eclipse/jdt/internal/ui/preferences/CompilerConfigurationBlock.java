@@ -267,7 +267,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_undocumented_empty_block.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-		
+
 		return composite;
 	}
 
