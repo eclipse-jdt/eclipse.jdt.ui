@@ -28,7 +28,7 @@ public class RetargetActionIDs {
 
 	public static String SHOW_NEXT_PROBLEM= "org.eclipse.jdt.ui.actions.NextProblem";
 	
-	public static String SHOW_PREVIOUS_PROBLEM= "org.eclipse.jdt.ui.actions.NextProblem";	
+	public static String SHOW_PREVIOUS_PROBLEM= "org.eclipse.jdt.ui.actions.PreviousProblem";	
 
 
 	// Source menu
