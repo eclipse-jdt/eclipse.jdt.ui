@@ -4,12 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
@@ -17,14 +14,14 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ui.texteditor.IDocumentProvider;
+
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -32,16 +29,13 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
-import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtCopyAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
-import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -53,7 +47,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private CopyRefactoring fCopyRefactoring;
 	private int fCanCopyElements;
 
-	public SelectionTransferDropAdapter(StructuredViewer viewer) {
+	public SelectionTransferDropAdapter(AbstractTreeViewer viewer) {
 		super(viewer, DND.FEEDBACK_SCROLL | DND.FEEDBACK_EXPAND);
 	}
 
@@ -113,16 +107,6 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		try{
 			if (event.detail == DND.DROP_MOVE) {
 				handleDropMove(target, event);
-				
-				if (! canPasteSourceReferences(target, event))
-					return;
-				DeleteSourceReferencesAction delete= new DeleteSourceReferencesAction(new SimpleSelectionProvider(fElements));
-				delete.setAskForDeleteConfirmation(false);
-				delete.setCanDeleteGetterSetter(false);
-				delete.update();
-				if (delete.isEnabled())
-					delete.run();
-				
 			} else if (event.detail == DND.DROP_COPY) {
 				handleDropCopy(target, event);
 			}
@@ -137,12 +121,6 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 	
 	private boolean handleValidateMove(Object target, DropTargetEvent event) throws JavaModelException{
-		if (target == null)
-			return false;
-		
-		if (canPasteSourceReferences(target, event))
-			return true;
-		
 		if (fMoveRefactoring == null){
 			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		}	
@@ -172,30 +150,10 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 	
 	private void handleDropMove(final Object target, DropTargetEvent event) throws JavaModelException{
-		if (canPasteSourceReferences(target, event)){
-			pasteSourceReferences(target, event);
-			return;
-		}
-		new DragNDropMoveAction(new SimpleSelectionProvider(fElements), target).run();
-	}
-
-	private void pasteSourceReferences(final Object target, DropTargetEvent event) {
-		ISourceReference[] elements= getDragableSourceReferences();
-		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(elements, target);
-		pasteAction.update();
-		if (!pasteAction.isEnabled()){
-			event.detail= DND.DROP_NONE;
-			return;
-		}	
-		pasteAction.run();	
-		
-		return;
+		new DragNDropMoveAction(StructuredSelectionProvider.createFrom(getViewer()), target).run();
 	}
 	
 	private boolean handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
-		if (canPasteSourceReferences(target, event))
-			return true;
-		
 		if (fCopyRefactoring == null)
 			fCopyRefactoring= new CopyRefactoring(fElements);
 		
@@ -203,36 +161,6 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			return false;	
 
 		return fCopyRefactoring.isValidDestination(target);
-	}
-
-	private boolean canPasteSourceReferences(Object target, DropTargetEvent event) throws JavaModelException{
-		ISourceReference[] elements= getDragableSourceReferences();
-		if (elements.length != fElements.size())
-			return false;
-		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(elements, target);
-		pasteAction.update();
-		return pasteAction.isEnabled();
-	}
-	
-	private ISourceReference[] getDragableSourceReferences(){
-		List result= new ArrayList(fElements.size());
-		for(Iterator iter= fElements.iterator(); iter.hasNext();){
-			Object each= iter.next();
-			if (isDragableSourceReferences(each))
-				result.add(each);
-		}
-		return (ISourceReference[])result.toArray(new ISourceReference[result.size()]);
-	}
-	
-	private static boolean isDragableSourceReferences(Object element) {
-		if (!(element instanceof ISourceReference))
-			return false;
-		if (!(element instanceof IJavaElement))
-			return false;
-		if (element instanceof ICompilationUnit)
-			return false;
-		
-		return true;	
 	}
 			
 	private boolean canCopyElements() {
@@ -245,12 +173,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}		
 	
 	private void handleDropCopy(final Object target, DropTargetEvent event) throws JavaModelException{
-		if (canPasteSourceReferences(target, event)){
-			pasteSourceReferences(target, event);
-			return;
-		}
-		
-		JdtCopyAction action= new JdtCopyAction("#COPY", new SimpleSelectionProvider(fElements)){//$NON-NLS-1$
+		JdtCopyAction action= new JdtCopyAction("#COPY", StructuredSelectionProvider.createFrom(getViewer())){ //$NON-NLS-1$
 			protected Object selectDestination(ReorgRefactoring ref) {
 				return target;
 			}
@@ -263,8 +186,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		private Object fTarget;
 		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
 		
-		public DragNDropMoveAction(ISelectionProvider provider, Object target){
-			super("#MOVE", provider);//$NON-NLS-1$
+		public DragNDropMoveAction(StructuredSelectionProvider provider, Object target){
+			super("#MOVE", provider); //$NON-NLS-1$
 			Assert.isNotNull(target);
 			fTarget= target;
 		}

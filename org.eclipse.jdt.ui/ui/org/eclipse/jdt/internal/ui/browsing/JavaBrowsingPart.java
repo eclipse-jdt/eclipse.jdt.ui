@@ -250,8 +250,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fViewer.setContentProvider(createContentProvider());
 		setInitialInput();
 		
-		initDragAndDrop();
-		
 		// Initialize selecton
 		setInitialSelection();
 		
@@ -262,30 +260,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fillActionBars();
 		
 		setHelp();
-	}
-
-	private void initDragAndDrop() {
-		int ops= DND.DROP_COPY | DND.DROP_MOVE;
-		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(), 
-			ResourceTransfer.getInstance(),
-			FileTransfer.getInstance()};
-		
-		// Drop Adapter
-		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
-			new SelectionTransferDropAdapter(fViewer)
-		};
-		fViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
-		
-		// Drag Adapter
-		Control control= fViewer.getControl();
-		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
-			new SelectionTransferDragAdapter(fViewer),
-			new ResourceTransferDragAdapter(fViewer)
-		};
-		DragSource source= new DragSource(control, ops);
-		// Note, that the transfer agents are set by the delegating drag adapter itself.
-		source.addDragListener(new DelegatingDragAdapter(dragListeners));
 	}
 	
 	protected void fillActionBars() {
