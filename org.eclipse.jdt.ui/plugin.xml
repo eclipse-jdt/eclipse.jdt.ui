@@ -894,19 +894,6 @@ JavaStructureDiffViewerCreator
 			description="%OpenSuperImplementationAction.description"
 			retarget="true" />
 			
-		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
-      		menubarPath="navigate/openGroup"
-      		label="%OpenTypeHierarchyAction.label"
-			retarget="true" />
-			
-		<action id="org.eclipse.jdt.ui.actions.Open"
-      		menubarPath="navigate/openGroup"
-      		label="%OpenAction.label"
-			tooltip="%OpenAction.tooltip"
-			description="%OpenAction.description"
-			retarget="true" 
-			allowLabelUpdate="true"/>
-			
 		<action id="org.eclipse.jdt.ui.actions.ShowInNaviagtorView"
       		menubarPath="navigate/showGroup"
       		label="%ShowInNavigatorViewAction.label"
@@ -1151,7 +1138,7 @@ JavaStructureDiffViewerCreator
 
 
 	<actionSet
-		id="org.eclipse.jdt.ui.JavaSearchActionSet"
+		id="org.eclipse.jdt.ui.SearchActionSet"
         label="%JavaSearchActionSet.label"
         description= "%JavaSearchActionSet.description"
 		visible="false">
@@ -1278,7 +1265,7 @@ JavaStructureDiffViewerCreator
 
 <extension point="org.eclipse.ui.actionSetPartAssociations">
 	<actionSetPartAssociation 
-		targetID="org.eclipse.jdt.ui.JavaSearchActionSet">
+		targetID="org.eclipse.jdt.ui.SearchActionSet">
 		<part id="org.eclipse.jdt.ui.PackageExplorer"/>
 		<part id="org.eclipse.jdt.ui.TypeHierarchy" />
 		<part id="org.eclipse.jdt.ui.CompilationUnitEditor"/>
@@ -1294,18 +1281,13 @@ JavaStructureDiffViewerCreator
 <!-- End Java contributions for Search view -->
 
 
-<!-- Begin Java contributions for Search view -->
+<!-- Begin Java Open action contributions  -->
+
 <extension point="org.eclipse.ui.actionSets">
-
-	<!-- =========================================================================== -->
-	<!-- Navigate Menu                                                               -->
-	<!-- =========================================================================== -->
-		
-
 	<actionSet
-		id="org.eclipse.jdt.internal.ui.SearchViewActionSet"
-        label="%JavaSearchViewActionSet.label"
-        description= "%JavaSearchViewActionSet.description"
+		id="org.eclipse.jdt.ui.OpenActionSet"
+        label="%OpenActionSet.label"
+        description= "%OpenActionSet.description"
 		visible="false">
 
 		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
@@ -1324,13 +1306,21 @@ JavaStructureDiffViewerCreator
 </extension>
 
 <extension point="org.eclipse.ui.actionSetPartAssociations">
-	<actionSetPartAssociation 
-		targetID="org.eclipse.jdt.internal.ui.SearchViewActionSet">
+	<actionSetPartAssociation
+		targetID="org.eclipse.jdt.ui.OpenActionSet">
 		<part id="org.eclipse.search.SearchResultView"/>
+		<part id="org.eclipse.jdt.ui.PackageExplorer"/>
+		<part id="org.eclipse.jdt.ui.TypeHierarchy" />
+		<part id="org.eclipse.jdt.ui.CompilationUnitEditor"/>
+		<part id="org.eclipse.jdt.ui.ClassFileEditor"/>
+		<part id="org.eclipse.jdt.ui.ProjectsView"/>
+		<part id="org.eclipse.jdt.ui.PackagesView"/>
+		<part id="org.eclipse.jdt.ui.TypesView"/>
+		<part id="org.eclipse.jdt.ui.MembersView"/>
 	</actionSetPartAssociation>
 </extension>
 
-<!-- End Java contributions for Search view -->
+<!-- End Java Open action contributions  -->
 
 <extension
 	point="org.eclipse.ui.popupMenus">         
