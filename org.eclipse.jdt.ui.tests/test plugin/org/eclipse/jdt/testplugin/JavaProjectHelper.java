@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.ClasspathEntry;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 /**
  * Helper methods to set up a IJavaProject.
@@ -70,7 +71,7 @@ public class JavaProjectHelper {
 		if (binFolderName != null && binFolderName.length() > 0) {
 			IFolder binFolder= project.getFolder(binFolderName);
 			if (!binFolder.exists()) {
-				binFolder.create(false, true, null);
+				CoreUtility.createFolder(binFolder, false, true, null);
 			}
 			outputLocation= binFolder.getFullPath();
 		} else {
@@ -117,6 +118,13 @@ public class JavaProjectHelper {
 	 * Adds a source container to a IJavaProject.
 	 */		
 	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName) throws CoreException {
+		return addSourceContainer(jproject, containerName, new Path[0]);
+	}
+
+	/**
+	 * Adds a source container to a IJavaProject.
+	 */		
+	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName, IPath[] exclusionFilters) throws CoreException {
 		IProject project= jproject.getProject();
 		IContainer container= null;
 		if (containerName == null || containerName.length() == 0) {
@@ -124,13 +132,13 @@ public class JavaProjectHelper {
 		} else {
 			IFolder folder= project.getFolder(containerName);
 			if (!folder.exists()) {
-				folder.create(false, true, null);
+				CoreUtility.createFolder(folder, false, true, null);
 			}
 			container= folder;
 		}
 		IPackageFragmentRoot root= jproject.getPackageFragmentRoot(container);
 		
-		IClasspathEntry cpe= JavaCore.newSourceEntry(root.getPath());
+		IClasspathEntry cpe= JavaCore.newSourceEntry(root.getPath(), exclusionFilters);
 		addToClasspath(jproject, cpe);		
 		return root;
 	}
@@ -140,7 +148,16 @@ public class JavaProjectHelper {
 	 * in the given Zip file.
 	 */	
 	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, ZipFile zipFile) throws InvocationTargetException, CoreException {
-		IPackageFragmentRoot root= addSourceContainer(jproject, containerName);
+		return addSourceContainerWithImport(jproject, containerName, zipFile, new Path[0]);
+	}
+
+
+	/**
+	 * Adds a source container to a IJavaProject and imports all files contained
+	 * in the given Zip file.
+	 */	
+	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, ZipFile zipFile, IPath[] exclusionFilters) throws InvocationTargetException, CoreException {
+		IPackageFragmentRoot root= addSourceContainer(jproject, containerName, exclusionFilters);
 		importFilesFromZip(zipFile, root.getPath(), null);
 		return root;
 	}
@@ -276,7 +293,7 @@ public class JavaProjectHelper {
 		workspace.setDescription(desc);
 	}
 
-	private static void addToClasspath(IJavaProject jproject, IClasspathEntry cpe) throws JavaModelException {
+	public static void addToClasspath(IJavaProject jproject, IClasspathEntry cpe) throws JavaModelException {
 		IClasspathEntry[] oldEntries= jproject.getRawClasspath();
 		for (int i= 0; i < oldEntries.length; i++) {
 			if (oldEntries[i].equals(cpe)) {
