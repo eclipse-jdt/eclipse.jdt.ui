@@ -25,7 +25,7 @@ public class DisplayAction extends EvaluateAction {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					if (result.hasProblems())
-						showProblems(result);
+						reportProblems(result);
 					if (value != null)
 						insertResult(value);
 				}
@@ -33,28 +33,21 @@ public class DisplayAction extends EvaluateAction {
 		}
 	}
 	
-	protected void showProblems(IJavaEvaluationResult result) {
+	protected void reportProblems(IJavaEvaluationResult result) {
 		IMarker[] problems= result.getProblems();
-		if (problems.length == 0) {
-			Throwable throwable= result.getException();
-			Status status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, throwable.getMessage(), throwable);
-			reportError(status);
-		} else
-			showProblems(problems);
+		if (problems.length == 0)
+			reportError(result.getException());
+		else
+			reportProblems(problems);
 	}
 	
-	protected void showProblems(IMarker[] problems) {
+	protected void reportProblems(IMarker[] problems) {
 		
 		String defaultMsg= getErrorResourceString("unqualified");
-		String position= getErrorResourceString("position");
 		
 		StringBuffer buffer= new StringBuffer();
 		for (int i= 0; i < problems.length; i++) {
 			if (i > 0) buffer.append('\n');
-			buffer.append(position);
-			buffer.append(' ');
-			buffer.append(MarkerUtilities.getCharStart(problems[i]));
-			buffer.append(' ');
 			buffer.append(problems[i].getAttribute(IMarker.MESSAGE, defaultMsg));
 		}
 		
@@ -80,20 +73,11 @@ public class DisplayAction extends EvaluateAction {
 				resultString.append(result.evaluateToString());
 			}
 		} catch(DebugException x) {
-			reportError(x.getStatus());
+			reportError(x);
 		}
 		
-		IDataDisplay dataDisplay= getDataDisplay(fWorkbenchPart);
+		IDataDisplay dataDisplay= getDataDisplay();
 		if (dataDisplay != null)
-			dataDisplay.display(fExpression, resultString.toString());
-	}
-	
-	protected IDataDisplay getDataDisplay(IWorkbenchPart workbenchPart) {
-		
-		Object value= workbenchPart.getAdapter(IDataDisplay.class);
-		if (value instanceof IDataDisplay)
-			return (IDataDisplay) value;
-		
-		return null;
+			dataDisplay.displayExpressionValue(resultString.toString());
 	}
 }

@@ -54,7 +54,7 @@ public class EditorUtility {
 		
 		return null;
 	}
-
+	
 	/**
 	 * Opens a Java editor for an element (IJavaElement, IFile, IStorage...)
 	 * The editor is activated by default
@@ -69,6 +69,10 @@ public class EditorUtility {
 	 * @return the IEditorPart or null if wrong element type or opening failed
 	 */
 	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws JavaModelException, PartInitException {
+		
+		if (inputElement instanceof IFile)
+			return openInEditor((IFile) inputElement);
+		
 		IEditorInput input= getEditorInput(inputElement);
 		return openInEditor(input, getEditorID(input, inputElement), activate);
 	}

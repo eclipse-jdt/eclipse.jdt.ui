@@ -16,7 +16,7 @@ public class EditorDisplayAction extends DisplayAction {
 		super(bundle, prefix, part);
 	}
 	
-	protected IDataDisplay getDataDisplay(IWorkbenchPart workbenchPart) {
+	protected IDataDisplay getDataDisplay() {
 		
 		IWorkbenchPage page= JavaPlugin.getDefault().getActivePage();
 		try {

@@ -8,5 +8,7 @@ public interface IDataDisplay {
 	
 	void clear();
 	
-	void display(String expression, String value);
+	void displayExpression(String expression);
+	
+	void displayExpressionValue(String value);
 }

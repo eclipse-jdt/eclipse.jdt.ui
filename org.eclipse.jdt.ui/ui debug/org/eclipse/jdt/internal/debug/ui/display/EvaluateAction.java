@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.debug.ui.display;
 
-import java.util.ResourceBundle;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.ISourceLocator;import org.eclipse.debug.core.model.IStackFrame;import org.eclipse.debug.core.model.IThread;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.texteditor.ResourceAction;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.debug.core.IJavaEvaluationListener;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;import java.util.ResourceBundle;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.ISourceLocator;import org.eclipse.debug.core.model.IStackFrame;import org.eclipse.debug.core.model.IThread;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.texteditor.ResourceAction;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.debug.core.IJavaEvaluationListener;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -134,11 +134,18 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 			if (javaElement != null) {
 				IJavaProject project = javaElement.getJavaProject();
 				try {
+					
 					ITextSelection selection = (ITextSelection) fWorkbenchPart.getSite().getSelectionProvider().getSelection();
 					fExpression= selection.getText();
+					
+					IDataDisplay dataDisplay= getDataDisplay();
+					if (dataDisplay != null)
+						dataDisplay.displayExpression(fExpression);
+						
 					adapter.evaluate(fExpression, this, project);
+					
 				} catch (DebugException e) {
-					ErrorDialog.openError(getShell(), getErrorResourceString("errorevaluating"), null, e.getStatus());
+					reportError(e);
 				}
 			} else {
 				reportError(getErrorResourceString("nosrccontext"));
@@ -173,6 +180,15 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 		return fWorkbenchPart.getSite().getShell();
 	}
 	
+	protected IDataDisplay getDataDisplay() {
+		
+		Object value= fWorkbenchPart.getAdapter(IDataDisplay.class);
+		if (value instanceof IDataDisplay)
+			return (IDataDisplay) value;
+		
+		return null;
+	}	
+	
 	protected boolean textHasContent(String text) {
 		int length= text.length();
 		if (length > 0) {
@@ -192,6 +208,35 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 	
 	protected void reportError(IStatus status) {
 		ErrorDialog.openError(getShell(), getErrorResourceString("errorevaluating"), null, status);
+	}
+	
+	protected void reportError(Throwable exception) {
+		if (exception instanceof DebugException) {
+			DebugException de = (DebugException)exception;
+			Throwable t= de.getStatus().getException();
+			if (t != null) {
+				reportWrappedException(t);
+				return;
+			}
+		}
+		
+		if (exception instanceof CoreException) {
+			CoreException ce= (CoreException) exception;
+			reportError(ce.getStatus());
+			return;
+		}
+		
+		reportError(exception.getMessage());
+	}
+	
+	protected void reportWrappedException(Throwable exception) {
+		if (exception instanceof com.sun.jdi.InvocationException) {
+			InvocationException ie= (InvocationException) exception;
+			ObjectReference ref= ie.exception();
+			String message = getErrorResourceString("errorevaluating");
+			reportError(message + " " + ref.referenceType().name());
+		} else
+			reportError(exception);
 	}
 	
 	protected String getErrorResourceString(String key) {
