@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -22,6 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
 
@@ -53,12 +55,13 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		return name + "_" + getName() + ".java";
 	}	
 	
-	protected void selectionTest(int start, int length) throws Exception{
+	protected void selectionTest(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
 		ICompilationUnit unit= createCU(getSelectionPackage(), "A");
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
-		assertEquals(start, selection[0]);
-		assertEquals(length, selection[1]);
+		ISourceRange expected= TextRangeUtil.getSelection(unit, startLine, startColumn, endLine, endColumn);
+		assertEquals(expected.getOffset(), selection[0]);
+		assertEquals(expected.getLength(), selection[1]);
 	}
 	
 	private IPackageFragment getSelectionPackage() throws JavaModelException {
@@ -136,19 +139,19 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	//=====================================================================================
 	
 	public void test1() throws Exception {
-		selectionTest(66, 15);
+		selectionTest(5, 9, 5, 24);
 	}
 	
 	public void test2() throws Exception {
-		selectionTest(66, 10);
+		selectionTest(5, 9, 5, 19);
 	}
 	
 	public void test3() throws Exception {
-		selectionTest(71, 10);
+		selectionTest(5, 14, 5, 24);
 	}
 	
 	public void test4() throws Exception {
-		selectionTest(71, 5);
+		selectionTest(5, 14, 5, 19);
 	}
 	
 	//=====================================================================================
