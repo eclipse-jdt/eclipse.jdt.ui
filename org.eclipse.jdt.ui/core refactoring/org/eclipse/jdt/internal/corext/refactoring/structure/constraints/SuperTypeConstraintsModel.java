@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -174,7 +173,7 @@ public final class SuperTypeConstraintsModel {
 	private final Collection fCastVariables= new ArrayList();
 
 	/** The compliance level */
-	private int fCompliance= AST.JLS3;
+	private int fCompliance= 3;
 
 	/** The set of constraint variables (element type: <code>ConstraintVariable2</code>) */
 	private final HashedSet fConstraintVariables= new HashedSet();
