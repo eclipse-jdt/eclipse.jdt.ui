@@ -39,8 +39,10 @@ final class MethodOccurenceCollector extends SearchResultCollector {
 			int matchLength= end - start;
 			IBuffer buffer= unit.getBuffer();
 			String match= buffer.getText(start, matchLength);
+			//TODO: use Scanner
 			int leftBracketIndex= match.indexOf("("); //$NON-NLS-1$
 			if (leftBracketIndex != -1) {
+				// reference in code includes arguments; reference in javadoc doesn't; constructors ?
 				end= start + leftBracketIndex;
 				match= match.substring(0, leftBracketIndex);
 			}
