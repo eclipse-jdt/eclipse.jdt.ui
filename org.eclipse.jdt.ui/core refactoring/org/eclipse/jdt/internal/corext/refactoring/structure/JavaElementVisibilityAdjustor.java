@@ -129,6 +129,24 @@ public final class JavaElementVisibilityAdjustor {
 	}
 
 	/**
+	 * Does the specified modifier represent a lower visibility than the required threshold?
+	 * 
+	 * @param modifier the visibility modifier to test
+	 * @param threshold the visibility threshold to compare with
+	 * @return <code>true</code> if the visibility is lower than required, <code>false</code> otherwise
+	 */
+	public static boolean hasLowerVisibility(final int modifier, final int threshold) {
+		if (Modifier.isPrivate(threshold))
+			return false;
+		else if (Modifier.isPublic(threshold))
+			return !Modifier.isPublic(modifier);
+		else if (Modifier.isProtected(threshold))
+			return !Modifier.isProtected(threshold) && !Modifier.isPublic(threshold);
+		else
+			return Modifier.isPrivate(modifier);
+	}
+
+	/**
 	 * Do the specified modifiers represent a lower visibility than the required threshold?
 	 * 
 	 * @param modifiers the modifier list to test
@@ -158,19 +176,12 @@ public final class JavaElementVisibilityAdjustor {
 	 * @param threshold the visibility threshold keyword to compare with, or <code>null</code> to compare with default visibility
 	 * @return <code>true</code> if the visibility is lower than required, <code>false</code> otherwise
 	 */
-	private static boolean hasLowerVisibility(final ModifierKeyword keyword, final ModifierKeyword threshold) {
+	public static boolean hasLowerVisibility(final ModifierKeyword keyword, final ModifierKeyword threshold) {
 		Assert.isTrue(keyword == null || isVisibilityKeyword(keyword));
 		Assert.isTrue(threshold == null || isVisibilityKeyword(threshold));
 		final int keywordFlag= keyword != null ? keyword.toFlagValue() : Modifier.NONE;
 		final int thresholdFlag= threshold != null ? threshold.toFlagValue() : Modifier.NONE;
-		if (Modifier.isPrivate(thresholdFlag))
-			return false;
-		else if (Modifier.isPublic(thresholdFlag))
-			return !Modifier.isPublic(keywordFlag);
-		else if (Modifier.isProtected(thresholdFlag))
-			return !Modifier.isProtected(thresholdFlag) && !Modifier.isPublic(thresholdFlag);
-		else
-			return Modifier.isPrivate(keywordFlag);
+		return hasLowerVisibility(keywordFlag, thresholdFlag);
 	}
 
 	/**
@@ -300,8 +311,10 @@ public final class JavaElementVisibilityAdjustor {
 				final CompilationUnitRewrite rewriter= getCompilationUnitRewrite(fMember.getCompilationUnit());
 				final ASTRewrite rewrite= (fRewrite != null) ? fRewrite : rewriter.getASTRewrite();
 				final BodyDeclaration declaration= ASTNodeSearchUtil.getBodyDeclarationNode(fMember, rewriter.getRoot());
-				if (declaration != null)
+				if (declaration != null) {
 					ModifierRewrite.create(rewrite, declaration).setVisibility(fAdjusted != null ? fAdjusted.toFlagValue() : Modifier.NONE, null);
+					fElements.add(fMember);
+				}
 			}
 		} finally {
 			monitor.done();
