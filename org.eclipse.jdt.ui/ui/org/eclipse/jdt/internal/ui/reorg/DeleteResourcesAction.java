@@ -153,7 +153,7 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		if (selection.isEmpty())
 			setEnabled(false);
 		else
-			setEnabled(DeleteRefactoring.create(selection.toList(), null) != null);
+			setEnabled(DeleteRefactoring.isAvailable(selection.toList()));
 	}
 	
 	private static boolean confirmDelete(IStructuredSelection selection) throws JavaModelException {
