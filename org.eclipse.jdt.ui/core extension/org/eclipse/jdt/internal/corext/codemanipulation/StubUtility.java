@@ -610,7 +610,7 @@ public class StubUtility {
 		return evaluateTemplate(context, template);
 	}
 	
-	private static String evaluateTemplate(CodeTemplateContext context, Template template) throws CoreException {
+	public static String evaluateTemplate(CodeTemplateContext context, Template template) throws CoreException {
 		TemplateBuffer buffer;
 		try {
 			buffer= context.evaluate(template);
