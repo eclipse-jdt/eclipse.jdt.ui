@@ -185,8 +185,8 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 *
 	 * @param colorManager the color manager
 	 * @param preferenceStore the preference store, can be read-only
-	 * @param editor the editor in which the configured viewer(s) will reside
-	 * @param partitioning the document partitioning for this configuration
+	 * @param editor the editor in which the configured viewer(s) will reside, or <code>null</code> if none
+	 * @param partitioning the document partitioning for this configuration, or <code>null</code> for the default partitioning
 	 * @since 3.0
 	 */
 	public JavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore preferenceStore, ITextEditor editor, String partitioning) {
@@ -202,7 +202,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * using the given Java tools.
 	 *
 	 * @param tools the Java text tools to be used
-	 * @param editor the editor in which the configured viewer(s) will reside
+	 * @param editor the editor in which the configured viewer(s) will reside, or <code>null</code> if none
 	 * @see JavaTextTools
 	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)}
 	 */
