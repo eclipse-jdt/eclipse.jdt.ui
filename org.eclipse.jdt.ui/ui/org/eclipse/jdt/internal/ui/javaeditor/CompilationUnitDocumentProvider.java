@@ -94,9 +94,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		/**
 		 * Annotation representing an <code>IProblem</code>.
 		 */
-		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation {
+		static public class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation {
 
-			private static final String SPELLING_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.spelling"; //$NON-NLS-1$
+			public static final String SPELLING_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.spelling"; //$NON-NLS-1$
 			
 			//XXX: To be fully correct these constants should be non-static
 			/** 
