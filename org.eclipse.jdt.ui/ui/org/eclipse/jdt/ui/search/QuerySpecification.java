@@ -24,8 +24,10 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
  * </p>
  * 
  * <p>
- * Clients may not instantiate or subclass this class.
+ * This class isn't intended to be instantiated to subclassed by clients.
  * </p>
+ * 
+ * @since 3.0
  */
 public abstract class QuerySpecification {
 	private IJavaSearchScope fScope;

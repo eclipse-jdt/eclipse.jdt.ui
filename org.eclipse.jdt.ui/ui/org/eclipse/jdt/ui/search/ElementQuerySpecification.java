@@ -19,10 +19,12 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
  * for.
  * </p>
  * <p>
- * Clients may not instantiate or subclass this class.
+ * This class isn't intended to be instantiated to subclassed by clients.
  * </p>
  * 
  * @see org.eclipse.jdt.ui.search.QuerySpecification
+ *
+ * @since 3.0
  */
 public class ElementQuerySpecification extends QuerySpecification {
 	private IJavaElement fElement;

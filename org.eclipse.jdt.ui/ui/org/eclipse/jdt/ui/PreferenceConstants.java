@@ -2475,7 +2475,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>.
 	 * </p>
 	 *
-	 * @since 2.1
+	 * @since 3.0
 	 */	
 	public static final String FORMATTER_PROFILE = "formatter_profile"; //$NON-NLS-1$
 	

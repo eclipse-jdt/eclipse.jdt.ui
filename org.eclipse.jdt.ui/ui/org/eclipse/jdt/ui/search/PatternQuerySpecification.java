@@ -18,10 +18,12 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
  * Describes a search query by giving a textual pattern to search for.
  * </p>
  * <p>
- * Clients may not instantiate or subclass this class.
+ * This class isn't intended to be instantiated to subclassed by clients.
  * </p>
  * 
  * @see org.eclipse.jdt.ui.search.QuerySpecification
+ * 
+ * @since 3.0
  */
 public class PatternQuerySpecification extends QuerySpecification {
 	private String fPattern;

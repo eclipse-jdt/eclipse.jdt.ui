@@ -16,7 +16,11 @@ import org.eclipse.search.ui.text.Match;
  * A callback interface to report matches against. This class serves as a bottleneck and minimal interface
  * to report matches to the java search infrastructure. Query participants will be passed an
  * instance of this interface when their <code>search(...)</code> method is called.
- * Clients must not implement this interface.
+ * <p>
+ * This interface isn't intended to be implemented by clients.
+ * </p>
+ *
+ * @since 3.0
  */
 public interface ISearchRequestor {
 	/**
