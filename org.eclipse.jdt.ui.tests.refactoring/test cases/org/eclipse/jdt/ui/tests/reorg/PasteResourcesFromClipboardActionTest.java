@@ -40,7 +40,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgActionFactory;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 
 public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 
@@ -173,8 +173,8 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		if (copySelection == null)
 			return; 
 			
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(copySelection), fClipboard);	
-		CopyToClipboardAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(copySelection), fClipboard, pasteAction);
+		SelectionDispatchAction pasteAction= new PasteAction(new MockWorkbenchSite(copySelection), fClipboard);	
+		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(copySelection), fClipboard, pasteAction);
 		copyAction.update(copyAction.getSelection());
 		copyAction.setAutoRepeatOnFailure(true);
 		assertTrue("copy not enabled", copyAction.isEnabled());
@@ -183,14 +183,14 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 
 	private void checkEnabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(pasteSelection), fClipboard);
+		SelectionDispatchAction pasteAction= new PasteAction(new MockWorkbenchSite(pasteSelection), fClipboard);
 		pasteAction.update(pasteAction.getSelection());
 		assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(pasteSelection), fClipboard);
+		SelectionDispatchAction pasteAction= new PasteAction(new MockWorkbenchSite(pasteSelection), fClipboard);
 		pasteAction.update(pasteAction.getSelection());
 		assertTrue("paste incorrectly enabled", ! pasteAction.isEnabled());
 	}
