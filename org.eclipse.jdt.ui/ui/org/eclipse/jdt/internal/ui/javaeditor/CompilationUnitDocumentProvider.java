@@ -132,6 +132,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				fCopy= copy;
 				fBufferSynchronizer= bufferSynchronizer;
 			}
+			
+			void setModificationStamp(long timeStamp) {
+				fModificationStamp= timeStamp;
+			}
 		};
 		
 		protected class CompilationUnitMarkerAnnotationModel extends ResourceMarkerAnnotationModel {
@@ -244,7 +248,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 				IResource resource= original.getUnderlyingResource();
 				if (resource != null)
-					info.fModificationStamp= resource.getModificationStamp();
+					info.setModificationStamp(resource.getModificationStamp());
 				
 				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 				model.updateMarkers(info.fDocument);
@@ -256,7 +260,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			super.doSaveDocument(monitor, element, document);
 		}		
 	}
-	
+		
 	/**
 	 * @see AbstractDocumentProvider#createAnnotationModel
 	 */
