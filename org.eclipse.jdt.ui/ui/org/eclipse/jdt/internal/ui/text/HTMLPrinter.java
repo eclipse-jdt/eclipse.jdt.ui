@@ -39,9 +39,6 @@ public class HTMLPrinter {
 		buffer.insert(position, "<html><body text=\"#000000\" bgcolor=\"#FFFF88\"><font size=-1>");
 	}
 	
-	/**
-	 * @deprecated use insertPageProlog instead
-	 */
 	public static void addPageProlog(StringBuffer buffer) {
 		insertPageProlog(buffer, buffer.length());
 	}
