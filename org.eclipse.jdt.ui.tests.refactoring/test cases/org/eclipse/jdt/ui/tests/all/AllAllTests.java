@@ -22,6 +22,7 @@ public class AllAllTests {
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.extensions.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.changes.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.reorg.AllTests.suite());
+		suite.addTest(org.eclipse.jdt.ui.tests.typeconstraints.TypeConstraintTests.suite());
 	    return suite;
 	}
 }
