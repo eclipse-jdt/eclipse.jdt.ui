@@ -384,6 +384,8 @@ public class RemoteTestRunnerClient {
 	}
 	
 	private boolean hasTestId() {
+		if (fVersion == null) // TODO fix me
+			return true;
 		return fVersion.equals("v2"); //$NON-NLS-1$
 	}
 

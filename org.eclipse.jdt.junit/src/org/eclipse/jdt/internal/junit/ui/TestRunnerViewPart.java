@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -1136,6 +1137,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				try {
 					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+testName); //$NON-NLS-1$
 					tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
+					String args= "-rerun "+testId;
+					tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
 					tmp.launch(fLastLaunch.getLaunchMode(), null);	
 					return;	
 				} catch (CoreException e) {
