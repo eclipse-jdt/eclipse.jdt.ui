@@ -26,7 +26,7 @@ public interface IColorManagerExtension {
 	 *
 	 * @param key the color key
 	 * @param rgb the color specification
-	 * @exception java.lang.UnsupportedOperationException if there is already a
+	 * @throws java.lang.UnsupportedOperationException if there is already a
 	 * 	color specification remembered under the given key
 	 */
 	void bindColor(String key, RGB rgb);
