@@ -33,12 +33,9 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -50,7 +47,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -79,44 +75,6 @@ public class CallInliner {
 	private ASTNode fTargetNode;
 	private FlowContext fFlowContext;
 	private FlowInfo fFlowInfo;
-
-	private static class NameCollector extends GenericVisitor {
-		List names= new ArrayList();
-		private Selection fSelection;
-		public NameCollector(ASTNode node) {
-			fSelection= Selection.createFromStartLength(node.getStartPosition(), node.getLength());
-		}
-		protected boolean visitNode(ASTNode node) {
-			if (node.getStartPosition() > fSelection.getInclusiveEnd())
-				return true;
-			if (fSelection.coveredBy(node))
-				return true;
-			return false;
-		}
-		public boolean visit(SimpleName node) {
-			names.add(node.getIdentifier());
-			return super.visit(node);
-		}
-		public boolean visit(VariableDeclarationStatement node) {
-			return true;
-		}
-		public boolean visit(VariableDeclarationFragment node) {
-			boolean result= super.visit(node);
-			if (!result)
-				names.add(node.getName().getIdentifier());
-			return result;
-		}
-		public boolean visit(SingleVariableDeclaration node) {
-			boolean result= super.visit(node);
-			if (!result)
-				names.add(node.getName().getIdentifier());
-			return result;
-		}
-		public boolean visit(TypeDeclarationStatement node) {
-			names.add(node.getTypeDeclaration().getName().getIdentifier());
-			return false;
-		}
-	}
 
 	public CallInliner(ICompilationUnit unit, SourceProvider sourceContext, CodeGenerationSettings settings) throws CoreException {
 		super();
@@ -456,7 +414,7 @@ public class CallInliner {
 		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(fInvocation, BodyDeclaration.class);
 		NameCollector collector= new NameCollector(fInvocation);
 		decl.accept(collector);
-		List result= collector.names;
+		List result= collector.getNames();
 		result.remove(fInvocation.getName().getIdentifier());
 		return result;
 	}
