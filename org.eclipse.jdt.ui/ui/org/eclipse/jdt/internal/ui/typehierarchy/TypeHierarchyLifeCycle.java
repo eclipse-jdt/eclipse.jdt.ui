@@ -109,12 +109,16 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 						doHierarchyRefresh(element, pm);
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
+					} finally {
+						if (pm != null) {
+							pm.done();
+						}
 					}
 				}
 			};
 			
 			try {
-				context.run(false, false, op);
+				context.run(true, true, op);
 			} catch (InvocationTargetException e) {
 				Throwable th= e.getTargetException();
 				if (th instanceof JavaModelException) {

@@ -90,15 +90,12 @@ public class OpenTypeHierarchyUtil {
 	private static TypeHierarchyViewPart openInViewPart(IWorkbenchWindow window, IJavaElement input) {
 		IWorkbenchPage page= window.getActivePage();
 		try {
-			// 1GEUMSG: ITPJUI:WINNT - Class hierarchy not shown when fast view
-			if (input instanceof IMember) {
-				openEditor(input);
-			}
 			TypeHierarchyViewPart result= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
 			result.setInputElement(input);
 			if (input instanceof IMember) {
 				result.selectMember((IMember) input);
-			}
+				openEditor(input, false);
+			}	
 			return result;
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, window.getShell(), 
@@ -114,13 +111,7 @@ public class OpenTypeHierarchyUtil {
 		IJavaElement perspectiveInput= input;
 		
 		if (input instanceof IMember) {
-			ICompilationUnit cu= ((IMember)input).getCompilationUnit();
-			if (cu != null && cu.isWorkingCopy()) {
-				IJavaElement je= cu.getOriginal(input);
-				if (je != null)
-					input= je;
-			}
-			perspectiveInput= input;
+			input= JavaModelUtil.toOriginal((IMember)input);
 			if (input.getElementType() != IJavaElement.TYPE) {
 				perspectiveInput= ((IMember)input).getDeclaringType();
 			} else {
@@ -128,14 +119,15 @@ public class OpenTypeHierarchyUtil {
 			}
 		}
 		IWorkbenchPage page= workbench.showPerspective(JavaUI.ID_HIERARCHYPERSPECTIVE, window, perspectiveInput);
+		TypeHierarchyViewPart part= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
 		if (input instanceof IMember) {
-			openEditor(input);
+			openEditor(input, false);
 		}
-		return (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
+		return part;
 	}
 
-	private static void openEditor(Object input) throws PartInitException, JavaModelException {
-		IEditorPart part= EditorUtility.openInEditor(input, true);
+	private static void openEditor(Object input, boolean activate) throws PartInitException, JavaModelException {
+		IEditorPart part= EditorUtility.openInEditor(input, activate);
 		if (input instanceof IJavaElement)
 			EditorUtility.revealInEditor(part, (IJavaElement) input);
 	}
