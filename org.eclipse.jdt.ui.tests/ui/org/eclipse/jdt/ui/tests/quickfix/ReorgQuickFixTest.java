@@ -88,6 +88,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -117,6 +118,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -150,6 +152,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -190,6 +193,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -226,6 +230,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -280,6 +285,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -332,6 +338,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -391,6 +398,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -423,6 +431,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -482,6 +491,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
@@ -522,6 +532,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);

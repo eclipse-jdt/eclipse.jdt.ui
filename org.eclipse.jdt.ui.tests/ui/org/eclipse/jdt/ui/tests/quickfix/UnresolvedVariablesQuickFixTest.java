@@ -90,7 +90,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+		assertCorrectContext(context);
 
 		ArrayList proposals= new ArrayList();
 		
@@ -166,7 +166,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertNumberOf("problems", problems.length, 1);
 		
 		CorrectionContext context= getCorrectionContext(cu, problems[0]);
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+		assertCorrectContext(context);
 
 		ArrayList proposals= new ArrayList();
 		

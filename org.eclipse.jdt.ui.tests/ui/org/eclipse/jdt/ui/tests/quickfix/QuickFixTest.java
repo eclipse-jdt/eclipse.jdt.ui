@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 /**
   */
@@ -53,6 +54,10 @@ public class QuickFixTest extends TestCase {
 			}			
 		}
 	}
+	
+	public static void assertCorrectContext(CorrectionContext context) {
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+	}	
 	
 	
 	public static void assertNumberOf(String name, int nProblems, int nProblemsExpected) {

@@ -10,7 +10,6 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
@@ -42,11 +41,7 @@ public class Bindings {
 		else
 			return k2.equals(k1);
 	}
-	
-	private static boolean isPrimitiveOrArrayOfPrimitive(ITypeBinding type) {
-		return (type.isPrimitive() || (type.isArray() && type.getElementType().isPrimitive()));
-	}
-	
+		
 	public static String asString(IMethodBinding method) {
 		StringBuffer result= new StringBuffer(method.getName());
 		result.append('(');
@@ -63,24 +58,62 @@ public class Bindings {
 	}
 	
 	public static String getTypeQualifiedName(ITypeBinding type) {
-		if (isPrimitiveOrArrayOfPrimitive(type))
-			return type.getName();
 		StringBuffer buffer= new StringBuffer();
-		createName(buffer, type);
+		createName(type, false, buffer);
 		return buffer.toString();
 	}
 	
 	public static String getFullyQualifiedName(ITypeBinding type) {
-		if (isPrimitiveOrArrayOfPrimitive(type))
-			return type.getName();
 		StringBuffer buffer= new StringBuffer();
-		if (!type.getPackage().isUnnamed()) {
-			buffer.append(type.getPackage().getName());
-			buffer.append('.');
-		}
-		createName(buffer, type);
+		createName(type, true, buffer);
 		return buffer.toString();		
+	}	
+
+	private static void createName(ITypeBinding type, boolean includePackage, StringBuffer buffer) {
+		ITypeBinding baseType= type;
+		if (type.isArray()) {
+			baseType= type.getElementType();
+		}
+		if (!baseType.isPrimitive() && !baseType.isNullType()) {
+			ITypeBinding declaringType= baseType.getDeclaringClass();
+			if (declaringType != null) {
+				createName(declaringType, includePackage, buffer);
+				buffer.append('.');
+			} else if (includePackage && !baseType.getPackage().isUnnamed()) {
+				buffer.append(baseType.getPackage().getName());
+				buffer.append('.');
+			}
+		}
+		if (!baseType.isAnonymous()) {
+			buffer.append(type.getName());
+		} else {
+			buffer.append("$local$");
+		}
 	}
+	
+	private static void createName(ITypeBinding type, boolean includePackage, List list) {
+		ITypeBinding baseType= type;
+		if (type.isArray()) {
+			baseType= type.getElementType();
+		}
+		if (!baseType.isPrimitive() && !baseType.isNullType()) {
+			ITypeBinding declaringType= baseType.getDeclaringClass();
+			if (declaringType != null) {
+				createName(declaringType, includePackage, list);
+			} else if (includePackage && !baseType.getPackage().isUnnamed()) {
+				String[] components= baseType.getPackage().getNameComponents();
+				for (int i= 0; i < components.length; i++) {
+					list.add(components[i]);
+				}
+			}
+		}
+		if (!baseType.isAnonymous()) {
+			list.add(type.getName());
+		} else {
+			list.add("$local$");
+		}		
+	}	
+	
 	
 	public static String getFullyQualifiedImportName(ITypeBinding type) {
 		if (type.isArray())
@@ -92,31 +125,15 @@ public class Bindings {
 	}
 	
 	public static String[] getNameComponents(ITypeBinding type) {
-		if (isPrimitiveOrArrayOfPrimitive(type))
-			return new String[] { type.getName() };
-		List result= new ArrayList(3);
-		while(type != null) {
-			if (type.isAnonymous())
-				result.add(0, "$local$"); //$NON-NLS-1$
-			else
-				result.add(0, type.getName());
-			type= type.getDeclaringClass();
-		}
+		List result= new ArrayList(5);
+		createName(type, false, result);
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 	
 	public static String[] getAllNameComponents(ITypeBinding type) {
-		String[] typeComponents= getNameComponents(type);
-		if (isPrimitiveOrArrayOfPrimitive(type))
-			return typeComponents;
-		IPackageBinding pack= type.getPackage();
-		if (pack.isUnnamed())
-			return typeComponents;
-		String[] packComponents= pack.getNameComponents();
-		String[] result= new String[packComponents.length + typeComponents.length];
-		System.arraycopy(packComponents, 0, result, 0, packComponents.length);
-		System.arraycopy(typeComponents, 0, result, packComponents.length, typeComponents.length);
-		return result;
+		List result= new ArrayList(5);
+		createName(type, true, result);
+		return (String[]) result.toArray(new String[result.size()]);
 	}
 	
 	public static ITypeBinding getTopLevelType(ITypeBinding type) {
@@ -203,12 +220,5 @@ public class Bindings {
 		return true;
 	}	
 	
-	private static void createName(StringBuffer buffer, ITypeBinding type) {
-		ITypeBinding declaringType= type.getDeclaringClass();
-		if (declaringType != null) {
-			createName(buffer, declaringType);
-			buffer.append('.');
-		}
-		buffer.append(type.getName());
-	}
+
 }
