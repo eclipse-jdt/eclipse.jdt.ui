@@ -90,7 +90,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 				
-		int offset= buf.indexOf("getClass()");
+		int offset= buf.toString().indexOf("getClass()");
 		CorrectionContext context= getCorrectionContext(cu, offset, 0);
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
@@ -159,7 +159,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 				
-		int offset= buf.indexOf("goo().iterator()");
+		int offset= buf.toString().indexOf("goo().iterator()");
 		CorrectionContext context= getCorrectionContext(cu, offset, 0);
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
@@ -238,7 +238,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "goo().toArray();";
-		CorrectionContext context= getCorrectionContext(cu, buf.indexOf(str) + str.length(), 0);
+		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
@@ -312,7 +312,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "(IOException e)";
-		CorrectionContext context= getCorrectionContext(cu, buf.indexOf(str), 0);
+		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
@@ -354,7 +354,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		String str= "(IOException e)";
-		CorrectionContext context= getCorrectionContext(cu, buf.indexOf(str) + str.length(), 0);
+		CorrectionContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
