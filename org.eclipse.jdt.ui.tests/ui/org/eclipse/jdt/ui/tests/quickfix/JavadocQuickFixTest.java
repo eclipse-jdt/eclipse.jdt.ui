@@ -420,7 +420,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    /**\n");
 		buf.append("     * @param b\n");
-		buf.append("     * @return\n");
+		buf.append("     * @return a number\n");
 		buf.append("     */\n");
 		buf.append("    public int foo(int a, int b, int c) throws NullPointerException, Exception {\n");
 		buf.append("        return 1;\n");
@@ -446,7 +446,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("     * @param a\n");
 		buf.append("     * @param b\n");
 		buf.append("     * @param c\n");
-		buf.append("     * @return\n");
+		buf.append("     * @return a number\n");
 		buf.append("     * @throws NullPointerException\n");
 		buf.append("     * @throws Exception\n");
 		buf.append("     */\n");
@@ -465,7 +465,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("    /**\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param b\n");
-		buf.append("     * @return\n");
+		buf.append("     * @return a number\n");
 		buf.append("     */\n");
 		buf.append("    public int foo(int a, int b, int c) throws NullPointerException, Exception {\n");
 		buf.append("        return 1;\n");
