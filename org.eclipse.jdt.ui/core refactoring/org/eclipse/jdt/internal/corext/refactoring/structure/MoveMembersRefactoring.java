@@ -173,7 +173,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + JavaElementUtil.createSignature(fDestinationType) + "\' is binary.");
 
 		if (fDestinationType.isInterface() && ! getDeclaringType().isInterface())
-			return RefactoringStatus.createFatalErrorStatus("Currently, only fileds declared in an interface can be moved to another interface.");
+			return RefactoringStatus.createFatalErrorStatus("Currently, only fields declared in an interface can be moved to another interface.");
 
 		if (! fDestinationType.isInterface() && getDeclaringType().isInterface())
 			return RefactoringStatus.createFatalErrorStatus("Currently, members declared in an interface can be moved only to another interface.");
