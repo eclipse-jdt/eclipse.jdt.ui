@@ -353,6 +353,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		if (fOriginalNode.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) fOriginalNode.getParent();
 			if (parent.getExpression() == fOriginalNode) {
+				// _x_.foo() -> guess qualifier type by looking for a type with method 'foo'
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(fOriginalNode.getRoot(), parent.getName().getIdentifier(), parent.arguments());
 				if (bindings.length > 0) {
 					for (int i= 0; i < bindings.length; i++) {
