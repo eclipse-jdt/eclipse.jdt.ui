@@ -45,6 +45,7 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -654,6 +655,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 			} catch (IOException e) {
 				log(e);
 			}
+			
+			// compatibility / bug fixing code for duplicated templates
+			// TODO remove for 3.0
+			CompatibilityTemplateStore.pruneDuplicates(fCodeTemplateStore, true);
 		}
 		
 		return fCodeTemplateStore;

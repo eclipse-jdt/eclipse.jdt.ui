@@ -51,7 +51,7 @@ public final class CompatibilityTemplateStore extends TemplateStore {
 			TemplatePersistenceData[] datas= getTemplateData(true);
 			for (Iterator it= legacyTemplates.listIterator(); it.hasNext();) {
 				Template t= (Template) it.next();
-				TemplatePersistenceData orig= findSimilarTemplate(datas, t);
+				TemplatePersistenceData orig= findSimilarTemplate(datas, t, isCodeTemplates());
 				if (orig == null) { // no contributed match for the old template found
 					if (!isCodeTemplates())
 						add(new TemplatePersistenceData(t, true));
@@ -67,23 +67,54 @@ public final class CompatibilityTemplateStore extends TemplateStore {
 		}
 	}
 	
-	private TemplatePersistenceData findSimilarTemplate(TemplatePersistenceData[] datas, Template template) {
+	private static TemplatePersistenceData findSimilarTemplate(TemplatePersistenceData[] datas, Template template, boolean isCodeTemplates) {
 		 for (int i= 0; i < datas.length; i++) {
 			TemplatePersistenceData data= datas[i];
 			Template orig= data.getTemplate();
-			if (isSimilar(template, orig))
+			if (isSimilar(template, orig, isCodeTemplates))
 				return data;
 		 }
 		 
 		 return null;
 	}
 
-	private boolean isSimilar(Template t, Template orig) {
+	private static boolean isSimilar(Template t, Template orig, boolean isCodeTemplates) {
 		return orig.getName().equals(t.getName()) && orig.getContextTypeId().equals(t.getContextTypeId())
-				&& (isCodeTemplates() || orig.getDescription().equals(t.getDescription())); // only use description for templates (for, while...)
+				&& (isCodeTemplates || orig.getDescription().equals(t.getDescription())); // only use description for templates (for, while...)
 	}
 	
 	private boolean isCodeTemplates() {
 		return fLegacySet instanceof CodeTemplates;
+	}
+
+	/**
+	 * Removes any duplicates from a template store. Duplicate user added templates
+	 * are copied over their contributed siblings. If isCodeTemplates is true, 
+	 * any user added templates are then removed.
+	 * 
+	 * @param store
+	 * @param isCodeTemplates
+	 */
+	public static void pruneDuplicates(TemplateStore store, boolean isCodeTemplates) {
+		TemplatePersistenceData[] datas= store.getTemplateData(true);
+		for (int i= datas.length - 1; i >= 0; i--) {
+			TemplatePersistenceData data= datas[i];
+			if (data.isUserAdded()) {
+				// find a contributed template that is similar and check it
+				TemplatePersistenceData similar= findSimilarTemplate(datas, data.getTemplate(), isCodeTemplates);
+				if (similar != data && !similar.isUserAdded()) {
+					similar.setTemplate(data.getTemplate());
+					store.delete(data);
+				}
+			}
+		}
+		
+		if (isCodeTemplates) {
+			datas= store.getTemplateData(true);
+			for (int i= datas.length - 1; i >= 0; i--) {
+				if (datas[i].isUserAdded())
+					store.delete(datas[i]);
+			}
+		}
 	}
 }

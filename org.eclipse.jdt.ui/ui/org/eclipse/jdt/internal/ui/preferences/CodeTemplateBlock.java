@@ -366,12 +366,12 @@ public class CodeTemplateBlock {
 				Reader input= new FileReader(file);
 				TemplatePersistenceData[] datas= reader.read(input);
 				for (int i= 0; i < datas.length; i++) {
-					TemplatePersistenceData data= datas[i];
-					fTemplates.add(data);
+					updateTemplate(datas[i]);
 				}
 			}
 
 			fCodeTemplateTree.refresh();
+			updateSourceViewerInput(fCodeTemplateTree.getSelectedElements());
 
 		} catch (FileNotFoundException e) {
 			openReadErrorDialog(e);
@@ -381,6 +381,17 @@ public class CodeTemplateBlock {
 			openReadErrorDialog(e);
 		}
 
+	}
+	
+	private void updateTemplate(TemplatePersistenceData data) {
+		TemplatePersistenceData[] datas= fTemplates.getTemplateData(true);
+		for (int i= 0; i < datas.length; i++) {
+			String id= datas[i].getId();
+			if (id != null && id.equals(data.getId())) {
+				datas[i].setTemplate(data.getTemplate());
+				break;
+			}
+		}
 	}
 	
 	private void exportAll() {
@@ -454,7 +465,8 @@ public class CodeTemplateBlock {
 		fTemplates.restoreDefaults();
 		
 		// refresh
-		fCodeTemplateTree.refresh();		
+		fCodeTemplateTree.refresh();
+		updateSourceViewerInput(fCodeTemplateTree.getSelectedElements());
 	}
 	
 	public boolean performOk(boolean enabled) {
