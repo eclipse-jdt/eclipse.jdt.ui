@@ -280,6 +280,54 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		}
 	}
 	
+	public void testWrongPackageStatementInEnum() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");				
+		buf.append("public enum E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		boolean hasRename= true, hasMove= true;
+		
+		for (int i= 0; i < proposals.size(); i++) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+			if (curr instanceof CorrectPackageDeclarationProposal) {
+				assertTrue("Duplicated proposal", hasRename);
+				hasRename= false;
+				
+				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
+				String preview= getPreviewContent(proposal);				
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("\n");				
+				buf.append("public enum E {\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());			
+			} else {
+				assertTrue("Duplicated proposal", hasMove);
+				hasMove= false;				
+				curr.apply(null);
+				
+				IPackageFragment pack2= fSourceFolder.getPackageFragment("test2");
+				ICompilationUnit cu2= pack2.getCompilationUnit("E.java");
+				assertTrue("CU does not exist", cu2.exists());
+				buf= new StringBuffer();
+				buf.append("package test2;\n");
+				buf.append("\n");				
+				buf.append("public enum E {\n");
+				buf.append("}\n");
+				assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());					
+			}
+		}
+	}
+	
 	public void testWrongPackageStatementFromDefault() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -551,6 +599,37 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		buf.append("    A;\n");
 		buf.append("    public E() {\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}
+	
+	public void testWrongTypeNameInAnnot() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public @interface X {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public @interface X {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		
+		String preview= getPreviewContent(proposal);				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public @interface E {\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	
 	}
