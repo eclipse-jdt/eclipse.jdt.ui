@@ -32,6 +32,8 @@ import org.eclipse.jdt.text.tests.performance.data.Sample;
  * 	Performance.getDefault().assertPerformance(performanceMeter);
  * }
  * </pre>
+ * 
+ * This class is not intended to be subclassed by clients.
  */
 public abstract class PerformanceMeter {
 
