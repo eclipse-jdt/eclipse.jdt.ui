@@ -382,7 +382,8 @@ class UseSupertypeWherePossibleUtil {
 
 	private boolean isAnyMethodReturnTypeNodeExcluded(IMethod[] methods, Collection nodesToRemove) throws JavaModelException{
 		for (int i= 0; i < methods.length; i++) {
-			if (nodesToRemove.contains(getMethodDeclarationNode(methods[i]).getReturnType()))
+			MethodDeclaration methodDeclarationNode= getMethodDeclarationNode(methods[i]);
+			if (methodDeclarationNode == null || nodesToRemove.contains(methodDeclarationNode.getReturnType()))
 				return true;
 		}
 		return false;
