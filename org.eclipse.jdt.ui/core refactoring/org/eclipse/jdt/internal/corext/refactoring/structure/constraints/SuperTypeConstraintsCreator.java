@@ -79,7 +79,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * 
 	 * @param binding the method binding
 	 * @param type the current type
-	 * @param originals the original methods which have already been found
+	 * @param originals the original methods which have already been found (element type: <code>IMethodBinding</code>)
 	 * @param implementations <code>true</code> to favor implementation methods, <code>false</code> otherwise
 	 */
 	private static void getOriginalMethods(final IMethodBinding binding, final ITypeBinding type, final Collection originals, final boolean implementations) {
@@ -256,11 +256,11 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * End of visit the return type of a method invocation.
 	 * 
 	 * @param invocation the method invocation
-	 * @param method the method binding
+	 * @param binding the method binding
 	 */
-	private void endVisit(final MethodInvocation invocation, final IMethodBinding method) {
-		if (!method.isConstructor()) {
-			final ConstraintVariable2 variable= fModel.createReturnTypeVariable(method);
+	private void endVisit(final MethodInvocation invocation, final IMethodBinding binding) {
+		if (!binding.isConstructor()) {
+			final ConstraintVariable2 variable= fModel.createReturnTypeVariable(binding);
 			if (variable != null)
 				invocation.setProperty(PROPERTY_CONSTRAINT_VARIABLE, variable);
 		}
@@ -283,30 +283,22 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/**
 	 * End of visit the specified method declaration.
 	 * 
-	 * @param method the method binding
+	 * @param binding the method binding
 	 */
-	private void endVisit(final IMethodBinding method) {
-		Assert.isNotNull(method);
-		final String key= method.getKey();
-		Collection originals= (Collection) fOriginalMethods.get(key);
-		if (originals == null) {
-			originals= new ArrayList();
-			final ITypeBinding type= method.getDeclaringClass();
-			getOriginalMethods(method, type, originals, false);
-			getOriginalMethods(method, type, originals, true);
-			if (originals.isEmpty())
-				originals.add(method);
-			fOriginalMethods.put(key, originals);
-		}
-		IMethodBinding binding= null;
+	private void endVisit(final IMethodBinding binding) {
+		Assert.isNotNull(binding);
+		IMethodBinding method= null;
 		ConstraintVariable2 ancestor= null;
-		final ConstraintVariable2 descendant= fModel.createReturnTypeVariable(method);
-		if (descendant != null && originals.size() > 1) {
+		final ConstraintVariable2 descendant= fModel.createReturnTypeVariable(binding);
+		if (descendant != null) {
+			final Collection originals= getOriginalMethods(binding);
 			for (final Iterator iterator= originals.iterator(); iterator.hasNext();) {
-				binding= (IMethodBinding) iterator.next();
-				ancestor= fModel.createReturnTypeVariable(binding);
-				if (ancestor != null)
-					fModel.createCovariantTypeConstraint(descendant, ancestor);
+				method= (IMethodBinding) iterator.next();
+				if (!method.getKey().equals(binding.getKey())) {
+					ancestor= fModel.createReturnTypeVariable(method);
+					if (ancestor != null)
+						fModel.createCovariantTypeConstraint(descendant, ancestor);
+				}
 			}
 		}
 	}
@@ -314,28 +306,18 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/**
 	 * End of visit the specified method invocation.
 	 * 
-	 * @param method the method binding
+	 * @param binding the method binding
 	 * @param descendant the constraint variable of the invocation expression
 	 */
-	private void endVisit(final IMethodBinding method, final ConstraintVariable2 descendant) {
-		Assert.isNotNull(method);
+	private void endVisit(final IMethodBinding binding, final ConstraintVariable2 descendant) {
+		Assert.isNotNull(binding);
 		Assert.isNotNull(descendant);
-		final String key= method.getKey();
-		Collection originals= (Collection) fOriginalMethods.get(key);
-		if (originals == null) {
-			originals= new ArrayList();
-			final ITypeBinding type= method.getDeclaringClass();
-			getOriginalMethods(method, type, originals, false);
-			getOriginalMethods(method, type, originals, true);
-			if (originals.isEmpty())
-				originals.add(method);
-			fOriginalMethods.put(key, originals);
-		}
 		ITypeBinding declaring= null;
-		IMethodBinding binding= null;
+		IMethodBinding method= null;
+		final Collection originals= getOriginalMethods(binding);
 		for (final Iterator iterator= originals.iterator(); iterator.hasNext();) {
-			binding= (IMethodBinding) iterator.next();
-			declaring= binding.getDeclaringClass();
+			method= (IMethodBinding) iterator.next();
+			declaring= method.getDeclaringClass();
 			if (declaring != null) {
 				final ConstraintVariable2 ancestor= fModel.createDeclaringTypeVariable(declaring);
 				if (ancestor != null)
@@ -345,16 +327,38 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	}
 
 	/**
+	 * Returns the original methods of the method hierarchy of the specified method.
+	 * 
+	 * @param binding the method binding
+	 * @return the original methods (element type: <code>IMethodBinding</code>)
+	 */
+	private Collection getOriginalMethods(final IMethodBinding binding) {
+		Assert.isNotNull(binding);
+		final String key= binding.getKey();
+		Collection originals= (Collection) fOriginalMethods.get(key);
+		if (originals == null) {
+			originals= new ArrayList();
+			final ITypeBinding type= binding.getDeclaringClass();
+			getOriginalMethods(binding, type, originals, false);
+			getOriginalMethods(binding, type, originals, true);
+			if (originals.isEmpty())
+				originals.add(binding);
+			fOriginalMethods.put(key, originals);
+		}
+		return originals;
+	}
+
+	/**
 	 * End of visit the field access.
 	 * 
-	 * @param variable the variable binding
+	 * @param binding the variable binding
 	 * @param qualifier the qualifier expression, or <code>null</code>
 	 * @param access the access expression
 	 */
-	private void endVisit(final IVariableBinding variable, final Expression qualifier, final Expression access) {
-		access.setProperty(PROPERTY_CONSTRAINT_VARIABLE, fModel.createVariableVariable(variable));
+	private void endVisit(final IVariableBinding binding, final Expression qualifier, final Expression access) {
+		access.setProperty(PROPERTY_CONSTRAINT_VARIABLE, fModel.createVariableVariable(binding));
 		if (qualifier != null) {
-			final ITypeBinding type= variable.getDeclaringClass();
+			final ITypeBinding type= binding.getDeclaringClass();
 			if (type != null) {
 				// array.length does not have a declaring class
 				final ConstraintVariable2 ancestor= fModel.createDeclaringTypeVariable(type);
@@ -371,16 +375,16 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * End of visit the method argument list.
 	 * 
 	 * @param arguments the arguments (element type: <code>Expression</code>)
-	 * @param method the method binding
+	 * @param binding the method binding
 	 */
-	private void endVisit(final List arguments, final IMethodBinding method) {
+	private void endVisit(final List arguments, final IMethodBinding binding) {
 		Expression expression= null;
 		ConstraintVariable2 ancestor= null;
 		ConstraintVariable2 descendant= null;
 		for (int index= 0; index < arguments.size(); index++) {
 			expression= (Expression) arguments.get(index);
 			descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-			ancestor= fModel.createMethodParameterVariable(method, index);
+			ancestor= fModel.createMethodParameterVariable(binding, index);
 			if (ancestor != null && descendant != null)
 				fModel.createSubtypeConstraint(descendant, ancestor);
 		}
@@ -437,6 +441,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			IVariableBinding variable= null;
 			final List parameters= node.parameters();
 			if (!parameters.isEmpty()) {
+				final Collection originals= getOriginalMethods(binding);
 				SingleVariableDeclaration declaration= null;
 				for (int index= 0; index < parameters.size(); index++) {
 					declaration= (SingleVariableDeclaration) parameters.get(index);
@@ -450,6 +455,15 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 							descendant= fModel.createVariableVariable(variable);
 							if (descendant != null)
 								fModel.createEqualityConstraint(ancestor, descendant);
+						}
+						IMethodBinding method= null;
+						for (final Iterator iterator= originals.iterator(); iterator.hasNext();) {
+							method= (IMethodBinding) iterator.next();
+							if (!method.getKey().equals(binding.getKey())) {
+								descendant= fModel.createMethodParameterVariable(method, index);
+								if (descendant != null)
+									fModel.createEqualityConstraint(ancestor, descendant);
+							}
 						}
 					}
 				}

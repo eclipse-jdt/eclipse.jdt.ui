@@ -24,8 +24,8 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ISourceConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
@@ -143,27 +143,25 @@ public final class SuperTypeConstraintsSolver {
 		ITypeSet estimate= null;
 		ICompilationUnit unit= null;
 		ConstraintVariable2 variable= null;
-		ISourceConstraintVariable declaration= null;
+		ITypeConstraintVariable declaration= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
 			variable= (ConstraintVariable2) iterator.next();
-			if (variable instanceof ISourceConstraintVariable) {
-				estimate= variable.getTypeEstimate();
+			if (variable instanceof ITypeConstraintVariable) {
+				declaration= (ITypeConstraintVariable) variable;
+				estimate= declaration.getTypeEstimate();
 				if (estimate != null) {
 					type= estimate.chooseSingleType();
 					if (type == fModel.getSuperType()) {
-						variable.setData(DATA_TYPE_ESTIMATE, type);
-						if (variable instanceof ISourceConstraintVariable) {
-							declaration= (ISourceConstraintVariable) variable;
-							unit= declaration.getCompilationUnit();
-							if (unit != null) {
-								Collection matches= (Collection) fTypeOccurrences.get(unit);
-								if (matches != null)
-									matches.add(variable);
-								else {
-									matches= new ArrayList(1);
-									matches.add(variable);
-									fTypeOccurrences.put(unit, matches);
-								}
+						declaration.setData(DATA_TYPE_ESTIMATE, type);
+						unit= declaration.getCompilationUnit();
+						if (unit != null) {
+							Collection matches= (Collection) fTypeOccurrences.get(unit);
+							if (matches != null)
+								matches.add(declaration);
+							else {
+								matches= new ArrayList(1);
+								matches.add(declaration);
+								fTypeOccurrences.put(unit, matches);
 							}
 						}
 					}

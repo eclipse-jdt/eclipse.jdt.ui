@@ -18,5 +18,9 @@ public interface ISourceConstraintVariable {
 
 	public Object getData(String name);
 
+	public ITypeSet getTypeEstimate();
+
 	public void setCompilationUnit(ICompilationUnit cu);
+
+	public void setData(String name, Object data);
 }

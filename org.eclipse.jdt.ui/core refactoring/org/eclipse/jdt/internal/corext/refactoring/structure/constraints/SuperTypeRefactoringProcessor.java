@@ -486,6 +486,17 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrence by a supertype.
 	 * 
+	 * @param rewrite the ast rewrite to use
+	 * @param node the ast node to rewrite
+	 * @param group the text edit group to use
+	 */
+	protected final void rewriteTypeOccurrence(final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group) {
+		rewrite.getASTRewrite().replace(node, createCorrespondingNode(rewrite.getAST(), fSuperType), group);
+	}
+
+	/**
+	 * Creates the necessary text edits to replace the subtype occurrence by a supertype.
+	 * 
 	 * @param manager the text change manager to use
 	 * @param subRewrite the compilation unit rewrite of the subtype
 	 * @param unit the compilation unit
