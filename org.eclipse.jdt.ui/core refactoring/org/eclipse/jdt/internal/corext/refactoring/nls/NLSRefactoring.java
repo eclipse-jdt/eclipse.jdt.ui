@@ -22,15 +22,14 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -42,7 +41,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -63,9 +63,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
-import org.eclipse.jdt.ui.CodeGeneration;
 
 public class NLSRefactoring extends Refactoring {
 	
@@ -801,7 +800,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	//--bundle class source creation
 	private String createAccessorCUSource(IProgressMonitor pm) throws CoreException {
-		return ToolFactory.createDefaultCodeFormatter(getFormatterOptions()).format(getUnformattedSource(pm), 0, null, null);
+		return CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, null, null, null);
 	}
 
 	private String getUnformattedSource(IProgressMonitor pm) throws CoreException {
@@ -825,10 +824,6 @@ public class NLSRefactoring extends Refactoring {
 		is.create(false, pm);
 	}
 
-	private static Map getFormatterOptions() {
-		return JavaCore.getOptions();
-	}
-	
 	private StringBuffer createClass() throws CoreException{
 		String ld= fgLineDelimiter; //want shorter name
 		StringBuffer b= new StringBuffer();
