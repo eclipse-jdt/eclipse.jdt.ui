@@ -35,8 +35,9 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	private List fFollowingLocalReads= new ArrayList(2);
 	
 	private String fLocalDeclaration= null;	
+	private String fLocalReturnValueDeclaration= null;
 	private String fLhs= "";
-	private String fReturnStatement;
+	private String fReturnStatement= null;
 	private String fReturnType= "void";
 	private List fUsedLocals= new ArrayList(2);
 	
@@ -48,19 +49,32 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 
 	public void visit(SingleNameReference singleNameReference, BlockScope scope, int mode) {
 		if (isOfInterestForRead(mode))
-			processLocalVariableBinding(getLocalVariableBindingIfSingleNameReference(singleNameReference), mode);
+			processLocalVariableBindingRead(getLocalVariableBindingIfSingleNameReference(singleNameReference), mode);
 	}
 	
 	public void visit(QualifiedNameReference reference, BlockScope scope, int mode) {
 		if (isOfInterestForRead(mode))
-			processLocalVariableBinding(getLocalVariableBindingIfQualifiedNameReference(reference), mode);
+			processLocalVariableBindingRead(getLocalVariableBindingIfQualifiedNameReference(reference), mode);
 	}
 	
-	public void visitAssignment(Assignment assignment, BlockScope scope, int mode) {
+	public void visitLhsOfAssignment(Reference reference, BlockScope scope, int mode) {
 		if (isOfInterestForWrite(mode)) {
-			LocalVariableBinding binding= getLocalVariableBindingIfSingleNameReference(assignment.lhs);
+			LocalVariableBinding binding= getLocalVariableBindingIfSingleNameReference(reference);
 			if (binding != null) {
-			    	addLocalWrite(binding, mode);
+			    addLocalWrite(binding, mode);
+			} else {
+				binding= getLocalVariableBindingIfQualifiedNameReference(reference);
+				if (binding != null) {
+					// code like this:
+					// class A {
+					//	public int x;
+					// }
+					//
+					// a.x= 10;
+					// 
+					// is a read to variable a.
+					addLocalRead(binding, mode);
+				}
 			}
 		}
 	}
@@ -91,13 +105,8 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		return null;
 	}
 
-	private void processLocalVariableBinding(LocalVariableBinding binding, int mode) {
+	private void processLocalVariableBindingRead(LocalVariableBinding binding, int mode) {
 		if (binding != null) {
-    			// A name reference is also reported by an assignment. So don't
-    			// treat it as a read if it is already treated as a write.
-			if (fSelectedLocalWrites.contains(binding) || fFollowingLocalWrites.contains(binding))
-				return;
-				
 			addLocalRead(binding, mode);	
 		}
 	}
@@ -182,6 +191,10 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		return fLocalDeclaration;
 	}
 	
+	public String getLocalReturnValueDeclaration() {
+		return fLocalReturnValueDeclaration;
+	}
+	
 	public String getReturnStatement() {
 		return fReturnStatement;
 	}
@@ -214,11 +227,14 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 				} else {
 					returnDeclaration= declaration;
 				}
-				fUsedLocals.add(binding);
+				if (fSelectedLocalReads.contains(binding))
+					fUsedLocals.add(binding);
+				else
+					fLocalReturnValueDeclaration= makeDeclaration(declaration); 
 			}
 		}
 		if (returnDeclaration != null) {
-			makeReturnType(returnDeclaration);
+			computeReturnType(returnDeclaration);
 		}
 	}
 	
@@ -257,8 +273,8 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		}
 		
 		if (returnDeclaration != null) {
-			makeReturnType(returnDeclaration);
-			makeLocalDeclaration(returnDeclaration);
+			computeReturnType(returnDeclaration);
+			fLocalDeclaration= makeDeclaration(returnDeclaration);
 		}
 	}
 	
@@ -266,18 +282,18 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		return "void".equals(fReturnType);
 	}
 	
-	private void makeReturnType(LocalDeclaration declaration) {
+	private void computeReturnType(LocalDeclaration declaration) {
 		TypeReference typeRef= declaration.type;
 		fReturnType= typeRef.toStringExpression(0);
 		fLhs= declaration.name() + "= ";
 		fReturnStatement= "return " + declaration.name() + ";";
 	}
 	
-	private void makeLocalDeclaration(LocalDeclaration declaration) {
+	private String makeDeclaration(LocalDeclaration declaration) {
 		TypeReference typeRef= declaration.type;
-		fLocalDeclaration= typeRef.toStringExpression(0) + " " + declaration.name() + ";";
-	}	
-	
+		return typeRef.toStringExpression(0) + " " + declaration.name() + ";";
+	}
+		
 	private List computeSelectedLocals() {
 		List result= new ArrayList(fSelectedLocalReads.size());
 		result.addAll(fSelectedLocalReads);
@@ -289,5 +305,4 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		}
 		return result;
 	}
-	
 }

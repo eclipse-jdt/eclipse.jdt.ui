@@ -188,17 +188,18 @@ public class ExtractMethodRefactoring extends Refactoring{
 		
 		AbstractMethodDeclaration method= fStatementAnalyzer.getEnclosingMethod();
 		
-		final int start= method.declarationSourceStart;
-		final int end= method.declarationSourceEnd;			
-		final int insertPosition= end + 1;
+		final int methodStart= method.declarationSourceStart;
+		final int methodEnd= method.declarationSourceEnd;			
+		final int insertPosition= methodEnd + 1;
 		
 		// Inserting the new method
 		result.addSimpleTextChange(new SimpleReplaceTextChange("Extracted method", insertPosition) {
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
-				int line= buffer.getLineOfOffset(start);
-				String delimiter= buffer.getLineDelimiter(line);
-				int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(start), fTabWidth);	
-				setText(computeNewMethod(buffer, line, TextUtilities.createIndentString(indent), delimiter));
+				int startLine= buffer.getLineOfOffset(methodStart);
+				int endLine= buffer.getLineOfOffset(methodEnd);
+				String delimiter= buffer.getLineDelimiter(startLine);
+				int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(methodStart), fTabWidth);	
+				setText(computeNewMethod(buffer, endLine, TextUtilities.createIndentString(indent), delimiter));
 				return null;
 			}
 		});
@@ -206,8 +207,8 @@ public class ExtractMethodRefactoring extends Refactoring{
 		// Replacing the old statements with the new method call.
 		result.addSimpleTextChange(new SimpleReplaceTextChange("Changed method", fSelectionStart, fSelectionLength, null) {
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
-				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(start));
-				int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(start), fTabWidth);	
+				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(methodStart));
+				int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(methodStart), fTabWidth);	
 				setText(computeCall(buffer, delimiter));
 				return null;
 			}
@@ -251,7 +252,6 @@ public class ExtractMethodRefactoring extends Refactoring{
 		LocalVariableAnalyzer localAnalyzer= fStatementAnalyzer.getLocalVariableAnalyzer();
 		final String EMPTY_LINE= "";
 		
-		StringBuffer result= new StringBuffer();
 		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength);
 		
 		// Format the first line with the right indent.
@@ -283,6 +283,10 @@ public class ExtractMethodRefactoring extends Refactoring{
 			}
 		}
 		
+		StringBuffer result= new StringBuffer();
+		String localReturnValueDeclaration= localAnalyzer.getLocalReturnValueDeclaration();
+		addLine(result, indent, localReturnValueDeclaration, delimiter);
+		
 		// Reformat and add to buffer
 		boolean isFirstLine= true;
 		for (int i= 0; i < lines.length; i++) {
@@ -301,12 +305,16 @@ public class ExtractMethodRefactoring extends Refactoring{
 		result.append(delimiter);
 			
 		String returnStatement= localAnalyzer.getReturnStatement();
-		if (returnStatement != null) {
-			result.append(indent);
-			result.append(returnStatement);
-			result.append(delimiter);
-		}
+		addLine(result, indent, returnStatement, delimiter);
 		return result.toString();
+	}
+	
+	private void addLine(StringBuffer buffer, String indent, String line, String delimiter) {
+		if (line == null)
+			return;
+		buffer.append(indent);
+		buffer.append(line);
+		buffer.append(delimiter);
 	}
 	
 	private String computeCall(ITextBuffer buffer, String delimiter) {

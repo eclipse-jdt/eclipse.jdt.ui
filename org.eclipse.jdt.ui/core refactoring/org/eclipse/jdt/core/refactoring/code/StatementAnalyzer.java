@@ -195,6 +195,16 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			fLastEnd= end;
 	}
 	
+	private boolean visitAssignment(Assignment assignment, BlockScope scope) {
+		if (visitStatement(assignment, scope)) {
+			fLocalVariableAnalyzer.visitLhsOfAssignment(assignment.lhs, scope, fMode);
+			assignment.expression.traverse(this, scope);
+			
+		}
+		// Since we visited the assigment node by ourselves we have to return false.	
+		return false;
+	}
+	
 	private boolean visitAbstractMethodDeclaration(AbstractMethodDeclaration node, Scope scope) {
 		boolean result= fSelection.enclosedBy(node);
 		if (result) {
@@ -430,9 +440,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 	
 	public boolean visit(Assignment assignment, BlockScope scope) {
-		boolean result= visitStatement(assignment, scope);
-		fLocalVariableAnalyzer.visitAssignment(assignment, scope, fMode);
-		return result;
+		return visitAssignment(assignment, scope);
 	}
 
 	public boolean visit(BinaryExpression binaryExpression, BlockScope scope) {
@@ -483,9 +491,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 
 	public boolean visit(CompoundAssignment compoundAssignment, BlockScope scope) {
-		boolean result= visitStatement(compoundAssignment, scope);
-		fLocalVariableAnalyzer.visitAssignment(compoundAssignment, scope, fMode);
-		return result;
+		return visitAssignment(compoundAssignment, scope);
 	}
 
 	public boolean visit(ConditionalExpression conditionalExpression, BlockScope scope) {
