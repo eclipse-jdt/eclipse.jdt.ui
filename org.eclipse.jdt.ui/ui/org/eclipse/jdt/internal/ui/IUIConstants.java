@@ -15,6 +15,7 @@ public interface IUIConstants {
 	
 	public static final String DIALOGSTORE_LASTEXTJAR= JavaUI.ID_PLUGIN + ".lastextjar";
 	public static final String DIALOGSTORE_LASTJARATTACH= JavaUI.ID_PLUGIN + ".lastjarattach";
+	public static final String DIALOGSTORE_LASTVARIABLE= JavaUI.ID_PLUGIN + ".lastvariable";	
 	
 	
 }

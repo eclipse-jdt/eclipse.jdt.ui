@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class VariableSelectionBlock {
 	
@@ -27,12 +27,15 @@ public class VariableSelectionBlock {
 	private String fVariable;
 	private IStatusChangeListener fContext;
 	
+	private boolean fIsEmptyAllowed;
+	
 	/**
 	 * Constructor for VariableSelectionBlock
 	 */
-	public VariableSelectionBlock(IStatusChangeListener context, List existingPaths, String varInitValue) {	
+	public VariableSelectionBlock(IStatusChangeListener context, List existingPaths, IPath varInitValue, boolean emptyAllowed) {	
 		fContext= context;
 		fExistingPaths= existingPaths;
+		fIsEmptyAllowed= emptyAllowed;
 		
 			
 		fVariableStatus= new StatusInfo();
@@ -49,19 +52,53 @@ public class VariableSelectionBlock {
 		fExtensionField.setLabelText(JavaPlugin.getResourceString(EXTENSION + ".label"));
 		fExtensionField.setButtonLabel(JavaPlugin.getResourceString(EXTENSION + ".button"));
 
-		if (varInitValue == null) {
-			varInitValue= "";
+		if (varInitValue != null) {
+			fVariableField.setText(varInitValue.segment(0));
+			fExtensionField.setText(varInitValue.removeFirstSegments(1).toString());
+		} else {
+			fVariableField.setText("");
+			fExtensionField.setText("");
 		}
-		
-		fVariableField.setText(varInitValue);
-		fExtensionField.setText("");
-		
 		updateFullTextField();
 	}
 	
-	public IPath getVariable() {
-		return new Path(fVariable).append(fExtensionField.getText());
+	public IPath getVariablePath() {
+		if (fVariable != null) {
+			return new Path(fVariable).append(fExtensionField.getText());
+		}
+		return null;
 	}
+	
+	public IPath getResolvedPath() {
+		if (fVariable != null) {
+			IPath entryPath= JavaCore.getClasspathVariable(fVariable);
+			if (entryPath != null) {
+				return entryPath.append(fExtensionField.getText());
+			}
+		}
+		return null;
+	}	
+		
+	public void doFillIntoGrid(Composite inner, int nColumns) {
+		fVariableField.doFillIntoGrid(inner, nColumns);	
+		
+		fExtensionField.doFillIntoGrid(inner, nColumns);
+		
+		Label label= new Label(inner, SWT.LEFT);
+		label.setLayoutData(new MGridData());
+		label.setText(JavaPlugin.getResourceString(FULLPATHLABEL));
+		
+		fFullPath= new CLabel(inner, SWT.NONE);
+		fFullPath.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
+		DialogField.createEmptySpace(inner, nColumns - 2);
+		updateFullTextField();
+		
+	}
+	
+	public void setFocus(Display display) {
+		fVariableField.postSetFocusOnDialogField(display);
+	}
+
 	
 	public Control createControl(Composite parent) {		
 		Composite inner= new Composite(parent, SWT.NONE);
@@ -72,26 +109,12 @@ public class VariableSelectionBlock {
 		layout.numColumns= 3;
 		inner.setLayout(layout);
 		
-		fVariableField.doFillIntoGrid(inner, 3);	
+		doFillIntoGrid(inner, 3);
 		
-		fExtensionField.doFillIntoGrid(inner, 3);
-		
-		Label label= new Label(inner, SWT.LEFT);
-		label.setLayoutData(new MGridData());
-		label.setText(JavaPlugin.getResourceString(FULLPATHLABEL));
-		
-		fFullPath= new CLabel(inner, SWT.NONE);
-		fFullPath.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
-		DialogField.createEmptySpace(inner);
-		
-		fVariableField.postSetFocusOnDialogField(parent.getDisplay());
-		
-		updateFullTextField();
+		setFocus(parent.getDisplay());
 		
 		return inner;
 	}
-	
-	
 	
 	// -------- VariableSelectionAdapter --------
 
@@ -149,7 +172,11 @@ public class VariableSelectionBlock {
 		StatusInfo status= new StatusInfo();
 		String name= fVariableField.getText();
 		if (name.length() == 0) {
-			status.setError("");
+			if (!fIsEmptyAllowed) {
+				status.setError("");
+			} else {
+				fVariable= "";
+			}
 		} else if (!findVariableName(name)) {
 			status.setError(JavaPlugin.getResourceString(ERR_NAMENOTEXISTS));
 		} else {
@@ -161,11 +188,9 @@ public class VariableSelectionBlock {
 	
 	private boolean findPath(IPath path) {
 		for (int i= fExistingPaths.size() -1; i >=0; i--) {
-			CPListElement curr= (CPListElement) fExistingPaths.get(i);
-			if (curr.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-				if (curr.getPath().equals(path)) {
-					return true;
-				}
+			IPath curr= (IPath) fExistingPaths.get(i);
+			if (curr.equals(path)) {
+				return true;
 			}
 		}
 		return false;
@@ -174,25 +199,14 @@ public class VariableSelectionBlock {
 	private IStatus getExistsStatus() {
 		StatusInfo status= new StatusInfo();
 		if (fVariable != null) {
-			IPath path= getVariable();
-			if (findPath(path)) {
+			IPath path= getVariablePath();
+			
+			if (path != null && findPath(path)) {
 				status.setError(JavaPlugin.getResourceString(ERR_PATHEXISTS));
 			}
 		}
 		return status;
 	}
-	
-	private IPath getResolvedPath() {
-		if (fVariable != null) {
-			IPath entryPath= JavaCore.getClasspathVariable(fVariable);
-			if (entryPath != null) {
-				return entryPath.append(fExtensionField.getText());
-			}
-		}
-		return null;
-	}		
-	
-		
 
 	private void updateFullTextField() {
 		if (fFullPath != null && !fFullPath.isDisposed()) {
@@ -215,9 +229,10 @@ public class VariableSelectionBlock {
 		if (entryPath != null) {
 			String fileExt= entryPath.getFileExtension();
 			if ("zip".equals(fileExt) || "jar".equals(fileExt)) {
-				entryPath.removeLastSegments(1);
+				lastUsedPath= entryPath.removeLastSegments(1).toOSString();
+			} else {
+				lastUsedPath= entryPath.toOSString();
 			}
-			lastUsedPath= entryPath.toOSString();
 		}
 		
 		FileDialog dialog= new FileDialog(getShell(), SWT.SINGLE);

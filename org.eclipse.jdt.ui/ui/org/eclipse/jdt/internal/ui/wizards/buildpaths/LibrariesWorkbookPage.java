@@ -25,9 +25,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private static final String DIALOG_JAR_ARCHIVE= 	PAGE_NAME + ".JARArchiveDialog";
 	private static final String DIALOG_SOURCE_ANNOT= 	PAGE_NAME + ".SourceAttachmentDialog";
 	private static final String DIALOG_VARIABLE_SELECTION= 	PAGE_NAME + ".VariableSelectionDialog";
-	
-	private static final String DIALOGSTORE_LASTVARIABLE= JavaUI.ID_PLUGIN + ".lastvariable";	
-	
+		
 	private ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
 	
@@ -164,8 +162,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		private boolean canDoSourceAttachment(List selElements) {
 			if (selElements != null && selElements.size() == 1) {
 				CPListElement elem= (CPListElement) selElements.get(0);
-				return (!(elem.getResource() instanceof IFolder) 
-					&& elem.getEntryKind() != IClasspathEntry.CPE_VARIABLE);
+				return (!(elem.getResource() instanceof IFolder));
 			}
 			return false;
 		}
@@ -366,7 +363,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				existingPaths.add(elem.getPath());
 			}
 		}
-		VariableSelectionDialog dialog= new VariableSelectionDialog(getShell(), existing);
+		VariableSelectionDialog dialog= new VariableSelectionDialog(getShell(), existingPaths);
 		if (dialog.open() == dialog.OK) {
 			IPath path= dialog.getVariable();
 			return new CPListElement[] { new CPListElement(IClasspathEntry.CPE_VARIABLE, path, null) };
@@ -381,7 +378,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		public VariableSelectionDialog(Shell parent, List existingPaths) {
 			super(parent);
 			setTitle(JavaPlugin.getResourceString(DIALOG_VARIABLE_SELECTION + ".title"));
-			fVariableSelectionBlock= new VariableSelectionBlock(this, existingPaths, fDialogSettings.get(DIALOGSTORE_LASTVARIABLE));
+			IPath initVar= new Path(fDialogSettings.get(IUIConstants.DIALOGSTORE_LASTVARIABLE));
+			fVariableSelectionBlock= new VariableSelectionBlock(this, existingPaths, initVar, false);
 		}
 
 		/**
@@ -403,7 +401,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		 * @see Dialog#okPressed()
 		 */
 		protected void okPressed() {
-			fDialogSettings.put(DIALOGSTORE_LASTVARIABLE, getVariable().segment(0));
+			fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTVARIABLE, getVariable().segment(0));
 			super.okPressed();
 		}	
 
@@ -415,7 +413,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 		
 		public IPath getVariable() {
-			return fVariableSelectionBlock.getVariable();
+			return fVariableSelectionBlock.getVariablePath();
 		}		
 	}
 				

@@ -88,7 +88,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		if (jdkPath == null) {
 			jdkPath= new Path("");
 		}
-		JavaCore.setClasspathVariable(JDKLIB_VARIABLE, jdkPath);
+		JavaCore.setClasspathVariable(JDKLIB_VARIABLE, jdkPath);		
 	}
 	
 	
