@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.Properties;
 
+import org.eclipse.core.resources.IStorage;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
@@ -19,6 +21,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -102,14 +105,23 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		else
 			value= JavaHoverMessages.getString("NLSStringHover.NLSStringHover.missingKeyWarning"); //$NON-NLS-1$
 		
-		return toHtml(value);
+		String header= JavaHoverMessages.getString("NLSStringHover.header"); //$NON-NLS-1$;
+		try {
+			IStorage propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref.getBinding());
+			if (propertiesFile != null)
+				header= propertiesFile.getName();
+		} catch (JavaModelException ex) {
+			// use default header
+		}
+		
+		return toHtml(header, value);
 	}
 	
-	private String toHtml(String string) {
+	private String toHtml(String header, String string) {
 		
 		StringBuffer buffer= new StringBuffer();
 		
-		HTMLPrinter.addSmallHeader(buffer, JavaHoverMessages.getString("NLSStringHover.header")); //$NON-NLS-1$
+		HTMLPrinter.addSmallHeader(buffer, header);
 		HTMLPrinter.addParagraph(buffer, string);
 		HTMLPrinter.insertPageProlog(buffer, 0);
 		HTMLPrinter.addPageEpilog(buffer);

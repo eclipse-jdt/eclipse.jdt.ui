@@ -16,24 +16,24 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.IStorage;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -48,6 +48,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class NLSHintHelper {
 
@@ -115,16 +118,20 @@ public class NLSHintHelper {
 	}
 
 	public static String getResourceBundleName(IJavaProject javaProject, ITypeBinding accessorClassBinding) throws JavaModelException {
-		ICompilationUnit unit= Bindings.findCompilationUnit(accessorClassBinding, javaProject);
-		if (unit == null) {
+		IJavaElement je= accessorClassBinding.getJavaElement();
+		if (je == null)
 			return null;
-		}
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
-		parser.setSource(unit);
-		parser.setResolveBindings(true);
-		parser.setFocalPosition(0);
 		
-		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+		IOpenable openable= je.getOpenable();
+		IJavaElement container= null;
+		if (openable instanceof ICompilationUnit)
+			container= (ICompilationUnit)openable;
+		else if (openable instanceof IClassFile)
+			container= (IClassFile)openable;
+		else
+			Assert.isLegal(false);
+		
+		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(container, ASTProvider.WAIT_YES, null);
 		
 		IVariableBinding[] fields= accessorClassBinding.getDeclaredFields();
 		for (int i= 0; i < fields.length; i++) {
@@ -174,41 +181,73 @@ public class NLSHintHelper {
 		}
 		return null;
 	}
+	
+	public static IStorage getResourceBundle(IJavaProject javaProject, String packageName, String resourceName) throws JavaModelException {
+		IPackageFragmentRoot[] allRoots= javaProject.getAllPackageFragmentRoots();
+		for (int i= 0; i < allRoots.length; i++) {
+			IPackageFragmentRoot root= allRoots[i];
+			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+				IStorage storage= getResourceBundle(root, packageName, resourceName);
+				if (storage != null)
+					return storage;
+			}
+		}
+		return null;
+	}
+	
+	public static IStorage getResourceBundle(IPackageFragmentRoot root, String packageName, String resourceName) throws JavaModelException {
+		IPackageFragment packageFragment= root.getPackageFragment(packageName);
+		if (packageFragment.exists()) {
+			Object[] resources= packageFragment.isDefaultPackage() ? root.getNonJavaResources() : packageFragment.getNonJavaResources();
+			for (int j= 0; j < resources.length; j++) {
+				Object object= resources[j];
+				if (object instanceof IStorage) {
+					IStorage storage= (IStorage)object;
+					if (storage.getName().equals(resourceName)) {
+						return storage;
+					}
+				}
+			}
+		}
+		return null;
+	}
 
-	public static IFile getResourceBundleFile(IJavaProject javaProject, ITypeBinding accessorClass) throws JavaModelException {
+	public static IStorage getResourceBundle(IJavaProject javaProject, ITypeBinding accessorClass) throws JavaModelException {
 		String resourceBundle= getResourceBundleName(javaProject, accessorClass);
 		if (resourceBundle == null) {
 			return null;
 		}
+		
 		String resourceName= Signature.getSimpleName(resourceBundle) + NLSRefactoring.PROPERTY_FILE_EXT;
 		String packName= Signature.getQualifier(resourceBundle);
 		
-		IPackageFragment bundlePack= getResourceBundlePackage(javaProject, packName, resourceName);
-		if (bundlePack == null) {
-			return null;
-		}
+		if (accessorClass.isFromSource())
+			return getResourceBundle(javaProject, packName, resourceName);
+		else if (accessorClass.getJavaElement() != null)
+			return getResourceBundle((IPackageFragmentRoot)accessorClass.getJavaElement().getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT), packName, resourceName);
 		
-		IPath path= bundlePack.getPath().append(resourceName);
-		IResource res= ResourcesPlugin.getWorkspace().getRoot().findMember(path);
-		if (res instanceof IFile) {
-			return (IFile) res;
-		}
 		return null;
 	}
 	
 	public static Properties getProperties(IJavaProject project, ITypeBinding accessorBinding) {
 		Properties props= new Properties();
+		InputStream is= null;
 		try {
-			IFile file= NLSHintHelper.getResourceBundleFile(project, accessorBinding);
-			if (file != null) {
-				InputStream is= file.getContents();
+			IStorage storage= NLSHintHelper.getResourceBundle(project, accessorBinding);
+			if (storage != null) {
+				is= storage.getContents();
 				props.load(is);
-				is.close();
 			}
 		} catch (IOException e) {
 			// sorry no property         
 		} catch (CoreException e) {
 			// sorry no property         
+		} finally {
+			if (is != null) try {
+				is.close();
+			} catch (IOException e) {
+				JavaPlugin.log(e);
+			}
 		}
 		return props;
 	}

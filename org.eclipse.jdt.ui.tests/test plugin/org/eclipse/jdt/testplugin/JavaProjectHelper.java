@@ -65,6 +65,7 @@ public class JavaProjectHelper {
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
 	
 	public static final IPath MYLIB= new Path("testresources/mylib.jar");
+	public static final IPath NLS_LIB= new Path("testresources/nls.jar");
 	
 	private static final int MAX_RETRY= 5;
 		

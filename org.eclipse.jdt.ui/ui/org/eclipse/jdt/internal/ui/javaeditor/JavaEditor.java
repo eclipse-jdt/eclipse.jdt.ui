@@ -54,8 +54,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -64,10 +62,8 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-
-import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -155,7 +151,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
@@ -1314,13 +1309,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (ref == null)
 				return;
 			
-			IFile file= null;
+			IStorage propertiesFile= null;
 			try {
-				file= NLSHintHelper.getResourceBundleFile(input.getJavaProject(), ref.getBinding());
+				propertiesFile= NLSHintHelper.getResourceBundle(input.getJavaProject(), ref.getBinding());
 			} catch (JavaModelException e) {
 				// Don't open the file
 			}
-			if (file == null) {
+			if (propertiesFile == null) {
 				// Can't write to status line because it gets immediately cleared
 				MessageDialog.openError(
 						JavaEditor.this.getEditorSite().getShell(),
@@ -1332,14 +1327,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			
 			IEditorPart editor;
 			try {
-				editor= IDE.openEditor(JavaEditor.this.getEditorSite().getPage(), file);
-			} catch (PartInitException e1) {
-				// Can't write to status line because it gets immediately cleared
-				MessageDialog.openError(
-						JavaEditor.this.getEditorSite().getShell(),
-						JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.openEditor.dialogTitle"), //$NON-NLS-1$
-						JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.openEditor.dialogMessage", file.getFullPath().toOSString())); //$NON-NLS-1$
-				
+				editor= EditorUtility.openInEditor(propertiesFile, true);
+			} catch (PartInitException e) {
+				handleOpenPropertiesFileFailed(propertiesFile);
+				return;
+			} catch (JavaModelException e) {
+				handleOpenPropertiesFileFailed(propertiesFile);
 				return;
 			}
 			
@@ -1347,11 +1340,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (editor instanceof ITextEditor) {
 				IRegion region= null;
 				// Find key in document
-				ITextFileBuffer buffer= FileBuffersPlugin.getDefault().getFileBufferManager().getTextFileBuffer(file.getFullPath());
-				if (buffer != null) {
-					FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(buffer.getDocument());
+				IDocument document= JavaPlugin.getDefault().getPropertiesFileDocumentProvider().getDocument(editor.getEditorInput());
+				if (document != null) {
+					FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
 					try {
-						region= finder.find(buffer.getDocument().getLength() - 1, nlsKeyStringLiteral.getLiteralValue(), false, true, false, false);
+						region= finder.find(document.getLength() - 1, nlsKeyStringLiteral.getLiteralValue(), false, true, false, false);
 					} catch (BadLocationException ex) {
 					}
 				}
@@ -1364,6 +1357,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						statusLine.setMessage(true, JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.keyNotFound", nlsKeyStringLiteral.getLiteralValue()), null); //$NON-NLS-1$
 				}
 			}
+		}
+		
+		private void handleOpenPropertiesFileFailed(IStorage propertiesFile) {
+			// Can't write to status line because it gets immediately cleared
+			MessageDialog.openError(
+					JavaEditor.this.getEditorSite().getShell(),
+					JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.openEditor.dialogTitle"), //$NON-NLS-1$
+					JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.openEditor.dialogMessage", propertiesFile.getFullPath().toOSString())); //$NON-NLS-1$
 		}
 
 		/*
