@@ -71,7 +71,7 @@ public class ChangeElementLabelProvider extends LabelProvider {
 			if (change instanceof TextFileChange) {
 				IFile file= ((TextFileChange)change).getFile();
 				return RefactoringMessages.getFormattedString(
-					"PreviewWizardPage.changeElementLabelProvider.textFormat", 
+					"PreviewWizardPage.changeElementLabelProvider.textFormat",  //$NON-NLS-1$
 					new String[] {file.getName(), getPath(file)});
 			} else {
 				return change.getName();
@@ -83,7 +83,7 @@ public class ChangeElementLabelProvider extends LabelProvider {
 				ChangeElement parent= getParent(element);
 				if (parent != null) 
 					result= RefactoringMessages.getFormattedString(
-						"PreviewWizardPage.changeElementLabelProvider.textFormatEdit", 
+						"PreviewWizardPage.changeElementLabelProvider.textFormatEdit",  //$NON-NLS-1$
 						new String[] {getText(parent), result});
 			}
 			return result;

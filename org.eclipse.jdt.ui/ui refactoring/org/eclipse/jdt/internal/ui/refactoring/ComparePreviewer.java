@@ -59,9 +59,9 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 	}
 	
 	/** A flag indicating that the input elements of a compare viewer a of type Java */
-	public static final String JAVA_TYPE= "java";
+	public static final String JAVA_TYPE= "java"; //$NON-NLS-1$
 	/** A flag indicating that the input elements of a compare viewer a of type text */
-	public static final String TEXT_TYPE= "txt";
+	public static final String TEXT_TYPE= "txt"; //$NON-NLS-1$
 
 	private static class CompareElement implements ITypedElement, IStreamContentAccessor {
 		private InputStream fContent;

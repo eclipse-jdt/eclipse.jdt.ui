@@ -84,7 +84,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	
 	private final String fHelpContextID;
 
-	private static final IDocument EMPTY_DOCUMENT= new Document("");
+	private static final IDocument EMPTY_DOCUMENT= new Document(""); //$NON-NLS-1$
 		
 	public ErrorWizardPage(String helpContextId){
 		super(PAGE_NAME);
