@@ -525,6 +525,9 @@ public class JavaModelUtil {
 		return false;
 	}
 	
+	/**
+	 * Checks if the field is boolean.
+	 */
 	public static boolean isBoolean(IField field) throws JavaModelException{
 		return field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 	}
