@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
 /**
  * Standard label provider for Java elements.
@@ -43,12 +42,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 public class JavaElementLabelProvider extends LabelProvider {
 	
 	/**
-	 * Flag (bit mask) indicating that the label should include the method return type.
+	 * Flag (bit mask) indicating that methods labels include the method return type. (prepended)
 	 */
 	public final static int SHOW_RETURN_TYPE=				0x001;
 	
 	/**
-	 * Flag (bit mask) indicating that the label should include method parameter types.
+	 * Flag (bit mask) indicating that method label include method parameter types.
 	 */
 	public final static int SHOW_PARAMETERS=				0x002;
 	
@@ -73,13 +72,13 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_OVERLAY_ICONS=			0x010;
 
 	/**
-	 * Flag (bit mask) indicating that the label should include the field type.
+	 * Flag (bit mask) indicating thata field label should include the declared type.
 	 */
 	public final static int SHOW_TYPE=					0x020;
 
 	/**
 	 * Flag (bit mask) indicating that the label should include the name of the
-	 * package fragment root.
+	 * package fragment root (appended).
 	 */
 	public final static int SHOW_ROOT=					0x040;
 	
@@ -105,14 +104,14 @@ public class JavaElementLabelProvider extends LabelProvider {
 	/**
 	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
 	 * should be rendered qualified.
-	 * examples: java.lang.String, java.util.Vector.size()
+	 * Examples: java.lang.String, java.util.Vector.size()
 	 */
 	public final static int SHOW_QUALIFIED=				0x400;
 
 	/**
 	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
 	 * should be rendered qualified. The qualifcation is appended
-	 * examples: String - java.lang, size() - java.util.Vector
+	 * Examples: String - java.lang, size() - java.util.Vector
 	 */
 	public final static int SHOW_POST_QUALIFIED=	0x800;	
 	
@@ -223,16 +222,12 @@ public class JavaElementLabelProvider extends LabelProvider {
 			fTextFlags |= (JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED 
 			| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED);
 		}		
-		
 	}
-	
-	
 
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
 	 */
 	public Image getImage(Object element) {
-
 		if (element instanceof IJavaElement) {
 			IJavaElement e= (IJavaElement) element;
 		
@@ -256,8 +251,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 
 		if (element instanceof IJavaElement) {
-			IJavaElement e= (IJavaElement) element;
-			return JavaElementLabels.getElementLabel(e, fTextFlags);
+			return JavaElementLabels.getElementLabel((IJavaElement) element, fTextFlags);
 		}
 	
 		String text= fWorkbenchLabelProvider.getText(element);

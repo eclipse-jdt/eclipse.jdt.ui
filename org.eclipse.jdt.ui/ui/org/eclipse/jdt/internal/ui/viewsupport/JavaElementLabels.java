@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -40,7 +39,7 @@ public class JavaElementLabels {
 	
 	/**
 	 * Method names contain return type (appended)
-	 * e.g. <code>foo int</code>
+	 * e.g. <code>foo : int</code>
 	 */
 	public final static int M_APP_RETURNTYPE= 1 << 3;
 	
@@ -82,7 +81,7 @@ public class JavaElementLabels {
 	
 	/**
 	 * Field names contain the declared type (prepended)
-	 * e.g. <code>fHello:int</code>
+	 * e.g. <code>fHello : int</code>
 	 */
 	public final static int F_PRE_TYPE_SIGNATURE= 1 << 10;	
 
@@ -135,8 +134,8 @@ public class JavaElementLabels {
 	public final static int CF_QUALIFIED= 1 << 18;
 	
 	/**
-	 * Class file names are fully qualified.
-	 * e.g. <code>java.util.Vector.class</code>
+	 * Class file names are post qualified.
+	 * e.g. <code>Vector.class - java.util</code>
 	 */	
 	public final static int CF_POST_QUALIFIED= 1 << 19;
 	
@@ -147,13 +146,13 @@ public class JavaElementLabels {
 	public final static int CU_QUALIFIED= 1 << 20;
 	
 	/**
-	 * Compilation unit names are fully qualified.
-	 * e.g. <code>java.util.Vector.java</code>
+	 * Compilation unit names are post  qualified.
+	 * e.g. <code>Vector.java - java.util</code>
 	 */	
 	public final static int CU_POST_QUALIFIED= 1 << 21;
 
 	/**
-	 * Package names are post qualified.
+	 * Package names are qualified.
 	 * e.g. <code>MyProject/src/java.util</code>
 	 */	
 	public final static int P_QUALIFIED= 1 << 22;
@@ -183,25 +182,41 @@ public class JavaElementLabels {
 	public final static int ROOT_POST_QUALIFIED= 1 << 26;	
 	
 	/**
-	 * Add root path to all elements except roots and Java projects.
+	 * Add root path to all elements except Package Fragment Roots and Java projects.
 	 * e.g. <code>java.lang.Vector - c:\java\lib\rt.jar</code>
 	 * Option only applies to getElementLabel
 	 */
 	public final static int APPEND_ROOT_PATH= 1 << 27;
 	
-	
+	/**
+	 * Qualify all elements
+	 */
 	public final static int ALL_FULLY_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED | P_QUALIFIED | ROOT_QUALIFIED;
+
+	/**
+	 * Post qualify all elements
+	 */
 	public final static int ALL_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED;
+
+	/**
+	 *  Default options (M_PARAMETER_TYPES enabled)
+	 */
 	public final static int ALL_DEFAULT= M_PARAMETER_TYPES;
+
+	/**
+	 *  Default qualify options (All except Root and Package)
+	 */
 	public final static int DEFAULT_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED;
+
+	/**
+	 *  Default post qualify options (All except Root and Package)
+	 */
 	public final static int DEFAULT_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED;
-
-
 
 
 	private final static String CONCAT_STRING= JavaUIMessages.getString("JavaElementLabels.concat_string"); // " - ";
 	private final static String COMMA_STRING= JavaUIMessages.getString("JavaElementLabels.comma_string"); // ", ";
-	private final static String SPACER_STRING= JavaUIMessages.getString("JavaElementLabels.spacer_string"); // "  "; // use for return type
+	private final static String DECL_STRING= JavaUIMessages.getString("JavaElementLabels.declseparator_string"); // "  "; // use for return type
 
 	private JavaElementLabels() {
 	}
@@ -211,6 +226,9 @@ public class JavaElementLabels {
 	}
 	
 	
+	/**
+	 * Returns the label for a Java element. Flags as defined above.
+	 */
 	public static String getElementLabel(IJavaElement element, int flags) {
 		StringBuffer buf= new StringBuffer();
 		boolean addRootPath= getFlag(flags, APPEND_ROOT_PATH);
@@ -263,7 +281,10 @@ public class JavaElementLabels {
 	
 		return buf.toString();
 	}
-		
+
+	/**
+	 * Appends the label for a method to a StringBuffer. Considers the M_* flags.
+	 */		
 	public static void getMethodLabel(IMethod method, int flags, StringBuffer buf) {
 		try {
 			boolean isConstructor= method.isConstructor();
@@ -321,7 +342,7 @@ public class JavaElementLabels {
 			}
 			
 			if (getFlag(flags, M_APP_RETURNTYPE) && !isConstructor) {
-				buf.append(SPACER_STRING);
+				buf.append(DECL_STRING);
 				buf.append(Signature.getSimpleName(Signature.toString(method.getReturnType())));	
 			}			
 			
@@ -335,7 +356,10 @@ public class JavaElementLabels {
 			JavaPlugin.log(e);
 		}
 	}
-
+	
+	/**
+	 * Appends the label for a field to a StringBuffer. Considers the F_* flags.
+	 */	
 	public static void getFieldLabel(IField field, int flags, StringBuffer buf) {
 		try {
 			if (getFlag(flags, F_PRE_TYPE_SIGNATURE)) {
@@ -351,7 +375,7 @@ public class JavaElementLabels {
 			buf.append(field.getElementName());
 			
 			if (getFlag(flags, F_APP_TYPE_SIGNATURE)) {
-				buf.append(SPACER_STRING); //$NON-NLS-1$
+				buf.append(DECL_STRING); //$NON-NLS-1$
 				buf.append(Signature.toString(field.getTypeSignature()));
 			}
 			
@@ -366,6 +390,9 @@ public class JavaElementLabels {
 		}			
 	}
 
+	/**
+	 * Appends the label for a initializer to a StringBuffer. Considers the I_* flags.
+	 */	
 	public static void getInitializerLabel(IInitializer initializer, int flags, StringBuffer buf) {
 		// qualification
 		if (getFlag(flags, I_FULLY_QUALIFIED)) {
@@ -381,7 +408,9 @@ public class JavaElementLabels {
 		}
 	}
 
-	
+	/**
+	 * Appends the label for a type to a StringBuffer. Considers the T_* flags.
+	 */		
 	public static void getTypeLabel(IType type, int flags, StringBuffer buf) {
 		if (getFlag(flags, T_FULLY_QUALIFIED)) {
 			buf.append(JavaModelUtil.getFullyQualifiedName(type));
@@ -401,7 +430,10 @@ public class JavaElementLabels {
 			}
 		}
 	}
-	
+
+	/**
+	 * Appends the label for a declaration to a StringBuffer. Considers the D_* flags.
+	 */	
 	public static void getDeclararionLabel(IJavaElement declaration, int flags, StringBuffer buf) {
 		if (getFlag(flags, D_QUALIFIED)) {
 			IJavaElement openable= (IJavaElement) JavaModelUtil.getOpenable(declaration);
@@ -425,7 +457,9 @@ public class JavaElementLabels {
 		}
 	}	
 	
-
+	/**
+	 * Appends the label for a class file to a StringBuffer. Considers the CF_* flags.
+	 */	
 	public static void getClassFileLabel(IClassFile classFile, int flags, StringBuffer buf) {
 		if (getFlag(flags, CF_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) classFile.getParent();
@@ -442,6 +476,9 @@ public class JavaElementLabels {
 		}
 	}
 
+	/**
+	 * Appends the label for a compilation unit to a StringBuffer. Considers the CU_* flags.
+	 */
 	public static void getCompilationUnitLabel(ICompilationUnit cu, int flags, StringBuffer buf) {
 		if (getFlag(flags, CU_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) cu.getParent();
@@ -457,7 +494,10 @@ public class JavaElementLabels {
 			getPackageFragmentLabel((IPackageFragment) cu.getParent(), 0, buf);
 		}		
 	}
-	
+
+	/**
+	 * Appends the label for a package fragment to a StringBuffer. Considers the P_* flags.
+	 */	
 	public static void getPackageFragmentLabel(IPackageFragment pack, int flags, StringBuffer buf) {
 		if (getFlag(flags, P_QUALIFIED)) {
 			getPackageFragmentRootLabel((IPackageFragmentRoot) pack.getParent(), ROOT_QUALIFIED, buf);
@@ -474,6 +514,9 @@ public class JavaElementLabels {
 		}
 	}
 
+	/**
+	 * Appends the label for a package fragment root to a StringBuffer. Considers the ROOT_* flags.
+	 */	
 	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
 		String name= root.getElementName();
 		if (root.isArchive() && getFlag(flags, ROOT_VARIABLE)) {
@@ -491,7 +534,7 @@ public class JavaElementLabels {
 		}
 		if (root.isExternal()) {
 			// external jars have path == name
-			// no qualification for roots
+			// no qualification for external roots
 			buf.append(root.getPath().toOSString());
 		} else {
 			if (getFlag(flags, ROOT_QUALIFIED)) {
