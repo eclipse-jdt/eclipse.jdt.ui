@@ -66,6 +66,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 	
 	private SearchResultGroup[] fOccurrences;
@@ -303,7 +305,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		IJavaSearchScope scope= RefactoringScopeFactory.create(getMethod().getJavaProject());
 		SearchRequestor requestor= new SearchRequestor() {
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
-				results.add(match.getElement());
+				Object method= match.getElement();
+				if (method instanceof IMethod) // check for bug 90138: [refactoring] [rename] Renaming method throws internal exception
+					results.add(method);
+				else
+					JavaPlugin.logErrorMessage("Unexpected element in search match: " + match.toString()); //$NON-NLS-1$
 			}
 		};
 		new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, pm);
