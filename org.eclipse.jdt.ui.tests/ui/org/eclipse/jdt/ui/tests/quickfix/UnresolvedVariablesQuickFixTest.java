@@ -888,7 +888,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 7);
 		assertCorrectLabels(proposals);
 
-		boolean doField= true, doParam= true, doLocal= true, doConst= true, doInterface= true, doClass= true, doChange= true;
+		boolean doField= true, doParam= true, doLocal= true, doConst= true, doInterface= true, doClass= true, doEnum= true, doChange= true;
 		for (int i= 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
 			if (curr instanceof NewVariableCompletionProposal) {
@@ -964,7 +964,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				ICompilationUnit newCU= pack1.getCompilationUnit("Fixe.java");
 				assertTrue("Nothing created", newCU.exists());
 
-				if (proposal.isClass()) {
+				if (proposal.getTypeKind() == NewCUCompletionUsingWizardProposal.K_CLASS) {
 					assertTrue("2 class proposals", doClass);
 					doClass= false;
 
@@ -977,7 +977,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 					assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
 					JavaProjectHelper.performDummySearch();
 					newCU.delete(true, null);
-				} else {
+				} else if (proposal.getTypeKind() == NewCUCompletionUsingWizardProposal.K_INTERFACE) {
 					assertTrue("2 interface proposals", doInterface);
 					doInterface= false;					
 					
@@ -985,6 +985,19 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 					buf.append("package test1;\n");
 					buf.append("\n");
 					buf.append("public interface Fixe {\n");
+					buf.append("\n");
+					buf.append("}\n");
+					assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+					JavaProjectHelper.performDummySearch();
+					newCU.delete(true, null);
+				} else if (proposal.getTypeKind() == NewCUCompletionUsingWizardProposal.K_ENUM) {
+					assertTrue("2 enum proposals", doEnum);
+					doEnum= false;					
+					
+					buf= new StringBuffer();
+					buf.append("package test1;\n");
+					buf.append("\n");
+					buf.append("public enum Fixe {\n");
 					buf.append("\n");
 					buf.append("}\n");
 					assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());

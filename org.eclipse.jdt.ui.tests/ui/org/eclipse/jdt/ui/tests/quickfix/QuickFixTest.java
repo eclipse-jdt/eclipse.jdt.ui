@@ -22,10 +22,16 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IProblemRequestor;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -43,8 +49,10 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
+import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -115,6 +123,7 @@ public class QuickFixTest extends TestCase {
 	public static void assertEqualStringsIgnoreOrder(String[] actuals, String[] expecteds) {
 		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expecteds);			
 	}
+	
 	
 	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException {
 		String[] actuals= new String[actualProposals.size()];
@@ -307,6 +316,33 @@ public class QuickFixTest extends TestCase {
 	
 	protected static String getPreviewContent(CUCorrectionProposal proposal) throws CoreException {
 		return proposal.getPreviewContent();
+	}
+	
+	protected static String getWizardPreviewContent(NewCUCompletionUsingWizardProposal newCUWizard) throws CoreException, BadLocationException {
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		IType createdType= newCUWizard.getCreatedType();
+		assertTrue("Nothing created", createdType.exists());
+		String preview= createdType.getCompilationUnit().getSource();
+		
+		IJavaElement parent= createdType.getParent();
+		if (parent instanceof IType) {
+			createdType.delete(true, null);
+		} else {
+			JavaProjectHelper.delete(parent);
+		}
+		StringBuffer res= new StringBuffer();
+		IDocument doc= new Document(preview);
+		int nLines= doc.getNumberOfLines();
+		for (int i= 0; i < nLines; i++) {
+			IRegion lineInformation= doc.getLineInformation(i);
+			res.append(doc.get(lineInformation.getOffset(), lineInformation.getLength()));
+			if (i != nLines - 1) {
+				res.append('\n');
+			}
+		}
+		return res.toString();
 	}
 	
 	protected static void assertNumberOfProposals(List proposals, int expectedProposals) {

@@ -16,9 +16,6 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,18 +23,22 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	
@@ -55,13 +56,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new UnresolvedTypesQuickFixTest("testInnerType"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
 	}
 
 	public static Test setUpTest(Test test) {
@@ -103,11 +98,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -117,31 +112,21 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    Vector vec;\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("Vector1.java");
-		assertTrue("Nothing created", newCU.exists());
-		
+		String preview2= getWizardPreviewContent(newCUWizard);
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class Vector1 {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-		JavaProjectHelper.performDummySearch();
-		newCU.delete(true, null);
+		String expected2= buf.toString();
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		newCU= pack1.getCompilationUnit("Vector1.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -149,7 +134,21 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public interface Vector1 {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		String expected3= buf.toString();
+		
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		String preview4= getWizardPreviewContent(newCUWizard);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public enum Vector1 {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
+
 	}
 
 	public void testTypeInMethodArguments() throws Exception {
@@ -164,11 +163,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -179,14 +178,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    void foo(Vector[] vec) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("Vect1or.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -194,16 +189,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class Vect1or {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-		JavaProjectHelper.performDummySearch();
-		newCU.delete(true, null);
+		String expected2= buf.toString();
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		newCU= pack1.getCompilationUnit("Vect1or.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -211,7 +200,20 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public interface Vect1or {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		String expected3= buf.toString();
+		
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		String preview4= getWizardPreviewContent(newCUWizard);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public enum Vect1or {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
 	
 	public void testTypeInMethodReturnType() throws Exception {
@@ -227,11 +229,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -243,14 +245,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("        return null;\n");		
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("Vect1or.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -258,16 +256,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class Vect1or {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-		JavaProjectHelper.performDummySearch();
-		newCU.delete(true, null);
+		String expected2= buf.toString();
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		newCU= pack1.getCompilationUnit("Vect1or.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -275,7 +267,20 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public interface Vect1or {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		String expected3= buf.toString();
+	
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		String preview4= getWizardPreviewContent(newCUWizard);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public enum Vect1or {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
 
 	public void testTypeInExceptionType() throws Exception {
@@ -294,7 +299,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -305,14 +310,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    void foo() throws IOException {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("IOExcpetion.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -320,9 +321,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class IOExcpetion extends Exception {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-		JavaProjectHelper.performDummySearch();
-		newCU.delete(true, null);
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	
 	
@@ -344,7 +345,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -354,15 +355,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("        ArrayList v= new ArrayList();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-		
+		String expected1= buf.toString();
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("ArrayListist.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -372,7 +368,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class ArrayListist extends ArrayList {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}	
 		
 
@@ -390,11 +388,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -404,10 +402,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("        Serializable[] v= new Serializable[10];\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= getPreviewContent(proposal);
+		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -418,14 +416,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("        Serializable[] v= new ArrayList[10];\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected2= buf.toString();
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("ArrayListExtra.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -435,16 +429,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class ArrayListExtra implements Serializable {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-		JavaProjectHelper.performDummySearch();
-		newCU.delete(true, null);
+		String expected3= buf.toString();
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		newCU= pack1.getCompilationUnit("ArrayListExtra.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview4= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -454,7 +442,22 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public interface ArrayListExtra extends Serializable {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		String expected4= buf.toString();
+		
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(4);
+		String preview5= getWizardPreviewContent(newCUWizard);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("\n");
+		buf.append("public enum ArrayListExtra implements Serializable {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected5= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });		
 	}
 	
 	public void testQualifiedType() throws Exception {
@@ -470,15 +473,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= fSourceFolder.getPackageFragment("test2").getCompilationUnit("Test.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview1= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -486,16 +485,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class Test {\n");
 		buf.append("\n");		
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-		JavaProjectHelper.performDummySearch();
-		newCU.delete(true, null);
+		String expected1= buf.toString();
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		newCU= fSourceFolder.getPackageFragment("test2").getCompilationUnit("Test.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -503,8 +496,20 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public interface Test {\n");
 		buf.append("\n");		
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());		
+		String expected2= buf.toString();
 		
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		String preview3= getWizardPreviewContent(newCUWizard);
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");		
+		buf.append("public enum Test {\n");
+		buf.append("\n");		
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });	
 	}
 	
 	public void testInnerType() throws Exception {
@@ -523,16 +528,15 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
 		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
 
-		
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -542,11 +546,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
+		String preview2= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -556,13 +559,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
-
-		cu2.getType("F").getType("Inner").delete(true, null);
+		String expected2= buf.toString();
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
+		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -572,12 +572,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");				
 		buf.append("    }\n");		
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());		
-	
+		String expected3= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
 	}
-	
-
-
 
 	public void testTypeInCatchBlock() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -598,10 +596,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("XXX.java");
+		String preview1= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -609,7 +604,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class XXX extends Exception {\n");
 		buf.append("\n");	
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 	
 	public void testTypeInSuperType() throws Exception {
@@ -626,10 +623,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("XXX.java");
+		String preview1= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -637,7 +631,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class XXX {\n");
 		buf.append("\n");	
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 	
 	public void testTypeInSuperInterface() throws Exception {
@@ -654,10 +650,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("XXX.java");
+		String preview1= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -665,7 +658,37 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public interface XXX {\n");
 		buf.append("\n");	
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });		
+	}
+	
+	public void testTypeInAnnotation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@Targ\n");
+		buf.append("public interface E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		String preview1= getWizardPreviewContent(newCUWizard);
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");			
+		buf.append("public @interface Targ {\n");
+		buf.append("\n");	
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });		
 	}
 	
 	public void testPrimitiveTypeInFieldDecl() throws Exception {
@@ -679,7 +702,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -712,16 +735,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
-
-		
-		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		ICompilationUnit newCU= pack1.getCompilationUnit("floot.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview4= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -729,16 +744,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class floot {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-		JavaProjectHelper.performDummySearch();
-		newCU.delete(true, null);
+		String expected4= buf.toString();
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(4);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		newCU= pack1.getCompilationUnit("floot.java");
-		assertTrue("Nothing created", newCU.exists());
+		String preview5= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -746,9 +755,21 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public interface floot {\n");
 		buf.append("\n");
 		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());	
+		String expected5= buf.toString();
+		
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(5);
+		String preview6= getWizardPreviewContent(newCUWizard);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public enum floot {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected6= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });		
 	}
-
 
 	private void createSomeAmbiguity(boolean ifc, boolean isException) throws Exception {
 
