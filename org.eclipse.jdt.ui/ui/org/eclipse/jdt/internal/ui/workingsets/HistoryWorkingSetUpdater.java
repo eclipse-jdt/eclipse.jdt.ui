@@ -169,6 +169,9 @@ public class HistoryWorkingSetUpdater implements IWorkingSetUpdater {
 				} else if (type == IJavaElement.JAVA_PROJECT && kind == IJavaElementDelta.CHANGED && (flags & IJavaElementDelta.F_CLOSED) != 0) {
 					projectClosed((IJavaProject)element);
 				} else {
+					// It is on purpose to only traverse the children in the else.
+					// If a project got closed there is no need to traverse children.
+					// Same for children of compilation unit.
 					IJavaElementDelta[] children= delta.getAffectedChildren();
 					for (int i= 0; i < children.length; i++) {
 						processDelta(children[i]);
