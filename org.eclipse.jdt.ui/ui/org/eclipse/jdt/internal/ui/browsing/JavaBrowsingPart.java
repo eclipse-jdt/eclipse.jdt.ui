@@ -151,7 +151,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 	
 	private IWorkbenchPart fPreviousSelectionProvider;
-	private Object fPreviousSelectedElement;
+	protected Object fPreviousSelectedElement;
 			
 	/*
 	 * Ensure selection changed events being processed only if
@@ -309,7 +309,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 	
 	protected DecoratingLabelProvider createDecoratingLabelProvider(ILabelProvider provider, ILabelDecorator decorationMgr) {
-		return new ExcludingDecoratingLabelProvider(provider, decorationMgr, "org.eclipse.jdt.ui.problem.decorator"); //$NON-NLS-1$
+//		XXX: Work in progress for problem decorator being a workbench decorator//
+//		return new ExcludingDecoratingLabelProvider(provider, decorationMgr, "org.eclipse.jdt.ui.problem.decorator"); //$NON-NLS-1$
+		return new DecoratingLabelProvider(provider, decorationMgr);
 	}
 	
 	protected JavaElementSorter createJavaElementSorter() {
@@ -557,6 +559,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			
 		if (input instanceof IJavaElement && newInput instanceof IJavaElement)
 			return getTypeComparator().compare(newInput, input)  > 0;
+
+// XXX: why?				
+//		if((newInput instanceof List) && (part instanceof PackagesView))
+//			return true;
+					
 		else
 			return false;
 	}

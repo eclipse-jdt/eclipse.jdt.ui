@@ -419,7 +419,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private PackageExplorerLabelProvider createLabelProvider() {
 		return new PackageExplorerLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-				fContentProvider);			
+				AppearanceAwareLabelProvider.getDecorators(true, null), fContentProvider);			
 	}
 	
 	private void fillActionBars() {
