@@ -551,8 +551,6 @@ public class Checks {
 	}
 
 	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify) {
-//		if (true)
-//			return RefactoringStatus.createFatalErrorStatus("CANT DO IT"); 
 		RefactoringStatus result= new RefactoringStatus();
 		IStatus status= Resources.checkInSync(filesToModify);
 		if (!status.isOK())
