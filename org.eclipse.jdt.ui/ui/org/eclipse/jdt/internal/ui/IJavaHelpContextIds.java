@@ -48,6 +48,7 @@ public interface IJavaHelpContextIds {
 	public static final String OPEN_PACKAGE_WIZARD_ACTION= 								PREFIX + "open_package_wizard_action"; //$NON-NLS-1$
 	public static final String OPEN_PROJECT_WIZARD_ACTION= 								PREFIX + "open_project_wizard_action"; //$NON-NLS-1$
 	public static final String OPEN_SNIPPET_WIZARD_ACTION= 								PREFIX + "open_snippet_wizard_action"; //$NON-NLS-1$
+	public static final String EDIT_WORKING_SET_ACTION= 									PREFIX + "edit_working_set_action"; //$NON-NLS-1$
 	public static final String CLEAR_WORKING_SET_ACTION= 									PREFIX + "clear_working_set_action"; //$NON-NLS-1$
 	public static final String GOTO_MARKER_ACTION= 											PREFIX + "goto_marker_action"; //$NON-NLS-1$
 	public static final String GOTO_PACKAGE_ACTION= 											PREFIX + "goto_package_action"; //$NON-NLS-1$

@@ -61,6 +61,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	
 	private ClearWorkingSetAction fClearWorkingSetAction;
 	private SelectWorkingSetAction fSelectWorkingSetAction;
+	private EditWorkingSetAction fEditWorkingSetAction;
 	
 	private IPropertyChangeListener fPropertyChangeListener;
 	private IPropertyChangeListener fTitleUpdater;
@@ -79,6 +80,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 		fPreferenceKey= viewId + ".WorkingSetFilter." + TAG_WORKING_SET_NAME; //$NON-NLS-1$
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
+		fEditWorkingSetAction= new EditWorkingSetAction(this, shell);
 		fPropertyChangeListener= addWorkingSetChangeSupport();
 	}
 
@@ -100,6 +102,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	public void setWorkingSet(IWorkingSet workingSet, boolean refreshViewer){
 		// Update action
 		fClearWorkingSetAction.setEnabled(workingSet != null);
+		fEditWorkingSetAction.setEnabled(workingSet != null);
 
 		fWorkingSet= workingSet;
 
@@ -160,6 +163,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	public void contributeToMenu(IMenuManager mm) {
 		mm.add(fSelectWorkingSetAction);
 		mm.add(fClearWorkingSetAction);
+		mm.add(fEditWorkingSetAction);
 		mm.add(new Separator());
 		mm.add(new Separator(SEPARATOR_ID));
 		
