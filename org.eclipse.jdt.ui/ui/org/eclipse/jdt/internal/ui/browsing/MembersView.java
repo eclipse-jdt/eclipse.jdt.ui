@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 public class MembersView extends JavaBrowsingPart {
 	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
+
 	
 	public MembersView() {
 		setHasWorkingSetFilter(false);
@@ -142,7 +143,7 @@ public class MembersView extends JavaBrowsingPart {
 			case IJavaElement.TYPE:
 				if (((IType)je).getDeclaringType() == null)
 					return null;
-				break;
+				// fall through
 			case IJavaElement.METHOD:
 				// fall through
 			case IJavaElement.FIELD:
@@ -150,10 +151,7 @@ public class MembersView extends JavaBrowsingPart {
 			case IJavaElement.PACKAGE_DECLARATION:
 				// fall through			
 			case IJavaElement.IMPORT_CONTAINER:
-				je= getSuitableJavaElement(je);
-				if (je != null)
-					return je;
-				break;
+				return getSuitableJavaElement(je);
 			case IJavaElement.IMPORT_DECLARATION:
 				je= getSuitableJavaElement(je);
 				if (je != null) {
