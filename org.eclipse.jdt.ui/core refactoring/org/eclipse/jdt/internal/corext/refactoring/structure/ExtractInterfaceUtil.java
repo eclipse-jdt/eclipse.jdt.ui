@@ -19,13 +19,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -43,6 +45,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -55,14 +58,13 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jface.text.Document;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -99,8 +101,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -604,12 +604,16 @@ class ExtractInterfaceUtil {
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	private static ITypeBinding getTypeBinding(IType theType, WorkingCopyOwner workingCopyOwner) throws JavaModelException {
-		return getTypeDeclarationNode(theType, workingCopyOwner).resolveBinding();
-	}
-
-	private static TypeDeclaration getTypeDeclarationNode(IType theType, WorkingCopyOwner workingCopyOwner) throws JavaModelException {
-		return ASTNodeSearchUtil.getTypeDeclarationNode(theType, ASTCreator.createAST(theType.getCompilationUnit(), workingCopyOwner));
+	private static ITypeBinding getTypeBinding(IType type, WorkingCopyOwner workingCopyOwner) throws JavaModelException {
+		final CompilationUnit unit= ASTCreator.createAST(type.getCompilationUnit(), workingCopyOwner);
+		AbstractTypeDeclaration decl= null;
+		if (type.isAnnotation())
+			decl= ASTNodeSearchUtil.getAnnotationTypeDeclarationNode(type, unit);
+		else if (type.isEnum())
+			decl= ASTNodeSearchUtil.getEnumDeclarationNode(type, unit);
+		else
+			decl= ASTNodeSearchUtil.getTypeDeclarationNode(type, unit);
+		return decl.resolveBinding();
 	}
 
 	private CompilationUnitRange[] getCompilationUnitRanges(ConstraintVariable[] variables, IType inputType, ITypeBinding inputTypeBinding) throws CoreException {
