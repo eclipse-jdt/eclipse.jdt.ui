@@ -19,7 +19,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-import org.eclipse.swt.custom.StyledText;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Preferences;
+
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
@@ -43,7 +50,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension;
-import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.Position;
@@ -55,15 +61,6 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -81,13 +78,17 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -101,12 +102,6 @@ import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 
 
@@ -1134,65 +1129,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return new AdaptedSourceViewer(parent, verticalRuler, overviewRuler, isOverviewRulerVisible, styles);
 	}
 	
-	public void synchronizeOutlinePageSelection() {
-		
-		if (isEditingScriptRunning())
-			return;
-		
-		ISourceViewer sourceViewer= getSourceViewer();
-		if (sourceViewer == null || fOutlinePage == null)
-			return;
-			
-		StyledText styledText= sourceViewer.getTextWidget();
-		if (styledText == null)
-			return;
-		
-		int modelCaret= 0;
-		if (sourceViewer instanceof ITextViewerExtension3) {
-			ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
-			modelCaret= extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
-		} else {
-			int offset= sourceViewer.getVisibleRegion().getOffset();
-			modelCaret= offset + styledText.getCaretOffset();
-		}
-				
-		IJavaElement element= getElementAt(modelCaret, false);
-		ISourceReference reference= getSourceReference(element, modelCaret);
-		if (reference != null) {
-			fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
-			fOutlinePage.select(reference);
-			fOutlinePage.addSelectionChangedListener(fSelectionChangedListener);
-		}
-	}
-	
-	private ISourceReference getSourceReference(IJavaElement element, int offset) {
-		
-		if ( !(element instanceof ISourceReference))
-			return null;
-		
-		if (element.getElementType() == IJavaElement.IMPORT_DECLARATION) {
-			
-			IImportDeclaration declaration= (IImportDeclaration) element;
-			IImportContainer container= (IImportContainer) declaration.getParent();
-			ISourceRange srcRange= null;
-			
-			try {
-				srcRange= container.getSourceRange();
-			} catch (JavaModelException e) {
-			}
-			
-			if (srcRange != null && srcRange.getOffset() == offset)
-				return container;
-		}
-		
-		return (ISourceReference) element;
-	}
-		
 	/*
 	 * @see IReconcilingParticipant#reconciled()
 	 */
 	public void reconciled() {
-		if (synchronizeOutlineOnCursorMove()) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
 			Shell shell= getSite().getShell();
 			if (shell != null && !shell.isDisposed()) {
 				shell.getDisplay().asyncExec(new Runnable() {
@@ -1203,11 +1144,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 		}
 	}
-	
-	private boolean synchronizeOutlineOnCursorMove() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
-	}
-	
+		
 	protected void updateStateDependentActions() {
 		super.updateStateDependentActions();
 		fGenerateActionGroup.editorStateChanged();
