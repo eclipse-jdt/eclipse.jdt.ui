@@ -45,6 +45,9 @@ public class CoreTests extends TestCase {
 		suite.addTest(ScopeAnalyzerTest.allTests());
 		suite.addTest(PartialASTTest.allTests());
 		suite.addTest(CodeCompletionTest.allTests());
+		suite.addTest(TypeRulesTest.allTests());
+		
+		
 		return new ProjectTestSetup(suite);
 	}
 

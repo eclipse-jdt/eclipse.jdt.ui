@@ -63,7 +63,7 @@ public class TypeInfoTest extends TestCase {
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new TypeInfoTest("test1"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}	
 	}
 

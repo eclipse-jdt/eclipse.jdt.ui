@@ -65,7 +65,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new AddUnimplementedConstructorsTest("testOneConstructorWithImportStatement"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}	
 	}
 

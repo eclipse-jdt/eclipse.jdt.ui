@@ -61,7 +61,7 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new AllTypesCacheTest("testHierarchyWithWorkingCopy"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}	
 	}
 	

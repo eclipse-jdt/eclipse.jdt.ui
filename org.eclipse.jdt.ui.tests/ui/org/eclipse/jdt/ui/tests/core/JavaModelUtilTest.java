@@ -66,7 +66,7 @@ public class JavaModelUtilTest extends TestCase {
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new JavaModelUtilTest("testFindType"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}	
 	}
 

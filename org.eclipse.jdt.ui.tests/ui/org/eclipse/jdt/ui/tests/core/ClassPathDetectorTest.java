@@ -61,7 +61,7 @@ public class ClassPathDetectorTest extends TestCase {
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new ClassPathDetectorTest("testClassFolderConflictingWithOutput"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}
 	}
 

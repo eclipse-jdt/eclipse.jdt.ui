@@ -54,7 +54,7 @@ public class TypeHierarchyTest extends TestCase {
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new AllTypesCacheTest("testHierarchyWithWorkingCopy"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}	
 	}
 	

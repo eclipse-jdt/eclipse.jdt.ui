@@ -52,15 +52,13 @@ public class ScopeAnalyzerTest extends CoreTests {
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new ScopeAnalyzerTest("testVariableDeclarations6"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}
 	}
 	
 	protected void setUp() throws Exception {
 		
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
-
+		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		Hashtable options= JavaCore.getDefaultOptions();
@@ -70,7 +68,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
+		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	
 	public void testVariableDeclarations1() throws Exception {
