@@ -33,7 +33,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -114,6 +113,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private boolean fQualifyReferencesWithDeclaringClassName= false;	//default value
 
 	private String fAccessModifier= PRIVATE; //default value
+	private boolean fTargetIsInterface= false;
 	private String fConstantName= ""; //$NON-NLS-1$;
 	private String[] fExcludedVariableNames;
 
@@ -166,6 +166,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 	
 	public String getAccessModifier() {
 		return fAccessModifier;	
+	}
+	
+	public boolean getTargetIsInterface() {
+		return fTargetIsInterface;
 	}
 
 	public boolean qualifyReferencesWithDeclaringClassName() {
@@ -339,8 +343,18 @@ public class ExtractConstantRefactoring extends Refactoring {
 			fCuRewrite= new CompilationUnitRewrite(fCu);
 	
 			result.merge(checkSelection(new SubProgressMonitor(pm, 5)));
-			if ((! result.hasFatalError()) && isLiteralNodeSelected())
+			if (result.hasFatalError())
+				return result;
+			
+			if (isLiteralNodeSelected())
 				fReplaceAllOccurrences= false;
+			
+			ITypeBinding targetType= getContainingTypeBinding();
+			if (targetType.isAnnotation() || targetType.isInterface()) {
+				fTargetIsInterface= true;
+				fAccessModifier= PUBLIC;
+			}
+			
 			return result;
 		} finally {
 			pm.done();
@@ -793,9 +807,4 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return result;
 	}
 
-	private IType getContainingType() throws JavaModelException {
-		IType type= (IType) fCu.getElementAt(getContainingTypeDeclarationNode().getName().getStartPosition());
-		Assert.isNotNull(type);
-		return type;
-	}
 }

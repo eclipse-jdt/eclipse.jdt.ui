@@ -135,6 +135,10 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		}
 	
 		private void addAccessModifierGroup(Composite result, RowLayouter layouter) {
+			fAccessModifier= getExtractConstantRefactoring().getAccessModifier();
+			if (getExtractConstantRefactoring().getTargetIsInterface())
+				return;
+			
 			Label label= new Label(result, SWT.NONE);
 			label.setText(RefactoringMessages.getString("ExtractConstantInputPage.access_modifiers")); //$NON-NLS-1$
 		
@@ -155,7 +159,6 @@ public class ExtractConstantWizard extends RefactoringWizard {
 										  ExtractConstantRefactoring.PACKAGE,
 										  ExtractConstantRefactoring.PRIVATE }; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 
-			fAccessModifier= getExtractConstantRefactoring().getAccessModifier();
 			updateContentAssistImage();
 			for (int i= 0; i < labels.length; i++) {
 				Button radio= new Button(group, SWT.RADIO);

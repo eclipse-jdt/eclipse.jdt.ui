@@ -41,8 +41,10 @@ public class ExtractConstantTests extends RefactoringTest {
 	private static final Class clazz = ExtractConstantTests.class;
 	private static final String REFACTORING_PATH = "ExtractConstant/";
 
+	private static final boolean BUG_86113_ImportRewrite= true;
+	
 	private Object fCompactPref; 
-	private boolean fAddComments; 
+	private boolean fAddComments;
 		
 	public ExtractConstantTests(String name) {
 		super(name);
@@ -267,29 +269,33 @@ public class ExtractConstantTests extends RefactoringTest {
 		helper1(14, 12, 14, 15, true, false, "COLOR");	
 	}
 
-//	public void test24() throws Exception {
-//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
-//	}
-//
-//	public void test25() throws Exception {
-//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
-//	}
-//
-//	public void test26() throws Exception {
-//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
-//	}
-//
-//	public void test27() throws Exception {
-//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
-//	}
-//
-//	public void test28() throws Exception {
-//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
-//	}
-//
-//	public void test29() throws Exception {
-//		helper1(9, 35, 9, 59, false, false, "ITEMS");	
-//	}
+	public void test24() throws Exception {
+		if (BUG_86113_ImportRewrite) {
+			printTestDisabledMessage("BUG_86113_ImportRewrite");
+			return;
+		}
+		helper1(9, 28, 9, 36, true, false, "NUM", "ENUM");	
+	}
+
+	public void test25() throws Exception {
+		helper1(5, 27, 5, 40, false, false, "DEFAULT_NAME", "JEAN_PIERRE");
+	}
+
+	public void test26() throws Exception {
+		helper1(6, 16, 6, 32, true, false, true, "INT", "A");
+	}
+
+	public void test27() throws Exception {
+		helper1(9, 35, 9, 59, false, false, "ITEMS");
+	}
+
+	public void test28() throws Exception {
+		helper1(9, 35, 9, 59, false, false, "ITEMS");
+	}
+
+	public void test29() throws Exception {
+		helper1(9, 35, 9, 59, false, false, "ITEMS");
+	}
 
 	public void testZeroLengthSelection0() throws Exception {
 		helper1(5, 18, 5, 18, false, false, "CONSTANT", "_100");
