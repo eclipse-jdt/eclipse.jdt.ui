@@ -96,8 +96,8 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		fFirstCheck= true;
 	}
 
-	/**
-	 * @see IDialogPage#createControl(Composite)
+	/*
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);

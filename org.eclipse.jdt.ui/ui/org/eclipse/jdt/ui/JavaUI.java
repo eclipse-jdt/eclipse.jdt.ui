@@ -151,8 +151,8 @@ public final class JavaUI {
 	 * </p>
 	 *
 	 * @see IPackagesViewPart
-	 * @see org.eclipse.ui.IWorkbenchPage#findView
-	 * @see org.eclipse.ui.IWorkbenchPage#showView
+	 * @see org.eclipse.ui.IWorkbenchPage#findView(java.lang.String)
+	 * @see org.eclipse.ui.IWorkbenchPage#showView(java.lang.String)
 	 */ 
 	public static final String ID_PACKAGES= 			"org.eclipse.jdt.ui.PackageExplorer"; //$NON-NLS-1$
 	
@@ -167,8 +167,8 @@ public final class JavaUI {
 	 * </p>
 	 *
 	 * @see ITypeHierarchyViewPart
-	 * @see org.eclipse.ui.IWorkbenchPage#findView
-	 * @see org.eclipse.ui.IWorkbenchPage#showView
+	 * @see org.eclipse.ui.IWorkbenchPage#findView(java.lang.String)
+	 * @see org.eclipse.ui.IWorkbenchPage#showView(java.lang.String)
 	 */ 
 	public static final String ID_TYPE_HIERARCHY= 		"org.eclipse.jdt.ui.TypeHierarchy"; //$NON-NLS-1$
 
@@ -285,7 +285,7 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see #createPackageDialog(Shell,IJavaProject,int,String)
+	 * @see #createPackageDialog(Shell, IJavaProject, int, String)
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IJavaProject project, int style) throws JavaModelException {
 		return createPackageDialog(parent, project, style, ""); //$NON-NLS-1$
@@ -313,7 +313,7 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see #createPackageDialog(Shell,IPackageFragmentRoot)
+	 * @see #createPackageDialog(Shell, IPackageFragmentRoot)
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root) throws JavaModelException {
 		return createPackageDialog(parent, root, ""); //$NON-NLS-1$
@@ -361,7 +361,7 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see #createTypeDialog(Shell,IRunnableContext,IJavaSearchScope,int,boolean,String)
+	 * @see #createTypeDialog(Shell, IRunnableContext, IJavaSearchScope, int, boolean, String)
 	 */
 	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) throws JavaModelException {
 		return createTypeDialog(parent, context, scope, style, multipleSelection, "");//$NON-NLS-1$
@@ -523,7 +523,7 @@ public final class JavaUI {
 	 * Returns the DocumentProvider used for Java compilation units.
 	 *
 	 * @return the DocumentProvider for Java compilation units.
-	 * @see org.eclpipse.ui.texteditor.IDocumentProvider
+	 * @see IDocumentProvider
 	 */
 	public static IDocumentProvider getDocumentProvider() {
 		return JavaPlugin.getDefault().getCompilationUnitDocumentProvider();

@@ -80,7 +80,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 		}
 	}
 	
-	/**
+	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {

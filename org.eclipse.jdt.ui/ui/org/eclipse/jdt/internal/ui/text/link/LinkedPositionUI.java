@@ -93,7 +93,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		initializeHighlightColor(viewer);
 	}
 
-	/**
+	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
@@ -205,7 +205,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		fgStore.addPropertyChangeListener(this);
 	}
 
-	/**
+	/*
 	 * @see LinkedPositionManager.LinkedPositionListener#exit(boolean)
 	 */
 	public void exit(boolean success) {

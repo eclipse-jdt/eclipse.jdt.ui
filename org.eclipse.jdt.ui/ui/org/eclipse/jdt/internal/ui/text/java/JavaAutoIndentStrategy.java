@@ -219,8 +219,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return false;
 	}	
 
-	/**
-	 * @see IAutoIndentStrategy#customizeDocumentCommand
+	/*
+	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))

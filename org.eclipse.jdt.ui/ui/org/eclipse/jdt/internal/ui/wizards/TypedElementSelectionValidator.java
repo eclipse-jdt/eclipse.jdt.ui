@@ -36,8 +36,8 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 		fAllowMultipleSelection= allowMultipleSelection;
 	}
 	
-	/**
-	 * @see ISelectionValidator#isValid
+	/*
+	 * @see org.eclipse.ui.dialogs.ISelectionValidator#isValid(java.lang.Object)
 	 */
 	public IStatus validate(Object[] elements) {
 		if (isValid(elements)) {

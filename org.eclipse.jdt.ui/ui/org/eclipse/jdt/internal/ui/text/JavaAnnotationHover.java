@@ -90,7 +90,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	}
 
 		
-	/**
+	/*
 	 * @see IVerticalRulerHover#getHoverInfo(ISourceViewer, int)
 	 */
 	public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {

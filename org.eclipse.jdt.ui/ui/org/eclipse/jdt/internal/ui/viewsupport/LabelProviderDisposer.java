@@ -22,9 +22,6 @@ public class LabelProviderDisposer implements DisposeListener {
 		fLabelProvider= labelProvider;
 	}
 	
-	/**
-	 * @see WidgetListener#widgetDisposed
-	 */
 	public void widgetDisposed(DisposeEvent e) {
 		fLabelProvider.dispose();
 	}

@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
  * 
  * Clients may subclass.
  * 
- * @see org.eclipse.jdt.ui.jarpackager.JarPackage
+ * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 2.0
  */
 public class JarWriter {
