@@ -76,10 +76,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 
-	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal) throws Exception {
-		IType parentClas= getClassFromTestFile(getPackageP(), parentClassName);
+	private void validatePassingTest(String parentClassName, String className, String packageName, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal) throws Exception {
+		IType parentClas= getClassFromTestFile(getPackage(packageName), parentClassName);
 		IType clas= parentClas.getType(className);
-				
+		
+		assertTrue("should be enabled", MoveInnerToTopRefactoring.isAvailable(clas));
 		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (enclosingInstanceName != null){
 			ref.setEnclosingInstanceName(enclosingInstanceName);
@@ -103,7 +104,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		SourceCompareUtil.compare("new Cu:", actual, expected);
 	}
 	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName) throws Exception {
-		validatePassingTest(parentClassName, className, cuNames, packageNames, enclosingInstanceName, false);
+		validatePassingTest(parentClassName, className, "p", cuNames, packageNames, enclosingInstanceName, false);
 	}
 
 	private void validateFailingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName, int expectedSeverity) throws Exception {
@@ -237,6 +238,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null);
 	}
 
+	public void test25() throws Exception{
+//		printTestDisabledMessage("bug 39716");
+		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false);
+	}
+
 	public void test_nonstatic_0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
@@ -338,27 +344,27 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	}
 	public void test_nonstatic_30() throws Exception{
 //		printTestDisabledMessage("test for bug 23715");
-		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true);
+		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", true);
 	}
 
 	public void test_nonstatic_31() throws Exception{
 //		printTestDisabledMessage("test for bug 25537");
-		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true);
+		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", true);
 	}
 
 	public void test_nonstatic_32() throws Exception{
 //		printTestDisabledMessage("test for bug 25537");
-		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true);
+		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", true);
 	}
 
     public void test_nonstatic_33() throws Exception{
 //		printTestDisabledMessage("test for bug 26252");
-        validatePassingTest("A", "I", new String[]{"A"}, new String[]{"p"}, "a", true);
+        validatePassingTest("A", "I", "p", new String[]{"A"}, new String[]{"p"}, "a", true);
     }
 
 	public void test_nonstatic_34() throws Exception{
 //		printTestDisabledMessage("test for bug 31861");
-		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true);
+		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", true);
 	}
 
 	public void test_nonstatic_35() throws Exception{
