@@ -859,7 +859,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 							same= true;
 						final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
 						final String modifier= same ? RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_default") : RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_public"); //$NON-NLS-1$ //$NON-NLS-2$
-						if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : keyword.toFlagValue()) && MemberVisibilityAdjustor.needsVisibilityAdjustments(type, keyword, fAdjustments))
+						if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(type, keyword, fAdjustments))
 							fAdjustments.put(type, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(type, keyword, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_type_warning", new String[] { BindingLabels.getFullyQualified(declaration.resolveBinding()), modifier}), JavaStatusContext.create(type.getCompilationUnit(), declaration)))); //$NON-NLS-1$
 					}
 				}
@@ -1625,7 +1625,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						final MethodDeclaration method= ASTNodeSearchUtil.getMethodDeclarationNode(getter, fSourceRewrite.getRoot());
 						if (method != null) {
 							binding= method.resolveBinding();
-							if (binding != null && MemberVisibilityAdjustor.hasLowerVisibility(getter.getFlags(), same ? Modifier.NONE : keyword.toFlagValue()) && MemberVisibilityAdjustor.needsVisibilityAdjustments(getter, keyword, adjustments))
+							if (binding != null && MemberVisibilityAdjustor.hasLowerVisibility(getter.getFlags(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(getter, keyword, adjustments))
 								adjustments.put(getter, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(getter, keyword, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_method_warning", new String[] { BindingLabels.getFullyQualified(binding), modifier}), JavaStatusContext.create(getter)))); //$NON-NLS-1$
 							final MethodInvocation invocation= rewrite.getAST().newMethodInvocation();
 							invocation.setExpression(expression);
@@ -1681,7 +1681,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					variable.setVarargs(true);
 					variable.setType(ast.newSimpleType(ast.newSimpleName(type.isArray() ? type.getElementType().getName() : type.getName())));
 				} else
-				variable.setType(ASTNodeFactory.newType(ast, type, false));
+					variable.setType(ASTNodeFactory.newType(ast, type, false));
 				return variable;
 			}
 
@@ -1836,9 +1836,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				if (declaring != null && Bindings.equals(declaring.getPackage(), fTarget.getType().getPackage()))
 					same= true;
 				final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
-				if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : keyword.toFlagValue()) && MemberVisibilityAdjustor.needsVisibilityAdjustments(fMethod, keyword, adjustments)) {
+				if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(fMethod, keyword, adjustments)) {
 					final MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment adjustment= new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(fMethod, keyword, RefactoringStatus.createStatus(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_method_warning", new String[] { MemberVisibilityAdjustor.getLabel(fMethod), MemberVisibilityAdjustor.getLabel(keyword)}), JavaStatusContext.create(fMethod), null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
-					ModifierRewrite.create(rewrite, declaration).setVisibility(keyword.toFlagValue(), null);
+					ModifierRewrite.create(rewrite, declaration).setVisibility(keyword == null ? Modifier.NONE : keyword.toFlagValue(), null);
 					adjustment.setNeedsRewriting(false);
 					adjustments.put(fMethod, adjustment);
 				}
@@ -1884,7 +1884,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final TextEditProcessor processor= new TextEditProcessor(document, new MultiTextEdit(0, document.getLength()), TextEdit.UPDATE_REGIONS);
 		processor.getRoot().addChild(result);
 		processor.performEdits();
-		final int width= CodeFormatterUtil.getTabWidth();
+		final int width= CodeFormatterUtil.getTabWidth(fMethod.getJavaProject());
 		final IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
 		return Strings.changeIndent(document.get(marker.getOffset(), marker.getLength()), Strings.computeIndent(document.get(region.getOffset(), region.getLength()), width), width, "", StubUtility.getLineDelimiterFor(document)); //$NON-NLS-1$
 	}
