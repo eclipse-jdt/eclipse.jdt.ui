@@ -1,7 +1,7 @@
 package p;
 
 class A {
-    void m() {
+    protected void m() {
         //implementation
     }
 }

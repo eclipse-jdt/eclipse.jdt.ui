@@ -363,7 +363,7 @@ public final class MemberVisibilityAdjustor {
 		else if (Modifier.isPublic(threshold))
 			return !Modifier.isPublic(modifiers);
 		else if (Modifier.isProtected(threshold))
-			return !Modifier.isProtected(threshold) && !Modifier.isPublic(threshold);
+			return !Modifier.isProtected(modifiers) && !Modifier.isPublic(modifiers);
 		else
 			return Modifier.isPrivate(modifiers);
 	}
@@ -787,20 +787,24 @@ public final class MemberVisibilityAdjustor {
 							break;
 						case IJavaElement.TYPE:
 							final IType type= (IType) referencing;
-							if (typeReferenced.getCompilationUnit().equals(type.getCompilationUnit()))
+							if (type.equals(typeReferenced.getDeclaringType()))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (typeReferenced.getCompilationUnit().getParent().equals(type.getCompilationUnit().getParent()))
-								keyword= null;
 							else {
 								final ITypeHierarchy hierarchy= getTypeHierarchy(type, new SubProgressMonitor(monitor, 1));
 								final IType[] types= hierarchy.getSupertypes(type);
 								IType superType= null;
 								for (int index= 0; index < types.length; index++) {
 									superType= types[index];
-									if (superType.equals(typeReferenced))
+									if (superType.equals(typeReferenced.getDeclaringType())) {
 										keyword= ModifierKeyword.PROTECTED_KEYWORD;
+										return keyword;
+									}
 								}
 							}
+							if (typeReferenced.getCompilationUnit().equals(type.getCompilationUnit()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (typeReferenced.getCompilationUnit().getParent().equals(type.getCompilationUnit().getParent()))
+								keyword= null;
 							break;
 						case IJavaElement.PACKAGE_FRAGMENT:
 							final IPackageFragment fragment= (IPackageFragment) referencing;
