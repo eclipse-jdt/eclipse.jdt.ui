@@ -22,6 +22,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IContainer;
@@ -163,6 +164,9 @@ public class PackageExplorerPart extends ViewPart
 		IShowInTarget,
 		IPackagesViewPart,  IPropertyChangeListener, 
 		IViewPartInputProvider {
+	
+	private static final String PERF_CREATE_PART_CONTROL= "org.eclipse.jdt.ui/perf/explorer/createPartControl"; //$NON-NLS-1$
+	private static final String PERF_MAKE_ACTIONS= "org.eclipse.jdt.ui/perf/explorer/makeActions"; //$NON-NLS-1$
 	
 	private boolean fIsCurrentLayoutFlat; // true means flat, false means hierachical
 
@@ -749,7 +753,10 @@ public class PackageExplorerPart extends ViewPart
 	 * Implementation of IWorkbenchPart.createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {
-		
+
+		final PerformanceStats stats= PerformanceStats.getStats(PERF_CREATE_PART_CONTROL, this);
+		stats.startRun();
+
 		fViewer= createViewer(parent);
 		fViewer.setUseHashlookup(true);
 		
@@ -816,6 +823,8 @@ public class PackageExplorerPart extends ViewPart
 		
 		fFilterUpdater= new FilterUpdater(fViewer);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fFilterUpdater);
+		
+		stats.endRun();
 	}
 
 	private void initFrameActions() {
@@ -1019,12 +1028,18 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	private void makeActions() {
+
+		final PerformanceStats stats= PerformanceStats.getStats(PERF_MAKE_ACTIONS, this);
+		stats.startRun();
+
 		fActionSet= new PackageExplorerActionGroup(this);
 		if (fWorkingSetModel != null)
 			fActionSet.getWorkingSetActionGroup().setWorkingSetModel(fWorkingSetModel);
+
+		stats.endRun();
 	}
 	
-	//---- Event handling ----------------------------------------------------------
+	// ---- Event handling ----------------------------------------------------------
 	
 	private void initDragAndDrop() {
 		initDrag();

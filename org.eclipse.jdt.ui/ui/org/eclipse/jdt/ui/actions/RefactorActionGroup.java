@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.PerformanceStats;
+
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Menu;
@@ -64,6 +66,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
  */
 public class RefactorActionGroup extends ActionGroup {
 	
+	private static final String PERF_REFACTOR_ACTION_GROUP= "org.eclipse.jdt.ui/explorer/RefactorActionGroup"; //$NON-NLS-1$
+
 	/**
 	 * Pop-up menu: id of the refactor sub menu (value <code>org.eclipse.jdt.ui.refactoring.menu</code>).
 	 * 
@@ -171,6 +175,10 @@ public class RefactorActionGroup extends ActionGroup {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public RefactorActionGroup(CompilationUnitEditor editor, String groupName) {
+
+		final PerformanceStats stats= PerformanceStats.getStats(PERF_REFACTOR_ACTION_GROUP, this);
+		stats.startRun();
+
 		fSite= editor.getEditorSite();
 		fEditor= editor;
 		fGroupName= groupName;
@@ -295,9 +303,15 @@ public class RefactorActionGroup extends ActionGroup {
 		fQuickAccessAction= new RefactorQuickAccessAction(editor);
 		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
 		fKeyBindingService.registerAction(fQuickAccessAction);
+		
+		stats.endRun();
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
+
+		final PerformanceStats stats= PerformanceStats.getStats(PERF_REFACTOR_ACTION_GROUP, this);
+		stats.startRun();
+
 		fSite= site;
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
@@ -363,6 +377,8 @@ public class RefactorActionGroup extends ActionGroup {
 			fQuickAccessAction= new RefactorQuickAccessAction(null);
 			fKeyBindingService.registerAction(fQuickAccessAction);
 		}
+		
+		stats.endRun();
 	}
 	
 	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
