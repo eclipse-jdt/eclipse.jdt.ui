@@ -19,14 +19,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -58,13 +57,11 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class LibrariesWorkbookPage extends BuildPathBasePage {
@@ -184,6 +181,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		public void doubleClicked(TreeListDialogField field) {
 			libaryPageDoubleClicked(field);
 		}
+		
+		public void keyPressed(TreeListDialogField field, KeyEvent event) {
+			libaryPageKeyPressed(field, event);
+		}
 
 		public Object[] getChildren(TreeListDialogField field, Object element) {
 			if (element instanceof CPListElement) {
@@ -208,8 +209,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		public void dialogFieldChanged(DialogField field) {
 			libaryPageDialogFieldChanged(field);
 		}
-
-
 	}
 	
 	private void libaryPageCustomButtonPressed(DialogField field, int index) {
@@ -262,6 +261,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
+	protected void libaryPageKeyPressed(TreeListDialogField field, KeyEvent event) {
+		if (field == fLibrariesList) {
+			if (event.character == SWT.DEL && event.stateMask == 0) {
+				List selection= field.getSelectedElements();
+				if (canRemove(selection)) {
+					removeEntry();
+				}
+			}
+		}	
+	}	
 
 	private void removeEntry() {
 		List selElements= fLibrariesList.getSelectedElements();
@@ -707,131 +716,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e.getStatus());
 		}
-	}
-	
-	private class AdvancedDialog extends Dialog {
-
-		private static final String DIALOGSTORE_ADV_SECTION= "LibrariesWorkbookPage.advanced"; //$NON-NLS-1$
-		private static final String DIALOGSTORE_SELECTED= "selected"; //$NON-NLS-1$
-		private static final String DIALOGSTORE_CONTAINER_IDX= "containerindex"; //$NON-NLS-1$
-
-		private DialogField fLabelField;
-		private SelectionButtonDialogField fCreateFolderField;
-		private SelectionButtonDialogField fAddFolderField;
-		private SelectionButtonDialogField fAddContainerField;
-		private ComboDialogField fCombo;
-		private CPListElement[] fResult;
-		
-		private IDialogSettings fAdvSettings;
-		
-		private ClasspathContainerDescriptor[] fDescriptors;
-
-		public AdvancedDialog(Shell parent) {
-			super(parent);
-			
-			fAdvSettings= fDialogSettings.getSection(DIALOGSTORE_ADV_SECTION);
-			if (fAdvSettings == null) {
-				fAdvSettings= fDialogSettings.addNewSection(DIALOGSTORE_ADV_SECTION);
-				fAdvSettings.put(DIALOGSTORE_SELECTED, 2); // container
-				fAdvSettings.put(DIALOGSTORE_CONTAINER_IDX, 0);
-			}		
-			
-			fDescriptors= ClasspathContainerDescriptor.getDescriptors();
-			
-			fLabelField= new DialogField();
-			fLabelField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.description")); //$NON-NLS-1$
-			
-			fCreateFolderField= new SelectionButtonDialogField(SWT.RADIO);
-			fCreateFolderField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.createfolder")); //$NON-NLS-1$
-
-			fAddFolderField= new SelectionButtonDialogField(SWT.RADIO);
-			fAddFolderField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.addfolder")); //$NON-NLS-1$
-
-			fAddContainerField= new SelectionButtonDialogField(SWT.RADIO);
-			fAddContainerField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.addcontainer")); //$NON-NLS-1$
-						
-			String[] names= new String[fDescriptors.length];
-			for (int i = 0; i < names.length; i++) {
-				names[i]= fDescriptors[i].getName();
-			}
-			
-			fCombo= new ComboDialogField(SWT.READ_ONLY);
-			fCombo.setItems(names);
-			
-			fAddContainerField.attachDialogField(fCombo);
-		
-			int selected= fAdvSettings.getInt(DIALOGSTORE_SELECTED);
-			fCreateFolderField.setSelection(selected == 0);
-			fAddFolderField.setSelection(selected == 1);
-			fAddContainerField.setSelection(selected == 2);
-			fCombo.selectItem(fAdvSettings.getInt(DIALOGSTORE_CONTAINER_IDX));
-		}
-
-		/* 
-		 * @see Window#create(Shell)
-		 */
-		protected void configureShell(Shell shell) {
-			super.configureShell(shell);
-			shell.setText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.title")); //$NON-NLS-1$
-			WorkbenchHelp.setHelp(shell, IJavaHelpContextIds.LIBRARIES_WORKBOOK_PAGE_ADVANCED_DIALOG);
-		}
-
-		protected Control createDialogArea(Composite parent) {
-			initializeDialogUnits(parent);
-			
-			Composite composite= (Composite) super.createDialogArea(parent);
-			Composite inner= new Composite(composite, SWT.NONE);
-			GridLayout layout= new GridLayout();
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;
-			inner.setLayout(layout);
-			
-			fLabelField.doFillIntoGrid(inner, 1);
-			fCreateFolderField.doFillIntoGrid(inner, 1);
-			fAddFolderField.doFillIntoGrid(inner, 1);
-			fAddContainerField.doFillIntoGrid(inner, 1);
-			Control control= fCombo.getComboControl(inner);
-			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.horizontalIndent= convertWidthInCharsToPixels(3);
-			control.setLayoutData(gd);
-		
-			return composite;
-		}
-		
-		
-		/* (non-Javadoc)
-		 * @see Dialog#okPressed()
-		 */
-		protected void okPressed() {
-			fResult= null;
-			if (fCreateFolderField.isSelected()) {
-				fResult= openNewClassFolderDialog(null);
-				fAdvSettings.put(DIALOGSTORE_SELECTED, 0);
-			} else if (fAddFolderField.isSelected()) {
-				fResult= openClassFolderDialog(null);
-				fAdvSettings.put(DIALOGSTORE_SELECTED, 1);
-			} else if (fAddContainerField.isSelected()) {
-				String selected= fCombo.getText();
-				for (int i = 0; i < fDescriptors.length; i++) {
-					if (fDescriptors[i].getName().equals(selected)) {
-						String title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.new.title"); //$NON-NLS-1$
-						fResult= openContainerDialog(title, new ClasspathContainerWizard(fDescriptors[i], fCurrJProject, getRawClasspath()));
-						fAdvSettings.put(DIALOGSTORE_CONTAINER_IDX, i);
-						break;
-					}
-				}
-				fAdvSettings.put(DIALOGSTORE_SELECTED, 2);
-			}
-			if (fResult != null) {
-				super.okPressed();
-			}
-			// stay open
-		}
-		
-		public CPListElement[] getResult() {
-			return fResult;
-		}
-
 	}
 	
 	private IClasspathEntry[] getRawClasspath() {

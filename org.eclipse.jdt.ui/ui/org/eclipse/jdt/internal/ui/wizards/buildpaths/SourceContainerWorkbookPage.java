@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -190,6 +191,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		public void doubleClicked(TreeListDialogField field) {
 			sourcePageDoubleClicked(field);
 		}
+		
+		public void keyPressed(TreeListDialogField field, KeyEvent event) {
+			sourcePageKeyPressed(field, event);
+		}	
 
 		public Object[] getChildren(TreeListDialogField field, Object element) {
 			if (element instanceof CPListElement) {
@@ -213,17 +218,28 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		public void dialogFieldChanged(DialogField field) {
 			sourcePageDialogFieldChanged(field);
 		}
+
 	}
+	
+	protected void sourcePageKeyPressed(TreeListDialogField field, KeyEvent event) {
+		if (field == fFoldersList) {
+			if (event.character == SWT.DEL && event.stateMask == 0) {
+				List selection= field.getSelectedElements();
+				if (canRemove(selection)) {
+					removeEntry();
+				}
+			}
+		}	
+	}	
 	
 	protected void sourcePageDoubleClicked(TreeListDialogField field) {
 		if (field == fFoldersList) {
-			List selection= fFoldersList.getSelectedElements();
+			List selection= field.getSelectedElements();
 			if (canEdit(selection)) {
 				editEntry();
 			}
 		}
 	}
-	
 	
 	protected void sourcePageCustomButtonPressed(DialogField field, int index) {
 		if (field == fFoldersList) {

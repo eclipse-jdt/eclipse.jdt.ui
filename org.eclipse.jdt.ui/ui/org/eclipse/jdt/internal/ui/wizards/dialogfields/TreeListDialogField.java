@@ -392,8 +392,10 @@ public class TreeListDialogField extends DialogField {
 		if (event.character == SWT.DEL && event.stateMask == 0) {
 			if (fRemoveButtonIndex != -1 && isButtonEnabled(fTree.getSelection(), fRemoveButtonIndex)) {
 				managedButtonPressed(fRemoveButtonIndex);
+				return;
 			}
 		}
+		fTreeAdapter.keyPressed(this, event);
 	}
 
 	// ------ enable / disable management
@@ -404,13 +406,6 @@ public class TreeListDialogField extends DialogField {
 	public void dialogFieldChanged() {
 		super.dialogFieldChanged();
 		updateButtonState();
-	}
-
-	private Button getButton(int index) {
-		if (fButtonControls != null && index >= 0 && index < fButtonControls.length) {
-			return fButtonControls[index];
-		}
-		return null;
 	}
 
 	/*

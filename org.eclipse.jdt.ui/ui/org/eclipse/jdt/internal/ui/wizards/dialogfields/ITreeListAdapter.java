@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
+import org.eclipse.swt.events.KeyEvent;
+
 /**
  * Change listener used by <code>TreeListDialogField</code>
  */
@@ -23,6 +25,11 @@ public interface ITreeListAdapter {
 	 * The list has been double clicked
 	 */
 	void doubleClicked(TreeListDialogField field);
+
+	/**
+	 * A key has been pressed
+	 */
+	void keyPressed(TreeListDialogField field, KeyEvent event);
 
 	Object[] getChildren(TreeListDialogField field, Object element);
 

@@ -8,9 +8,9 @@ package org.eclipse.jdt.ui.examples;
 import java.util.Random;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.LabelProvider;
@@ -23,7 +23,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class TreeListDialogFieldExample {
 	private Shell fShell;
-	private Label fLabel;
 	
 	public TreeListDialogFieldExample() {
 	}
@@ -111,6 +110,9 @@ public class TreeListDialogFieldExample {
 		}
 
 		public void doubleClicked(TreeListDialogField field) {
+		}
+
+		public void keyPressed(TreeListDialogField field, KeyEvent event) {
 		}
 
 	}	
