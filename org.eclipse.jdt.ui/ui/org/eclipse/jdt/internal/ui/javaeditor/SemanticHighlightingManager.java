@@ -31,7 +31,9 @@ import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IColorManagerExtension;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 
 /**
@@ -262,6 +264,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	private IColorManager fColorManager;
 	/** The preference store */
 	private IPreferenceStore fPreferenceStore;
+	/** The source viewer configuration */
+	private JavaSourceViewerConfiguration fConfiguration;
 	/** The presentation reconciler */
 	private JavaPresentationReconciler fPresentationReconciler;
 	
@@ -277,12 +281,42 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @param preferenceStore The preference store
 	 * @param backgroundPresentationReconciler the background presentation reconciler
 	 */
+	public void install(JavaEditor editor, JavaSourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore) {
+		fEditor= editor;
+		fSourceViewer= sourceViewer;
+		fColorManager= colorManager;
+		fPreferenceStore= preferenceStore;
+		if (fEditor != null) {
+			fConfiguration= new JavaSourceViewerConfiguration(colorManager, preferenceStore, editor, IJavaPartitions.JAVA_PARTITIONING);
+			fPresentationReconciler= (JavaPresentationReconciler) fConfiguration.getPresentationReconciler(sourceViewer);
+		} else {
+			fConfiguration= null;
+			fPresentationReconciler= null;
+		}
+		
+		fPreferenceStore.addPropertyChangeListener(this);
+
+		if (isEnabled())
+			enable();
+	}
+	
+	/**
+	 * Install the semantic highlighting on the given editor infrastructure
+	 * 
+	 * @param editor The Java editor
+	 * @param sourceViewer The source viewer 
+	 * @param colorManager The color manager
+	 * @param preferenceStore The preference store
+	 * @param backgroundPresentationReconciler the background presentation reconciler
+	 * @deprecated As of 3.0.1, use {@link SemanticHighlightingManager#install(JavaEditor, JavaSourceViewer, IColorManager, IPreferenceStore) instead
+	 */
 	public void install(JavaEditor editor, JavaSourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, JavaPresentationReconciler backgroundPresentationReconciler) {
 		fEditor= editor;
 		fSourceViewer= sourceViewer;
 		fColorManager= colorManager;
 		fPreferenceStore= preferenceStore;
 		fPresentationReconciler= backgroundPresentationReconciler;
+		fConfiguration= null;
 		
 		fPreferenceStore.addPropertyChangeListener(this);
 
@@ -300,7 +334,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 */
 	public void install(JavaSourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, HighlightedRange[][] hardcodedRanges) {
 		fHardcodedRanges= hardcodedRanges;
-		install(null, sourceViewer, colorManager, preferenceStore, null);
+		install(null, sourceViewer, colorManager, preferenceStore);
 	}
 	
 	/**
@@ -373,6 +407,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		fEditor= null;
 		fSourceViewer= null;
 		fColorManager= null;
+		fConfiguration= null;
 		fPresentationReconciler= null;
 	}
 
@@ -452,6 +487,9 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	private void handlePropertyChangeEvent(PropertyChangeEvent event) {
 		if (fPreferenceStore == null)
 			return; // Uninstalled during event notification
+		
+		if (fConfiguration != null)
+			fConfiguration.handlePropertyChangeEvent(event);
 		
 		if (PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED.equals(event.getProperty())) {
 			if (isEnabled())

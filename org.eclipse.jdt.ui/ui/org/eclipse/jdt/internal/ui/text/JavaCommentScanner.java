@@ -78,12 +78,12 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#clearWords()
 		 * @since 3.0
 		 */
-		public void clearWords() {
+		public synchronized void clearWords() {
 			super.clearWords();
 			fUppercaseWords.clear();
 		}
 	
-		public void addTaskTags(String value) {
+		public synchronized void addTaskTags(String value) {
 			String[] tasks= split(value, ","); //$NON-NLS-1$
 			for (int i= 0; i < tasks.length; i++) {
 				if (tasks[i].length() > 0) {
@@ -106,7 +106,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#addWord(java.lang.String, org.eclipse.jface.text.rules.IToken)
 		 * @since 3.0
 		 */
-		public void addWord(String word, IToken token) {
+		public synchronized void addWord(String word, IToken token) {
 			Assert.isNotNull(word);
 			Assert.isNotNull(token);		
 		
@@ -118,7 +118,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#evaluate(org.eclipse.jface.text.rules.ICharacterScanner, org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer)
 		 * @since 3.0
 		 */
-		public IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
+		public synchronized IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
 			if (fCaseSensitive)
 				return super.evaluate(scanner, word);
 			
@@ -274,8 +274,10 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		if (fTaskTagMatcher != null && event.getProperty().equals(COMPILER_TASK_TAGS)) {
 			Object value= event.getNewValue();
 			if (value instanceof String) {
-				fTaskTagMatcher.clearWords();
-				fTaskTagMatcher.addTaskTags((String) value);
+				synchronized (fTaskTagMatcher) {
+					fTaskTagMatcher.clearWords();
+					fTaskTagMatcher.addTaskTags((String) value);
+				}
 			}
 		} else if (fTaskTagMatcher != null && event.getProperty().equals(COMPILER_TASK_CASE_SENSITIVE)) {
 			Object value= event.getNewValue();
