@@ -34,6 +34,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -45,6 +46,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -72,7 +74,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -398,6 +399,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 	}
 
+	private static final String SETTINGS_NLS_ACCESSORS= "nls_accessor_history"; //$NON-NLS-1$
+	private static final int SETTINGS_MAX_ENTRIES= 5;
+	
 	private Text fPrefixField;
 	private Table fTable;
 	private TableViewer fTableViewer;
@@ -412,8 +416,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private Button fEditButton;
 	private NLSRefactoring fNLSRefactoring;
 	private Button fRenameButton;
-	private Text fAccessorClassField;
-	private Text fPropertiesFileField;
+	private Combo fAccessorClassField;
+	
+	private AccessorDescription[] fAccessorChoices;
 	private Button fFilterCheckBox;
 
 	public ExternalizeWizardPage(NLSRefactoring nlsRefactoring) {
@@ -421,6 +426,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fCu= nlsRefactoring.getCu();
 		fSubstitutions= nlsRefactoring.getSubstitutions();
 		fNLSRefactoring= nlsRefactoring;
+		fAccessorChoices= null;
 
 		createDefaultExternalization(fSubstitutions, nlsRefactoring.getPrefix());
 	}
@@ -470,7 +476,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Composite composite= new Composite(accessorComposite, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		layout= new GridLayout(2, true);
+		layout= new GridLayout(1, true);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
@@ -479,21 +485,24 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		accessorClassLabel.setText(NLSUIMessages.getString("ExternalizeWizardPage.accessorclass.label")); //$NON-NLS-1$
 		accessorClassLabel.setLayoutData(new GridData());
 		
-		Label propertiesFileLabel= new Label(composite, SWT.NONE);
-		propertiesFileLabel.setText(NLSUIMessages.getString("ExternalizeWizardPage.propertiesfile.label")); //$NON-NLS-1$
-		propertiesFileLabel.setLayoutData(new GridData());
+		
+		SelectionListener listener= new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (e.widget instanceof Button) {
+					doConfigureButtonPressed();
+				} else {
+					doAccessorSelectionChanged();
+				}
+			}
+		};
+		
 		
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint= convertWidthInCharsToPixels(30);
-		fAccessorClassField= new Text(composite, SWT.SINGLE | SWT.BORDER);
+		fAccessorClassField= new Combo(composite, SWT.READ_ONLY);
 		fAccessorClassField.setLayoutData(data);
-		fAccessorClassField.setEditable(false);
+		fAccessorClassField.addSelectionListener(listener);
 		
-		data= new GridData(GridData.FILL_HORIZONTAL);
-		data.widthHint= convertWidthInCharsToPixels(30);
-		fPropertiesFileField= new Text(composite, SWT.SINGLE | SWT.BORDER);
-		fPropertiesFileField.setLayoutData(data);
-		fPropertiesFileField.setEditable(false);
 		
 		//new Label(composite, SWT.NONE); // placeholder
 		
@@ -504,25 +513,96 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		data.heightHint= SWTUtil.getButtonHeightHint(configure);
 		configure.setLayoutData(data);
 
-		configure.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {
-				doConfigureButtonPressed();
-			}
+		configure.addSelectionListener(listener);
+		
+		updateAccessorChoices();
+		
+	}
+	
+	protected void doAccessorSelectionChanged() {
+		int selectionIndex= fAccessorClassField.getSelectionIndex();
+		if (fAccessorChoices != null && selectionIndex < fAccessorChoices.length) {
+			AccessorDescription selected= fAccessorChoices[selectionIndex];
+			fNLSRefactoring.setAccessorClassName(selected.getAccessorClassName());
+			fNLSRefactoring.setAccessorClassPackage(selected.getAccessorClassPackage());
+			fNLSRefactoring.setResourceBundleName(selected.getResourceBundleName());
+			fNLSRefactoring.setResourceBundlePackage(selected.getResourceBundlePackage());
+			
+			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
+			fTableViewer.refresh(true);
+		}
+	}
 
-			public void widgetDefaultSelected(SelectionEvent e) {
+	private void updateAccessorChoices() {
+		
+		AccessorDescription configured= new AccessorDescription(
+				fNLSRefactoring.getAccessorClassName(),
+				fNLSRefactoring.getAccessorClassPackage(),
+				fNLSRefactoring.getResourceBundleName(),
+				fNLSRefactoring.getResourceBundlePackage());
+		
+		ArrayList currChoices= new ArrayList();
+		ArrayList currLabels= new ArrayList();
+		
+		currChoices.add(configured);
+		currLabels.add(configured.getLabel());
+		
+		AccessorDescription[] choices= fAccessorChoices;
+		if (choices == null) {
+			choices= loadAccessorDescriptions();
+		}
+		
+		for (int i= 0; i < choices.length; i++) {
+			AccessorDescription curr= choices[i];
+			if (!curr.equals(configured)) {
+				currChoices.add(curr);
+				currLabels.add(curr.getLabel());
 			}
-		});
+		}
 		
-		updateAccessorFieldLabels();
+		String[] labels= (String[]) currLabels.toArray(new String[currLabels.size()]);
+		fAccessorChoices= (AccessorDescription[]) currChoices.toArray(new AccessorDescription[currChoices.size()]);
 		
+		fAccessorClassField.setItems(labels);
+		fAccessorClassField.select(0);
 	}
 	
-	private void updateAccessorFieldLabels() {
-		String accessorClass= JavaModelUtil.concatenateName(fNLSRefactoring.getAccessorClassPackage().getElementName(), fNLSRefactoring.getAccessorClassName());
-		fAccessorClassField.setText(accessorClass);
-		fPropertiesFileField.setText(fNLSRefactoring.getPropertyFilePath().makeRelative().toString());
+	
+	private AccessorDescription[] loadAccessorDescriptions() {
+		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_NLS_ACCESSORS);
+		if (section == null) {
+			return new AccessorDescription[0];
+		}
+		ArrayList res= new ArrayList();
+		for (int i= 0; i < SETTINGS_MAX_ENTRIES; i++) {
+			IDialogSettings serializedDesc= section.getSection(String.valueOf(i));
+			if (serializedDesc != null) {
+				AccessorDescription accessor= AccessorDescription.deserialize(serializedDesc);
+				if (accessor != null) {
+					res.add(accessor);
+				}
+			}
+		}
+		return (AccessorDescription[]) res.toArray(new AccessorDescription[res.size()]);
 	}
 	
+	
+	
+	private void storeAccessorDescriptions() {
+		if (fAccessorChoices == null) {
+			return;
+		}
+		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
+		IDialogSettings nlsSection= dialogSettings.getSection(SETTINGS_NLS_ACCESSORS);
+		if (nlsSection == null) {
+			nlsSection= dialogSettings.addNewSection(SETTINGS_NLS_ACCESSORS);
+		}
+		int nEntries= Math.min(SETTINGS_MAX_ENTRIES, fAccessorChoices.length);
+		for (int i= 0; i < nEntries; i++) {
+			IDialogSettings serializedDesc= nlsSection.addNewSection(String.valueOf(i));
+			fAccessorChoices[i].serialize(serializedDesc);
+		}
+	}
 	
 
 	private void doConfigureButtonPressed() {
@@ -530,7 +610,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		if (dialog.open() == Window.OK) {
 			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
 			fTableViewer.refresh(true);
-			updateAccessorFieldLabels();
+			updateAccessorChoices();
 		}
 	}
 
@@ -1034,6 +1114,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	public void dispose() {
+		storeAccessorDescriptions();
 		//widgets will be disposed. only need to null'em		
 		fPrefixField= null;
 		fSourceViewer= null;
