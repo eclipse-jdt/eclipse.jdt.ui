@@ -33,6 +33,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	private static final boolean BUG_79976_RippleMethodFinder= true;
 	private static final boolean BUG_83083_CORE_SEARCH_NPE= true;
+	private static final boolean BUG_83393_CORE_VARARG_JAVADOC= true;
 	
 	private static final boolean BUG_83217_IMPLICIT_ENUM_METHODS= true;
 		
@@ -170,6 +171,18 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	public void testGenerics4() throws Exception {
 		helper2_0("takeANumber", "doit", new String[]{"QNumber;"});
+	}
+	
+	public void testVarargs1() throws Exception {
+		helper2_0("runall", "runThese", new String[]{"[QRunnable;"});
+	}
+	
+	public void testVarargs2() throws Exception {
+		if (BUG_83393_CORE_VARARG_JAVADOC) {
+			printTestDisabledMessage("BUG_83393_CORE_VARARG_JAVADOC");
+			return;
+		}
+		helper2_0("m", "k", new String[]{"[QString;"});
 	}
 	
 	public void testFail0() throws Exception{
