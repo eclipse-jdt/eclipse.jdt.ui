@@ -273,7 +273,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	}
 
     public String getPluginId() {
-        return fElement.getDeclaringExtension().getNamespace();
+        return fElement.getNamespace();
     }
 
 }

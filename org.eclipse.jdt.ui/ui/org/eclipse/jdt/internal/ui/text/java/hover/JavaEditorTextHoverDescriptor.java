@@ -109,7 +109,7 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 	 * Creates the Java editor text hover.
 	 */
 	public IJavaEditorTextHover createTextHover() {
- 		String pluginId = fElement.getDeclaringExtension().getNamespace();
+ 		String pluginId = fElement.getNamespace();
 		boolean isHoversPlugInActivated= Platform.getBundle(pluginId).getState() == Bundle.ACTIVE;
 		if (isHoversPlugInActivated || canActivatePlugIn()) {
 			try {
