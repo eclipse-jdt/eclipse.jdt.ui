@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
@@ -101,36 +102,40 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	 */
 	public boolean visit(IResourceDelta delta) throws CoreException {
 		
-		if (delta != null) {
-			
-			if (fMarkerResource != null && !fMarkerResource.equals(delta.getResource()))
-				return true;
-			
-			IMarkerDelta[] markerDeltas= delta.getMarkerDeltas();
-			for (int i= 0; i < markerDeltas.length; i++) {
-				if (isAffected(markerDeltas[i])) {
-					IMarker marker= markerDeltas[i].getMarker();
-					switch (markerDeltas[i].getKind()) {
-						case IResourceDelta.ADDED :
-							addMarkerAnnotation(marker);
-							fChangesApplied= true;
-							break;
-						case IResourceDelta.REMOVED :
-							removeMarkerAnnotation(marker);
-							fChangesApplied= true;
-							break;
-						case IResourceDelta.CHANGED:
-							modifyMarkerAnnotation(marker);
-							fChangesApplied= true;
-							break;
-					}
-				}
-			}
-			
-			return (fMarkerResource == null);
+		if (delta == null)
+			return false;
+
+		if (fMarkerResource != null) {
+
+			IPath path= fMarkerResource.getFullPath();
+			delta= delta.findMember(path);
+
+			if (delta == null)
+				return false;			
 		}
 		
-		return false;
+		IMarkerDelta[] markerDeltas= delta.getMarkerDeltas();
+		for (int i= 0; i < markerDeltas.length; i++) {
+			if (isAffected(markerDeltas[i])) {
+				IMarker marker= markerDeltas[i].getMarker();
+				switch (markerDeltas[i].getKind()) {
+					case IResourceDelta.ADDED :
+						addMarkerAnnotation(marker);
+						fChangesApplied= true;
+						break;
+					case IResourceDelta.REMOVED :
+						removeMarkerAnnotation(marker);
+						fChangesApplied= true;
+						break;
+					case IResourceDelta.CHANGED:
+						modifyMarkerAnnotation(marker);
+						fChangesApplied= true;
+						break;
+				}
+			}
+		}
+		
+		return (fMarkerResource == null);
 	}
 	
 	/**
