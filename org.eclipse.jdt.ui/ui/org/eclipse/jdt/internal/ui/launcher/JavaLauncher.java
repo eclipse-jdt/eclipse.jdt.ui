@@ -6,7 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.text.DateFormat;import java.util.Date;import java.util.List;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.swt.widgets.Display;
+import java.text.DateFormat;import java.util.Date;import java.util.List;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.swt.widgets.Display;import com.sun.jdi.VirtualMachine;
 
 public abstract class JavaLauncher implements IVMRunner {
 	protected final static String PREFIX= "launcher.";
@@ -57,4 +57,14 @@ public abstract class JavaLauncher implements IVMRunner {
 		});
 		return result[0];
 	}
+	
+	
+	protected void setTimeout(VirtualMachine vm) {
+		if (vm instanceof org.eclipse.jdi.VirtualMachine) {
+			int timeout= JavaPlugin.getDefault().getPreferenceStore().getInt(JDK12PreferencePage.PREF_TIMEOUT);
+			org.eclipse.jdi.VirtualMachine vm2= (org.eclipse.jdi.VirtualMachine)vm;
+			vm2.setRequestTimeout(timeout);
+		}
+	}
+
 }

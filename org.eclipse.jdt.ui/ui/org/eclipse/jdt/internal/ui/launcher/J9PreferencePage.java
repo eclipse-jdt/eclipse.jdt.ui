@@ -6,17 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;
-
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.io.File;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.preferences.MinMaxIntegerFieldEditor;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.swt.widgets.Composite;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;
 
 /*
  * The page for setting java concole preferences.
@@ -24,12 +14,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class J9PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	public static final String PREF_LOCATION= "org.eclipse.jdt.ui.Launcher.J9.location";
+	public static final String PREF_TIMEOUT= "org.eclipse.jdt.ui.Launcher.J9.timeout";
 	protected static final String PREFIX= "launcher.j9.preferences.";
 	protected static final String DESCRIPTION= PREFIX + "description";
+	protected static final String HOME= PREFIX+"home";
+	protected static final String TIMEOUT= PREFIX+"timeout";
 	private JDKRootFieldEditor fJDKRoot;
 
 	public J9PreferencePage() {
-		super(FLAT);
+		super(GRID);
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		setPreferenceStore(store);
@@ -44,8 +37,11 @@ public class J9PreferencePage extends FieldEditorPreferencePage implements IWork
 		Composite parent= getFieldEditorParent();
 		String suffix1= "bin" + File.separator + "j9.exe";
 		String suffix2= "bin" + File.separator + "j9";
-		fJDKRoot= new JDKRootFieldEditor(PREF_LOCATION, "Home:", new String[] { suffix1, suffix2 }, parent);
+		fJDKRoot= new JDKRootFieldEditor(PREF_LOCATION, JavaLaunchUtils.getResourceString(HOME), new String[] { suffix1, suffix2 }, parent);
 		addField(fJDKRoot);
+		MinMaxIntegerFieldEditor timeout= new MinMaxIntegerFieldEditor(PREF_TIMEOUT, JavaLaunchUtils.getResourceString(TIMEOUT), parent);
+		timeout.setMinimumValue(500);
+		addField(timeout);
 	}
 
 	public void setVisible(boolean visible) {
@@ -54,6 +50,9 @@ public class J9PreferencePage extends FieldEditorPreferencePage implements IWork
 			fJDKRoot.setFocus();
 	}
 	
+	public static void initDefaults(IPreferenceStore store) {
+		store.setDefault(PREF_TIMEOUT, 3000);
+	}
 	/**
 	 * @see IWorkbenchPreferencePage#init
 	 */
