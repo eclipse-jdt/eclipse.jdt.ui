@@ -197,28 +197,23 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (original != null) {
 				
 			try {
-				
-				try {
-					input.getFile().refreshLocal(IResource.DEPTH_INFINITE, null);
-				} catch (CoreException x) {
-					handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
-				}
-				
-				ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy();
-				IDocument d= createCompilationUnitDocument(c);
-				IAnnotationModel m= createCompilationUnitAnnotationModel(element);
-				_FileSynchronizer f= new _FileSynchronizer(input);
-				f.install();
-				BufferSynchronizer b= new BufferSynchronizer(d, c);
-				b.install();
-				
-				CompilationUnitInfo info= new CompilationUnitInfo(d, m, f, c, b);
-				info.setModificationStamp(computeModificationStamp(input.getFile()));
-				return info;
-				
-			} catch (JavaModelException x) {
-				throw new CoreException(x.getStatus());
+				input.getFile().refreshLocal(IResource.DEPTH_INFINITE, null);
+			} catch (CoreException x) {
+				handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
 			}
+			
+			ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy();
+			IDocument d= createCompilationUnitDocument(c);
+			IAnnotationModel m= createCompilationUnitAnnotationModel(element);
+			_FileSynchronizer f= new _FileSynchronizer(input);
+			f.install();
+			BufferSynchronizer b= new BufferSynchronizer(d, c);
+			b.install();
+			
+			CompilationUnitInfo info= new CompilationUnitInfo(d, m, f, c, b);
+			info.setModificationStamp(computeModificationStamp(input.getFile()));
+			return info;
+			
 		} else {		
 			return super.createElementInfo(element);
 		}
@@ -265,47 +260,42 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (elementInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
 			
-			try {					
-				// update structure, assumes lock on info.fCopy
-				info.fCopy.reconcile();
+			// update structure, assumes lock on info.fCopy
+			info.fCopy.reconcile();
+			
+			ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
+			IResource resource= original.getUnderlyingResource();
+			
+			if (resource != null && !overwrite)
+				checkSynchronizationState(info.fModificationStamp, resource);
+			
+			if (fSavePolicy != null)
+				fSavePolicy.preSave(info.fCopy);
+							
+			if (info.fBufferSynchronizer != null)
+				info.fBufferSynchronizer.uninstall();
 				
-				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-				IResource resource= original.getUnderlyingResource();
-				
-				if (resource != null && !overwrite)
-					checkSynchronizationState(info.fModificationStamp, resource);
-				
-				if (fSavePolicy != null)
-					fSavePolicy.preSave(info.fCopy);
-								
-				if (info.fBufferSynchronizer != null)
-					info.fBufferSynchronizer.uninstall();
-					
-				// commit working copy
-				info.fCopy.commit(overwrite, monitor);
-				
-				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
-				model.updateMarkers(info.fDocument);
-				
-				if (resource != null)
-					info.setModificationStamp(computeModificationStamp(resource));
-				
-				if (fSavePolicy != null) {
-					ICompilationUnit unit= fSavePolicy.postSave(original);
-					if (unit != null) {
-						IResource r= unit.getUnderlyingResource();
-						IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
-						if (markers != null && markers.length > 0) {
-							for (int i= 0; i < markers.length; i++)
-								model.updateMarker(markers[i], info.fDocument, null);
-						}
+			// commit working copy
+			info.fCopy.commit(overwrite, monitor);
+			
+			AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
+			model.updateMarkers(info.fDocument);
+			
+			if (resource != null)
+				info.setModificationStamp(computeModificationStamp(resource));
+			
+			if (fSavePolicy != null) {
+				ICompilationUnit unit= fSavePolicy.postSave(original);
+				if (unit != null) {
+					IResource r= unit.getUnderlyingResource();
+					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
+					if (markers != null && markers.length > 0) {
+						for (int i= 0; i < markers.length; i++)
+							model.updateMarker(markers[i], info.fDocument, null);
 					}
 				}
-					
-			} catch (JavaModelException x) {
-				throw new CoreException(x.getStatus());
 			}
-			
+						
 		} else {
 			super.doSaveDocument(monitor, element, document, overwrite);
 		}		
@@ -327,15 +317,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	protected IDocument createCompilationUnitDocument(ICompilationUnit unit) throws CoreException {
 		
-		String contents= ""; //$NON-NLS-1$
-		
-		try {
-			contents= unit.getSource();
-		} catch (JavaModelException x) {
-			throw new CoreException(x.getStatus());
-		}
-		
-		Document document= new Document(contents);		
+		Document document= new Document(unit.getSource());		
 		
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
@@ -356,22 +338,18 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (elementInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
 			if (info.fCanBeSaved) {
-				try {
 					
-					ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
+				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
+				
+				fireElementContentAboutToBeReplaced(element);
+				
+				removeUnchangedElementListeners(element, info);
+				info.fDocument.set(original.getSource());
+				info.fCanBeSaved= false;
+				addUnchangedElementListeners(element, info);
+				
+				fireElementContentReplaced(element);
 					
-					fireElementContentAboutToBeReplaced(element);
-					
-					removeUnchangedElementListeners(element, info);
-					info.fDocument.set(original.getSource());
-					info.fCanBeSaved= false;
-					addUnchangedElementListeners(element, info);
-					
-					fireElementContentReplaced(element);
-					
-				} catch (JavaModelException x) {
-					throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, x));
-				}
 			}
 		} else {
 			super.resetDocument(element);

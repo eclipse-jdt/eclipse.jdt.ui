@@ -6,25 +6,25 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jface.action.IMenuManager;
 
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.core.JavaModelStatus;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 /**
  * Java specific text editor.
@@ -100,24 +100,6 @@ public class ClassFileEditor extends JavaEditor {
 	}
 	
 	/**
-	 * @see EditorPart#init(IEditorSite, IEditorInput)
-	 */
-	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-		
-		if (input instanceof IFileEditorInput) {
-			IFile file= ((IFileEditorInput) input).getFile();
-			IClassFileEditorInput classFileInput= new ExternalClassFileEditorInput(file);
-			if (classFileInput.getClassFile() != null)
-				input= classFileInput;
-		}
-		
-		if (!(input instanceof IClassFileEditorInput))
-			throw new PartInitException(JavaEditorMessages.getString("ClassFileEditor.error.invalid_input_message")); //$NON-NLS-1$
-			
-		super.init(site, input);
-	}
-	
-	/**
 	 * @see IEditorPart#saveState(IMemento)
 	 */
 	public void saveState(IMemento memento) {
@@ -166,18 +148,32 @@ public class ClassFileEditor extends JavaEditor {
 	}
 	
 	/**
+	 * Translates the given editor input into an <code>ExternalClassFileEditorInput</code>
+	 * if it is a file editor input representing an external class file.
+	 * 
+	 * @param input the editor input to be transformed if necessary
+	 * @return the transformed editor input
+	 */
+	protected IEditorInput transformEditorInput(IEditorInput input) {
+		
+		if (input instanceof IFileEditorInput) {
+			IFile file= ((IFileEditorInput) input).getFile();
+			IClassFileEditorInput classFileInput= new ExternalClassFileEditorInput(file);
+			if (classFileInput.getClassFile() != null)
+				input= classFileInput;
+		}
+		
+		return input;
+	}
+	
+	/**
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
-		if (input instanceof ExternalClassFileEditorInput) {
-			ExternalClassFileEditorInput classFileInput= (ExternalClassFileEditorInput) input;
-			IFile file= classFileInput.getFile();
-			try {
-				file.refreshLocal(IResource.DEPTH_INFINITE, null);
-			} catch (CoreException x) {
-				JavaPlugin.log(x);
-			}
-		}
+		input= transformEditorInput(input);
+		if (!(input instanceof IClassFileEditorInput))
+			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE, JavaEditorMessages.getString("ClassFileEditor.error.invalid_input_message"))); //$NON-NLS-1$
+			
 		super.doSetInput(input);
 	}
 }

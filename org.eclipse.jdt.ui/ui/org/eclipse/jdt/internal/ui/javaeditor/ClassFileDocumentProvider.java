@@ -166,13 +166,9 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		IResource resource= null;
 		IClassFile classFile= classFileEditorInput.getClassFile();
 		
-		try {
-			IResourceLocator locator= (IResourceLocator) classFile.getAdapter(IResourceLocator.class);
-			if (locator != null)
-				resource= locator.getContainingResource(classFile);
-		} catch (JavaModelException x) {
-			throw new CoreException(x.getStatus());
-		}
+		IResourceLocator locator= (IResourceLocator) classFile.getAdapter(IResourceLocator.class);
+		if (locator != null)
+			resource= locator.getContainingResource(classFile);
 		
 		if (resource != null) {
 			ClassFileMarkerAnnotationModel model= new ClassFileMarkerAnnotationModel(resource);
@@ -190,21 +186,15 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 * @exception CoreException if the editor inpur could not be accessed
 	 */
 	protected IDocument createClassFileDocument(IClassFileEditorInput classFileEditorInput) throws CoreException {
-		try {
-			
-			IDocument document= createDocument(classFileEditorInput);
-			if (document != null) {
-				JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-				IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
-				document.setDocumentPartitioner(partitioner);
-				partitioner.connect(document);
-			}
-			
-			return document;
-			
-		} catch (JavaModelException x) {
-			throw new CoreException(x.getStatus());
+		IDocument document= createDocument(classFileEditorInput);
+		if (document != null) {
+			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+			IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
+			document.setDocumentPartitioner(partitioner);
+			partitioner.connect(document);
 		}
+		
+		return document;
 	}
 	
 	/*
@@ -213,21 +203,31 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	protected ElementInfo createElementInfo(Object element) throws CoreException {
 		
 		if (element instanceof IClassFileEditorInput) {
+			
 			IClassFileEditorInput input = (IClassFileEditorInput) element;
+			ExternalClassFileEditorInput external= null;
+			if (input instanceof ExternalClassFileEditorInput)
+				external= (ExternalClassFileEditorInput) input;
+				
+			if (external != null) {				
+				try {
+					external.getFile().refreshLocal(IResource.DEPTH_INFINITE, null);
+				} catch (CoreException x) {
+					handleCoreException(x, JavaEditorMessages.getString("ClassFileDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
+				}
+			}
+			
 			IDocument d= createClassFileDocument(input);
 			IAnnotationModel m= createClassFileAnnotationModel(input);
 			
-			if (input instanceof InternalClassFileEditorInput) {
+			if (external != null) {
+				ClassFileInfo info= new ClassFileInfo(d, m,  (_FileSynchronizer) null);
+				info.fModificationStamp= computeModificationStamp(external.getFile());
+				return info;
+			} else if (input instanceof InternalClassFileEditorInput) {
 				ClassFileSynchronizer s= new ClassFileSynchronizer(input);
 				s.install();
 				return new ClassFileInfo(d, m, s);			
-			} else if (element instanceof ExternalClassFileEditorInput) {
-				ExternalClassFileEditorInput external= (ExternalClassFileEditorInput) input;
-//				_FileSynchronizer s= new _FileSynchronizer(external);
-//				s.install();
-				ClassFileInfo info= new ClassFileInfo(d, m,  (_FileSynchronizer) null /* s */);
-				info.fModificationStamp= computeModificationStamp(external.getFile());
-				return info;
 			}
 		}
 		
