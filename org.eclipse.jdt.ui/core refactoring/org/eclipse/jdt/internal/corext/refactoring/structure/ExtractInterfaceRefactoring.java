@@ -66,8 +66,10 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class ExtractInterfaceRefactoring extends Refactoring {
@@ -536,7 +538,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (fInputType.isClass()){
 			int methodDeclarationOffset= methodDeclaration.getReturnType().getStartPosition();
 			int length= getMethodDeclarationLength(iMethod, methodDeclaration);
+			
 			StringBuffer methodDeclarationSource= new StringBuffer();
+			String methodComment= getCommentContent(iMethod);
+			if (methodComment != null)
+				methodDeclarationSource.append(methodComment);
 			methodDeclarationSource.append(INTERFACE_METHOD_MODIFIERS);//$NON-NLS-1$
 			methodDeclarationSource.append(iMethod.getCompilationUnit().getBuffer().getText(methodDeclarationOffset, length));
 			
@@ -555,6 +561,16 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			return source.toString();
 		}	
 	}
+	
+	private static String getCommentContent(IMethod iMethod) throws JavaModelException {
+		String rawContent= JavaElementCommentFinder.getCommentContent(iMethod);
+		if (rawContent == null)
+			return null;
+		String[] lines= Strings.convertIntoLines(rawContent);
+		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(iMethod));
+	}
+	
     private void replaceReferencesInMethodDeclaration(MethodDeclaration methodDeclaration, int methodDeclarationOffset, StringBuffer methodDeclarationSource) {
         SingleVariableDeclaration[] params= (SingleVariableDeclaration[]) methodDeclaration.parameters().toArray(new SingleVariableDeclaration[methodDeclaration.parameters().size()]);
         for (int i= params.length - 1; i >= 0; i--) {//iterate backwards to preserve indices
