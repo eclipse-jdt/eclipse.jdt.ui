@@ -67,19 +67,22 @@ public class JavaFormatter implements ITemplateEditor {
 	}
 
 	private void format(TemplateBuffer templateBuffer, int indentationLevel) throws CoreException {
-		// XXX 4360
+		// XXX 4360, 15247
 		// workaround for code formatter limitations
 		// handle a special case where cursor position is surrounded by whitespaces		
 
-		final String MARKER= "/*${" + JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor") + "}*/"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
 		String string= templateBuffer.getString();
 		TemplatePosition[] variables= templateBuffer.getVariables();
+
 		int caretOffset= getCaretOffset(variables);
+		int commentOffset= string.indexOf("/*"); //$NON-NLS-1$
 
 		if ((caretOffset > 0) && Character.isWhitespace(string.charAt(caretOffset - 1)) &&
-			(caretOffset < string.length()) && Character.isWhitespace(string.charAt(caretOffset)))
+			(caretOffset < string.length()) && Character.isWhitespace(string.charAt(caretOffset)) &&
+			(commentOffset == -1 || commentOffset > caretOffset))
 		{
+			final String MARKER= "/*${" + JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor") + "}*/"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
 			MultiTextEdit positions= variablesToPositions(variables);
 
 		    TextEdit insert= SimpleTextEdit.createInsert(caretOffset, MARKER);
