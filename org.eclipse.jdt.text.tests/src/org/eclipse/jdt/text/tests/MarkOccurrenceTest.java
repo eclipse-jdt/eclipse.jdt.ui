@@ -96,6 +96,7 @@ public class MarkOccurrenceTest extends TestCase {
 	protected void setUp() throws Exception {
 		assertNotNull(fgHighlightRGB);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
+		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, true);
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
 		assertNotNull(fEditor);
 		fTextWidget= fEditor.getViewer().getTextWidget();
@@ -113,7 +114,7 @@ public class MarkOccurrenceTest extends TestCase {
 			 * @since 3.1
 			 */
 			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
-				if (selection != null && selection.getOffset() == fMatch.getOffset() && selection.getLength() == fMatch.getLength()) {
+				if (fMatch != null && selection != null && selection.getOffset() == fMatch.getOffset() && selection.getLength() == fMatch.getLength()) {
 					countOccurrences();
 				}
 			}
@@ -301,6 +302,85 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrencesInWidget();
 	}
 	
+	public void testMarkImplementOccurrences1() {
+		try {
+			fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
+		} catch (BadLocationException e) {
+			fail();
+		}
+		assertNotNull(fMatch);
+		fMatch= new Region(fMatch.getOffset(), 4);
+
+		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
+		
+		long timeOut= System.currentTimeMillis() + 60000;
+		while (fOccurrences == 0) {
+			EditorTestHelper.runEventQueue(fEditor);
+			synchronized (this) {
+				try {
+					wait(200);
+				} catch (InterruptedException e1) {
+				}
+			}
+			assertTrue(System.currentTimeMillis() < timeOut);
+		}
+		assertEquals(3, fOccurrences);
+		assertOccurrencesInWidget();
+	}
+	public void testMarkImplementOccurrences2() {
+		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, false);
+		fOccurrences= Integer.MAX_VALUE;
+		
+		try {
+			fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
+		} catch (BadLocationException e) {
+			fail();
+		}
+		assertNotNull(fMatch);
+		fMatch= new Region(fMatch.getOffset(), 4);
+
+		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
+		
+		long timeOut= System.currentTimeMillis() + 60000;
+		while (fOccurrences > 0) {
+			EditorTestHelper.runEventQueue(fEditor);
+			synchronized (this) {
+				try {
+					wait(200);
+				} catch (InterruptedException e1) {
+				}
+			}
+			assertTrue(System.currentTimeMillis() < timeOut);
+		}
+		assertEquals(0, fOccurrences);
+		assertOccurrencesInWidget();
+	}
+	
+	public void testMarkImplementOccurrences3() {
+		try {
+			fMatch= fFindReplaceDocumentAdapter.find(0, "Assert", true, true, false, false);
+		} catch (BadLocationException e) {
+			fail();
+		}
+		assertNotNull(fMatch);
+
+		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
+		
+		long timeOut= System.currentTimeMillis() + 60000;
+		while (fOccurrences == 0) {
+			EditorTestHelper.runEventQueue(fEditor);
+			synchronized (this) {
+				try {
+					wait(200);
+				} catch (InterruptedException e1) {
+				}
+			}
+			assertTrue(System.currentTimeMillis() < timeOut);
+		}
+		assertEquals(1, fOccurrences);
+		assertOccurrencesInWidget();
+	}
+	
 	public void testNoOccurrencesIfDisabled() {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
 		fOccurrences= Integer.MAX_VALUE;
@@ -352,10 +432,9 @@ public class MarkOccurrenceTest extends TestCase {
 		
 	}
 	/**
-	 * Returns the shared color for the given key.
+	 * Returns the occurrence annotation color.
 	 * 
-	 * @param key the color key string
-	 * @return the shared color for the given key
+	 * @return the occurrence annotation color
 	 */
 	private static RGB getHighlightRGB() {
 		AnnotationPreference annotationPref= EditorsPlugin.getDefault().getAnnotationPreferenceLookup().getAnnotationPreference(OCCURRENCE_ANNOTATION);
