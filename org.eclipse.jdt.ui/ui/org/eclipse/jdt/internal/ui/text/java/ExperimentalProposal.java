@@ -13,25 +13,21 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+
+import org.eclipse.jdt.core.IImportDeclaration;
 
 import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
-import org.eclipse.jdt.internal.ui.text.template.*;
+import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
 
 /**
  * An experimental proposal.
  */
-public class ExperimentalProposal implements ICompletionProposal {
+public class ExperimentalProposal extends JavaCompletionProposal {
 
-	private String fReplacementString;
-	private int fReplacementOffset;
-	private int fReplacementLength;
-	private Image fImage;
-	private String fDisplayString;
 	private int[] fPositionOffsets;
 	private int[] fPositionLengths;
 	private ITextViewer fViewer;
@@ -47,33 +43,30 @@ public class ExperimentalProposal implements ICompletionProposal {
 	public ExperimentalProposal(String replacementString, int replacementOffset, int replacementLength, Image image,
 	    String displayString, int[] positionOffsets, int[] positionLengths, ITextViewer viewer)
 	{
-		Assert.isNotNull(replacementString);
-		Assert.isTrue(replacementOffset >= 0);
-		Assert.isTrue(replacementLength >= 0);
-		
-		fReplacementString= replacementString;
-		fReplacementOffset= replacementOffset;
-		fReplacementLength= replacementLength;
-		fImage= image;
-		fDisplayString= displayString != null ? displayString : replacementString;
+		super(replacementString, replacementOffset, replacementLength, image, displayString);		
+
 		fPositionOffsets= positionOffsets;
 		fPositionLengths= positionLengths;
 		fViewer= viewer;
 	}
 
-	/**
-	 * @see ICompletionProposal#apply(IDocument)
+	/*
+	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
-	public void apply(IDocument document) {
+	public void apply(IDocument document, char trigger) {
+		super.apply(document, trigger);
+
+		int replacementOffset= getReplacementOffset();
+		int replacementLength= getReplacementLength();
+		String replacementString= getReplacementString();
+		
 		try {
-			document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
-	
 			LinkedPositionManager manager= new LinkedPositionManager(document);
 			for (int i= 0; i != fPositionOffsets.length; i++)
-				manager.addPosition(fReplacementOffset + fPositionOffsets[i], fPositionLengths[i]);
+				manager.addPosition(replacementOffset + fPositionOffsets[i], fPositionLengths[i]);
 			
 			LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
-			editor.setFinalCaretOffset(fReplacementOffset + fReplacementString.length());
+			editor.setFinalCaretOffset(replacementOffset + replacementString.length());
 			editor.enter();
 
 			fSelectedRegion= editor.getSelectedRegion();
@@ -81,7 +74,7 @@ public class ExperimentalProposal implements ICompletionProposal {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);	
 			openErrorDialog(e);
-		}
+		}		
 	}
 	
 	/**
@@ -89,37 +82,9 @@ public class ExperimentalProposal implements ICompletionProposal {
 	 */
 	public Point getSelection(IDocument document) {
 		if (fSelectedRegion == null)
-			return new Point(fReplacementOffset, 0);
+			return new Point(getReplacementOffset(), 0);
 
 		return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
-	}
-
-	/**
-	 * @see ICompletionProposal#getAdditionalProposalInfo()
-	 */
-	public String getAdditionalProposalInfo() {
-		return null;		
-	}
-
-	/**
-	 * @see ICompletionProposal#getDisplayString()
-	 */
-	public String getDisplayString() {
-		return fDisplayString;
-	}
-
-	/**
-	 * @see ICompletionProposal#getImage()
-	 */
-	public Image getImage() {
-		return fImage;
-	}
-
-	/**
-	 * @see ICompletionProposal#getContextInformation()
-	 */
-	public IContextInformation getContextInformation() {
-		return null;
 	}
 
 	private void openErrorDialog(BadLocationException e) {

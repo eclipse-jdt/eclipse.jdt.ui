@@ -178,10 +178,8 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 		char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
 		int start, int end) {
 
-		ICompletionProposal proposal= createTemplateMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
-		fMethods.add(proposal);
-/*
-		JavaCompletionProposal proposal= createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+		JavaCompletionProposal proposal= createExperimentalMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+//		JavaCompletionProposal proposal= createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames));
 
 		boolean hasClosingBracket= completionName.length > 0 && completionName[completionName.length - 1] == ')';
@@ -209,7 +207,6 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 			proposal= createAnonymousTypeCompletion(declaringTypePackageName, declaringTypeName, name, parameterTypeNames, parameterNames, completionName, start, end);
 			fMethods.add(proposal);
 		}
-*/		
 	}
 
 	
@@ -285,7 +282,7 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 	}
 
 	// XXX experimental
-	protected ICompletionProposal createTemplateMethodCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
+	protected JavaCompletionProposal createExperimentalMethodCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
 		String iconName= JavaPluginImages.IMG_MISC_DEFAULT;
 		if (Flags.isPublic(modifiers)) {
 			iconName= JavaPluginImages.IMG_MISC_PUBLIC;
@@ -310,6 +307,10 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 			nameBuffer.append(" - "); //$NON-NLS-1$
 			nameBuffer.append(declaringTypeName);
 		}
+
+		// XXX hack to handle empty code completion
+		if (completionName.length == 0)
+			return createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 	
 		int count= parameterNames.length;
 		int[] offsets= new int[count];
