@@ -39,6 +39,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
@@ -324,7 +325,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	
 				IClasspathEntry[] newEntriesArray= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 
-				IStatus status= JavaConventions.validateClasspath(fCurrJProject, newEntriesArray, fOutputLocation);
+				IJavaModelStatus status= JavaConventions.validateClasspath(fCurrJProject, newEntriesArray, fOutputLocation);
 				if (!status.isOK()) {
 					if (fIsProjectAsSourceFolder && fOutputLocation.equals(projPath)) {
 						IPath newOutputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
@@ -334,7 +335,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 							return;
 						}
 					}
-					fRootStatus.setError(status.getMessage());
+					fRootStatus.setError(status.getString());
 				} else if (fIsProjectAsSourceFolder) {
 					fRootStatus.setWarning(NewWizardMessages.getString("NewSourceFolderWizardPage.warning.ReplaceSF")); //$NON-NLS-1$
 				}					
