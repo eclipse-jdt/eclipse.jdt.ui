@@ -40,10 +40,11 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -165,11 +166,11 @@ public class QuickAssistLightBulbUpdater {
 	}	
 	
 	private ICompilationUnit getCompilationUnit(IEditorInput input) {
-		if (input instanceof FileEditorInput) {
-			IFile file= ((FileEditorInput) input).getFile();
-			ICompilationUnit cu= JavaCore.createCompilationUnitFrom(file);
-			if (cu != null) {
-				return JavaModelUtil.toWorkingCopy(cu);
+		if (input instanceof IFileEditorInput) {
+			IFile file= ((IFileEditorInput) input).getFile();
+			IJavaElement element= JavaCore.create(file);
+			if (element instanceof ICompilationUnit) {
+				return JavaModelUtil.toWorkingCopy((ICompilationUnit) element);
 			}
 		}
 		return null;

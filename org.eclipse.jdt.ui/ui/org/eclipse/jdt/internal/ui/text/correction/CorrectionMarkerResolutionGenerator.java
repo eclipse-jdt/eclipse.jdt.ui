@@ -31,6 +31,7 @@ import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -152,7 +153,9 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	private ICompilationUnit getCompilationUnit(IMarker marker) {
 		IResource res= marker.getResource();
 		if (res instanceof IFile && res.isAccessible()) {
-			return JavaCore.createCompilationUnitFrom((IFile) res);
+			IJavaElement element= JavaCore.create((IFile) res);
+			if (element instanceof ICompilationUnit)
+				return (ICompilationUnit) element;
 		}
 		return null;
 	}

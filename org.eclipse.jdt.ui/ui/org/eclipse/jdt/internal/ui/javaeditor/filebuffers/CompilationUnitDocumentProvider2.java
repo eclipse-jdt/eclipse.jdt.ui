@@ -51,7 +51,6 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.IAnnotationExtension;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
@@ -697,18 +696,13 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 	private IPropertyChangeListener fPropertyListener;
 	/** Annotation model listener added to all created CU annotation models */
 	private GlobalAnnotationModelListener fGlobalAnnotationModelListener;	
-	/** Parent document provider for file editor inputs. */
-	private IDocumentProvider fParentProviderForFileResources;	
-	/** Parent document provider for storage editor inputs (non-resources). */
-	private IDocumentProvider fParentProviderForNonResources;	
 	
 	/**
 	 * Constructor
 	 */
 	public CompilationUnitDocumentProvider2() {
+		setParentDocumentProvider(new TextFileDocumentProvider(new JavaStorageDocumentProvider()));		
 		fGlobalAnnotationModelListener= new GlobalAnnotationModelListener();
-		fParentProviderForFileResources= new TextFileDocumentProvider();
-		fParentProviderForNonResources= new JavaStorageDocumentProvider();
 		fPropertyListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (HANDLE_TEMPORARY_PROBLEMS.equals(event.getProperty()))
@@ -963,26 +957,5 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 	 */
 	public ILineTracker createLineTracker(Object element) {
 		return new DefaultLineTracker();
-	}
-
-	/*
-	 * @see IDocumentProvider#connect(Object)
-	 */
-	public void connect(Object element) throws CoreException {
-		setParentDocumentProvider(getParentProvider(element));
-		super.connect(element);
-	}
-
-	/**
-	 * Returns the parent provider for the given element.
-	 * 
-	 * @param element the element
-	 * @return the parent document provider
-	 */	
-	private IDocumentProvider getParentProvider(Object element) {
-		if (element instanceof IFileEditorInput)
-			return fParentProviderForFileResources;
-		else	
-			return fParentProviderForNonResources;
 	}
 }

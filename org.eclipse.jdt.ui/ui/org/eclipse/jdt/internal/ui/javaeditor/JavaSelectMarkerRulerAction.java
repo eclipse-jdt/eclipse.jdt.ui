@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import org.eclipse.core.resources.IFile;
+
 import java.util.Iterator;
 import java.util.ResourceBundle;
 
@@ -20,14 +22,15 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
 
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorExtension;
 import org.eclipse.ui.texteditor.SelectMarkerRulerAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -119,10 +122,13 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 	
 	private ICompilationUnit getCompilationUnit() {
 		IEditorInput input= fTextEditor.getEditorInput();
-		if (input instanceof FileEditorInput) {
-			return JavaCore.createCompilationUnitFrom(((FileEditorInput) input).getFile());
+		if (input instanceof IFileEditorInput) {
+			IFile file= ((IFileEditorInput) input).getFile();
+			IJavaElement element= JavaCore.create(file);
+			if (element instanceof ICompilationUnit)
+				return (ICompilationUnit) element;
 		}
 		return null;
-	}	
+	}
 }
 
