@@ -270,6 +270,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void test1() throws Exception{
+		ParticipantTesting.reset();
 		helper2();
 	}	
 

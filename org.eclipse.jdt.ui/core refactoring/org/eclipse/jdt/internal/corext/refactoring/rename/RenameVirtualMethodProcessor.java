@@ -174,8 +174,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	}
 	
 	private Set getRelatedTypes(IProgressMonitor pm) throws CoreException {
-		IMethod[] rippleMethods= RippleMethodFinder.getRelatedMethods(getMethod(), pm, null);
-		Set methods= new HashSet(Arrays.asList(rippleMethods));
+		Set methods= getMethodsToRename();
 		Set result= new HashSet(methods.size());
 		for (Iterator iter= methods.iterator(); iter.hasNext(); ){
 			result.add(((IMethod)iter.next()).getDeclaringType());

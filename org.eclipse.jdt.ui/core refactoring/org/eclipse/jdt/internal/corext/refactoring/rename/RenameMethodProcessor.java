@@ -49,11 +49,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
@@ -62,6 +62,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private SearchResultGroup[] fOccurrences;
 	private boolean fUpdateReferences;
 	private IMethod fMethod;
+	private Set/*<IMethod>*/ fMethodsToRename;
 	private TextChangeManager fChangeManager;
 	private ICompilationUnit[] fNewWorkingCopies;
 	private WorkingCopyOwner fWorkingCopyOwner;
@@ -117,7 +118,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 
 	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
-		// TODO must caclulate ripple ??
+		Set derived= new HashSet(fMethodsToRename);
+		derived.remove(fMethod);
+		loadDerivedParticipants(status, result, 
+			derived.toArray(), 
+			new RenameArguments(getNewElementName(), getUpdateReferences()), 
+			null, natures, shared);
 	}
 	
 	//---- IRenameProcessor -------------------------------------
@@ -140,6 +146,15 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	public final IMethod getMethod() {
 		return fMethod;
+	}
+	
+	private void initializeMethodsToRename(IProgressMonitor pm) throws CoreException {
+		//TODO: RippleMethodFinder2? can WorkingCopyOwner be null there?
+		fMethodsToRename= new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(fMethod, pm, null)));
+	}
+	
+	protected Set getMethodsToRename() {
+		return fMethodsToRename;
 	}
 	
 	//---- IReferenceUpdating -----------------------------------
@@ -177,7 +192,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			RefactoringStatus result= new RefactoringStatus();
-			pm.beginTask("", 4); //$NON-NLS-1$
+			pm.beginTask("", 12); //$NON-NLS-1$
 			// TODO workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=40367
 			if (!Checks.isAvailable(fMethod)) {
 				result.addFatalError("Method to be renamed is binary.", JavaStatusContext.create(fMethod));
@@ -190,6 +205,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			result.merge(checkNewElementName(getNewElementName()));
 			pm.worked(1);
 			
+			initializeMethodsToRename(new SubProgressMonitor(pm, 3));
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.searchingForReferences")); //$NON-NLS-1$
 			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 4));	
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.checkingPreconditions")); //$NON-NLS-1$
@@ -232,7 +248,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	ISearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) throws CoreException {
-		return createSearchPatternWithOwner(pm, fMethod);
+		HashSet methods= new HashSet(fMethodsToRename);
+		methods.add(fMethod);
+		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
+		pm.done();
+		return RefactoringSearchEngine.createSearchPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 
 	private ISearchPattern createSearchPatternWithOwner(IProgressMonitor pm, IMethod method) throws CoreException {
@@ -274,9 +294,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws CoreException { 
 		RefactoringStatus result= new RefactoringStatus();
-		//TODO: RippleMethodFinder2? can WorkingCopyOwner be null there?
-		Set methodsToRename= new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(fMethod, pm, null)));
-		for (Iterator iter= methodsToRename.iterator(); iter.hasNext(); ) {
+		for (Iterator iter= fMethodsToRename.iterator(); iter.hasNext(); ) {
 			IMethod method= (IMethod)iter.next();
 			
 			result.merge(checkIfConstructorName(method, getNewElementName()));
