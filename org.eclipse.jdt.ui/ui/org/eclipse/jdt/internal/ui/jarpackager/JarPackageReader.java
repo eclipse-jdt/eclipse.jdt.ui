@@ -62,7 +62,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	
 	/**
 	 * Reads a Jar Package from the underlying stream.
-	 * It is the client's responsiblity to close the stream.
+	 * It is the client's responsibility to close the stream.
 	 */
 	public JarPackageReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);
@@ -85,7 +85,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 
 	/**
      * Closes this stream.
-	 * It is the clients responsiblity to close the stream.
+	 * It is the clients responsibility to close the stream.
 	 * 
 	 * @exception CoreException
      */
@@ -109,7 +109,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		} catch (ParserConfigurationException ex) {
 			throw new IOException(ex.getLocalizedMessage());
 		} finally {
-			// Note: Above code is ok since clients are responsible to close the stream
+			// Note: Above code is OK since clients are responsible to close the stream
 		}
 		Element xmlJarDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
 		if (!xmlJarDesc.getNodeName().equals(JarPackagerUtil.DESCRIPTION_EXTENSION)) {
