@@ -33,7 +33,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 public final class PaintManager implements KeyListener, MouseListener, ISelectionChangedListener, ITextListener, ITextInputListener {		
 					
-	static class PositionManager implements IPositionManager {
+	static class PaintPositionUpdater extends DefaultPositionUpdater {				/**		 * Creates the position updater.		 */		protected PaintPositionUpdater(String category) {			super(category);		}				/**		 * If an insertion happens at a position's offset, the		 * position is extended rather than shifted. Also, if something is added 		 * right behind the end of the position, the position is extended rather		 * than kept stable.		 */		protected void adaptToInsert() {						int myStart= fPosition.offset;			int myEnd=   fPosition.offset + fPosition.length;			myEnd= Math.max(myStart, myEnd);						int yoursStart= fOffset;			int yoursEnd=   fOffset + fReplaceLength;// - 1;			yoursEnd= Math.max(yoursStart, yoursEnd);						if (myEnd < yoursStart)				return;						if (myStart <= yoursStart)				fPosition.length += fReplaceLength;			else				fPosition.offset += fReplaceLength;		}	};	static class PositionManager implements IPositionManager {
 		
 		private IDocument fDocument;
 		private IPositionUpdater fPositionUpdater;
@@ -41,10 +41,8 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 		
 		public PositionManager() {
 			fCategory= getClass().getName() + hashCode();
-			fPositionUpdater= new DefaultPositionUpdater(fCategory);
-		}
-		
-		public void install(IDocument document) {
+			fPositionUpdater= new PaintPositionUpdater(fCategory);		}
+		public void install(IDocument document) {
 			fDocument= document;
 			fDocument.addPositionCategory(fCategory);
 			fDocument.addPositionUpdater(fPositionUpdater);
@@ -172,20 +170,12 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 	 * @see KeyListener#keyPressed(KeyEvent)
 	 */
 	public void keyPressed(KeyEvent e) {
-		if (fAutoRepeat)
-			paint(IPainter.KEY_STROKE);
-		
-		fTextChanged= false;
-		fAutoRepeat= true;
-	}
+		paint(IPainter.KEY_STROKE);	}
 
 	/*
 	 * @see KeyListener#keyReleased(KeyEvent)
 	 */
 	public void keyReleased(KeyEvent e) {
-		fAutoRepeat= false;
-		if (!fTextChanged)
-			paint(IPainter.KEY_STROKE);
 	}
 
 	/*
@@ -198,13 +188,12 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 	 * @see MouseListener#mouseDown(MouseEvent)
 	 */
 	public void mouseDown(MouseEvent e) {
-	}
+		paint(IPainter.MOUSE_BUTTON);	}
 	
 	/*
 	 * @see MouseListener#mouseUp(MouseEvent)
 	 */
 	public void mouseUp(MouseEvent e) {
-		paint(IPainter.MOUSE_BUTTON);
 	}
 	
 	/*

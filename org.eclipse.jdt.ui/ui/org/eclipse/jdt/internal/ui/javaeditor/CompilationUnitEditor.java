@@ -1181,8 +1181,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				}
 				
 				if (CURRENT_LINE_COLOR.equals(p)) {
-					if (fLinePainter != null)
-						fLinePainter.setHighlightColor(getColor(CURRENT_LINE_COLOR));
+					if (fLinePainter != null) {
+						stopLineHighlighting();
+						startLineHighlighting();
+					}					
 					return;
 				}
 				
