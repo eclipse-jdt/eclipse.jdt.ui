@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.corext.text.comment;
 import java.util.Map;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.Position;
 
 /**
  * Factory for comment related objects.
@@ -27,54 +27,43 @@ import org.eclipse.jface.text.TypedPosition;
  */
 public class CommentObjectFactory {
 
+	// TODO: move to CodeFormatter
 	/**
-	 * Creates a comment line for a specific comment region.
-	 * 
-	 * @param region
-	 *                  Comment region to create the line for
-	 * @return A new comment line for the comment region, or <code>null</code>
-	 *               iff there is no line available for this comment type
+	 * Kind used to format single-line comments
 	 */
-	public static CommentLine createLine(final CommentRegion region) {
-
-		final String type= region.getType();
-
-		if (type.equals(JavaPartitions.JAVA_DOC))
-			return new JavaDocLine(region);
-		else if (type.equals(JavaPartitions.JAVA_MULTI_LINE_COMMENT))
-			return new MultiCommentLine(region);
-		else if (type.equals(JavaPartitions.JAVA_SINGLE_LINE_COMMENT))
-			return new SingleCommentLine(region);
-
-		return null;
-	}
+	public static final int K_SINGLE_LINE_COMMENT= 0x10;
+	/**
+	 * Kind used to format multi-line comments
+	 */
+	public static final int K_MULTI_LINE_COMMENT= 0x20;
+	/**
+	 * Kind used to format a Javadoc comments
+	 */
+	public static final int K_JAVA_DOC= 0x40;
 
 	/**
 	 * Creates a comment region for a specific document partition type.
 	 * 
-	 * @param document
-	 *                   The document which contains the comment region
-	 * @param range
-	 *                  Range of the comment region in the document
-	 * @param delimiter
-	 *                   Line delimiter to use in the comment region
-	 * @param preferences
-	 *                   The preferences to use
-	 * @param textMeasurement
-	 *                   The text measurement. Can be <code>null</code>.
+	 * @param kind the comment snippet kind
+	 * @param document The document which contains the comment region
+	 * @param range Range of the comment region in the document
+	 * @param delimiter Line delimiter to use in the comment region
+	 * @param preferences The preferences to use
+	 * @param textMeasurement The text measurement. Can be <code>null</code>.
 	 * @return A new comment region for the comment region range in the
-	 *               document
+	 *         document
 	 */
-	public static CommentRegion createRegion(final IDocument document, final TypedPosition range, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
-
-		final String type= range.getType();
-
-		if (type.equals(JavaPartitions.JAVA_DOC))
-			return new JavaDocRegion(document, range, delimiter, preferences, textMeasurement);
-		else if (type.equals(JavaPartitions.JAVA_MULTI_LINE_COMMENT))
-			return new MultiCommentRegion(document, range, delimiter, preferences, textMeasurement);
-
-		return new CommentRegion(document, range, delimiter, preferences, textMeasurement);
+	public static CommentRegion createRegion(int kind, IDocument document, Position range, String delimiter, Map preferences, ITextMeasurement textMeasurement) {
+		switch (kind) {
+			case K_SINGLE_LINE_COMMENT:
+				return new CommentRegion(document, range, delimiter, preferences, textMeasurement);
+			case K_MULTI_LINE_COMMENT:
+				return new MultiCommentRegion(document, range, delimiter, preferences, textMeasurement);
+			case K_JAVA_DOC:
+				return new JavaDocRegion(document, range, delimiter, preferences, textMeasurement);
+			default:
+				return null;
+		}
 	}
 
 	/**

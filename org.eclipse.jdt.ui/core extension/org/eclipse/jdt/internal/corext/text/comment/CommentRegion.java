@@ -26,7 +26,7 @@ import org.eclipse.jface.text.ConfigurableLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
  * 
  * @since 3.0
  */
-public class CommentRegion extends TypedPosition implements IHtmlTagConstants, IBorderAttributes, ICommentAttributes {
+public class CommentRegion extends Position implements IHtmlTagConstants, IBorderAttributes, ICommentAttributes {
 
 	/** Default comment range delimiter */
 	protected static final String COMMENT_RANGE_DELIMITER= " "; //$NON-NLS-1$
@@ -97,8 +97,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * @param textMeasurement
 	 *                   The text measurement. Can be <code>null</code>.
 	 */
-	protected CommentRegion(final IDocument document, final TypedPosition position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
-		super(position.getOffset(), position.getLength(), position.getType());
+	protected CommentRegion(final IDocument document, final Position position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
+		super(position.getOffset(), position.getLength());
 
 		fDelimiter= delimiter;
 		fPreferences= preferences;
@@ -133,7 +133,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			for (int index= 0; index < lines; index++) {
 
 				range= tracker.getLineInformation(index);
-				line= CommentObjectFactory.createLine(this);
+				line= createLine();
 				line.append(new CommentRange(range.getOffset(), range.getLength()));
 
 				fLines.add(line);
@@ -645,7 +645,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			adapted= false;
 
 			predecessor= successor;
-			successor= CommentObjectFactory.createLine(this);
+			successor= createLine();
 			fLines.add(successor);
 
 			while (!fRanges.isEmpty()) {
@@ -668,5 +668,15 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 					break;
 			}
 		}
+	}
+
+	/**
+	 * Creates a new line for this region.
+	 * 
+	 * @return a new line for this region
+	 * @since 3.1
+	 */
+	protected CommentLine createLine() {
+		return new SingleCommentLine(this);
 	}
 }

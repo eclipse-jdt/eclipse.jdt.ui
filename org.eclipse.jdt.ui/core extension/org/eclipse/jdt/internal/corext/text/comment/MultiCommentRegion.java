@@ -17,7 +17,7 @@ import java.util.Map;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.Position;
 
 /**
  * Multi-comment region in a source code document.
@@ -52,7 +52,7 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 	 * @param textMeasurement
 	 *                   The text measurement. Can be <code>null</code>.
  	 */
-	protected MultiCommentRegion(final IDocument document, final TypedPosition position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
+	protected MultiCommentRegion(final IDocument document, final Position position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
 		super(document, position, delimiter, preferences, textMeasurement);
 
 		String trueProperty= Boolean.toString(true);
@@ -259,5 +259,13 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 			}
 		}
 		markHtmlRanges();
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#createLine()
+	 * @since 3.1
+	 */
+	protected CommentLine createLine() {
+		return new MultiCommentLine(this);
 	}
 }

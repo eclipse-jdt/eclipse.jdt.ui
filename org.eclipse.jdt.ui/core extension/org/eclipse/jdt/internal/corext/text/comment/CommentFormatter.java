@@ -19,7 +19,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -68,24 +68,22 @@ public class CommentFormatter extends CodeFormatter {
 	 * @see org.eclipse.jdt.core.formatter.CodeFormatter#format(int, java.lang.String, int, int, int, java.lang.String)
 	 */
 	public TextEdit format(int kind, String source, int offset, int length, int indentationLevel, String lineSeparator) {
-		String type= JavaPartitions.getPartitionType(kind);
-		if (type != null)
-			return format(new Document(source), new TypedPosition(offset, length, type), indentationLevel, lineSeparator);
-		return null;
+		return format(kind, new Document(source), new Position(offset, length), indentationLevel, lineSeparator);
 	}
 
 	/**
 	 * Compute a text edit for formatting the given partition in the given
 	 * document with the given indentation level and line delimiter.
 	 * 
+	 * @param kind the comment snippet kind
 	 * @param document the document
-	 * @param partition the partition
+	 * @param position the position
 	 * @param indentationLevel the indentation level
 	 * @param lineDelimiter the line delimiter
 	 * @return the text edit for formatting
 	 * @since 3.1
 	 */
-	private TextEdit format(IDocument document, TypedPosition partition, int indentationLevel, String lineDelimiter) {
+	private TextEdit format(int kind, IDocument document, Position position, int indentationLevel, String lineDelimiter) {
 		String trueProperty= Boolean.toString(true);
 		final boolean isFormattingComments= trueProperty.equals(fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMAT));
 		final boolean isFormattingHeader= trueProperty.equals(fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHEADER));
@@ -93,10 +91,11 @@ public class CommentFormatter extends CodeFormatter {
 		int documentsHeaderEnd= computeHeaderEnd(document);
 		
 		TextEdit edit= null;
-		if (isFormattingComments && (isFormattingHeader || partition.offset >= documentsHeaderEnd)) {
+		if (isFormattingComments && (isFormattingHeader || position.offset >= documentsHeaderEnd)) {
 			
-			final CommentRegion region= CommentObjectFactory.createRegion(document, partition, lineDelimiter, fPreferences, fTextMeasurement);
-			edit= region.format(indentationLevel);
+			final CommentRegion region= CommentObjectFactory.createRegion(kind, document, position, lineDelimiter, fPreferences, fTextMeasurement);
+			if (region != null)
+				edit= region.format(indentationLevel);
 		}
 		return edit;
 	}

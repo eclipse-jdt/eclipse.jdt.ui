@@ -25,7 +25,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.TypedPosition;
 
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
@@ -60,7 +59,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	 * @param textMeasurement
 	 *                   The text measurement. Can be <code>null</code>.
  	 */	
-	protected JavaDocRegion(final IDocument document, final TypedPosition position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
+	protected JavaDocRegion(final IDocument document, final Position position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
 		super(document, position, delimiter, preferences, textMeasurement);
 
 		String trueProperty= Boolean.toString(true);
@@ -347,5 +346,13 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 		} catch (IOException e) {
 			return html;
 		}
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#createLine()
+	 * @since 3.1
+	 */
+	protected CommentLine createLine() {
+		return new JavaDocLine(this);
 	}
 }
