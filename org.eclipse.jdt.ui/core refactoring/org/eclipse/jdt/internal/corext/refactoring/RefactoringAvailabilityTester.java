@@ -130,14 +130,14 @@ public final class RefactoringAvailabilityTester {
 		if (selection.size() == 1) {
 			if (selection.getFirstElement() instanceof IType) {
 				final IType type= (IType) selection.getFirstElement();
-				return type.isAnonymous();
+				return type.isAnonymous() && !(type.getParent() instanceof IField);
 			}
 		}
 		return false;
 	}
 
 	public static boolean isConvertAnonymousAvailable(final IType type) throws JavaModelException {
-		return Checks.isAvailable(type) && type.isAnonymous();
+		return Checks.isAvailable(type) && type.isAnonymous() && !(type.getParent() instanceof IField);
 	}
 
 	public static boolean isConvertAnonymousAvailable(final JavaTextSelection selection) throws JavaModelException {
@@ -513,10 +513,12 @@ public final class RefactoringAvailabilityTester {
 		return Checks.isAvailable(field) && !JdtFlags.isEnum(field) && !field.getDeclaringType().isAnnotation();
 	}
 
-	public static boolean isSelfEncapsulateAvailable(final IStructuredSelection selection) {
+	public static boolean isSelfEncapsulateAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() == 1) {
-			if (selection.getFirstElement() instanceof IField)
-				return true;
+			if (selection.getFirstElement() instanceof IField) {
+				final IField field= (IField) selection.getFirstElement();
+				return !JdtFlags.isEnum(field);
+			}
 		}
 		return false;
 	}
