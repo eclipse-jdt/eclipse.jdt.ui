@@ -103,6 +103,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}
 	
 	public static boolean hasCorrections(IMarker marker) {
+		if (marker == null || !marker.exists())
+			return false;
+		
 		try {
 			if (marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
 				int problemId= marker.getAttribute(IJavaModelMarker.ID, -1);
