@@ -367,6 +367,13 @@ public class StubUtility {
 			if (!isSubType) {
 				allMethods.removeAll(Arrays.asList(typeMethods));
 			}
+			// remove finals
+			for (int i= allMethods.size() - 1; i >= 0; i--) {
+				IMethod curr= (IMethod) allMethods.get(i);
+				if (Flags.isFinal(curr.getFlags())) {
+					allMethods.remove(i);
+				}
+			}
 			IMethod[] choice= (IMethod[]) allMethods.toArray(new IMethod[allMethods.size()]);
 			toImplementArray= selectionQuery.select(choice, toImplementArray, hierarchy);
 			if (toImplementArray == null) {
