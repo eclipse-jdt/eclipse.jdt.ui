@@ -1215,10 +1215,10 @@ public class Bindings {
 	 * Get field declaration. See bug 83100
 	 */
 	public static IBinding getVariableDeclaration(IVariableBinding var) {
-		if (!var.isField()) {
+		ITypeBinding declaringClass= var.getDeclaringClass();
+		if (declaringClass == null) {
 			return var;
 		}
-		ITypeBinding declaringClass= var.getDeclaringClass();
 		if (declaringClass.getTypeDeclaration() == declaringClass) { // test if type is already declaration
 			return var;
 		}
