@@ -98,4 +98,8 @@ public final class TypeBindings {
 			return "<NULL BINDING>";
 		return Bindings.asString(binding);
 	}
+
+	public static boolean isClassBinding(ITypeBinding typeBinding){
+		return typeBinding != null && typeBinding.isClass();
+	}
 }
