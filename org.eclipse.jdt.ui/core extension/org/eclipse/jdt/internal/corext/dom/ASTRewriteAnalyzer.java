@@ -310,13 +310,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					if (!isInserted(elem)) {
 						if (last != null) {
 							if (elem.getNodeType() == nodeType && last.getNodeType() == nodeType) {
-								int currLine= fTextBuffer.getLineOfOffset(elem.getStartPosition());
-								int lastLine= fTextBuffer.getLineOfOffset(last.getStartPosition() + last.getLength());
-								return currLine - lastLine - 1;
+								return countEmptyLines(last);
 							} else if (additionalLines == -1) {
-								int currLine= fTextBuffer.getLineOfOffset(elem.getStartPosition());
-								int lastLine= fTextBuffer.getLineOfOffset(last.getStartPosition() + last.getLength());
-								additionalLines= currLine - lastLine - 1;
+								additionalLines= countEmptyLines(last);
 							}
 						}
 						last= elem;
@@ -327,6 +323,16 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 			}
 			return 1;
+		}
+
+		private int countEmptyLines(ASTNode last) {
+			int lastLine= fTextBuffer.getLineOfOffset(last.getStartPosition() + last.getLength());
+			int scanLine= lastLine + 1;
+			int numLines= fTextBuffer.getNumberOfLines();
+			while(scanLine < numLines && Strings.containsOnlyWhitespaces(fTextBuffer.getLineContent(scanLine))){
+				scanLine++;
+			}
+			return scanLine - lastLine - 1;	
 		}		
 		
 	}		
