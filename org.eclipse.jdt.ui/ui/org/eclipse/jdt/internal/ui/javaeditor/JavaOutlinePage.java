@@ -170,6 +170,17 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 				}
 				
+				private boolean isPossibleStructuralChange(IJavaElementDelta cuDelta) {
+					if (cuDelta.getKind() != IJavaElementDelta.CHANGED) {
+						return true; // add or remove
+					}
+					int flags= cuDelta.getFlags();
+					if ((flags & IJavaElementDelta.F_CHILDREN) != 0) {
+						return true;
+					}
+					return (flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
+				}
+				
 				protected IJavaElementDelta findElement(IJavaElement unit, IJavaElementDelta delta) {
 					
 					if (delta == null || unit == null)
@@ -177,8 +188,13 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					
 					IJavaElement element= delta.getElement();
 					
-					if (unit.equals(element))
-						return delta;
+					if (unit.equals(element)) {
+						if (isPossibleStructuralChange(delta)) {
+							return delta;
+						}
+						return null;
+					}
+						
 					
 					if (element.getElementType() > IJavaElement.CLASS_FILE)
 						return null;
