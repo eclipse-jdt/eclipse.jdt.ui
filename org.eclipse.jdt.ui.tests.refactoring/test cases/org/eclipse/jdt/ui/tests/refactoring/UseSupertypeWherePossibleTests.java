@@ -17,12 +17,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
@@ -62,7 +64,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 	private void validatePassingTest(String className, String[] cuNames, String superTypeFullName, boolean updateInstanceOf) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 				
-		UseSupertypeWherePossibleRefactoring ref= new UseSupertypeWherePossibleRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		UseSupertypeWherePossibleRefactoring ref= UseSupertypeWherePossibleRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
 		ref.setUseSupertypeInInstanceOf(updateInstanceOf);
 			
 		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
@@ -73,7 +75,11 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 
 		for (int i= 0; i < cus.length; i++) {
-			assertEquals("incorrect changes in " + cus[i].getElementName(), getFileContents(getOutputTestFileName(cuNames[i])), cus[i].getSource());
+			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
+			String actual= cus[i].getSource();
+			String message= "incorrect changes in " + cus[i].getElementName();
+//			assertEquals("incorrect changes in " + cus[i].getElementName(), expected, actual);
+			SourceCompareUtil.compare(message, actual, expected);
 		}
 	}
 

@@ -92,7 +92,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	private void validatePassingTest(String className, String[] cuNames, String newInterfaceName, boolean replaceOccurrences, String[] extractedMethodNames, String[][] extractedSignatures, String[] extractedFieldNames) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 				
-		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
 		ref.setNewInterfaceName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, ref.checkNewInterfaceName(newInterfaceName).getSeverity());
 		
@@ -121,7 +121,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		ICompilationUnit cu= clas.getCompilationUnit();
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 				
-		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
 		ref.setNewInterfaceName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, ref.checkNewInterfaceName(newInterfaceName).getSeverity());
 		
@@ -137,7 +137,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	private void validateFailingTest(String className, String newInterfaceName, boolean extractAll, int expectedSeverity) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
-		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
 		
 		ref.setNewInterfaceName(newInterfaceName);
 		if (extractAll)
@@ -641,11 +641,25 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test94() throws Exception{
-		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
-//		String[] names= {};
-//		String[][] signatures= {{}};
-//		String[] fieldNames= {};
-//		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test95() throws Exception{
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test96() throws Exception{
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
 	public void testPaperExample0() throws Exception{
