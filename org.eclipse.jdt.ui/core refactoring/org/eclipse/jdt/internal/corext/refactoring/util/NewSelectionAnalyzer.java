@@ -346,6 +346,15 @@ public class NewSelectionAnalyzer extends GenericVisitor {
 	
 	//---- Compilation Unit -------------------------------------------------------
 	
+	public void endVisit(CompilationUnitDeclaration node, CompilationUnitScope scope) {
+		super.endVisit(node, scope);
+		if (fSelectedNodes != null && fSelectedNodes.size() > 1) {
+			fExpressionTypeBinding= null;
+			fExpressionIsPartOfOperator = false;
+			fExpressionTypeIsVisible= false;
+		}
+	}
+	
 	//---- Methods / Block --------------------------------------------------------
 		
 	public boolean visit(LocalDeclaration node, BlockScope scope) {

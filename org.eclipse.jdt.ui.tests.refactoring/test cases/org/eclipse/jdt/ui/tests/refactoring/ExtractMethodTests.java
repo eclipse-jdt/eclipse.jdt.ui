@@ -808,6 +808,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		validSelectionTestChecked();
 	}
 	
+	public void test364() throws Exception {
+		validSelectionTestChecked();
+	}
+	
 	//====================================================================================
 	// Testing Extracted result
 	//====================================================================================
