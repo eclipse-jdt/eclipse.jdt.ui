@@ -197,10 +197,13 @@ public class TextBuffer {
 	 * Returns the line indent for the given line. If there isn't any line for the
 	 * given line number, <code>-1</code> is returned.
 	 * 
-	 * @return the line indent for the given line number of <code>-1</code>
+	 * @return the line indent for the given line number or <code>-1</code>
 	 */
 	public int getLineIndent(int lineNumber, int tabWidth) {
-		return Strings.computeIndent(getLineContent(lineNumber), tabWidth);
+		String lineContent= getLineContent(lineNumber);
+		if (lineContent == null)
+			return -1;
+		return Strings.computeIndent(lineContent, tabWidth);
 	}
 	
 	/**
