@@ -318,4 +318,7 @@ public interface IJavaHelpContextIds {
     public static final String CALL_HIERARCHY_TOGGLE_CALL_MODE_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_TOGGLE_JAVA_LABEL_FORMAT_ACTION= PREFIX + "call_hierarchy_toggle_java_label_format_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_COPY_ACTION= PREFIX + "call_hierarchy_copy_action_context"; //$NON-NLS-1$
+	public static final String CALL_HIERARCHY_TOGGLE_IMPLEMENTORS_ACTION= PREFIX + "call_hierarchy_toggle_implementors_action_context"; //$NON-NLS-1$
+
 }
