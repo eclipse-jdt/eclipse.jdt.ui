@@ -67,5 +67,9 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewSnippetFileCreationWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder");//$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");//$NON-NLS-1$
+		
+		layout.addShowInPart(IPageLayout.ID_RES_NAV);
+		layout.addShowInPart(JavaUI.ID_PACKAGES);	 
+
 	}
 }

@@ -163,7 +163,6 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -1540,14 +1539,13 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		resAction.setActionDefinitionId(ITextEditorActionDefinitionIds.ADD_TASK);
 		setAction(ITextEditorActionConstants.ADD_TASK, resAction);
 
-		ActionGroup oeg, ovg, sg, jsg;
+		ActionGroup oeg, ovg, jsg;
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 			oeg= new OpenEditorActionGroup(this),
 			ovg= new OpenViewActionGroup(this),
-			sg= new ShowActionGroup(this),
 			jsg= new JavaSearchActionGroup(this)
 		});
-		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
+		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, jsg});
 		
 		resAction= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
 		resAction= new InformationDispatchAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", (TextOperationAction) resAction); //$NON-NLS-1$

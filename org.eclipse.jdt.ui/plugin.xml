@@ -129,6 +129,17 @@
 		targetID="org.eclipse.debug.ui.DebugPerspective">
 		<actionSet id="org.eclipse.jdt.ui.JavaActionSet"/>
 	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.jdt.ui.JavaPerspective">
+		<showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
+		<showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
+	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+		<showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
+		<showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
+	</perspectiveExtension>
+	
 </extension>
 
 <extension point="org.eclipse.ui.projectNatureImages">
@@ -994,21 +1005,7 @@
 			description="%OpenSuperImplementationAction.description"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
 			retarget="true" />
-			
-		<action id="org.eclipse.jdt.ui.actions.ShowInNaviagtorView"
-      		menubarPath="navigate/show.ext"
-      		label="%ShowInNavigatorViewAction.label"
-      		tooltip="%ShowInNavigatorViewAction.tooltip"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view"
-			retarget="true" />
-			
-		<action id="org.eclipse.jdt.ui.actions.ShowInPackagesView"
-      		menubarPath="navigate/show.ext"
-      		label="%ShowInPackageViewAction.label"
-      		tooltip="%ShowInPackageViewAction.tooltip"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.show.in.package.view"
-			retarget="true" />
-			
+						
 		<action id="org.eclipse.jdt.ui.actions.GoToPackage"
 			menubarPath="navigate/goTo/"
 			label="%GoToPackageAction.label"

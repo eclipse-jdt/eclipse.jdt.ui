@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ * @deprecated Instead of using this ActionGroup clients should integrate with the Show In support.
  * @since 2.0
  */
 public class ShowActionGroup extends ActionGroup {
@@ -64,7 +64,7 @@ public class ShowActionGroup extends ActionGroup {
 	 */
 	public ShowActionGroup(IViewPart part) {
 		this(part.getSite());
-		fIsPackageExplorer= part instanceof PackageExplorerPart;
+		fIsPackageExplorer= false; // remove the Show in support
 	}
 	
 	/**

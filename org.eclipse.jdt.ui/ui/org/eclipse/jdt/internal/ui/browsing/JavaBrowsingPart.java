@@ -186,7 +186,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				IWorkbenchPage page= getSite().getWorkbenchWindow().getActivePage();
 				if (page != null)
 					selectionChanged(page.getActivePart(), page.getSelection());
-			}
+		}
 		}
 		public void partHidden(IWorkbenchPartReference ref) {
 			if (ref != null && ref.getId() == getSite().getId())
@@ -517,7 +517,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				new NewWizardsActionGroup(this.getSite()),
 				fOpenEditorGroup= new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
-				new ShowActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this), 
 				new RefactorActionGroup(this),
 				new ImportActionGroup(this),

@@ -73,6 +73,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.dialogs.IShowInSource;
+import org.eclipse.ui.dialogs.IShowInTarget;
+import org.eclipse.ui.dialogs.ShowInContext;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -120,7 +123,11 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
  * view the corresponding editor is activated. 
  */
 
-public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget, IMenuListener, IPackagesViewPart,  IPropertyChangeListener, IViewPartInputProvider {
+public class PackageExplorerPart extends ViewPart 
+	implements ISetSelectionTarget, IMenuListener,
+		IShowInTarget,
+		IPackagesViewPart,  IPropertyChangeListener, 
+		IViewPartInputProvider {
 	
 	private boolean fIsCurrentLayoutFlat; // true means flat, false means hierachical
 
@@ -453,6 +460,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	public Object getAdapter(Class key) {
 		if (key.equals(ISelectionProvider.class))
 			return fViewer;
+		if (key == IShowInSource.class) {
+			return getShowInSource();
+		}
 		return super.getAdapter(key);
 	}
 
@@ -654,7 +664,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Returns whether the preference to link selection to active editor is enabled.
 	 */
 	boolean isLinkingEnabled() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
+		// linking was removed in 2.1
+		return false;
 	}
 
 	/**
@@ -848,15 +859,18 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	void editorActivated(IEditorPart editor) {
 		if (!isLinkingEnabled())  
 			return;
-		Object input= getElementOfInput(editor.getEditorInput());
+		showInput(getElementOfInput(editor.getEditorInput()));
+	}
+
+	boolean showInput(Object input) {
 		Object element= null;
-		
+			
 		if (input instanceof IFile) 
 			element= JavaCore.create((IFile)input);
-			
+				
 		if (element == null) // try a non Java resource
 			element= input;
-			
+				
 		if (element != null) {
 			// if the current selection is a child of the new
 			// selection then ignore it.
@@ -869,12 +883,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 						if (cu.isWorkingCopy())
 							cu= (ICompilationUnit)cu.getOriginalElement();
 						if ( element.equals(cu))
-							return;
+							return false;
 					}
-
+	
 					IClassFile cf= (IClassFile)((IJavaElement)o).getAncestor(IJavaElement.CLASS_FILE);
 					if (cf != null && element.equals(cf))
-						return;
+						return false;
 				}
 			}
 			ISelection newSelection= new StructuredSelection(element);
@@ -882,7 +896,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				try {
 					fViewer.removeSelectionChangedListener(fSelectionListener);						
 					fViewer.setSelection(newSelection);
-
+	
 					while (element != null && fViewer.getSelection().isEmpty()) {
 						// Try to select parent in case element is filtered
 						element= getParent(element);
@@ -894,10 +908,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				} finally {
 					fViewer.addSelectionChangedListener(fSelectionListener);
 				}
+				return true;
 			}
 		}
+		return false;
 	}
-
 	/**
 	 * Returns the element's parent.
 	 * 
@@ -1057,5 +1072,25 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 	
 	public PackageExplorerPart() { 
+	}
+
+	public boolean show(ShowInContext context) {
+		Object input= context.getInput();
+		if (input instanceof IEditorInput)
+			return showInput(getElementOfInput((IEditorInput)context.getInput()));
+		return false;
+	}
+
+	/**
+	 * Returns the <code>IShowInSource</code> for this view.
+	 */
+	protected IShowInSource getShowInSource() {
+		return new IShowInSource() {
+			public ShowInContext getShowInContext() {
+				return new ShowInContext(
+					getViewer().getInput(),
+					getViewer().getSelection());
+			}
+		};
 	}
 }
