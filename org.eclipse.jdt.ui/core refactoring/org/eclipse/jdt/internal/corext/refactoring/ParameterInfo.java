@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import org.eclipse.jdt.core.dom.IVariableBinding;
+
 import org.eclipse.jdt.internal.corext.Assert;
 
 public class ParameterInfo {
 	
 	private static final int INDEX_FOR_ADDED= -1;
+	private final IVariableBinding fOldBinding;
 	private final String fOldName;
 	private final String fOldTypeName;
 	private final int fOldIndex;
@@ -25,7 +28,12 @@ public class ParameterInfo {
 	private Object fData;
 	private boolean fIsDeleted;
 	
-	public ParameterInfo(String type, String name, int index){
+	public ParameterInfo(String type, String name, int index) {
+		this(null, type, name, index);
+	}
+
+	public ParameterInfo(IVariableBinding binding, String type, String name, int index) {
+		fOldBinding= binding;
 		fOldTypeName= type;
 		fNewTypeName= type;
 		fOldName= name;
@@ -59,6 +67,10 @@ public class ParameterInfo {
 	public void setDefaultValue(String value){
 		Assert.isNotNull(value);
 		fDefaultValue= value;
+	}
+
+	public IVariableBinding getOldBinding() {
+		return fOldBinding;
 	}
 
 	public String getOldTypeName() {

@@ -69,7 +69,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private boolean fThrowRuntimeExceptions;
 	private List fParameterInfos;
 	private Set fUsedNames;
-	private boolean fReplaceDuplicate;
+	private boolean fReplaceDuplicates;
+	private SnippetFinder.Match[] fDuplicates;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
 	
@@ -181,6 +182,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			}
 			initializeParameterInfos();
 			initializeUsedNames();
+			initializeDuplicates();
 			return result;
 		} finally {
 			pm.worked(1);
@@ -325,7 +327,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 		TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(method, TypeDeclaration.class);
 		fRewriter= new ASTRewrite(type);
 		String sourceMethodName= method.getName().getIdentifier();
-		// SnippetFinder.Match[] matches= SnippetFinder.perform(type, fAnalyzer.getSelectedNodes());
 		
 		CompilationUnitChange result= null;
 		try {
@@ -341,8 +342,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 				// This is cheap since the compilation unit is already open in a editor.
 				buffer= TextBuffer.create((IFile)WorkingCopyUtil.getOriginal(fCUnit).getResource());
 				
-				ASTNodes.expandRange(fAnalyzer.getSelectedNodes(), buffer, fSelectionStart, fSelectionLength);
-				ASTNode target= getTargetNode();
+				ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
+				ASTNodes.expandRange(selectedNodes, buffer, fSelectionStart, fSelectionLength);
+				ASTNode target= getTargetNode(selectedNodes);
 				
 				MethodDeclaration mm= createNewMethod(fMethodName, true, target);
 				fRewriter.markAsInserted(mm, RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
@@ -350,7 +352,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				container.add(container.indexOf(method) + 1, mm);
 				
 				String description= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName); //$NON-NLS-1$
-				ASTNode[] callNodes= createCallNodes();
+				ASTNode[] callNodes= createCallNodes(null);
 				fRewriter.markAsReplaced(target, callNodes[0], description);
 				if (callNodes.length > 1) {
 					container= ASTNodes.getContainingList(target);
@@ -361,6 +363,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 						fRewriter.markAsInserted(node, description);
 					}
 				}
+				
+				replaceDuplicates();
 			
 				if (!fImportEdit.isEmpty()) {
 					root.add(fImportEdit);
@@ -374,8 +378,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 				MultiTextEdit changes= new MultiTextEdit();
 				fRewriter.rewriteNode(buffer, changes, groups);
 				root.add(changes);
-				fRewriter.removeModifications();
 				result.addGroupDescriptions((GroupDescription[])groups.toArray(new GroupDescription[groups.size()]));
+				
+				fRewriter.removeModifications();
 			} finally {
 				TextBuffer.release(buffer);
 			}
@@ -414,6 +419,26 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return flattener.getResult();		
 	}
 	
+	/**
+	 * Returns the number of duplicate code snippets found.
+	 * 
+	 * @return the number of duplicate code fragments
+	 */
+	public int getNumberOfDuplicates() {
+		if (fDuplicates == null)
+			return 0;
+		int result=0;
+		for (int i= 0; i < fDuplicates.length; i++) {
+			if (!fDuplicates[i].isMethodBody())
+				result++;
+		}
+		return result;
+	}
+	
+	public void setReplaceDuplicates(boolean replace) {
+		fReplaceDuplicates= replace;
+	}
+	
 	//---- Helper methods ------------------------------------------------------------------------
 	
 	private void initializeParameterInfos() {
@@ -425,7 +450,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (argument == null)
 				continue;
 			VariableDeclaration declaration= ASTNodes.findVariableDeclaration(argument, root);
-			ParameterInfo info= new ParameterInfo(getType(declaration), argument.getName(), i);
+			ParameterInfo info= new ParameterInfo(argument, getType(declaration), argument.getName(), i);
 			info.setData(argument);
 			fParameterInfos.add(info);
 		}
@@ -439,6 +464,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 	}
 	
+	private void initializeDuplicates() {
+		fDuplicates= SnippetFinder.perform(
+			(TypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingMethod(), TypeDeclaration.class), 
+			fAnalyzer.getSelectedNodes());
+		fReplaceDuplicates= fDuplicates.length > 0;
+	}
+	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
 		status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.no_set_of_statements")); //$NON-NLS-1$
 		return status;	
@@ -450,9 +482,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	//---- Code generation -----------------------------------------------------------------------
 	
-	private ASTNode getTargetNode() {
+	private ASTNode getTargetNode(ASTNode[] nodes) {
 		ASTNode result;
-		ASTNode[] nodes= fAnalyzer.getSelectedNodes();
 		if (nodes.length == 1) {
 			return nodes[0];
 		} else {
@@ -463,7 +494,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private ASTNode[] createCallNodes() {
+	private ASTNode[] createCallNodes(SnippetFinder.Match duplicate) {
 		List result= new ArrayList(2);
 		
 		IVariableBinding[] locals= fAnalyzer.getCallerLocals();
@@ -475,7 +506,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 		invocation.setName(fAST.newSimpleName(fMethodName));
 		List arguments= invocation.arguments();
 		for (int i= 0; i < fParameterInfos.size(); i++) {
-			arguments.add(ASTNodeFactory.newName(fAST, ((ParameterInfo)fParameterInfos.get(i)).getOldName()));
+			ParameterInfo parameter= ((ParameterInfo)fParameterInfos.get(i));
+			if (duplicate == null) {
+				arguments.add(ASTNodeFactory.newName(fAST, parameter.getOldName()));
+			} else {
+				arguments.add(ASTNodeFactory.newName(fAST, duplicate.getMappedName(parameter.getOldBinding()).getIdentifier()));
+			}
 		}		
 		
 		ASTNode call;		
@@ -514,6 +550,35 @@ public class ExtractMethodRefactoring extends Refactoring {
 			result.add(fAST.newReturnStatement());
 		}
 		return (ASTNode[])result.toArray(new ASTNode[result.size()]);		
+	}
+	
+	private void replaceDuplicates() {
+		int numberOf= getNumberOfDuplicates();
+		if (numberOf == 0 || !fReplaceDuplicates)
+			return;
+		String description= null;
+		if (numberOf == 1)
+			description= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.single", fMethodName); //$NON-NLS-1$
+		else
+			description= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.multi", fMethodName); //$NON-NLS-1$
+			
+		for (int d= 0; d < fDuplicates.length; d++) {
+			SnippetFinder.Match duplicate= fDuplicates[d];
+			if (!duplicate.isMethodBody()) {
+				ASTNode target= getTargetNode(duplicate.getNodes());
+				ASTNode[] callNodes= createCallNodes(duplicate);
+				fRewriter.markAsReplaced(target, callNodes[0], description);
+				if (callNodes.length > 1) {
+					List container= ASTNodes.getContainingList(target);
+					int index= container.indexOf(target);
+					for (int n= 1; n < callNodes.length; n++) {
+						ASTNode node= callNodes[n];
+						container.add(index + n, node);
+						fRewriter.markAsInserted(node, description);
+					}
+				}
+			}
+		}		
 	}
 	
 	private MethodDeclaration createNewMethod(String name, boolean code, ASTNode selection) {
