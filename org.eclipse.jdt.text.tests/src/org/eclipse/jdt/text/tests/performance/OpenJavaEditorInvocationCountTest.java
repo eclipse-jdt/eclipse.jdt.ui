@@ -27,9 +27,9 @@ import org.eclipse.jface.text.presentation.PresentationReconciler;
 /**
  * @since 3.1
  */
-public class OpenJavaEditorCountTest extends OpenEditorTest {
+public class OpenJavaEditorInvocationCountTest extends OpenEditorTest {
 
-	private static final Class THIS= OpenJavaEditorCountTest.class;
+	private static final Class THIS= OpenJavaEditorInvocationCountTest.class;
 
 	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
 	

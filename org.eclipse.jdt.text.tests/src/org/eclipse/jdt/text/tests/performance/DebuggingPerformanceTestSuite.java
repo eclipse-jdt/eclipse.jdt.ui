@@ -24,6 +24,8 @@ public class DebuggingPerformanceTestSuite extends TestSuite {
 	}
 	
 	public DebuggingPerformanceTestSuite() {
-		addTest(OpenJavaEditorCountTest.suite());
+		addTest(TextTypingInvocationCountTest.suite());
+		addTest(JavaTypingInvocationCountTest.suite());
+		addTest(OpenJavaEditorInvocationCountTest.suite());
 	}
 }
