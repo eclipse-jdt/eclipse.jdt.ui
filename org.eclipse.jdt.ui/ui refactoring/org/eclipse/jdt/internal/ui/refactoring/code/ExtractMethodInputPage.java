@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
