@@ -49,7 +49,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.internal.ui.search.JavaSearchDescription;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
@@ -59,6 +58,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 /**
  * Abstract class for Java search actions.

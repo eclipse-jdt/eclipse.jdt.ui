@@ -22,10 +22,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 
-import org.eclipse.jdt.internal.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 import org.eclipse.jdt.internal.ui.search.ReferenceScopeFactory;
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 public class SearchTest {
 	public static Test suite() {

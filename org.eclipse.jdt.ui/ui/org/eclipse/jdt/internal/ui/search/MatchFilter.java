@@ -14,6 +14,9 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
+import org.eclipse.jdt.ui.search.PatternQuerySpecification;
+import org.eclipse.jdt.ui.search.QuerySpecification;
 
 abstract class  MatchFilter {
 	public abstract boolean isApplicable(JavaSearchQuery query);

@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.search;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.internal.ui.search.QuerySpecification;
 
 /**
  * This is the interface expected of extension to the extension point.

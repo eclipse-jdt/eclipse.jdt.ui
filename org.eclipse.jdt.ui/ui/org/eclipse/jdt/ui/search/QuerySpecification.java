@@ -8,17 +8,24 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.search;
+package org.eclipse.jdt.ui.search;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 /**
- * Describes the a java search query.  This class is not to be subclassed by 
- * clients.
- * Clients must not instantiate or subclass this class.
+ * <p>
+ * Describes a java search query. A query is described by giving a scope, a
+ * scope description, what kind of match to search for (reference, declarations,
+ * etc) and either a java element or a string and what kind of element to search
+ * for (type, field, etc). What exactly it means to, for example, to search for
+ * "references to type foo" is up to query participants. For example, a
+ * participant might consider the "class" attribute of an extension in a
+ * plugin.xml file to be a reference to the class mentioned in the attribute.
+ * </p>
+ * 
+ * <p>
+ * Clients may not instantiate or subclass this class.
+ * </p>
  */
 public abstract class QuerySpecification {
 	private IJavaSearchScope fScope;
@@ -32,7 +39,7 @@ public abstract class QuerySpecification {
 	}
 
 	/**
-	 * Returns the serach scope to be used in the query.
+	 * Returns the search scope to be used in the query.
 	 * @return The search scope.
 	 */
 	public IJavaSearchScope getScope() {
@@ -41,18 +48,17 @@ public abstract class QuerySpecification {
 	
 	/**
 	 * Returns a human readable description of the search scope.
-	 * @see #getScope()
 	 * @return A description of the search scope. 
+	 * @see QuerySpecification#getScope()
 	 */
 	public String getScopeDescription() {
 		return fScopeDescription;
 	}
 	
 	/**
-	 * Returns what kind of occurences the query should look for. 
+	 * Returns what kind of occurences the query should look for.
+	 * @return Whether to search for reference, declaration, etc
 	 * @see org.eclipse.jdt.core.search.IJavaSearchConstants
-	 * @see org.eclipse.jdt.core.search.SearchEngine#search(IWorkspace, IJavaElement, int, IJavaSearchScope, IJavaSearchResultCollector)
-	 * @return
 	 */
 	public int getLimitTo() {
 		return fLimitTo;

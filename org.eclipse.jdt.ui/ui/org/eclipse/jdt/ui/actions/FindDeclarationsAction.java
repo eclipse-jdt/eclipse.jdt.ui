@@ -32,9 +32,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
-import org.eclipse.jdt.internal.ui.search.PatternQuerySpecification;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
+import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 
 /**
  * Finds declarations of the selected element in the workspace.

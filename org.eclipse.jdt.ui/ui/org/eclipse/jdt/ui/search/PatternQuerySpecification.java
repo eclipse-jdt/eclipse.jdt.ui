@@ -8,15 +8,21 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.search;
+package org.eclipse.jdt.ui.search;
 
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 
 /**
+ * <p>
  * Describes a search query by giving a textual pattern to search for.
- * Clients must not instantiate or subclass this class.
-*/
+ * </p>
+ * <p>
+ * Clients may not instantiate or subclass this class.
+ * </p>
+ * 
+ * @see org.eclipse.jdt.ui.search.QuerySpecification
+ */
 public class PatternQuerySpecification extends QuerySpecification {
 	private String fPattern;
 	private int fSearchFor;

@@ -8,23 +8,27 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.search;
+package org.eclipse.jdt.ui.search;
 
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 /**
- * Describes a search query by giving the <code>IJavaElement</code> to search for.
- * Clients must not instantiate or subclass this class.
+ * <p>
+ * Describes a search query by giving the <code>IJavaElement</code> to search
+ * for.
+ * </p>
+ * <p>
+ * Clients may not instantiate or subclass this class.
+ * </p>
+ * 
+ * @see org.eclipse.jdt.ui.search.QuerySpecification
  */
 public class ElementQuerySpecification extends QuerySpecification {
 	private IJavaElement fElement;
 
 	/**
 	 * A constructor.
-	 * @see org.eclipse.jdt.core.search.SearchEngine#search(IWorkspace, IJavaElement, int, IJavaSearchScope, IJavaSearchResultCollector)
 	 * @param javaElement The java element the query should search for.
 	 * @param limitTo		  The kind of occurrence the query should search for
 	 * @param scope		  The scope to search in.
