@@ -47,6 +47,9 @@ public interface IJavaColorConstants {
 	String JAVA_TYPE= "java_type"; //$NON-NLS-1$
 	
 	
+	/** The color key for task tags in java comments. */
+	String TASK_TAG= "java_comment_task_tag"; //$NON-NLS-1$
+
 	/** The color key for JavaDoc keywords (<code>@foo</code>) in JavaDoc comments. */
 	String JAVADOC_KEYWORD= "java_doc_keyword"; //$NON-NLS-1$
 	/** The color key for HTML tags (<code>&lt;foo&gt;</code>) in JavaDoc comments. */

@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -65,6 +66,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -77,6 +79,7 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 public class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
 	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
+	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;	
 
 	public final OverlayPreferenceStore.OverlayKey[] fKeys= new OverlayPreferenceStore.OverlayKey[] {
 		
@@ -103,6 +106,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVA_DEFAULT_BOLD),
 
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TASK_TAG_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_TASK_TAG_BOLD),
+		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD),
 		
@@ -206,6 +212,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.keywords"), PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, //$NON-NLS-1$
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.strings"), PreferenceConstants.EDITOR_STRING_COLOR }, //$NON-NLS-1$
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.others"), PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, //$NON-NLS-1$
+		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaCommentTaskTags"), PreferenceConstants.EDITOR_TASK_TAG_COLOR }, //$NON-NLS-1$
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocKeywords"), PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR }, //$NON-NLS-1$
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocHtmlTags"), PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR }, //$NON-NLS-1$
 		{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocLinks"), PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR }, //$NON-NLS-1$
@@ -489,7 +496,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private Control createPreviewer(Composite parent) {
 		
-		fJavaTextTools= new JavaTextTools(fOverlayStore, false);
+		Preferences coreStore= createTemporaryCorePreferenceStore();
+		
+		fJavaTextTools= new JavaTextTools(fOverlayStore, coreStore, false);
 		
 		fPreviewViewer= new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		fPreviewViewer.configure(new JavaSourceViewerConfiguration(fJavaTextTools, null));
@@ -520,6 +529,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		return fPreviewViewer.getControl();
+	}
+	
+	private Preferences createTemporaryCorePreferenceStore() {
+		Preferences result= new Preferences();
+		
+		result.setValue(COMPILER_TASK_TAGS, "TASK"); //$NON-NLS-1$
+		
+		return result;
 	}
 	
 	/**

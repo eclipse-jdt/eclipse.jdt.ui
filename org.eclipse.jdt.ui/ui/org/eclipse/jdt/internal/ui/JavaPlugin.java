@@ -45,6 +45,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -316,7 +317,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	public synchronized JavaTextTools getJavaTextTools() {
 		if (fJavaTextTools == null)
-			fJavaTextTools= new JavaTextTools(getPreferenceStore());
+			fJavaTextTools= new JavaTextTools(getPreferenceStore(), JavaCore.getPlugin().getPluginPreferences());
 		return fJavaTextTools;
 	}
 		

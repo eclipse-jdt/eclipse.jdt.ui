@@ -96,6 +96,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.core.resources.IMarker;
 
@@ -136,6 +137,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -989,6 +991,15 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 	};
 
+	private class PropertyChangeListener implements org.eclipse.core.runtime.Preferences.IPropertyChangeListener {		
+		/*
+		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+		 */
+		public void propertyChange(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
+			handlePreferencePropertyChanged(event);
+		}
+	};
+	
 	
 	/** Preference key for showing the line number ruler */
 	protected final static String LINE_NUMBER_RULER= PreferenceConstants.EDITOR_LINE_NUMBER_RULER;
@@ -1048,6 +1059,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected final static String SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for unknown annotation indication in overview ruler */
 	protected final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
+	/** Preference key for compiler task tags */
+	private final static String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	
 	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
 
@@ -1081,6 +1094,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected OverviewRuler fOverviewRuler;
 	/** History for structure select action */
 	private SelectionHistory fSelectionHistory;
+	/** The preference property change listener for java core. */
+	private org.eclipse.core.runtime.Preferences.IPropertyChangeListener fPropertyChangeListener= new PropertyChangeListener();
 	
 	protected CompositeActionGroup fActionGroups;
 	private CompositeActionGroup fContextMenuGroup;
@@ -1128,7 +1143,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		fOverviewRuler= new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);		
 		fOverviewRuler.addHeaderAnnotationType(AnnotationType.WARNING);
 		fOverviewRuler.addHeaderAnnotationType(AnnotationType.ERROR);
-		fOverviewRuler.setHeaderColor(sharedColors.getColor(new RGB(251, 70, 102)));
 		
 		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
 		
@@ -1519,6 +1533,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				fEncodingSupport= null;
 		}
 		
+		if (fPropertyChangeListener != null) {
+			Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+			preferences.removePropertyChangeListener(fPropertyChangeListener);
+			fPropertyChangeListener= null;
+		}
+		
 		if (fSourceViewerDecorationSupport != null) {
 			fSourceViewerDecorationSupport.dispose();
 			fSourceViewerDecorationSupport= null;
@@ -1678,6 +1698,21 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	
 	private boolean isJavaEditorHoverProperty(String property) {
 		return	PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS.equals(property);
+	}
+	
+	/**
+	 * Handles a property change event describing a change
+	 * of the java core's preferences and updates the preference
+	 * related editor properties.
+	 * 
+	 * @param event the property change event
+	 */
+	protected void handlePreferencePropertyChanged(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
+		if (COMPILER_TASK_TAGS.equals(event.getProperty())) {
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer != null && affectsTextPresentation(new PropertyChangeEvent(event.getSource(), event.getProperty(), event.getOldValue(), event.getNewValue())))
+				sourceViewer.invalidateTextPresentation();
+		}
 	}
 	
 	/**
@@ -1933,6 +1968,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		fSourceViewerDecorationSupport.install(getPreferenceStore());
 
+		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+		preferences.addPropertyChangeListener(fPropertyChangeListener);			
+		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				boolean cutDown= false;

@@ -58,7 +58,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
@@ -323,15 +322,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	};
 	
-	private class PropertyChangeListener implements IPropertyChangeListener {		
-		/*
-		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
-		 */
-		public void propertyChange(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
-			handlePreferencePropertyChanged(event);
-		}
-	};
-	
 	private static class ExitPolicy implements LinkedPositionUI.ExitPolicy {
 		
 		final char fExitCharacter;
@@ -575,8 +565,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
 	/** The editor's tab converter */
 	private TabConverter fTabConverter;
-	/** The preference property change listener for java core. */
-	private IPropertyChangeListener fPropertyChangeListener= new PropertyChangeListener();
 	/** The remembered java element */
 	private IJavaElement fRememberedElement;
 	/** The remembered selection */
@@ -981,12 +969,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (sourceViewer instanceof ITextViewerExtension)
 			((ITextViewerExtension) sourceViewer).removeVerifyKeyListener(fBracketInserter);
 
-		if (fPropertyChangeListener != null) {
-			Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-			preferences.removePropertyChangeListener(fPropertyChangeListener);
-			fPropertyChangeListener= null;
-		}
-		
 		if (fJavaEditorErrorTickUpdater != null) {
 			fJavaEditorErrorTickUpdater.dispose();
 			fJavaEditorErrorTickUpdater= null;
@@ -1010,9 +992,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (isTabConversionEnabled())
 			startTabConversion();			
 			
-		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		preferences.addPropertyChangeListener(fPropertyChangeListener);			
-		
 		IPreferenceStore preferenceStore= getPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
 		boolean closeStrings= preferenceStore.getBoolean(CLOSE_STRINGS);
@@ -1087,12 +1066,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 
-	/**
-	 * Handles a property change event describing a change
-	 * of the java core's preferences and updates the preference
-	 * related editor properties.
-	 * 
-	 * @param event the property change event
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#handlePreferencePropertyChanged(org.eclipse.core.runtime.Preferences.PropertyChangeEvent)
 	 */
 	protected void handlePreferencePropertyChanged(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
 		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
@@ -1104,6 +1079,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					fTabConverter.setNumberOfSpacesPerTab(getTabSize());
 			}
 		}
+		super.handlePreferencePropertyChanged(event);
 	}
 	
 	/*

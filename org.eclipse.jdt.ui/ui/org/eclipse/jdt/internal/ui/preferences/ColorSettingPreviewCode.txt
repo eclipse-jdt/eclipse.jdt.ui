@@ -8,4 +8,5 @@ public class ClassName extends SuperClass {
 	private int integer= 0;
 	// This comment may span only this line
 	private String string= "zero";
+	// TASK: refactor
 }

@@ -15,9 +15,12 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.core.runtime.Preferences;
+
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
@@ -34,9 +37,12 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  */
 public class JavaTextTools {
 	
-	private class PreferenceListener implements IPropertyChangeListener {
+	private class PreferenceListener implements IPropertyChangeListener, Preferences.IPropertyChangeListener {
 		public void propertyChange(PropertyChangeEvent event) {
 			adaptToPreferenceChange(event);
+		}
+		public void propertyChange(Preferences.PropertyChangeEvent event) {
+			adaptToPreferenceChange(new PropertyChangeEvent(event.getSource(), event.getProperty(), event.getOldValue(), event.getNewValue()));
 		}
 	};
 		
@@ -45,9 +51,9 @@ public class JavaTextTools {
 	/** The Java source code scanner */
 	private JavaCodeScanner fCodeScanner;
 	/** The Java multiline comment scanner */
-	private SingleTokenJavaScanner fMultilineCommentScanner;
+	private JavaCommentScanner fMultilineCommentScanner;
 	/** The Java singleline comment scanner */
-	private SingleTokenJavaScanner fSinglelineCommentScanner;
+	private JavaCommentScanner fSinglelineCommentScanner;
 	/** The Java string scanner */
 	private SingleTokenJavaScanner fStringScanner;
 	/** The JavaDoc scanner */
@@ -57,6 +63,8 @@ public class JavaTextTools {
 	
 	/** The preference store */
 	private IPreferenceStore fPreferenceStore;
+	/** The core preference store */
+	private Preferences fCorePreferenceStore;
 	/** The preference change listener */
 	private PreferenceListener fPreferenceListener= new PreferenceListener();
 
@@ -72,7 +80,7 @@ public class JavaTextTools {
 	 * @since 2.0
 	 */
 	public JavaTextTools(IPreferenceStore store) {
-		this(store, true);
+		this(store, null, true);
 	}
 
 	/**
@@ -90,15 +98,57 @@ public class JavaTextTools {
 	 * @since 2.1
 	 */
 	public JavaTextTools(IPreferenceStore store, boolean autoDisposeOnDisplayDispose) {
+		this(store, null, autoDisposeOnDisplayDispose);
+	}
+
+	/**
+	 * Creates a new Java text tools collection.
+	 * @param store the preference store to initialize the text tools. The text tool
+	 * instance installs a listener on the passed preference store to adapt itself to 
+	 * changes in the preference store. In general <code>PreferenceConstants.
+	 * getPreferenceStore()</code> should be used to initialize the text tools.
+	 * @param coreStore optional preference store to initialize the text tools. The text tool
+	 * instance installs a listener on the passed preference store to adapt itself to 
+	 * changes in the preference store.
+	 * 
+	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
+	 * @since 2.1
+	 */
+	public JavaTextTools(IPreferenceStore store, Preferences coreStore) {
+		this(store, coreStore, true);
+	}
+	
+	/**
+	 * Creates a new Java text tools collection.
+	 * 
+	 * @param store the preference store to initialize the text tools. The text tool
+	 * instance installs a listener on the passed preference store to adapt itself to 
+	 * changes in the preference store. In general <code>PreferenceConstants.
+	 * getPreferenceStore()</code> shoould be used to initialize the text tools.
+	 * @param coreStore optional preference store to initialize the text tools. The text tool
+	 * instance installs a listener on the passed preference store to adapt itself to 
+	 * changes in the preference store.
+	 * @param autoDisposeOnDisplayDispose 	if <code>true</code>  the color manager
+	 * automatically disposes all managed colors when the current display gets disposed
+	 * and all calls to {@link org.eclipse.jface.text.source.ISharedTextColors#dispose()} are ignored.
+	 * 
+	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
+	 * @since 2.1
+	 */
+	public JavaTextTools(IPreferenceStore store, Preferences coreStore, boolean autoDisposeOnDisplayDispose) {
 		fPreferenceStore= store;
 		fPreferenceStore.addPropertyChangeListener(fPreferenceListener);
 		
+		fCorePreferenceStore= coreStore;
+		if (fCorePreferenceStore != null)
+			fCorePreferenceStore.addPropertyChangeListener(fPreferenceListener);
+		
 		fColorManager= new JavaColorManager(autoDisposeOnDisplayDispose);
 		fCodeScanner= new JavaCodeScanner(fColorManager, store);
-		fMultilineCommentScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
-		fSinglelineCommentScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
+		fMultilineCommentScanner= new JavaCommentScanner(fColorManager, store, coreStore, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
+		fSinglelineCommentScanner= new JavaCommentScanner(fColorManager, store, coreStore, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
 		fStringScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_STRING);
-		fJavaDocScanner= new JavaDocScanner(fColorManager, store);
+		fJavaDocScanner= new JavaDocScanner(fColorManager, store, coreStore);
 		fPartitionScanner= new FastJavaPartitionScanner();
 	}
 	
@@ -122,6 +172,12 @@ public class JavaTextTools {
 		if (fPreferenceStore != null) {
 			fPreferenceStore.removePropertyChangeListener(fPreferenceListener);
 			fPreferenceStore= null;
+			
+			if (fCorePreferenceStore != null) {
+				fCorePreferenceStore.removePropertyChangeListener(fPreferenceListener);
+				fCorePreferenceStore= null;
+			}
+			
 			fPreferenceListener= null;
 		}
 	}

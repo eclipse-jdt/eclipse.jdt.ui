@@ -11,7 +11,6 @@ Contributors:
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -28,7 +27,8 @@ import org.eclipse.jface.text.rules.WordRule;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
-import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 
 
@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 /**
  * A rule based JavaDoc scanner.
  */
-public final class JavaDocScanner extends AbstractJavaScanner {
+public final class JavaDocScanner extends JavaCommentScanner {
 		
 		
 	/**
@@ -129,13 +129,13 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVADOC_KEYWORD,
 		IJavaColorConstants.JAVADOC_TAG,
 		IJavaColorConstants.JAVADOC_LINK,
-		IJavaColorConstants.JAVADOC_DEFAULT
+		IJavaColorConstants.JAVADOC_DEFAULT,
+		TASK_TAG
 	};			
 	
 	
-	public JavaDocScanner(IColorManager manager, IPreferenceStore store) {
-		super(manager, store);
-		initialize();
+	public JavaDocScanner(IColorManager manager, IPreferenceStore store, Preferences coreStore) {
+		super(manager, store, coreStore, IJavaColorConstants.JAVADOC_DEFAULT, fgTokenProperties);
 	}
 	
 	public IDocument getDocument() {
@@ -143,18 +143,11 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 	}
 	
 	/*
-	 * @see AbstractJavaScanner#getTokenProperties()
-	 */
-	protected String[] getTokenProperties() {
-		return fgTokenProperties;
-	}
-
-	/*
 	 * @see AbstractJavaScanner#createRules()
 	 */
 	protected List createRules() {
 		
-		List list= new ArrayList();
+		List list= super.createRules();
 		
 		// Add rule for tags.
 		Token token= getToken(IJavaColorConstants.JAVADOC_TAG);
@@ -186,7 +179,6 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 			wordRule.addWord(fgKeywords[i], token);
 		list.add(wordRule);
 		
-		setDefaultReturnToken(getToken(IJavaColorConstants.JAVADOC_DEFAULT));
 		return list;
 	}
 }
