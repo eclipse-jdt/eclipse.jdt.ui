@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 
@@ -112,6 +113,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -1684,6 +1687,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	protected AbstractSelectionChangedListener fOutlineSelectionChangedListener= new OutlineSelectionChangedListener();
 	/** The editor's bracket matcher */
 	protected JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
+	/** This editor's encoding support */
+	private DefaultEncodingSupport fEncodingSupport;
 	/** The mouse listener */
 	private MouseClickListener fMouseListener;
 	/** The information presenter. */
@@ -1882,6 +1887,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			return fOutlinePage;
 		}
 		
+		if (IEncodingSupport.class.equals(required))
+			return fEncodingSupport;
+
 		if (required == IShowInTargetList.class) {
 			return new IShowInTargetList() {
 				public String[] getShowInTargetIds() {
@@ -2077,10 +2085,48 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 	
 	/*
+	 * @see StatusTextEditor#getStatusHeader(IStatus)
+	 */
+	protected String getStatusHeader(IStatus status) {
+		if (fEncodingSupport != null) {
+			String message= fEncodingSupport.getStatusHeader(status);
+			if (message != null)
+				return message;
+		}
+		return super.getStatusHeader(status);
+	}
+	
+	/*
+	 * @see StatusTextEditor#getStatusBanner(IStatus)
+	 */
+	protected String getStatusBanner(IStatus status) {
+		if (fEncodingSupport != null) {
+			String message= fEncodingSupport.getStatusBanner(status);
+			if (message != null)
+				return message;
+		}
+		return super.getStatusBanner(status);
+	}
+	
+	/*
+	 * @see StatusTextEditor#getStatusMessage(IStatus)
+	 */
+	protected String getStatusMessage(IStatus status) {
+		if (fEncodingSupport != null) {
+			String message= fEncodingSupport.getStatusMessage(status);
+			if (message != null)
+				return message;
+		}
+		return super.getStatusMessage(status);
+	}
+	
+	/*
 	 * @see AbstractTextEditor#doSetInput
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
+		if (fEncodingSupport != null)
+			fEncodingSupport.reset();
 		setOutlinePageInput(fOutlinePage, input);
 	}
 	
@@ -2092,6 +2138,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		if (isBrowserLikeLinks())
 			disableBrowserLikeLinks();
 			
+		if (fEncodingSupport != null) {
+				fEncodingSupport.dispose();
+				fEncodingSupport= null;
+		}
+		
 		if (fPropertyChangeListener != null) {
 			Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 			preferences.removePropertyChangeListener(fPropertyChangeListener);
@@ -2157,6 +2208,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 		setAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, action);
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.OPEN_HIERARCHY_ACTION);
+		
+		fEncodingSupport= new DefaultEncodingSupport();
+		fEncodingSupport.initialize(this);
 		
 		fSelectionHistory= new SelectionHistory(this);
 
@@ -2388,7 +2442,16 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 		return null;
 	}
-	
+
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#updatePropertyDependentActions()
+	 */
+	protected void updatePropertyDependentActions() {
+		super.updatePropertyDependentActions();
+		if (fEncodingSupport != null)
+			fEncodingSupport.reset();
+	}
+
 	/*
 	 * Update the hovering behavior depending on the preferences.
 	 */
