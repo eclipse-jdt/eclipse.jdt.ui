@@ -205,15 +205,18 @@ public class GenerateActionGroup extends ActionGroup {
 			target= generateMenu;
 		}
 		int added= 0;
-		added+= appendToGroup(target, fAddImport);
+		if (fEditorIsOwner)
+			added+= appendToGroup(target, fAddImport);
 		added+= appendToGroup(target, fOrganizeImports);
-		added+= appendToGroup(target, fSurroundWithTryCatch);
+		if (fEditorIsOwner)
+			added+= appendToGroup(target, fSurroundWithTryCatch);
 		added+= appendToGroup(target, fOverrideMethods);
 		added+= appendToGroup(target, fAddGetterSetter);
 		added+= appendToGroup(target, fAddUnimplementedConstructors);
 		added+= appendToGroup(target, fAddJavaDocStub);
 		added+= appendToGroup(target, fAddBookmark);
-		added+= appendToGroup(target, fExternalizeStrings);
+		if (fEditorIsOwner)
+			added+= appendToGroup(target, fExternalizeStrings);
 		if (generateMenu != null && added > 0)
 			menu.appendToGroup(fGroupName, generateMenu);
 	}
