@@ -51,6 +51,13 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 		fContextType= contextType;	
 	}
 	
+	/**
+	 * Gets the context type.
+	 */
+	public ContextType getContextType() {
+		return fContextType;	
+	}	
+	
 	/*
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */

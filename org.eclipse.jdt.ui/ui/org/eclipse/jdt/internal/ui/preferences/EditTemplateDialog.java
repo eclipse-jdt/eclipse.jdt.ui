@@ -53,16 +53,18 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -84,11 +86,13 @@ import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
+import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -99,9 +103,9 @@ public class EditTemplateDialog extends StatusDialog {
 
 	private static class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfiguration {
 
-		private final IContentAssistProcessor fProcessor;
+		private final TemplateVariableProcessor fProcessor;
 
-		SimpleJavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor, IContentAssistProcessor processor) {
+		SimpleJavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor, TemplateVariableProcessor processor) {
 			super(tools, editor);
 			fProcessor= processor;
 		}
@@ -148,8 +152,63 @@ public class EditTemplateDialog extends StatusDialog {
 		private Color getColor(IPreferenceStore store, String key, IColorManager manager) {
 			RGB rgb= PreferenceConverter.getColor(store, key);
 			return manager.getColor(rgb);
-		}	
+		}
+		
+		/*
+		 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
+		 * @since 2.1
+		 */
+		public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+			return new TemplateVariableTextHover(fProcessor);
+		}
+	
 	}
+
+	private static class TemplateVariableTextHover implements ITextHover {
+
+		private TemplateVariableProcessor fProcessor;
+
+		/**
+		 * @param type
+		 */
+		public TemplateVariableTextHover(TemplateVariableProcessor processor) {
+			fProcessor= processor;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.text.ITextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
+		 */
+		public String getHoverInfo(ITextViewer textViewer, IRegion subject) {
+			try {
+				IDocument doc= textViewer.getDocument();
+				int offset= subject.getOffset();
+				if (offset >= 2 && "${".equals(doc.get(offset-2, 2))) { //$NON-NLS-1$
+					String varName= doc.get(offset, subject.getLength());
+					Iterator iter= fProcessor.getContextType().variableIterator();
+					while (iter.hasNext()) {
+						TemplateVariable var= (TemplateVariable) iter.next();
+						if (varName.equals(var.getName())) {
+							return var.getDescription();
+						}
+					}
+				}				
+			} catch (BadLocationException e) {
+			}
+			return null;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
+		 */
+		public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
+			if (textViewer != null) {
+				return JavaWordFinder.findWord(textViewer.getDocument(), offset);
+			}
+			return null;	
+		}
+		
+	} 
+
 
 	private static class TextViewerAction extends Action implements IUpdate {
 	
