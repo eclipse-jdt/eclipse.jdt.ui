@@ -26,29 +26,23 @@ import org.eclipse.help.IHelp;
 
 public class OpenBrowserUtil {
 	
-	public static void open(final URL url, Shell shell, String dialogTitle) {
-		if (shell == null) {
-			shell= JavaPlugin.getActiveWorkbenchShell();
-			if (shell == null) {
-				return;
-			}
-		}
-		
+	public static void open(final URL url, Display display, String dialogTitle) {
 		IHelp help= WorkbenchHelp.getHelpSupport();
 		if (help != null) {
-			BusyIndicator.showWhile(shell.getDisplay(), new Runnable() {
+			BusyIndicator.showWhile(display, new Runnable() {
 				public void run() {
 					WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm() + "?noframes=true"); //$NON-NLS-1$
 				}
 			});			
 		} else {
-			showMessage(shell, dialogTitle, ActionMessages.getString("OpenBrowserUtil.help_not_available"), false); //$NON-NLS-1$
+			showMessage(display, dialogTitle, ActionMessages.getString("OpenBrowserUtil.help_not_available"), false); //$NON-NLS-1$
 		}
 	}
 	
-	private static void showMessage(final Shell shell, final String title, final String message, final boolean isError) {
-		Display.getDefault().asyncExec(new Runnable() {
+	private static void showMessage(Display display, final String title, final String message, final boolean isError) {
+		display.asyncExec(new Runnable() {
 			public void run() {
+				Shell shell= JavaPlugin.getActiveWorkbenchShell();
 				if (isError) {
 					MessageDialog.openError(shell, title, message);
 				} else {

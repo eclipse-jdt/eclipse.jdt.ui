@@ -161,7 +161,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		
 			URL url= JavaUI.getJavadocLocation(element, true);
 			if (url != null) {
-				OpenBrowserUtil.open(url, shell, getTitle());
+				OpenBrowserUtil.open(url, shell.getDisplay(), getTitle());
 			} 		
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

@@ -130,7 +130,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	public static Shell getActiveWorkbenchShell() {
-		return getActiveWorkbenchWindow().getShell();
+		 IWorkbenchWindow window= getActiveWorkbenchWindow();
+		 if (window != null) {
+		 	return window.getShell();
+		 }
+		 return null;
 	}
 	
 	/**

@@ -21,6 +21,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.Launch;
+import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -51,22 +63,9 @@ import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
 
-import org.eclipse.debug.core.DebugEvent;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventSetListener;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.Launch;
-import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.ui.IDebugUIConstants;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -236,7 +235,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					buf.append(' ');
 				}
 
-				IDebugEventSetListener listener= new JavadocDebugEventListener();
+				IDebugEventSetListener listener= new JavadocDebugEventListener(getShell().getDisplay());
 				DebugPlugin.getDefault().addDebugEventListener(listener);
 
 				ILaunchConfigurationWorkingCopy wc= null;
@@ -440,12 +439,12 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 	}
 
-	private void spawnInBrowser() {
+	private void spawnInBrowser(Display display) {
 		if (fOpenInBrowser) {
 			try {
 				IPath indexFile= fDestination.append("index.html"); //$NON-NLS-1$
 				URL url= indexFile.toFile().toURL();
-				OpenBrowserUtil.open(url, getShell(), getWindowTitle());
+				OpenBrowserUtil.open(url, display, getWindowTitle());
 			} catch (MalformedURLException e) {
 				JavaPlugin.log(e);
 			}
@@ -453,14 +452,19 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	}
 
 	private class JavadocDebugEventListener implements IDebugEventSetListener {
+		private Display fDisplay;
+
+		public JavadocDebugEventListener(Display display) {
+			fDisplay= display;
+		}
+		
 		public void handleDebugEvents(DebugEvent[] events) {
 			for (int i= 0; i < events.length; i++) {
 				if (events[i].getKind() == DebugEvent.TERMINATE) {
 					try {
 						if (!fWriteCustom) {
 							refresh(fDestination); //If destination of javadoc is in workspace then refresh workspace
-							spawnInBrowser();
-
+							spawnInBrowser(fDisplay);
 						}
 					} finally {
 						DebugPlugin.getDefault().removeDebugEventListener(this);

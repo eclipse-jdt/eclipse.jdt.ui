@@ -289,7 +289,7 @@ public class JavadocConfigurationBlock {
 		}
 		
 		public void spawnInBrowser(URL url) {
-			OpenBrowserUtil.open(url, fShell, fTitle);
+			OpenBrowserUtil.open(url, fShell.getDisplay(), fTitle);
 		}
 
 		private void validateFile(URL location) throws MalformedURLException {
