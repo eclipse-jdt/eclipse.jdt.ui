@@ -2,7 +2,8 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -11,21 +12,15 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.*;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
@@ -58,15 +53,16 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
-		JavaCore.setOptions(options);			
+		JavaCore.setOptions(options);
 		
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);
+		store.setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
+				
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		
-		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);
-		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
 	}
 
 

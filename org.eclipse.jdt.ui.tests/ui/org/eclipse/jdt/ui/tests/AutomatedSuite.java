@@ -18,6 +18,7 @@ import org.eclipse.jdt.ui.tests.core.JavaModelUtilTest;
 import org.eclipse.jdt.ui.tests.core.TextBufferTest;
 import org.eclipse.jdt.ui.tests.core.TypeHierarchyTest;
 import org.eclipse.jdt.ui.tests.core.TypeInfoTest;
+import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.text.HTML2TextReaderTester;
 import org.eclipse.jdt.ui.tests.text.JavaDoc2HTMLTextReaderTester;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
@@ -50,6 +51,7 @@ public class AutomatedSuite extends TestSuite {
 		addTest(JavaDoc2HTMLTextReaderTester.suite());
 		
 		addTest(ASTRewritingTest.suite());
+		addTest(QuickFixTest.suite());
 
 		// disabled addTest(AllTypesCacheTest.suite());
 		addTest(NewJavaProjectWizardTest.suite());

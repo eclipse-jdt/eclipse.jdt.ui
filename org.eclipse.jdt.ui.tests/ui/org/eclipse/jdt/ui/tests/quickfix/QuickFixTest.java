@@ -9,18 +9,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTRewriteClear;
 
 /**
   */
@@ -29,6 +20,7 @@ public class QuickFixTest extends TestCase {
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
 		suite.addTest(new TestSuite(UnresolvedTypesQuickFixTest.class));
+		suite.addTest(new TestSuite(UnresolvedVariablesQuickFixTest.class));
 		return suite;
 	}
 
