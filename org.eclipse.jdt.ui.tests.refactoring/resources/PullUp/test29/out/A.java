@@ -1,0 +1,19 @@
+package p;
+abstract class A{
+
+	public abstract boolean m(int[] a) throws Exception;
+}
+class B extends A{
+	public boolean m(int[] a) throws Exception {
+		return true;
+	}
+}
+class C extends A{
+
+	/**
+	 * @see p.A#m(int[])
+	 */
+	public boolean m(int[] a) throws Exception {
+		return false;
+	}
+}
