@@ -492,7 +492,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	public synchronized void dispose(){
 		fIsDisposed= true;
 		stopTest();
-		fProgressImages.dispose();
+		if (fProgressImages != null)
+			fProgressImages.dispose();
 		JUnitPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		fTestRunOKIcon.dispose();
 		fTestRunFailIcon.dispose();
