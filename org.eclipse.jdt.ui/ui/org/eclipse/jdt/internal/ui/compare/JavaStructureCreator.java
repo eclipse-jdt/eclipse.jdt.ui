@@ -35,7 +35,7 @@ public class JavaStructureCreator implements IStructureCreator {
 	/**
 	 * Used to bail out from ProblemFactory.
 	 */
-	private static class ParseError extends Error {
+	private static class ParseError extends RuntimeException {
 	}
 	
 	/**

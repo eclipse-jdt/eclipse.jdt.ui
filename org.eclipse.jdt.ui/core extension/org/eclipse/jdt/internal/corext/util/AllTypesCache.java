@@ -182,7 +182,7 @@ public class AllTypesCache {
 			
 			final ArrayList typesFound= new ArrayList(fSizeHint);
 
-			class RequestorAbort extends Error { }
+			class RequestorAbort extends RuntimeException { }
 		
 			ITypeNameRequestor requestor= new TypeInfoRequestor(typesFound) {
 				protected boolean inScope(char[] packageName) {
@@ -499,7 +499,7 @@ public class AllTypesCache {
 	 * Checks if the search index is up to date.
 	 */
 	public static boolean isIndexUpToDate() {
-		class TypeFoundException extends Error {
+		class TypeFoundException extends RuntimeException {
 		}
 		ITypeNameRequestor requestor= new ITypeNameRequestor() {
 			public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
