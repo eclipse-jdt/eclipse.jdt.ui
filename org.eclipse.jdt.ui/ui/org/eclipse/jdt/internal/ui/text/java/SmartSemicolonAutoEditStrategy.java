@@ -679,7 +679,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Checks whether, to the left of <code>position</code> and separated only by whitespace, 
 	 * <code>document</code> contains a keyword taking a parameter list and a block after it.
-	 * These are: <code>if</code>, <code>while</code>, <code>catch</code>, <code>for</code>, <code>synchronized</code>. 
+	 * These are: <code>if</code>, <code>while</code>, <code>catch</code>, <code>for</code>, <code>synchronized</code>, <code>switch</code>. 
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
@@ -695,6 +695,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 				|| looksLike(document, position, "while") //$NON-NLS-1$
 				|| looksLike(document, position, "catch") //$NON-NLS-1$
 				|| looksLike(document, position, "synchronized") //$NON-NLS-1$
+				|| looksLike(document, position, "switch") //$NON-NLS-1$
 				|| looksLike(document, position, "for"); //$NON-NLS-1$
 	}
 
