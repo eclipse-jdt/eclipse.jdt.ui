@@ -33,38 +33,44 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
-
-public class TypeRefTest extends TestCase {
+
+
+public class TypeInfoTest extends TestCase {
 	
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
-	private static final IPath SOURCES= new Path("test-resources/junit32-noUI.zip");
-	public TypeRefTest(String name) {
+
+	private static final IPath SOURCES= new Path("test-resources/junit32-noUI.zip");
+
+	public TypeInfoTest(String name) {
 		super(name);
 	}
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeRefTest.class, args);
+
+
+	public static void main(String[] args) {
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeInfoTest.class, args);
 	}
-
+
+
 	public static Test suite() {
-		TestSuite suite= new TestSuite(TestSuite.class.getName());
-		suite.addTest(new TypeRefTest("doTest1"));
-		suite.addTest(new TypeRefTest("doTest2"));
-		return suite;
+		return new TestSuite(TypeInfoTest.class);
 	}
-
+
+
 	protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 			fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 	}
-
+
+
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);		
 		
 	}
-
-	public void doTest1() throws Exception {
+
+
+	public void test1() throws Exception {
 		
 		// a junit project
 		IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(fJProject2);
@@ -86,11 +92,13 @@ public class TypeRefTest extends TestCase {
 		IPackageFragment pack1= root1.createPackageFragment("com.oti", true, null);
 		ICompilationUnit cu1= pack1.getCompilationUnit("V.java");
 		IType type1= cu1.createType("public class V {\n static class VInner {\n}\n}\n", null, true, null);
-
+
+
 		// internal jar
 		//IPackageFragmentRoot root2= JavaProjectHelper.addLibraryWithImport(fJProject1, JARFILE, null, null);
 		ArrayList result= new ArrayList();
-
+
+
 		IResource[] resources= new IResource[] {fJProject1.getJavaProject().getProject()};
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(resources);
 		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
@@ -113,15 +121,14 @@ public class TypeRefTest extends TestCase {
 		findTypeRef(result, "java.lang.Void");
 		findTypeRef(result, "java.util.Vector");
 		findTypeRef(result, "junit.samples.VectorTest");
-		findTypeRef(result, "junit.util.Version");
+		findTypeRef(result, "junit.util.Version");
+
 		//System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
 			IType resolvedType= ref.resolveType(scope);
 			if (resolvedType == null) {
 				assertTrue("Could not be resolved: " + ref.toString(), false);
-			} else {
-				//System.out.println(resolvedType.getFullyQualifiedName());
 			}
 		}
 
@@ -139,8 +146,7 @@ public class TypeRefTest extends TestCase {
 	}
 		
 	
-	
-	public void doTest2() throws Exception {
+	public void test2() throws Exception {
 		// our project
 		IJavaProject fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		// external jar
@@ -156,7 +162,7 @@ public class TypeRefTest extends TestCase {
 		engine.searchAllTypeNames(
 			fJProject1.getJavaModel().getWorkspace(),
 			null, 
-			new char[] {'A', 'c', 't', 'i', 'v', 'a'}, 
+			new char[] {'T'}, 
 			IJavaSearchConstants.PREFIX_MATCH, 
 			IJavaSearchConstants.CASE_INSENSITIVE, 
 			IJavaSearchConstants.TYPE, 
@@ -164,7 +170,12 @@ public class TypeRefTest extends TestCase {
 			requestor, 
 			IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, 
 			null); 
-
+
+	findTypeRef(result, "junit.extensions.TestDecorator");
+		findTypeRef(result, "junit.framework.Test");
+		findTypeRef(result, "junit.framework.TestListener");
+		findTypeRef(result, "junit.tests.TestTest.TornDown");
+
 		System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
@@ -172,8 +183,6 @@ public class TypeRefTest extends TestCase {
 			IType resolvedType= ref.resolveType(scope);
 			if (resolvedType == null) {
 				assertTrue("Could not be resolved: " + ref.toString(), false);
-			} else {
-				System.out.println(resolvedType.getFullyQualifiedName());
 			}
 		}
 	}

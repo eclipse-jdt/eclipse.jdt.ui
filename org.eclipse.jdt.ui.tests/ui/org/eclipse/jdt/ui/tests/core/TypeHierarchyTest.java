@@ -32,9 +32,7 @@ public class TypeHierarchyTest extends TestCase {
 	}		
 			
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
-		suite.addTest(new TypeHierarchyTest("doTest1"));
-		return suite;
+		return new TestSuite(TypeHierarchyTest.class);
 	}
 	
 	protected void setUp() throws Exception {
@@ -47,7 +45,7 @@ public class TypeHierarchyTest extends TestCase {
 		JavaProjectHelper.delete(fJavaProject2);		
 	}
 					
-	public void doTest1() throws Exception {
+	public void test1() throws Exception {
 		
 		IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(fJavaProject1);
 		assertTrue("jdk not found", jdk != null);
@@ -69,19 +67,10 @@ public class TypeHierarchyTest extends TestCase {
 		IType[] allTypes= hierarchy.getAllTypes();
 		
 		System.out.println("all types in TH of B");
-		for (int i= 0; i < allTypes.length; i++) {
-			System.out.print(allTypes[i].getElementName());
-			System.out.print(" - ");
-			System.out.println(allTypes[i].getJavaProject().getElementName());
-		}
 		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 		
 		IType type= JavaModelUtil.findType(fJavaProject2, "pack1.A");
 		assertTrue("Type not found", type != null);
-		System.out.println("Using findElement");
-		System.out.print(type.getElementName());
-		System.out.print(" - ");
-		System.out.println(type.getJavaProject().getElementName());
 
 	}	
 	

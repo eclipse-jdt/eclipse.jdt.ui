@@ -1,5 +1,6 @@
 package org.eclipse.jdt.testplugin;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -37,6 +38,9 @@ import org.eclipse.jdt.launching.LibraryLocation;
  * Helper methods to set up a IJavaProject.
  */
 public class JavaProjectHelper {
+	
+	private static final IPath JCL_MAX= new Path("test-resources/jclmax.jar");
+	
 
 	/**
 	 * Creates a IJavaProject.
@@ -248,7 +252,16 @@ public class JavaProjectHelper {
 	 * Try to find rt.jar
 	 */
 	public static IPath[] findRtJar() {
-		IVMInstall vmInstall= JavaRuntime.getDefaultVMInstall();
+		File jclMaxArchive= JavaTestPlugin.getDefault().getFileInPlugin(JCL_MAX);
+		if (jclMaxArchive != null) {
+			return new IPath[] {
+				new Path(jclMaxArchive.getPath()),
+				null,
+				null
+			};
+		}
+		
+		/**IVMInstall vmInstall= JavaRuntime.getDefaultVMInstall();
 		if (vmInstall != null) {
 			LibraryLocation loc= vmInstall.getVMInstallType().getDefaultLibraryLocation(vmInstall.getInstallLocation());
 			if (loc != null) {
@@ -258,7 +271,7 @@ public class JavaProjectHelper {
             		loc.getPackageRootPath()
 				};
 			}
-		}
+		}*/
 		return null;
 	}
 		
