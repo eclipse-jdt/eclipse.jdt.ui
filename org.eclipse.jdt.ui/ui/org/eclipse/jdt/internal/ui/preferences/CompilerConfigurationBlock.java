@@ -121,6 +121,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING= JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING;
 	private static final String PREF_PB_UNQUALIFIED_FIELD_ACCESS= JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS;
 
+	private static final String PREF_PB_MISSING_SERIAL_VERSION= JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION;
+	
 	private static final String PREF_15_PB_UNSAVE_TYPE_OPERATION= "org.eclipse.jdt.core.compiler.problem.unsafeTypeOperation"; //$NON-NLS-1$
 	private static final String PREF_15_PB_FINAL_PARAM_BOUND= "org.eclipse.jdt.core.compiler.problem.finalParameterBound"; //$NON-NLS-1$
 	
@@ -210,7 +212,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_EMPTY_STATEMENT, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
 				PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
 				PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_DEPRECATION_WHEN_OVERRIDING,
-				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING,
+				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, PREF_PB_MISSING_SERIAL_VERSION, 
 				PREF_JAVADOC_SUPPORT,
 				PREF_PB_INVALID_JAVADOC, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY,
 				PREF_PB_MISSING_JAVADOC_TAGS, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING,
@@ -355,6 +357,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_undocumented_empty_block.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_serial_version.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_MISSING_SERIAL_VERSION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
 		return composite;
 	}
