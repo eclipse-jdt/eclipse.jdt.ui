@@ -216,4 +216,34 @@ public class RenamePackageTests extends RefactoringTest {
 	public void test5() throws Exception{
 		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1", false);
 	}
+	
+	public void testReadOnly() throws Exception{
+		printTestDisabledMessage("see bug#6054 (renaming a read-only package resets the read-only flag)");
+		if (true)
+			return;
+		
+		String[] packageNames= new String[]{"r"};
+		String[][] packageFileNames= new String[][]{{"A"}};
+		String newPackageName= "p1";
+		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
+
+		ICompilationUnit[][] cus= new ICompilationUnit[packageFileNames.length][packageFileNames[0].length];
+		for (int i= 0; i < packageNames.length; i++){
+			packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
+			for (int j= 0; j < packageFileNames[i].length; j++){
+				cus[i][j]= createCUfromTestFile(packages[i], packageFileNames[i][j], packageNames[i].replace('.', '/') + "/");
+			}
+		}
+		IPackageFragment thisPackage= packages[0];
+		thisPackage.getCorrespondingResource().setReadOnly(true);
+		RenamePackageRefactoring ref= createRefactoring(thisPackage, newPackageName);
+		RefactoringStatus result= performRefactoring(ref);
+		assertEquals("preconditions were supposed to pass", null, result);
+		
+		assertTrue("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());
+		IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
+		assertTrue("new package does not exist", newPackage.exists());
+		assertTrue("new package should be read-only", newPackage.getCorrespondingResource().isReadOnly());
+	}
+	
 }
