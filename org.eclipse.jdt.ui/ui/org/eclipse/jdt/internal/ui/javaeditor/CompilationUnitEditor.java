@@ -702,6 +702,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		setAction("Indent", action); //$NON-NLS-1$
 		markAsStateDependentAction("Indent", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("Indent", true); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.INDENT_ACTION);
 		
 		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
 			removeActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT);

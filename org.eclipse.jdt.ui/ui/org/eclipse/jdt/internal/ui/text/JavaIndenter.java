@@ -34,6 +34,8 @@ public class JavaIndenter {
 	private int fIndent;
 	/** The absolute (character-counted) indentation offset for special cases (method defs, array initializers) */
 	private int fAlign;
+	/** Whether to add one space to the absolute indentation. */
+	private boolean fAlignPlusOne;
 	/** The stateful scanpositionf or the indentation methods. */
 	private int fPosition;
 	/** The previous position. */
@@ -141,7 +143,7 @@ public class JavaIndenter {
 					case Symbols.TokenCASE:
 					case Symbols.TokenDEFAULT:
 						// only if not right after the brace!
-						if (fScanner.previousToken(prevPos, JavaHeuristicScanner.UNBOUND) != Symbols.TokenLBRACE)
+						if (prefAlignCaseWithSwitch() || fScanner.previousToken(prevPos, JavaHeuristicScanner.UNBOUND) != Symbols.TokenLBRACE)
 							unindent= true;
 						break;
 					case Symbols.TokenLBRACE: // for opening-brace-on-new-line style
@@ -211,17 +213,39 @@ public class JavaIndenter {
 	 * and <code>indent</code>
 	 */
 	private String createIndent(int start, int indent) {
+		int tabLen;
+		if (JavaPlugin.getDefault() != null)
+			tabLen= CodeFormatterUtil.getTabWidth();
+		else
+			tabLen= 4;
+		
 		StringBuffer ret= new StringBuffer();
 		try {
+			int spaces= 0;
 			while (start < indent) {
+				
 				char ch= fDocument.getChar(start);
-				if (ch == '\t')
-					ret.append(ch);
-				else
-					ret.append(' ');
-
+				if (ch == '\t') {
+					ret.append('\t');
+					spaces= 0;
+				} else {
+					spaces++;
+					if (spaces == tabLen) {
+						ret.append('\t');
+						spaces= 0;
+					}
+				}
+				
 				start++;
 			}
+			if (fAlignPlusOne)
+				spaces++;
+			
+			if (spaces == tabLen)
+				ret.append('\t');
+			else
+				while (spaces-- > 0)
+					ret.append(' ');
 			
 		} catch (BadLocationException e) {
 		}
@@ -373,14 +397,22 @@ public class JavaIndenter {
 				case Symbols.TokenLBRACE:
 				
 					int searchPos= fPreviousPos;
+					int bracePos= fPosition;
 					
 					// special array handling
 					nextToken();
 					if (fToken == Symbols.TokenEQUAL || skipBrackets()) {
 						int first= fScanner.findNonWhitespaceForwardInAnyPartition(searchPos, position);
 						// ... with a first element already defined - take its offset
-						if (first != JavaHeuristicScanner.NOT_FOUND)
-							fAlign= first;
+						if (prefArrayDeepIndent()) {
+							if (first != JavaHeuristicScanner.NOT_FOUND)
+								fAlign= first;
+							else {
+								fAlign= bracePos;
+								fAlignPlusOne= true;
+							}
+						} else
+							fIndent += prefArrayIndent();
 					}
 					
 					hasBrace= true;
@@ -430,22 +462,30 @@ public class JavaIndenter {
 				// use double indentation inside conditions and calls
 				// handle method definitions separately
 				case Symbols.TokenLPAREN:
+					// TODO differentiate between conditional continuation and calls
 					if (!hasBrace)
-						fIndent += 2;
+						fIndent += prefCallContinuationIndent();
+					
 					searchPos= fPreviousPos;
-					if (looksLikeMethodDecl()) {
+					int parenPos= fPosition;
+					
+					if (prefMethodDeclDeepIndent() && looksLikeMethodDecl()) {
 						if (found)
 							fAlign= fScanner.findNonWhitespaceForward(searchPos, position);
+						else {
+							fAlign= parenPos;
+							fAlignPlusOne= true;
+						}
 					}
 					
 					break;
 
 				// array dimensions
 				case Symbols.TokenLBRACKET:
-					if (found)
+					if (prefArrayDimensionsDeepIndent() && found)
 						fAlign= fScanner.findNonWhitespaceForward(fPreviousPos, position);
 					
-					fIndent+= 2;
+					fIndent+= prefArrayDimensionIndent();
 						
 					nextToken();
 					break;
@@ -669,6 +709,41 @@ public class JavaIndenter {
 					return false;
 			}
 		}
+	}
+
+	private boolean prefAlignCaseWithSwitch() {
+		// TODO preference lookup
+		return false;
+	}
+
+	private int prefArrayDimensionIndent() {
+		// TODO preference lookup
+		return 2;
+	}
+
+	private boolean prefArrayDimensionsDeepIndent() {
+		// TODO preference lookup
+		return true;
+	}
+
+	private boolean prefMethodDeclDeepIndent() {
+		// TODO preference lookup
+		return true;
+	}
+
+	private int prefCallContinuationIndent() {
+		// TODO preference lookup
+		return 2;
+	}
+
+	private int prefArrayIndent() {
+		// TODO preference lookup
+		return 2;
+	}
+
+	private boolean prefArrayDeepIndent() {
+		// TODO preference lookup
+		return false;
 	}
 
 }
