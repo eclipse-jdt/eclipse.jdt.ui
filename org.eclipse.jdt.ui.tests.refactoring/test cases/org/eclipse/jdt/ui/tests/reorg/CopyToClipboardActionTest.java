@@ -15,6 +15,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.dnd.Clipboard;
@@ -48,6 +49,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	private static final String CU_A_NAME= "A";
 	private static final String CU_B_NAME= "B";
 	private IFile faTxt;
+	private IFolder fOlder;
 	
 	public CopyToClipboardActionTest(String name) {
 		super(name);
@@ -73,12 +75,14 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		fPackageQ_R= MySetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
 		
 		faTxt= createFile((IFolder)getPackageP().getUnderlyingResource(), "a.txt");
-		
+		fOlder= createFolder(MySetup.getProject().getProject(), "fOlder");
+
 		assertTrue("A.java does not exist", fCuA.exists());
 		assertTrue("B.java does not exist", fCuB.exists());
 		assertTrue("q does not exist", fPackageQ.exists());
 		assertTrue("q.r does not exist", fPackageQ_R.exists());
-		assertTrue(faTxt.exists());
+		assertTrue("a.txt does not exist", faTxt.exists());
+		assertTrue("fOlder does not exist", fOlder.exists());
 	}
 	
 	protected void tearDown() throws Exception {
@@ -89,6 +93,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		delete(fPackageQ_R);
 		delete(fPackageQ);
 		delete(faTxt);
+		delete(fOlder);
 	}
 
 	private IFile createFile(IFolder folder, String fileName) throws Exception {
@@ -97,15 +102,29 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		return file;
 	}
 	
+	private IFolder createFolder(IProject project, String name) throws CoreException{
+		IFolder folder= project.getFolder(name);
+		folder.create(true, true, null);
+		return folder;
+	}
+	
 	private static void delete(ISourceManipulation element) {
 		try {
 			if (element != null && ((IJavaElement)element).exists())
-				element.delete(false, null);
+				element.delete(true, null);
 		} catch(JavaModelException e) {
 			//ignore, we must keep going
 		}		
 	}
 	private static void delete(IFile element) {
+		try {
+			element.delete(true, false, null);
+		} catch(CoreException e) {
+			//ignore, we must keep going
+		}
+	}
+
+	private static void delete(IFolder element) {
 		try {
 			element.delete(true, false, null);
 		} catch(CoreException e) {
@@ -356,5 +375,9 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 
 	public void testEnabled20() throws Exception{
 		checkEnabled(new Object[]{faTxt, fCuA});
+	}
+
+	public void testEnabled21() throws Exception{
+		checkEnabled(new Object[]{fOlder});
 	}
 }
