@@ -1285,7 +1285,7 @@ public class PullUpRefactoring extends Refactoring {
 		TextChange textChange= manager.get(cu);
 		if (fImportEditManager.hasImportEditFor(cu))
 			resultingEdits.add(fImportEditManager.getImportEdit(cu));
-		textChange.addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
+		textChange.addTextEdit("Pull up", resultingEdits);
 		rewrite.removeModifications();
 	}
 
