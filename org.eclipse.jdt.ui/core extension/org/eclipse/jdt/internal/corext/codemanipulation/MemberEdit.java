@@ -211,7 +211,7 @@ public class MemberEdit extends SimpleTextEdit {
 		for (int i= 0; i < l; i++) {
 			char c= line.charAt(i);
 			if (c == '\r') {
-				if (i < l && line.charAt(i+1) == '\n') {
+				if ((i < l - 1) && line.charAt(i+1) == '\n') {
 					emptyLines++;
 					i++;
 				}
