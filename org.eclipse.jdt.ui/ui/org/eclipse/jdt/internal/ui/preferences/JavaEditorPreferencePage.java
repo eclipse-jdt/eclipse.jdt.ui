@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.TabFolder;
@@ -61,7 +62,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -70,9 +70,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
-
-import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
-
 
 /*
  * The page for setting the editor options.
@@ -387,12 +384,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Composite colorComposite= new Composite(parent, SWT.NULL);
 		colorComposite.setLayout(new GridLayout());
 
-		Composite backgroundComposite= new Composite(colorComposite, SWT.NULL);
+		Group backgroundComposite= new Group(colorComposite, SWT.SHADOW_ETCHED_IN);
 		backgroundComposite.setLayout(new RowLayout());
-
-		Label label= new Label(backgroundComposite, SWT.NULL);
-		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.backgroundColor")); //$NON-NLS-1$
-
+		backgroundComposite.setText(JavaUIMessages.getString("JavaEditorPreferencePage.backgroundColor"));//$NON-NLS-1$
+	
 		SelectionListener backgroundSelectionListener= new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {				
 				boolean custom= fBackgroundCustomRadioButton.getSelection();
@@ -413,7 +408,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
 		fBackgroundColorButton= fBackgroundColorEditor.getButton();
 
-		label= new Label(colorComposite, SWT.LEFT);
+		Label label= new Label(colorComposite, SWT.LEFT);
 		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.foreground")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
