@@ -1,29 +1,56 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 public class PromoteTempToFieldRefactoring extends Refactoring {
 
@@ -55,7 +82,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		fCu= cu;
 		
 		fFieldName= "";
-		fAccessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+		fAccessModifier= Modifier.PRIVATE;
 		fDeclareStatic= false;
 		fDeclareFinal= false;
 	}
@@ -89,10 +116,10 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
     public void setAccessModifier(int accessModifier) {
-    	Assert.isTrue(accessModifier == JdtFlags.VISIBILITY_CODE_PRIVATE ||
-    					accessModifier == JdtFlags.VISIBILITY_CODE_PACKAGE ||
-    					accessModifier == JdtFlags.VISIBILITY_CODE_PROTECTED ||
-    					accessModifier == JdtFlags.VISIBILITY_CODE_PUBLIC);
+    	Assert.isTrue(accessModifier == Modifier.PRIVATE ||
+    					accessModifier == Modifier.NONE ||
+    					accessModifier == Modifier.PROTECTED ||
+    					accessModifier == Modifier.PUBLIC);
         fAccessModifier= accessModifier;
     }
 
@@ -195,8 +222,10 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			if (isTempAnExceptionInCatchBlock())
 				return RefactoringStatus.createFatalErrorStatus("Cannot convert exceptions declared in catch clauses to fields.");
 	
-			result.merge(checkLocalTypeUsageInTempDeclaration());
-
+			result.merge(checkTempTypeForLocalTypeUsage());
+			if (result.hasFatalError())
+		        return result;
+		     
 	        return result;
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
@@ -204,10 +233,62 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     		pm.done();
     	}
     }
-    
-    private RefactoringStatus checkLocalTypeUsageInTempDeclaration() {
-    	//TODO
+        
+    private RefactoringStatus checkTempInitializerForLocalTypeUsage() {
+    	Expression initializer= fTempDeclarationNode.getInitializer();
+    	if (initializer == null)
+	        return null;
+	    
+	    LocalTypeAndVariableUsageAnalyzer localTypeAnalyer= new LocalTypeAndVariableUsageAnalyzer();
+	    initializer.accept(localTypeAnalyer);
+	    //do not create a list - it is not shown in a dialog anyway.
+	    //can optimize here to not walk the whole expression but only until 1 match is found
+	    if (! localTypeAnalyer.getLocalTypeUsageNodes().isEmpty())
+			return RefactoringStatus.createFatalErrorStatus("Cannot promote this local variable to a field because it uses types or variables declared locally in the method");
         return null;
+    }
+    
+    private static class LocalTypeAndVariableUsageAnalyzer extends HierarchicalASTVisitor{
+    	private final List fLocalTypes= new ArrayList(0);
+    	public List getLocalTypeUsageNodes(){
+    		return fLocalTypes;
+    	}
+    	public boolean visitType(Type node) {
+	  		ITypeBinding typeBinding= node.resolveBinding();
+	  		if (typeBinding != null && typeBinding.isLocal())
+	  			fLocalTypes.add(node);
+	  		return super.visitType(node);	
+		}
+		public boolean visitName(Name node) {
+			ITypeBinding typeBinding= node.resolveTypeBinding();
+			if (typeBinding != null && typeBinding.isLocal())
+				fLocalTypes.add(node);
+			else {
+				IBinding binding= node.resolveBinding();
+				if (binding != null && binding.getKind() == IBinding.TYPE && ((ITypeBinding)binding).isLocal())
+					fLocalTypes.add(node);
+				else if (binding != null && binding.getKind() == IBinding.VARIABLE && ! ((IVariableBinding)binding).isField())
+					fLocalTypes.add(node);
+			}
+            return super.visitName(node);
+        }
+    }
+    
+    private RefactoringStatus checkTempTypeForLocalTypeUsage(){
+    	VariableDeclarationStatement vds= getTempDeclarationStatement();
+    	if (vds == null)
+    		return RefactoringStatus.createFatalErrorStatus("Cannot promote this local variable to a field");
+    	Type type= 	vds.getType();
+    	ITypeBinding binding= type.resolveBinding();
+    	if (binding == null)
+    		return RefactoringStatus.createFatalErrorStatus("Cannot promote this local variable to a field");
+    	if (binding.isLocal())
+			return RefactoringStatus.createFatalErrorStatus("Cannot promote this local variable to a field because it uses a type declared locally in the method");
+		return null;    	
+    }
+    
+    private VariableDeclarationStatement getTempDeclarationStatement() {
+        return (VariableDeclarationStatement) ASTNodes.getParent(fTempDeclarationNode, VariableDeclarationStatement.class);
     }
     
     private boolean isTempAnExceptionInCatchBlock() {
@@ -228,17 +309,209 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
      */
     public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
     	try{
-	        return new RefactoringStatus();
+	        RefactoringStatus result= new RefactoringStatus();
+	        
+	        if (fInitializeIn != INITIALIZE_IN_METHOD)
+	        	result.merge(checkTempInitializerForLocalTypeUsage());
+	        if (result.hasFatalError())
+	        	return result;
+	        
+	        result.merge(checkClashesWithExistingFields());  
+	        if (fInitializeIn == INITIALIZE_IN_CONSTRUCTOR)
+		        result.merge(checkClashesInConstructors());  
+	        return result;
     	} finally {
     		pm.done();
     	}
+    }
+    private RefactoringStatus checkClashesInConstructors() {
+    	Assert.isTrue(fInitializeIn == INITIALIZE_IN_CONSTRUCTOR);
+    	Assert.isTrue(! isDeclaredInAnonymousClass());
+    	TypeDeclaration declaringType= (TypeDeclaration)getMethodDeclaration().getParent();
+		MethodDeclaration[] methods= declaringType.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+            MethodDeclaration method= methods[i];
+            if (! method.isConstructor())
+            	continue;
+            NameCollector nameCollector= new NameCollector(method){
+            	protected boolean visitNode(ASTNode node) {
+            		return true;
+            	}
+            };	
+            method.accept(nameCollector);
+            List names= nameCollector.getNames();
+            if (names.contains(fFieldName)){
+            	String pattern= "Name conflict with name ''{0}'' used in ''{1}''";
+ 				String msg= MessageFormat.format(pattern, new String[]{fFieldName, Bindings.asString(method.resolveBinding())});
+            	return RefactoringStatus.createFatalErrorStatus(msg);
+            }	
+        }    	
+    	return null;
+    }
+    
+    private RefactoringStatus checkClashesWithExistingFields(){
+        FieldDeclaration[] existingFields= getFieldDeclarationsInDeclaringType();
+        for (int i= 0; i < existingFields.length; i++) {
+            FieldDeclaration declaration= existingFields[i];
+			VariableDeclarationFragment[] fragments= (VariableDeclarationFragment[]) declaration.fragments().toArray(new VariableDeclarationFragment[declaration.fragments().size()]);
+			for (int j= 0; j < fragments.length; j++) {
+                VariableDeclarationFragment fragment= fragments[j];
+                if (fFieldName.equals(fragment.getName().getIdentifier())){
+                	//cannot conflict with more than 1 name
+                	Context context= JavaSourceContext.create(fCu, fragment);
+                	return RefactoringStatus.createFatalErrorStatus("Name conflict with existing field", context);
+                }
+            }
+        }
+        return null;
+    }
+    
+    private FieldDeclaration[] getFieldDeclarationsInDeclaringType() {
+		return getFieldDeclarations(getBodyDeclarationListOfDeclaringType());
+    }
+    
+    private List getBodyDeclarationListOfDeclaringType(){
+    	ASTNode methodParent= getMethodDeclaration().getParent();
+    	if (methodParent instanceof TypeDeclaration)
+    		return ((TypeDeclaration)methodParent).bodyDeclarations();
+    	if (methodParent instanceof AnonymousClassDeclaration)
+    		return ((AnonymousClassDeclaration)methodParent).bodyDeclarations();
+    	Assert.isTrue(false);
+    	return null;	
+    }
+    
+    private static FieldDeclaration[] getFieldDeclarations(List bodyDeclarations) {
+    	List fields= new ArrayList(1);
+    	for (Iterator iter= bodyDeclarations.iterator(); iter.hasNext();) {
+	        Object each= iter.next();
+	        if (each instanceof FieldDeclaration)
+	        	fields.add(each);
+        }
+        return (FieldDeclaration[]) fields.toArray(new FieldDeclaration[fields.size()]);
     }
 
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
     public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-        return new NullChange();
+    	pm.beginTask("", 1);
+    	try{
+    		ASTRewrite rewrite= new ASTRewrite(fCompilationUnitNode);
+    		addFieldDeclaration(rewrite);
+    		if (fInitializeIn == INITIALIZE_IN_METHOD)
+    			addLocalDeclarationSplit(rewrite);
+			else
+				addLocalDeclarationRemoval(rewrite);
+    		
+            return createChange(rewrite);
+    	} catch (CoreException e) {
+    		throw new JavaModelException(e);
+        } finally{
+    		pm.done();
+    	}
+    }
+    public IChange createChange(ASTRewrite rewrite) throws CoreException{
+        TextChange change= new CompilationUnitChange("", fCu);
+        TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
+        TextEdit resultingEdits= new MultiTextEdit();
+        rewrite.rewriteNode(textBuffer, resultingEdits, null);
+        change.addTextEdit("Promote local variable to field", resultingEdits);
+        rewrite.removeModifications();
+        return change;
     }
 
+    private void addLocalDeclarationSplit(ASTRewrite rewrite) {
+    	VariableDeclarationStatement tempDeclarationStatement= getTempDeclarationStatement();
+    	Block block= (Block)tempDeclarationStatement.getParent();//XXX can it be anything else?
+    	int statementIndex= block.statements().indexOf(tempDeclarationStatement);
+   	   	Assert.isTrue(statementIndex != -1);
+    	List fragments= tempDeclarationStatement.fragments();
+        int fragmentIndex= fragments.indexOf(fTempDeclarationNode);
+    	Assert.isTrue(fragmentIndex != -1);
+
+        for (int i1= fragmentIndex, n = fragments.size(); i1 < n; i1++) {
+        	VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i1);
+        	rewrite.markAsRemoved(fragment);
+        }
+        if (fragmentIndex == 0)
+           	rewrite.markAsRemoved(tempDeclarationStatement);
+        
+        Assert.isTrue(tempHasInitializer());
+        Assignment assignment= fTempDeclarationNode.getAST().newAssignment();
+        SimpleName fieldName= fTempDeclarationNode.getAST().newSimpleName(fFieldName);
+        assignment.setLeftHandSide(fieldName);
+        Expression tempInitializerCopy= (Expression)rewrite.createCopy(getTempInitializer());
+        assignment.setRightHandSide(tempInitializerCopy);
+        ExpressionStatement assignmentStatement= fTempDeclarationNode.getAST().newExpressionStatement(assignment);
+        rewrite.markAsInserted(assignmentStatement);
+        block.statements().add(statementIndex + 1, assignmentStatement);
+        
+        if (fragmentIndex + 1 < fragments.size()){
+            VariableDeclarationFragment firstFragmentAfter= (VariableDeclarationFragment)fragments.get(fragmentIndex + 1);
+            VariableDeclarationFragment copyfirstFragmentAfter= (VariableDeclarationFragment)rewrite.createCopy(firstFragmentAfter);
+        	VariableDeclarationStatement statement= fTempDeclarationNode.getAST().newVariableDeclarationStatement(copyfirstFragmentAfter);
+        	for (int i= fragmentIndex + 2; i < fragments.size(); i++) {
+        		VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i);
+                VariableDeclarationFragment fragmentCopy= (VariableDeclarationFragment)rewrite.createCopy(fragment);
+                rewrite.markAsInserted(fragmentCopy);
+                statement.fragments().add(fragmentCopy);
+            }
+            rewrite.markAsInserted(statement);
+            block.statements().add(statementIndex + 2, statement);
+        }
+    }
+
+    private void addLocalDeclarationRemoval(ASTRewrite rewrite) {
+		VariableDeclarationStatement tempDeclarationStatement= getTempDeclarationStatement();
+    	List fragments= tempDeclarationStatement.fragments();
+
+    	int fragmentIndex= fragments.indexOf(fTempDeclarationNode);
+    	Assert.isTrue(fragmentIndex != -1);
+        VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(fragmentIndex);
+        rewrite.markAsRemoved(fragment);
+        if (fragments.size() == 1)
+			rewrite.markAsRemoved(tempDeclarationStatement);
+    }
+
+    private void addFieldDeclaration(ASTRewrite rewrite) {
+    	List bodyDeclarations= getBodyDeclarationListOfDeclaringType();
+    	FieldDeclaration[] fields= getFieldDeclarationsInDeclaringType();
+    	int insertIndex;
+    	if (fields.length == 0)
+    		insertIndex= 0;
+    	else
+    		insertIndex= bodyDeclarations.indexOf(fields[fields.length - 1]) + 1;
+    	
+    	FieldDeclaration fieldDeclaration= createNewFieldDeclaration(rewrite);
+    	rewrite.markAsInserted(fieldDeclaration);
+    	bodyDeclarations.add(insertIndex, fieldDeclaration);	
+    }
+    
+    private FieldDeclaration createNewFieldDeclaration(ASTRewrite rewrite) {
+    	AST ast= fTempDeclarationNode.getAST();
+        VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
+        SimpleName variableName= ast.newSimpleName(fFieldName);
+        fragment.setName(variableName);
+        if (fInitializeIn == INITIALIZE_IN_FIELD && tempHasInitializer()){
+	        Expression initializer= (Expression)rewrite.createCopy(getTempInitializer());
+	        fragment.setInitializer(initializer);
+        }
+    	FieldDeclaration fieldDeclaration= ast.newFieldDeclaration(fragment);
+    	
+    	VariableDeclarationStatement vds= getTempDeclarationStatement();
+    	Type type= (Type)rewrite.createCopy(vds.getType());
+    	fieldDeclaration.setType(type);
+    	fieldDeclaration.setModifiers(getModifiers());
+    	return fieldDeclaration;
+    }
+    
+    private int getModifiers() {
+    	int flags= fAccessModifier;
+    	if (fDeclareFinal)
+    		flags |= Modifier.FINAL;
+    	if (fDeclareStatic)	
+    		flags |= Modifier.STATIC;
+        return flags;
+    }
+    
 }
