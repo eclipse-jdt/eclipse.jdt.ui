@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -151,10 +152,6 @@ public class JavaElementSorter extends ViewerSorter {
 					case IJavaElement.IMPORT_DECLARATION :
 						return IMPORT_DECLARATION;
 					case IJavaElement.PACKAGE_FRAGMENT :
-						IPackageFragment pack= (IPackageFragment) je;
-						if (pack.getParent().getResource() instanceof IProject) {
-							return PACKAGEFRAGMENTROOTS;
-						}
 						return PACKAGEFRAGMENT;
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
 						return PACKAGEFRAGMENTROOTS;
@@ -197,10 +194,7 @@ public class JavaElementSorter extends ViewerSorter {
 		int cat1= category(e1);
 		int cat2= category(e2);
 
-		if (cat1 != cat2)
-			return cat1 - cat2;
-				
-		if (cat1 == PACKAGEFRAGMENTROOTS) {
+		if (needsClasspathComparision(e1, cat1, e2, cat2)) {
 			IPackageFragmentRoot root1= getPackageFragmentRoot(e1);
 			IPackageFragmentRoot root2= getPackageFragmentRoot(e2);
 			if (root1 == null) {
@@ -211,7 +205,8 @@ public class JavaElementSorter extends ViewerSorter {
 				}
 			} else if (root2 == null) {
 				return -1;
-			}			
+			}
+			// check if not same to avoid expensive class path access
 			if (!root1.getPath().equals(root2.getPath())) {
 				int p1= getClassPathIndex(root1);
 				int p2= getClassPathIndex(root2);
@@ -219,9 +214,10 @@ public class JavaElementSorter extends ViewerSorter {
 					return p1 - p2;
 				}
 			}
-			e1= root1; // normalize classpath container to root
-			e2= root2;
 		}
+		
+		if (cat1 != cat2)
+			return cat1 - cat2;
 
 		if (cat1 == PROJECTS || cat1 == RESOURCES || cat1 == RESOURCEFOLDERS || cat1 == STORAGE || cat1 == OTHERS) {
 			String name1= getNonJavaElementLabel(viewer, e1);
@@ -343,4 +339,26 @@ public class JavaElementSorter extends ViewerSorter {
 		return collator;
 	}
 
+	private boolean needsClasspathComparision(Object e1, int cat1, Object e2, int cat2) {
+		if ((cat1 == PACKAGEFRAGMENTROOTS && cat2 == PACKAGEFRAGMENTROOTS) ||
+			(cat1 == PACKAGEFRAGMENT && 
+				((IPackageFragment)e1).getParent().getResource() instanceof IProject && 
+				cat2 == PACKAGEFRAGMENTROOTS) ||
+			(cat1 == PACKAGEFRAGMENTROOTS &&
+				cat2 == PACKAGEFRAGMENT && 
+				((IPackageFragment)e2).getParent().getResource() instanceof IProject)) {
+			IJavaProject p1= getJavaProject(e1);
+			return p1 != null && p1.equals(getJavaProject(e2));
+		}
+		return false;
+	}
+	
+	private IJavaProject getJavaProject(Object element) {
+		if (element instanceof IJavaElement) {
+			return ((IJavaElement)element).getJavaProject();
+		} else if (element instanceof ClassPathContainer) {
+			return ((ClassPathContainer)element).getJavaProject();
+		}
+		return null;
+	}
 }
