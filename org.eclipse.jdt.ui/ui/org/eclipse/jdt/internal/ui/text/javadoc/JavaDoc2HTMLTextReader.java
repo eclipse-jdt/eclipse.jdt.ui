@@ -49,7 +49,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		"@throws",			//$NON-NLS-1$
 		"@version"			//$NON-NLS-1$
 	};
-	private static final int MAX_TAG_LENGTH= "@deprecated".length();//$NON-NLS-1$
+	private static final int MAX_TAG_LENGTH= "@serialField".length();//$NON-NLS-1$
 	
 	private List fParameters;
 	private String fReturn;
