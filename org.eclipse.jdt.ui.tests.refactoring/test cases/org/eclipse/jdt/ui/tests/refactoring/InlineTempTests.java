@@ -12,6 +12,8 @@ import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
 public class InlineTempTests extends RefactoringTest {
 
 	private static final Class clazz= InlineTempTests.class;
@@ -59,10 +61,8 @@ public class InlineTempTests extends RefactoringTest {
 		int end= source.indexOf(ExtractMethodTests.SQUARE_BRACKET_CLOSE);
 		return new SourceRange(offset, end - offset);
 	}
-
-	private void helper1() throws Exception{
-		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
-		ISourceRange selection= getSelection(cu);
+	
+	private void helper1(ICompilationUnit cu, ISourceRange selection) throws Exception{
 		InlineTempRefactoring ref= new InlineTempRefactoring(cu, selection.getOffset(), selection.getLength());
 		
 		RefactoringStatus result= performRefactoring(ref);
@@ -73,6 +73,17 @@ public class InlineTempTests extends RefactoringTest {
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEquals("incorrect inlining", getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+	
+	private void helper1(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		helper1(cu, selection);
+	}
+	
+	private void helper1() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		helper1(cu, getSelection(cu));
 	}	
 	
 	private void helper2() throws Exception{
@@ -112,7 +123,7 @@ public class InlineTempTests extends RefactoringTest {
 
 	public void test6() throws Exception{
 		//printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
-		helper1();
+		helper1(9, 13, 9, 14);
 	}
 
 	public void test7() throws Exception{
@@ -121,7 +132,7 @@ public class InlineTempTests extends RefactoringTest {
 	
 	public void test8() throws Exception{
 		//printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
-		helper1();
+		helper1(5, 13, 5, 14);
 	}
 	
 	public void test9() throws Exception{
@@ -130,26 +141,36 @@ public class InlineTempTests extends RefactoringTest {
 	
 	public void test10() throws Exception{
 //		printTestDisabledMessage("regression test for bug#9001");
-		helper1();
+		helper1(4, 21, 4, 25);
 	}
 	
 	public void test11() throws Exception{
-		helper1();
+		helper1(5, 21, 5, 25);
 	}	
 
 	public void test12() throws Exception{
-		helper1();
+		helper1(5, 15, 5, 19);
 	}	
 
 	public void test13() throws Exception{
-		helper1();
+		helper1(5, 17, 5, 18);
+	}	
+	
+	public void test14() throws Exception{
+		printTestDisabledMessage("incorrect for multiple declarations");		
+//		helper1(4, 13, 4, 14);
+	}	
+	
+	public void test15() throws Exception{
+		printTestDisabledMessage("incorrect for multiple declarations");		
+//		helper1(4, 19, 4, 20);
 	}	
 
 	//------
 	
 	public void testFail0() throws Exception{
-//		printTestDisabledMessage("compile errors are ok now");
-		helper2();
+		printTestDisabledMessage("compile errors are ok now");
+//		helper2();
 	}
 
 	public void testFail1() throws Exception{
