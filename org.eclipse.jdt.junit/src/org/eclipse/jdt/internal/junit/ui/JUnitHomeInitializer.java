@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
@@ -39,7 +40,8 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 			} catch (IOException e) {
 				JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
 			}
-			JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, new Path(local.getFile()), null);
+			String fullPath= new File(local.getPath()).getAbsolutePath();
+			JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, new Path(fullPath), null);
 		} catch (JavaModelException e1) {
 			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
 		}
