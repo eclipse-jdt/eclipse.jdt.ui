@@ -42,7 +42,7 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 		}
 		try {
 			String fullPath= new File(local.getPath()).getAbsolutePath();
-			JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, new Path(fullPath), null);
+			JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, Path.fromOSString(fullPath), null);
 		} catch (JavaModelException e1) {
 			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
 		}
