@@ -63,7 +63,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -207,9 +206,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	}
 
 	public static IntroduceFactoryRefactoring create(ICompilationUnit cu,
-													 int selectionStart, int selectionLength,
-													 CodeGenerationSettings settings) {
-		return new IntroduceFactoryRefactoring(cu, selectionStart, selectionLength, settings);
+													 int selectionStart, int selectionLength) {
+		return new IntroduceFactoryRefactoring(cu, selectionStart, selectionLength);
 	}
 
 	/**
@@ -218,16 +216,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param cu the <code>ICompilationUnit</code> in which the user selection was made
 	 * @param selectionStart the start of the textual selection in <code>cu</code>
 	 * @param selectionLength the length of the textual selection in <code>cu</code>
-	 * @param settings
 	 */
-	private IntroduceFactoryRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength,
-							CodeGenerationSettings settings) {
+	private IntroduceFactoryRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		super();
 		Assert.isTrue(selectionStart  >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
-		Assert.isNotNull(settings);
-
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 

@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -566,7 +565,7 @@ public class InlineConstantRefactoring extends Refactoring {
 
 			InlineTargetCompilationUnit[] result= new InlineTargetCompilationUnit[searchResultGroups.length];
 			for (int i= 0; i < searchResultGroups.length; i++)
-				result[i]= new InlineTargetCompilationUnit(searchResultGroups[i], refactoring.getInitializer(), refactoring.getDeclaringCompilationUnit(), refactoring.fSettings);
+				result[i]= new InlineTargetCompilationUnit(searchResultGroups[i], refactoring.getInitializer(), refactoring.getDeclaringCompilationUnit());
 
 			return result;
 		}
@@ -580,7 +579,7 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		private static InlineTargetCompilationUnit getTargetForOnlySelectedReference(InlineConstantRefactoring refactoring) throws JavaModelException {
 			Assert.isTrue(!refactoring.isDeclarationSelected());
-			return new InlineTargetCompilationUnit(refactoring.fCu, refactoring.getConstantNameNode(), refactoring.getInitializer(), refactoring.getDeclaringCompilationUnit(), refactoring.fSettings);
+			return new InlineTargetCompilationUnit(refactoring.fCu, refactoring.getConstantNameNode(), refactoring.getInitializer(), refactoring.getDeclaringCompilationUnit());
 		}
 
 		public static InlineTargetCompilationUnit[] prepareTargets(InlineConstantRefactoring refactoring, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException, CoreException {
@@ -626,29 +625,25 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		private final ICompilationUnit fUnit;
 
-		private InlineTargetCompilationUnit(ICompilationUnit cu, Name singleReference, Expression initializer, ICompilationUnit initializerUnit, CodeGenerationSettings codeGenSettings) {
+		private InlineTargetCompilationUnit(ICompilationUnit cu, Name singleReference, Expression initializer, ICompilationUnit initializerUnit) {
 			Assert.isNotNull(initializer);
 			Assert.isNotNull(singleReference);
 			Assert.isNotNull(cu);
 			Assert.isTrue(cu.exists());
 			Assert.isNotNull(initializerUnit);
 			Assert.isTrue(initializerUnit.exists());
-			Assert.isNotNull(codeGenSettings);
-
 			fReferences= new Expression[] { getQualifiedReference(singleReference)};
 			fUnit= cu;
 			fInitializer= initializer;
 			fInitializerUnit= initializerUnit;
 		}
 
-		private InlineTargetCompilationUnit(ICompilationUnit cu, SearchMatch[] references, Expression initializer, ICompilationUnit initializerUnit, CodeGenerationSettings codeGenSettings) {
+		private InlineTargetCompilationUnit(ICompilationUnit cu, SearchMatch[] references, Expression initializer, ICompilationUnit initializerUnit) {
 			Assert.isNotNull(initializer);
 			Assert.isNotNull(references);
 			Assert.isTrue(references.length > 0);
 			Assert.isNotNull(cu);
 			Assert.isTrue(cu.exists());
-			Assert.isNotNull(codeGenSettings);
-
 			fUnit= cu;
 			fInitializer= initializer;
 			fInitializerUnit= initializerUnit;
@@ -664,8 +659,8 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		}
 
-		private InlineTargetCompilationUnit(SearchResultGroup group, Expression initializer, ICompilationUnit initializerUnit, CodeGenerationSettings codeGenSettings) {
-			this(group.getCompilationUnit(), group.getSearchResults(), initializer, initializerUnit, codeGenSettings);
+		private InlineTargetCompilationUnit(SearchResultGroup group, Expression initializer, ICompilationUnit initializerUnit) {
+			this(group.getCompilationUnit(), group.getSearchResults(), initializer, initializerUnit);
 		}
 
 		private void addEditsToInline(Expression reference) throws CoreException {
@@ -778,8 +773,8 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	// ---- End InlineTargetCompilationUnit ----------------------------------------------------------------------------------------------
 
-	public static InlineConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(cu, selectionStart, selectionLength, settings);
+	public static InlineConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(cu, selectionStart, selectionLength);
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			return null;
 		return ref;
@@ -820,20 +815,15 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	private final int fSelectionStart;
 
-	private final CodeGenerationSettings fSettings;
-
 	private InlineTargetCompilationUnit[] fTargetCompilationUnits;
 
-	private InlineConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
+	private InlineConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
-		Assert.isNotNull(settings);
-
+		fCu= cu;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		fCu= cu;
-		fSettings= settings;
 	}
 
 	private void addRemoveConstantDeclarationIfNecessary(List changes) throws CoreException {

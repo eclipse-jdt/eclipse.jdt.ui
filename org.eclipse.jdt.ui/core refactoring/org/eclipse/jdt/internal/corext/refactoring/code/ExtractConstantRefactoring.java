@@ -61,7 +61,6 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
@@ -121,15 +120,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private BodyDeclaration fToInsertAfter;
 	private boolean fInsertFirst;
 
-	private ExtractConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
+	private ExtractConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
-		Assert.isNotNull(settings);
-		
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		
 		fCu= cu;
 	}
 	
@@ -137,8 +133,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return Checks.isExtractableExpression(selectedNodes, coveringNode);
 	}
 
-	public static ExtractConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
-		return new ExtractConstantRefactoring(cu, selectionStart, selectionLength, settings);
+	public static ExtractConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
+		return new ExtractConstantRefactoring(cu, selectionStart, selectionLength);
 	}
 	
 	public String getName() {
