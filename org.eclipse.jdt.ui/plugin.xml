@@ -1591,14 +1591,12 @@
                definitionId="org.eclipse.jdt.ui.edit.text.java.uncomment"
                label="%UncommentAction.label"
                retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
                id="org.eclipse.jdt.ui.actions.Uncomment">
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.comment"
                label="%CommentAction.label"
                retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
                id="org.eclipse.jdt.ui.actions.Comment">
          </action>
 <!-- convert group -->
@@ -2160,58 +2158,38 @@
             category="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.comment">
       </command>
-      <keyBinding
-            string="Ctrl+/"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+/"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+/"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.comment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.uncomment.name"
             description="%ActionDefinition.uncomment.description"
             category="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.uncomment">
       </command>
-      <keyBinding
-            string="Ctrl+\"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.uncomment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+\"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+\"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.uncomment"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       <command
             name="%ActionDefinition.toggleComment.name"
             description="%ActionDefinition.toggleComment.description"
             category="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.toggle.comment">
       </command>
+      <keyBinding
+            string="Ctrl+Shift+C"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Ctrl+Shift+C"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Shift+C"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
       <command
             name="%ActionDefinition.format.name"
             description="%ActionDefinition.format.description"

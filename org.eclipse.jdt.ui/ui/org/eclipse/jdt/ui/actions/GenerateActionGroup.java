@@ -285,8 +285,6 @@ public class GenerateActionGroup extends ActionGroup {
 	private IMenuManager createEditorSubMenu(IMenuManager mainMenu) {
 		IMenuManager result= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
 		int added= 0;
-		added+= addEditorAction(result, "Comment"); //$NON-NLS-1$
-		added+= addEditorAction(result, "Uncomment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "ToggleComment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "AddBlockComment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "RemoveBlockComment"); //$NON-NLS-1$
