@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -239,10 +238,8 @@ public class CallInliner {
 		fNumberOfLocals= 0;
 		switch (declaration.getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
-				fNumberOfLocals= LocalVariableIndex.perform((MethodDeclaration)declaration);
-				break;
 			case ASTNode.INITIALIZER:
-				fNumberOfLocals= LocalVariableIndex.perform((Initializer)declaration);
+				fNumberOfLocals= LocalVariableIndex.perform(declaration);
 				break;
 		}
 	}
