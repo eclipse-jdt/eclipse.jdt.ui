@@ -7,11 +7,9 @@
 	class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectsPlugin">
 
    <requires>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.jdt.ui"/>
+       <import plugin="org.eclipse.core.runtime"/>
+       <import plugin="org.eclipse.core.resources"/>
+       <import plugin="org.eclipse.ui"/>
    </requires>
 
    <runtime>
@@ -33,13 +31,17 @@
 		category="org.eclipse.ui.Examples/org.eclipse.jdt.ui.java"
 		project="true"
 		finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
-		icon="icons/full/ctool16/newjprjex_wiz.gif">
+		icon="icons/full/ctool16/newjprjex_wiz.gif"
+		banner="icons/full/wizban/newjprjex_wiz.gif">
 		<description>%JUnitProjectExampleCreationWizard.description</description>
-		<pagetitle>%JUnitProjectExampleCreationWizard.pagetitle</pagetitle>
-		<pagedescription>%JUnitProjectExampleCreationWizard.pagedescription</pagedescription>
-		<projectsetup output="" jre="true">
-    		<src path="" import="archive/junit/junit37src.jar"/>
-    	</projectsetup>
+	    <projectsetup
+        	pagetitle="%JUnitProjectExampleCreationWizard.pagetitle"
+        	pagedescription="%JUnitProjectExampleCreationWizard.pagedescription"
+         	label="%JUnitProjectExampleCreationWizard.label"
+        	name="JUnit">
+           <nature id="org.eclipse.jdt.core.javanature"/>
+           <import dest="" src="archive/junit/junit37src.jar"/>
+        </projectsetup>
       </wizard>	
 </extension>  
 </plugin>

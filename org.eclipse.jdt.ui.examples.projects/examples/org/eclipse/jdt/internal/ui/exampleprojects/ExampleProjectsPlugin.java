@@ -3,11 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.exampleprojects;
-
-import java.net.MalformedURLException;
+import java.net.MalformedURLException;
 import java.net.URL;
-
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -23,8 +20,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
  * The main plugin class to be used in the desktop.
  */
 public class ExampleProjectsPlugin extends AbstractUIPlugin {
-	private static ExampleProjectsPlugin fgPlugin;
 
+	// The shared instance.
+	private static ExampleProjectsPlugin fgPlugin;
+	
 	/**
 	 * The constructor.
 	 */
@@ -32,29 +31,23 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 		super(descriptor);
 		fgPlugin= this;
 	}
-	/**
+
+	/**
 	 * Returns the shared instance.
 	 */
 	public static ExampleProjectsPlugin getDefault() {
 		return fgPlugin;
 	}
-
+	
 	/**
 	 * Returns the workspace instance.
 	 */
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
-	
-	public ImageDescriptor getImageDescriptor(String name) {
+	public ImageDescriptor getImageDescriptor(String name) {
 		try {
-			URL url;
-			Display d= Display.getCurrent();
-			if (d != null && d.getIconDepth() <= 4) {
-				url= new URL(getDescriptor().getInstallURL(), "icons/basic/" + name); //$NON-NLS-1$
-			} else {
-				url= new URL(getDescriptor().getInstallURL(), "icons/full/" + name); //$NON-NLS-1$
-			}
+			URL url= new URL(getDescriptor().getInstallURL(), name);
 			return ImageDescriptor.createFromURL(url);
 		} catch (MalformedURLException e) {
 			return ImageDescriptor.getMissingImageDescriptor();
@@ -64,17 +57,17 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 	public static String getPluginId() {
 		return getDefault().getDescriptor().getUniqueIdentifier();
 	}	
-
+
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
-
+
 	public static void log(String message) {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, null));
 	}
-
+
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Internal Error", e)); //$NON-NLS-1$
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Internal Error", e));
 	}
 
 }
