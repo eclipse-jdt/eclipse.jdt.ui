@@ -270,8 +270,11 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	 * Tests if a position is inside the source range of an element.	 * @param pos Position to be tested.	 * @param sourceElement Source element (must be a IJavaElement)	 * @return boolean Return <code>true</code> if position is located inside the source element.	 * @throws CoreException Exception thrown if element range could not be accessed.	 */
 	protected boolean isInside(int pos, ISourceReference sourceElement) throws CoreException {
 		ISourceRange range= sourceElement.getSourceRange();
-		int rangeOffset= range.getOffset();
-		return (rangeOffset <= pos && rangeOffset + range.getLength() > pos);
+		if (range != null) {
+			int rangeOffset= range.getOffset();
+			return (rangeOffset <= pos && rangeOffset + range.getLength() > pos);			
+		}
+		return false;
 	}	
 	
 	/* (non-Javadoc)
