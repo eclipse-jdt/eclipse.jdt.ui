@@ -1,7 +1,5 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,6 +11,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -21,7 +20,6 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 
 	public static final String PAGE_NAME= "ModifyParametersInputPage"; //$NON-NLS-1$
 	private Label fSignaturePreview;
-	private List fParameterInfoList;
 	
 	public ModifyParametersInputPage() {
 		super(PAGE_NAME, true);
@@ -54,15 +52,27 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		String labelText= RefactoringMessages.getString("ModifyParametersInputPage.parameters");
 		ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new ParameterListChangeListener() {
 			public void parameterChanged(ParameterInfo parameter) {
+				updateStatus();
 				updateSignaturePreview();
 			}
 			public void parameterListChanged() {
+				updateStatus();
 				updateSignaturePreview();
 			}
 		}, true, false);
 		cp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
-		fParameterInfoList= getModifyParametersRefactoring().getParameterInfos();//createParameterInfoList();
-		cp.setInput(fParameterInfoList);
+		cp.setInput(getModifyParametersRefactoring().getParameterInfos());
+	}
+
+	private void updateStatus() {
+		RefactoringStatus nameCheck= getModifyParametersRefactoring().checkNewNames();
+		if (nameCheck.hasFatalError()){
+			setErrorMessage(nameCheck.getFirstMessage(RefactoringStatus.FATAL));
+			setPageComplete(false);
+		} else {
+			setErrorMessage(null);	
+			setPageComplete(true);
+		}	
 	}
 
 	private ModifyParametersRefactoring getModifyParametersRefactoring(){
