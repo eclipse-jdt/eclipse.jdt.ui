@@ -21,17 +21,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
@@ -49,18 +66,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
@@ -77,26 +82,14 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-import org.eclipse.debug.ui.DebugUITools;
-
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
-import org.eclipse.jdt.junit.ITestRunListener;
-
 /**
  * A ViewPart that shows the results of a test run.
  */
 public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, IPropertyChangeListener {
 
-	private static final int REFRESH_INTERVAL= 200;
 	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
+
+	private static final int REFRESH_INTERVAL= 200;
  	/**
  	 * Number of executed tests during a test run
  	 */
@@ -119,7 +112,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private boolean fAutoScroll = true;
 	/**
 	 * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
-	 * or <code>VIEW_ORIENTATION_VERTICAL</code>.
+	 * <code>VIEW_ORIENTATION_VERTICAL</code>, or <code>VIEW_ORIENTATION_AUTOMATIC</code>.
+	 */
+	private int fOrientation= VIEW_ORIENTATION_AUTOMATIC;
+	/**
+	 * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
+	 * <code>VIEW_ORIENTATION_VERTICAL</code>.
 	 */
 	private int fCurrentOrientation;
 	/**
@@ -195,6 +193,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	//orientations
 	static final int VIEW_ORIENTATION_VERTICAL= 0;
 	static final int VIEW_ORIENTATION_HORIZONTAL= 1;
+	static final int VIEW_ORIENTATION_AUTOMATIC= 2;
 	
 	private IMemento fMemento;	
 
@@ -240,36 +239,36 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	}
 	
 	private class ToggleOrientationAction extends Action {
-		private final int fOrientation;
+		private final int fActionOrientation;
 		
 		public ToggleOrientationAction(TestRunnerViewPart v, int orientation) {
 			super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 			if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL) {
 				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.horizontal.label")); //$NON-NLS-1$
-				setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/th_horizontal.gif")); //$NON-NLS-1$
-				setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$				
 			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL) {
 				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.vertical.label")); //$NON-NLS-1$
-				setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/th_vertical.gif")); //$NON-NLS-1$
-				setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$				
+			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC) {
+				setText("Automatic"); 
+				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_automatic.gif")); //$NON-NLS-1$				
 			}
-			fOrientation= orientation;
+			fActionOrientation= orientation;
 			WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION);
 		}
 		
 		public int getOrientation() {
-			return fOrientation;
+			return fActionOrientation;
 		}
 		
 		public void run() {
-			if (fCurrentOrientation == fOrientation)
-				return;
-			setOrientation(fOrientation);
+			if (isChecked()) {
+				fOrientation= fActionOrientation;
+				computeOrientation();
+			}
 		}		
 	}
-	
+
 	/**
 	 * Listen for for modifications to Java elements
 	 */
@@ -340,7 +339,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			fSashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue()} );
 		Integer orientation= memento.getInteger(TAG_ORIENTATION);
 		if (orientation != null)
-			setOrientation(orientation.intValue());
+			fOrientation= orientation.intValue();
+		computeOrientation();
 		String scrollLock= memento.getString(TAG_SCROLL);
 		if (scrollLock != null)
 			fScrollLockAction.setChecked(scrollLock.equals("true")); //$NON-NLS-1$
@@ -965,7 +965,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
     	addResizeListener(parent);
 		fClipboard= new Clipboard(parent.getDisplay());
 
-		GridLayout gridLayout= new GridLayout();
+		GridLayout gridLayout= new GridLayout(); 
 		gridLayout.marginWidth= 0;
 		gridLayout.marginHeight= 0;
 		parent.setLayout(gridLayout);
@@ -997,15 +997,25 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			public void controlMoved(ControlEvent e) {
 			}
 			public void controlResized(ControlEvent e) {
-				Point size= fParent.getSize();
-				if (size.x != 0 && size.y != 0) {
-					if (size.x > size.y) 
-						setOrientation(VIEW_ORIENTATION_HORIZONTAL);
-					else 
-						setOrientation(VIEW_ORIENTATION_VERTICAL);
-				}
+				computeOrientation();
 			}
 		});
+	}
+
+	void computeOrientation() {
+		if (fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
+			fCurrentOrientation= fOrientation;
+			setOrientation(fCurrentOrientation);
+		}
+		else {
+			Point size= fParent.getSize();
+			if (size.x != 0 && size.y != 0) {
+				if (size.x > size.y) 
+					setOrientation(VIEW_ORIENTATION_HORIZONTAL);
+				else 
+					setOrientation(VIEW_ORIENTATION_VERTICAL);
+			}
+		}
 	}
 
 	public void saveState(IMemento memento) {
@@ -1022,7 +1032,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		int weigths[]= fSashForm.getWeights();
 		int ratio= (weigths[0] * 1000) / (weigths[0] + weigths[1]);
 		memento.putInteger(TAG_RATIO, ratio);
-		memento.putInteger(TAG_ORIENTATION, fCurrentOrientation);
+		memento.putInteger(TAG_ORIENTATION, fOrientation);
 	}
 	
 	private void configureToolBar() {
@@ -1034,7 +1044,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		fToggleOrientationActions =
 			new ToggleOrientationAction[] {
 				new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
-				new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL)};
+				new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
+				new ToggleOrientationAction(this, VIEW_ORIENTATION_AUTOMATIC)};
 		fNextAction= new ShowNextFailureAction(this);
 		fPreviousAction= new ShowPreviousFailureAction(this);
 		fNextAction.setEnabled(false);
@@ -1059,7 +1070,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 	private IStatusLineManager getStatusLine() {
 		// we want to show messages globally hence we
-		// have to go throgh the active part
+		// have to go through the active part
 		IViewSite site= getViewSite();
 		IWorkbenchPage page= site.getPage();
 		IWorkbenchPart activePart= page.getActivePart();
@@ -1237,7 +1248,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
 		fSashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
 		for (int i = 0; i < fToggleOrientationActions.length; ++i)
-			fToggleOrientationActions[i].setChecked(orientation == fToggleOrientationActions[i].getOrientation());
+			fToggleOrientationActions[i].setChecked(fOrientation == fToggleOrientationActions[i].getOrientation());
 		fCurrentOrientation = orientation;
 		GridLayout layout= (GridLayout) fCounterComposite.getLayout();
 		setCounterColumns(layout); 
