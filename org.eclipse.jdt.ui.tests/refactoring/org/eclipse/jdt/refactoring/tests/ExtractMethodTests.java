@@ -122,7 +122,8 @@ public class ExtractMethodTests extends RefactoringTest {
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
 		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(
-			unit, new TextBufferChangeCreator(), selection[0], selection[1]);
+			unit, new TextBufferChangeCreator(), selection[0], selection[1],
+			true, 4);
 		refactoring.setMethodName("extracted");
 		RefactoringStatus status= refactoring.checkPreconditions(pm);
 		switch (mode) {
