@@ -678,15 +678,14 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 	 * Constructor
 	 */
 	public CompilationUnitDocumentProvider2() {
+		setParentDocumentProvider(new JavaStorageDocumentProvider());		
+		fGlobalAnnotationModelListener= new GlobalAnnotationModelListener();
 		fPropertyListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (HANDLE_TEMPORARY_PROBLEMS.equals(event.getProperty()))
 					enableHandlingTemporaryProblems();
 			}
 		};
-		
-		fGlobalAnnotationModelListener= new GlobalAnnotationModelListener();
-		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyListener);
 	}
 	

@@ -18,6 +18,7 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IDocumentProviderExtension2;
 import org.eclipse.ui.texteditor.IDocumentProviderExtension3;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -25,7 +26,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 /**
  * @since 3.0
  */
-public interface ICompilationUnitDocumentProvider extends IDocumentProvider, IDocumentProviderExtension3 {
+public interface ICompilationUnitDocumentProvider extends IDocumentProvider, IDocumentProviderExtension2, IDocumentProviderExtension3 {
 		
 	/**
 	 * Shuts down this provider.

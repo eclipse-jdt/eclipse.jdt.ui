@@ -52,7 +52,6 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.part.FileEditorInput;
@@ -920,22 +919,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	}
 	
 	/*
-	 * @see AbstractDocumentProvider#createDocument(Object)
-	 */
-	protected IDocument createDocument(Object element) throws CoreException {
-		
-		if (element instanceof IEditorInput) {
-			IDocument document= createEmptyDocument();
-			if (setDocumentContent(document, (IEditorInput) element, getEncoding(element))) {
-				setupDocument(element, document);
-				return document;
-			}
-		}
-	
-		return null;
-	}
-	
-	/*
 	 * @see AbstractDocumentProvider#resetDocument(Object)
 	 */
 	public void resetDocument(Object element) throws CoreException {
@@ -1081,33 +1064,16 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	}
 
 	/*
-	 * @see org.eclipse.ui.texteditor.IDocumentProviderExtension3#isSynchronized(java.lang.Object)
-	 */
-	public boolean isSynchronized(Object element) {
-		Object elementInfo= getElementInfo(element);
-		if (elementInfo instanceof FileInfo) {
-			FileEditorInput input= (FileEditorInput) element;
-			IResource resource= input.getFile();
-			return resource.isSynchronized(IResource.DEPTH_ZERO);
-		}
-		return false;
-	}
-
-	/*
 	 * @see org.eclipse.ui.texteditor.IDocumentProviderExtension3#createEmptyDocument(java.lang.Object)
 	 */
 	public IDocument createEmptyDocument(Object element) {
 		return createEmptyDocument();
 	}
 	
-	/**
-	 * Sets up the given document as it would be provided for the given element. The
-	 * content of the document is not changed.
-	 * 
-	 * @param element the blue-print element
-	 * @param document the document to set up
+	/*
+	 * @see org.eclipse.ui.editors.text.StorageDocumentProvider#setupDocument(java.lang.Object, org.eclipse.jface.text.IDocument)
 	 */
-	public void setupDocument(Object element, IDocument document) {
+	protected void setupDocument(Object element, IDocument document) {
 		if (document != null) {
 			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 			tools.setupDocument(document, IJavaPartitions.JAVA_PARTITIONING);
@@ -1126,5 +1092,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	public void setSavePolicy(ISavePolicy savePolicy) {
 		fSavePolicy= savePolicy;
+	}
+
+	/*
+	 * Here for visibility reasons.
+	 * @see AbstractDocumentProvider#createDocument(Object)
+	 */
+	public IDocument createDocument(Object element) throws CoreException {
+		return super.createDocument(element);
 	}
 }
