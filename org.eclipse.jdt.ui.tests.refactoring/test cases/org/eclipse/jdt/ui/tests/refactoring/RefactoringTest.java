@@ -69,7 +69,11 @@ public abstract class RefactoringTest extends TestCase {
 		Refactoring.getUndoManager().flush();
 	}
 
-	protected void performDummySearch() throws Exception{
+	protected void performDummySearch() throws Exception {
+		performDummySearch(fPackageP);
+	}	
+
+	public static void performDummySearch(IJavaElement element) throws Exception{
 		new SearchEngine().searchAllTypeNames(
 		 	ResourcesPlugin.getWorkspace(),
 			null,
@@ -77,7 +81,7 @@ public abstract class RefactoringTest extends TestCase {
 			IJavaSearchConstants.EXACT_MATCH,
 			IJavaSearchConstants.CASE_SENSITIVE,
 			IJavaSearchConstants.CLASS,
-			SearchEngine.createJavaSearchScope(new IJavaElement[]{fPackageP}),
+			SearchEngine.createJavaSearchScope(new IJavaElement[]{element}),
 			new Requestor(),
 			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 			null);

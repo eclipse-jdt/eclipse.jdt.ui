@@ -93,6 +93,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
+		RefactoringTest.performDummySearch(fJavaProject);
 		JavaProjectHelper.delete(fJavaProject);
 	}
 	
