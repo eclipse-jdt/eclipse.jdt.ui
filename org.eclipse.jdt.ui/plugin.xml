@@ -474,7 +474,7 @@
       </factory>
    </extension>
    <extension
-         id="org.eclipse.jdt.ui.javaeditor"
+         id="javaeditor"
          point="org.eclipse.ui.editors">
       <editor
             name="%JavaEditor.label"
@@ -749,7 +749,7 @@
    </extension>
 
    <extension
-         id="org.eclipse.jdt.ui.JavaDocumentSetupParticipant"
+         id="JavaDocumentSetupParticipant"
          name="%javaDocumentSetupParticipant"
          point="org.eclipse.core.filebuffers.documentSetup">
       <participant
@@ -758,7 +758,7 @@
       </participant>
    </extension>
    <extension
-         id="org.eclipse.jdt.ui.JavaDocumentFactory"
+         id="JavaDocumentFactory"
          name="%javaDocumentFactory"
          point="org.eclipse.core.filebuffers.documentCreation">
       <factory
