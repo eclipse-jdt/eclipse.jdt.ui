@@ -34,6 +34,7 @@ import org.eclipse.search.ui.ISearchResultViewPart;
 import org.eclipse.search.ui.SearchUI;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
@@ -208,11 +209,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 	
 	protected TreeViewer createTreeViewer(Composite parent) {
-		return new ProblemTreeViewer(parent);
+		return new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 	
 	protected TableViewer createTableViewer(Composite parent) {
-		return new ProblemTableViewer(parent);
+		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 	
 	void setSortOrder(int order) {
