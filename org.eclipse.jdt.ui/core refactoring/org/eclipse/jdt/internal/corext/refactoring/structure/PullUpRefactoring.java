@@ -1546,7 +1546,7 @@ public class PullUpRefactoring extends Refactoring {
 		copyBodyOfPulledUpMethod(targetRewrite, sourceMethod, sourceMethodNode, newMethod, pm);
 		newMethod.setConstructor(sourceMethodNode.isConstructor());
 		newMethod.setExtraDimensions(sourceMethodNode.getExtraDimensions());
-		copyJavadocNode(ast, sourceMethodNode, newMethod);
+		copyJavadocNode(targetRewrite, sourceMethod, sourceMethodNode, newMethod);
 		newMethod.setModifiers(getNewModifiers(sourceMethod));
 		newMethod.setName(createCopyOfSimpleName(sourceMethodNode.getName(), ast));
 		copyReturnType(targetRewrite, getDeclaringWorkingCopy(), sourceMethodNode, newMethod);
@@ -1616,13 +1616,17 @@ public class PullUpRefactoring extends Refactoring {
 		Type newReturnType= createPlaceholderForType(oldMethod.getReturnType(), sourceCu, targetRewrite);
 		newMethod.setReturnType(newReturnType);
 	}
-
-	private static void copyJavadocNode(AST ast, BodyDeclaration oldDeclaration, BodyDeclaration newDeclaration) {
-		if (oldDeclaration.getJavadoc() == null)
+	
+	private static void copyJavadocNode(ASTRewrite rewrite, IMember member, BodyDeclaration oldDeclaration, BodyDeclaration newDeclaration) throws JavaModelException {
+		Javadoc oldJavaDoc= oldDeclaration.getJavadoc();
+		if (oldJavaDoc == null)
 			return;
-		Javadoc newJavadoc= ast.newJavadoc();
-		newJavadoc.setComment(oldDeclaration.getJavadoc().getComment());
-		newDeclaration.setJavadoc(newJavadoc);
+		String source= oldJavaDoc.getComment();
+		String[] lines= Strings.convertIntoLines(source);
+		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+		source= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(member));
+		Javadoc newJavaDoc= (Javadoc)rewrite.createPlaceholder(source, ASTRewrite.JAVADOC);
+		newDeclaration.setJavadoc(newJavaDoc);
 	}
 
 	private void copyFieldToTargetClass(IField field, CompilationUnit declaringCuNode, TypeDeclaration targetClass, ASTRewrite rewrite) throws JavaModelException {
@@ -1643,7 +1647,7 @@ public class PullUpRefactoring extends Refactoring {
 		newFragment.setName(createCopyOfSimpleName(oldFieldFragment.getName(), ast));
 		FieldDeclaration newField= ast.newFieldDeclaration(newFragment);
 		FieldDeclaration oldField= ASTNodeSearchUtil.getFieldDeclarationNode(field, declaringCuNode);
-		copyJavadocNode(ast, oldField, newField);
+		copyJavadocNode(rewrite, field, oldField, newField);
 		newField.setModifiers(getNewModifiers(field));
 		
 		Type newType= createPlaceholderForType(oldField.getType(), field.getCompilationUnit(), rewrite);
