@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -108,8 +109,7 @@ public class StubUtility {
 		genMethodDeclaration(destTypeName, method, bodyContent, imports, buf);
 		return buf.toString();
 	}
-
-
+	
 	/**
 	 * Generates a method stub not including the method comment. Given a
 	 * template method and the body content, a stub with the same signature will
@@ -266,6 +266,37 @@ public class StubUtility {
 		}
 		return str;
 	}
+	
+	/**
+	 * Returns the content for a new compilation unit using the 'new file' code template.
+	 * @param cu The compilation to create the source for. the compilation unit must not exist
+	 * @param typeComment The comment for the type to created. Used when the code template contains a ${typecomment} variable
+	 * @param typeContent The type declaration as string
+	 * @param lineDelimiter The line delimiter used in the type declaration
+	 * @return String Returns the new content or <code>null</code> if the template is empty.
+	 * @throws CoreException
+	 */
+	public static String getCompilationUnitContent(ICompilationUnit cu, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
+		IPackageFragment pack= (IPackageFragment) cu.getParent();
+		String packDecl= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
+
+		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE);
+		if (template == null) {
+			return null;
+		}
+		IJavaProject project= cu.getJavaProject();
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
+		context.setCompilationUnitVariables(cu);
+		context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, packDecl);
+		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment);
+		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
+		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(cu.getElementName()));
+		String content= context.evaluate(template).getString();
+		if (content.length() == 0) {
+			return null;
+		}
+		return content;
+	}		
 	
 	public static String getTypeComment(IType type) throws CoreException {
 		String outer= (type.getDeclaringType() != null) ? JavaModelUtil.getTypeContainerName(type) : ""; //$NON-NLS-1$

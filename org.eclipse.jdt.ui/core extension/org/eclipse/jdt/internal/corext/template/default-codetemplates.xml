@@ -23,9 +23,7 @@
  */
 ${package_declaration}
 
-/**
- * @author ${user}
- */
+${typecomment}
 ${type_declaration}</codetemplate>
 <codetemplate name="catchblock" description="Code in new catch blocks" context="catchblock_context" enabled="true">// ${todo} Auto-generated catch block
 ${exception_var}.printStackTrace();</codetemplate><codetemplate name="methodbody" description="Code in created method stubs" context="methodbody_context" enabled="true">// ${todo} Auto-generated method stub

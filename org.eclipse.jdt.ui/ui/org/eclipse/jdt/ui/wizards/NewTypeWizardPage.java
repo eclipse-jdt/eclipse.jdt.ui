@@ -67,11 +67,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -1438,35 +1435,29 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @throws CoreException
 	 */
 	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
-		IPackageFragment pack= (IPackageFragment) cu.getParent();
-		String packDecl= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
-
-		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE);
-		if (template == null) {
-			return getDefaultCUContent(packDecl, typeContent, lineDelimiter);
-		}
 		String enclosing= isEnclosingTypeSelected() ? JavaModelUtil.getTypeQualifiedName(getEnclosingType()) : ""; //$NON-NLS-1$
 		String typeComment= StubUtility.getTypeComment(cu, getTypeName(), enclosing);
-		IJavaProject project= cu.getJavaProject();
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
-		context.setCompilationUnitVariables(cu);
-		context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, packDecl);
-		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
-		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
-		context.setVariable(CodeTemplateContextType.TYPENAME, getTypeName());
-		String content= context.evaluate(template).getString();
-		if (content.length() == 0) {
-			return getDefaultCUContent(packDecl, typeContent, lineDelimiter);
+		if (typeComment == null) {
+			typeComment= ""; //$NON-NLS-1$
 		}
-		CompilationUnit unit= AST.parseCompilationUnit(content.toCharArray());
-		if (!pack.isDefaultPackage() && unit.getPackage() == null || unit.types().isEmpty()) {
-			return getDefaultCUContent(packDecl, typeContent, lineDelimiter);
+		IPackageFragment pack= (IPackageFragment) cu.getParent();
+		String content= StubUtility.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
+		if (content != null) {
+			CompilationUnit unit= AST.parseCompilationUnit(content.toCharArray());
+			if ((pack.isDefaultPackage() || unit.getPackage() != null) && !unit.types().isEmpty()) {
+				return content;
+			}
 		}
-		return content;
-	}
-	
-	private String getDefaultCUContent(String packStatement, String typeContent, String lineDelimiter) {
-		return packStatement + lineDelimiter + lineDelimiter + typeContent;
+		StringBuffer buf= new StringBuffer();
+		if (!pack.isDefaultPackage()) {
+			buf.append("package ").append(pack.getElementName()).append(';'); //$NON-NLS-1$
+		}
+		buf.append(lineDelimiter).append(lineDelimiter);
+		if (typeComment.length() > 0) {
+			buf.append(typeComment).append(lineDelimiter);
+		}
+		buf.append(typeContent);
+		return buf.toString();
 	}
 	
 
