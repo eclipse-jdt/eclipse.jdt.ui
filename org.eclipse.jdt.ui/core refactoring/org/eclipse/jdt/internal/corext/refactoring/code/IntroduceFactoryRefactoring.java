@@ -15,9 +15,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -25,6 +22,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -69,7 +70,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -519,7 +519,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param ctorBinding binding for the constructor being wrapped
 	 * @param unitRewriter the ASTRewrite to be used
 	 */
-	private MethodDeclaration createFactoryMethod(AST ast, IMethodBinding ctorBinding, OldASTRewrite unitRewriter) {
+	private MethodDeclaration createFactoryMethod(AST ast, IMethodBinding ctorBinding, ASTRewrite unitRewriter) {
 		MethodDeclaration		newMethod= ast.newMethodDeclaration();
 		SimpleName				newMethodName= ast.newSimpleName(fNewMethodName);
 		ClassInstanceCreation	newCtorCall= ast.newClassInstanceCreation();
@@ -541,7 +541,6 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		ret.setExpression(newCtorCall);
 		stmts.add(ret);
-		unitRewriter.markAsInserted(ret);
 
 		return newMethod;
 	}
@@ -625,7 +624,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param ctorCall the ClassInstanceCreation to be marked as replaced
 	 */
 	private MethodInvocation createFactoryMethodCall(AST ast, ClassInstanceCreation ctorCall,
-													 OldASTRewrite unitRewriter, TextEditGroup gd) {
+													 ASTRewrite unitRewriter, TextEditGroup gd) {
 		MethodInvocation	factoryMethodCall= ast.newMethodInvocation();
 
 		List	actualFactoryArgs= factoryMethodCall.arguments();
@@ -688,7 +687,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * Creates and adds the necessary change to make the constructor method protected.
 	 * Returns false iff the constructor didn't exist (i.e. was implicit)
 	 */
-	private boolean protectConstructor(CompilationUnit unitAST, OldASTRewrite unitRewriter, TextEditGroup declGD) {
+	private boolean protectConstructor(CompilationUnit unitAST, ASTRewrite unitRewriter, TextEditGroup declGD) {
 		MethodDeclaration constructor= (MethodDeclaration) unitAST.findDeclaringNode(fCtorBinding.getKey());
 
 		// No need to rewrite the modifiers if the visibility is what we already want it to be.
@@ -710,7 +709,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 //		ICompilationUnit	unitHandle= rg.getCompilationUnit();
 		Assert.isTrue(rg == null || rg.getCompilationUnit() == unitHandle);
 		CompilationUnit		unit= getASTFor(unitHandle);
-		OldASTRewrite			unitRewriter= new OldASTRewrite(unit);
+		ASTRewrite			unitRewriter= ASTRewrite.create(unit.getAST());
 		TextBuffer			buffer= null;
 		MultiTextEdit		root= new MultiTextEdit();
 		boolean				someChange= false;
@@ -745,12 +744,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			}
 
 			if (someChange) {
-				unitRewriter.rewriteNode(buffer, root);
+				root.addChild(unitRewriter.rewriteAST(buffer.getDocument(), fCUHandle.getJavaProject().getOptions(true)));
 				root.addChild(fImportRewriter.createEdit(buffer.getDocument()));
 			}
 		} finally {
-			if (unitRewriter != null)
-				unitRewriter.removeModifications();
 			if (buffer != null)
 				TextBuffer.release(buffer);
 		}
@@ -790,7 +787,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @return true iff at least one constructor call site was rewritten.
 	 */
 	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit,
-											OldASTRewrite unitRewriter, CompilationUnitChange unitChange)
+											ASTRewrite unitRewriter, CompilationUnitChange unitChange)
 	throws JavaModelException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
 		SearchMatch[]	hits= rg.getSearchResults();
@@ -884,7 +881,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param unit
 	 * @param gd the <code>GroupDescription</code> to associate with the changes made
 	 */
-	private void createFactoryChange(OldASTRewrite unitRewriter, CompilationUnit unit, TextEditGroup gd) {
+	private void createFactoryChange(ASTRewrite unitRewriter, CompilationUnit unit, TextEditGroup gd) {
 		// ================================================================================
 		// First add the factory itself (method, class, and interface as needed/directed by user)
 		AST				ast= unit.getAST();
@@ -892,17 +889,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		fFactoryMethod= createFactoryMethod(ast, fCtorBinding, unitRewriter);
 
 		TypeDeclaration	factoryOwner= (TypeDeclaration) unit.findDeclaringNode(fFactoryOwningClass.resolveBinding().getKey());
-		TypeDeclaration	methodOwner= factoryOwner;
-
 		fImportRewriter.addImport(fCtorOwningClass.resolveBinding());
 
-		List	methodDeclList= methodOwner.bodyDeclarations(); // where to put factory method
-
-		int	idx= ASTNodes.getInsertionIndex(fFactoryMethod, methodDeclList);
+		int	idx= ASTNodes.getInsertionIndex(fFactoryMethod, factoryOwner.bodyDeclarations());
 
 		if (idx < 0) idx= 0; // Guard against bug in getInsertionIndex()
-		methodDeclList.add(idx, fFactoryMethod);
-		unitRewriter.markAsInserted(fFactoryMethod, gd);
+		unitRewriter.getListRewrite(factoryOwner, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(fFactoryMethod, idx, gd);
 	}
 
 	/*

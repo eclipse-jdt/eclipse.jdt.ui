@@ -22,12 +22,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.UndoEdit;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -48,15 +51,12 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.ThisExpression;
-
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -68,7 +68,7 @@ public class SourceProvider {
 	private ICompilationUnit fCUnit;
 	private TextBuffer fBuffer;
 	private MethodDeclaration fDeclaration;
-	private OldASTRewrite fRewriter;
+	private ASTRewrite fRewriter;
 	private SourceAnalyzer fAnalyzer;
 	private boolean fMustEvalReturnedExpression;
 	private boolean fReturnValueNeedsLocalVariable;
@@ -98,7 +98,7 @@ public class SourceProvider {
 			ParameterData data= new ParameterData(element);
 			element.setProperty(ParameterData.PROPERTY, data);
 		}
-		fRewriter= new OldASTRewrite(fDeclaration);
+		fRewriter= ASTRewrite.create(fDeclaration.getAST());
 		fAnalyzer= new SourceAnalyzer(fCUnit, fDeclaration);
 		fReturnValueNeedsLocalVariable= true;
 		fReturnExpressions= new ArrayList();
@@ -233,12 +233,9 @@ public class SourceProvider {
 	}
 	
 	public TextEdit getDeleteEdit() {
-		OldASTRewrite rewriter= new OldASTRewrite(fDeclaration.getParent());
+		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getParent().getAST());
 		rewriter.remove(fDeclaration, null);
-		MultiTextEdit result= new MultiTextEdit();
-		rewriter.rewriteNode(fBuffer, result);
-		rewriter.removeModifications();
-		return result;
+		return rewriter.rewriteAST(fBuffer.getDocument(), fCUnit.getJavaProject().getOptions(true));
 	}
 	
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
@@ -262,10 +259,8 @@ public class SourceProvider {
 				ranges= getStatementRanges();
 			}
 		}
-		
-		MultiTextEdit dummy= new MultiTextEdit();
-		fRewriter.rewriteNode(fBuffer, dummy);
 
+		final TextEdit dummy= fRewriter.rewriteAST(fBuffer.getDocument(), fCUnit.getJavaProject().getOptions(true));
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
@@ -295,7 +290,6 @@ public class SourceProvider {
 		TextBufferEditor undoEditor= new TextBufferEditor(fBuffer);
 		undoEditor.add(undo);
 		undoEditor.performEdits(null);
-		fRewriter.removeModifications();
 		return result;
 	}
 
@@ -336,10 +330,10 @@ public class SourceProvider {
 			ASTNode node= (ASTNode)iter.next();
 			if (node instanceof MethodInvocation) {
 				final MethodInvocation inv= (MethodInvocation)node;
-				inv.setExpression(createReceiver(context, (IMethodBinding)inv.getName().resolveBinding()));
+				fRewriter.set(inv, MethodInvocation.EXPRESSION_PROPERTY, createReceiver(context, (IMethodBinding)inv.getName().resolveBinding()), null);
 			} else if (node instanceof ClassInstanceCreation) {
 				final ClassInstanceCreation inst= (ClassInstanceCreation)node;
-				inst.setExpression(createReceiver(context, inst.resolveConstructorBinding()));
+				fRewriter.set(inst, ClassInstanceCreation.EXPRESSION_PROPERTY, createReceiver(context, inst.resolveConstructorBinding()), null);
 			} else if (node instanceof ThisExpression) {
 				fRewriter.replace(node, fRewriter.createStringPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
 			} else if (node instanceof SimpleName && ((SimpleName)node).resolveBinding() instanceof IVariableBinding) {
@@ -376,18 +370,14 @@ public class SourceProvider {
 		String receiver= getReceiver(context, method.getModifiers());
 		if (receiver == null)
 			return null;
-		Expression result= (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
-		fRewriter.markAsInserted(result);
-		return result;
+		return (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
 	}
 	
 	private Expression createReceiver(CallContext context, IVariableBinding field) {
 		String receiver= getReceiver(context, field.getModifiers());
 		if (receiver == null)
 			return null;
-		Expression result= (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.SIMPLE_NAME);
-		fRewriter.markAsInserted(result);
-		return result;
+		return (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.SIMPLE_NAME);
 	}
 	
 	private String getReceiver(CallContext context, int modifiers) {
