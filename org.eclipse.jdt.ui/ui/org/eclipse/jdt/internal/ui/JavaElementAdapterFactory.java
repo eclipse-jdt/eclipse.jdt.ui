@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IAdapterFactory;
 
+import org.eclipse.ui.IContainmentAdapter;
 import org.eclipse.ui.IContributorResourceAdapter;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -44,13 +45,15 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		IPersistableElement.class,
 		IProject.class,
 		IContributorResourceAdapter.class,
-		ITaskListResourceAdapter.class
+		ITaskListResourceAdapter.class,
+		IContainmentAdapter.class
 	};
 	
 	private Object fSearchPageScoreComputer;
 	private static IResourceLocator fgResourceLocator= new ResourceLocator();
 	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter= new JavaWorkbenchAdapter();
 	private static ITaskListResourceAdapter fgTaskListAdapter= new JavaTaskListAdapter();
+	private static JavaElementContainmentAdapter fgJavaElementContainmentAdapter= new JavaElementContainmentAdapter();
 	
 	public Class[] getAdapterList() {
 		updateLazyLoadedAdapters();
@@ -79,6 +82,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			return this;
 		} if (ITaskListResourceAdapter.class.equals(key)) {
 			return fgTaskListAdapter;
+		} if (IContainmentAdapter.class.equals(key)) {
+			return fgJavaElementContainmentAdapter;
 		}
 		return null; 
 	}
@@ -136,7 +141,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	private void updateLazyLoadedAdapters() {
 		if (fSearchPageScoreComputer == null && SearchUtil.isSearchPlugInActivated())
 			createSearchPageScoreComputer();
-}
+	}
 
 	private void createSearchPageScoreComputer() {
 		fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
@@ -149,7 +154,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			IPersistableElement.class,
 			IProject.class,
 			IContributorResourceAdapter.class,
-			ITaskListResourceAdapter.class
+			ITaskListResourceAdapter.class,
+			IContainmentAdapter.class
 		};
 	}
 }
