@@ -231,9 +231,9 @@ public class PullUpInputPage extends UserInputWizardPage {
 	
 	private Button createSelectButton(Composite composite, String buttonLabel, final boolean select){
 		Button button= new Button(composite, SWT.PUSH);
+		button.setText(buttonLabel);		
 		button.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(button);
-		button.setText(buttonLabel);		
 		button.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				IType root= ((ITypeHierarchy)fTreeViewer.getInput()).getType();

@@ -230,9 +230,9 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	
 	private Button createEditButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
+		button.setText(RefactoringMessages.getString("ModifyParametersInputPage.editButton.text")); //$NON-NLS-1$
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
-		button.setText(RefactoringMessages.getString("ModifyParametersInputPage.editButton.text")); //$NON-NLS-1$
 		button.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					ISelection selection= fTableViewer.getSelection();
@@ -279,9 +279,9 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 
 	private Button createButton(Composite buttonComposite, String text, final boolean up) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
+		button.setText(text);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
-		button.setText(text);
 		button.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				ISelection savedSelection= fTableViewer.getSelection();
