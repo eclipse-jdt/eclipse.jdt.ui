@@ -200,7 +200,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		switch (fReturnKind) {
 			case ACCESS_TO_LOCAL:
 				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingBodyDeclaration);
-				fReturnType= ASTNodes.getType(ast, declaration);
+				fReturnType= ASTNodeFactory.newType(ast, declaration);
 				break;
 			case EXPRESSION:
 				Expression expression= (Expression)getFirstSelectedNode();
@@ -223,6 +223,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 			case RETURN_STATEMENT_VALUE:
 				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION)
 					fReturnType= ((MethodDeclaration)fEnclosingBodyDeclaration).getReturnType();
+					// TODO: ma: check for MethodDeclaration extra dimensions?
 				break;
 			default:
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);

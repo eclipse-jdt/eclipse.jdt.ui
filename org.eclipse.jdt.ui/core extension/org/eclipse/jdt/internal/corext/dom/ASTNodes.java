@@ -233,39 +233,35 @@ public class ASTNodes {
 	}
 	
 	/**
-	 * Returns the type node for the given declaration. The returned node
-	 * is a copy and is owned by a different AST. The returned node contains
-	 * any extra dimensions.
-	 * @param ast The AST to create the resulting type with.
-	 * @param declaration The variable declaration to get the type from
-	 * @return A new type node created with the given AST.
+	 * Returns the type node for the given declaration. 
 	 */
-	public static Type getType(AST ast, VariableDeclaration declaration) {
-		Type type= null;
+	public static Type getType(VariableDeclaration declaration) {
 		if (declaration instanceof SingleVariableDeclaration) {
-			type= ((SingleVariableDeclaration)declaration).getType();
+			return ((SingleVariableDeclaration)declaration).getType();
 		} else if (declaration instanceof VariableDeclarationFragment) {
 			ASTNode parent= ((VariableDeclarationFragment)declaration).getParent();
 			if (parent instanceof VariableDeclarationExpression)
-				type= ((VariableDeclarationExpression)parent).getType();
+				return ((VariableDeclarationExpression)parent).getType();
 			else if (parent instanceof VariableDeclarationStatement)
-				type= ((VariableDeclarationStatement)parent).getType();
+				return ((VariableDeclarationStatement)parent).getType();
 		}
-		if (type == null)
-			return null;
-		type= (Type) ASTNode.copySubtree(ast, type);
-		int extraDim= 0;
-		if (declaration.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			extraDim= ((VariableDeclarationFragment)declaration).getExtraDimensions();
-		} else if (declaration.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-			extraDim= ((SingleVariableDeclaration)declaration).getExtraDimensions();
-		}
-		for (int i= 0; i < extraDim; i++) {
-			type= ast.newArrayType(type);
-		}
-		return type;		
+		Assert.isTrue(false, "Unknown VariableDeclaration"); //$NON-NLS-1$
+		return null;
 	}
 	
+	/**
+	 * Returns the extra dimensions for the given declaration. 
+	 */
+	public static int getExtraDimensions(VariableDeclaration declaration) {
+		if (declaration instanceof SingleVariableDeclaration) {
+			return ((SingleVariableDeclaration)declaration).getExtraDimensions();
+		} else if (declaration instanceof VariableDeclarationFragment) {
+			return ((VariableDeclarationFragment)declaration).getExtraDimensions();
+		}
+		Assert.isTrue(false, "Unknown VariableDeclaration"); //$NON-NLS-1$
+		return 0;
+	}
+		
 	public static int getModifiers(VariableDeclaration declaration) {
 		Assert.isNotNull(declaration);
 		if (declaration instanceof SingleVariableDeclaration) {

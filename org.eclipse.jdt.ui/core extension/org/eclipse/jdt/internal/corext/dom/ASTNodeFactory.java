@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 public class ASTNodeFactory {
 
@@ -74,7 +75,7 @@ public class ASTNodeFactory {
 		}
 		return res;
 	}
-	
+		
 	public static Type newType(AST ast, String content) {
 		StringBuffer buffer= new StringBuffer(TYPE_HEADER);
 		buffer.append(content);
@@ -104,6 +105,24 @@ public class ASTNodeFactory {
 				return ast.newSimpleType(ast.newName(Bindings.getNameComponents(binding)));	
 		}
 	}
+	
+	/**
+	 * Returns the new type node corresponding to the type of the given declaration
+	 * including the extra dimensions.
+	 * @param ast The AST to create the resulting type with.
+	 * @param declaration The variable declaration to get the type from
+	 * @return A new type node created with the given AST.
+	 */
+	public static Type newType(AST ast, VariableDeclaration declaration) {
+		Type type= ASTNodes.getType(declaration);
+		int extraDim= ASTNodes.getExtraDimensions(declaration);
+	
+		type= (Type) ASTNode.copySubtree(ast, type);
+		for (int i= 0; i < extraDim; i++) {
+			type= ast.newArrayType(type);
+		}
+		return type;		
+	}		
 
 	/**
 	 * Returns an expression that is assignable to the given type. <code>null</code> is
@@ -150,5 +169,7 @@ public class ASTNodeFactory {
 			}
 		}
 		return ast.newNullLiteral();
-	}		
+	}
+
+
 }
