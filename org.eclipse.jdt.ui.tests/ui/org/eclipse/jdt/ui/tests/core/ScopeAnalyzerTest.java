@@ -43,7 +43,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -93,8 +93,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertNoProblems(astRoot);
 		
 		{
 			String str= "count+= count2;";
@@ -154,8 +153,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertNoProblems(astRoot);
 		
 		{
 			String str= "j++;";
@@ -210,20 +208,10 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 	
 	public void testVariableDeclarations3() throws Exception {
-		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class Rectangle {\n");
-		buf.append("  public int x;\n");
-		buf.append("  public int y;\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("Rectangle.java", buf.toString(), false, null);
-		
+	
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1.ae;\n");
-		buf.append("import pack1.Rectangle;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int fVar1, fVar2;\n");
 		buf.append("    public int goo(int param1) {\n");
@@ -241,8 +229,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertNoProblems(astRoot);
 		
 		{
 			String str= "fVar1= k;";
@@ -292,8 +279,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertNoProblems(astRoot);
 		{
 			String str= "return r.x;";
 			int offset= buf.toString().indexOf(str) + "return r.".length();
@@ -334,8 +320,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertNoProblems(astRoot);
 		{
 			String str= "return 1;";
 			int offset= buf.toString().indexOf(str);
@@ -356,7 +341,122 @@ public class ScopeAnalyzerTest extends CoreTests {
 			assertVariables(res, new String[] { "param1", "fCount2", "fCount", "k", "param0", "fVar1", "fVar2"});
 		}				
 			
-	}	
+	}
+
+	public void testTypeDeclarations1() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static class A {\n");
+		buf.append("        public class A1 {\n");
+		buf.append("            public int foo() {\n");
+		buf.append("                return 1;\n");		
+		buf.append("            }\n");			
+		buf.append("        }\n");
+		buf.append("        public class A2 {\n");
+		buf.append("        }\n");		
+		buf.append("        public int foo() {\n");
+		buf.append("            return 2;\n");		
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+		buf.append("class F {\n");
+		buf.append("    public int goo(int param0) {\n");
+		buf.append("        class C extends E.A {\n");
+		buf.append("            A1 b;\n");
+		buf.append("            public int foo() {\n");
+		buf.append("                return 3;\n");		
+		buf.append("            }\n");
+		buf.append("        }\n");		
+		buf.append("        return 4;\n");
+		buf.append("    }\n");			
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		assertNoProblems(astRoot);
+		{
+			String str= "return 1;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.TYPES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { "A1", "A", "E", "A2", "F"});
+		}
+		
+		{
+			String str= "return 2;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.TYPES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { "A1", "A", "E", "A2", "F"});
+		}
+		
+		{
+			String str= "return 3;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.TYPES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { "C", "F", "A1", "A2", "E"});
+		}
+		
+		{
+			String str= "return 4;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.TYPES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { "C", "F", "E"});
+		}					
+			
+	}
+	
+	public void testTypeDeclarations2() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static class E1 extends G {\n");
+		buf.append("        public static class EE1 {\n");
+		buf.append("        }\n");
+		buf.append("        public static class EE2 {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public static class E2 {\n");
+		buf.append("    }\n");				
+		buf.append("}\n");		
+		buf.append("class F extends E.E1{\n");
+		buf.append("    F f1;\n");
+		buf.append("}\n");
+		buf.append("class G {\n");
+		buf.append("    public static class G1 {\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		assertNoProblems(astRoot);
+		{
+			String str= "F f1;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.TYPES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { "F", "EE1", "EE2", "G1", "G", "E"});
+		}
+	}		
+	
+		
 	
 	public void testMethodDeclarations1() throws Exception {
 		
@@ -379,8 +479,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertNoProblems(astRoot);
 		{
 			String str= "return;";
 			int offset= buf.toString().indexOf(str);
@@ -392,6 +491,70 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}			
 			
 	}
+	
+	public void testMethodDeclarations2() throws Exception {
+	
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    int fVar1, fVar2;\n");
+		buf.append("    public int goo(int param1) {\n");
+		buf.append("        Runnable run= new Runnable() {\n");
+		buf.append("            int fInner;\n");		
+		buf.append("            public void run() {\n");
+		buf.append("                return;\n");
+		buf.append("            }\n");		
+		buf.append("        };\n");
+		buf.append("        int k= 0;\n");
+		buf.append("        return k;\n");
+		buf.append("    }\n");
+		buf.append("    private class A extends E {\n");
+		buf.append("        { // initializer\n");
+		buf.append("           fVar1= 9; \n");		
+		buf.append("        }\n");
+		buf.append("        public int foo(int param1) {\n");
+		buf.append("            return 1;\n");		
+		buf.append("        }\n");		
+		buf.append("    }\n");			
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		assertNoProblems(astRoot);
+
+		{
+			String str= "return;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.METHODS;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertMethods(res, new String[] { "run", "goo", "E"}, true);
+		}
+		
+		{
+			String str= "return k;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.METHODS;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertMethods(res, new String[] { "goo", "E"}, true);
+		}
+		
+		{
+			String str= "return 1;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.METHODS;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			
+			assertMethods(res, new String[] { "foo", "goo", "E", "A"}, true);
+		}		
+
+	}
+	
 	
 	private static final String[] OBJ_METHODS= new String[] { "getClass", 
 		"hashCode", "equals", "clone", "toString", "notify", "notifyAll", "wait", "wait",
@@ -419,6 +582,17 @@ public class ScopeAnalyzerTest extends CoreTests {
 			names[i]= res[i].getName();
 		}
 		assertEqualStringsIgnoreOrder(names, expectedNames);
+	}
+	
+	private void assertNoProblems(CompilationUnit astRoot) {
+		IProblem[] problems= astRoot.getProblems();
+		if (problems.length > 0) {
+			StringBuffer buf= new StringBuffer();
+			for (int i= 0; i < problems.length; i++) {
+				buf.append(problems[i].getMessage()).append('\n');
+			}
+			assertTrue(buf.toString(), false);	
+		}
 	}
 
 	
