@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
@@ -45,10 +44,12 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -302,20 +303,24 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private void updateReferences(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException, CoreException {
 		pm.beginTask("", 2);//$NON-NLS-1$
-		ISearchPattern pattern= SearchEngine.createSearchPattern(fInputClass, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope= RefactoringScopeFactory.create(fInputClass);
-		SearchResultGroup[] referenceGroups= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
+		SearchResultGroup[] referenceGroups= getMemberReferences(fInputClass, new SubProgressMonitor(pm, 1));
 		addReferenceUpdatesAndImports(manager, new SubProgressMonitor(pm, 1), referenceGroups);
 		pm.done();
 	}
 	
+	private static SearchResultGroup[] getMemberReferences(IMember member, IProgressMonitor pm) throws JavaModelException{
+		ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
+		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
+		return RefactoringSearchEngine.search(pm, scope, pattern);
+	}
+	
 	private void addReferenceUpdatesAndImports(TextChangeManager manager, IProgressMonitor pm, SearchResultGroup[] resultGroups) throws CoreException {
-		Map mapping= getNodeMapping(resultGroups, pm); //ASTNode -> ICompilationUnit
+		Set nodeSet= getNodesToUpdate(resultGroups, pm); //ASTNodes
 		Set updatedCus= new HashSet(0);
-		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
+		for (Iterator iter= nodeSet.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
-			ICompilationUnit cu= (ICompilationUnit)mapping.get(node);
-			manager.get(cu).addTextEdit("update", createTypeUpdateEdit(new SourceRange(node)));	
+			ICompilationUnit cu= getCompilationUnit(node);
+			manager.get(cu).addTextEdit("Update reference", createTypeUpdateEdit(new SourceRange(node)));	
 			updatedCus.add(cu);
 		}
 		for (Iterator iter= updatedCus.iterator(); iter.hasNext();) {
@@ -324,38 +329,28 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				addInterfaceImport(manager, cu);			
 		}
 	}
-
-	//ASTNode -> ICompilationUnit
-	private Map getNodeMapping(SearchResultGroup[] resultGroups, IProgressMonitor pm) throws JavaModelException {
-		Map mapping= new HashMap();
+	
+	//Set of ASTNodes
+	private Set getNodesToUpdate(SearchResultGroup[] resultGroups, IProgressMonitor pm) throws JavaModelException {
+		Set nodeSet= new HashSet();
 		for (int i= 0; i < resultGroups.length; i++) {
-			SearchResultGroup searchResultGroup= resultGroups[i];
-			IJavaElement element= JavaCore.create(searchResultGroup.getResource());
-			if (!(element instanceof ICompilationUnit))
-				continue;
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
-			ASTNode[] nodes= getAstNodes(searchResultGroup.getSearchResults(), getAST(cu));
-			for (int j= 0; j < nodes.length; j++) {
-				mapping.put(nodes[j], cu);
-			}			
+			nodeSet.addAll(Arrays.asList(getAstNodes(resultGroups[i])));
 		}
-		retainUpdatableNodes(mapping, pm);
-		return mapping;
+		retainUpdatableNodes(nodeSet, pm);
+		return nodeSet;
 	}
-
-	//ASTNode -> ICompilationUnit
-	private void retainUpdatableNodes(Map mapping, IProgressMonitor pm) throws JavaModelException {
-		Collection nodesToRemove= computeNodesToRemove(mapping, pm);
+	
+	private void retainUpdatableNodes(Set nodeSet, IProgressMonitor pm) throws JavaModelException {
+		Collection nodesToRemove= computeNodesToRemove(nodeSet, pm);
 		for (Iterator iter= nodesToRemove.iterator(); iter.hasNext();) {
-			mapping.remove(iter.next());
+			nodeSet.remove(iter.next());
 		}
 	}
 	
-	//ASTNode -> ICompilationUnit	
-	private Collection computeNodesToRemove(Map mapping, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", mapping.keySet().size()); //XXX
+	private Collection computeNodesToRemove(Set nodeSet, IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", nodeSet.size()); //XXX
 		Collection nodesToRemove= new HashSet(0);
-		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
+		for (Iterator iter= nodeSet.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
 			if (hasDirectProblems(node, new SubProgressMonitor(pm, 1)))
 				nodesToRemove.add(node);	
@@ -363,7 +358,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		boolean reiterate;
 		do {
 			reiterate= false;
-			for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
+			for (Iterator iter= nodeSet.iterator(); iter.hasNext();) {
 				ASTNode node= (ASTNode) iter.next();
 				if (! nodesToRemove.contains(node) && hasIndirectProblems(node, nodesToRemove, new NullProgressMonitor())){ //XXX
 					reiterate= true;
@@ -527,9 +522,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private ASTNode[] getReferenceNodes(IMember member, IProgressMonitor pm) throws JavaModelException{
-		ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
-		SearchResultGroup[] referenceGroups= RefactoringSearchEngine.search(pm, scope, pattern);
+		SearchResultGroup[] referenceGroups= getMemberReferences(member, pm);
 		List result= new ArrayList();
 		for (int i= 0; i < referenceGroups.length; i++) {
 			ICompilationUnit referencedCu= referenceGroups[i].getCompilationUnit();
@@ -606,6 +599,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			}	
 			if (parentNode instanceof TypeLiteral)
 				return true;
+			if (parentNode instanceof MethodInvocation)	
+				return true;
+			if (parentNode instanceof FieldAccess)	
+				return true;
+			if (parentNode instanceof QualifiedName)	
+				return true;
 				
 			if (parentNode instanceof MethodDeclaration){
 				MethodDeclaration md= (MethodDeclaration)parentNode;
@@ -655,10 +654,25 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				if (isNotUpdatableReference(parentNode))
 					return true;
 			}
+			if (parentNode instanceof ImportDeclaration)	
+				return true;	
 			return false;	
 		} finally {
 			pm.done();
 		}	
+	}
+
+	private ASTNode[] getAstNodes(SearchResultGroup searchResultGroup){
+		Set nodeSet= new HashSet();
+		ICompilationUnit cu= searchResultGroup.getCompilationUnit();
+		if (cu == null)
+			return new ASTNode[0];
+		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+		ASTNode[] nodes= getAstNodes(searchResultGroup.getSearchResults(), getAST(wc));
+		for (int i= 0; i < nodes.length; i++) {
+			nodeSet.add(nodes[i]);
+		}
+		return (ASTNode[]) nodeSet.toArray(new ASTNode[nodeSet.size()]);	
 	}
 	
 	private static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
@@ -721,8 +735,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private static boolean isExtractableMember(IMember iMember) throws JavaModelException {
 		if (iMember.getElementType() == IJavaElement.METHOD)
 			return isExtractableMethod((IMethod)iMember);
-		if (iMember.getElementType() == IJavaElement.FIELD)	
-			return isExtractableField((IField)iMember);
+//		if (iMember.getElementType() == IJavaElement.FIELD)	
+//			return isExtractableField((IField)iMember);
 		return false;	
 	}
 
