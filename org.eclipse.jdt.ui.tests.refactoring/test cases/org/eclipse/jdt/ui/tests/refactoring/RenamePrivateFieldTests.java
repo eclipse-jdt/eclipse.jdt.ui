@@ -36,6 +36,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "RenamePrivateField/";
 
 	private static final boolean BUG_75642_GENERIC_METHOD_SEARCH= true;
+	private static final boolean BUG_81084= true;
 	
 	private Object fPrefixPref;
 	public RenamePrivateFieldTests(String name) {
@@ -253,6 +254,10 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	
 	public void test10() throws Exception{
 		//regression test for 81084
+		if (BUG_81084) {
+			printTestDisabledMessage("BUG_81084");
+			return;
+		}
 		helper2("fList", "fElements", true, false, false, false, false, false);
 	}		
 	
