@@ -155,7 +155,11 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		// we don't show the contents of a compilation or IClassFile, so don't go any deeper
 		if ((element instanceof ICompilationUnit) || (element instanceof IClassFile))
 			return;
-		
+			
+		// the contents of an external JAR has changed
+		if (element instanceof IPackageFragmentRoot && ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0))
+			postRefresh(element);
+			
 		if (isClassPathChange(delta)) {
 			 // throw the towel and do a full refresh of the affected java project. 
 			postRefresh(element.getJavaProject());
