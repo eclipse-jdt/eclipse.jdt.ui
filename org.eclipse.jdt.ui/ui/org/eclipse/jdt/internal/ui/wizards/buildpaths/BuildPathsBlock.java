@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.lang.reflect.InvocationTargetException;import java.text.MessageFormat;import java.util.ArrayList;import java.util.List;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.TabFolder;import org.eclipse.swt.widgets.TabItem;import org.eclipse.swt.widgets.Widget;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.ISharedImages;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.util.CoreUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.TabFolderLayout;import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
+import java.lang.reflect.InvocationTargetException;import java.text.MessageFormat;import java.util.ArrayList;import java.util.List;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.TabFolder;import org.eclipse.swt.widgets.TabItem;import org.eclipse.swt.widgets.Widget;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.ISharedImages;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.util.CoreUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.TabFolderLayout;import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 public class BuildPathsBlock {
 	
@@ -20,6 +20,8 @@ public class BuildPathsBlock {
 	private static final String BP_ENTERPATH_ERROR= "BuildPathsBlock.error.EnterBuildPath";
 	private static final String BP_PROJNOTEXISTS_ERROR= "BuildPathsBlock.error.BuildPathProjNotExists";
 	private static final String BP_CPBP_CLASH_ERROR= "BuildPathsBlock.error.BuildPathInClassPath";
+	private static final String BP_CPBP_CLASH_OUTPUT= "BuildPathsBlock.error.OutputInSourceFolder";
+	private static final String BP_CPBP_CLASH_CFF= "BuildPathsBlock.error.OutputIsClassFileFolder";
 		
 	private static final String CP_RECURSIVE_ERROR= "BuildPathsBlock.error.RecursiveClassPath";
 	private static final String CP_DUPLICATE_ERROR= "BuildPathsBlock.error.DuplicateEntriesInClassPath";
@@ -454,29 +456,64 @@ public class BuildPathsBlock {
 		}
 		fOutputLocationPath= path;
 		
-		
 		// 1GET6BZ: ITPJUI:ALL - Error setting source folder
 		// test if the build path is overlapping with a class path entry
 		// (exception: a source contianer may be equal to the bin folder (but not nested))
 		List elements= fClassPathList.getElements();
+		
+		// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
+		// check if any source entries coincidates with binary output - in which case nesting inside output is legal
+		// Code adopted from JavaCore SetClasspathOperation.verfiy()
+		boolean allowNestingInOutput = false;
+		for (int i= elements.size()-1 ; i >= 0 ; i--) {
+			CPListElement entry= (CPListElement)elements.get(i);
+			if (entry.getPath().equals(fOutputLocationPath)){
+				allowNestingInOutput= true;
+				break;
+			}
+		}
+		
+		// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
+		IPath projectPath= fCurrProject.getFullPath();
+		
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
 			CPListElement listElement= (CPListElement)elements.get(i);
-			int kind= listElement.getEntryKind();
+						
+			IPath cppath= listElement.getPath();
 			
-			if (kind == IClasspathEntry.CPE_SOURCE || kind == IClasspathEntry.CPE_LIBRARY) {
-				IPath cppath= listElement.getPath();
-				if (path.isPrefixOf(cppath) && !path.equals(cppath)) {
-					fBuildPathStatus.setError(getFormattedString(BP_CPBP_CLASH_ERROR, cppath.toString()));
-					return;
-				}
+			// Addition to Java Core. Avoid setting class file folder to output location
+			if (listElement.getEntryKind() == IClasspathEntry.CPE_LIBRARY && cppath.equals(fOutputLocationPath)) {
+				fBuildPathStatus.setError(getFormattedString(BP_CPBP_CLASH_CFF, cppath.toString()));
+				return;
+				
 			}
+						
+			// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
+			// Code adopted from SetClasspathOperation.verify();
+			// no further check if entry coincidates with project or output location
+			if (cppath.equals(projectPath)) continue;
+			if (cppath.equals(fOutputLocationPath)) continue;
+			
+			// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
+			// prevent nesting the output location inside entry.
+			if (cppath.isPrefixOf(fOutputLocationPath)) {
+				fBuildPathStatus.setError(getFormattedString(BP_CPBP_CLASH_OUTPUT, cppath.toString()));
+				return;
+			}
+			
+			// 1GET6BZ: ITPJUI:ALL - Error setting source folder
+			// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
+			// Removed kind check to be consistent with check done in SetClasspathOperation
+			if (!allowNestingInOutput && fOutputLocationPath.isPrefixOf(cppath)) {
+				fBuildPathStatus.setError(getFormattedString(BP_CPBP_CLASH_ERROR, cppath.toString()));
+				return;
+			}
+				
 		}
 				
 		fBuildPathStatus.setOK();
-	}	
+	}
 	
-	
-				 
 	// -------- creation -------------------------------
 	
 	public IRunnableWithProgress getRunnable() {
