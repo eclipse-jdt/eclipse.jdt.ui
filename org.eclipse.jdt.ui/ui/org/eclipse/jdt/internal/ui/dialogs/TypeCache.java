@@ -1,25 +1,24 @@
-package org.eclipse.jdt.internal.ui.dialogs;import java.util.ArrayList;import java.util.List;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jface.operation.IRunnableContext;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.dialogs;import java.util.ArrayList;import java.util.List;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.internal.core.search.JavaWorkspaceScope;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jface.operation.IRunnableContext;
 public class TypeCache{
 
 	private static int fgLastStyle= -1;
 	private static List fgTypeList;
-	private static boolean fgIsRegistered= false;
+	private static boolean fgIsRegistered= false;		//no instances	private TypeCache(){	}
 
 	public static List findTypes(AllTypesSearchEngine engine, int style, IRunnableContext runnableContext, IJavaSearchScope scope) {
-						//FIXME: should also check if the scope is the same. (at least workbench scope)		//needs an equals method on IJavaSearchScope
-		checkIfSameStyle(style);
+				checkIfOkToReuse(style, scope);
 		if (fgTypeList == null) {
 			fgTypeList= engine.searchTypes(runnableContext, scope, style);
 			if (!fgIsRegistered){
 				JavaCore.addElementChangedListener(new DeltaListener());				fgIsRegistered= true;			}	
-		}				//must never return null		if (fgTypeList == null)			return new ArrayList(0); 		else				return fgTypeList;
+		}				//must not return null		if (fgTypeList == null)			return new ArrayList(0); 		else				return fgTypeList;
 	}
 
-	private static void checkIfSameStyle(int style) {
+	private static void checkIfOkToReuse(int style, IJavaSearchScope scope) {
 		if (style != fgLastStyle)
-			fgTypeList= null;
-		fgLastStyle= style;
-	}
+			flushCache();
+				if (! (scope instanceof JavaWorkspaceScope))			flushCache();					fgLastStyle= style;	
+	}		private static void flushCache(){		fgTypeList= null;	}
 
 	private static class DeltaListener implements IElementChangedListener {
 		public void elementChanged(ElementChangedEvent event) {
@@ -67,7 +66,7 @@ public class TypeCache{
 				return true;
 	
 			if (mustFlush(delta)) {
-				fgTypeList= null;
+				flushCache();
 				return false;
 			}
 			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
