@@ -553,7 +553,7 @@ public class UnresolvedElementsSubProcessor {
 			} else {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addarguments.description", arg); //$NON-NLS-1$
 			}			
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
 			proposal.ensureNoModifications();
 			proposals.add(proposal);				
@@ -586,7 +586,7 @@ public class UnresolvedElementsSubProcessor {
 					}					
 				}
 			
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
 				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
 			}
@@ -638,7 +638,7 @@ public class UnresolvedElementsSubProcessor {
 			} else {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removearguments.description", arg); //$NON-NLS-1$
 			}			
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
 			proposal.ensureNoModifications();
 			proposals.add(proposal);				
@@ -676,7 +676,7 @@ public class UnresolvedElementsSubProcessor {
 						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.description", arg); //$NON-NLS-1$
 					}
 				}	
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
 			}
