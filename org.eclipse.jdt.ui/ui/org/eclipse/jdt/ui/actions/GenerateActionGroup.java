@@ -309,6 +309,8 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(result, fAddDelegateMethods);
 		added+= addAction(result, fAddUnimplementedConstructors);
 		added+= addAction(result, fAddJavaDocStub);
+		added+= addAction(result, fAddToClasspathAction);
+		added+= addAction(result, fRemoveFromClasspathAction);
 		result.add(new Separator());		
 		added+= addAction(result, fSurroundWithTryCatch);
 		added+= addAction(result, fExternalizeStrings);
