@@ -47,15 +47,11 @@ public class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 		return result;
 	}
 	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(super.checkActivation(pm));
+		result.merge(super.checkPreactivation());
 		result.merge(checkAvailability(getMethod()));
-		
-		HackFinder.fixMeSoon("remove this constraint");	
-		if (Flags.isNative(getMethod().getFlags()))
-			result.addFatalError("not applicable to native methods");
-			
+					
 		if (Flags.isPrivate(getMethod().getFlags()))
 			result.addFatalError("must not be private");
 		if (! Flags.isStatic(getMethod().getFlags()))

@@ -60,9 +60,9 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 		return result;
 	}
 		
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(super.checkActivation(pm));
+		result.merge(super.checkPreactivation());
 		if (! getMethod().getDeclaringType().isInterface()){
 			result.addFatalError("Not applicable to class methods");
 		}
@@ -114,8 +114,6 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	/************ Changes ***************/
 
 	private HashSet getRelatedTypes(IProgressMonitor pm) throws JavaModelException {
-		
-		HackFinder.fixMeSoon("needs a better name");
 		pm.beginTask("", 2);
 		IType type= getMethod().getDeclaringType();
 		ITypeHierarchy hierarchy= type.newTypeHierarchy(new SubProgressMonitor(pm, 1));
@@ -125,17 +123,11 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	}
 
 	private boolean containsNew(IMethod method, IType type) throws JavaModelException {
-
-		HackFinder.fixMeSoon(null);
-
 		IMethod found= findMethod(getNewName(), method.getParameterTypes().length, false, type);
 		return (found != null && !Flags.isPrivate(found.getFlags()) && !Flags.isStatic(found.getFlags()));
 	}
 
 	private boolean containsOld(IMethod method, IType type) throws JavaModelException {
-		
-		HackFinder.fixMeSoon(null);
-		
 		IMethod found= findMethod(method, type);
 		return (found != null && !Flags.isPrivate(found.getFlags()) && !Flags.isStatic(found.getFlags()));
 	}

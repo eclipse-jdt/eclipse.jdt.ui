@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.IChange;
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
-import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.core.refactoring.text.ITextBufferChange;
 import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;
@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
  * non java-doc
  * not API
  */
-abstract class RenameMethodRefactoring extends MethodRefactoring implements IRenameRefactoring{
+abstract class RenameMethodRefactoring extends MethodRefactoring implements IRenameRefactoring, IPreactivatedRefactoring{
 	
 	private String fNewName;
 	
@@ -129,13 +129,22 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		return fOccurrences;
 	}
 			
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getMethod()));
+		if (isSpecialCase(getMethod()))
+			result.addError("This method is a special case - renaming might change program's behavior.");
+		if (getMethod().isConstructor())
+			result.addFatalError("Not applicable to contructors");	
+		return result;
+	}
+	
+	public final RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+		if (! getMethod().getCompilationUnit().isStructureKnown())
+			result.addFatalError("Compilation unit that declares this method cannot be parsed correctly.");
 		if (Flags.isNative(getMethod().getFlags()))
 			result.addError("Renaming native methods can change the program's behavior.");
-		if (isSpecialCase(getMethod()))
-			result.addError("This method is a special case - renaming might change program's behavior.");	
 		return result;
 	}
 					
@@ -213,7 +222,6 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 			builder.addChange(change);
 			pm.worked(1);
 		}
-		HackFinder.fixMeSoon("maybe add dispose() method?");
 		fOccurrences= null; //to prevent memory leak
 	}
 	
@@ -267,11 +275,10 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		pm.done();
 		return methods;
 	}
-	/**
+	
+	/* not java-doc
 	 * possible performance improvement
 	 * needs rework
-	 *
-	 * it's too specific to have a home here - should be moved
 	 */
 	private boolean classesDeclareMethodName(ITypeHierarchy hier, List classes, IMethod method, String newName)  throws JavaModelException  {
 

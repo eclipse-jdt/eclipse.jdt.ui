@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.SearchResult;
+import org.eclipse.jdt.internal.core.refactoring.Checks;import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.core.util.HackFinder;
 
@@ -73,21 +73,17 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		return result;
 	}
 		
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(super.checkActivation(pm));
+		result.merge(super.checkPreactivation());
 		result.merge(checkAvailability(getMethod()));
-		
-		HackFinder.fixMeSoon("remove this constraint");
-		if (Flags.isNative(getMethod().getFlags()))
-			result.addFatalError("not applicable to native methods");
-			
+					
 		if (Flags.isPrivate(getMethod().getFlags()))
 			result.addFatalError("not applicable to private methods");
 		if (Flags.isStatic(getMethod().getFlags()))
 			result.addFatalError("not applicable to static methods");	
-		if (getMethod().isConstructor())
-			result.addFatalError("not applicable to contructors");
+		//if (getMethod().isConstructor())
+		//	result.addFatalError("not applicable to contructors");
 		if (! getMethod().getDeclaringType().isClass())
 			result.addFatalError("only applicable to class methods");
 		return result;
@@ -96,8 +92,12 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	private RefactoringStatus analyzeCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		List grouped= getOccurrences(pm);
 		if (grouped.isEmpty())
-			return null;	
-		RefactoringStatus result= new RefactoringStatus();	
+			return null;
+			
+		RefactoringStatus result= Checks.excludeBrokenCompilationUnits(grouped);
+		if (result.hasFatalError())
+			return result;
+			
 		RenameMethodASTAnalyzer analyzer= new RenameMethodASTAnalyzer(getNewName(), getMethod());
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){	
 			List searchResults= (List)iter.next();
@@ -175,13 +175,7 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		return methods;
 	}
 		
-	/**
-	 * possible performance improvement
-	 */ 
 	private boolean classesDeclareOverridingNativeMethod(IType[] classes) throws JavaModelException{
-		
-		HackFinder.fixMeSoon(null);
-		
 		boolean isPrivate= Flags.isPrivate(getMethod().getFlags());
 		for (int i= 0; i < classes.length; i++){
 			IMethod[] methods= classes[i].getMethods();
@@ -194,6 +188,7 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		}
 		return false;
 	}
+	
 	/**
 	 * Finds a method in a type's hierarchy
 	 * This searches for a method with the same name and signature. Parameter types are only

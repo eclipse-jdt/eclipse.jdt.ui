@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;import org.e
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
 	private String fPageMessage;
+	
 	private static final String INPUTPAGE_TITLE_SUFFIX= ".wizard.inputpage.title";
 	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
 	
@@ -54,5 +55,9 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 			result.addFatalError("JavaModelException during name checking:" + msg);
 			return result;
 		}	
+	}
+	
+	protected boolean checkActivationOnOpen() {
+		return true;
 	}
 }

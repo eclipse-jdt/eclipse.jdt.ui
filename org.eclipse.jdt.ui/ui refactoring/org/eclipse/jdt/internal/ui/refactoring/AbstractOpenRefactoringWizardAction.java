@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.Refactoring;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 
 public abstract class AbstractOpenRefactoringWizardAction extends AbstractOpenWizardAction {
@@ -34,7 +34,11 @@ public abstract class AbstractOpenRefactoringWizardAction extends AbstractOpenWi
 	
 	private boolean canActivateRefactoring() {
 		try {
-			return fRefactoring.checkActivation(fgNullProgressMonitor).isOK();
+			//FIX ME: must have a better solution to this
+			if (fRefactoring instanceof IPreactivatedRefactoring)
+				return ((IPreactivatedRefactoring)fRefactoring).checkPreactivation().isOK();
+			else	
+				return fRefactoring.checkActivation(fgNullProgressMonitor).isOK();
 		} catch (JavaModelException e){
 			return false;
 		}

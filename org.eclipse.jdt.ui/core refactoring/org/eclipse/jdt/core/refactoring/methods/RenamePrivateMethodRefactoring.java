@@ -80,19 +80,13 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 		return result;
 	}
 		
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(super.checkActivation(pm));
+		result.merge(super.checkPreactivation());
 		result.merge(checkAvailability(getMethod()));
 		if (! Flags.isPrivate(getMethod().getFlags()))
 			result.addFatalError("Only applicable to private methods");
 
-		HackFinder.fixMeSoon("remove this constraint");	
-		if (Flags.isNative(getMethod().getFlags()))
-			result.addFatalError("Not applicable to native methods");
-
-		if (Flags.isStatic(getMethod().getFlags()))
-			result.addFatalError("Not applicable to static methods");	
 		return result;
 	}
 	
@@ -124,7 +118,6 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 		change.addReplace("Method declaration change", getMethod().getNameRange().getOffset(), getMethod().getNameRange().getLength(), getNewName());
 		builder.addChange(change);
 		pm.worked(1);
-		HackFinder.fixMeSoon("maybe add dispose() method?");
 		setOccurrences(null); //to prevent memory leak
 	}
 	

@@ -3,7 +3,7 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.core.refactoring.methods;
-import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.text.ITextBufferChange;import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.Checks;import org.eclipse.jdt.internal.core.util.HackFinder;
+import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.core.refactoring.text.ITextBufferChange;import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.Checks;import org.eclipse.jdt.internal.core.util.HackFinder;
 
 /**
  * <p>
@@ -12,7 +12,7 @@ import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
-public class RenameParametersRefactoring extends MethodRefactoring{
+public class RenameParametersRefactoring extends MethodRefactoring implements IPreactivatedRefactoring{
 
 	private String[] fNewParameterNames;
 
@@ -59,7 +59,7 @@ public class RenameParametersRefactoring extends MethodRefactoring{
 		fNewParameterNames= newParameterNames;
 	}
 	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getMethod()));
 		HackFinder.fixMeSoon("fix this");
@@ -67,6 +67,13 @@ public class RenameParametersRefactoring extends MethodRefactoring{
 			result.addFatalError("Temporarily not available for constructors");
 		if (fOldParameterNames == null || fOldParameterNames.length == 0)
 			result.addFatalError("Only applicable to methods with parameters."); 
+		return result;
+	}
+	
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+		if (! getMethod().getCompilationUnit().isStructureKnown())
+			result.addFatalError("Compilation unit that declares this method cannot be parsed correctly.");
 		return result;
 	}
 
