@@ -38,7 +38,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -109,7 +108,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	
 	private static int askIfOverwrite(String elementName){
 		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
-		String title= RefactoringMessages.getString("JdtMoveAction.move"); //$NON-NLS-1$
+		String title= ReorgMessages.getString("JdtMoveAction.move"); //$NON-NLS-1$
 		String question= "Element '" + elementName + "' already exists. Would you like to overwrite?";
 		
 		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL,
@@ -183,7 +182,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 			return;
 		}	
 		//XX incorrect help
-		RefactoringWizard wizard= new RefactoringWizard(refactoring, RefactoringMessages.getString("JdtMoveAction.move"), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+		RefactoringWizard wizard= new RefactoringWizard(refactoring, ReorgMessages.getString("JdtMoveAction.move"), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); //$NON-NLS-1$
 		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();	
 	}
 	
@@ -210,7 +209,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
 			fCheckbox= new Button(result, SWT.CHECK);
-			fCheckbox.setText(RefactoringMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
+			fCheckbox.setText(ReorgMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
 			fCheckbox.setEnabled(canUpdateReferences());
 			fCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -224,7 +223,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		
 		protected void createButtonsForButtonBar(Composite parent) {
 			super.createButtonsForButtonBar(parent);
-			fPreview= createButton(parent, PREVIEW_ID, RefactoringMessages.getString("JdtMoveAction.preview"), false); //$NON-NLS-1$
+			fPreview= createButton(parent, PREVIEW_ID, ReorgMessages.getString("JdtMoveAction.preview"), false); //$NON-NLS-1$
 		}
 		
 		protected void updateOKStatus() {
@@ -234,7 +233,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 				fCheckbox.setEnabled(getOkButton().getEnabled() &&  canUpdateReferences());
 				updatePreviewButton();
 			} catch (JavaModelException e){
-				ExceptionHandler.handle(e, RefactoringMessages.getString("JdtMoveAction.move"), RefactoringMessages.getString("JdtMoveAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, ReorgMessages.getString("JdtMoveAction.move"), ReorgMessages.getString("JdtMoveAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			}		
 		}
 		
