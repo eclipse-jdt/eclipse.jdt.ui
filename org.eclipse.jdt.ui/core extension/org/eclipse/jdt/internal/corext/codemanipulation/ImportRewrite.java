@@ -53,6 +53,9 @@ public final class ImportRewrite {
 		this(cunit, JavaPreferencesSettings.getImportOrderPreference(cunit.getJavaProject()), JavaPreferencesSettings.getImportNumberThreshold(cunit.getJavaProject()));
 	}
 	
+	/**
+	 * @deprecated Use #createEdit(IDocument, IProgressMonitor) instead
+	 */
 	public final TextEdit createEdit(IDocument document) throws CoreException {
 		return createEdit(document, null);
 	}
@@ -146,6 +149,20 @@ public final class ImportRewrite {
 	 */
 	public Type addImport(ITypeBinding binding, AST ast) {
 		return fImportsStructure.addImport(binding, ast);
+	}
+	
+	/**
+	 * Adds a new import declaration that is sorted in the structure using
+	 * a best match algorithm. If an import already exists, the import is
+	 * not added.  The type binding can be an array binding. No import is added for unnamed
+	 * types (local or anonymous types)
+	 * @param typeSig The type name in signature notations (See {@link org.eclipse.jdt.core.Signature}).
+	 * @param ast The ast to create the node for
+	 * @return Returns the simple type name that can be used in the code or the
+	 * fully qualified type name if an import conflict prevented the import.
+	 */
+	public Type addImportFromSignature(String typeSig, AST ast) {
+		return fImportsStructure.addImportFromSignature(typeSig, ast);
 	}
 	
 	/**
