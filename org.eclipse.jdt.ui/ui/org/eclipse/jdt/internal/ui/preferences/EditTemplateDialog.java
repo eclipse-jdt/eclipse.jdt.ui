@@ -265,7 +265,7 @@ public class EditTemplateDialog extends StatusDialog {
 	private List fSelectionActions = new ArrayList(3);	
 	private String[] fContextTypes;
 	
-	private final TemplateVariableProcessor fProcessor= new TemplateVariableProcessor();
+	private final TemplateVariableProcessor fTemplateProcessor= new TemplateVariableProcessor();
 		
 	public EditTemplateDialog(Shell parent, Template template, boolean edit, boolean isNameModifiable, String[] contextTypes) {
 		super(parent);
@@ -284,7 +284,7 @@ public class EditTemplateDialog extends StatusDialog {
 		fValidationStatus= new StatusInfo();
 		
 		ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
-		fProcessor.setContextType(type);
+		fTemplateProcessor.setContextType(type);
 	}
 	
 	/*
@@ -385,7 +385,7 @@ public class EditTemplateDialog extends StatusDialog {
 		} else if (w == fContextCombo) {
 			String name= fContextCombo.getText();
 			fTemplate.setContext(name);
-			fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(name));
+			fTemplateProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(name));
 		} else if (w == fDescriptionText) {
 			String desc= fDescriptionText.getText();
 			fTemplate.setDescription(desc);
@@ -439,7 +439,7 @@ public class EditTemplateDialog extends StatusDialog {
 		IDocument document= new Document(fTemplate.getPattern());
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
-		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null, fProcessor));
+		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null, fTemplateProcessor));
 		viewer.setEditable(true);
 		viewer.setDocument(document);
 		
