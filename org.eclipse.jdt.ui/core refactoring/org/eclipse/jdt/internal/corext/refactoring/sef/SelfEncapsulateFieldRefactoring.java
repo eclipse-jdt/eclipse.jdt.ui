@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Message;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -360,7 +361,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		TextChange change= fChangeManager.get(fField.getCompilationUnit());
 		
 		if (!JdtFlags.isPrivate(fField))
-			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility"), new ChangeVisibilityEdit(fField, JdtFlags.VISIBILITY_CODE_PRIVATE)); //$NON-NLS-1$
+			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility"), new ChangeVisibilityEdit(fField, Modifier.PRIVATE)); //$NON-NLS-1$
 		
 		String modifiers= createModifiers();
 		String type= Signature.toString(fField.getTypeSignature());
