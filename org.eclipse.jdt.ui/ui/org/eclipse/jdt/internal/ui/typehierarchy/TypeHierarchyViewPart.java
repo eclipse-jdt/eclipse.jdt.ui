@@ -81,6 +81,7 @@ import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
@@ -153,6 +154,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private IDialogSettings fDialogSettings;
 	
 	private ToggleViewAction[] fViewActions;
+	private IRefactoringAction fDeleteAction;
 	
 	private HistoryDropDownAction fHistoryDropDownAction;
 	
@@ -484,8 +486,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					} else if (event.keyCode == SWT.F5) {
 						updateHierarchyViewer();
 						return;
+					} else if (event.character == SWT.DEL){
+						fDeleteAction.update();
+						if (fDeleteAction.isEnabled())
+							fDeleteAction.run();
+						return;	
 					}
-				}
+ 				}
 				viewPartKeyShortcuts(event);					
 			}
 		};		
@@ -633,7 +640,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		getSite().setSelectionProvider(fSelectionProviderMediator);
 		getSite().getPage().addPartListener(fPartListener);
 		
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE,  ReorgGroup.createDeleteAction(fSelectionProviderMediator));
+		fDeleteAction= ReorgGroup.createDeleteAction(fSelectionProviderMediator);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE,  fDeleteAction);
 				
 		IJavaElement input= determineInputElement();
 		if (fMemento != null) {
