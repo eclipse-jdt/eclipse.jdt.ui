@@ -387,8 +387,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		validSelectionTest();
 	}
 	
-	public void test131() throws Exception {
-		invalidSelectionTest();
+	public void test131_() throws Exception {
+		validSelectionTest();
 	}
 	
 	//---- invalid return statement selection
