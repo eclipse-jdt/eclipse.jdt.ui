@@ -329,6 +329,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fNoHierarchyShownLabel.setText(CallHierarchyMessages.getString(
                 "CallHierarchyViewPart.empty")); //$NON-NLS-1$   
 
+		initDragAndDrop();
+
         showPage(PAGE_EMPTY);
 
         WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
@@ -355,9 +357,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         if (fMemento != null) {
             restoreState(fMemento);
         }
-        
-        initDragAndDrop();      
-    }
+   }
 
     /**
      * @param PAGE_EMPTY

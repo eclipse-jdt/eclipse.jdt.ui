@@ -704,10 +704,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				
 		ToolBar methodViewerToolBar= new ToolBar(fMethodViewerViewForm, SWT.FLAT | SWT.WRAP);
 		fMethodViewerViewForm.setTopCenter(methodViewerToolBar);
-		
+				
 		// page 2 of pagebook (no hierarchy label)
 		fNoHierarchyShownLabel= new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
 		fNoHierarchyShownLabel.setText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.empty")); //$NON-NLS-1$	
+
+		initDragAndDrop();
 		
 		MenuManager menu= new MenuManager();
 		menu.add(fFocusOnTypeAction);
@@ -795,8 +797,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fSelectAllAction= new SelectAllAction(fMethodsViewer);
 		
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
-		
-		initDragAndDrop();		
 	}
 
 

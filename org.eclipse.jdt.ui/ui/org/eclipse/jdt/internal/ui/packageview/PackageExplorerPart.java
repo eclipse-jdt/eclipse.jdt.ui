@@ -274,6 +274,7 @@ public class PackageExplorerPart extends ViewPart
 		fViewer= createViewer(parent);
 		fViewer.setUseHashlookup(true);
 		fViewer.setComparer(new PackageExplorerElementComparer());
+		initDragAndDrop();
 		
 		setProviders();
 		
@@ -302,7 +303,6 @@ public class PackageExplorerPart extends ViewPart
 		restoreFilterAndSorter();
 		fViewer.setInput(findInputElement());
 		initFrameActions();
-		initDragAndDrop();
 		initKeyListener();
 			
 		fSelectionListener= new ISelectionChangedListener() {

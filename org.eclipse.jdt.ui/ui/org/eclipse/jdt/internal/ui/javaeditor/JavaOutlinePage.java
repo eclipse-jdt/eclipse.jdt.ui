@@ -921,8 +921,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		);
 
 		fOutlineViewer= new JavaOutlineViewer(tree);		
+		initDragAndDrop();
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(new DecoratingJavaLabelProvider(lprovider));
+		
 		
 		Object[] listeners= fSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
@@ -987,8 +989,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				handleKeyReleased(e);
 			}
 		});
-		
-		initDragAndDrop();
 	}
 
 	public void dispose() {

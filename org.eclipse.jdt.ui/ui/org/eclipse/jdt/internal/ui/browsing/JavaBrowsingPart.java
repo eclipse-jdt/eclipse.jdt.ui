@@ -330,6 +330,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Setup viewer
 		fViewer= createViewer(parent);
 
+		initDragAndDrop();
+
 		fLabelProvider= createLabelProvider();
 		fViewer.setLabelProvider(createDecoratingLabelProvider(fLabelProvider));
 		
@@ -365,9 +367,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Initialize viewer input
 		fViewer.setContentProvider(createContentProvider());
 		setInitialInput();
-		
-		initDragAndDrop();
-		
+				
 		// Initialize selecton
 		setInitialSelection();
 		fMemento= null;		
