@@ -495,7 +495,11 @@ public class JarFileExportOperation implements IJarExportRunnable {
 			fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer);
 			if (fJavaNameToClassFilesMap == null) {
 				// Could not fully build map. fallback is to export whole directory
-				String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.missingSourceFileAttributeExportedAll", classContainer.getLocation().toFile()); //$NON-NLS-1$
+				IPath location= classContainer.getLocation();
+				String containerName= "";  //$NON-NLS-1$
+				if (location != null)
+					containerName= location.toFile().toString();
+				String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.missingSourceFileAttributeExportedAll", containerName); //$NON-NLS-1$
 				addInfo(msg, null);
 				fExportedClassContainers.add(classContainer);
 				return getClassesIn(classContainer);
