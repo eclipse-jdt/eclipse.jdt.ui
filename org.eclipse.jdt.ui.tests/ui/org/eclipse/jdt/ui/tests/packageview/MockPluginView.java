@@ -141,18 +141,15 @@ public class MockPluginView extends PackageExplorerPart {
 		public void refresh(Object object){
 			fRefreshHappened= true;
 			fRefreshedObjects.add(object);	
-			super.refresh(object);
 		}
 		
 		public void remove (Object object){
 			fRemoveHappened= true;
 			fRemovedObject= object;
-			super.remove(object);	
 		}
 		
 		public void add(Object parentObject, Object object){
 			fAddHappened= true;
-			super.add(parentObject, object);	
 			fAddedObject= object;
 			fAddedParentObject= parentObject;
 		}
@@ -162,8 +159,12 @@ public class MockPluginView extends PackageExplorerPart {
 	 * Returns the refreshed object.
 	 * @return Object
 	 */
-	public boolean getRefreshedObject(Object c) {
+	public boolean wasObjectRefreshed(Object c) {
 		return fRefreshedObjects.contains(c);
+	}
+	
+	public List getRefreshedObject(){
+		return fRefreshedObjects;	
 	}
 
 	/**
