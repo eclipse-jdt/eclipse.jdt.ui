@@ -127,8 +127,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	}
 
 	public void create() {
-		if (getFilter() == null)
-			setFilter("A"); //$NON-NLS-1$
+//		if (getFilter() == null)
+//			setFilter("A"); //$NON-NLS-1$
 				
 		super.create();
 	}
