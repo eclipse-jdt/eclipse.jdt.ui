@@ -28,12 +28,13 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Represents a custom filter which is provided by the
@@ -99,9 +100,9 @@ public class FilterDescriptor implements Comparable {
 	private FilterDescriptor(IConfigurationElement element) {
 		fElement= element;
 		// it is either a pattern filter or a custom filter
-		Assert.isTrue(isPatternFilter() ^ isCustomFilter());
-		Assert.isNotNull(getId());
-		Assert.isNotNull(getName());
+		Assert.isTrue(isPatternFilter() ^ isCustomFilter(), "An extension for extension-point org.eclipse.jdt.ui.javaElementFilters does not specify a correct filter"); //$NON-NLS-1$
+		Assert.isNotNull(getId(), "An extension for extension-point org.eclipse.jdt.ui.javaElementFilters does not provide a valid ID"); //$NON-NLS-1$
+		Assert.isNotNull(getName(), "An extension for extension-point org.eclipse.jdt.ui.javaElementFilters does not provide a valid name"); //$NON-NLS-1$
 	}
 
 	/**
@@ -112,7 +113,9 @@ public class FilterDescriptor implements Comparable {
 	 * 
 	 */
 	public ViewerFilter createViewerFilter() {
-		Assert.isTrue(isCustomFilter());
+		if (!isCustomFilter())
+			return null;
+		
 		ViewerFilter result= null;
 		try {
 			result= (ViewerFilter)fElement.createExecutableExtension(CLASS_ATTRIBUTE);
@@ -253,12 +256,19 @@ public class FilterDescriptor implements Comparable {
 		List result= new ArrayList(5);
 		Set descIds= new HashSet(5);
 		for (int i= 0; i < elements.length; i++) {
-			IConfigurationElement element= elements[i];
+			final IConfigurationElement element= elements[i];
 			if (FILTER_TAG.equals(element.getName())) {
-				FilterDescriptor desc= new FilterDescriptor(element);
-				if (!descIds.contains(desc.getId())) {
-					result.add(desc);
-					descIds.add(desc.getId());
+
+				final FilterDescriptor[] desc= new FilterDescriptor[1];
+				Platform.run(new SafeRunnable(FilterMessages.getString("FilterDescriptor.filterDescriptionCreationError.message")) { //$NON-NLS-1$
+					public void run() throws Exception {
+						desc[0]= new FilterDescriptor(element);
+					}
+				});
+
+				if (desc[0] != null && !descIds.contains(desc[0].getId())) {
+					result.add(desc[0]);
+					descIds.add(desc[0].getId());
 				}
 			}
 		}
