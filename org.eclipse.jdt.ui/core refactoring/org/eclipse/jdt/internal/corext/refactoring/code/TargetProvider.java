@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -267,7 +268,9 @@ abstract class TargetProvider {
 		private boolean matches(IBinding binding) {
 			if (!(binding instanceof IMethodBinding))
 				return false;
-			return fBinding.isEqualTo(((IMethodBinding)binding).getMethodDeclaration());
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=87777
+			// return fBinding.isEqualTo(((IMethodBinding)binding).getMethodDeclaration());
+			return Bindings.equals(fBinding, ((IMethodBinding)binding).getMethodDeclaration());
 		}
 	}
 	
