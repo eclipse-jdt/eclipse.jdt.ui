@@ -5,7 +5,7 @@ class A {
 }
 
 class B extends A {
-	void m() { 
+	public void m() { 
 		super.a();
 		super.a();
 	}

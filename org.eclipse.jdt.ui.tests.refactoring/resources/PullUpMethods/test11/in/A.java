@@ -5,7 +5,7 @@ class A {
 }
 
 class B extends A {
-	void m() { 
+	protected void m() { 
 		class T extends A{
 			void t(){
 				super.x++;

@@ -9,7 +9,7 @@ void g(){
 	}
 }
 class B extends A{
-	void m(){
+	protected void m(){
 		List l= new ArrayList();
 		l.size();
 	}	

@@ -3,7 +3,7 @@ package p;
 class A {
 	void a(){}
 
-	protected void m() { 
+	public void m() { 
 		this.a();
 		this.a();
 	}
@@ -11,4 +11,4 @@ class A {
 }
 
 class B extends A {
-	}
+}

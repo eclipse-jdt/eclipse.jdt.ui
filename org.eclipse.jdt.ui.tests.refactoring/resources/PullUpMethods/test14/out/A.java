@@ -15,4 +15,4 @@ protected void m(){
 
 }
 class B extends A{
-	}
+}

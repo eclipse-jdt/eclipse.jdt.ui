@@ -6,7 +6,7 @@ class A {
 }
 
 class B extends A {
-	void m() { 
+	protected void m() { 
 		super.j++;
 		super.j= 0;
 	}
