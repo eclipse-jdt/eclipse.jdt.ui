@@ -10,6 +10,7 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -53,6 +54,9 @@ public class MethodsViewer extends TableViewer {
 	private static final String TAG_HIDESTATIC= "hidestatic"; //$NON-NLS-1$
 	private static final String TAG_HIDENONPUBLIC= "hidenonpublic"; //$NON-NLS-1$
 	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
+	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
+
+
 	
 	private MethodsViewerFilterAction fHideNonPublic;
 	private MethodsViewerFilterAction fHideFields;
@@ -178,6 +182,10 @@ public class MethodsViewer extends TableViewer {
 		memento.putString(TAG_HIDESTATIC, String.valueOf(fFilter.hasFilter(MethodsViewerFilter.FILTER_STATIC)));
 		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(fFilter.hasFilter(MethodsViewerFilter.FILTER_NONPUBLIC)));
 		memento.putString(TAG_SHOWINHERITED, String.valueOf(isShowInheritedMethods()));
+
+		ScrollBar bar= getTable().getVerticalBar();
+		int position= bar != null ? bar.getSelection() : 0;
+		memento.putString(TAG_VERTICAL_SCROLL, String.valueOf(position));
 	}
 
 	/**
@@ -199,6 +207,16 @@ public class MethodsViewer extends TableViewer {
 		showInheritedMethods(set);
 		
 		fShowInheritedMembersAction.updateState();
+		
+		String vScroll= memento.getString(TAG_VERTICAL_SCROLL);
+		try {
+			ScrollBar bar= getTable().getVerticalBar();
+			if (bar != null) {
+				bar.setSelection(Integer.parseInt(vScroll));
+			}
+		} catch (NumberFormatException e) {
+		}	
+		
 	}
 	
 	/**

@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.ToolBar;
 
 import org.eclipse.core.resources.IContainer;
@@ -101,6 +102,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	private static final String TAG_INPUT= "input"; //$NON-NLS-1$
 	private static final String TAG_VIEW= "view"; //$NON-NLS-1$
 	private static final String TAG_ORIENTATION= "orientation"; //$NON-NLS-1$
+	private static final String TAG_RATIO= "ratio"; //$NON-NLS-1$
+	private static final String TAG_SELECTION= "selection"; //$NON-NLS-1$
+	private static final String TAG_VERTICAL_SCROLL= "vertical_scroll"; //$NON-NLS-1$
 
 	private IType fInput;
 	
@@ -923,6 +927,18 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		}
 		memento.putString(TAG_VIEW, Integer.toString(getViewIndex()));
 		memento.putString(TAG_ORIENTATION, String.valueOf(fToggleOrientationAction.isChecked()));	
+		int weigths[]= fTypeMethodsSplitter.getWeights();
+		int ratio= (weigths[0] * 1000) / (weigths[0] + weigths[1]);
+		memento.putString(TAG_RATIO, String.valueOf(ratio));
+		
+		ScrollBar bar= getCurrentViewer().getTree().getVerticalBar();
+		int position= bar != null ? bar.getSelection() : 0;
+		memento.putString(TAG_VERTICAL_SCROLL, String.valueOf(position));
+
+		IJavaElement selection= (IJavaElement)((IStructuredSelection) getCurrentViewer().getSelection()).getFirstElement();
+		if (selection != null) {
+			memento.putString(TAG_SELECTION, selection.getHandleIdentifier());
+		}
 			
 		fMethodsViewer.saveState(memento);
 	}
@@ -940,13 +956,27 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 
 		String viewerIndex= memento.getString(TAG_VIEW);
 		String orientation= memento.getString(TAG_ORIENTATION);
+		String ratioString= memento.getString(TAG_RATIO);
+		String vScroll= memento.getString(TAG_VERTICAL_SCROLL);
 		try {
 			setView(Integer.parseInt(viewerIndex));
 			fToggleOrientationAction.setChecked(new Boolean(orientation).booleanValue());
+			int ratio= Integer.parseInt(ratioString);
+			fTypeMethodsSplitter.setWeights(new int[] { ratio, 1000 - ratio });
+			ScrollBar bar= getCurrentViewer().getTree().getVerticalBar();
+			if (bar != null) {
+				bar.setSelection(Integer.parseInt(vScroll));
+			}
 		} catch (NumberFormatException e) {
 		}
-
 		
+		String selectionId= memento.getString(TAG_SELECTION);
+		if (selectionId != null) {
+			IJavaElement elem= JavaCore.create(selectionId);
+			if (getCurrentViewer().containsElement(elem)) {
+				getCurrentViewer().setSelection(new StructuredSelection(elem));
+			}
+		}
 		fMethodsViewer.restoreState(memento);
 	}
 	
