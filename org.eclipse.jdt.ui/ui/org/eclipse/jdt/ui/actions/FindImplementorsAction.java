@@ -12,12 +12,14 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -42,7 +44,7 @@ public class FindImplementorsAction extends FindAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindImplementorsAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {IType.class}); //$NON-NLS-1$
+		super(site, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {ICompilationUnit.class, IType.class}); //$NON-NLS-1$
 		init();
 	}
 
@@ -50,7 +52,7 @@ public class FindImplementorsAction extends FindAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindImplementorsAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {IType.class}); //$NON-NLS-1$
+		super(editor, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {ICompilationUnit.class, IType.class}); //$NON-NLS-1$
 		init();
 	}
 

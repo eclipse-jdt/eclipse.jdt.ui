@@ -120,11 +120,15 @@ public abstract class FindAction extends SelectionDispatchAction {
 			return null;
 		switch (o.getElementType()) {
 			case IJavaElement.COMPILATION_UNIT:
-				return findType((ICompilationUnit)o, silent);
+				if (silent)
+					return (ICompilationUnit)o;
+				else
+					return findType((ICompilationUnit)o, silent);
 			case IJavaElement.CLASS_FILE:
-				return findType((IClassFile)o);			
+				return findType((IClassFile)o);
+			default:
+				return o;				
 		}
-		return o;
 	}
 
 	private IJavaElement getJavaElement(IMarker marker, boolean silent) {
