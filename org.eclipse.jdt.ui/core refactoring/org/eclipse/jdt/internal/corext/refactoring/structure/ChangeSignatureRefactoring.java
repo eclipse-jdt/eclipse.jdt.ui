@@ -1425,19 +1425,26 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			removeExtraDimensions(oldParam);
 		}
 
-		private void changeReturnType() throws JavaModelException {
-		    if (! isReturnTypeSameAsInitial())
-		        replaceTypeNode(fMethDecl.getReturnType(), fReturnTypeName);
-		    	//TODO: Remove expression from return statement when changed to void?
-		    	//      Add return statement with default value and //TODO automatically generated ...
-		}
-	
 		private void removeExtraDimensions(SingleVariableDeclaration oldParam) {
 			if (oldParam.getExtraDimensions() != 0) {		
 				getASTRewrite().set(oldParam, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), fDescription);
 			}
 		}
 	
+		private void changeReturnType() throws JavaModelException {
+		    if (isReturnTypeSameAsInitial())
+		    	return;
+			replaceTypeNode(fMethDecl.getReturnType(), fReturnTypeName);
+	        removeExtraDimensions(fMethDecl);
+	    	//TODO: Remove expression from return statement when changed to void?
+	    	//      Add return statement with default value and //TODO automatically generated ...
+		}
+	
+		private void removeExtraDimensions(MethodDeclaration methDecl) {
+			if (methDecl.getExtraDimensions() != 0)
+				getASTRewrite().set(methDecl, MethodDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), fDescription);
+		}
+
 		private boolean needsVisibilityUpdate() throws JavaModelException {
 			if (isVisibilitySameAsInitial())
 				return false;
