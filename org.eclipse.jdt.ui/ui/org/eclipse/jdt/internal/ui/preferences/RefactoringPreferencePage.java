@@ -29,7 +29,6 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	private static final String ERROR_SEVERITY= PreferenceConstants.REFACTOR_ERROR_SEVERITY;
 	private static final String WARNING_SEVERITY= PreferenceConstants.REFACTOR_WARNING_SEVERITY;
 	private static final String INFO_SEVERITY= PreferenceConstants.REFACTOR_INFO_SEVERITY;
-	private static final String OK_SEVERITY= PreferenceConstants.REFACTOR_OK_SEVERITY;
 		
 	public RefactoringPreferencePage() {
 		super(GRID);

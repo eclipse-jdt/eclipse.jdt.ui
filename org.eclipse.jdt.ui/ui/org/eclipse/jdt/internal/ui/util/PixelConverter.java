@@ -17,8 +17,6 @@ public class PixelConverter {
 		gc.dispose();
 	}
 	
-	private FontMetrics fgFontMetrics;
-		
 	/**
 	 * @see org.eclipse.jface.dialogs.DialogPage#convertHeightInCharsToPixels(int)
 	 */
