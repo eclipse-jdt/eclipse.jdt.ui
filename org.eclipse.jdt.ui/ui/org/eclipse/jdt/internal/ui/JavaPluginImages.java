@@ -58,10 +58,10 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_SEARCH_REF= NAME_PREFIX + "search_ref_obj.gif"; 	//$NON-NLS-1$
 	public static final String IMG_OBJS_CLASS= NAME_PREFIX + "class_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_CLASSALT= NAME_PREFIX + "classfo_obj.gif"; 			//$NON-NLS-1$	
-	public static final String IMG_OBJS_PCLASS= NAME_PREFIX + "classp_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASS_DEFAULT= NAME_PREFIX + "class_default_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_INTERFACE= NAME_PREFIX + "int_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_INTERFACEALT= NAME_PREFIX + "intf_obj.gif"; 			//$NON-NLS-1$	
-	public static final String IMG_OBJS_PINTERFACE= NAME_PREFIX + "intp_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_INTERFACE_DEFAULT= NAME_PREFIX + "int_default_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_CFILE= NAME_PREFIX + "classf_obj.gif";  			//$NON-NLS-1$
 	public static final String IMG_OBJS_CFILECLASS= NAME_PREFIX + "class_obj.gif";  		//$NON-NLS-1$
@@ -140,14 +140,6 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_JSEARCH= createManaged(T_OBJ, IMG_OBJS_JSEARCH);
 	public static final ImageDescriptor DESC_OBJS_SEARCH_DECL= createManaged(T_OBJ, IMG_OBJS_SEARCH_DECL);
 	public static final ImageDescriptor DESC_OBJS_SEARCH_REF= createManaged(T_OBJ, IMG_OBJS_SEARCH_REF);
-	public static final ImageDescriptor DESC_OBJS_CLASS= createManaged(T_OBJ, IMG_OBJS_CLASS);
-	public static final ImageDescriptor DESC_OBJS_INNER_CLASS= create(T_OBJ, "innerclass_obj.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OBJS_CLASSALT= createManaged(T_OBJ, IMG_OBJS_CLASSALT);
-	public static final ImageDescriptor DESC_OBJS_PCLASS= createManaged(T_OBJ, IMG_OBJS_PCLASS);
-	public static final ImageDescriptor DESC_OBJS_INTERFACE= createManaged(T_OBJ, IMG_OBJS_INTERFACE);
-	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE= create(T_OBJ, "innerinterface_obj.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OBJS_INTERFACEALT= createManaged(T_OBJ, IMG_OBJS_INTERFACEALT);
-	public static final ImageDescriptor DESC_OBJS_PINTERFACE= createManaged(T_OBJ, IMG_OBJS_PINTERFACE);
 	public static final ImageDescriptor DESC_OBJS_CUNIT= createManaged(T_OBJ, IMG_OBJS_CUNIT);
 	public static final ImageDescriptor DESC_OBJS_CFILE= createManaged(T_OBJ, IMG_OBJS_CFILE); 
 	public static final ImageDescriptor DESC_OBJS_CFILECLASS= createManaged(T_OBJ, IMG_OBJS_CFILECLASS); 
@@ -157,6 +149,26 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_MISSING_PACKFRAG_ROOT= createManaged(T_OBJ, IMG_OBJS_MISSING_PACKFRAG_ROOT);
 	public static final ImageDescriptor DESC_OBJS_JAVA_MODEL= createManaged(T_OBJ, IMG_OBJS_JAVA_MODEL);
 
+	public static final ImageDescriptor DESC_OBJS_CLASS= createManaged(T_OBJ, IMG_OBJS_CLASS);
+	public static final ImageDescriptor DESC_OBJS_CLASS_DEFAULT= createManaged(T_OBJ, IMG_OBJS_CLASS_DEFAULT);
+	
+	public static final ImageDescriptor DESC_OBJS_INNER_CLASS= create(T_OBJ, "innerclass_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_INNER_CLASS_DEFAULT= create(T_OBJ, "innerclass_default_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_INNER_CLASS_PROTECTED= create(T_OBJ, "innerclass_protected_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_INNER_CLASS_PRIVATE= create(T_OBJ, "innerclass_private_obj.gif"); //$NON-NLS-1$
+	
+	public static final ImageDescriptor DESC_OBJS_CLASSALT= createManaged(T_OBJ, IMG_OBJS_CLASSALT);
+
+	public static final ImageDescriptor DESC_OBJS_INTERFACE= createManaged(T_OBJ, IMG_OBJS_INTERFACE);
+	public static final ImageDescriptor DESC_OBJS_INTERFACE_DEFAULT= createManaged(T_OBJ, IMG_OBJS_INTERFACE_DEFAULT);
+	
+	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE= create(T_OBJ, "innerinterface_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE_DEFAULT= create(T_OBJ, "innerinterface_default_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE_PROTECTED= create(T_OBJ, "innerinterface_protected_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE_PRIVATE= create(T_OBJ, "innerinterface_private_obj.gif"); //$NON-NLS-1$
+	
+	public static final ImageDescriptor DESC_OBJS_INTERFACEALT= createManaged(T_OBJ, IMG_OBJS_INTERFACEALT);
+	
 	public static final ImageDescriptor DESC_OBJS_JAR= createManaged(T_OBJ, IMG_OBJS_JAR);
 	public static final ImageDescriptor DESC_OBJS_MISSING_JAR= createManaged(T_OBJ, IMG_OBJS_MISSING_JAR);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR= createManaged(T_OBJ, IMG_OBJS_EXTJAR);

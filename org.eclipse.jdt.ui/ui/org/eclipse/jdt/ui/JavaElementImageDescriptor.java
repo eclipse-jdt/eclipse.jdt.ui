@@ -55,7 +55,10 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	public final static int OVERRIDES= 		0x080;
 	
 	/** Flag to render the 'implements' adornment */
-	public final static int IMPLEMENTS= 		0x100;		
+	public final static int IMPLEMENTS= 		0x100;
+	
+	/** Flag to render the 'constructor' adornment */
+	public final static int CONSTRUCTOR= 	0x200;	
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -164,6 +167,11 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		ImageData data= null;
 		if ((fFlags & ABSTRACT) != 0) {
 			data= JavaPluginImages.DESC_OVR_ABSTRACT.getImageData();
+			x-= data.width;
+			drawImage(data, x, 0);
+		}
+		if ((fFlags & CONSTRUCTOR) != 0) {
+			data= JavaPluginImages.DESC_OVR_CONSTRUCTOR.getImageData();
 			x-= data.width;
 			drawImage(data, x, 0);
 		}

@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
@@ -206,17 +207,17 @@ public class JavaElementImageProvider {
 
 					IJavaElement parent= type.getParent();
 					int typeType= parent != null ? parent.getElementType() : 0;
+					flags= type.getFlags();
 					if (parent == null || typeType == IJavaElement.COMPILATION_UNIT || typeType == IJavaElement.CLASS_FILE) {
-						flags= type.getFlags();
-						boolean hasVisibility= Flags.isPublic(flags) || Flags.isPrivate(flags) || Flags.isProtected(flags);
-						
 						if (type.isClass())
-							return hasVisibility ? JavaPluginImages.DESC_OBJS_CLASS : JavaPluginImages.DESC_OBJS_PCLASS;
-						return hasVisibility ? JavaPluginImages.DESC_OBJS_INTERFACE : JavaPluginImages.DESC_OBJS_PINTERFACE;
+							return getClassImageDescriptor(flags);
+						else
+							return getInterfaceImageDescriptor(flags);
 					} else {
 						if (type.isClass())
-							return JavaPluginImages.DESC_OBJS_INNER_CLASS;
-						return JavaPluginImages.DESC_OBJS_INNER_INTERFACE;
+							return getInnerClassImageDescriptor(flags);
+						else
+							return getInnerInterfaceImageDescriptor(flags);
 					}
 				}
 
@@ -305,8 +306,11 @@ public class JavaElementImageProvider {
 		if (showOverlayIcons(renderFlags) && element instanceof IMember) {
 			try {
 				IMember member= (IMember) element;
+				
+				if (element.getElementType() == IJavaElement.METHOD && ((IMethod)element).isConstructor())
+					flags |= JavaElementImageDescriptor.CONSTRUCTOR;
+					
 				int modifiers= member.getFlags();
-		
 				if (Flags.isAbstract(modifiers) && confirmAbstract(member))
 					flags |= JavaElementImageDescriptor.ABSTRACT;
 				if (Flags.isFinal(modifiers) || isInterfaceField(member))
@@ -351,5 +355,40 @@ public class JavaElementImageProvider {
 	
 	public void dispose() {
 	}
+
+	private ImageDescriptor getClassImageDescriptor(int flags) {
+		if (Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_OBJS_CLASS;
+		else
+			return JavaPluginImages.DESC_OBJS_CLASS_DEFAULT;
+	}
 	
+	private ImageDescriptor getInnerClassImageDescriptor(int flags) {
+		if (Flags.isPublic(flags))
+			return JavaPluginImages.DESC_OBJS_INNER_CLASS;
+		else if (Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PRIVATE;
+		else if (Flags.isProtected(flags))
+			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PROTECTED;
+		else
+			return JavaPluginImages.DESC_OBJS_INNER_CLASS_DEFAULT;
+	}
+	
+	private ImageDescriptor getInterfaceImageDescriptor(int flags) {
+		if (Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_OBJS_INTERFACE;
+		else
+			return JavaPluginImages.DESC_OBJS_INTERFACE_DEFAULT;
+	}
+	
+	private ImageDescriptor getInnerInterfaceImageDescriptor(int flags) {
+		if (Flags.isPublic(flags))
+			return JavaPluginImages.DESC_OBJS_INTERFACE;
+		else if (Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PRIVATE;
+		else if (Flags.isProtected(flags))
+			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PROTECTED;
+		else
+			return JavaPluginImages.DESC_OBJS_INTERFACE_DEFAULT;
+	}	
 }
