@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+
 public abstract class ConstraintVariable {
 	private final ITypeBinding fBinding;
 
@@ -62,6 +64,6 @@ public abstract class ConstraintVariable {
 	public int hashCode() {
 		if (fBinding == null)
 			return super.hashCode();
-		return TypeBindings.hashCode(fBinding);
+		return Bindings.hashCode(fBinding);
 	}
 }
