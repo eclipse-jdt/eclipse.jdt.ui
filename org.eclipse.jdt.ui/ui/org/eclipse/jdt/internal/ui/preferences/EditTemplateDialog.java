@@ -445,6 +445,7 @@ public class EditTemplateDialog extends StatusDialog {
 		
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
+		new JavaSourcePreviewerUpdater(viewer, tools);
 		
 		int nLines= document.getNumberOfLines();
 		if (nLines < 5) {

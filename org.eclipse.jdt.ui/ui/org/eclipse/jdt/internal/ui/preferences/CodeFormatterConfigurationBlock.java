@@ -302,6 +302,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		SourceViewer previewViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		previewViewer.configure(fViewerConfiguration);
 		previewViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
+		new JavaSourcePreviewerUpdater(previewViewer, fTextTools);
 		previewViewer.getTextWidget().setTabs(getPositiveIntValue((String) fWorkingValues.get(PREF_TAB_SIZE), 0));
 		previewViewer.setDocument(fPreviewDocument);
 		

@@ -33,6 +33,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
@@ -53,8 +54,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -521,20 +520,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		fPreviewViewer.configure(new JavaSourceViewerConfiguration(fJavaTextTools, null));
-		fPreviewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
+		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
+		fPreviewViewer.getTextWidget().setFont(font);
+		new JavaSourcePreviewerUpdater(fPreviewViewer, fJavaTextTools);
 		fPreviewViewer.setEditable(false);
 		
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
 		fJavaTextTools.setupJavaDocumentPartitioner(document);
 		fPreviewViewer.setDocument(document);
-		
-		fOverlayStore.addPropertyChangeListener(new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				fPreviewViewer.invalidateTextPresentation();
-			}
-		});
-		
+
 		return fPreviewViewer.getControl();
 	}
 	
