@@ -3,26 +3,24 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.ISelectionProvider;
+
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameParametersRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.rename.RenameTempRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.viewers.ISelectionProvider;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameParametersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
-import org.eclipse.jdt.internal.ui.actions.*;
 
 /**
  * Refactoring menu group
@@ -48,27 +46,22 @@ public class RefactoringGroup extends ContextMenuGroup {
 			return;
 		
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(p);	
-		ITextBufferChangeCreator changeCreator= createChangeCreator();
 		
 		fRefactoringActions= new RefactoringAction[]{
-			createRenameParametersAction(provider, changeCreator),
+			createRenameParametersAction(provider),
 			new SelfEncapsulateFieldAction(provider)
 		};
 		
 		fIntitialized= true;
 	}
-	
-	static ITextBufferChangeCreator createChangeCreator(){
-		return new DocumentTextBufferChangeCreator(JavaPlugin.getDefault().getCompilationUnitDocumentProvider());
-	}
-	
+		
 	// -------------------- method refactorings ----------------------
 	
-	static OpenRefactoringWizardAction createRenameParametersAction(StructuredSelectionProvider selectionProvider, final ITextBufferChangeCreator changeCreator) {
+	static OpenRefactoringWizardAction createRenameParametersAction(StructuredSelectionProvider selectionProvider) {
 		String label= RefactoringMessages.getString("RefactoringGroup.rename_parameters"); //$NON-NLS-1$
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMethod.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new RenameParametersRefactoring(changeCreator, (IMethod)obj);
+				return new RenameParametersRefactoring((IMethod)obj);
 			}
 			boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
 				return ((RenameParametersRefactoring)refactoring).checkPreactivation().isOK();
