@@ -449,7 +449,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		String pkgName= fPropertyPackage.getText();
 		
 		IStatus status= JavaConventions.validatePackageName(pkgName);
-		if (!"".equals(pkgName) && !status.isOK()) { //$NON-NLS-1$
+		if (!"".equals(pkgName) && status.getSeverity() == IStatus.ERROR) { //$NON-NLS-1$
 			setInvalid(fPropertyPackage, status.getMessage());
 			return;
 		} 
