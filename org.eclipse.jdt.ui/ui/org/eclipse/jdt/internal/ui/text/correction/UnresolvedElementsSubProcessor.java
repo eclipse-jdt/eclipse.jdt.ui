@@ -197,8 +197,11 @@ public class UnresolvedElementsSubProcessor {
 			if (assignment.getLeftHandSide() == node && assignment.getParent().getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 				ASTNode statement= assignment.getParent();
 				ASTRewrite rewrite= ASTRewrite.create(statement.getAST());
-				rewrite.remove(statement, null);
-		
+				if (ASTNodes.isControlStatementBody(assignment.getParent().getLocationInParent())) {
+					rewrite.replace(statement, rewrite.getAST().newBlock(), null);
+				} else {
+					rewrite.remove(statement, null);
+				}
 				String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.removestatement.description"); //$NON-NLS-1$
 				Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 4, image);
@@ -266,8 +269,13 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, SimpleName node, boolean isWriteAccess, Collection proposals) {
-		IBinding[] varsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
-		if (varsInScope.length > 0) {
+		int kind= ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY;
+		if (!isWriteAccess) {
+			kind |= ScopeAnalyzer.METHODS; // also try to find similar methods
+		}
+		
+		IBinding[] varsAndMethodsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, kind);
+		if (varsAndMethodsInScope.length > 0) {
 			// avoid corrections like int i= i;
 			String otherNameInAssign= null;
 			
@@ -305,43 +313,67 @@ public class UnresolvedElementsSubProcessor {
 				
 			
 			ITypeBinding guessedType= ASTResolving.guessBindingForReference(node);
-			if (astRoot.getAST().resolveWellKnownType("java.lang.Object") == guessedType) { //$NON-NLS-1$
-				guessedType= null; // too many suggestions
-			}
-			
+
+			ITypeBinding objectBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			String identifier= node.getIdentifier();
-			for (int i= 0; i < varsInScope.length; i++) {
-				IVariableBinding curr= (IVariableBinding) varsInScope[i];
-				String currName= curr.getName();
-				boolean isFinal= Modifier.isFinal(curr.getModifiers());
-				if (!currName.equals(otherNameInAssign) && !(isFinal && curr.isField() && isWriteAccess)) {
-					int relevance= 0;
-					if (NameMatcher.isSimilarName(currName, identifier)) {
-						relevance += 3; // variable with a similar name than the unresolved variable
-					}
-					if (currName.equalsIgnoreCase(identifier)) {
-						relevance+= 5;
-					}
-					ITypeBinding varType= curr.getType();
-					if (varType != null) {
-						if (guessedType != null) {
-							// var type is compatible with the guessed type
-							if (!isWriteAccess && TypeRules.canAssign(varType, guessedType)
-									|| isWriteAccess && TypeRules.canAssign(guessedType, varType)) {
-								relevance += 2; // unresolved variable can be assign to this variable
+			
+			for (int i= 0; i < varsAndMethodsInScope.length; i++) {
+				IBinding varOrMeth= varsAndMethodsInScope[i];
+				if (varOrMeth instanceof IVariableBinding) {
+					IVariableBinding curr= (IVariableBinding) varOrMeth;
+					String currName= curr.getName();
+					boolean isFinal= Modifier.isFinal(curr.getModifiers());
+					if (!currName.equals(otherNameInAssign) && !(isFinal && curr.isField() && isWriteAccess)) {
+						int relevance= 0;
+						if (NameMatcher.isSimilarName(currName, identifier)) {
+							relevance += 3; // variable with a similar name than the unresolved variable
+						}
+						if (currName.equalsIgnoreCase(identifier)) {
+							relevance+= 5;
+						}
+						ITypeBinding varType= curr.getType();
+						if (varType != null) {
+							if (guessedType != null && guessedType != objectBinding) { // too many result with object
+								// var type is compatible with the guessed type
+								if (!isWriteAccess && TypeRules.canAssign(varType, guessedType)
+										|| isWriteAccess && TypeRules.canAssign(guessedType, varType)) {
+									relevance += 2; // unresolved variable can be assign to this variable
+								}
+							}
+							if (methodSenderName != null && hasMethodWithName(varType, methodSenderName)) {
+								relevance += 2;
+							}
+							if (fieldSenderName != null && hasFieldWithName(varType, fieldSenderName)) {
+								relevance += 2;
 							}
 						}
-						if (methodSenderName != null && hasMethodWithName(varType, methodSenderName)) {
-							relevance += 2;
-						}
-						if (fieldSenderName != null && hasFieldWithName(varType, fieldSenderName)) {
-							relevance += 2;
+									
+						if (relevance > 0) {
+							String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", currName); //$NON-NLS-1$
+							proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), currName, relevance));
 						}
 					}
-								
-					if (relevance > 0) {
-						String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", currName); //$NON-NLS-1$
-						proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), currName, relevance));
+				} else if (varOrMeth instanceof IMethodBinding) {
+					IMethodBinding curr= (IMethodBinding) varOrMeth;
+					if (!curr.isConstructor() && guessedType != null && TypeRules.canAssign(curr.getReturnType(), guessedType)) {
+						if (NameMatcher.isSimilarName(curr.getName(), identifier)) {
+							AST ast= astRoot.getAST();
+							ASTRewrite rewrite= ASTRewrite.create(ast);
+							String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetomethod.description", getMethodSignature(curr, false)); //$NON-NLS-1$
+							Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+							LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 8, image);
+							proposals.add(proposal);
+							
+							MethodInvocation newInv= ast.newMethodInvocation();
+							newInv.setName(ast.newSimpleName(curr.getName()));
+							ITypeBinding[] parameterTypes= curr.getParameterTypes();
+							for (int k= 0; k < parameterTypes.length; k++) {
+								ASTNode arg= ASTNodeFactory.newDefaultExpression(ast, parameterTypes[k]);
+								newInv.arguments().add(arg);
+								proposal.addLinkedPosition(rewrite.track(arg), false, null);
+							}
+							rewrite.replace(node, newInv, null);
+						}
 					}
 				}
 			}
@@ -351,7 +383,6 @@ public class UnresolvedElementsSubProcessor {
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", idLength); //$NON-NLS-1$
 			proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), idLength, 8)); //$NON-NLS-1$
 		}
-		
 	}
 	
 	private static boolean hasMethodWithName(ITypeBinding typeBinding, String name) {

@@ -1411,5 +1411,71 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });	
 	}
+	
+	public void testVarWithMethodName1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    int foo(String str) {\n");
+		buf.append("        for (int i = 0; i > str.length; i++) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    int foo(String str) {\n");
+		buf.append("        for (int i = 0; i > str.length(); i++) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });	
+	}
+	
+	public void testVarWithMethodName2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    int foo(String str) {\n");
+		buf.append("        return length;\n");
+		buf.append("    }\n");
+		buf.append("    int getLength() {\n");
+		buf.append("        return 1;\n");	
+		buf.append("    }\n");	
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    int foo(String str) {\n");
+		buf.append("        return getLength();\n");
+		buf.append("    }\n");
+		buf.append("    int getLength() {\n");
+		buf.append("        return 1;\n");	
+		buf.append("    }\n");	
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 
 }
