@@ -41,45 +41,19 @@ public class PullUpTests extends RefactoringTest {
 	}
 	
 	//-------------------
-	private static IField[] getFields(IType type, String[] names) throws JavaModelException{
-		Set fields= new HashSet();
-		for (int i = 0; i < names.length; i++) {
-			IField field= type.getField(names[i]);
-			assertTrue(field.exists());
-			fields.add(field);
-		}
-		return (IField[]) fields.toArray(new IField[fields.size()]);	
-	}
-	
-	private static IMethod[] getMethods(IType type, String[] names, String[][] signatures) throws JavaModelException{
-		Set methods= new HashSet();
-		for (int i = 0; i < names.length; i++) {
-			IMethod method= type.getMethod(names[i], signatures[i]);
-			assertTrue(method.exists());
-			methods.add(method);
-		}
-		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);	
-	}
 	
 	private static PullUpRefactoring createRefactoring(IMember[] methods){
 		return new PullUpRefactoring(methods, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
-	private static IMember[] merge(IMember[] a1, IMember[] a2){
-		Set result= new HashSet(a1.length + a2.length);
-		result.addAll(Arrays.asList(a1));
-		result.addAll(Arrays.asList(a2));
-		return (IMember[]) result.toArray(new IMember[result.size()]);
-	}
-
 	private void fieldMethodHelper1(String[] fieldNames, String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IField[] fields= getFields(type, fieldNames);
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+			IField[] fields= TestUtil.getFields(type, fieldNames);
+			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
 
-			PullUpRefactoring ref= createRefactoring(merge(methods, fields));
+			PullUpRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
 
 			if (deleteAllInSourceType)
 				ref.setMethodsToDelete(methods);
@@ -102,7 +76,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IField[] fields= getFields(type, fieldNames);
+			IField[] fields= TestUtil.getFields(type, fieldNames);
 			
 			PullUpRefactoring ref= createRefactoring(fields);
 		
@@ -121,7 +95,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IField[] fields= getFields(type, fieldNames);
+			IField[] fields= TestUtil.getFields(type, fieldNames);
 			PullUpRefactoring ref= createRefactoring(fields);
 		
 			RefactoringStatus result= performRefactoring(ref);
@@ -140,7 +114,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 			if (deleteAllInSourceType)
 				ref.setMethodsToDelete(methods);
@@ -163,7 +137,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType type= getType(cu, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 			if (deleteAllInSourceType)
 				ref.setMethodsToDelete(methods);
@@ -182,7 +156,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 		try{
 			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 			if (deleteAllInSourceType)
 				ref.setMethodsToDelete(methods);
@@ -224,7 +198,7 @@ public class PullUpTests extends RefactoringTest {
 			String[][] signatures= new String[][]{new String[]{"QList;"}};
 			
 			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
 		
@@ -248,7 +222,7 @@ public class PullUpTests extends RefactoringTest {
 			String[][] signatures= new String[][]{new String[0]};
 			
 			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
+			IMethod[] methods= TestUtil.getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
 			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor())));
 		
