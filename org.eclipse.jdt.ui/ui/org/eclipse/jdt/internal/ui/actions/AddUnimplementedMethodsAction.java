@@ -63,7 +63,7 @@ public class AddUnimplementedMethodsAction extends Action {
 			type= EditorUtility.getWorkingCopy(type);
 			
 			if (type == null) {
-				showSimpleDialog(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.dialogTitle"), JavaUIMessages.getString("AddUnimplementedMethodsAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+				MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.dialogTitle"), JavaUIMessages.getString("AddUnimplementedMethodsAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 				return;
 			}
 			
@@ -73,7 +73,7 @@ public class AddUnimplementedMethodsAction extends Action {
 				dialog.run(false, true, op);
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
-					showSimpleDialog(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.DialogTitle"), JavaUIMessages.getString("AddUnimplementedMethodsAction.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.dialogTitle"), JavaUIMessages.getString("AddUnimplementedMethodsAction.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$
 				} else if (editor != null) {
 					EditorUtility.revealInEditor(editor, res[0]);
 				}
@@ -83,19 +83,14 @@ public class AddUnimplementedMethodsAction extends Action {
 				// Do nothing. Operation has been canceled by user.
 			}
 		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 			ErrorDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.actionFailed"), null, e.getStatus()); //$NON-NLS-1$
 		} catch (PartInitException e) {
+			JavaPlugin.log(e);
 			MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.actionFailed"), e.getMessage()); //$NON-NLS-1$
 		}			
 	}
-	
-	private void showSimpleDialog(Shell shell, String title, String message) {
-		MessageDialog dialog= new MessageDialog(shell, title, null, message, SWT.ICON_INFORMATION,
-	 		new String[] { JavaUIMessages.getString("AddUnimplementedMethodsAction.ok") }, 0); //$NON-NLS-1$
-	 	
-	 	dialog.open();
-	}	
-	
+		
 	private IType getSelectedType() throws JavaModelException {
 		ISelection sel= fSelectionProvider.getSelection();
 		if (sel instanceof IStructuredSelection) {

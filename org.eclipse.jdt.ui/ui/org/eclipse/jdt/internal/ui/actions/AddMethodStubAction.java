@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -84,7 +85,7 @@ public class AddMethodStubAction extends Action {
 				// work on the working copy
 				usedType= EditorUtility.getWorkingCopy(fParentType);
 				if (usedType == null) {
-					showSimpleDialog(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 					return;
 				}
 			} else {
@@ -122,7 +123,7 @@ public class AddMethodStubAction extends Action {
 				
 			int nMethods= newMethods.size();
 			if (nMethods == 0) {
-				showSimpleDialog(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.method_exists")); //$NON-NLS-2$ //$NON-NLS-1$
+				MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.method_exists")); //$NON-NLS-2$ //$NON-NLS-1$
 				return;
 			}
 			
@@ -134,7 +135,7 @@ public class AddMethodStubAction extends Action {
 				editor= EditorUtility.openInEditor(fParentType);
 				usedType= EditorUtility.getWorkingCopy(fParentType);
 				if (usedType == null) {
-					showSimpleDialog(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.dialogTitle"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 					return;
 				}				
 			}
@@ -158,21 +159,15 @@ public class AddMethodStubAction extends Action {
 			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.actionFailed"), e.getMessage()); //$NON-NLS-1$
 		}
 	}
-			
-	private void showSimpleDialog(Shell shell, String title, String message) {
-		MessageDialog dialog= new MessageDialog(shell, title, null, message, SWT.ICON_INFORMATION,
-	 		new String[] { JavaUIMessages.getString("AddMethodStubAction.ok") }, 0); //$NON-NLS-1$
-	 	dialog.open();
-	}
-	
 	
 	private boolean showOverridesFinalDialog(Shell shell, IMethod overridden) {
 		JavaTextLabelProvider provider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS); 	
 		String methodName= provider.getTextLabel(overridden);
 		String title= JavaUIMessages.getString("AddMethodStubAction.warning"); //$NON-NLS-1$
 		String message= JavaUIMessages.getFormattedString("AddMethodStubAction.OverridesFinalDialog.message", methodName); //$NON-NLS-1$
+		
 		MessageDialog dialog= new MessageDialog(shell, title, null, message, SWT.ICON_INFORMATION,
-	 		new String[] { JavaUIMessages.getString("AddMethodStubAction.ok"), JavaUIMessages.getString("AddMethodStubAction.cancel") }, 0); //$NON-NLS-2$ //$NON-NLS-1$
+	 		new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0); //$NON-NLS-2$ //$NON-NLS-1$
 	 	return (dialog.open() == dialog.OK);
 	}
 	

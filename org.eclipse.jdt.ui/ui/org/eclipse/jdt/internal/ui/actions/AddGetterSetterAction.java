@@ -5,9 +5,11 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -18,20 +20,20 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddGetterSetterOperation;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
  * Create Getter and Setter for a selected field
@@ -51,86 +53,122 @@ public class AddGetterSetterAction extends Action {
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.GETTERSETTER_ACTION });
 	}
 
+				
 	public void run() {
-		IField field= getSelectedField();
-		if (field == null) {
+		IField[] fields= getSelectedFields();
+		if (fields == null) {
 			return;
 		}
-
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		
 		try {
-			ICompilationUnit cu= field.getCompilationUnit();
-			IType parentType= field.getDeclaringType();
-			// open an editor and work on a working copy
-			IEditorPart editor= EditorUtility.openInEditor(parentType);
-			IType workingCopyType= EditorUtility.getWorkingCopy(parentType);
-			if (workingCopyType != null) {
-				field= workingCopyType.getField(field.getElementName());
-				if (!field.exists()) {
-					showSimpleDialog(shell, JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
-				}
-			} else {
-				showSimpleDialog(shell, JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
-				return;				
-			}
+			ICompilationUnit cu= fields[0].getCompilationUnit();
+			// open the editor
+			IEditorPart editor= EditorUtility.openInEditor(cu);
 			
-			AddGetterSetterOperation op= new AddGetterSetterOperation(field);
-
-			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-			dialog.run(false, true, op);
-			IMethod getter= op.getCreatedGetter();
-			IMethod setter= op.getCreatedSetter();
-			if (getter == null && setter == null) {
-				showSimpleDialog(shell, JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.both_exists")); //$NON-NLS-2$ //$NON-NLS-1$
-			} else if (getter == null) {
-				showSimpleDialog(shell,  JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.getter_exists")); //$NON-NLS-2$ //$NON-NLS-1$
-			} else if (setter == null) {
-				showSimpleDialog(shell, JavaUIMessages.getString("AddGetterSetterAction.dialogTitle"), JavaUIMessages.getString("AddGetterSetterAction.setter_exists")); //$NON-NLS-2$ //$NON-NLS-1$
+			ICompilationUnit workingCopyCU= EditorUtility.getWorkingCopy(cu);
+			if (workingCopyCU == null) {
+				showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionFailed")); //$NON-NLS-1$
+				return;
 			}
-			
-			if (editor != null) {
-				if (getter != null) {
-					EditorUtility.revealInEditor(editor, getter);
-				} else if (setter != null) {
-					EditorUtility.revealInEditor(editor, setter);
-				}
-			}
-		} catch (InvocationTargetException e) {
-			MessageDialog.openError(shell, JavaUIMessages.getString("AddGetterSetterAction.actionFailed"), e.getTargetException().getMessage()); //$NON-NLS-1$
-		} catch (JavaModelException e) {
-			ErrorDialog.openError(shell, JavaUIMessages.getString("AddGetterSetterAction.actionFailed"), null, e.getStatus()); //$NON-NLS-1$
-		} catch (InterruptedException e) {
-			// Do nothing. Operation has been canceled by the user.
-		} catch (PartInitException e) {
-			MessageDialog.openError(shell, JavaUIMessages.getString("AddGetterSetterAction.actionFailed"), e.getMessage()); //$NON-NLS-1$
-		}
 		
+			int nFields= fields.length;
+			IField[] workingCopyFields= new IField[nFields];
+			
+			for (int i= 0; i < nFields; i++) {
+				IField field= fields[i];
+				String parentTypeSig= JavaModelUtility.getFullyQualifiedName(field.getDeclaringType());
+				IType workingCopyType= JavaModelUtility.findTypeInCompilationUnit(workingCopyCU, parentTypeSig);
+				if (workingCopyType == null) {
+					showError(JavaUIMessages.getFormattedString("AddGetterSetterAction.error.typeRemoved", field.getElementName())); //$NON-NLS-1$
+					return;
+				} else {
+					// get the field of the working copy
+					workingCopyFields[i]= workingCopyType.getField(field.getElementName());
+					if (!workingCopyFields[i].exists()) {
+						showError(JavaUIMessages.getFormattedString("AddGetterSetterAction.error.fieldRemoved", field.getElementName())); //$NON-NLS-1$
+						return;
+					}
+				}
+			}
+		
+			AddGetterSetterOperation op= new AddGetterSetterOperation(workingCopyFields);
+			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
+			dialog.run(false, true, op);
+			
+			if (op.getOperationInfo() != null) {
+				String title= JavaUIMessages.getString("AddGetterSetterAction.info.title"); //$NON-NLS-1$
+				String message= JavaUIMessages.getString("AddGetterSetterAction.info.message"); //$NON-NLS-1$
+				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message, op.getOperationInfo());
+			}
+		
+			IMethod[] createdMethods= op.getCreatedAccessors();
+			if (createdMethods.length > 0) {
+				EditorUtility.revealInEditor(editor, createdMethods[0]);
+			}		
+		} catch (InvocationTargetException e) {
+			JavaPlugin.log(e);
+			showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionFailed")); //$NON-NLS-1$
+		} catch (InterruptedException e) {
+			// operation cancelled
+		} catch (CoreException e) {
+			JavaPlugin.log(e.getStatus());
+			showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionFailed")); //$NON-NLS-1$
+			return;
+		}
+	}
+				
+	
+	
+	private void showError(String message) {
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		String title= JavaUIMessages.getString("AddGetterSetterAction.error.dialogTitle"); //$NON-NLS-1$
+		MessageDialog.openError(shell, title, message);
 	}
 	
-	private void showSimpleDialog(Shell shell, String title, String message) {
-		MessageDialog dialog= new MessageDialog(shell, title, null, message, SWT.ICON_INFORMATION,
-	 		new String[] { JavaUIMessages.getString("AddGetterSetterAction.ok") }, 0); //$NON-NLS-1$
-	 	dialog.open();
-	}
-	
-	private IField getSelectedField() {
+	private IField[] getSelectedFields() {
 		ISelection sel= fSelectionProvider.getSelection();
 		if (sel instanceof IStructuredSelection) {
-			Object[] elements= ((IStructuredSelection)sel).toArray();
-			if (elements.length == 1 && elements[0] instanceof IField) {
-				IField field= (IField)elements[0];
-				if (field.getCompilationUnit() != null) {
-					return field;
+			List elements= ((IStructuredSelection)sel).toList();
+			int nElements= elements.size();
+			if (nElements > 0) {
+				IField[] res= new IField[nElements];
+				ICompilationUnit cu= null;
+				for (int i= 0; i < nElements; i++) {
+					Object curr= elements.get(i);
+					if (curr instanceof IField) {
+						IField fld= (IField)curr;
+						
+						if (i == 0) {
+							cu= fld.getCompilationUnit();
+							if (cu == null) {
+								return null;
+							}
+						} else if (!cu.equals(fld.getCompilationUnit())) {
+							return null;
+						}
+						try {
+							if (fld.getDeclaringType().isInterface()) {
+								return null;
+							}
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e);
+							return null;
+						}
+						
+						res[i]= fld;
+					} else {
+						return null;
+					}
 				}
+				return res;
 			}
 		}
 		return null;
-	}		
+	}
 	
 	
 	public boolean canActionBeAdded() {
-		return getSelectedField() != null;
+		return getSelectedFields() != null;
 	}
 
 }
