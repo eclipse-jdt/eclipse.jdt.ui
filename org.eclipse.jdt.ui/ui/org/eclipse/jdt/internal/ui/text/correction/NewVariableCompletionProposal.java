@@ -196,4 +196,12 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	}
 
 
+	/**
+	 * Returns the variableKind.
+	 * @return int
+	 */
+	public int getVariableKind() {
+		return fVariableKind;
+	}
+
 }
