@@ -14,11 +14,13 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 public interface INewNameQueries {
-	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu);
-	public INewNameQuery createNewResourceNameQuery(IResource res);
-	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack);
+	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName);
+	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName);
+	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName);
+	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName);
 	public INewNameQuery createNullQuery();
 	public INewNameQuery createStaticQuery(String newName);
 }
