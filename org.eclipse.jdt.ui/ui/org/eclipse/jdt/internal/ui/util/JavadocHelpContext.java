@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
+import org.eclipse.help.IContext2;
 import org.eclipse.help.IHelpResource;
 
 import org.eclipse.ui.PlatformUI;
@@ -42,7 +43,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
 
-public class JavadocHelpContext implements IContext {
+public class JavadocHelpContext implements IContext2 {
 	
 	
 	public static void displayHelp(String contextId, Object[] selected) throws CoreException {
@@ -71,7 +72,7 @@ public class JavadocHelpContext implements IContext {
 		}
 
 		public String getLabel() {
-			String label= JavaElementLabels.getTextLabel(fElement, JavaElementLabels.ALL_DEFAULT);
+			String label= JavaElementLabels.getTextLabel(fElement, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
 			return JavaUIMessages.getFormattedString("JavaUIHelp.link.label", label); //$NON-NLS-1$
 		}
 	}	
@@ -94,16 +95,22 @@ public class JavadocHelpContext implements IContext {
 			}
 		}
 
+//		String javadocSummary= null;
 		for (int i= 0; i < elements.length; i++) {
 			if (elements[i] instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement) elements[i];
 				
-				// Looks ugly in new Help view
-//				if (fText == null) {
-//					fText= retrieveText(element);
+				// Create Javadoc summary
+				// This will have to wait due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=85719
+//				if (javadocSummary == null) {
+//					javadocSummary= retrieveText(element);
+//					if (javadocSummary != null) {
+//						String elementLabel= JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT);
+//						javadocSummary= "<b>Javadoc for " + elementLabel + ":</b><br>" + javadocSummary;
+//					}
 //				} else {
-//					fText= ""; // no doc on multiple selection //$NON-NLS-1$
-//				}					
+//					javadocSummary= ""; // no Javadoc summary for multiple selection //$NON-NLS-1$
+//				}	
 				
 				URL url= JavaUI.getJavadocLocation(element, true);
 				if (url == null || doesNotExist(url)) {
@@ -125,11 +132,17 @@ public class JavadocHelpContext implements IContext {
 			}
 		}
 		fHelpResources= (IHelpResource[]) helpResources.toArray(new IHelpResource[helpResources.size()]);
-		if (fText == null || fText.length() == 0) {
-			if (context != null) {
-				fText= context.getText();
-			}
-		}
+
+		if (context != null)
+			fText= context.getText();
+		
+		// This will have to wait due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=85719
+//		if (javadocSummary != null && javadocSummary.length() > 0) {
+//			if (fText != null)
+//				fText= context.getText() + "<br><br>" + javadocSummary; //$NON-NLS-1$
+//			else
+//				fText= javadocSummary;
+//		}
 		
 		if (fText == null)
 			fText= "";  //$NON-NLS-1$
@@ -169,6 +182,17 @@ public class JavadocHelpContext implements IContext {
 
 	public String getText() {
 		return fText;
+	}
+
+	public String getStyledText() {
+		return fText;
+	}
+
+	public String getCategory(IHelpResource topic) {
+		if (topic instanceof JavaUIHelpResource)
+			return JavaUIMessages.getString("JavaUIHelpContext.javaHelpSection.label"); //$NON-NLS-1$
+
+		return null;
 	}
 
 }
