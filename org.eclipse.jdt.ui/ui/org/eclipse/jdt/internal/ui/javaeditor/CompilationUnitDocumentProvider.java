@@ -79,7 +79,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
-import org.eclipse.jdt.internal.ui.text.spelling.SpellReconcileStrategy.SpellProblem;
+import org.eclipse.jdt.internal.ui.text.spelling.newapi.JavaSpellingReconcileStrategy;
 
 
 public class CompilationUnitDocumentProvider extends TextFileDocumentProvider implements ICompilationUnitDocumentProvider {
@@ -150,7 +150,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				fProblem= problem;
 				fCompilationUnit= cu;
 				
-				if (SpellProblem.Spelling == fProblem.getID()) {
+				if (JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID == fProblem.getID()) {
 					setType(SPELLING_ANNOTATION_TYPE);
 					fLayer= WARNING_LAYER;
 				} else if (IProblem.Task == fProblem.getID()) {

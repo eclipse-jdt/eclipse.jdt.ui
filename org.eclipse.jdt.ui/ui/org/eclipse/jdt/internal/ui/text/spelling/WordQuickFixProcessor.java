@@ -24,10 +24,10 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
-import org.eclipse.jdt.internal.ui.text.spelling.SpellReconcileStrategy.SpellProblem;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
+import org.eclipse.jdt.internal.ui.text.spelling.newapi.JavaSpellingReconcileStrategy;
 
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
@@ -73,7 +73,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor, IHtmlTagConsta
 			for (int index= 0; index < locations.length; index++) {
 
 				location= locations[index];
-				if (location.getProblemId() == SpellProblem.Spelling) {
+				if (location.getProblemId() == JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID) {
 
 					arguments= location.getProblemArguments();
 					if (arguments != null && arguments.length > 4) {
@@ -122,6 +122,6 @@ public class WordQuickFixProcessor implements IQuickFixProcessor, IHtmlTagConsta
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#hasCorrections(org.eclipse.jdt.core.ICompilationUnit,int)
 	 */
 	public final boolean hasCorrections(ICompilationUnit unit, int id) {
-		return id == SpellProblem.Spelling;
+		return id == JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID;
 	}
 }

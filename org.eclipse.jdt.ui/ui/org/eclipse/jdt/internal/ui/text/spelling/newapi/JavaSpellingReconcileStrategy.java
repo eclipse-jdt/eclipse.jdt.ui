@@ -51,9 +51,6 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 */
 	private class CoreSpellingProblem implements IProblem {
 
-		/** The id of the problem */
-		public static final int SPELLING= 0x80000000;
-
 		/** The end offset of the problem */
 		private int fSourceEnd= 0;
 
@@ -103,7 +100,7 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 		 * @see org.eclipse.jdt.core.compiler.IProblem#getID()
 		 */
 		public int getID() {
-			return SPELLING;
+			return SPELLING_PROBLEM_ID;
 		}
 
 		/*
@@ -212,6 +209,9 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 				fRequester.endReporting();
 		}
 	}
+
+	/** The id of the problem */
+	public static final int SPELLING_PROBLEM_ID= 0x80000000;
 	
 	/** The text editor to operate on. */
 	private ITextEditor fEditor;
