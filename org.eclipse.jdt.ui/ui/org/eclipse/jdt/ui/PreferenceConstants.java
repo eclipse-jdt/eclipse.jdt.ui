@@ -896,6 +896,14 @@ public class PreferenceConstants {
 	public final static String EDITOR_MULTI_LINE_COMMENT_COLOR= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT;
 
 	/**
+	 * The symbolic font name for the Java editor text font 
+	 * (value <code>"org.eclipse.jdt.ui.editors.textfont"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public final static String EDITOR_TEXT_FONT= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls whether multi line comments are rendered in bold.
 	 * <p>
 	 * Value is of type <code>Boolean</code>. If <code>true</code> multi line comments are rendered
@@ -1621,8 +1629,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_LINE_NUMBER_RULER, false);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR, new RGB(0, 0, 0));
 
-		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
-
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR, new RGB(0, 200 , 100));
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINK_COLOR, new RGB(0, 0, 255));
 
@@ -1661,7 +1667,7 @@ public class PreferenceConstants {
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR, new RGB(63, 95, 191));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_BOLD, false);
-
+		
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 500);
 

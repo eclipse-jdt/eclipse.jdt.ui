@@ -348,7 +348,7 @@ public class EditTemplateDialog extends StatusDialog {
 		viewer.setEditable(true);
 		viewer.setDocument(document);
 		
-		Font font= JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT);
+		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
 		
 		Control control= viewer.getControl();

@@ -60,8 +60,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.eclipse.ui.texteditor.WorkbenchChainedTextFontFieldEditor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
@@ -281,7 +279,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}
 	};
 	
-	private WorkbenchChainedTextFontFieldEditor fFontEditor;
 	private List fSyntaxColorList;
 	private List fAppearanceColorList;
 	private List fProblemIndicationList;
@@ -580,10 +577,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		appearanceComposite.setLayout(layout);
 
-		String label= JavaUIMessages.getString("JavaEditorPreferencePage.textFont"); //$NON-NLS-1$
-		addTextFontEditor(appearanceComposite, label, AbstractTextEditor.PREFERENCE_FONT);
-		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
+		String label= JavaUIMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
 		addTextField(appearanceComposite, label, PreferenceConstants.EDITOR_TAB_WIDTH, 3, 0, true);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
@@ -965,10 +959,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private void initialize() {
 		
-		fFontEditor.setPreferenceStore(getPreferenceStore());
-		fFontEditor.setPreferencePage(this);
-		fFontEditor.load();
-		
 		initializeFields();
 		
 		for (int i= 0; i < fSyntaxColorListModel.length; i++)
@@ -1062,7 +1052,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 * @see PreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		fFontEditor.store();
 		fJavaEditorHoverConfigurationBlock.performOk();
 		fOverlayStore.propagate();
 		JavaPlugin.getDefault().savePluginPreferences();
@@ -1073,8 +1062,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		
-		fFontEditor.loadDefault();
 		
 		fOverlayStore.loadDefaults();
 		initializeFields();
@@ -1095,9 +1082,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		if (fJavaTextTools != null) {
 			fJavaTextTools= null;
 		}
-		
-		fFontEditor.setPreferencePage(null);
-		fFontEditor.setPreferenceStore(null);
 		
 		if (fOverlayStore != null) {
 			fOverlayStore.stop();
@@ -1174,8 +1158,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
 		editorComposite.setLayout(layout);		
-		fFontEditor= new WorkbenchChainedTextFontFieldEditor(key, label, editorComposite);
-		fFontEditor.setChangeButtonText(JavaUIMessages.getString("JavaEditorPreferencePage.change")); //$NON-NLS-1$
 				
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;

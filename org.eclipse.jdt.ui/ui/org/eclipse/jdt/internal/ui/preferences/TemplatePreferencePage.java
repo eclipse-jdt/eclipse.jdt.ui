@@ -351,7 +351,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		viewer.setDocument(document);
 		viewer.getTextWidget().setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 	
-		Font font= JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT);
+		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
 		
 		Control control= viewer.getControl();

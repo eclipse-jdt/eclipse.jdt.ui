@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -304,7 +305,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		previewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
-		previewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
+		previewViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 		previewViewer.getTextWidget().setTabs(getPositiveIntValue((String) fWorkingValues.get(PREF_TAB_SIZE), 0));
 		previewViewer.setEditable(false);
 		previewViewer.setDocument(fPreviewDocument);
