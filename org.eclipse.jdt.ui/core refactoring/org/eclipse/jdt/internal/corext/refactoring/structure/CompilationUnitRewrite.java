@@ -26,6 +26,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -55,25 +56,34 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class CompilationUnitRewrite {
 	//TODO: add RefactoringStatus fStatus;?
 	private ICompilationUnit fCu;
-	private List/*<TextEditGroup>*/ fTextEditGroups;
+	private List/*<TextEditGroup>*/ fTextEditGroups= new ArrayList();
 	
 	private CompilationUnit fRoot; // lazily initialized
 	private ASTRewrite fRewrite; // lazily initialized
 	private ImportRewrite fImportRewrite; // lazily initialized
 	private ImportRemover fImportRemover; // lazily initialized
-	private boolean fResolveBindings;
-	
+	private boolean fResolveBindings= true;
+	private final WorkingCopyOwner fOwner;
+
 	public CompilationUnitRewrite(ICompilationUnit cu) {
 		this(cu, null);
 	}
-	
+
+	public CompilationUnitRewrite(WorkingCopyOwner owner, ICompilationUnit cu) {
+		fOwner= owner;
+		fCu= cu;
+	}
+
 	public CompilationUnitRewrite(ICompilationUnit cu, CompilationUnit root) {
+		this(null, cu, root);
+	}
+
+	public CompilationUnitRewrite(WorkingCopyOwner owner, ICompilationUnit cu, CompilationUnit root) {
+		fOwner= owner;
 		fCu= cu;
 		fRoot= root;
-		fTextEditGroups= new ArrayList();
-		fResolveBindings= true;
 	}
-	
+
 	/**
 	 * Requests that the compiler should provide binding information for the AST
 	 * nodes it creates. To be effective, this method must be called before any
@@ -189,7 +199,7 @@ public class CompilationUnitRewrite {
 
 	public CompilationUnit getRoot() {
 		if (fRoot == null)
-			fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, fResolveBindings);
+			fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, fOwner, fResolveBindings, null);
 		return fRoot;
 	}
 	
