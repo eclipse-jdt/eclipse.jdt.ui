@@ -26,19 +26,19 @@
   </library> 
 </runtime>
 
-<extension-point name="JavaElement Filters" id="javaElementFilters"/>
+<extension-point name="%elementFiltersName" id="javaElementFilters"/>
 
 <extension 
 	point="org.eclipse.ui.perspectives">
 	<perspective
 		id="org.eclipse.jdt.ui.JavaPerspective"
-		name="Java"
+		name="%perspectiveName"
 		icon="icons/full/cview16/jperspective.gif"
 		class="org.eclipse.jdt.internal.ui.JavaPerspectiveFactory">
 	</perspective>
 	<perspective
 		id="org.eclipse.jdt.ui.JavaHierarchyPerspective"
-		name="Java Type Hierarchy"
+		name="%typeHierarchyName"
 		icon="icons/full/cview16/hierch_persp.gif"
 		class="org.eclipse.jdt.internal.ui.JavaHierarchyPerspectiveFactory">
 	</perspective>
@@ -88,25 +88,25 @@
 	point="org.eclipse.ui.views">
 	<category 
 		id="org.eclipse.jdt.ui.java"
-		name="&amp;Java">
+		name="%viewCategoryName">
 	</category>
 	<view
 		id="org.eclipse.jdt.ui.PackageExplorer"
-		name="Packages"
+		name="%packagesViewName"
 		icon="icons/full/cview16/package.gif"
 		category="org.eclipse.jdt.ui.java"
 		class="org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart">
 	</view>
 	<view
 		id="org.eclipse.jdt.ui.TypeHierarchy"
-		name="Hierarchy"
+		name="%hierarchyViewName"
 		category="org.eclipse.jdt.ui.java"
 	   	icon="icons/full/cview16/class_hi.gif"
 		class="org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart">
 	</view>
 	<view
 		id="org.eclipse.jdt.debug.ui.DisplayView"
-		name="Display"
+		name="%displayViewName"
 		category="org.eclipse.debug.ui"
 	   	icon="icons/full/ctool16/disp_sbook.gif"
 	   	class="org.eclipse.jdt.internal.debug.ui.display.DisplayView">
@@ -118,7 +118,7 @@
 	point="org.eclipse.ui.newWizards">
 	<category
 	   id="org.eclipse.jdt.ui.java"
-	   name="Java">
+	   name="%newWizardCategoryName">
 	</category>
 	<wizard 
 		id="org.eclipse.jdt.ui.wizards.NewProjectCreationWizard"
@@ -167,35 +167,35 @@
 
 <extension
 	point="org.eclipse.ui.propertyPages">
-   	<page name="Java Build Path"
+   	<page name="%buildPathPageName"
   	   id="org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"
        objectClass="org.eclipse.core.resources.IProject"
        class="org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage">
        <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
    	</page>
-   	<page name="Java Build Path"
+   	<page name="%buildPathPageName"
   	   id="org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"
        objectClass="org.eclipse.jdt.core.IJavaProject"
        class="org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage">
        <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
    	</page>
-   	<page name="Java Source Attachment"
+   	<page name="%sourceAttachmentPageName"
 		id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1" 
 		objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
 		class="org.eclipse.jdt.internal.ui.preferences.SourceAttachmentPropertyPage">
     </page>  
-  	<page name="Java Source Attachment" 
+  	<page name="%sourceAttachmentPageName" 
 		id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage2" 
 		objectClass="org.eclipse.core.resources.IFile"
 		class="org.eclipse.jdt.internal.ui.preferences.SourceAttachmentPropertyPage"
 		nameFilter="*.jar">
     </page>  
-  	<page name="Java Info"
+  	<page name="%infoPageName"
 		id="org.eclipse.jdt.ui.propertyPages.InfoPage" 
 		objectClass="org.eclipse.jdt.core.IJavaElement"
 		class="org.eclipse.jdt.internal.ui.preferences.JavaElementInfoPage">
     </page>  
-   	<page name="Project References"
+   	<page name="%referencePageName"
   	   id="org.eclipse.jdt.ui.propertypages.projectreference"
            objectClass="org.eclipse.jdt.core.IJavaProject"
            class="org.eclipse.ui.internal.dialogs.ProjectReferencePage">
@@ -228,7 +228,7 @@
    <editor
       id ="org.eclipse.jdt.ui.ClassFileEditor"
       icon="icons/full/obj16/classf_obj.gif"
-      name="Class File Viewer"
+      name="%classFileViewerName"
       extensions="class"
       class="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor"
       contributorClass="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorActionContributor">
@@ -245,7 +245,7 @@
    
    <editor id ="org.eclipse.jdt.ui.DefaultTextEditor"
       icon="icons/full/obj16/file_obj.gif"
-      name="Properties File Editor"
+      name="%propertiesFileEditorName"
       extensions="properties"
       class="org.eclipse.ui.editors.text.TextEditor"
       contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor">     
@@ -253,7 +253,7 @@
 
    <editor id ="org.eclipse.jdt.ui.DefaultTextEditor"
       icon="icons/full/obj16/jar_desc_obj.gif"
-      name="JAR Description Editor"
+      name="%jarDescEditorName"
       extensions="jardesc"
       class="org.eclipse.ui.editors.text.TextEditor"
       contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor">     
@@ -270,26 +270,26 @@
 
 <extension
 	point="org.eclipse.ui.preferencePages">
-	<page name="Java"
+	<page name="%javaPrefName"
 		id="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage">
 	</page>
-	<page name="Organize Imports"
+	<page name="%organizeImportsPrefName"
 		id="org.eclipse.jdt.ui.preferences.ImportOrganizePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
-	<page name="Code Formatter"
+	<page name="%codeFormatterPrefName"
 		id="org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
-	<page name="Classpath Variables"
+	<page name="%classPathVarPrefName"
 		id="org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
-	<page name= "Java Editor"
+	<page name= "%editorPrefName"
 		id="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
@@ -474,20 +474,20 @@
 	   	class="org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher"
 	  	modes="run, debug"
 	  	labelProvider="org.eclipse.jdt.internal.ui.launcher.LauncherLabelProvider"
-		description="Launch a local Java program"
+		description="%launcher.description"
 	  	wizard="org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard"
- 	  	label= "Java Application"/>
+ 	  	label= "%launcher.label"/>
    <launcher
 		id="org.eclipse.jdt.ui.launcher.JDIAttachLauncher"
 		class="org.eclipse.jdt.internal.debug.ui.JDIAttachLauncher"
-		label="Remote Java Application"
-		description="Attach to a remote Java program"
+		label="%remoteLauncher.label"
+		description="%remoteLauncher.description"
 		wizard="org.eclipse.jdt.internal.debug.ui.JDIAttachLauncherWizard"
    		modes="debug" />
    	<launcher
 		id="org.eclipse.jdt.ui.launcher.ScrapbookLauncher"
 		class="org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookLauncher"
-		label="Java Scrapbook Page"
+		label="%scrabbookLauncher.label"
 		public="false"
    		modes="debug" />
 </extension>	
@@ -502,13 +502,13 @@
 	point="org.eclipse.ui.propertyPages">
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.VMPropertyPage" 
-		name="JRE"
+		name="%vmPageName"
 		objectClass="org.eclipse.jdt.core.IJavaProject"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPropertyPage">
     </page>
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.VMPropertyPage" 
-		name="JRE"
+		name="%vmPageName"
 		objectClass="org.eclipse.core.resources.IProject"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPropertyPage">
 		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
@@ -519,51 +519,51 @@
 	point="org.eclipse.ui.propertyPages">
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.ExecutionArgsPage" 
-		name="Execution Arguments"
+		name="%execArgPageName"
 		objectClass="org.eclipse.jdt.core.api.IType"
 		class="org.eclipse.jdt.internal.ui.launcher.ExecutionArgsPropertyPage">
     </page>
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.ExecutionArgsPage" 
-		name="Execution Arguments"
+		name="%execArgPageName"
 		objectClass="org.eclipse.jdt.core.ICompilationUnit"
 		class="org.eclipse.jdt.internal.ui.launcher.ExecutionArgsPropertyPage">
     </page>
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.ExecutionArgsPage" 
-		name="Execution Arguments"
+		name="%execArgPageName"
 		objectClass="org.eclipse.jdt.core.IClassFile"
 		class="org.eclipse.jdt.internal.ui.launcher.ExecutionArgsPropertyPage">
     </page>
 	<page
 		id="org.eclipse.jdt.ui.propertyPages.ExecutionArgsPage" 
-		name="Execution Arguments"
+		name="%execArgPageName"
 		objectClass="org.eclipse.core.resources.IFile"
 		class="org.eclipse.jdt.internal.ui.launcher.ExecutionArgsPropertyPage"
         nameFilter="*.java"> 
     </page>
 	<page
 		id="org.eclipse.jdt.ui.launching.SourceLookupPage" 
-		name="Debugger Source Lookup"
+		name="%debugSourcePageName"
 		objectClass="org.eclipse.core.resources.IProject"
 		class="org.eclipse.jdt.internal.ui.launcher.SourceLookupPropertyPage"> 
 		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
     </page>
 	<page
 		id="org.eclipse.jdt.ui.launching.SourceLookupPage" 
-		name="Debugger Source Lookup"
+		name="%debugSourcePageName"
 		objectClass="org.eclipse.jdt.core.IJavaProject"
 		class="org.eclipse.jdt.internal.ui.launcher.SourceLookupPropertyPage"> 
     </page>
 	<page
 		id="org.eclipse.jdt.ui.launching.ProcessPage" 
-		name="Process Info"
+		name="%processInfoPageName"
 		objectClass="org.eclipse.debug.core.model.IProcess"
 		class="org.eclipse.jdt.internal.ui.launcher.ProcessPropertyPage"> 
     </page>
 	<page
 		id="org.eclipse.jdt.ui.launching.ProcessPage" 
-		name="Process Info"
+		name="%processInfoPageName"
 		objectClass="org.eclipse.debug.core.model.IDebugTarget"
 		class="org.eclipse.jdt.internal.ui.launcher.ProcessPropertyPage"> 
     </page>
@@ -573,7 +573,7 @@
 	<page
 		id = "org.eclipse.jdt.ui.preferences.VMPreferencePage"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPreferencePage"
-		name= "Installed JREs"
+		name= "%installJREPageName"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
 </extension>
@@ -583,26 +583,26 @@
 		id="org.eclipse.jdt.ui.debug.VariableViewActions"
 		targetID="org.eclipse.debug.ui.VariableView">
 		<action id="org.eclipse.jdt.ui.actions.ShowFinalFields"
-			label="Show Final Variables"
+			label="%showFinalAction.label"
 			toolbarPath="javaVariableFilters"
 			icon="icons/full/elcl16/final_co.gif"
-			tooltip="Hide Final Variables"
+			tooltip="showFinalAction.tooltip"
 			state="true"
 			class="org.eclipse.jdt.internal.debug.ui.ShowFinalFieldsAction">
 		</action>
 		<action id="org.eclipse.jdt.ui.actions.ShowStaticFields"
-			label="Show Static Fields"
+			label="%showStaticAction.label"
 			toolbarPath="javaVariableFilters"
 			icon="icons/full/elcl16/static_co.gif"
-			tooltip="Hide Static Fields"
+			tooltip="%showStaticAction.tooltip"
 			state="true"
 			class="org.eclipse.jdt.internal.debug.ui.ShowStaticFieldsAction">
 		</action>
 		<action id="org.eclipse.jdt.ui.actions.HexValues"
-			label="Show Hexadecimal Values"
+			label="%hexValueAction.label"
 			toolbarPath="javaVariableFilters"
 			icon="icons/full/elcl16/hexad_co.gif"
-			tooltip="Show Hexadecimal Values"
+			tooltip="%hexValueAction.tooltip"
 			state="false"
 			class="org.eclipse.jdt.internal.debug.ui.HexValuesAction">
 		</action>
@@ -614,26 +614,26 @@
 		id="org.eclipse.jdt.ui.debug.InspectorViewActions"
 		targetID="org.eclipse.debug.ui.InspectorView">
 		<action id="org.eclipse.jdt.ui.actions.ShowFinalFields"
-			label="Show Final Variables"
+			label="%showFinalAction.label"
 			toolbarPath="javaVariableFilters"
 			icon="icons/full/elcl16/final_co.gif"
-			tooltip="Hide Final Variables"
+			tooltip="%showFinalAction.tooltip"
 			state="true"
 			class="org.eclipse.jdt.internal.debug.ui.ShowFinalFieldsAction">
 		</action>
 		<action id="org.eclipse.jdt.ui.actions.ShowStaticFields"
-			label="Show Static Fields"
+			label="%showStaticAction.label"
 			toolbarPath="javaVariableFilters"
 			icon="icons/full/elcl16/static_co.gif"
-			tooltip="Hide Static Fields"
+			tooltip="%showStaticAction.tooltip"
 			state="true"
 			class="org.eclipse.jdt.internal.debug.ui.ShowStaticFieldsAction">
 		</action>
 		<action id="org.eclipse.jdt.ui.actions.HexValues"
-			label="Show Hexadecimal Values"
+			label="%hexValueAction.label"
 			toolbarPath="javaVariableFilters"
 			icon="icons/full/elcl16/hexad_co.gif"
-			tooltip="Show Hexadecimal Values"
+			tooltip="%hexValueAction.tooltip"
 			state="false"
 			class="org.eclipse.jdt.internal.debug.ui.HexValuesAction">
 		</action>
@@ -642,10 +642,10 @@
 		id="org.eclipse.jdt.ui.BreakpointViewActions"
 		targetID="org.eclipse.debug.ui.BreakpointView">
 		<action id="org.eclipse.jdt.ui.actions.AddException"
-			label="Add Java Exception Breakpoint"
+			label="%exceptionAction.label"
 			toolbarPath="javaExceptions"
 			icon="icons/full/clcl16/exc_catch.gif"
-			tooltip="Add Java Exception"
+			tooltip="%exceptionAction.tooltip"
 			class="org.eclipse.jdt.internal.ui.launcher.AddExceptionAction">
 		</action>
 	</viewContribution>
@@ -660,13 +660,13 @@
 		<menu
 			id="org.eclipse.jdt.ui.actions.OpenOnMenu"
 			path="emptyEditGroup"
-			label="Open on...">
+			label="%openOnAction.label">
 			<separator name="group.openOn"/>
 		</menu>
 		<action
 			id="org.eclipse.jdt.ui.actions.OpenOnDeclaringType"
-			label="Declaring Type"
-			tooltip="Open on Declaring Type"
+			label="%openDeclType.label"
+			tooltip="%openDeclType.tooltip"
 			menubarPath="org.eclipse.jdt.ui.actions.OpenOnMenu/group.openOn"
 			class="org.eclipse.jdt.internal.ui.launcher.OpenOnDeclaringTypeAction">
 		</action>
@@ -677,8 +677,8 @@
 		objectClass="org.eclipse.jdt.debug.IJavaVariable">
 		<action
 			id="org.eclipse.jdt.ui.actions.OpenOnVariableType"
-			label="Open Declared Type"
-			tooltip="Open the Variable's Type"
+			label="%openDeclVarType.label"
+			tooltip="%openDeclVarType.tooltip"
 			menubarPath="openOnGroup"
 			class="org.eclipse.jdt.internal.ui.launcher.OpenOnVariableAction">
 		</action>
@@ -688,8 +688,8 @@
 		objectClass="org.eclipse.jdt.internal.debug.core.JDIStackFrame">
 		<action
 			id="org.eclipse.jdt.ui.actions.OpenOnReceivingType"
-			label="Receiving Type"
-			tooltip="Open on Receiving Type"
+			label="%openRecType.label"
+			tooltip="%openRecType.tooltip"
 			menubarPath="org.eclipse.jdt.ui.actions.OpenOnMenu/group.openOn"
 			class="org.eclipse.jdt.internal.ui.launcher.OpenOnReceivingTypeAction">
 		</action>
@@ -699,8 +699,8 @@
 		targetID="org.eclipse.debug.ui.BreakpointView">
 		<action
 			id="org.eclipse.jdt.ui.actions.BreakpointHitCount"
-			label="&amp;Hit Count"
-			tooltip="Set breakpoint hit count"
+			label="%hitCount.label"
+			tooltip="%hitCount.tooltip"
 			menubarPath="emptyBreakpointGroup"
 			class="org.eclipse.jdt.internal.debug.ui.BreakpointHitCountAction"
 			enablesFor="1">
@@ -711,8 +711,8 @@
 		targetID="org.eclipse.debug.ui.BreakpointView">
 		<action
 			id="org.eclipse.jdt.ui.actions.CaughtToggle"
-			label="&amp;Caught"
-			tooltip="Suspend when caught"
+			label="%caughtAction.label"
+			tooltip="%caughtAction.tooltip"
 			menubarPath="emptyBreakpointGroup"
 			state="true"
 			class="org.eclipse.jdt.internal.debug.ui.ExceptionCaughtToggleAction"
@@ -724,8 +724,8 @@
 		targetID="org.eclipse.debug.ui.BreakpointView">
 		<action
 			id="org.eclipse.jdt.ui.actions.UncaughtToggle"
-			label="&amp;Uncaught"
-			tooltip="Suspend when uncaught"
+			label="%uncaughtAction.label"
+			tooltip="%uncaughtAction.tooltip"
 			menubarPath="emptyBreakpointGroup"
 			state="true"
 			class="org.eclipse.jdt.internal.debug.ui.ExceptionUncaughtToggleAction"
@@ -737,8 +737,8 @@
 		targetID="org.eclipse.debug.ui.DebugView">
 		<action
 			id="org.eclipse.jdt.ui.actions.DropToFrame"
-			label="&amp;Drop To Frame"
-			tooltip="Drop the current stack frame"
+			label="%dropFrameAction.label"
+			tooltip="%dropFrameAction.tooltip"
 			menubarPath="emptyThreadGroup"
 			class="org.eclipse.jdt.internal.debug.ui.DropToFrameAction"
 			enablesFor="1">
@@ -781,10 +781,10 @@
 <extension point="org.eclipse.ui.exportWizards">
 	<wizard
 	   id="org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard"
-	   name="JAR file"
+	   name="%jarExportWizard.label"
 	   class="org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard"
 	   icon="icons/full/ctool16/exportjar_wiz.gif">
-	   <description>Package resources into a JAR file on the local file system</description>
+	   <description>%jarExportWizard.description</description>
 	   <selection class="org.eclipse.core.resources.IResource"/>
 	</wizard>
 </extension> 
@@ -801,8 +801,8 @@
 		nameFilter="*.jardesc">
 		<action
 			id="CreateJar"
-			label="Create JAR"
-			tooltip="Create the JAR based on the selected JAR description file"
+			label="%createJarAction.label"
+			tooltip="%createJarAction.tooltip"
 			menubarPath="additions"
 			enablesFor="+"
 			class="org.eclipse.jdt.internal.ui.jarpackager.CreateJarActionDelegate">
@@ -814,8 +814,8 @@
 		nameFilter="*.jardesc">
 		<action
 			id="OpenJarPackageWizard"
-			label="Open JAR Packager"
-			tooltip="Opens the JAR Package Wizard based on the selected JAR description file"
+			label="%openJarPackager.label"
+			tooltip="%openJarPackager.tooltip"
 			menubarPath="additions"
 			enablesFor="1"
 			class="org.eclipse.jdt.internal.ui.jarpackager.OpenJarPackageWizardActionDelegate">
