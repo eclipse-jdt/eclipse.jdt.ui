@@ -90,7 +90,12 @@ public class NLSPropertyFileModifier {
 			boolean isExternalized= substitution.hasStateChanged() && (substitution.getState() == NLSSubstitution.EXTERNALIZED);
 			boolean isMissingKey= !substitution.hasStateChanged() && (substitution.getState() == NLSSubstitution.EXTERNALIZED) && (substitution.getInitialValue() == null);
 			if (isExternalized || isMissingKey) {
-				KeyValuePair curr= new KeyValuePair(substitution.getKey(), substitution.getValue());
+				String value= substitution.getValue();
+				if (value == null) {
+					value= ""; //$NON-NLS-1$
+				}
+			
+				KeyValuePair curr= new KeyValuePair(substitution.getKey(), value);
 				
 				InsertEdit insert= model.insert(curr);
 				String message= NLSMessages.getFormattedString("NLSPropertyFileModifier.add_entry", curr.getKey()); //$NON-NLS-1$
