@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.text.java.*;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -192,11 +193,8 @@ public class ModifierCorrectionSubProcessor {
 			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
 			
 			AST ast= astRoot.getAST();
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(decl.isConstructor());
-			modifiedNode.setExtraDimensions(decl.getExtraDimensions());
-			modifiedNode.setModifiers(decl.getModifiers() & ~Modifier.ABSTRACT);
-			rewrite.markAsModified(decl, modifiedNode);
+			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 
 			if (hasNoBody) {
 				Block newBody= ast.newBlock();
@@ -257,11 +255,9 @@ public class ModifierCorrectionSubProcessor {
 			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
 			
 			AST ast= astRoot.getAST();
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(decl.isConstructor());
-			modifiedNode.setExtraDimensions(decl.getExtraDimensions());
-			modifiedNode.setModifiers(decl.getModifiers() & ~Modifier.NATIVE);
-			rewrite.markAsModified(decl, modifiedNode);
+			
+			int newModifiers= decl.getModifiers() & ~Modifier.NATIVE;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 
 			Block newBody= ast.newBlock();
 			rewrite.markAsInserted(newBody);
@@ -297,12 +293,9 @@ public class ModifierCorrectionSubProcessor {
 	
 	public static ASTRewriteCorrectionProposal getMakeTypeStaticProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration, int relevance) throws CoreException {
 		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getParent());
-		
-		AST ast= typeDeclaration.getAST();
-		TypeDeclaration modifiedNode= ast.newTypeDeclaration();
-		modifiedNode.setInterface(typeDeclaration.isInterface());
-		modifiedNode.setModifiers(typeDeclaration.getModifiers() | Modifier.ABSTRACT);
-		rewrite.markAsModified(typeDeclaration, modifiedNode);
+				
+		int newModifiers= typeDeclaration.getModifiers() | Modifier.ABSTRACT;
+		rewrite.markAsReplaced(typeDeclaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 
 		String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.addabstract.description", typeDeclaration.getName().getIdentifier()); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -323,11 +316,8 @@ public class ModifierCorrectionSubProcessor {
 		
 		ASTRewrite rewrite= new ASTRewrite(decl);
 		
-		MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-		modifiedNode.setConstructor(decl.isConstructor());
-		modifiedNode.setExtraDimensions(decl.getExtraDimensions());
-		modifiedNode.setModifiers(decl.getModifiers() & ~Modifier.ABSTRACT);
-		rewrite.markAsModified(decl, modifiedNode);		
+		int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
+		rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);		
 		
 		Block body= ast.newBlock();
 		decl.setBody(body);

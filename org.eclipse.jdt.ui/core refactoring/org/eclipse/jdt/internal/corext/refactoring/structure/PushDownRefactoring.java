@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -1173,12 +1174,9 @@ public class PushDownRefactoring extends Refactoring {
 		return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
 	}
 
-	private void makeDeclaringClassAbstract(TypeDeclaration declaration, ASTRewrite rewrite) throws JavaModelException {
-		AST ast= getAST(rewrite);
-		TypeDeclaration newType= ast.newTypeDeclaration();
-		newType.setInterface(declaration.isInterface());
-		newType.setModifiers(createNewModifiersForMakingDeclaringClassAbstract(declaration));
-		rewrite.markAsModified(declaration, newType);
+	private void makeDeclaringClassAbstract(TypeDeclaration declaration, ASTRewrite rewrite) {
+		int newModifiers= createNewModifiersForMakingDeclaringClassAbstract(declaration);
+		rewrite.markAsReplaced(declaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 	}
 
 	private int createNewModifiersForMakingDeclaringClassAbstract(TypeDeclaration declaration) {
@@ -1213,13 +1211,10 @@ public class PushDownRefactoring extends Refactoring {
 		if (JdtFlags.isAbstract(method))
 			return;
 		MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cuNode);
-		AST ast= getAST(rewrite);
-		MethodDeclaration newMethod= ast.newMethodDeclaration();
 		rewrite.markAsRemoved(declaration.getBody());
-		newMethod.setModifiers(createModifiersForMethodMadeAbstract(info, declaration.getModifiers()));
-		newMethod.setExtraDimensions(declaration.getExtraDimensions());
-		newMethod.setConstructor(declaration.isConstructor());
-		rewrite.markAsModified(declaration, newMethod);
+		
+		int newModifiers= createModifiersForMethodMadeAbstract(info, declaration.getModifiers());
+		rewrite.markAsReplaced(declaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 	}
 
 	private int createModifiersForMethodMadeAbstract(MemberActionInfo info, int oldModifiers) throws JavaModelException {

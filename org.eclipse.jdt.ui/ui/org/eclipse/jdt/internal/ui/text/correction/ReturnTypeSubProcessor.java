@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.text.java.*;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -89,7 +90,7 @@ public class ReturnTypeSubProcessor {
 			MethodDeclaration declaration= (MethodDeclaration) selectedNode;
 			
 			ASTRewrite rewrite= new ASTRewrite(declaration);
-			rewrite.markAsRemoved(declaration.getReturnType());
+			rewrite.markAsReplaced(declaration, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.TRUE, null);
 			
 			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.constrnamemethod.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -130,13 +131,8 @@ public class ReturnTypeSubProcessor {
 				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
 				
 				if (methodDeclaration.isConstructor()) {
-					MethodDeclaration modifiedNode= astRoot.getAST().newMethodDeclaration();
-					modifiedNode.setModifiers(methodDeclaration.getModifiers()); // no changes
-					modifiedNode.setExtraDimensions(methodDeclaration.getExtraDimensions()); // no changes
-					modifiedNode.setConstructor(false);
-					rewrite.markAsModified(methodDeclaration, modifiedNode);
-					methodDeclaration.setReturnType(newReturnType);
-					rewrite.markAsInserted(newReturnType);
+					rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.FALSE, null);
+					rewrite.markAsInsert(methodDeclaration, ASTNodeConstants.RETURN_TYPE, newReturnType, null);
 				} else {
 					rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
 				}
@@ -197,15 +193,9 @@ public class ReturnTypeSubProcessor {
 				type= ast.newPrimitiveType(PrimitiveType.VOID);	
 			}
 			proposal.setDisplayName(CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName)); //$NON-NLS-1$		
-
-			rewrite.markAsInserted(type);
-			methodDeclaration.setReturnType(type);
-			
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setModifiers(methodDeclaration.getModifiers()); // no changes
-			modifiedNode.setExtraDimensions(methodDeclaration.getExtraDimensions()); // no changes
-			modifiedNode.setConstructor(false);
-			rewrite.markAsModified(methodDeclaration, modifiedNode);
+		
+			rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.RETURN_TYPE, type, null);
+			rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.FALSE, null);
 			
 			String key= "return_type"; //$NON-NLS-1$
 			proposal.markAsLinked(rewrite, type, true, key);

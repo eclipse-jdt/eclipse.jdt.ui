@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -767,10 +768,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private void removeUnusedTypeModifiers(TypeDeclaration type, ASTRewrite rewrite) {
-		TypeDeclaration modified= type.getAST().newTypeDeclaration();
-		modified.setInterface(type.isInterface());
-		modified.setModifiers(JdtFlags.clearFlag(Modifier.STATIC | Modifier.PROTECTED | Modifier.PRIVATE, type.getModifiers()));
-		rewrite.markAsModified(type, modified);
+		int newModifiers= JdtFlags.clearFlag(Modifier.STATIC | Modifier.PROTECTED | Modifier.PRIVATE, type.getModifiers());
+		rewrite.markAsReplaced(type, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+		
 	}
 	
 	private void updateTypeReference(ASTNode node, ASTRewrite rewrite, ICompilationUnit cu) throws CoreException{

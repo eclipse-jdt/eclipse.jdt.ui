@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -28,6 +26,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
@@ -46,7 +45,7 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		fExcludedModifiers= excludedModifiers;
 	}
 	
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected ASTRewrite getRewrite() {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
@@ -63,62 +62,40 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		}
 		if (declNode != null) {
 			ASTRewrite rewrite= new ASTRewrite(declNode.getParent());
-			AST ast= declNode.getAST();
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
 				int newModifiers= (methodDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 				
-				MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-				modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-				modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
-				modifiedNode.setModifiers(newModifiers);
-				
-				rewrite.markAsModified(methodDecl, modifiedNode, selectionDescription);
+				rewrite.markAsReplaced(methodDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);
 			} else if (declNode instanceof VariableDeclarationFragment) {
 				ASTNode parent= declNode.getParent();
 				if (parent instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) parent;
 					int newModifiers= (fieldDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
-					
-					FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-					modifiedNode.setModifiers(newModifiers);
-					
-					rewrite.markAsModified(fieldDecl, modifiedNode, selectionDescription);					
+				
+					rewrite.markAsReplaced(fieldDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);	
 				} else if (parent instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
 					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 					
-					VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
-					modifiedNode.setModifiers(newModifiers);
-					
-					rewrite.markAsModified(varDecl, modifiedNode, selectionDescription);
+					rewrite.markAsReplaced(varDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);	
 				} else if (parent instanceof VariableDeclarationExpression) {
 					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
 					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 					
-					VariableDeclarationExpression modifiedNode= ast.newVariableDeclarationExpression(ast.newVariableDeclarationFragment());
-					modifiedNode.setModifiers(newModifiers);
-					
-					rewrite.markAsModified(varDecl, modifiedNode, selectionDescription);					
+					rewrite.markAsReplaced(varDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
 				int newModifiers= (variableDeclaration.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 				
-				SingleVariableDeclaration modifiedNode= ast.newSingleVariableDeclaration();
-				modifiedNode.setExtraDimensions(variableDeclaration.getExtraDimensions()); // no change
-				modifiedNode.setModifiers(newModifiers);
+				rewrite.markAsReplaced(variableDeclaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);
 				
-				rewrite.markAsModified(variableDeclaration, modifiedNode, selectionDescription);				
 			} else if (declNode instanceof TypeDeclaration) {
 				TypeDeclaration typeDecl= (TypeDeclaration) declNode;
 				int newModifiers= (typeDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 				
-				TypeDeclaration modifiedNode= ast.newTypeDeclaration();
-				modifiedNode.setInterface(typeDecl.isInterface()); // no change
-				modifiedNode.setModifiers(newModifiers);
-				
-				rewrite.markAsModified(typeDecl, modifiedNode, selectionDescription);				
+				rewrite.markAsReplaced(typeDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), selectionDescription);
 			}
 			return rewrite;
 		}

@@ -59,6 +59,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -838,10 +839,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
 				int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 				if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers) {
-					AST ast= fieldDecl.getAST();
-					FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-					modifiedNode.setModifiers(psfModifiers);
-					fSource.rewriter.markAsModified(fieldDecl, modifiedNode);
+					fSource.rewriter.markAsReplaced(fieldDecl, ASTNodeConstants.MODIFIERS, new Integer(psfModifiers), null);
 				}
 			}
 			fSource.rewriter.markAsTracked(declaration, new GroupDescription("moved member declaration"));

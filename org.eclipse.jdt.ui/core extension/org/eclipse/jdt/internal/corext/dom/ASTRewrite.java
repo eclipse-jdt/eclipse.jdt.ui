@@ -210,20 +210,35 @@ public final class ASTRewrite extends NewASTRewrite {
 
 		clearRewrite();
 	}
-
+	
+	/**
+	 * Marke a node to insert.
+	 * @param parent The node to change
+	 * @param childProperty The propert of the child to be inserted.
+	 * @param insertedNode the node or attribute to insert.
+	 * @param description Description of the change.
+	 */
+	public final void markAsInsert(ASTNode parent, int childProperty, ASTNode insertedNode, GroupDescription description) {
+		validateIsInsideRoot(parent);
+		validateIsNodeProperty(childProperty);
+		NodeRewriteEvent nodeEvent= getNodeEvent(parent, childProperty, true);
+		nodeEvent.setNewValue(insertedNode);
+		if (description != null) {
+			setDescription(nodeEvent, description);
+		}
+	}
+	
+			
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
 	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 * @param node The node to be marked as inserted.
-	 * @param boundToPrevious If set, the inserted node is bound to the previous node, that means
-	 * it is inserted directly after the previous node. If set to false the node is inserted before the next.
-	 * This option is only used for nodes in lists.
 	 * @param description Description of the change.
 	 */
-	public final void markAsInserted(ASTNode node, boolean boundToPrevious, GroupDescription description) {
+	public final void markAsInserted(ASTNode node, GroupDescription description) {
 		Assert.isTrue(!isCollapsed(node), "Tries to insert a collapsed node"); //$NON-NLS-1$
 		ASTInsert insert= new ASTInsert();
-		insert.isBoundToPrevious= boundToPrevious;
+		insert.isBoundToPrevious= getDefaultBoundBehaviour(node);
 		insert.description= description;
 		setChangeProperty(node, insert);
 		fHasASTModifications= true;
@@ -233,31 +248,9 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
 	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 * @param node The node to be marked as inserted.
-	 * @param boundToPrevious If set, the inserted node is bound to the previous node, that means
-	 * it is inserted directly after the previous node. If set to false the node is inserted before the next.
-	 * This option is only used for nodes in lists.
-	 */
-	public final void markAsInserted(ASTNode node, boolean boundToPrevious) {
-		markAsInserted(node, boundToPrevious, (GroupDescription) null);
-	}
-			
-	/**
-	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link #createCopy})
-	 * @param node The node to be marked as inserted.
-	 * @param description Description of the change.
-	 */
-	public final void markAsInserted(ASTNode node, GroupDescription description) {
-		markAsInserted(node, getDefaultBoundBehaviour(node), description);
-	}
-
-	/**
-	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link #createCopy})
-	 * @param node The node to be marked as inserted.
 	 */
 	public final void markAsInserted(ASTNode node) {
-		markAsInserted(node, getDefaultBoundBehaviour(node), (GroupDescription) null);
+		markAsInserted(node, (GroupDescription) null);
 	}
 	
 	private boolean getDefaultBoundBehaviour(ASTNode node) {
@@ -283,6 +276,9 @@ public final class ASTRewrite extends NewASTRewrite {
 		validateIsNodeProperty(childProperty);
 		NodeRewriteEvent nodeEvent= getNodeEvent(parent, childProperty, true);
 		nodeEvent.setNewValue(null);
+		if (description != null) {
+			setDescription(nodeEvent, description);
+		}
 	}
 
 	/**
@@ -301,6 +297,9 @@ public final class ASTRewrite extends NewASTRewrite {
 		RewriteEvent res= listEvent.removeEntry(nodeToRemove);
 		if (res == null) {
 			throw new IllegalArgumentException("Node to remove is not member of list"); //$NON-NLS-1$
+		}
+		if (description != null) {
+			setDescription(res, description);
 		}
 	}
 	
@@ -341,6 +340,9 @@ public final class ASTRewrite extends NewASTRewrite {
 		validateIsNodeProperty(childProperty);
 		NodeRewriteEvent nodeEvent= getNodeEvent(parent, childProperty, true);
 		nodeEvent.setNewValue(replacingNode);
+		if (description != null) {
+			setDescription(nodeEvent, description);
+		}
 	}
 
 	/**
@@ -360,6 +362,9 @@ public final class ASTRewrite extends NewASTRewrite {
 		RewriteEvent res= listEvent.replaceEntry(nodeToReplace, replacingNode);
 		if (res == null) {
 			throw new IllegalArgumentException("Node to replace is not member of list"); //$NON-NLS-1$
+		}
+		if (description != null) {
+			setDescription(res, description);
 		}
 	}
 	

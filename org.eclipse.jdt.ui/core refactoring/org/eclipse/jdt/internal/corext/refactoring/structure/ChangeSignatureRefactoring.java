@@ -65,6 +65,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -1135,11 +1136,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private void removeExtraDimensions(SingleVariableDeclaration oldParam, ASTRewrite rewrite) {
-		if (oldParam.getExtraDimensions() != 0) {
-			SingleVariableDeclaration newParam= oldParam.getAST().newSingleVariableDeclaration();
-			newParam.setModifiers(oldParam.getModifiers());
-			newParam.setExtraDimensions(0);
-			rewrite.markAsModified(oldParam, newParam);
+		if (oldParam.getExtraDimensions() != 0) {		
+			rewrite.markAsReplaced(oldParam, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(0), null);
 		}
 	}
 
@@ -1152,11 +1150,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		replaceTypeNode(methodDeclaration.getReturnType(), fReturnTypeName, rewrite);
 	}
 
-	private void changeVisibility(MethodDeclaration methodDeclaration, ASTRewrite rewrite) throws JavaModelException {
-		MethodDeclaration modifierMethodDeclaration= methodDeclaration.getAST().newMethodDeclaration();
-		modifierMethodDeclaration.setModifiers(getNewModifiers(methodDeclaration));
-		modifierMethodDeclaration.setExtraDimensions(methodDeclaration.getExtraDimensions());
-		rewrite.markAsModified(methodDeclaration, modifierMethodDeclaration);
+	private void changeVisibility(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
+		int newModifiers= getNewModifiers(methodDeclaration);
+		rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 	}
 
 	private void updateReferenceNode(ASTNode methodOccurrence, ASTRewrite rewrite) {

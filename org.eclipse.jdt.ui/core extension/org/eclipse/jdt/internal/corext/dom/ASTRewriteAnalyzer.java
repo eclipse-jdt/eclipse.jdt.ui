@@ -542,12 +542,11 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					ASTNode node= (ASTNode) event.getOriginalValue();
 					GroupDescription description= getDescription(event);
 					
-					int nodeOffset= getExtendedOffset(node);
-					int nodeLen= getExtendedLength(node);		
+					int nodeEnd= getExtendedEnd(node);
 					// if there is a prefix, remove the prefix as well
-					int len= nodeOffset + nodeLen - offset;
+					int len= nodeEnd - offset;
 					doTextRemoveAndVisit(offset, len, node, description);
-					return nodeOffset + nodeLen;
+					return nodeEnd;
 				}
 				case RewriteEvent.REPLACED: {
 					ASTNode node= (ASTNode) event.getOriginalValue();
@@ -1212,6 +1211,41 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 
 
+	private void rewriteReturnType(MethodDeclaration node, boolean isConstructor, boolean isConstructorChange) {
+		// weakness in the AST: return type always exists, even if missing in source
+		ASTNode originalReturnType= (ASTNode) getOriginalValue(node, ASTNodeConstants.RETURN_TYPE);
+		boolean returnTypeExists=  originalReturnType != null && originalReturnType.getStartPosition() != -1;
+		if (!isConstructorChange && returnTypeExists) {
+			rewriteRequiredNode(node, ASTNodeConstants.RETURN_TYPE);
+			return;
+		}
+		ASTNode newReturnType= (ASTNode) getNewValue(node, ASTNodeConstants.RETURN_TYPE);
+		if (isConstructorChange || !returnTypeExists && newReturnType != originalReturnType) {
+			try {
+				int startPos= node.getStartPosition();
+				
+				getScanner().setOffset(startPos);
+				int token= getScanner().readNext(true);
+				while (TokenScanner.isModifier(token)) {
+					startPos= getScanner().getCurrentEndOffset();
+					token= getScanner().readNext(true);
+				}
+				
+				GroupDescription description= getDescription(node, ASTNodeConstants.RETURN_TYPE);
+				if (isConstructor || !returnTypeExists) { // insert
+					doTextInsert(startPos, " ", description); //$NON-NLS-1$
+					doTextInsert(startPos, newReturnType, getIndent(startPos), true, description);
+				} else { // remove
+					int len= getExtendedEnd(originalReturnType) - startPos;
+					doTextRemoveAndVisit(startPos, len, originalReturnType, description);
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+		}
+	}
+	
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(MethodDeclaration)
 	 */
@@ -1222,33 +1256,10 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		rewriteModifiers(node, ASTNodeConstants.MODIFIERS, node.getStartPosition());
 		
-		boolean willBeConstructor= ((Boolean) getNewValue(node, ASTNodeConstants.IS_CONSTRUCTOR)).booleanValue();
-	
-		// return type
-		int returnChangeKind= getChangeKind(node, ASTNodeConstants.RETURN_TYPE);
-		if (!willBeConstructor || returnChangeKind == RewriteEvent.REMOVED) {
-			try {
-				int startPos= node.getStartPosition();
-				if (returnChangeKind == RewriteEvent.REMOVED || returnChangeKind == RewriteEvent.INSERTED) {
-					getScanner().setOffset(startPos);
-					int token= getScanner().readNext(true);
-					while (TokenScanner.isModifier(token)) {
-						startPos= getScanner().getCurrentEndOffset();
-						token= getScanner().readNext(true);
-					}
-				}
-				ASTNode nameNode= (ASTNode) getOriginalValue(node, ASTNodeConstants.NAME);
-				if (startPos == nameNode.getStartPosition()) {
-					rewriteNode(node, ASTNodeConstants.RETURN_TYPE, startPos, ASTRewriteFormatter.NONE); //$NON-NLS-1$
-					if (returnChangeKind == RewriteEvent.INSERTED) {
-						doTextInsert(startPos, " ", getDescription(node, ASTNodeConstants.RETURN_TYPE)); //$NON-NLS-1$
-					}
-				} else {
-					rewriteNode(node, ASTNodeConstants.RETURN_TYPE, startPos, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
-				}
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			}
+		boolean isConstructorChange= isChanged(node, ASTNodeConstants.IS_CONSTRUCTOR);
+		boolean isConstructor= ((Boolean) getOriginalValue(node, ASTNodeConstants.IS_CONSTRUCTOR)).booleanValue();
+		if (!isConstructor || isConstructorChange) {
+			rewriteReturnType(node, isConstructor, isConstructorChange);
 		}
 		// method name
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);

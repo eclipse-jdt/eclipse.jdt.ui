@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -398,12 +399,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		AST ast= root.getAST();
 		if (!JdtFlags.isPrivate(fField)) {
 			FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
-			FieldDeclaration modified= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-			modified.setModifiers(ASTNodes.changeVisibility(decl.getModifiers(), Modifier.PRIVATE));
+			int newModifiers= ASTNodes.changeVisibility(decl.getModifiers(), Modifier.PRIVATE);
+
 			GroupDescription description= new GroupDescription(
 				RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
 			result.add(description);
-			rewriter.markAsModified(decl, modified, description);
+			rewriter.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), description);
 		}
 		
 		TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class);
