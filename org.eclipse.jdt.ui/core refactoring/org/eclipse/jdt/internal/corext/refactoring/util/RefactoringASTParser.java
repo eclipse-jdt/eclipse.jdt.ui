@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -73,6 +74,7 @@ public class RefactoringASTParser {
 				options.put(key, "ignore"); //$NON-NLS-1$
 			}
 		}
+		options.put(JavaCore.COMPILER_TASK_TAGS, ""); //$NON-NLS-1$		
 		return options;
 	}
 }
