@@ -24,7 +24,7 @@ public class ShowInheritedMembersAction extends Action {
 		setDescription(TypeHierarchyMessages.getString("ShowInheritedMembersAction.description")); //$NON-NLS-1$
 		setToolTipText(TypeHierarchyMessages.getString("ShowInheritedMembersAction.tooltip")); //$NON-NLS-1$
 		
-		JavaPluginImages.setImageDescriptors(this, "lcl16", "inher_co.gif"); //$NON-NLS-1$ //$NON-NLS-2$
+		JavaPluginImages.setLocalImageDescriptors(this, "inher_co.gif"); //$NON-NLS-1$
 
 		fMethodsViewer= viewer;
 		

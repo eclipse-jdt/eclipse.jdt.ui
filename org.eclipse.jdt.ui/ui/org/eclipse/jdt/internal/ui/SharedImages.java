@@ -18,9 +18,29 @@ import org.eclipse.jdt.ui.ISharedImages;
  */
 public class SharedImages implements ISharedImages {
 	
-	private static HashMap fgMap= new HashMap(20);
+	private static HashMap fgMap;
 	
 	public SharedImages() {
+		if (fgMap == null)
+			fillMap();
+	}
+		
+	/* (Non-Javadoc)
+	 * Method declared in ISharedImages
+	 */
+	public Image getImage(String key) {
+		return JavaPluginImages.get(key);
+	}
+	
+	/* (Non-Javadoc)
+	 * Method declared in ISharedImages
+	 */
+	public ImageDescriptor getImageDescriptor(String key) {
+		return (ImageDescriptor)fgMap.get(key);
+	}
+	
+	private void fillMap() {
+		fgMap= new HashMap(20);
 		fgMap.put(IMG_OBJS_CUNIT, JavaPluginImages.DESC_OBJS_CUNIT);
 		fgMap.put(IMG_OBJS_CFILE, JavaPluginImages.DESC_OBJS_CFILE);
 		fgMap.put(IMG_OBJS_JAR, JavaPluginImages.DESC_OBJS_JAR);
@@ -33,19 +53,6 @@ public class SharedImages implements ISharedImages {
 		fgMap.put(IMG_OBJS_PUBLIC, JavaPluginImages.DESC_MISC_PUBLIC);
 		fgMap.put(IMG_OBJS_PROTECTED, JavaPluginImages.DESC_MISC_PROTECTED);
 		fgMap.put(IMG_OBJS_PRIVATE, JavaPluginImages.DESC_MISC_PRIVATE);
-		fgMap.put(IMG_OBJS_DEFAULT, JavaPluginImages.DESC_MISC_DEFAULT);
-	}
-		
-	/* (Non-Javadoc)
-	 * Method declared in ISharedImages
-	 */
-	public Image getImage(String key) {
-		return JavaPluginImages.get(key);
-	}
-	/* (Non-Javadoc)
-	 * Method declared in ISharedImages
-	 */
-	public ImageDescriptor getImageDescriptor(String key) {
-		return (ImageDescriptor)fgMap.get(key);
+		fgMap.put(IMG_OBJS_DEFAULT, JavaPluginImages.DESC_MISC_DEFAULT);		
 	}
 }

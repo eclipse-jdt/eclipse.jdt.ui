@@ -26,7 +26,7 @@ public class DisplayAction extends EvaluateAction {
 		setText(DisplayMessages.getString("Display.label")); //$NON-NLS-1$
 		setToolTipText(DisplayMessages.getString("Display.tooltip")); //$NON-NLS-1$
 		setDescription(DisplayMessages.getString("Display.description")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(this, "tool16", "disp_sbook.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setToolImageDescriptors(this, "disp_sbook.gif"); //$NON-NLS-1$
 	}
 	
 	public void evaluationComplete(final IJavaEvaluationResult result) {

@@ -606,7 +606,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					super();
 					
 					setText(JavaEditorMessages.getString("JavaOutlinePage.Sort.label")); //$NON-NLS-1$
-					JavaPluginImages.setImageDescriptors(this, "lcl16", "alphab_sort_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+					JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
 					
 					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean("LexicalSortingAction.isChecked"); //$NON-NLS-1$
 					valueChanged(checked, false);
@@ -985,15 +985,15 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		toolBarManager.add(action);		
 		
 		action= new FilterAction(new FieldFilter(), JavaEditorMessages.getString("JavaOutlinePage.HideFields.label"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.unchecked"), "HideFields.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(action, "lcl16", "fields_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(action, "fields_co.gif"); //$NON-NLS-1$
 		toolBarManager.add(action);
 					
 		action= new FilterAction(new VisibilityFilter(VisibilityFilter.NOT_STATIC), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.unchecked"), "HideStaticMembers.isChecked");		 //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(action, "lcl16", "static_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(action, "static_co.gif"); //$NON-NLS-1$
 		toolBarManager.add(action);
 				
 		action= new FilterAction(new VisibilityFilter(VisibilityFilter.PUBLIC), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.unchecked"), "HideNonePublicMembers.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(action, "lcl16", "public_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(action, "public_co.gif"); //$NON-NLS-1$
 		toolBarManager.add(action);
 	}	
 	

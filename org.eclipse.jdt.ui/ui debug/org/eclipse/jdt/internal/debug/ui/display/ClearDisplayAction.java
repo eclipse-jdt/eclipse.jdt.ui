@@ -31,7 +31,7 @@ public class ClearDisplayAction extends Action {
 		 * Subsituted "clear_co.gif" for "removea_exc.gif".
 		 * Copied icons to /icons.
 		 */
-		JavaPluginImages.setImageDescriptors(this, "lcl16", "clear_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "clear_co.gif"); //$NON-NLS-1$
 	}
 
 	/**

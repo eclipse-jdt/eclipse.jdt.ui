@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.IJavaUIStatus;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -54,7 +54,7 @@ public class OpenResourceAction extends SelectionProviderAction implements ISele
 			} catch (JavaModelException x) {
 				
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-					IJavaUIStatus.INTERNAL_ERROR, PackagesMessages.getString("OpenResource.error.message"), x)); //$NON-NLS-1$
+					JavaStatusConstants.INTERNAL_ERROR, PackagesMessages.getString("OpenResource.error.message"), x)); //$NON-NLS-1$
 				
 				ErrorDialog.openError(shell, 
 					PackagesMessages.getString("OpenResource.error.title"), //$NON-NLS-1$

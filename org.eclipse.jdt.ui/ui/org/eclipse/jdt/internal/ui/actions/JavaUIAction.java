@@ -65,12 +65,5 @@ public abstract class JavaUIAction extends Action {
 	}
 	
 	public final void actionPerformed(Window window) {
-	}
-	
-	/**
-	 * @deprecated Use JavaPluginImages.setImageDescriptors(...) instead
-	 */
-	public void setImageDescriptors(String type, String name) {
-		JavaPluginImages.setImageDescriptors(this, type, name);
-	}
+	}	
 }

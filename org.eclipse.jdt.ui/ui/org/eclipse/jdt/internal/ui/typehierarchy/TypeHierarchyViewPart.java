@@ -175,19 +175,19 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		ToggleViewAction superViewAction= new ToggleViewAction(this, VIEW_ID_SUPER, title, true);
 		superViewAction.setDescription(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.supertypes.description")); //$NON-NLS-1$
 		superViewAction.setToolTipText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.supertypes.tooltip")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(superViewAction, "lcl16", "super_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(superViewAction, "super_co.gif"); //$NON-NLS-1$
 
 		title= TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.subtypes.label"); //$NON-NLS-1$
 		ToggleViewAction subViewAction= new ToggleViewAction(this, VIEW_ID_SUB, title, false);
 		subViewAction.setDescription(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.subtypes.description")); //$NON-NLS-1$
 		subViewAction.setToolTipText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.subtypes.tooltip")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(subViewAction, "lcl16", "sub_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(subViewAction, "sub_co.gif"); //$NON-NLS-1$
 
 		title= TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.vajhierarchy.label"); //$NON-NLS-1$
 		ToggleViewAction vajViewAction= new ToggleViewAction(this, VIEW_ID_TYPE, title, false);
 		vajViewAction.setDescription(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.vajhierarchy.description")); //$NON-NLS-1$
 		vajViewAction.setToolTipText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.vajhierarchy.tooltip")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(vajViewAction, "lcl16", "hierarchy_co.gif"); //$NON-NLS-1$ //$NON-NLS-2$
+		JavaPluginImages.setLocalImageDescriptors(vajViewAction, "hierarchy_co.gif"); //$NON-NLS-2$
 		
 		fViewActions= new ToggleViewAction[] { vajViewAction, superViewAction, subViewAction };
 		

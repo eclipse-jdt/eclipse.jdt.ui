@@ -42,7 +42,7 @@ import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.debug.core.IJavaThread;
 import org.eclipse.jdt.debug.core.IJavaValue;
-import org.eclipse.jdt.internal.ui.IJavaUIStatus;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
@@ -362,7 +362,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			return;
 		}
 		if (getThread() == null) {
-			IStatus status = new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaUIStatus.INTERNAL_ERROR, 
+			IStatus status = new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, 
 				SnippetMessages.getString("SnippetEditor.error.nocontext"), null); //$NON-NLS-1$
 			ErrorDialog.openError(getShell(), SnippetMessages.getString("SnippetEditor.error.evaluating"), null, status); //$NON-NLS-1$
 			evaluationEnds();

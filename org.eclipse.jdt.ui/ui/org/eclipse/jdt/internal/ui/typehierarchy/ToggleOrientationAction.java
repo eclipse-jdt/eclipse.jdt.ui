@@ -20,7 +20,7 @@ public class ToggleOrientationAction extends Action {
 		setDescription(TypeHierarchyMessages.getString("ToggleOrientationAction.description")); //$NON-NLS-1$
 		setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.tooltip")); //$NON-NLS-1$
 		
-		JavaPluginImages.setImageDescriptors(this, "lcl16", "impl_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "impl_co.gif"); //$NON-NLS-1$
 
 		fView= v;
 		setChecked(initHorizontal);

@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.internal.ui.IJavaUIStatus;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -90,7 +90,7 @@ public class ExceptionHandler {
 	 */
 	public static void log(Throwable t, String message) {
 		JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
-			IJavaUIStatus.INTERNAL_ERROR, message, t));
+			JavaStatusConstants.INTERNAL_ERROR, message, t));
 	}
 	
 	/**

@@ -21,9 +21,9 @@ public class HistoryAction extends Action {
 		super(getLabel(forward));
 		setDescription(getDescription(forward));
 		if (forward) {
-			JavaPluginImages.setImageDescriptors(this, "lcl16", "forward_nav.gif"); //$NON-NLS-1$ //$NON-NLS-2$
+			JavaPluginImages.setLocalImageDescriptors(this, "forward_nav.gif"); //$NON-NLS-1$
 		} else {
-			JavaPluginImages.setImageDescriptors(this, "lcl16", "backward_nav.gif"); //$NON-NLS-1$ //$NON-NLS-2$
+			JavaPluginImages.setLocalImageDescriptors(this, "backward_nav.gif"); //$NON-NLS-1$
 		}
 		
 		fViewPart= viewPart;
@@ -62,11 +62,6 @@ public class HistoryAction extends Action {
 				return TypeHierarchyMessages.getFormattedString("HistoryAction.backward.tooltip.arg", arg); //$NON-NLS-1$
 			}
 		}
-	}		
-	
-	
-	public void setImageDescriptors(String type, String name) {
-		JavaPluginImages.setImageDescriptors(this, type, name);
 	}		
 	
 	private void updateToolTip(IType type) {

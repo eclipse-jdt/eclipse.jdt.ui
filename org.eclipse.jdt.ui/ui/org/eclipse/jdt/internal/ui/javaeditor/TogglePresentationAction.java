@@ -26,7 +26,7 @@ public class TogglePresentationAction extends TextEditorAction {
 	public TogglePresentationAction() {
 		super(JavaEditorMessages.getResourceBundle(), "TooglePresentation.", null); //$NON-NLS-1$
 		
-		JavaPluginImages.setImageDescriptors(this, "tool16", "segment_edit.gif"); //$NON-NLS-1$ //$NON-NLS-2$
+		JavaPluginImages.setToolImageDescriptors(this, "segment_edit.gif"); //$NON-NLS-1$
 		
 		fToolTipChecked= JavaEditorMessages.getString("TogglePresentation.tooltip.checked"); //$NON-NLS-1$
 		fToolTipUnchecked= JavaEditorMessages.getString("TogglePresentation.tooltip.unchecked"); //$NON-NLS-1$

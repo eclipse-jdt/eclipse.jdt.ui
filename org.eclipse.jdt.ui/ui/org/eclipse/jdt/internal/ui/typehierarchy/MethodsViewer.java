@@ -168,7 +168,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		hideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
 		hideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$
 		hideFields.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(hideFields, "lcl16", "fields_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(hideFields, "fields_co.gif"); //$NON-NLS-1$
 		
 		// static
 		title= TypeHierarchyMessages.getString("MethodsViewer.hide_static.label"); //$NON-NLS-1$
@@ -176,7 +176,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		hideStatic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_static.description")); //$NON-NLS-1$
 		hideStatic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.checked")); //$NON-NLS-1$
 		hideStatic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(hideStatic, "lcl16", "static_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(hideStatic, "static_co.gif"); //$NON-NLS-1$
 		
 		// non-public
 		title= TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.label"); //$NON-NLS-1$
@@ -184,7 +184,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		hideNonPublic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.description")); //$NON-NLS-1$
 		hideNonPublic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.checked")); //$NON-NLS-1$
 		hideNonPublic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(hideNonPublic, "lcl16", "public_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(hideNonPublic, "public_co.gif"); //$NON-NLS-1$
 		
 		// order corresponds to order in toolbar
 		fFilterActions= new MethodsViewerFilterAction[] { hideFields, hideStatic, hideNonPublic };

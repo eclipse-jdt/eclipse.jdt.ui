@@ -27,7 +27,7 @@ public class InspectAction extends EvaluateAction {
 		setText(DisplayMessages.getString("Inspect.label")); //$NON-NLS-1$
 		setToolTipText(DisplayMessages.getString("Inspect.tooltip")); //$NON-NLS-1$
 		setDescription(DisplayMessages.getString("Inspect.description")); //$NON-NLS-1$
-		JavaPluginImages.setImageDescriptors(this, "tool16", "insp_sbook.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setToolImageDescriptors(this, "insp_sbook.gif"); //$NON-NLS-1$
 	}
 	
 	public void evaluationComplete(final IJavaEvaluationResult res) {
