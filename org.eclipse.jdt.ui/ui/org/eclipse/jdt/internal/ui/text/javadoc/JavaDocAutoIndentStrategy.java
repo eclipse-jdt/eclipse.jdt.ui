@@ -17,6 +17,7 @@ import java.text.BreakIterator;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.DocumentCommand;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 /**
  * Auto indent strategy for java doc comments
@@ -255,11 +257,26 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			return false;
 		}			
 	}
+	
+	private boolean isSmartMode() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null)  {
+			IEditorPart part= page.getActiveEditor(); 
+			if (part instanceof CompilationUnitEditor) {
+				CompilationUnitEditor editor= (CompilationUnitEditor) part;
+				return editor.isSmartTyping();
+			}
+		}
+		return false;
+	}
 
 	/*
 	 * @see IAutoIndentStrategy#customizeDocumentCommand
 	 */
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
+		
+		if (!isSmartMode())
+			return;
 
 		try {
 			

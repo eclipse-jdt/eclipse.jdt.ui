@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.Document;
@@ -20,9 +21,13 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 /**
  * Auto indent strategy for java strings
@@ -99,6 +104,18 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 		command.text= getModifiedText(command.text, lineDelimiter, indentation);		
 	}
+	
+	private boolean isSmartMode() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null)  {
+			IEditorPart part= page.getActiveEditor(); 
+			if (part instanceof CompilationUnitEditor) {
+				CompilationUnitEditor editor= (CompilationUnitEditor) part;
+				return editor.isSmartTyping();
+			}
+		}
+		return false;
+	}
 
 	/*
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(IDocument, DocumentCommand)
@@ -110,14 +127,10 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 				
-			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) &&
-				isLineDelimiters(document, command.text))
-			{
+			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) && isLineDelimiters(document, command.text) && isSmartMode())
 				javaStringIndentAfterNewLine(document, command);
-			}
 				
 		} catch (BadLocationException e) {
 		}
 	}
-
 }
