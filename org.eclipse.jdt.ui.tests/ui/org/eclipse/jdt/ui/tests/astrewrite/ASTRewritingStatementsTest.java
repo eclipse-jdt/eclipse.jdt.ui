@@ -39,11 +39,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingStatementsTest("testForStatement"));
+			suite.addTest(new ASTRewritingStatementsTest("testInsertCode"));
 			return suite;
 		}
 	}
@@ -89,7 +89,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			List statements= block.statements();
 			ReturnStatement returnStatement= block.getAST().newReturnStatement();
-			returnStatement.setExpression(ASTResolving.getNullExpression(methodDecl.getReturnType()));
+			returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType()));
 			statements.add(returnStatement);
 			rewrite.markAsInserted(returnStatement);
 			
@@ -323,7 +323,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 			Expression expr= returnStatement.getExpression();
-			Expression modified= ASTResolving.getNullExpression(methodDecl.getReturnType());
+			Expression modified= ASTResolving.getInitExpression(methodDecl.getReturnType());
 	
 			rewrite.markAsReplaced(expr, modified);
 			
@@ -1638,8 +1638,69 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
-	}		
+	}
+	
+	
+	public void testInsertCode() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (i == j) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
 
+		{ // replace while statement with comment, insert new statement
+			WhileStatement whileStatement= (WhileStatement) statements.get(0);
+			String comment= "//hello";
+			ASTNode placeHolder= rewrite.createCopyTarget(comment, whileStatement);
+			
+			rewrite.markAsReplaced(whileStatement, placeHolder);
+			
+			StringBuffer buf1= new StringBuffer();
+			buf1.append("if (i == 3) {\n");
+			buf1.append("    System.beep();\n");
+			buf1.append("}");
+			
+			ASTNode placeHolder2= rewrite.createCopyTarget(buf1.toString(), whileStatement);
+			rewrite.markAsInserted(placeHolder2);
+			
+			statements.add(placeHolder2);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        //hello\n");
+		buf.append("        if (i == 3) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 }
 
