@@ -683,11 +683,20 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		for (int i= 0; i < constructorReferenceNodes.length; i++) {
 			ASTNode refNode= constructorReferenceNodes[i];
 			if (refNode instanceof SuperConstructorInvocation){
-				MultiTextEdit textEdit= createConstructorReferenceUpdateEdit((SuperConstructorInvocation)refNode);
-				if (textEdit != null)
-					manager.get(getCompilationUnit(refNode)).addTextEdit("Update Constructor Reference", textEdit);
-			}		
+				updateConstructorReferenceInSuperCall(manager, (SuperConstructorInvocation)refNode);
+			} else if (refNode.getParent() instanceof SuperConstructorInvocation){
+				//XXX workaround for bug 23527
+				SuperConstructorInvocation sci= (SuperConstructorInvocation)refNode.getParent();
+				if (refNode == sci.getExpression())
+					updateConstructorReferenceInSuperCall(manager, sci);
+			}
 		}
+	}
+	
+	private void updateConstructorReferenceInSuperCall(TextChangeManager manager, SuperConstructorInvocation sci) throws CoreException{
+		MultiTextEdit textEdit= createConstructorReferenceUpdateEdit(sci);
+		if (textEdit != null)
+			manager.get(getCompilationUnit(sci)).addTextEdit("Update Constructor Reference", textEdit);
 	}
 
 	private ASTNode[] getConstructorReferenceNodes(IProgressMonitor pm) throws JavaModelException{
