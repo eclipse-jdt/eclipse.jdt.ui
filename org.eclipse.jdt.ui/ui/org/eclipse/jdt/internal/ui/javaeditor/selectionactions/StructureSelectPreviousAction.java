@@ -90,7 +90,7 @@ public class StructureSelectPreviousAction extends StructureSelectionAction {
 	}
 	
 	private static ASTNode getPreviousNode(ASTNode parent, ASTNode node){
-		ASTNode[] siblingNodes= StructureSelectionAction.getChildNodes(parent);
+		ASTNode[] siblingNodes= StructureSelectionAction.getSiblingNodes(node);
 		if (siblingNodes == null || siblingNodes.length == 0)
 			return parent;
 		if (node == siblingNodes[0]) {

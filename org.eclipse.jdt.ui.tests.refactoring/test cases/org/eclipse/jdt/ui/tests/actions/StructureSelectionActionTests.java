@@ -319,6 +319,18 @@ public class StructureSelectionActionTests extends RefactoringTest{
 		helperSelectPrevious(7, 13, 7, 20);
 	}
 	
+	public void test41() throws Exception{
+		helperSelectPrevious(4, 1, 4, 29);
+	}
+	
+	public void test42() throws Exception{
+		helperSelectNext(4, 1, 4, 29);
+	}
+	
+	public void test43() throws Exception{
+		helperSelectNext(4, 1, 4, 32);
+	}
+	
 	public void testZeroLength0() throws Exception{
 		//printTestDisabledMessage("");
 		helperZeroLength(4, 20);

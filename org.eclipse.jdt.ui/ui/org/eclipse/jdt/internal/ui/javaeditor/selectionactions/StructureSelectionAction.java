@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -28,9 +29,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -183,18 +183,18 @@ public abstract class StructureSelectionAction extends Action {
 		return new SourceRange(Math.max(0, offset), length);
 	}
 	
-	static ASTNode[] getChildNodes(ASTNode node){
-		if (node instanceof Block)
-			return convertToNodeArray(((Block)node).statements());	
-		if (node instanceof AbstractTypeDeclaration)
-			return convertToNodeArray(((AbstractTypeDeclaration)node).bodyDeclarations());	
-		if (node instanceof CompilationUnit)
-			return convertToNodeArray(((CompilationUnit)node).types());	
-		return null;	
+	static ASTNode[] getSiblingNodes(ASTNode node) {
+		ASTNode parent= node.getParent();
+		StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+		if (locationInParent.isChildListProperty()) {
+			List siblings= (List) parent.getStructuralProperty(locationInParent);
+			return convertToNodeArray(siblings);
+		}
+		return null;
 	}
 	
-	private static ASTNode[] convertToNodeArray(Collection statements){
-		return (ASTNode[]) statements.toArray(new ASTNode[statements.size()]);
+	private static ASTNode[] convertToNodeArray(Collection nodes){
+		return (ASTNode[]) nodes.toArray(new ASTNode[nodes.size()]);
 	}
 
 	static int findIndex(Object[] array, Object o){
