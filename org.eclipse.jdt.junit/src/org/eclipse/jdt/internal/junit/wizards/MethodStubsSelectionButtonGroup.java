@@ -56,6 +56,7 @@ public class MethodStubsSelectionButtonGroup {
 	public interface SelectionButtonGroupListener {
 		/**
 		 * The dialog field has changed.
+		 * @param field The changed dialog field
 		 */
 		void groupChanged(MethodStubsSelectionButtonGroup field);
 	}
@@ -88,7 +89,7 @@ public class MethodStubsSelectionButtonGroup {
 			fButtonsEnabled[i]= true;
 		}
 		fMainComboEnabled= true;
-		if (fButtonsStyle == SWT.RADIO) {
+		if (buttonsStyle == SWT.RADIO) {
 			fButtonsSelected[0]= true;
 		}
 		
