@@ -119,7 +119,9 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 			wizard.setChange(create.getChange());
 			if (!result)
 				return false;
-			inputStatus= create.getStatus();
+			inputStatus= new RefactoringStatus();
+			inputStatus.merge(create.getStatus());
+			inputStatus.merge(perform.getValidationStatus());
 		}
 		
 		status.merge(activationStatus);
