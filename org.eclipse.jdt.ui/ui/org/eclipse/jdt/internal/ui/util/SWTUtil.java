@@ -9,6 +9,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Control;
@@ -19,6 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.util.Assert;
 
 /**
  * Utility class to simplify access to some SWT resources. 
@@ -123,6 +125,20 @@ public class SWTUtil {
 		}
 		return convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
 	}		
-	
-		 
+
+	/**
+	 * Sets width and height hint for the button control.
+	 * <b>Note:</b> This is a NOP if the button's layout data is not
+	 * an instance of <code>GridData</code>.
+	 * 
+	 * @param	the button for which to set the dimension hint
+	 */		
+	public static void setButtonDimensionHint(Button button) {
+		Assert.isNotNull(button);
+		Object gd= button.getLayoutData();
+		if (gd instanceof GridData) {
+			((GridData)gd).heightHint= SWTUtil.getButtonHeigthHint(button);
+			((GridData)gd).widthHint= SWTUtil.getButtonWidthHint(button);		 
+		}
+	}
 }

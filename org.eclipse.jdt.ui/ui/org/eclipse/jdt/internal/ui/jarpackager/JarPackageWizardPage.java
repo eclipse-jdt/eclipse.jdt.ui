@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 
 /**
@@ -367,6 +368,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		fDestinationBrowseButton= new Button(destinationSelectionGroup, SWT.PUSH);
 		fDestinationBrowseButton.setText(JarPackagerMessages.getString("JarPackageWizardPage.browseButton.text")); //$NON-NLS-1$
 		fDestinationBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		SWTUtil.setButtonDimensionHint(fDestinationBrowseButton);
 		fDestinationBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleDestinationBrowseButtonPressed();
@@ -503,37 +505,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		updateModel();
 		updateWidgetEnablements();
 		updatePageCompletion();
-	}
-	/*
-	 * Overrides method from WizardDataTransferPage
-	 */
-	protected void createDescriptionFileGroup(Composite parent) {
-		// destination specification group
-		fDescriptionFileGroup= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 3;
-		fDescriptionFileGroup.setLayout(layout);
-		fDescriptionFileGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL));
-
-		fDescriptionFileLabel= new Label(fDescriptionFileGroup, SWT.NONE);
-		fDescriptionFileLabel.setText(JarPackagerMessages.getString("JarPackageWizardPage.descriptionFile.text")); //$NON-NLS-1$
-
-		// destination name entry field
-		fDescriptionFileText= new Text(fDescriptionFileGroup, SWT.SINGLE | SWT.BORDER);
-		fDescriptionFileText.addListener(SWT.Modify, this);
-		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
-		fDescriptionFileText.setLayoutData(data);
-
-		// destination browse button
-		fDescriptionFileBrowseButton= new Button(fDescriptionFileGroup, SWT.PUSH);
-		fDescriptionFileBrowseButton.setText(JarPackagerMessages.getString("JarPackageWizardPage.browseButton.text")); //$NON-NLS-1$
-		fDescriptionFileBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		fDescriptionFileBrowseButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleDescriptionFileBrowseButtonPressed();
-			}
-		});
 	}
 	/*
 	 * Overrides method from WizardDataTransferPage

@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.ui.dialogs.SelectionStatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  *	Page 3 of the JAR Package wizard
@@ -304,6 +305,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		fSealJarLabel.setText(""); //$NON-NLS-1$
 		
 		fUnSealedPackagesDetailsButton= new Button(sealGroup, SWT.PUSH);
+		fUnSealedPackagesDetailsButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fUnSealedPackagesDetailsButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.unsealPackagesButton.text")); //$NON-NLS-1$
 		fUnSealedPackagesDetailsButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -326,6 +328,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		fSealPackagesLabel.setText(""); //$NON-NLS-1$
 
 		fSealedPackagesDetailsButton= new Button(sealGroup, SWT.PUSH);
+		fSealedPackagesDetailsButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		fSealedPackagesDetailsButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.sealedPackagesDetailsButton.text")); //$NON-NLS-1$
 		fSealedPackagesDetailsButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -732,21 +735,28 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	 * Makes the size of all buttons equal.
 	 */
 	protected void setEqualButtonSizes() {
-		Point buttonSize= fManifestFileBrowseButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-		int width= buttonSize.x;
-		int height= buttonSize.y;
-		buttonSize= fNewManifestFileBrowseButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-		width= Math.max(width, buttonSize.x);
-		height= Math.max(height, buttonSize.y);
-		buttonSize= fSealedPackagesDetailsButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-		width= Math.max(width, buttonSize.x);
-		height= Math.max(height, buttonSize.y);
-		buttonSize= fUnSealedPackagesDetailsButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-		width= Math.max(width, buttonSize.x);
-		height= Math.max(height, buttonSize.y);
-		buttonSize= fMainClassBrowseButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-		width= Math.max(width, buttonSize.x);
-		height= Math.max(height, buttonSize.y);
+		int width= SWTUtil.getButtonWidthHint(fManifestFileBrowseButton);
+		int height= SWTUtil.getButtonHeigthHint(fManifestFileBrowseButton);
+		int width2= SWTUtil.getButtonWidthHint(fNewManifestFileBrowseButton);
+		int height2= SWTUtil.getButtonHeigthHint(fNewManifestFileBrowseButton);
+		width= Math.max(width, width2);
+		height= Math.max(height, height2);
+
+		width2= SWTUtil.getButtonWidthHint(fSealedPackagesDetailsButton);
+		height2= SWTUtil.getButtonHeigthHint(fSealedPackagesDetailsButton);
+		width= Math.max(width, width2);
+		height= Math.max(height, height2);
+
+		width2= SWTUtil.getButtonWidthHint(fUnSealedPackagesDetailsButton);
+		height2= SWTUtil.getButtonHeigthHint(fUnSealedPackagesDetailsButton);
+		width= Math.max(width, width2);
+		height= Math.max(height, height2);
+
+		width2= SWTUtil.getButtonWidthHint(fMainClassBrowseButton);
+		height2= SWTUtil.getButtonHeigthHint(fMainClassBrowseButton);
+		width= Math.max(width, width2);
+		height= Math.max(height, height2);
+
 		setSize(fManifestFileBrowseButton, width, height);
 		setSize(fNewManifestFileBrowseButton, width, height);
 		setSize(fSealedPackagesDetailsButton, width, height);
