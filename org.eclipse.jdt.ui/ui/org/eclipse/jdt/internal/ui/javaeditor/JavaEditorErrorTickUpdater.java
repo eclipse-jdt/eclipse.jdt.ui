@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
@@ -71,11 +72,23 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 			if (jelement != null) {
 				Image newImage= fLabelProvider.getImage(jelement);
 				if (titleImage != newImage) {
-					fJavaEditor.updatedTitleImage(newImage);
+					updatedTitleImage(newImage);
 				}
 			}
 		}
 	}
+	
+	private void updatedTitleImage(final Image newImage) {
+		Shell shell= fJavaEditor.getEditorSite().getShell();
+		if (shell != null && !shell.isDisposed()) {
+			shell.getDisplay().syncExec(new Runnable() {
+				public void run() {
+					fJavaEditor.updatedTitleImage(newImage);
+				}
+			});
+		}
+	}	
+	
 }
 
 
