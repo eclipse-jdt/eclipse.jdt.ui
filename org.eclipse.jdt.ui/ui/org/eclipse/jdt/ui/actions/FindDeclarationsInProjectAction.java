@@ -68,7 +68,7 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 	}
 
 	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(new IResource[] { element.getJavaProject().getProject() });
+		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element);
 	}
 
 	String getScopeDescription(IJavaElement element) {

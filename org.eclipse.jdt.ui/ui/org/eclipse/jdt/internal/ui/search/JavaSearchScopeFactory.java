@@ -21,19 +21,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
-
-import org.eclipse.search.ui.ISearchResultViewEntry;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -41,9 +28,22 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
 
 public class JavaSearchScopeFactory {
 
@@ -101,11 +101,54 @@ public class JavaSearchScopeFactory {
 		return createJavaSearchScope(getJavaElements(selection));
 	}
 	
-	public IJavaSearchScope createJavaProjectSearchScope(ISelection selection) {
+	private IJavaSearchScope internalCreateProjectScope(ISelection selection) {
 		Set javaProjects= getJavaProjects(selection);
 		return createJavaSearchScope(javaProjects);
 	}
 	
+	public IJavaSearchScope createJavaProjectSearchScope(IJavaElement selection) {
+		return createJavaProjectSearchScope(new StructuredSelection(selection));
+	}
+	
+	public IJavaSearchScope createJavaProjectSearchScope(ISelection selection) {
+		IEditorInput input= getActiveEditorInput();;
+		if (input != null)
+			return JavaSearchScopeFactory.getInstance().internalCreateProjectScope(input);
+		return internalCreateProjectScope(selection);
+		
+	}
+	private IEditorInput getActiveEditorInput() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			IEditorPart editor= page.getActiveEditor();
+			if (editor != null) {
+				return editor.getEditorInput();
+			}
+		}
+		return null;
+	}
+
+	private IJavaSearchScope internalCreateProjectScope(IEditorInput editorInput) {
+		IAdaptable inputElement = getEditorInputElement(editorInput);
+		StructuredSelection selection;
+		if (editorInput != null) {
+			selection= new StructuredSelection(inputElement);
+		} else {
+			selection= StructuredSelection.EMPTY;
+		}
+		return internalCreateProjectScope(selection);
+	}
+	
+	private IAdaptable getEditorInputElement(IEditorInput editorInput) {
+		IAdaptable inputElement= null;
+		if (editorInput instanceof IClassFileEditorInput) {
+			inputElement= ((IClassFileEditorInput)editorInput).getClassFile();
+		} else if (editorInput instanceof IFileEditorInput) {
+			inputElement= ((IFileEditorInput)editorInput).getFile();
+		}
+		return inputElement;
+	}
+
 	private Set getJavaProjects(ISelection selection) {
 		Set javaProjects;
 		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {

@@ -64,7 +64,7 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 	}
 	
 	IJavaSearchScope getScope(IType element) throws JavaModelException {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(new IResource[] { element.getJavaProject().getProject() });
+		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element);
 	}
 
 	String getScopeDescription(IType type) {

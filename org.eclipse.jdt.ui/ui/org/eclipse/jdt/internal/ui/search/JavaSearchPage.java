@@ -46,6 +46,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -165,7 +167,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection);
+				scope = getProjectScope();
 				IProject[] projects= JavaSearchScopeFactory.getInstance().getJavaProjects(scope);
 				if (projects.length > 1)
 					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
@@ -206,6 +208,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		return true;
 	}
 	
+	private IJavaSearchScope getProjectScope() {
+		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection);
+	}
+
 	private int getLimitTo() {
 		for (int i= 0; i < fLimitTo.length; i++) {
 			if (fLimitTo[i].getSelection())
