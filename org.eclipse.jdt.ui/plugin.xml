@@ -512,7 +512,7 @@
    	<launcher
 		id="org.eclipse.jdt.ui.launcher.ScrapbookLauncher"
 		class="org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookLauncher"
-		label="%scrabbookLauncher.label"
+		label="%scrapbookLauncher.label"
 		public="false"
    		modes="debug" />
 </extension>	
