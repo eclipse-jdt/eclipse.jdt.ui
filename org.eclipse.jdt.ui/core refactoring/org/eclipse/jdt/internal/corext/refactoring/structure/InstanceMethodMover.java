@@ -90,6 +90,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 class InstanceMethodMover {
@@ -337,7 +338,7 @@ class InstanceMethodMover {
 			return getVariable();
 		}
 
-		protected RefactoringStatus checkVariableNotWrittenInMethod(Method method) {
+		protected final RefactoringStatus checkVariableNotWrittenInMethod(Method method) {
 //			IVariableBinding variable= getVariable();
 			return new RefactoringStatus();
 		}
@@ -1255,12 +1256,19 @@ class InstanceMethodMover {
 				}
 				
 				public boolean visit(MethodInvocation invocation) {
+					IMethodBinding binding= invocation.resolveMethodBinding();
+					if (binding == null){
+						fMethodMayBeRecursive= true;
+						return false;
+					}
+						
 					if(!isSelfSend(invocation))
 						return true;
 					
-					IMethodBinding invokedMethod= invocation.resolveMethodBinding();
-					if(hasSameSignature(invokedMethod))
+					if(hasSameSignature(binding)){
 						fMethodMayBeRecursive= true; 
+						return false;
+					}
 					
 					return true;
 				}
@@ -1294,10 +1302,7 @@ class InstanceMethodMover {
 				}
 				
 				private boolean isStatic(MethodInvocation invocation) {
-					IMethodBinding binding= (IMethodBinding) invocation.getName().resolveBinding();
-					// TODO:  deal with or rule out null bindings
-					Assert.isNotNull(binding);
-					return Modifier.isStatic(binding.getModifiers());
+					return JdtFlags.isStatic(invocation.resolveMethodBinding());
 				}					
 			};
 			
@@ -1488,21 +1493,20 @@ class InstanceMethodMover {
 			fMethodNode.accept(
 				new ASTVisitor() {
 					public boolean visit(MethodInvocation invocation) {
+						if (invocation.resolveMethodBinding() == null)
+							return true;
 						if(isImplicitThisMethodInvocation(invocation))
 							result.add(invocation);
 						return true;
 					}
 					
 					private boolean isImplicitThisMethodInvocation(MethodInvocation invocation) {
-						return   isInvokedMethodNotStatic(invocation)
+						return ! isInvokedMethodStatic(invocation)
 						       && invocation.getExpression() == null;
 					}
 					
-					private boolean isInvokedMethodNotStatic(MethodInvocation invocation) {
-						IMethodBinding methodBinding= invocation.resolveMethodBinding();
-						// TODO: handle null bindings
-						Assert.isNotNull(methodBinding);					
-						return !Modifier.isStatic(methodBinding.getModifiers());
+					private boolean isInvokedMethodStatic(MethodInvocation invocation) {
+						return JdtFlags.isStatic(invocation.resolveMethodBinding());
 					}
 				}
 			);
@@ -1524,7 +1528,6 @@ class InstanceMethodMover {
 		}			
 	
 		public boolean hasSelfReferences() {
-			// TODO: add caching for these methods
 			return   getExplicitThisReferences().length != 0
 			       || getImplicitThisMethodInvocations().length != 0
 			       || getImplicitThisFieldAccesses().length != 0;
@@ -1737,10 +1740,10 @@ class InstanceMethodMover {
 	public static InstanceMethodMover create(MethodDeclaration declaration, ICompilationUnit declarationCU, CodeGenerationSettings codeGenSettings) {
 		Method method= Method.create(declaration, declarationCU, codeGenSettings);
 		if (method == null) return null;
-		return new InstanceMethodMover(declaration, declarationCU, method);
+		return new InstanceMethodMover(method);
 	}
 
-	private InstanceMethodMover(MethodDeclaration declaration, ICompilationUnit declarationCU, Method method) {	
+	private InstanceMethodMover(Method method) {	
 		Assert.isNotNull(method);
 		fMethodToMove= method;
 		
@@ -1847,15 +1850,30 @@ class InstanceMethodMover {
 	}
 
 	public RefactoringStatus checkInitialState(IProgressMonitor pm) {
-		return fMethodToMove.checkCanBeMoved();
+		try{
+			pm.beginTask("", 1);
+			return fMethodToMove.checkCanBeMoved();
+		}finally{
+			pm.done();
+		}
 	}
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		Assert.isNotNull(fNewReceiver, "New receiver must be chosen before checkInput(..) is called."); //$NON-NLS-1$
-		return fNewReceiver.checkMoveOfMethodToMe(fMethodToMove, fNewMethodName, fOriginalReceiverParameterName, fInlineDelegator, fRemoveDelegator);
+		pm.beginTask("", 1);
+		try{
+			Assert.isNotNull(fNewReceiver, "New receiver must be chosen before checkInput(..) is called."); //$NON-NLS-1$
+			return fNewReceiver.checkMoveOfMethodToMe(fMethodToMove, fNewMethodName, fOriginalReceiverParameterName, fInlineDelegator, fRemoveDelegator);
+		}finally{
+			pm.done();
+		}
 	}
 
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
-		return fNewReceiver.moveMethodToMe(fMethodToMove, fNewMethodName, fOriginalReceiverParameterName, fInlineDelegator, fRemoveDelegator);
+		try{		
+			pm.beginTask("", 1);
+			return fNewReceiver.moveMethodToMe(fMethodToMove, fNewMethodName, fOriginalReceiverParameterName, fInlineDelegator, fRemoveDelegator);
+		}finally{
+			pm.done();
+		}
 	}
 }
