@@ -30,15 +30,17 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 		Bundle bundle= Platform.getBundle("org.junit"); //$NON-NLS-1$
 		if (bundle == null) {
 			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
+			return;
 		}
 		URL installLocation= bundle.getEntry("/"); //$NON-NLS-1$
 		URL local= null;
 		try {
-			try {
-				local= Platform.asLocalURL(installLocation);
-			} catch (IOException e) {
-				JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
-			}
+			local= Platform.asLocalURL(installLocation);
+		} catch (IOException e) {
+			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
+			return;
+		}
+		try {
 			String fullPath= new File(local.getPath()).getAbsolutePath();
 			JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, new Path(fullPath), null);
 		} catch (JavaModelException e1) {

@@ -22,6 +22,10 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -705,14 +709,20 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 	}
 	
 	public static void addJUnitToBuildPath(Shell shell, IJavaProject project) throws JavaModelException {
-		IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME);
-		IPath sourceHome= new Path("ORG_ECLIPSE_JDT_SOURCE_SRC"); //$NON-NLS-1$
-		IPath sourcePath= sourceHome.append("org.junit_3.8.1/junitsrc.zip"); //$NON-NLS-1$
-		IClasspathEntry entry= JavaCore.newVariableEntry(
-			junitHome.append("junit.jar"),  //$NON-NLS-1$
-			sourcePath,  //$NON-NLS-1$
-			null
-		);
+		IProject junitProject= ResourcesPlugin.getWorkspace().getRoot().getProject("org.junit");
+		IClasspathEntry entry;
+		if (junitProject.exists()) {
+			entry= JavaCore.newProjectEntry(junitProject.getFullPath());
+		} else {
+			IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME);
+			IPath sourceHome= new Path("ECLIPSE_HOME"); //$NON-NLS-1$
+			entry= JavaCore.newVariableEntry(
+				junitHome.append("junit.jar"),  //$NON-NLS-1$
+				//TODO: find a better solution than declaring a classpath variable
+				sourceHome.append("plugins/org.eclipse.jdt.source_3.0.0/src/org.junit_3.8.1/junitsrc.zip"),  //$NON-NLS-1$
+				null
+			);
+		}
 		addToClasspath(shell, project, entry);
 	}	
 	
