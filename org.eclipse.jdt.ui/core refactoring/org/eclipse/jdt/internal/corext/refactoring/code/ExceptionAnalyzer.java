@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -51,6 +52,13 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 	
 	public boolean visit(ClassInstanceCreation node) {
 		return handleExceptions(node.resolveConstructorBinding());
+	}
+	
+	private boolean handleExceptions(IMethodBinding binding) {
+		if (binding == null)
+			return false;
+		addExceptions(binding.getExceptionTypes());
+		return true;
 	}
 	
 	private boolean methodThrowsException(ITypeBinding exception) {

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -63,7 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 
 	public boolean visit(ThrowStatement node) {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
-		if (!isSelected(node) || exception == null) // Safety net for null bindings when compiling fails.
+		if (!isSelected(node) || exception == null || isRuntimeException(exception, node.getAST())) // Safety net for null bindings when compiling fails.
 			return false;
 		
 		addException(exception);
@@ -73,15 +74,27 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 	public boolean visit(MethodInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(ASTNodes.getMethodBinding(node.getName()));
+		return handleExceptions(ASTNodes.getMethodBinding(node.getName()), node.getAST());
 	}
 	
 	public boolean visit(ClassInstanceCreation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveConstructorBinding());
+		return handleExceptions(node.resolveConstructorBinding(), node.getAST());
 	}
 	
+	private boolean handleExceptions(IMethodBinding binding, AST ast) {
+		if (binding == null)
+			return false;
+		ITypeBinding[] exceptions= binding.getExceptionTypes();
+		for (int i= 0; i < exceptions.length; i++) {
+			ITypeBinding exception= exceptions[i];
+			if (!isRuntimeException(exception, ast))
+				addException(exception);
+		}
+		return true;
+	}
+		
 	private boolean isSelected(ASTNode node) {
 		return fSelection.getVisitSelectionMode(node) == Selection.SELECTED;
 	}

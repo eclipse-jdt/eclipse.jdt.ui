@@ -115,4 +115,12 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	public void testThrowInCatch() throws Exception {
 		tryCatchTest();
 	}
+	
+	public void testRuntimeException1() throws Exception {
+		tryCatchInvalidTest();
+	}
+	
+	public void testRuntimeException2() throws Exception {
+		tryCatchInvalidTest();
+	}	
 }

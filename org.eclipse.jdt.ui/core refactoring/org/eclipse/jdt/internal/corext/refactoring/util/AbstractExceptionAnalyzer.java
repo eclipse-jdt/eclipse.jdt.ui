@@ -65,7 +65,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		List current= (List)fTryStack.pop();
 		fCurrentExceptions= (List)fTryStack.peek();
 		for (Iterator iter= current.iterator(); iter.hasNext();) {
-			addException(iter.next());
+			addException((ITypeBinding)iter.next());
 		}
 		
 		// visit catch and finally
@@ -77,20 +77,15 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		return false;
 	}
 	
-	protected boolean handleExceptions(IMethodBinding binding) {
-		if (binding == null)
-			return false;
-			
-		ITypeBinding[] thrownExceptions= binding.getExceptionTypes();
-		if (thrownExceptions != null) {
-			for (int i= 0; i < thrownExceptions.length;i++) {
-				addException(thrownExceptions[i]);
-			}
-		}
-		return true;
+	protected void addExceptions(ITypeBinding[] exceptions) {
+		if(exceptions == null)
+			return;
+		for (int i= 0; i < exceptions.length;i++) {
+			addException(exceptions[i]);
+		}			
 	}
 	
-	protected void addException(Object exception) {
+	protected void addException(ITypeBinding exception) {
 		if (!fCurrentExceptions.contains(exception))
 			fCurrentExceptions.add(exception);
 	}
