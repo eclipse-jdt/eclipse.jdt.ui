@@ -55,17 +55,18 @@ public class JavaPartitionScanner extends BufferedRuleBasedScanner {
 	public JavaPartitionScanner() {
 		super();
 		
+		IToken skip= new Token(SKIP);
 		IToken javaDoc= new Token(JAVA_DOC);
 		IToken comment= new Token(JAVA_MULTILINE_COMMENT);
 
 		List rules= new ArrayList();
 
 		// Add rule for single line comments.
-		rules.add(new EndOfLineRule("//", Token.UNDEFINED)); //$NON-NLS-1$
+		rules.add(new EndOfLineRule("//", skip)); //$NON-NLS-1$
 
 		// Add rule for strings and character constants.
-		rules.add(new SingleLineRule("\"", "\"", Token.UNDEFINED, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
-		rules.add(new SingleLineRule("'", "'", Token.UNDEFINED, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
+		rules.add(new SingleLineRule("\"", "\"", skip, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
+		rules.add(new SingleLineRule("'", "'", skip, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
 
 		// Add special case word rule.
 		WordRule wordRule= new WordRule(new EmptyCommentDetector());
