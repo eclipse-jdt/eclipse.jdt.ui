@@ -335,11 +335,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		if (event.stateMask != 0) 
 			return;		
 		
-		if (event.keyCode == SWT.F5) {
-			IAction refreshAction= fBuildActionGroup.getRefreshAction();
-			if (refreshAction != null && refreshAction.isEnabled())
-				refreshAction.run();
-		} else if (event.character == SWT.DEL) {
+		if (event.character == SWT.DEL) {
 			IAction delete= fCCPActionGroup.getDeleteAction();
 			if (delete != null && delete.isEnabled())
 				delete.run();
