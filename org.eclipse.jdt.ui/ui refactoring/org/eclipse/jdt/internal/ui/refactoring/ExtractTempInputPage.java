@@ -10,13 +10,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public class ExtractTempInputPage extends TextInputWizardPage {
 
+	private Label fLabel;
+	
 	public ExtractTempInputPage() {
 		super(true);
 		setMessage("Enter a name for the introduced local variable.");
@@ -42,6 +46,8 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 		
 		addReplaceAllCheckbox(result, layouter);
 		addDeclareFinalCheckbox(result, layouter);
+		addSeparator(result, layouter);
+		addLabel(result, layouter);
 		//WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, fHelpContextID));		
 	}
 	
@@ -69,10 +75,33 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 		});		
 	}
 	
+	private void addLabel(Composite result, RowLayouter layouter) {
+		fLabel= new Label(result, SWT.WRAP);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.widthHint= convertWidthInCharsToPixels(50);
+		fLabel.setLayoutData(gd);
+		updatePreviewLabel();
+		layouter.perform(fLabel);
+	}
+
+	private void addSeparator(Composite result, RowLayouter layouter) {
+		Label separator= new Label(result, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+		layouter.perform(separator);
+	}
+	
+	private void updatePreviewLabel(){
+		try {
+			fLabel.setText("Signature Preview: " + getExtractTempRefactoring().getTempSignaturePreview());
+		} catch(JavaModelException e) {
+			ExceptionHandler.handle(e, "Extract local variable", "Unexpected exception. See log for details.");
+		}
+	}
 	
 	//overridden
 	protected RefactoringStatus validateTextField(String text) {
 		getExtractTempRefactoring().setTempName(text);
+		updatePreviewLabel();
 		return getExtractTempRefactoring().checkTempName(text);
 	}	
 	
