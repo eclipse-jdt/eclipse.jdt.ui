@@ -58,7 +58,19 @@ public final class CompilationUnitRange {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return "(" + fSourceRange.toString() + " in " + fCompilationUnit.getElementName() + ")";
+		return "(" + fSourceRange.toString() + " in " + fCompilationUnit.getElementName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (! (obj instanceof CompilationUnitRange))
+			return false;
+		CompilationUnitRange other= (CompilationUnitRange)obj;
+		return fCompilationUnit.equals(other.fCompilationUnit) && fSourceRange.equals(other.fSourceRange);
+	}
+	
+	public int hashCode() {
+		return (37 * fCompilationUnit.hashCode()) ^ fSourceRange.hashCode();
+	}
 }

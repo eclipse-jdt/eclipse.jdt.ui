@@ -10,56 +10,110 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
-public class ExpressionVariable extends ConstraintVariable {
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+
+public final class ExpressionVariable extends ConstraintVariable {
 	
-	private final Expression fExpression;
-	
+	private final CompilationUnitRange fRange;
+	private final String fSource;
+	private final IBinding fExpressionBinding;
+	private final int fExpressionType;
+		
 	public ExpressionVariable(Expression expression){
 		super(expression.resolveTypeBinding());
-		fExpression= expression;
+		fSource= expression.toString();
+		ICompilationUnit cu= ASTCreator.getCu(expression);
+		Assert.isNotNull(cu);
+		fRange= new CompilationUnitRange(cu, expression);
+		fExpressionBinding= resolveBinding(expression);
+		fExpressionType= expression.getNodeType();
 	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return "[" + fExpression.toString() + "]";
+		return "[" + fSource + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj) {
+		if (obj == this)
+			return true;
 		if (! super.equals(obj))
 			return false;
 		if (! (obj instanceof ExpressionVariable))
 			return false;
 		ExpressionVariable other= (ExpressionVariable)obj;
 
-		if (fExpression.equals(other.fExpression))
+		if (fRange.equals(other.fRange))
 			return true;
 			
-		IBinding binding= Expressions.resolveBinding(fExpression);
-		if (binding instanceof ITypeBinding){
+		if (fExpressionBinding instanceof ITypeBinding){
 			//if the expression resolves to a type binding, then the expressions should be the same
 			//we checked already that they are not, so false
 			return false;
 		}
-		return Expressions.equalBindings(fExpression, other.fExpression);
+		if (fExpressionBinding == null)
+			return false;
+		return Bindings.equals(fExpressionBinding, other.fExpressionBinding);
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return super.hashCode() ^ Expressions.hashCode(fExpression);
+		if (fExpressionBinding != null)
+			return super.hashCode() ^ Bindings.hashCode(fExpressionBinding);
+		else
+			return super.hashCode() ^ fRange.hashCode();
 	}
 	
-	public Expression getExpression(){
-		return fExpression;
+	public CompilationUnitRange getCompilationUnitRange() {
+		return fRange;
+	}
+	
+	public int getExpressionType() {
+		return fExpressionType;
+	}
+
+	public IBinding getExpressionBinding() {
+		return fExpressionBinding;
+	}
+	
+	private static IBinding resolveBinding(Expression expression){
+		if (expression instanceof Name)
+			return ((Name)expression).resolveBinding();
+		if (expression instanceof ParenthesizedExpression)
+			return resolveBinding(((ParenthesizedExpression)expression).getExpression());
+		else if (expression instanceof Assignment)
+			return resolveBinding(((Assignment)expression).getLeftHandSide());//TODO ???
+		else if (expression instanceof MethodInvocation)
+			return ((MethodInvocation)expression).resolveMethodBinding();
+		else if (expression instanceof SuperMethodInvocation)
+			return ((SuperMethodInvocation)expression).resolveMethodBinding();
+		else if (expression instanceof FieldAccess)
+			return ((FieldAccess)expression).resolveFieldBinding();
+		else if (expression instanceof SuperFieldAccess)
+			return ((SuperFieldAccess)expression).resolveFieldBinding();
+		else if (expression instanceof ConditionalExpression)
+			return resolveBinding(((ConditionalExpression)expression).getThenExpression());
+		return null;
 	}
 }

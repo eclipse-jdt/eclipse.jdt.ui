@@ -10,49 +10,57 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.Type;
 
-public class TypeVariable extends ConstraintVariable {
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
-	private final Type fType;
+public final class TypeVariable extends ConstraintVariable {
+
+	private final String fSource;
+	private final CompilationUnitRange fTypeRange;
 	
 	public TypeVariable(Type type){
 		super(type.resolveBinding());
-		fType= type;
+		fSource= type.toString();
+		ICompilationUnit cu= ASTCreator.getCu(type);
+		Assert.isNotNull(cu);
+		fTypeRange= new CompilationUnitRange(cu, ASTNodes.getElementType(type));
 	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return fType.toString();
+		return fSource;
 	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj) {
+		if (obj == this)
+			return true;
 		if (! super.equals(obj))
 			return false;
 		if (! (obj instanceof TypeVariable))
 			return false;
 		TypeVariable other= (TypeVariable)obj;
 		//cannot compare bindings here
-		return fType.equals(other.fType);
+		return fTypeRange.equals(other.fTypeRange);
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		if (fType.resolveBinding() == null)
+		if (super.getBinding() == null)
 			return super.hashCode();
-		//cannot look at bindings here
-		return super.hashCode() ^ fType.hashCode();
+		return (29 * super.hashCode()) ^ fTypeRange.hashCode();
 	}
 
-	public Type getType() {
-		return fType;
+	public CompilationUnitRange getCompilationUnitRange() {
+		return fTypeRange;
 	}
-
 }
