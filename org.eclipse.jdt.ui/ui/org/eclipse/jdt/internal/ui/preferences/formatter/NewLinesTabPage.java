@@ -28,8 +28,8 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 	"  static int [] fArray= {1, 2, 3, 4, 5 };" + //$NON-NLS-1$
 	"  Listener fListener= new Listener() {" + //$NON-NLS-1$
 	"  };\n" + //$NON-NLS-1$
-	"  // the following line contains line breaks\n// which can be preserved:\n" + //$NON-NLS-1$
-	"  void\nbar\n()\n {}" + //$NON-NLS-1$
+	"  @deprecated @overrides " + //$NON-NLS-1$
+	"  public void\nbar\n()\n {}" + //$NON-NLS-1$
 	"  void foo() {" + //$NON-NLS-1$
 	"    ;;" + //$NON-NLS-1$
 	"    do {} while (false);" + //$NON-NLS-1$
@@ -74,6 +74,10 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 		
 		final Group emptyStatementsGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.empty_statement_group.title")); //$NON-NLS-1$
 		createPref(emptyStatementsGroup, numColumns, "NewLinesTabPage.emtpy_statement_group.option.empty_statement_on_new_line", DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, FALSE_TRUE); //$NON-NLS-1$
+
+		final Group annotationsGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.annotations_group.title")); //$NON-NLS-1$
+		createPref(annotationsGroup, numColumns, "NewLinesTabPage.annotations_group.option.after_annotation", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION, NOTINSERT_INSERT); //$NON-NLS-1$
+
 	}
 	
 	protected void initializePage() {
