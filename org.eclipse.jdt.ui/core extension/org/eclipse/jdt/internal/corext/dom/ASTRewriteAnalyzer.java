@@ -1245,28 +1245,39 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(Initializer)
 	 */
 	public boolean visit(Initializer node) {
-		return super.visit(node);
+		if (isModified(node)) {
+			Initializer modifedNode= (Initializer) getModifiedNode(node);
+			rewriteModifiers(node.getStartPosition(), node.getModifiers(), modifedNode.getModifiers());
+		}
+		rewriteRequiredNode(node.getBody());
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(InstanceofExpression)
 	 */
 	public boolean visit(InstanceofExpression node) {
-		return super.visit(node);
+		rewriteRequiredNode(node.getLeftOperand());
+		rewriteRequiredNode(node.getRightOperand());
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(Javadoc)
 	 */
 	public boolean visit(Javadoc node) {
-		return super.visit(node);
+		checkNoInsertOrReplace(node);
+		checkNoModification(node);
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(LabeledStatement)
 	 */
 	public boolean visit(LabeledStatement node) {
-		return super.visit(node);
+		rewriteRequiredNode(node.getLabel());
+		rewriteRequiredNode(node.getBody());		
+		return false;
 	}
 
 	/* (non-Javadoc)

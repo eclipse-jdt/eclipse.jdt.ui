@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -743,8 +744,74 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("    static final transient int k2;\n");
 		buf.append("    int i3= 1, k3= 2, n3= 3;\n");
 		buf.append("}\n");	
-			
+		
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testInitializer() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    {\n");
+		buf.append("        foo();\n");
+		buf.append("    }\n");
+		buf.append("    static {\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "A");
+		
+		List declarations= type.bodyDeclarations();
+		assertTrue("Number of fieldDeclarations not 2", declarations.size() == 2);
+		{	// change modifier, replace body
+			Initializer initializer= (Initializer) declarations.get(0);
+			
+			// add modifier
+			Initializer modifiedNode= ast.newInitializer();
+			modifiedNode.setModifiers(Modifier.STATIC);
+			
+			ASTRewriteAnalyzer.markAsModified(initializer, modifiedNode);
+			
+			
+			Block block= ast.newBlock();
+			block.statements().add(ast.newReturnStatement());
+			
+			ASTRewriteAnalyzer.markAsReplaced(initializer.getBody(), block);
+		}
+		{	// change modifier
+			Initializer initializer= (Initializer) declarations.get(1);
+			
+			// remove modifier
+			Initializer modifiedNode= ast.newInitializer();
+			modifiedNode.setModifiers(0);
+			
+			ASTRewriteAnalyzer.markAsModified(initializer, modifiedNode);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    static {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");
+		buf.append("    {\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
 	
 }

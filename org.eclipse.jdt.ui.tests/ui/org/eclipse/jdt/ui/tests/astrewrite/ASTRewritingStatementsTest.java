@@ -863,6 +863,63 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testLabeledStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        label: if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+
+		{ // replace label and statement
+			LabeledStatement labeledStatement= (LabeledStatement) statements.get(0);
+			
+			Name newLabel= ast.newSimpleName("newLabel");
+			
+			ASTRewriteAnalyzer.markAsReplaced(labeledStatement.getLabel(), newLabel);
+						
+			Assignment newExpression= ast.newAssignment();
+			newExpression.setLeftHandSide(ast.newSimpleName("x"));
+			newExpression.setRightHandSide(ast.newNumberLiteral("1"));
+			newExpression.setOperator(Assignment.Operator.ASSIGN);
+			
+			Statement newStatement= ast.newExpressionStatement(newExpression);
+			
+			ASTRewriteAnalyzer.markAsReplaced(labeledStatement.getBody(), newStatement);
+		}		
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        newLabel: x = 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
 	}		
+	
 	
 }
