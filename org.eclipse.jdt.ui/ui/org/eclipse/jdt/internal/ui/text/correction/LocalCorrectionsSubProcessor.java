@@ -76,13 +76,22 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
+		
+		int offset= selectedNode.getStartPosition();
+		int length= selectedNode.getLength();
+		int selectionEnd= context.getSelectionOffset() + context.getSelectionLength();
+		if (selectionEnd > offset + length) {
+			// extend the selection if more than one statement is selected (bug 72149)
+			length= selectionEnd - offset;
+		}
 			
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selectedNode.getStartPosition(), selectedNode.getLength(), settings, null);
+		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, offset, length, settings, null);
 		if (refactoring == null)
 			return;
 		
 		refactoring.setLeaveDirty(true);
+		// SurroundWithTryCatchRefactoring still uses modifying rewrite - pass in a copy
 		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
@@ -99,7 +108,8 @@ public class LocalCorrectionsSubProcessor {
 		if (decl == null) {
 			return;
 		}
-		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(decl, Selection.createFromStartLength(selectedNode.getStartPosition(), selectedNode.getLength()));
+		
+		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(decl, Selection.createFromStartLength(offset, length));
 		if (uncaughtExceptions.length == 0) {
 			return;
 		}
