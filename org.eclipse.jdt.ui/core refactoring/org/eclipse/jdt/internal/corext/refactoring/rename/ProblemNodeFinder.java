@@ -22,9 +22,10 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class ProblemNodeFinder {
 
-	private ProblemNodeFinder(){}
+	private ProblemNodeFinder() {
+	}
 	
-	public static SimpleName[] getProblemNodes(ASTNode methodNode, TextEdit[] edits, TextChange change, String key){
+	public static SimpleName[] getProblemNodes(ASTNode methodNode, TextEdit[] edits, TextChange change, String key) {
 		NameNodeVisitor visitor= new NameNodeVisitor(edits, change, key);
 		methodNode.accept(visitor);
 		return visitor.getProblemNodes();

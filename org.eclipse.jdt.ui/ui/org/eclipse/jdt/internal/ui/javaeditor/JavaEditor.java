@@ -151,7 +151,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHi
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
@@ -168,11 +167,6 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-
-
-
-
-
 
 /**
  * Java specific text editor.
@@ -1587,10 +1581,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);				
 		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
 			
-		action= new SearchUsagesInFileAction(this);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_REFERENCES);
-		setAction(SearchUsagesInFileAction.SHOWREFERENCES, action);
-		
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"ShowOutline.", this, JavaSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 		setAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE, action);
@@ -1631,7 +1621,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		if (isBrowserLikeLinks())
 			enableBrowserLikeLinks();
-	}
+		}
 	
 	private boolean isTextSelectionEmpty() {
 		ISelection selection= getSelectionProvider().getSelection();

@@ -74,12 +74,6 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String SELECT_LAST= "org.eclipse.jdt.ui.edit.text.java.select.last"; //$NON-NLS-1$
 	
 	/**
-	 * Action definition ID of the search -> show references 
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.showreferences"</code>).
-	 */
-	public static final String SHOW_REFERENCES= "org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"; //$NON-NLS-1$
-
-	/**
 	 * Action definition ID of the edit -> correction assist proposal action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"</code>).
 	 */

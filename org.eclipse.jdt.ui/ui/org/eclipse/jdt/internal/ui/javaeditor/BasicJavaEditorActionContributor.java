@@ -37,7 +37,6 @@ import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
@@ -125,7 +124,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private TogglePresentationAction fTogglePresentation;
 	private GotoErrorAction fPreviousError;
 	private GotoErrorAction fNextError;
-	private RetargetTextEditorAction fShowReferencesAction;	
 	private RetargetTextEditorAction fGotoMatchingBracket;
 	private RetargetTextEditorAction fShowOutline;
 	private RetargetTextEditorAction fOpenStructure;
@@ -176,14 +174,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
-		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next"); 
+		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next");
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
-		
-		fShowReferencesAction= new RetargetTextEditorAction(b, "ShowReferencesInFile."); //$NON-NLS-1$
-		fShowReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_REFERENCES);
 		
 		fShowJavaDoc= new RetargetTextEditorAction(b, "ShowJavaDoc."); //$NON-NLS-1$
 		fShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
@@ -248,23 +243,21 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
 			
-			editMenu.appendToGroup(IWorkbenchActionConstants.FIND_EXT, fShowReferencesAction);
-
 			MenuManager structureSelection= new MenuManager(JavaEditorMessages.getString("ExpandSelectionMenu.label"), "expandSelection"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			structureSelection.add(fStructureSelectEnclosingAction);
 			structureSelection.add(fStructureSelectNextAction);
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
-
+			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}
 
 		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
 		if (navigateMenu != null) {
 			navigateMenu.appendToGroup(IWorkbenchActionConstants.SHOW_EXT, fShowOutline);
-		}
-		
+	}
+	
 		IMenuManager gotoMenu= menu.findMenuUsingPath("navigate/goTo"); //$NON-NLS-1$
 		if (gotoMenu != null) {
 			gotoMenu.add(new Separator("additions2"));  //$NON-NLS-1$
@@ -305,7 +298,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fNextError.setEditor(textEditor);
 		
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
-		fShowReferencesAction.setAction(getAction(textEditor, SearchUsagesInFileAction.SHOWREFERENCES));
 		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
 		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));

@@ -12,8 +12,10 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
@@ -25,6 +27,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the Java search actions to a context menu and
@@ -47,6 +51,8 @@ public class JavaSearchActionGroup extends ActionGroup {
 	private DeclarationsSearchGroup fDeclarationsGroup;
 	private ImplementorsSearchGroup fImplementorsGroup;
 	
+	private FindOccurrencesInFileAction fOccurrencesInFileAction;
+	
 	/**
 	 * Creates a new <code>JavaSearchActionGroup</code>. The group 
 	 * requires that the selection provided by the part's selection provider 
@@ -56,6 +62,8 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 */
 	public JavaSearchActionGroup(IViewPart part) {
 		this(part.getViewSite());
+		fOccurrencesInFileAction= new FindOccurrencesInFileAction(part);
+		part.getViewSite().getSelectionProvider().addSelectionChangedListener(fOccurrencesInFileAction);
 	}
 	
 	/**
@@ -67,6 +75,8 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 */
 	public JavaSearchActionGroup(Page page) {
 		this(page.getSite());
+		fOccurrencesInFileAction= new FindOccurrencesInFileAction(page);
+		page.getSite().getSelectionProvider().addSelectionChangedListener(fOccurrencesInFileAction);
 	}
 
 	/**
@@ -82,6 +92,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fWriteAccessGroup= new WriteReferencesSearchGroup(fEditor);
 		fDeclarationsGroup= new DeclarationsSearchGroup(fEditor);
 		fImplementorsGroup= new ImplementorsSearchGroup(fEditor);
+		fOccurrencesInFileAction= new FindOccurrencesInFileAction(fEditor);
 	}
 
 	private JavaSearchActionGroup(IWorkbenchSite site) {
@@ -114,6 +125,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fImplementorsGroup.fillActionBars(actionBar);
 		fReadAccessGroup.fillActionBars(actionBar);
 		fWriteAccessGroup.fillActionBars(actionBar);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_OCCURRENCES_IN_FILE, fOccurrencesInFileAction);
 	}
 	
 	/* 
@@ -137,6 +149,13 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fReadAccessGroup.fillContextMenu(target);
 		fWriteAccessGroup.fillContextMenu(target);
 		
+		if (searchSubMenu != null) {
+			searchSubMenu.add(new Separator());
+			addAction(target, fOccurrencesInFileAction);
+		} else {
+			addAction(target, IContextMenuConstants.GROUP_SEARCH, fOccurrencesInFileAction);
+		}
+		
 		// no other way to find out if we have added items.
 		if (searchSubMenu != null && searchSubMenu.getItems().length > 1) {		
 			menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, searchSubMenu);
@@ -152,6 +171,18 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fImplementorsGroup.dispose();
 		fReadAccessGroup.dispose();
 		fWriteAccessGroup.dispose();
+		if (fOccurrencesInFileAction != null)
+			fSite.getSelectionProvider().removeSelectionChangedListener(fOccurrencesInFileAction);
 		super.dispose();
 	}
+	
+	private void addAction(IMenuManager manager, IAction action) {
+		if (action != null && action.isEnabled())
+			manager.add(action);
+	}
+	
+	private void addAction(IMenuManager manager, String group, IAction action) {
+		if (action != null && action.isEnabled())
+			manager.appendToGroup(group, action);
+	}	
 }

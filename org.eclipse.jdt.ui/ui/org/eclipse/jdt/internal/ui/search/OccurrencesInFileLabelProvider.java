@@ -22,7 +22,7 @@ import org.eclipse.swt.graphics.Image;
  * Label provider for the SearchUsagesInFile results.
  * @see SearchUsagesInFileAction
  */
-class SearchUsagesInFileLabelProvider extends JavaSearchResultLabelProvider {
+class OccurrencesInFileLabelProvider extends JavaSearchResultLabelProvider {
 
 	public String getText(Object o) {
 		IMarker marker= getMarker(o);
@@ -50,7 +50,7 @@ class SearchUsagesInFileLabelProvider extends JavaSearchResultLabelProvider {
 		Boolean write= null;
 		boolean writeValue= false;
 		try {
-			write= (Boolean)marker.getAttribute(SearchUsagesInFileAction.IS_WRITEACCESS);
+			write= (Boolean)marker.getAttribute(FindOccurrencesEngine.IS_WRITEACCESS);
 			writeValue= write != null && write.booleanValue();
 		} catch (CoreException e) {
 		}
@@ -61,7 +61,7 @@ class SearchUsagesInFileLabelProvider extends JavaSearchResultLabelProvider {
 		Boolean variable= null;
 		boolean variableValue= false;
 		try {
-			variable= (Boolean)marker.getAttribute(SearchUsagesInFileAction.IS_VARIABLE);
+			variable= (Boolean)marker.getAttribute(FindOccurrencesEngine.IS_VARIABLE);
 			variableValue= variable != null && variable.booleanValue();
 		} catch (CoreException e) {
 		}

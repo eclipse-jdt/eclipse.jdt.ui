@@ -407,4 +407,10 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet"</code>).
 	 */
 	public static final String FIND_WRITE_ACCESS_IN_WORKING_SET= "org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet"; //$NON-NLS-1$
+	
+	/**
+	 * Search menu: name of standard Occurrences in File global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.OccurrencesInFile"</code>).
+	 */
+	public static final String FIND_OCCURRENCES_IN_FILE= "org.eclipse.jdt.ui.actions.OccurrencesInFile"; //$NON-NLS-1$
 }
