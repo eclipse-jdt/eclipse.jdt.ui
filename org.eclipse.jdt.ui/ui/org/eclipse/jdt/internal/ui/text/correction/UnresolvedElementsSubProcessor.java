@@ -944,12 +944,12 @@ public class UnresolvedElementsSubProcessor {
 			ITypeBinding binding= nodeToCast.resolveTypeBinding();
 			if (binding == null || TypeRules.canCast(castType, binding)) {
 				String castTypeName= castType.getQualifiedName();
-				ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.createCastProposal(context, castTypeName, nodeToCast, 6);
+				ASTRewriteCorrectionProposal proposal= TypeMismatchSubProcessor.createCastProposal(context, castTypeName, nodeToCast, 6);
 				String[] arg= new String[] { getArgumentName(cu, arguments, idx), castTypeName};
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addargumentcast.description", arg)); //$NON-NLS-1$
 				proposals.add(proposal);
 			}
-			LocalCorrectionsSubProcessor.addChangeSenderTypeProposals(context, nodeToCast, castType, false, 5, proposals);
+			TypeMismatchSubProcessor.addChangeSenderTypeProposals(context, nodeToCast, castType, false, 5, proposals);
 		}
 		if (nDiffs == 2) { // try to swap
 			int idx1= indexOfDiff[0];

@@ -25,7 +25,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -79,8 +79,8 @@ public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 			Iterator iter= model.getAnnotationIterator();
 			while (iter.hasNext()) {
 				Object curr= iter.next();
-				if (curr instanceof MarkerAnnotation) {
-					MarkerAnnotation annot= (MarkerAnnotation) curr;
+				if (curr instanceof SimpleMarkerAnnotation) {
+					SimpleMarkerAnnotation annot= (SimpleMarkerAnnotation) curr;
 					if (marker.equals(annot.getMarker())) {
 						return model.getPosition(annot);
 					}

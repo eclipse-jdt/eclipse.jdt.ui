@@ -37,7 +37,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -127,7 +127,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}
 	
 	public static boolean isQuickFixableType(Annotation annotation) {
-		return (annotation instanceof IJavaAnnotation || annotation instanceof MarkerAnnotation) && !annotation.isMarkedDeleted();
+		return (annotation instanceof IJavaAnnotation || annotation instanceof SimpleMarkerAnnotation) && !annotation.isMarkedDeleted();
 	}
 	
 	
@@ -142,8 +142,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				}
 			}
 		}
-		if (annotation instanceof MarkerAnnotation) {
-			return hasCorrections(((MarkerAnnotation) annotation).getMarker());
+		if (annotation instanceof SimpleMarkerAnnotation) {
+			return hasCorrections(((SimpleMarkerAnnotation) annotation).getMarker());
 		}
 		return false;
 	}
@@ -241,8 +241,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				return; // java problems all handled by the quick assist processors
 			}
 		}
-		if (curr instanceof MarkerAnnotation) {
-			IMarker marker= ((MarkerAnnotation) curr).getMarker();
+		if (curr instanceof SimpleMarkerAnnotation) {
+			IMarker marker= ((SimpleMarkerAnnotation) curr).getMarker();
 			IMarkerResolution[] res= IDE.getMarkerHelpRegistry().getResolutions(marker);
 			if (res.length > 0) {
 				for (int i= 0; i < res.length; i++) {

@@ -240,7 +240,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
 				break;	
 			case IProblem.TypeMismatch:
-				LocalCorrectionsSubProcessor.addCastProposals(context, problem, proposals);
+				TypeMismatchSubProcessor.addTypeMismatchProposals(context, problem, proposals);
 				break;
 			case IProblem.UnhandledException:
 				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, problem, proposals);

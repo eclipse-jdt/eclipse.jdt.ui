@@ -59,6 +59,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(UnresolvedMethodsQuickFixTest.allTests());
 		suite.addTest(ReturnTypeQuickFixTest.allTests());
 		suite.addTest(LocalCorrectionsQuickFixTest.allTests());
+		suite.addTest(TypeMismatchQuickFixTests.allTests());
 		suite.addTest(ReorgQuickFixTest.allTests());
 		suite.addTest(ModifierCorrectionsQuickFixTest.allTests());
 		suite.addTest(AssistQuickFixTest.allTests());
