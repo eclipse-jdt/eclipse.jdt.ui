@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -67,7 +69,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	}
 	
 	protected void perform(IStructuredSelection selection) throws CoreException {
-		if (fAskForDeleteConfirmation && !confirmDelete())
+		if (fAskForDeleteConfirmation && !confirmDelete(selection))
 			return;
 			
 		try {
@@ -313,13 +315,17 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 			return new IMethod[0];
 		}
 	}
-
-	//made protected for ui-less testing
-	protected final boolean confirmDelete() {
+	private static boolean confirmDelete(IStructuredSelection selection) {
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
-		String label= ReorgMessages.getString("deleteAction.confirm.message"); //$NON-NLS-1$
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		return MessageDialog.openQuestion(parent, title, label);
+		String label;
+		if (selection.size() == 1){
+			String pattern= "Are you sure you want to delete ''{0}''?";
+			label= MessageFormat.format(pattern, new String[]{ReorgUtils.getName(selection.getFirstElement())});
+		} else {
+			String pattern= "Are you sure you want to delete these {0} elements?";
+			label= MessageFormat.format(pattern, new String[]{String.valueOf(selection.size())});
+		}
+		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);
 	}
 
 	//made protected for ui-less testing

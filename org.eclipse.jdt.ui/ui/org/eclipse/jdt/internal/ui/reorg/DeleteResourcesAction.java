@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
+import java.text.MessageFormat;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFolder;
@@ -132,7 +133,14 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	private static boolean confirmDelete(IStructuredSelection selection) {
 		Assert.isTrue(ClipboardActionUtil.getSelectedProjects(selection).isEmpty());
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
-		String label= ReorgMessages.getString("deleteAction.confirm.message"); //$NON-NLS-1$
+		String label;
+		if (selection.size() == 1){
+			String pattern= "Are you sure you want to delete ''{0}''?";
+			label= MessageFormat.format(pattern, new String[]{ReorgUtils.getName(selection.getFirstElement())});
+		} else {
+			String pattern= "Are you sure you want to delete these {0} resources?";
+			label= MessageFormat.format(pattern, new String[]{String.valueOf(selection.size())});
+		}
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);
 	}
 }
