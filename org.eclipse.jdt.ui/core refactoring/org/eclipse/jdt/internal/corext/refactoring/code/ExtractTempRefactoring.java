@@ -615,8 +615,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 		if (parent instanceof PostfixExpression)
 			return true;
-		if (parent instanceof PrefixExpression)
-			return true;
+		if (parent instanceof PrefixExpression){
+			PrefixExpression.Operator op= ((PrefixExpression)parent).getOperator();
+			if (op.equals(PrefixExpression.Operator.DECREMENT))
+				return true;
+			if (op.equals(PrefixExpression.Operator.INCREMENT))
+				return true;
+			return false;	
+		}
 		return false;	
     }
 		
