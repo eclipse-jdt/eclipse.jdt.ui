@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
 public class CPListElement {
 	
@@ -40,7 +39,7 @@ public class CPListElement {
 	public static final String ACCESSRULES= "accessrules"; //$NON-NLS-1$
 	public static final String COMBINE_ACCESSRULES= "combineaccessrules"; //$NON-NLS-1$
 	
-	public static final String JAVADOC= JavaDocLocations.ATTRIB_ID;
+	public static final String JAVADOC= IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME;
 	
 	private IJavaProject fProject;
 	

@@ -33,8 +33,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
-
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -104,12 +102,11 @@ public class BuildPathSupport {
 					IClasspathEntry[] entries= curr.getRawClasspath();
 					for (int k= 0; k < entries.length; k++) {
 						IClasspathEntry entry= entries[k];
-						if (entry.getEntryKind() == elem.getEntryKind()
-							&& entry.getPath().equals(elem.getPath())) {
+						if (entry.getEntryKind() == elem.getEntryKind() && entry.getPath().equals(elem.getPath())) {
 							IClasspathAttribute[] attributes= entry.getExtraAttributes();
 							for (int n= 0; n < attributes.length; n++) {
 								IClasspathAttribute attrib= attributes[n];
-								if (JavaDocLocations.ATTRIB_ID.equals(attrib.getName())) {
+								if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(attrib.getName())) {
 									return attrib.getValue();
 								}
 							}
@@ -221,7 +218,7 @@ public class BuildPathSupport {
 			}
 		}
 		if (!found) {
-			if (newEntry.getSourceAttachmentPath() == null || !putJarOnClasspathDialog(shell)) {
+			if (!putJarOnClasspathDialog(shell)) {
 				return;
 			}
 			// add new

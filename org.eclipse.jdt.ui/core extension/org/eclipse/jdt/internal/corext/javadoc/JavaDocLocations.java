@@ -96,8 +96,6 @@ public class JavaDocLocations {
 	
 	private static final QualifiedName PROJECT_JAVADOC= new QualifiedName(JavaUI.ID_PLUGIN, "project_javadoc_location"); //$NON-NLS-1$
 	
-	public static final String ATTRIB_ID= "javadoc_location"; //$NON-NLS-1$
-	
 	public static void migrateToClasspathAttributes() {
 		final Map oldLocations= loadOldForCompatibility();
 		if (oldLocations.isEmpty()) {
@@ -189,7 +187,7 @@ public class JavaDocLocations {
 		}
 		IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
 		for (int i= 0; i < extraAttributes.length; i++) {
-			if (ATTRIB_ID.equals(extraAttributes[i].getName())) {
+			if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(extraAttributes[i].getName())) {
 				return null;
 			}
 		}
@@ -271,7 +269,7 @@ public class JavaDocLocations {
 		IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
 		for (int i= 0; i < extraAttributes.length; i++) {
 			IClasspathAttribute attrib= extraAttributes[i];
-			if (ATTRIB_ID.equals(attrib.getName())) {
+			if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(attrib.getName())) {
 				try {
 					return new URL(attrib.getValue());
 				} catch (MalformedURLException e) {
