@@ -50,7 +50,9 @@ public class RefactoringSupportFactory {
 		}
 		
 		protected RefactoringWizard createWizard() {
-			RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenamePackage", IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE, IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE); 
+			String title= "Rename Package";
+			String message= "Enter the new name for this package. References to all types declared in it will be updated.";
+			RenameRefactoringWizard w= new RenameRefactoringWizard(title, message, IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE, IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE); 
 			w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PACKAGE);
 			return w;
 		}
@@ -62,7 +64,9 @@ public class RefactoringSupportFactory {
 		}
 		
 		protected RefactoringWizard createWizard() {
-			RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameCompilationUnit", IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE, IJavaHelpContextIds.RENAME_CU_ERROR_WIZARD_PAGE); 
+			String title= "Rename Compilation Unit";
+			String message= "Enter the new name for this compilation unit. Refactoring will also rename and update references to the type (if any exists) that has the same name as this compilation unit.";
+			RenameRefactoringWizard w= new RenameRefactoringWizard(title, message, IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE, IJavaHelpContextIds.RENAME_CU_ERROR_WIZARD_PAGE); 
 			w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 			return w;
 		}
