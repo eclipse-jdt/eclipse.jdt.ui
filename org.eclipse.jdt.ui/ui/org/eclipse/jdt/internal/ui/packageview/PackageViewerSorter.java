@@ -148,7 +148,6 @@ public class PackageViewerSorter extends ViewerSorter {
 			if (fClassPath[i].getPath().equals(root.getPath()))
 				return i;
 		}
-		Assert.isTrue(false, "package fragment root not found on class path");
 		return 0;
 	}
 }
