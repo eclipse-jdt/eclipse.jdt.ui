@@ -15,6 +15,9 @@ import java.util.Hashtable;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -25,12 +28,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 public class SurroundWithTestSetup extends TestSetup {
@@ -71,7 +72,7 @@ public class SurroundWithTestSetup extends TestSetup {
 		workspace.setDescription(description);
 		
 		fTryCatchPackage= getRoot().createPackageFragment("trycatch_in", true, null);
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CATCHBLOCK).setPattern("");
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CATCHBLOCK_ID, "", null);
 	}
 
 	protected void tearDown() throws Exception {

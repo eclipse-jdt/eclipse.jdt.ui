@@ -15,15 +15,15 @@ import java.util.Hashtable;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
 
 public class AbstractRefactoringTestSetup extends TestSetup {
 
@@ -51,7 +51,7 @@ public class AbstractRefactoringTestSetup extends TestSetup {
 		comment.append("/**\n");
 		comment.append(" * ${tags}\n");
 		comment.append(" */");
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern(comment.toString());
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, comment.toString(), null);
 	}
 	
 	protected void tearDown() throws Exception {

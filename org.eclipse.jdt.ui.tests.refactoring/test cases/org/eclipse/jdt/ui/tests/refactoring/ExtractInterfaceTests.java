@@ -15,6 +15,8 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
@@ -23,12 +25,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -56,14 +56,14 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(
+		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, 
 			"${package_declaration}" + 
 				System.getProperty("line.separator", "\n") +
-			"${"+ CodeTemplateContextType.TYPECOMMENT+"}" + 
+			"${"+ CodeTemplateContextType.TYPE_COMMENT+"}" + 
 			System.getProperty("line.separator", "\n") +
-			"${type_declaration}");
+			"${type_declaration}", null);
 
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern("/** typecomment template*/");
+		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "/** typecomment template*/", null);
 		
 		fOldOptions= JavaCore.getOptions();
 		

@@ -26,10 +26,9 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -62,11 +61,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.FIELDCOMMENT).setPattern(FIELD_COMMENT);
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(
+		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, FIELD_COMMENT, null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, 
 			"${package_declaration}" + 
 			System.getProperty("line.separator", "\n") +
-			"${type_declaration}");
+			"${type_declaration}", null);
 
 		Hashtable options= JavaCore.getOptions();
 		

@@ -27,8 +27,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Helper class for the nls-tests.
@@ -68,8 +68,8 @@ public class NlsRefactoringTestHelper {
         createCu("/TestSetupProject/src1/p", "WithoutStrings.java", "package p;class WithoutStrings {}");
         
 		String newFileTemplate= "${package_declaration}\n\n${type_declaration}";
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(newFileTemplate);
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern("");
+		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, newFileTemplate, null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "", null);
 
     }
 
