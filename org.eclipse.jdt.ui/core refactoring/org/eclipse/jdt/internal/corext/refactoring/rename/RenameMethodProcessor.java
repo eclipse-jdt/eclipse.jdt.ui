@@ -150,7 +150,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	private void initializeMethodsToRename(IProgressMonitor pm) throws CoreException {
-		//TODO: RippleMethodFinder2? can WorkingCopyOwner be null there?
 		fMethodsToRename= new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(fMethod, pm, null)));
 	}
 	
@@ -259,7 +258,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private SearchPattern createSearchPatternWithOwner(IProgressMonitor pm, IMethod method) throws CoreException {
 		HashSet methods= new HashSet();
 		methods.add(method);
-		IMethod[] rippleMethods= RippleMethodFinder2.getRelatedMethods(method, pm, fWorkingCopyOwner);
+		IMethod[] rippleMethods= RippleMethodFinder.getRelatedMethods(method, pm, fWorkingCopyOwner);
 		methods.addAll(Arrays.asList(rippleMethods));
 		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
 		return RefactoringSearchEngine.createOrPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);

@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -1230,7 +1229,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				// end code fragment
 				
 				IMethod[] rippleMethods= RippleMethodFinder.getRelatedMethods(
-						root, new SubProgressMonitor(pm, 15), new IWorkingCopy[0]);
+						root, new SubProgressMonitor(pm, 15), null);
 				SearchPattern pattern= RefactoringSearchEngine.createOrPattern(
 						rippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
 
