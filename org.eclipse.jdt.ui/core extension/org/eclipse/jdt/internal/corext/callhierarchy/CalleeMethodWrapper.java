@@ -17,9 +17,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -88,19 +91,38 @@ class CalleeMethodWrapper extends MethodWrapper {
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
      */
     protected Map findChildren(IProgressMonitor progressMonitor) {
-        if (getMember().exists() && getMember().getElementType() == IJavaElement.METHOD) {
-            ICompilationUnit icu = getMember().getCompilationUnit();
-            if (icu != null && icu.exists()) {
-                CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor((IMethod) getMember(),
-                        progressMonitor);
+    	progressMonitor.beginTask("", 1); //$NON-NLS-1$
+    	try{
+			if (getMember().exists() && getMember().getElementType() == IJavaElement.METHOD) {
+				CompilationUnit cu= createCompilationUnitNode(getMember());
+				if (cu != null) {
+					CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor((IMethod) getMember(),
+							new SubProgressMonitor(progressMonitor, 1));
             
-                CompilationUnit cu = AST.parseCompilationUnit(icu, true);
-                cu.accept(visitor);
-                return visitor.getCallees();
-            }
-        }
-        return new HashMap(0);
+					cu.accept(visitor);
+					return visitor.getCallees();
+				}
+			}
+			return new HashMap(0);
+    	} finally{
+    		progressMonitor.done();
+    	}
     }
+    
+	private static CompilationUnit createCompilationUnitNode(IMember member) {
+		if (member.isBinary()) {
+			IClassFile classFile= member.getClassFile();
+			if (classFile != null && classFile.exists()) {
+				return AST.parseCompilationUnit(classFile, true);
+			}
+		} else {
+			ICompilationUnit icu= member.getCompilationUnit();
+			if (icu != null && icu.exists()) {
+				return AST.parseCompilationUnit(icu, true);
+			}
+		}
+		return null;
+	}
 
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getDirection()
