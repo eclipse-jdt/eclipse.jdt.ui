@@ -63,7 +63,7 @@ public final class UnboundWildcardType extends WildcardType {
 		return "?"; //$NON-NLS-1$
 	}
 	
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		return getName();
 	}
 }

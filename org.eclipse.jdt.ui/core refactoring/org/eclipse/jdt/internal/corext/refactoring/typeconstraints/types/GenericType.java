@@ -61,7 +61,7 @@ public final class GenericType extends HierarchyType {
 		return getJavaElementType().getElementName();
 	}
 	
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		StringBuffer result= new StringBuffer(getJavaElementType().getFullyQualifiedName('.'));
 		result.append("<"); //$NON-NLS-1$
 		result.append(fTypeParameters[0].getPrettySignature());

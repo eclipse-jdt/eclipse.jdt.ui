@@ -76,7 +76,7 @@ public final class SuperWildcardType extends WildcardType {
 		return internalGetName("super"); //$NON-NLS-1$
 	}
 	
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		return internalGetPrettySignature("super"); //$NON-NLS-1$
 	}
 }

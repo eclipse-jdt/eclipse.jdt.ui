@@ -115,12 +115,16 @@ public final class TypeVariable extends TType {
 		StringBuffer result= new StringBuffer(fJavaTypeParameter.getElementName());
 		if (fBounds.length > 0) {
 			result.append(" extends "); //$NON-NLS-1$
-			result.append(fBounds[0].getPrettySignature());
+			result.append(fBounds[0].getPlainPrettySignature());
 			for (int i= 1; i < fBounds.length; i++) {
-				result.append(", "); //$NON-NLS-1$
-				result.append(fBounds[i].getPrettySignature());
+				result.append(" & "); //$NON-NLS-1$
+				result.append(fBounds[i].getPlainPrettySignature());
 			}
 		}
 		return result.toString();
+	}
+	
+	protected String getPlainPrettySignature() {
+		return fJavaTypeParameter.getElementName();
 	}
 }

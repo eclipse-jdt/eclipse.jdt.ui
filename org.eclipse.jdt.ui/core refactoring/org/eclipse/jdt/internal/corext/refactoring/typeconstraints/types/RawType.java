@@ -89,7 +89,7 @@ public final class RawType extends HierarchyType {
 		return getJavaElementType().getElementName();
 	}
 	
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		return getJavaElementType().getFullyQualifiedName('.');
 	}
 }

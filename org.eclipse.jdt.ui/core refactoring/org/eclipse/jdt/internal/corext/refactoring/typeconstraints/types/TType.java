@@ -526,7 +526,18 @@ public abstract class TType {
 	 * 
 	 * @return a pretty signature for this type
 	 */
-	public abstract String getPrettySignature();
+	public String getPrettySignature() {
+		return getPlainPrettySignature();
+	}
+	
+	/**
+	 * Computes a plain pretty signature. For type with bounds (e.g
+	 * type variables and wildcards) the plain signature is different
+	 * than the full pretty signture.
+	 * 
+	 * @return a plain pretty signature for this type
+	 */
+	protected abstract String getPlainPrettySignature();
 	
 	/**
 	 * {@inheritDoc}

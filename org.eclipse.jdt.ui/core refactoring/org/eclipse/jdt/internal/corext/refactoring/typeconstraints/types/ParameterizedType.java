@@ -155,13 +155,13 @@ public final class ParameterizedType extends HierarchyType {
 		return result.toString();
 	}
 	
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		StringBuffer result= new StringBuffer(getJavaElementType().getFullyQualifiedName('.'));
 		result.append("<"); //$NON-NLS-1$
-		result.append(fTypeArguments[0].getPrettySignature());
+		result.append(fTypeArguments[0].getPlainPrettySignature());
 		for (int i= 1; i < fTypeArguments.length; i++) {
 			result.append(", "); //$NON-NLS-1$
-			result.append(fTypeArguments[i].getPrettySignature());
+			result.append(fTypeArguments[i].getPlainPrettySignature());
 		}
 		result.append(">"); //$NON-NLS-1$
 		return result.toString();

@@ -29,7 +29,7 @@ public class NullType extends TType {
 		return "null";  //$NON-NLS-1$
 	}
 	
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		return getName();
 	}
 	

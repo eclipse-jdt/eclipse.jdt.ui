@@ -35,7 +35,7 @@ public class VoidType extends TType {
 		return "void"; //$NON-NLS-1$
 	}
 
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		return getName();
 	}
 }

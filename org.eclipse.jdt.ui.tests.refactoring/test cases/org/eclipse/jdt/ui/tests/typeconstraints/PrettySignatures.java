@@ -13,66 +13,72 @@ package org.eclipse.jdt.ui.tests.typeconstraints;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-
 public class PrettySignatures {
+	
 	public static String get(ITypeBinding binding) {
+		if (binding.isTypeVariable()) {
+			return getTypeVariable(binding);
+		}
+		return getPlain(binding);	
+	}
+
+	private static String getPlain(ITypeBinding binding) {
 		if (binding.isPrimitive()) {
 			return binding.getName();
 		} else if (binding.isArray()) {
-			return getArrayType(binding);
+			return getPlainArrayType(binding);
 		} else if (binding.isRawType()) {
-			return getRawType(binding);
+			return getPlainRawType(binding);
 		} else if (binding.isGenericType()) {
-			return getGenericType(binding);
+			return getPlainGenericType(binding);
 		} else if (binding.isParameterizedType()) {
-			return getParameterizedType(binding);
+			return getPlainParameterizedType(binding);
 		} else if (binding.isTypeVariable()) {
-			return getTypeVariable(binding);
+			return getPlainTypeVariable(binding);
 		} else if (binding.isWildcardType()) {
 			if (binding.isUpperbound()) {
-				return getExtendsWildCardType(binding);
+				return getPlainExtendsWildCardType(binding);
 			} else {
-				return getSuperWildCardType(binding);
+				return getPlainSuperWildCardType(binding);
 			}
 		}
-		return getStandardType(binding);
-		
+		return getPlainStandardType(binding);
 	}
 
-	private static String getSuperWildCardType(ITypeBinding binding) {
+	private static String getPlainSuperWildCardType(ITypeBinding binding) {
 		StringBuffer result= new StringBuffer("?");
 		ITypeBinding bound= binding.getBound();
 		if (bound != null) {
 			result.append(" super ");
-			result.append(PrettySignatures.get(bound));
+			result.append(PrettySignatures.getPlain(bound));
 		}
 		return result.toString();
 	}
 
-	private static String getExtendsWildCardType(ITypeBinding binding) {
+	private static String getPlainExtendsWildCardType(ITypeBinding binding) {
 		StringBuffer result= new StringBuffer("?");
 		ITypeBinding bound= binding.getBound();
 		if (bound != null) {
 			result.append(" extends ");
-			result.append(PrettySignatures.get(bound));
+			result.append(PrettySignatures.getPlain(bound));
 		}
 		return result.toString();
 	}
 
-	private static String getParameterizedType(ITypeBinding binding) {
+	private static String getPlainParameterizedType(ITypeBinding binding) {
 		StringBuffer result= new StringBuffer(getQualifiedName(binding));
 		ITypeBinding[] typeArguments= binding.getTypeArguments();
 		result.append("<"); //$NON-NLS-1$
-		result.append(PrettySignatures.get(typeArguments[0]));
+		result.append(PrettySignatures.getPlain(typeArguments[0]));
 		for (int i= 1; i < typeArguments.length; i++) {
 			result.append(", "); //$NON-NLS-1$
-			result.append(PrettySignatures.get(typeArguments[i]));
+			result.append(PrettySignatures.getPlain(typeArguments[i]));
 		}
 		result.append(">"); //$NON-NLS-1$
 		return result.toString();
 	}
 
-	private static String getGenericType(ITypeBinding binding) {
+	private static String getPlainGenericType(ITypeBinding binding) {
 		StringBuffer result= new StringBuffer(getQualifiedName(binding));
 		ITypeBinding[] typeParameters= binding.getTypeParameters();
 		result.append("<"); //$NON-NLS-1$
@@ -90,28 +96,32 @@ public class PrettySignatures {
 		ITypeBinding[] bounds= binding.getTypeBounds();
 		if (bounds.length > 0) {
 			result.append(" extends "); //$NON-NLS-1$
-			result.append(PrettySignatures.get(bounds[0]));
+			result.append(PrettySignatures.getPlain(bounds[0]));
 			for (int i= 1; i < bounds.length; i++) {
-				result.append(", "); //$NON-NLS-1$
-				result.append(PrettySignatures.get(bounds[i]));
+				result.append(" & "); //$NON-NLS-1$
+				result.append(PrettySignatures.getPlain(bounds[i]));
 			}
 		}
 		return result.toString();
 	}
 
-	private static String getRawType(ITypeBinding binding) {
+	private static String getPlainTypeVariable(ITypeBinding binding) {
+		return binding.getName();
+	}
+
+	private static String getPlainRawType(ITypeBinding binding) {
 		return getQualifiedName(binding);
 	}
 
-	private static String getArrayType(ITypeBinding binding) {
-		StringBuffer result= new StringBuffer(PrettySignatures.get(binding.getElementType()));
+	private static String getPlainArrayType(ITypeBinding binding) {
+		StringBuffer result= new StringBuffer(PrettySignatures.getPlain(binding.getElementType()));
 		for (int i= 0; i < binding.getDimensions(); i++) {
 			result.append("[]");
 		}
 		return result.toString();
 	}
 
-	private static String getStandardType(ITypeBinding binding) {
+	private static String getPlainStandardType(ITypeBinding binding) {
 		return getQualifiedName(binding);
 	}
 

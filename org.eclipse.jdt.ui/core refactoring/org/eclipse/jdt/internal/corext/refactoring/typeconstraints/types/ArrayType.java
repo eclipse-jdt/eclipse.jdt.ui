@@ -92,8 +92,8 @@ public final class ArrayType extends TType {
 		return lhsElementType.isJavaLangObject() || lhsElementType.isJavaLangCloneable() || lhsElementType.isJavaIoSerializable();
 	}
 	
-	public String getPrettySignature() {
-		StringBuffer result= new StringBuffer(fItemType.getPrettySignature());
+	protected String getPlainPrettySignature() {
+		StringBuffer result= new StringBuffer(fItemType.getPlainPrettySignature());
 		for (int i= 0; i < fDimensions; i++) {
 			result.append("[]"); //$NON-NLS-1$
 		}

@@ -70,7 +70,7 @@ public abstract class WildcardType extends TType {
 			result.append(" "); //$NON-NLS-1$
 			result.append(keyword);
 			result.append(" "); //$NON-NLS-1$
-			result.append(bound.getPrettySignature());
+			result.append(bound.getPlainPrettySignature());
 		}
 		return result.toString();
 	}	

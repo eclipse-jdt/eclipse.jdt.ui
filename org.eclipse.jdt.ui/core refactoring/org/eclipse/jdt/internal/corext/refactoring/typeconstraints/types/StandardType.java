@@ -77,7 +77,7 @@ public final class StandardType extends HierarchyType {
 		return getJavaElementType().getElementName();
 	}
 	
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		return getJavaElementType().getFullyQualifiedName('.');
 	}
 }

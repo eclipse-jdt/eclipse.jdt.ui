@@ -127,7 +127,7 @@ public class PrimitiveType extends TType {
 		return NAMES[fId];
 	}
 	
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		return NAMES[fId];
 	}
 }

@@ -171,7 +171,7 @@ public class TypeEnvironment {
 	}
 	
 	PrimitiveType createUnBoxed(StandardType type) {
-		String name= type.getPrettySignature();
+		String name= type.getPlainPrettySignature();
 		for (int i= 0; i < BOXED_PRIMITIVE_NAMES.length; i++) {
 			if (BOXED_PRIMITIVE_NAMES[i].equals(name))
 				return PRIMITIVE_TYPES[i];

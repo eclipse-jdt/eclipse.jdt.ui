@@ -80,7 +80,7 @@ public final class ExtendsWildcardType extends WildcardType {
 		return internalGetName("extends"); //$NON-NLS-1$
 	}
 	
-	public String getPrettySignature() {
+	protected String getPlainPrettySignature() {
 		return internalGetPrettySignature("extends"); //$NON-NLS-1$
 	}
 }

@@ -187,6 +187,10 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		performCreationTest();
 	}
 	
+	public void testTypeVariables() throws Exception {
+		performCreationTest();
+	}
+	
 	//---- generic assigment test ----------------------------------------------
 	
 	private void performGenericAssignmentTest() throws Exception {
