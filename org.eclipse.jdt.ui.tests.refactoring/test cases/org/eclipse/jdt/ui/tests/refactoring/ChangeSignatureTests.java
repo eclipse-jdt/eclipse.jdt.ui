@@ -42,6 +42,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private static final Class clazz= ChangeSignatureTests.class;
 	private static final String REFACTORING_PATH= "ChangeSignature/";
 	
+	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
 	public ChangeSignatureTests(String name) {
@@ -1531,6 +1532,65 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PUBLIC;
 		String newReturnTypeName= null;
 		helperDoAll("A", "textContains", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testEnum01() throws Exception {
+		if (BUG_83691_CORE_JAVADOC_REF) {
+			printTestDisabledMessage("BUG_83691_CORE_JAVADOC_REF");
+			return;
+		}
+		String[] signature= {"I"};
+		String[] newNames= {"a"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"17"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+
+		String[] oldParamNames= {"i"};
+		String[] newParamNames= {"i"};
+		int[] permutation= {0};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PRIVATE;
+		String newReturnTypeName= null;
+		helperDoAll("A", "A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testEnum02() throws Exception {
+		String[] signature= {"I"};
+		String[] newNames= {"a"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"17"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+
+		String[] oldParamNames= {"i"};
+		String[] newParamNames= {"i"};
+		int[] permutation= {0};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PRIVATE;
+		String newReturnTypeName= null;
+		helperDoAll("A_testEnum02_in", "A_testEnum02_in", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testEnum03() throws Exception {
+		if (BUG_83691_CORE_JAVADOC_REF) {
+			printTestDisabledMessage("BUG_83691_CORE_JAVADOC_REF");
+			return;
+		}
+		String[] signature= {};
+		String[] newNames= {"obj"};
+		String[] newTypes= {"Object"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", "A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 }
 

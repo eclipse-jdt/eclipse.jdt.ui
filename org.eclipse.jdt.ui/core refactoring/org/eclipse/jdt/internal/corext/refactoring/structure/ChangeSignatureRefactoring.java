@@ -260,7 +260,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	public int[] getAvailableVisibilities() throws JavaModelException{
 		if (fMethod.getDeclaringType().isInterface())
 			return new int[]{Modifier.PUBLIC};
-		else 	
+		else if (fMethod.getDeclaringType().isEnum() && fMethod.isConstructor())
+			return new int[]{	Modifier.NONE,
+								Modifier.PRIVATE};
+		else
 			return new int[]{	Modifier.PUBLIC,
 								Modifier.PROTECTED,
 								Modifier.NONE,
@@ -1155,6 +1158,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private OccurrenceUpdate createOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
+		//see bug 83693: Search for References to methods/constructors: do ranges include parameter lists?
+		if (node instanceof SimpleName && node.getParent() instanceof EnumConstantDeclaration)
+			node= node.getParent();
+		
 		if (isReferenceNode(node))
 			return new ReferenceUpdate(node, cuRewrite, result);
 		
@@ -1176,6 +1183,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			case ASTNode.CLASS_INSTANCE_CREATION :
 			case ASTNode.CONSTRUCTOR_INVOCATION :
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
+			case ASTNode.ENUM_CONSTANT_DECLARATION :
 				return true;
 
 			default :
@@ -1356,6 +1364,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (fNode instanceof SuperConstructorInvocation)	
 				return getASTRewrite().getListRewrite(fNode, SuperConstructorInvocation.ARGUMENTS_PROPERTY);
 			
+			if (fNode instanceof EnumConstantDeclaration)	
+				return getASTRewrite().getListRewrite(fNode, EnumConstantDeclaration.ARGUMENTS_PROPERTY);
+			
 			return null;
 		}
 		
@@ -1406,6 +1417,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (fNode instanceof SuperConstructorInvocation) {
 				return false; //Constructors don't override -> enclosing has not been changed -> no recursion
 			}
+			
+			if (fNode instanceof EnumConstantDeclaration) {
+				return false; //cannot define enum constant inside enum constructor
+			}
 
 			Assert.isTrue(false);
 			return false;
@@ -1424,6 +1439,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (! m1.getName().equals(m2.getName()))
 					return false;
 			}
+			//TODO: generics: take typeDeclarations of parameter types
 			return Bindings.equals(m1.getParameterTypes(), m2.getParameterTypes());
 		}
 

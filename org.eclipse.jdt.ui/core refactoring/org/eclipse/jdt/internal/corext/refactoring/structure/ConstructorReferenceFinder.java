@@ -115,12 +115,30 @@ class ConstructorReferenceFinder {
 	//XXX this method is a workaround for jdt core bug 27236
 	private boolean isRealConstructorReferenceNode(ASTNode node){
 		String typeName= fConstructors[0].getDeclaringType().getElementName();
-		if (node.getParent() instanceof AbstractTypeDeclaration)
+		if (node.getParent() instanceof AbstractTypeDeclaration
+				&& ((AbstractTypeDeclaration) node.getParent()).getNameProperty().equals(node.getLocationInParent())) {
+			//Example:
+			//	class A{
+			//	    A(){}
+			//	}
+			//	class B extends A {}
+			//==> "B" is found as reference to A()
 			return false;
-		if (node.getParent() instanceof MethodDeclaration){
+		}
+		if (node.getParent() instanceof MethodDeclaration
+				&& MethodDeclaration.NAME_PROPERTY.equals(node.getLocationInParent())) {
 			MethodDeclaration md= (MethodDeclaration)node.getParent();
-			if (md.isConstructor() && ! md.getName().getIdentifier().equals(typeName))
+			if (md.isConstructor() && ! md.getName().getIdentifier().equals(typeName)) {
+				//Example:
+				//	class A{
+				//	    A(){}
+				//	}
+				//	class B extends A{
+				//	    B(){}
+				//	}
+				//==> "B" in "B(){}" is found as reference to A()
 				return false;
+			}
 		}
 		return true;
 	}
