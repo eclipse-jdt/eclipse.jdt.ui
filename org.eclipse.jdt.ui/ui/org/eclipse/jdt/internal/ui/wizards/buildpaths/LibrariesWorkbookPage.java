@@ -261,6 +261,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		dialog.setStatusLineAboveButtons(true);
 		dialog.setValidator(validator);
 		dialog.setTitle(JavaPlugin.getResourceString(DIALOG_JAR_ARCHIVE + ".title"));
 		dialog.setMessage(JavaPlugin.getResourceString(DIALOG_JAR_ARCHIVE + ".description"));

@@ -33,10 +33,23 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	private IStatus fLastStatus;
 	private Image fImage;
 	private boolean fInitialSelectionSet;
+	private boolean fStatusLineAboveButtons= false;
+	
 	
 	public SelectionStatusDialog(Shell parent) {
 		super(parent);
 		fInitialSelectionSet= false;
+	}
+	
+	/**
+	 * Controls whether status line appears to the left of the buttons (default)
+	 * or above them.
+	 *
+	 * @param aboveButtons if <code>true</code> status line is placed above buttons; if
+	 * 	<code>false</code> to the right
+	 */
+	public void setStatusLineAboveButtons(boolean aboveButtons) {
+		fStatusLineAboveButtons= aboveButtons;
 	}
 	
 	/**
@@ -124,7 +137,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	}
 	
 	/**
-	 * Update the dialog's status line to reflect the given status. It is save to call
+	 * Update the dialog's status line to reflect the given status. It is safe to call
 	 * this method before the dialog has been opened.
 	 */
 	protected void updateStatus(IStatus status) {
@@ -169,7 +182,12 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	protected Control createButtonBar(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2; layout.marginHeight= 0; layout.marginWidth= 0;
+		if (fStatusLineAboveButtons) {
+			layout.verticalSpacing= 0;
+		} else {
+			layout.numColumns= 2;
+		}
+		layout.marginHeight= 0; layout.marginWidth= 0;
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
