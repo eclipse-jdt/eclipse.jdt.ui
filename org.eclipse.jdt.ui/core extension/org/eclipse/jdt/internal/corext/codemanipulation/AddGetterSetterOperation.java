@@ -181,12 +181,11 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 					buf.append('\n');
 				}					
 			}
-
+			
 			buf.append(JdtFlags.getVisibilityString(fVisibility));
 			buf.append(' ');			
-			if (isStatic) {
+			if (isStatic)
 				buf.append("static "); //$NON-NLS-1$
-			}
 			if (fSynchronized)
 				buf.append("synchronized "); //$NON-NLS-1$
 			if (fFinal)
@@ -195,8 +194,11 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				buf.append("native "); //$NON-NLS-1$
 				
 			buf.append(typeName);
-			buf.append(' '); buf.append(getterName);
-			buf.append("() {\nreturn "); buf.append(fieldName); buf.append(";\n}\n"); //$NON-NLS-2$ //$NON-NLS-1$
+			buf.append(' ');
+			buf.append(getterName);
+			buf.append("() {\n"); //$NON-NLS-1$
+			buf.append(CodeGeneration.getGetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, fieldName, String.valueOf('\n')));
+			buf.append("}\n"); //$NON-NLS-1$
 			
 			IJavaElement sibling= null;
 			if (existingGetter != null) {
@@ -256,9 +258,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			}
 			buf.append(JdtFlags.getVisibilityString(fVisibility));
 			buf.append(' ');	
-			if (isStatic) {
+			if (isStatic)
 				buf.append("static "); //$NON-NLS-1$
-			}
 			if (fSynchronized)
 				buf.append("synchronized "); //$NON-NLS-1$
 			if (fFinal)
@@ -266,18 +267,21 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			if (fNative)
 				buf.append("native "); //$NON-NLS-1$
 				
-			buf.append("void "); buf.append(setterName); //$NON-NLS-1$
-			buf.append('('); buf.append(typeName); buf.append(' '); 
-			buf.append(argname); buf.append(") {\n"); //$NON-NLS-1$
+			buf.append("void "); //$NON-NLS-1$
+			buf.append(setterName);
+			buf.append('('); 
+			buf.append(typeName); 
+			buf.append(' '); 
+			buf.append(argname); 
+			buf.append(") {\n"); //$NON-NLS-1$
 			if (argname.equals(fieldName)) {
-				if (isStatic) {
-					buf.append(parentType.getElementName());
-					buf.append('.');
-				} else {
-					buf.append("this."); //$NON-NLS-1$
-				}
+				if (isStatic)
+					fieldName= parentType.getElementName() + '.' + fieldName;
+				else
+					fieldName= "this." + fieldName; //$NON-NLS-1$
 			}
-			buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n}\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			buf.append(CodeGeneration.getSetterMethodBodyContent(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, fieldName, argname, String.valueOf('\n')));
+			buf.append("}\n"); //$NON-NLS-1$			
 			
 			IJavaElement sibling= null;
 			if (existingSetter != null) {

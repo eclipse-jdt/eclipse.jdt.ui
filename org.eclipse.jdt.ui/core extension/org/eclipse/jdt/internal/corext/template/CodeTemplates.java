@@ -34,6 +34,8 @@ public class CodeTemplates extends TemplateSet {
 	public static final String METHODSTUB= "methodbody"; //$NON-NLS-1$	
 	public static final String NEWTYPE= "newtype"; //$NON-NLS-1$	
 	public static final String CONSTRUCTORSTUB= "constructorbody"; //$NON-NLS-1$
+	public static final String GETTERSTUB= "getterbody"; //$NON-NLS-1$
+	public static final String SETTERSTUB= "setterbody"; //$NON-NLS-1$
 	public static final String TYPECOMMENT= "type" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String METHODCOMMENT= "method" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String CONSTRUCTORCOMMENT= "constructor" + COMMENT_SUFFIX; //$NON-NLS-1$
@@ -64,7 +66,7 @@ public class CodeTemplates extends TemplateSet {
 	
 	private void create() {
 		try {
-			addFromStream(getDefaultsAsStream(), false);
+			addFromStream(getDefaultsAsStream(), false, true);
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
 				addFromFile(templateFile, false);
@@ -95,7 +97,7 @@ public class CodeTemplates extends TemplateSet {
 	 */
 	public void restoreDefaults() throws CoreException {
 		clear();
-		addFromStream(getDefaultsAsStream(), false);
+		addFromStream(getDefaultsAsStream(), false, true);
 	}
 
 	/**

@@ -272,6 +272,49 @@ public class StubUtility {
 		return str;
 	}
 	
+	public static String getGetterMethodBodyContent(IJavaProject project, String destTypeName, String methodName, String fieldName, String lineDelimiter) throws CoreException {
+		String templateName= CodeTemplates.GETTERSTUB;
+		Template template= CodeTemplates.getCodeTemplate(templateName);
+		if (template == null) {
+			return null;
+		}
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
+		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
+		
+		TemplateBuffer buffer= context.evaluate(template);
+		if (buffer == null)
+			return null;
+		String str= buffer.getString();
+		if (Strings.containsOnlyWhitespaces(str)) {
+			return null;
+		}
+		return str;
+	}
+	
+	public static String getSetterMethodBodyContent(IJavaProject project, String destTypeName, String methodName, String fieldName, String paramName, String lineDelimiter) throws CoreException {
+		String templateName= CodeTemplates.SETTERSTUB;
+		Template template= CodeTemplates.getCodeTemplate(templateName);
+		if (template == null) {
+			return null;
+		}
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
+		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
+		context.setVariable(CodeTemplateContextType.PARAM, paramName);
+		
+		TemplateBuffer buffer= context.evaluate(template);
+		if (buffer == null)
+			return null;
+		String str= buffer.getString();
+		if (Strings.containsOnlyWhitespaces(str)) {
+			return null;
+		}
+		return str;
+	}
+	
 	public static String getCatchBodyContent(ICompilationUnit cu, String exceptionType, String variableName, String lineDelimiter) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK);
 		if (template != null) {

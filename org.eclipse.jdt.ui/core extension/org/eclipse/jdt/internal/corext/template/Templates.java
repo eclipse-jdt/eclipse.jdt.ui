@@ -51,7 +51,7 @@ public class Templates extends TemplateSet {
 			if (templateFile.exists()) {
 				addFromFile(templateFile, true);
 			} else {
-				addFromStream(getDefaultsAsStream(), true);
+				addFromStream(getDefaultsAsStream(), true, true);
 				saveToFile(templateFile);
 			}
 
@@ -79,7 +79,7 @@ public class Templates extends TemplateSet {
 	 */
 	public void restoreDefaults() throws CoreException {
 		clear();
-		addFromStream(getDefaultsAsStream(), true);
+		addFromStream(getDefaultsAsStream(), true, true);
 	}
 
 	/**

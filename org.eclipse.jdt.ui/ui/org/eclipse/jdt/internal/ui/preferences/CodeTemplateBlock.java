@@ -165,6 +165,10 @@ public class CodeTemplateBlock {
 				return PreferencesMessages.getString("CodeTemplateBlock.methodstub.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.CONSTRUCTORSTUB.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.constructorstub.label"); //$NON-NLS-1$
+			} else if (CodeTemplates.GETTERSTUB.equals(name)) {
+				return PreferencesMessages.getString("CodeTemplateBlock.getterstub.label"); //$NON-NLS-1$
+			} else if (CodeTemplates.SETTERSTUB.equals(name)) {
+				return PreferencesMessages.getString("CodeTemplateBlock.setterstub.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.NEWTYPE.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.newtype.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.TYPECOMMENT.equals(name)) {

@@ -138,4 +138,40 @@ public class CodeGeneration {
 		return StubUtility.getMethodBodyContent(isConstructor, cu.getJavaProject(), declaringTypeName, methodName, bodyStatement, lineDelimiter);
 	}
 	
+	/**
+	 * Returns the content of body for a getter method using the getter method body template.
+	 * <code>null</code> is returned if the template is empty.
+	 * <p>The returned string is unformatted and not indented.
+	 * 
+	 * @param cu The compilation unit to which the method belongs. The compilation unit does not need to exist.
+	 * @param declaringTypeName Name of the type to which the method belongs. For inner types the name must be qualified and include the outer
+	 * types names (dot separated).
+	 * @param methodName The name of the getter method.
+	 * @param fieldName The name of the field to be set in the setter method, corresponding to the template variable for ${field}. 
+	 * @return String Returns the constructed body content or <code>null</code> if
+	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
+	 * @throws CoreException
+	 */	
+	public static String getGetterMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String lineDelimiter) throws CoreException {
+		return StubUtility.getGetterMethodBodyContent(cu.getJavaProject(), declaringTypeName, methodName, fieldName, lineDelimiter);
+	}
+	
+	/**
+	 * Returns the content of body for a setter method using the setter method body template.
+	 * <code>null</code> is returned if the template is empty.
+	 * <p>The returned string is unformatted and not indented.
+	 * 
+	 * @param cu The compilation unit to which the method belongs. The compilation unit does not need to exist.
+	 * @param declaringTypeName Name of the type to which the method belongs. For inner types the name must be qualified and include the outer
+	 * types names (dot separated).
+	 * @param methodName The name of the setter method.
+	 * @param fieldName The name of the field to be set in the setter method, corresponding to the template variable for ${field}. 
+	 * @param paramName The parameter passed to the setter method, corresponding to the template variable for $(param).
+	 * @return String Returns the constructed body content or <code>null</code> if
+	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
+	 * @throws CoreException
+	 */	
+	public static String getSetterMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String paramName, String lineDelimiter) throws CoreException {
+		return StubUtility.getSetterMethodBodyContent(cu.getJavaProject(), declaringTypeName, methodName, fieldName, paramName, lineDelimiter);
+	}	
 }

@@ -33,6 +33,8 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String CATCHBLOCK_CONTEXTTYPE= "catchblock_context"; //$NON-NLS-1$
 	public static final String METHODBODY_CONTEXTTYPE= "methodbody_context"; //$NON-NLS-1$
 	public static final String CONSTRUCTORBODY_CONTEXTTYPE= "constructorbody_context"; //$NON-NLS-1$
+	public static final String GETTERBODY_CONTEXTTYPE= "getterbody_context"; //$NON-NLS-1$
+	public static final String SETTERBODY_CONTEXTTYPE= "setterbody_context"; //$NON-NLS-1$
 	public static final String NEWTYPE_CONTEXTTYPE= "newtype_context"; //$NON-NLS-1$
 	public static final String TYPECOMMENT_CONTEXTTYPE= "typecomment_context"; //$NON-NLS-1$
 	public static final String METHODCOMMENT_CONTEXTTYPE= "methodcomment_context"; //$NON-NLS-1$
@@ -44,6 +46,8 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String ENCLOSING_METHOD= "enclosing_method"; //$NON-NLS-1$
 	public static final String ENCLOSING_TYPE= "enclosing_type"; //$NON-NLS-1$
 	public static final String BODY_STATEMENT= "body_statement"; //$NON-NLS-1$
+	public static final String FIELD= "field"; //$NON-NLS-1$
+	public static final String PARAM= "param"; //$NON-NLS-1$
 	public static final String RETURN_TYPE= "return_type"; //$NON-NLS-1$
 	public static final String SEE_TAG= "see_to_overridden"; //$NON-NLS-1$
 	
@@ -116,7 +120,16 @@ public class CodeTemplateContextType extends ContextType {
 			addVariable(new CodeTemplateVariable(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement"))); //$NON-NLS-1$
 		} else if (CONSTRUCTORBODY_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addVariable(new CodeTemplateVariable(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement")));			 //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement"))); //$NON-NLS-1$
+		} else if (GETTERBODY_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.field"))); //$NON-NLS-1$
+		} else if (SETTERBODY_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.field"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(PARAM, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.param"))); //$NON-NLS-1$
 		} else if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(TYPENAME,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typename"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(PACKAGE_DECLARATION,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.packdeclaration"))); //$NON-NLS-1$
@@ -190,6 +203,8 @@ public class CodeTemplateContextType extends ContextType {
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.CATCHBLOCK_CONTEXTTYPE));
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.METHODBODY_CONTEXTTYPE));
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORBODY_CONTEXTTYPE));
+		registry.add(new CodeTemplateContextType(CodeTemplateContextType.GETTERBODY_CONTEXTTYPE));
+		registry.add(new CodeTemplateContextType(CodeTemplateContextType.SETTERBODY_CONTEXTTYPE));		
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.NEWTYPE_CONTEXTTYPE));
 		
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.TYPECOMMENT_CONTEXTTYPE));

@@ -27,10 +27,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.Serializer;
 import org.apache.xml.serialize.SerializerFactory;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -39,6 +35,9 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -73,7 +72,7 @@ public class TemplateSet {
 
 		try {
 			stream= new FileInputStream(file);
-			addFromStream(stream, allowDuplicates);
+			addFromStream(stream, allowDuplicates, false);
 
 		} catch (IOException e) {
 			throwReadException(e);
@@ -94,7 +93,7 @@ public class TemplateSet {
 	/**
 	 * Reads templates from a XML stream and adds them to the templates
 	 */	
-	public void addFromStream(InputStream stream, boolean allowDuplicates) throws CoreException {
+	public void addFromStream(InputStream stream, boolean allowDuplicates, boolean doTranslations) throws CoreException {
 		try {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			DocumentBuilder parser= factory.newDocumentBuilder();		
@@ -112,6 +111,9 @@ public class TemplateSet {
 
 				String name= getAttributeValue(attributes, NAME_ATTRIBUTE);
 				String description= getAttributeValue(attributes, DESCRIPTION_ATTRIBUTE);
+				if (doTranslations) {
+					description= translateString(description);
+				} 
 				String context= getAttributeValue(attributes, CONTEXT_ATTRIBUTE);
 				Node enabledNode= attributes.getNamedItem(ENABLED_ATTRIBUTE);
 
@@ -128,6 +130,9 @@ public class TemplateSet {
 						buffer.append(value);
 				}
 				String pattern= buffer.toString().trim();
+				if (doTranslations) {
+					pattern= translateString(pattern);
+				}				
 
 				Template template= new Template(name, description, context, pattern);
 				
@@ -154,6 +159,26 @@ public class TemplateSet {
 		}
 	}
 	
+	private String translateString(String str) {
+		int idx= str.indexOf('%');
+		if (idx == -1) {
+			return str;
+		}
+		StringBuffer buf= new StringBuffer();
+		int k= 0;
+		while (idx != -1) {
+			buf.append(str.substring(k, idx));
+			for (k= idx + 1; k < str.length() && !Character.isWhitespace(str.charAt(k)); k++) {
+				// loop
+			}
+			String key= str.substring(idx + 1, k);
+			buf.append(TemplateMessages.getString(key));
+			idx= str.indexOf('%', k);
+		}
+		buf.append(str.substring(k));
+		return buf.toString();
+	}
+	
 	protected String validateTemplate(Template template) throws CoreException {
 		ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
 		if (type == null) {
@@ -161,8 +186,6 @@ public class TemplateSet {
 		}
 		return type.validate(template.getPattern());
 	}
-	
-
 	
 	private String getAttributeValue(NamedNodeMap attributes, String name) {
 		Node node= attributes.getNamedItem(name);
