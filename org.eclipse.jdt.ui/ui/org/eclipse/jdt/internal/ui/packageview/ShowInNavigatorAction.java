@@ -36,9 +36,9 @@ import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 /**
  * Show the current selection in the Navigator view 
  */
-public class ShowInNavigator extends SelectionProviderAction {
+public class ShowInNavigatorAction extends SelectionProviderAction {
 	
-	public ShowInNavigator(ISelectionProvider viewer) {
+	public ShowInNavigatorAction(ISelectionProvider viewer) {
 		super(viewer, "Show in &Navigator");
 		setDescription("Show the selected object(s) in the navigator view");
 	}

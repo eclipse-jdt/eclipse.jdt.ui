@@ -297,7 +297,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		ISelectionProvider provider= getSelectionProvider();
 		fOpenCUAction= new OpenResourceAction(provider);
 		fPropertyDialogAction= new PropertyDialogAction(getShell(), provider);
-		fShowNavigatorAction= new ShowInNavigator(provider);
+		fShowNavigatorAction= new ShowInNavigatorAction(provider);
 		
 		fStandardGroups= new ContextMenuGroup[] {
 			new NewGroup(),
