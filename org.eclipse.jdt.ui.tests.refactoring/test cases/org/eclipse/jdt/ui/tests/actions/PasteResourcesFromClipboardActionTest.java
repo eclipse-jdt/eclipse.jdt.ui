@@ -193,8 +193,8 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		checkEnabled(new Object[]{fCuA}, new Object[]{fAnotherProject});
 		checkEnabled(new Object[]{fCuA}, new Object[]{MySetup.getProject()});
 		checkEnabled(new Object[]{fCuA}, new Object[]{getRoot()});
+		checkEnabled(new Object[]{fCuA}, new Object[]{fCuA});
 		
-		checkDisabled(new Object[]{fCuA}, new Object[]{fCuA});
 		checkDisabled(new Object[]{fCuA}, new Object[]{faTxt});
 	}
 	

@@ -212,7 +212,7 @@ public class ReorgTests extends RefactoringTest {
 			folder= createFolder("f");
 			
 			CopyRefactoring copyRef= new CopyRefactoring(elements);
-			assertEquals("copy0", false, copyRef.isValidDestination(cu));
+			assertEquals("copy0", true, copyRef.isValidDestination(cu));
 			assertEquals("copy1", true, copyRef.isValidDestination(p1));
 			assertEquals("copy2", true, copyRef.isValidDestination(getPackageP()));
 			assertEquals("copy3", true, copyRef.isValidDestination(getRoot()));
@@ -254,8 +254,8 @@ public class ReorgTests extends RefactoringTest {
 			
 			p1= getRoot().createPackageFragment("p1", false, null);
 			CopyRefactoring copyRef= new CopyRefactoring(elements);
-			assertEquals("copy0", false, copyRef.isValidDestination(cu));
-			assertEquals("copy0a", false, copyRef.isValidDestination(cu2));
+			assertEquals("copy0", true, copyRef.isValidDestination(cu));
+			assertEquals("copy0a", true, copyRef.isValidDestination(cu2));
 			assertEquals("copy1", true, copyRef.isValidDestination(p1));
 			assertEquals("copy2", true, copyRef.isValidDestination(getPackageP()));
 			assertEquals("copy3", true, copyRef.isValidDestination(getRoot()));
@@ -300,8 +300,8 @@ public class ReorgTests extends RefactoringTest {
 			
 			p1= getRoot().createPackageFragment("p1", false, null);
 			CopyRefactoring copyRef= new CopyRefactoring(elements);
-			assertEquals("copy0", false, copyRef.isValidDestination(cu));
-			assertEquals("copy0a", false, copyRef.isValidDestination(cu2));
+			assertEquals("copy0", true, copyRef.isValidDestination(cu));
+			assertEquals("copy0a", true, copyRef.isValidDestination(cu2));
 			assertEquals("copy1", true, copyRef.isValidDestination(p1));
 			assertEquals("copy2", true, copyRef.isValidDestination(getPackageP()));
 			assertEquals("copy3", true, copyRef.isValidDestination(getRoot()));
