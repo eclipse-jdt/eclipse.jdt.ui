@@ -1590,7 +1590,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_LINK_COLOR= "linkColor"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether hover tooltips in the editor are turned on or off.
+	 * A named preference that controls whether hover tool tips in the editor are turned on or off.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -1610,7 +1610,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI
 	 * @since 2.1
-	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_NONE_HOVER= "noneHover"; //$NON-NLS-1$
 
@@ -1626,7 +1626,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI
 	 * @since 2.1
-	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_CTRL_HOVER= "ctrlHover"; //$NON-NLS-1$
 	
@@ -1642,7 +1642,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI ID_*_HOVER
 	 * @since 2.1
-	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_SHIFT_HOVER= "shiftHover"; //$NON-NLS-1$
 
@@ -1658,6 +1658,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI ID_*_HOVER
 	 * @since 2.1
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_CTRL_ALT_HOVER= "ctrlAltHover"; //$NON-NLS-1$
 
@@ -1673,6 +1674,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI ID_*_HOVER
 	 * @since 2.1
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_CTRL_ALT_SHIFT_HOVER= "ctrlAltShiftHover"; //$NON-NLS-1$
 
@@ -1703,7 +1705,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_NO_HOVER_CONFIGURED_ID
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI ID_*_HOVER
-	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 * @since 2.1
 	 */
 	public static final String EDITOR_ALT_SHIFT_HOVER= "altShiftHover"; //$NON-NLS-1$
@@ -1711,7 +1713,7 @@ public class PreferenceConstants {
 	/**
 	 * A string value used by the named preferences for hover configuration to
 	 * describe that no hover should be shown for the given key modifiers.
-	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 * @since 2.1
 	 */
 	public static final String EDITOR_NO_HOVER_CONFIGURED_ID= "noHoverConfiguredId"; //$NON-NLS-1$
@@ -1722,7 +1724,7 @@ public class PreferenceConstants {
 	 * modifiers. The default hover is described by the
 	 * <code>EDITOR_DEFAULT_HOVER</code> property.
 	 * @since 2.1
-	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_DEFAULT_HOVER_CONFIGURED_ID= "defaultHoverConfiguredId"; //$NON-NLS-1$
 
@@ -1733,7 +1735,7 @@ public class PreferenceConstants {
 	 * contributed as <code>javaEditorTextHovers</code>.
 	 * </p>
 	 * @since 2.1
-	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_DEFAULT_HOVER= "defaultHover"; //$NON-NLS-1$
 
