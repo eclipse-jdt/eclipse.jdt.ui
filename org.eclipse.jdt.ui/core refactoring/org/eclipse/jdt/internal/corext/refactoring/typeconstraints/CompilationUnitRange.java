@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -26,6 +27,8 @@ public final class CompilationUnitRange {
 	private final ISourceRange fSourceRange;
 
 	public CompilationUnitRange(ICompilationUnit unit, ISourceRange range) {
+		Assert.isNotNull(unit);
+		Assert.isNotNull(range);
 		fCompilationUnit= unit;
 		fSourceRange= range;
 	}
