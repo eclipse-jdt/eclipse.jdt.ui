@@ -340,8 +340,8 @@ public class LocalCorrectionsSubProcessor {
 			} else {
 				List statements= tryStatement.getBody().statements();
 				if (statements.size() > 0) {
-					ASTNode placeholder= rewrite.createCopy((ASTNode) statements.get(0), (ASTNode) statements.get(statements.size() - 1));
-					rewrite.markAsReplaced(tryStatement, placeholder);
+					ASTNode placeholder= rewrite.collapseNodes(statements, 0, statements.size());
+					rewrite.markAsReplaced(tryStatement, rewrite.createCopy(placeholder));
 				} else {
 					rewrite.markAsRemoved(tryStatement);
 				}

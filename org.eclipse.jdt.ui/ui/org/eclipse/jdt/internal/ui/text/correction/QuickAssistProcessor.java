@@ -124,8 +124,8 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		} else {
 			List statements= tryStatement.getBody().statements();
 			if (statements.size() > 0) {
-				ASTNode placeholder= rewrite.createCopy((ASTNode) statements.get(0), (ASTNode) statements.get(statements.size() - 1));
-				rewrite.markAsReplaced(tryStatement, placeholder);
+				ASTNode placeholder= rewrite.collapseNodes(statements, 0, statements.size());
+				rewrite.markAsReplaced(tryStatement, rewrite.createCopy(placeholder));
 			} else {
 				rewrite.markAsRemoved(tryStatement);
 			}
@@ -182,7 +182,8 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 			if (nStatements == 1) {
 				return rewrite.createCopy((ASTNode) innerStatements.get(0));
 			} else if (nStatements > 1) {
-				return rewrite.createCopy((ASTNode) innerStatements.get(0), (ASTNode) innerStatements.get(nStatements - 1));
+				ASTNode placeholder= rewrite.collapseNodes(innerStatements, 0, nStatements);
+				return rewrite.createCopy(placeholder);
 			}
 			return null;
 		} else {

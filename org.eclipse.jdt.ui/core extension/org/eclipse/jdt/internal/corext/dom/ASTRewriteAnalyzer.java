@@ -817,10 +817,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	public void postVisit(ASTNode node) {
 		TextEdit edit= (TextEdit) fRewrite.getCopySourceEdit(node);
 		if (edit != null) {
-			int endPos= node.getStartPosition() + node.getLength();
-			if (edit.getTextRange().getExclusiveEnd() == endPos) {
-				fCurrentEdit= fCurrentEdit.getParent();
-			}
+			fCurrentEdit= fCurrentEdit.getParent();
 		}
 	}
 
@@ -829,7 +826,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 */
 	public void preVisit(ASTNode node) {
 		TextEdit edit= (TextEdit) fRewrite.getCopySourceEdit(node);
-		if (edit != null && edit.getTextRange().getOffset() == node.getStartPosition()) {
+		if (edit != null) {
 			fCurrentEdit.add(edit);
 			fCurrentEdit= edit;
 		}

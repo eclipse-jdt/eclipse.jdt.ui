@@ -56,7 +56,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMoveCodeTest("testReplaceCollapsed"));
+			suite.addTest(new ASTRewritingMoveCodeTest("testCopyRangeAndReplace"));
 			return suite;
 		}
 	}
@@ -642,9 +642,9 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			List statements= methodDecl.getBody().statements();
 			IfStatement ifStatement= (IfStatement) statements.get(0);
 			List ifStatementBody= ((Block) ifStatement.getThenStatement()).statements();
-			ASTNode first= (ASTNode) ifStatementBody.get(0);
-			ASTNode last= (ASTNode) ifStatementBody.get(ifStatementBody.size() - 1);
-			ASTNode placeholder= rewrite.createCopy(first, last);
+			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
+
+			ASTNode placeholder= rewrite.createCopy(collapsed);
 			
 			rewrite.markAsInserted(placeholder);
 			
@@ -700,9 +700,12 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			List statements= methodDecl.getBody().statements();
 			IfStatement ifStatement= (IfStatement) statements.get(0);
 			List ifStatementBody= ((Block) ifStatement.getThenStatement()).statements();
-			ASTNode first= (ASTNode) ifStatementBody.get(0);
+			
 			ASTNode last= (ASTNode) ifStatementBody.get(ifStatementBody.size() - 1);
-			ASTNode placeholder= rewrite.createCopy(first, last);
+			
+			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
+
+			ASTNode placeholder= rewrite.createCopy(collapsed);			
 			
 			ReturnStatement returnStatement= ast.newReturnStatement();
 			rewrite.markAsReplaced(last, returnStatement);

@@ -302,31 +302,6 @@ public final class ASTRewrite {
 		return (List) compoundNode.getProperty(COMPOUND_CHILDREN);
 	}
 	
-	/**
-	 * Creates a target node for a node to be moved or copied. A target node can be inserted or used
-	 * to replace at the target position. 
-	 */
-	public final ASTNode createCopy(ASTNode startNode, ASTNode endNode) {
-		Assert.isTrue(startNode.getStartPosition() != -1, "Tries to copy a non-existing node"); //$NON-NLS-1$
-		Assert.isTrue(endNode.getStartPosition() != -1, "Tries to copy a non-existing node"); //$NON-NLS-1$
-		Assert.isTrue(getCopySourceEdit(startNode) == null, "Start node used as more than one copy source "); //$NON-NLS-1$
-		Assert.isTrue(getCopySourceEdit(endNode) == null, "End node used as more than one copy source "); //$NON-NLS-1$
-		Assert.isTrue(startNode.getParent() == endNode.getParent(), "Nodes must have same parent"); //$NON-NLS-1$
-		assertIsInside(startNode);
-		assertIsInside(endNode);
-		int start= startNode.getStartPosition();
-		int end= endNode.getStartPosition() + endNode.getLength();
-		Assert.isTrue(start < end, "Start node must have smaller offset than end node"); //$NON-NLS-1$
-
-		Object copySource= ASTRewriteAnalyzer.createSourceCopy(start, end - start);
-		setCopySourceEdit(startNode, copySource);
-		setCopySourceEdit(endNode, copySource);
-		int placeHolderType= getPlaceholderType(startNode);
-		if (placeHolderType == UNKNOWN) {
-			Assert.isTrue(false, "Can not create copy for elements of type " + startNode.getClass().getName()); //$NON-NLS-1$
-		}		
-		return ASTWithExistingFlattener.createPlaceholder(startNode.getAST(), startNode, placeHolderType);
-	}	
 	
 	/**
 	 * Creates a target node for a source string to be inserted without being formatted. A target node can
