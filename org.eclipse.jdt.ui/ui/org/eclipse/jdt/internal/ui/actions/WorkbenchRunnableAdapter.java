@@ -16,12 +16,17 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * An <code>IRunnableWithProgress</code> that adapts and  <code>IWorkspaceRunnable</code>
@@ -60,6 +65,40 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 			throw new InvocationTargetException(e);
 		}
 	}
+	
+	public void runAsUserJob(String name, final Object jobFamiliy) {
+		Job buildJob = new Job(name){ 
+			/* (non-Javadoc)
+			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+			 */
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					WorkbenchRunnableAdapter.this.run(monitor);
+				} catch (InvocationTargetException e) {
+					Throwable cause= e.getCause();
+					if (cause instanceof CoreException) {
+						return ((CoreException) cause).getStatus();
+					} else {
+						return JavaUIStatus.createError(IStatus.ERROR, cause);
+					}
+				} catch (InterruptedException e) {
+					return Status.CANCEL_STATUS;
+				} finally {
+					monitor.done();
+				}
+				return Status.OK_STATUS;
+			}
+			public boolean belongsTo(Object family) {
+				return jobFamiliy == family;
+			}
+		};
+		buildJob.setRule(fRule);
+		buildJob.setUser(true); 
+		buildJob.schedule();
+		
+		// TODO: should block until user pressed 'to background'
+	}
+
 
 }
 
