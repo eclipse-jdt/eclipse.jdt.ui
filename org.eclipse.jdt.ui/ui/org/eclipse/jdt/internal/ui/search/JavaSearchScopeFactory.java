@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -60,6 +61,11 @@ public class JavaSearchScopeFactory {
 			Set javaElements= new HashSet(((IStructuredSelection)selection).size());
 			while (iter.hasNext()) {
 				Object selectedElement= iter.next();
+
+				// Unpack search result view entry
+				if (selectedElement instanceof ISearchResultViewEntry)
+					selectedElement= ((ISearchResultViewEntry)selectedElement).getGroupByKey();
+				
 				if (selectedElement instanceof IJavaElement)
 					addJavaElements(javaElements, (IJavaElement)selectedElement);
 				else if (selectedElement instanceof IResource)
