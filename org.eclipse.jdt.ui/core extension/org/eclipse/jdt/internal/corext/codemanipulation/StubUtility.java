@@ -31,21 +31,7 @@ import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.*;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -89,6 +75,7 @@ public class StubUtility {
 	 * method, a stub with the same signature will be constructed so it can be
 	 * added to a type. The method body will be empty or contain a return or
 	 * super call.
+	 * @param cu The cu to create the source for
 	 * @param destTypeName The name of the type to which the method will be
 	 * added to
 	 * @param method A method template (method belongs to different type than the parent)
@@ -96,6 +83,8 @@ public class StubUtility {
 	 * @param settings Options as defined above (<code>GenStubSettings</code>)
 	 * @param imports Imports required by the stub are added to the imports structure. If imports structure is <code>null</code>
 	 * all type names are qualified.
+	 * @return The generated code
+	 * @throws CoreException
 	 * @throws JavaModelException
 	 */
 	public static String genStub(ICompilationUnit cu, String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws CoreException {
@@ -152,6 +141,7 @@ public class StubUtility {
 	 * structure. If imports structure is <code>null</code> all type names are
 	 * qualified.
 	 * @param buf The buffer to append the gerenated code.
+	 * @throws CoreException
 	 * @throws JavaModelException
 	 */
 	public static void genMethodDeclaration(String destTypeName, IMethod method, String bodyContent, IImportsStructure imports, StringBuffer buf) throws CoreException {
@@ -165,11 +155,13 @@ public class StubUtility {
 	 * @param destTypeName The name of the type to which the method will be
 	 * added to
 	 * @param method A method template (method belongs to different type than the parent)
+	 * @param flags
 	 * @param bodyContent Content of the body
 	 * @param imports Imports required by the stub are added to the imports
 	 * structure. If imports structure is <code>null</code> all type names are
 	 * qualified.
 	 * @param buf The buffer to append the gerenated code.
+	 * @throws CoreException
 	 * @throws JavaModelException
 	 */
 	public static void genMethodDeclaration(String destTypeName, IMethod method, int flags, String bodyContent, IImportsStructure imports, StringBuffer buf) throws CoreException {
@@ -354,7 +346,7 @@ public class StubUtility {
 		return evaluateTemplate(context, template);
 	}		
 	
-	/**
+	/*
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String)
 	 */	
 	public static String getCompilationUnitContent(ICompilationUnit cu, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
@@ -442,7 +434,7 @@ public class StubUtility {
 		return buf.toString();
 	}
 	
-	/**
+	/*
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(IMethod,IMethod,String)
 	 */
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
@@ -453,7 +445,7 @@ public class StubUtility {
 			method.getElementName(), paramNames, method.getExceptionTypes(), retType, overridden, lineDelimiter);
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, IMethod, String)
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden, String lineDelimiter) throws CoreException {
@@ -530,7 +522,7 @@ public class StubUtility {
 	}	
 	
 	
-	/**
+	/*
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getSetterComment(ICompilationUnit, String, String, String, String, String, String, String)
 	 */
 	public static String getSetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter) throws CoreException {
@@ -552,7 +544,7 @@ public class StubUtility {
 		return evaluateTemplate(context, template);
 	}	
 	
-	/**
+	/*
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getGetterComment(ICompilationUnit, String, String, String, String, String, String)
 	 */
 	public static String getGetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
@@ -590,7 +582,7 @@ public class StubUtility {
 		return str;
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, IMethodBinding, String)
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
@@ -617,6 +609,7 @@ public class StubUtility {
 	 * method (if any exists) in declared. If isOverridden is <code>false</code>, this is ignored.
 	 * @param parameterTypesQualifiedNames Fully qualified names of parameter types of the type in which the overriddden 
 	 * method (if any exists) in declared. If isOverridden is <code>false</code>, this is ignored.
+	 * @param lineDelimiter The line delimiter to use
 	 * @return String Returns the method comment or <code>null</code> if the
 	 * configured template is empty. 
 	 * (formatting required)
@@ -743,34 +736,66 @@ public class StubUtility {
 	
 	private static boolean isPrimitiveType(String typeName) {
 		char first= Signature.getElementType(typeName).charAt(0);
-		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
+		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_TYPE_VARIABLE);
 	}
 
 	private static String resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
-		String[] typeParameters= Signature.getTypeParameters(refTypeSig);
-		if (typeParameters.length > 0) {
-			// see bug 68847 
-		}
-		String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
-		if (resolvedTypeName != null) {
+		int genericStart = refTypeSig.indexOf(Signature.C_GENERIC_START);
+		if (genericStart != -1) {
+			// generic type
 			StringBuffer buf= new StringBuffer();
-			if (imports != null) {
-				buf.append(imports.addImport(resolvedTypeName));
-			} else {
-				buf.append(resolvedTypeName);
+			
+			String erasure= resolveAndAdd(Signature.getTypeErasure(refTypeSig), declaringType, imports);
+			buf.append(erasure);
+			buf.append('<');
+			String[] typeArguments= Signature.getTypeArguments(refTypeSig);
+			if (typeArguments.length > 0) {
+				for (int i= 0; i < typeArguments.length; i++) {
+					if (i > 0) {
+						buf.append(", "); //$NON-NLS-1$
+					}
+					buf.append(resolveAndAdd(typeArguments[i], declaringType, imports));
+				}
 			}
-			int arrayCount= Signature.getArrayCount(refTypeSig);
-			for (int i= 0; i < arrayCount; i++) {
-				buf.append("[]"); //$NON-NLS-1$
-			}
+			buf.append('>');
 			return buf.toString();
+		}
+		if (refTypeSig.length() > 0) {
+			switch (refTypeSig.charAt(0)) {
+				case Signature.C_ARRAY :
+					int arrayCount= Signature.getArrayCount(refTypeSig);
+					StringBuffer buf= new StringBuffer();
+					buf.append(resolveAndAdd(Signature.getElementType(refTypeSig), declaringType, imports));
+					for (int i= 0; i < arrayCount; i++) {
+						buf.append("[]"); //$NON-NLS-1$
+					}
+					return buf.toString();
+				case Signature.C_RESOLVED:
+				case Signature.C_UNRESOLVED:
+					String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
+					if (resolvedTypeName != null) {
+						if (imports == null) {
+							return resolvedTypeName;
+						} else {
+							return imports.addImport(resolvedTypeName);
+						}
+					}
+					break;
+				case Signature.C_EXTENDS:
+					return "? extends " + resolveAndAdd(refTypeSig.substring(1), declaringType, imports); //$NON-NLS-1$
+				case Signature.C_SUPER:
+					return "? super " + resolveAndAdd(refTypeSig.substring(1), declaringType, imports); //$NON-NLS-1$
+			}
 		}
 		return Signature.toString(refTypeSig);
 	}
 		
 	/**
 	 * Finds a method in a list of methods.
+	 * @param method
+	 * @param allMethods
 	 * @return The found method or null, if nothing found
+	 * @throws JavaModelException
 	 */
 	private static IMethod findMethod(IMethod method, List allMethods) throws JavaModelException {
 		String name= method.getElementName();
@@ -793,6 +818,7 @@ public class StubUtility {
 	 * @param settings Options for comment generation
 	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
+	 * @throws CoreException
 	 */
 	public static String[] evalConstructors(IType type, IType supertype, CodeGenerationSettings settings, IImportsStructure imports) throws CoreException {
 		IMethod[] superMethods= supertype.getMethods();
@@ -821,6 +847,7 @@ public class StubUtility {
 	 * constructors if there are no other superclass constructors unimplemented. 
 	 * @param type The type to create constructors for
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
+	 * @throws CoreException
 	 */
 	public static IMethod[] getOverridableConstructors(IType type) throws CoreException {
 		List constructorMethods= new ArrayList();
@@ -862,6 +889,7 @@ public class StubUtility {
  	 * @param isSubType If set, the result can include methods of the passed type, if not only methods from super
 	 * types are considered
 	 * @return Returns the all methods that can be overridden
+	 * @throws JavaModelException
 	 */
 	public static IMethod[] getOverridableMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType) throws JavaModelException {
 		List allMethods= new ArrayList();
@@ -943,6 +971,7 @@ public class StubUtility {
 	 * @param settings Options for comment generation
 	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
 	 * @return Returns the generated stubs
+	 * @throws CoreException
 	 */
 	public static String[] genOverrideStubs(IMethod[] methodsToImplement, IType type, ITypeHierarchy hierarchy, CodeGenerationSettings settings, IImportsStructure imports) throws CoreException {
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
@@ -967,11 +996,14 @@ public class StubUtility {
 	}
 	/**
 	 * Searches for unimplemented methods of a type.
+	 * @param type
+	 * @param hierarchy
 	 * @param isSubType If set, the evaluation is for a subtype of the given type. If not set, the
 	 * evaluation is for the type itself.
 	 * @param settings Options for comment generation
 	 * @param imports Required imports are added to the import structure. Structure can be <code>null</code>, types are qualified then.
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
+	 * @throws CoreException
 	 */
 	public static String[] evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, 
 			IImportsStructure imports) throws CoreException {
@@ -991,6 +1023,9 @@ public class StubUtility {
 
 	/**
 	 * Examines a string and returns the first line delimiter found.
+	 * @param elem
+	 * @return
+	 * @throws JavaModelException
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
@@ -1017,6 +1052,8 @@ public class StubUtility {
 	/**
 	 * Embodies the policy which line delimiter to use when inserting into
 	 * a document.
+	 * @param doc
+	 * @return The line delimiter
 	 */	
 	public static String getLineDelimiterFor(IDocument doc) {
 		// new for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
@@ -1044,6 +1081,9 @@ public class StubUtility {
 
 	/**
 	 * Evaluates the indention used by a Java element. (in tabulators)
+	 * @param elem
+	 * @return
+	 * @throws JavaModelException
 	 */	
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {
@@ -1064,6 +1104,9 @@ public class StubUtility {
 		
 	/**
 	 * Returns the element after the give element.
+	 * @param member
+	 * @return
+	 * @throws JavaModelException
 	 */
 	public static IJavaElement findNextSibling(IJavaElement member) throws JavaModelException {
 		IJavaElement parent= member.getParent();
