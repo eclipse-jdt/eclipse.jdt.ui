@@ -89,7 +89,7 @@ public class ReorgActionFactory {
 				List result= new ArrayList(elements.length);
 				for(int i= 0; i < elements.length; i++){
 					try {
-						result.add(new TypedSource(elements[i]));
+						result.add(TypedSource.create(elements[i]));
 					} catch(JavaModelException e) {
 						//ignore
 					}
