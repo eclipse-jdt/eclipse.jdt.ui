@@ -11,12 +11,10 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.core.resources.IFile;
-
-import org.eclipse.ui.PartInitException;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.core.resources.IFile;
 
 public class MouseScrollJavaEditorTest extends MouseScrollEditorTest {
 
@@ -34,7 +32,11 @@ public class MouseScrollJavaEditorTest extends MouseScrollEditorTest {
 		return ResourceTestHelper.findFile(FILE);
 	}
 	
-	public void testMouseScrollJavaEditor1() throws PartInitException {
-		measureScrolling(N_OF_RUNS);
+	public void testThumbScrollJavaEditor1() {
+		measureScrolling(N_OF_RUNS, new ThumbScrollPoster());
+	}
+	
+	public void testAutoScrollJavaEditor1() {
+		measureScrolling(N_OF_RUNS, new AutoScrollPoster());
 	}
 }

@@ -16,8 +16,6 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.ui.PartInitException;
-
 public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 	
 	private static final Class THIS= MouseScrollTextEditorTest.class;
@@ -48,7 +46,11 @@ public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 		return ResourceTestHelper.findFile(FILE);
 	}
 	
-	public void testMouseScrollTextEditor1() throws PartInitException {
-		measureScrolling(N_OF_RUNS);
+	public void testThumbScrollTextEditor1() {
+		measureScrolling(N_OF_RUNS, new ThumbScrollPoster());
+	}
+	
+	public void testAutoScrollTextEditor1() {
+		measureScrolling(N_OF_RUNS, new AutoScrollPoster());
 	}
 }
