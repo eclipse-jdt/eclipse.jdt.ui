@@ -65,15 +65,25 @@ public class ReplaceRewrite {
 	
 	protected void handleManyMany(ASTNode[] replacements, TextEditGroup description) {
 		ListRewrite container= fRewrite.getListRewrite(fToReplace[0].getParent(), (ChildListPropertyDescriptor)fDescriptor);
-		int min= Math.min(fToReplace.length, replacements.length);
-		for (int i= 0; i < min; i++) {
-			container.replace(fToReplace[i], replacements[i], description);
-		}
-		for (int i= min; i < fToReplace.length; i++) {
-			container.remove(fToReplace[i], description);
-		}
-		for (int i= min; i < replacements.length; i++) {
-			container.insertAfter(replacements[i], replacements[i - 1], description);
+		if (fToReplace.length == replacements.length) {
+			for (int i= 0; i < fToReplace.length; i++) {
+				container.replace(fToReplace[i], replacements[i], description);
+			}
+		} else if (fToReplace.length < replacements.length) {
+			for (int i= 0; i < fToReplace.length; i++) {
+				container.replace(fToReplace[i], replacements[i], description);
+			}
+			for (int i= fToReplace.length; i < replacements.length; i++) {
+				container.insertAfter(replacements[i], replacements[i - 1], description);
+			}
+		} else if (fToReplace.length > replacements.length) {
+			int delta= fToReplace.length - replacements.length;
+			for(int i= 0; i < delta; i++) {
+				container.remove(fToReplace[i], description);
+			}
+			for (int i= delta, r= 0; i < fToReplace.length; i++, r++) {
+				container.replace(fToReplace[i], replacements[r], description);
+			}
 		}
 	}
 }
