@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
@@ -158,7 +159,7 @@ public final class MemberVisibilityAdjustor {
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(root);
 			final int visibility= fKeyword != null ? fKeyword.toFlagValue() : Modifier.NONE;
-			if (fMember instanceof IField) {
+			if (fMember instanceof IField && !Flags.isEnum(fMember.getFlags())) {
 				final VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) fMember, root);
 				final FieldDeclaration declaration= (FieldDeclaration) fragment.getParent();
 				if (declaration.fragments().size() == 1)

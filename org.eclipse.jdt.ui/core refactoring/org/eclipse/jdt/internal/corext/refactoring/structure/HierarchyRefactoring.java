@@ -32,6 +32,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
@@ -41,7 +42,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -243,7 +243,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	}
 
 	protected static Expression createPlaceholderForExpression(final Expression expression, final ICompilationUnit declaringCu, final ASTRewrite rewrite) throws JavaModelException {
-		return (Expression) rewrite.createStringPlaceholder(getBufferText(expression, declaringCu), ASTNode.METHOD_INVOCATION);
+		return (Expression) rewrite.createStringPlaceholder(declaringCu.getBuffer().getText(expression.getStartPosition(), expression.getLength()), ASTNode.METHOD_INVOCATION);
 	}
 
 	protected static Expression createPlaceholderForExpression(final Expression expression, final ICompilationUnit declaringCu, final TypeVariableMaplet[] mapping, final ASTRewrite rewrite) throws JavaModelException {
@@ -269,7 +269,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final ASTRewrite rewriter= ASTRewrite.create(bodyDeclaration.getAST());
 			ModifierRewrite.create(rewriter, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
 			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
-			final IDocument document= new Document(getBufferText(declaringCuNode, declaringCu));
+			final IDocument document= new Document(declaringCu.getBuffer().getText(declaringCuNode.getStartPosition(), declaringCuNode.getLength()));
 			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 			text= document.get(position.getStartPosition(), position.getLength());
 		} catch (BadLocationException exception) {
@@ -312,7 +312,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	}
 
 	protected static SingleVariableDeclaration createPlaceholderForSingleVariableDeclaration(final SingleVariableDeclaration declaration, final ICompilationUnit declaringCu, final ASTRewrite rewrite) throws JavaModelException {
-		return (SingleVariableDeclaration) rewrite.createStringPlaceholder(getBufferText(declaration, declaringCu), ASTNode.SINGLE_VARIABLE_DECLARATION);
+		return (SingleVariableDeclaration) rewrite.createStringPlaceholder(declaringCu.getBuffer().getText(declaration.getStartPosition(), declaration.getLength()), ASTNode.SINGLE_VARIABLE_DECLARATION);
 	}
 
 	protected static SingleVariableDeclaration createPlaceholderForSingleVariableDeclaration(final SingleVariableDeclaration declaration, final ICompilationUnit declaringCu, final TypeVariableMaplet[] mapping, final ASTRewrite rewrite) throws JavaModelException {
@@ -333,7 +333,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	}
 
 	protected static Type createPlaceholderForType(final Type type, final ICompilationUnit declaringCu, final ASTRewrite rewrite) throws JavaModelException {
-		return (Type) rewrite.createStringPlaceholder(getBufferText(type, declaringCu), ASTNode.SIMPLE_TYPE);
+		return (Type) rewrite.createStringPlaceholder(declaringCu.getBuffer().getText(type.getStartPosition(), type.getLength()), ASTNode.SIMPLE_TYPE);
 	}
 
 	protected static Type createPlaceholderForType(final Type type, final ICompilationUnit declaringCu, final TypeVariableMaplet[] mapping, final ASTRewrite rewrite) throws JavaModelException {
@@ -405,18 +405,17 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		}
 	}
 
-	protected static String getBufferText(final ASTNode node, final ICompilationUnit declaringCu) throws JavaModelException {
-		return declaringCu.getBuffer().getText(node.getStartPosition(), node.getLength());
-	}
-
 	protected static List getDeclarationNodes(final CompilationUnit cuNode, final List members) throws JavaModelException {
 		final List result= new ArrayList(members.size());
 		for (final Iterator iterator= members.iterator(); iterator.hasNext();) {
 			final IMember member= (IMember) iterator.next();
 			ASTNode node= null;
-			if (member instanceof IField)
-				node= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, cuNode);
-			else if (member instanceof IType)
+			if (member instanceof IField) {
+				if (Flags.isEnum(member.getFlags()))
+					node= ASTNodeSearchUtil.getEnumConstantDeclaration((IField) member, cuNode);
+				else
+					node= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, cuNode);
+			} else if (member instanceof IType)
 				node= ASTNodeSearchUtil.getAbstractTypeDeclarationNode((IType) member, cuNode);
 			else if (member instanceof IMethod)
 				node= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, cuNode);
@@ -427,25 +426,17 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	}
 
 	protected static String getNewText(final ASTNode node, final ICompilationUnit declaringCu, final boolean removeIndentation) throws JavaModelException {
-		final String result= getBufferText(node, declaringCu);
+		final String result= declaringCu.getBuffer().getText(node.getStartPosition(), node.getLength());
 		if (removeIndentation)
 			return getUnindentedText(result, declaringCu);
 
 		return result;
 	}
 
-	protected static String getReturnTypeName(final IMethod method) throws JavaModelException {
-		return Signature.toString(Signature.getReturnType(method.getSignature()).toString());
-	}
-
 	protected static IType getSingleTopLevelType(final IMember[] members) {
 		if (members != null && members.length == 1 && Checks.isTopLevelType(members[0]))
 			return (IType) members[0];
 		return null;
-	}
-
-	protected static String getTypeName(final IField field) throws JavaModelException {
-		return Signature.toString(field.getTypeSignature());
 	}
 
 	protected static String getUnindentedText(final String text, final ICompilationUnit declaringCu) throws JavaModelException {
