@@ -6,13 +6,15 @@
 package org.eclipse.jdt.internal.ui;
 
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import org.eclipse.ui.IContributorResourceAdapter;
 import org.eclipse.ui.IPersistableElement;import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertySource;
-
+import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.eclipse.ui.views.tasklist.ITaskListResourceAdapter;
 
 import org.eclipse.search.ui.ISearchPageScoreComputer;
@@ -89,6 +91,11 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 	}
 
 	private IPropertySource getProperties(IJavaElement element) {
-		return new JavaElementProperties(element);
+		IResource resource= getResource(element);
+		if (resource == null)
+			return new JavaElementProperties(element);
+		if (resource.getType() == IResource.FILE)
+			return new FilePropertySource((IFile) resource);
+		return new ResourcePropertySource((IResource) resource);
 	}
 }
