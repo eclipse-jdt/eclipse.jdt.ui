@@ -212,10 +212,13 @@ public class ReturnTypeSubProcessor {
 			// change to constructor
 			ASTNode parentType= ASTResolving.findParentType(decl);
 			if (parentType instanceof TypeDeclaration) {
-				String constructorName= ((TypeDeclaration) parentType).getName().getIdentifier();
-				ASTNode nameNode= methodDeclaration.getName();
-				label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.wrongconstructorname.description", constructorName); //$NON-NLS-1$		
-				proposals.add(new ReplaceCorrectionProposal(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, 5));
+				TypeDeclaration typeDeclaration= (TypeDeclaration) parentType;
+				if (!typeDeclaration.isInterface()) {
+					String constructorName= ((TypeDeclaration) parentType).getName().getIdentifier();
+					ASTNode nameNode= methodDeclaration.getName();
+					label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.wrongconstructorname.description", constructorName); //$NON-NLS-1$		
+					proposals.add(new ReplaceCorrectionProposal(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, 5));
+				}
 			}			
 		}
 	}
