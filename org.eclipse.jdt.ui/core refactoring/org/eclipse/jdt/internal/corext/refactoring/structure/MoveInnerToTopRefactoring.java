@@ -156,8 +156,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			return result;
 		if (Checks.isTopLevel(fType))
 			return RefactoringStatus.createFatalErrorStatus("This refactoring is available only on nested types.");
-		if (fType.isInterface()) //XXX
-			return RefactoringStatus.createFatalErrorStatus("This refactoring is not available on interfaces.");;
 		return result;
 	}
 
