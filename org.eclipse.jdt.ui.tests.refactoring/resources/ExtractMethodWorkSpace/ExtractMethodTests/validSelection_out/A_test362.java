@@ -7,8 +7,8 @@ public class A_test362 {
 		final int y= 0;
 		extracted(y);
 	}
-	protected A_test362 extracted(final int y) {
-		return /*[*/new A_test362(y){
+	protected void extracted(final int y) {
+		/*[*/new A_test362(y){
 			void f(){
 				int y= 9;
 			}

@@ -3,9 +3,9 @@ package expression_out;
 	class Inner {
 	}
 	public void foo() {
-		Inner inner= /*]*/extracted();/*[*/
+		Inner inner= /*]*/extracted();
 	}
 	protected Inner extracted() {
-		return new Inner();
+		return new Inner()/*]*/;
 	}
 }

@@ -3,6 +3,6 @@ package expression_in;
 	class Inner {
 	}
 	public void foo() {
-		Inner[] inner= /*]*/new Inner[10];/*[*/
+		Inner[] inner= /*]*/new Inner[10]/*]*/;
 	}
 }
