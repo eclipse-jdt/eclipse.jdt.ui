@@ -24,6 +24,8 @@ import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.jdt.core.IMember;
+
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 
@@ -130,6 +132,17 @@ public class ProblemTreeViewer extends TreeViewer {
 	private boolean canIgnoreChangesFromAnnotionModel() {
 		Object contentProvider= getContentProvider();
 		return contentProvider instanceof IWorkingCopyProvider && !((IWorkingCopyProvider)contentProvider).providesWorkingCopies();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang.Object)
+	 */
+	public boolean isExpandable(Object element) {
+		// workaround for 65762
+		if (hasFilters() && element instanceof IMember) {
+			return getFilteredChildren(element).length > 0;
+		}
+		return super.isExpandable(element);
 	}
 }
 
