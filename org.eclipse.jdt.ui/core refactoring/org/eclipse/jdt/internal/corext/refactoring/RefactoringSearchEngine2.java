@@ -142,7 +142,7 @@ public final class RefactoringSearchEngine2 {
 	private IJavaSearchScope fScope= SearchEngine.createWorkspaceScope();
 
 	/** The severity */
-	private int fSeverity= RefactoringStatus.OK;
+	private int fSeverity= RefactoringStatus.WARNING;
 
 	/** The search status */
 	private RefactoringStatus fStatus= new RefactoringStatus();
@@ -498,7 +498,7 @@ public final class RefactoringSearchEngine2 {
 	 * @param severity the severity to set
 	 */
 	public final void setSeverity(final int severity) {
-		Assert.isTrue(severity == RefactoringStatus.OK || severity == RefactoringStatus.WARNING || severity == RefactoringStatus.INFO || severity == RefactoringStatus.FATAL || severity == RefactoringStatus.ERROR);
+		Assert.isTrue(severity == RefactoringStatus.WARNING || severity == RefactoringStatus.INFO || severity == RefactoringStatus.FATAL || severity == RefactoringStatus.ERROR);
 		fSeverity= severity;
 	}
 
