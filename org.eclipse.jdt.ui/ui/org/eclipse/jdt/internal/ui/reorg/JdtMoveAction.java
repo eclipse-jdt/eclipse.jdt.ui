@@ -5,13 +5,10 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,23 +20,16 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.actions.MoveProjectAction;
-import org.eclipse.ui.actions.MoveResourceAction;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
@@ -48,7 +38,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -119,7 +109,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	
 	private static int askIfOverwrite(String elementName){
 		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
-		String title= "Move";
+		String title= RefactoringMessages.getString("JdtMoveAction.move"); //$NON-NLS-1$
 		String question= "Element '" + elementName + "' already exists. Would you like to overwrite?";
 		
 		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL,
@@ -193,7 +183,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 			return;
 		}	
 		//XX incorrect help
-		RefactoringWizard wizard= new RefactoringWizard(refactoring, "Move", IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE);
+		RefactoringWizard wizard= new RefactoringWizard(refactoring, RefactoringMessages.getString("JdtMoveAction.move"), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); //$NON-NLS-1$
 		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();	
 	}
 	
@@ -220,7 +210,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
 			fCheckbox= new Button(result, SWT.CHECK);
-			fCheckbox.setText("Update references to the moved element(s).");
+			fCheckbox.setText(RefactoringMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
 			fCheckbox.setEnabled(canUpdateReferences());
 			fCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -234,7 +224,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		
 		protected void createButtonsForButtonBar(Composite parent) {
 			super.createButtonsForButtonBar(parent);
-			fPreview= createButton(parent, PREVIEW_ID, "Preview", false);
+			fPreview= createButton(parent, PREVIEW_ID, RefactoringMessages.getString("JdtMoveAction.preview"), false); //$NON-NLS-1$
 		}
 		
 		protected void updateOKStatus() {
@@ -244,7 +234,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 				fCheckbox.setEnabled(getOkButton().getEnabled() &&  canUpdateReferences());
 				updatePreviewButton();
 			} catch (JavaModelException e){
-				ExceptionHandler.handle(e, "Move", "Unexpected exception occurred. See log for details.");
+				ExceptionHandler.handle(e, RefactoringMessages.getString("JdtMoveAction.move"), RefactoringMessages.getString("JdtMoveAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			}		
 		}
 		

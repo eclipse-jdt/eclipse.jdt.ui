@@ -89,7 +89,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 			String duplicate= getDuplicatedElementName(elements);
 			if (duplicate != null){
 				String message= "Two or more elements named " + duplicate + " are selected."; 
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell().getShell(), "Duplicate Element Name",	message);
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell().getShell(), RefactoringMessages.getString("ReorgDestinationAction.duplicate_name"),	message); //$NON-NLS-1$
 				return;
 			}
 			
@@ -106,7 +106,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 				return;
 			doReorg(refactoring);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Exception", "Unexpected exception occurred. See log for details.");
+			ExceptionHandler.handle(e, "Exception", RefactoringMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
 		}	
 	}
 	
@@ -147,7 +147,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		if (status.isOK()) 
 			return;
 		JavaPlugin.log(status);
-		ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), getActionName(), "An error occurred while reorganizing resources", status);
+		ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), getActionName(), RefactoringMessages.getString("ReorgDestinationAction.error"), status); //$NON-NLS-1$
 	}	
 		
 	private static boolean ensureSaved(List elements, String actionName) {
@@ -314,7 +314,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 						
 		IPath p1= r1.getParent().getFullPath();
 		IPath p2= r2.getParent().getFullPath();
-		IPath commonPath= new Path("");
+		IPath commonPath= new Path(""); //$NON-NLS-1$
 		int segCount= Math.min(p1.segmentCount(), p2.segmentCount());
 		for (int i= 0; i < segCount; i++){
 			if (p1.segment(i).equals(p2.segment(i)))
@@ -376,7 +376,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 						return ReorgMessages.getString("DestinationRenderer.packages"); //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, "Exception", "Unexpected exception occurred. See log for details.");
+				ExceptionHandler.handle(e, "Exception", RefactoringMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
 			}
 			return super.getText(element);
 		}
@@ -392,14 +392,14 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		
 		public IStatus validate(Object[] selection)  {
 			if (selection.length != 1)
-				return new StatusInfo(IStatus.ERROR, "");
+				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			try{	
 				if (fRefactoring.isValidDestination(selection[0]))
 					return new StatusInfo();
-				return new StatusInfo(IStatus.ERROR, "");	
+				return new StatusInfo(IStatus.ERROR, "");	 //$NON-NLS-1$
 			} catch (JavaModelException e){
-				ExceptionHandler.handle(e, "Exception", "Unexpected exception occurred. See log for details.");
-				return new StatusInfo(IStatus.ERROR, "");
+				ExceptionHandler.handle(e, "Exception", RefactoringMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
+				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			}	
 		}
 	}

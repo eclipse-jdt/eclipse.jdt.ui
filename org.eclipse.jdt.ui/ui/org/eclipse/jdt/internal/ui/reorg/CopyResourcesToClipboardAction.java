@@ -27,6 +27,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 
 class CopyResourcesToClipboardAction extends Action implements IRefactoringAction {
@@ -35,7 +36,7 @@ class CopyResourcesToClipboardAction extends Action implements IRefactoringActio
 	private final StructuredSelectionProvider fProvider;
 	
 	public CopyResourcesToClipboardAction(ISelectionProvider selectionProvider) {
-		super("&Copy");
+		super(RefactoringMessages.getString("CopyResourcesToClipboardAction.copy")); //$NON-NLS-1$
 		fProvider= StructuredSelectionProvider.createFrom(selectionProvider);
 	}
 

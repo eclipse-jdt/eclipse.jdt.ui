@@ -20,11 +20,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 
 	public CopySourceReferencesToClipboardAction(ISelectionProvider provider) {
-		super("&Copy", provider);
+		super(RefactoringMessages.getString("CopySourceReferencesToClipboardAction.copy"), provider); //$NON-NLS-1$
 	}
 	
 	protected void perform() throws JavaModelException {
@@ -48,7 +49,7 @@ class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 	}
 
 	private static String convertToInputForTextTransfer(TypedSource[] typedSources) throws JavaModelException {
-		String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$
+		String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		StringBuffer buff= new StringBuffer();
 		for (int i= 0; i < typedSources.length; i++) {
 			buff.append(typedSources[i].getSource()).append(lineDelim);

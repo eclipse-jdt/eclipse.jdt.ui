@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /** 
@@ -54,10 +55,10 @@ class DeleteResourcesAction extends ReorgAction {
 			MultiStatus status= ReorgAction.perform(refactoring);
 			if (!status.isOK()) {
 				JavaPlugin.log(status);
-				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), "Delete", "Unexpected exception. See log for details.", status);
+				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("DeleteResourceAction.delete"), RefactoringMessages.getString("DeleteResourceAction.exception"), status); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Delete", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("DeleteResourceAction.delete"), RefactoringMessages.getString("DeleteResourceAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}	
 	}

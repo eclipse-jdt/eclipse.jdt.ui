@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 		try{
 			fRefactoringSupport.rename(getStructuredSelection().getFirstElement());
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Rename", "Unexpected exception occurred. See log for details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameAction.rename"), RefactoringMessages.getString("RenameAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}	
 	}
 	

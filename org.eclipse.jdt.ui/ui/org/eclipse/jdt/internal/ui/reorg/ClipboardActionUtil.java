@@ -63,7 +63,7 @@ class ClipboardActionUtil {
 
 	public static JdtCopyAction createDnDCopyAction(List elems, final IResource destination){
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(new SimpleSelectionProvider(elems.toArray()));
-		JdtCopyAction action= new JdtCopyAction("#PASTE", provider){
+		JdtCopyAction action= new JdtCopyAction("#PASTE", provider){ //$NON-NLS-1$
 			protected Object selectDestination(ReorgRefactoring ref) {
 				return tryConvertingToJava(destination);			
 			}

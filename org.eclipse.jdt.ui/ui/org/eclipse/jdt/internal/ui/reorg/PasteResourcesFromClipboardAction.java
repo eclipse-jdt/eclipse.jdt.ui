@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 
 class PasteResourcesFromClipboardAction extends Action implements IRefactoringAction {
@@ -28,7 +29,7 @@ class PasteResourcesFromClipboardAction extends Action implements IRefactoringAc
 	private final StructuredSelectionProvider fProvider;
 
 	public PasteResourcesFromClipboardAction(ISelectionProvider selectionProvider) {
-		super("Paste");		
+		super(RefactoringMessages.getString("PasteResourcesFromClipboardAction.paste"));		 //$NON-NLS-1$
 		fProvider= StructuredSelectionProvider.createFrom(selectionProvider);
 	}
 

@@ -30,13 +30,14 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class PasteSourceReferencesFromClipboardAction extends RefactoringAction {
 
 	public PasteSourceReferencesFromClipboardAction(ISelectionProvider provider) {
-		super("&Paste", provider);
+		super(RefactoringMessages.getString("PasteSourceReferencesFromClipboardAction.paste"), provider); //$NON-NLS-1$
 	}
 
 	/*
@@ -135,7 +136,7 @@ class PasteSourceReferencesFromClipboardAction extends RefactoringAction {
 				try {
 					perform(getSelectedElement());
 				} catch (CoreException e) {
-					ExceptionHandler.handle(e, "Paste", "Unexpected exception. See log for details.");
+					ExceptionHandler.handle(e, RefactoringMessages.getString("PasteSourceReferencesFromClipboardAction.paste1"), RefactoringMessages.getString("PasteSourceReferencesFromClipboardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		});
