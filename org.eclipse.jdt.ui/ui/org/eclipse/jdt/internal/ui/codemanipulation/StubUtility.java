@@ -312,7 +312,7 @@ public class StubUtility {
 			}
 		}
 
-		for (int i= allMethods.size() - 1; i >= 0; i--) {
+		for (int i= 0; i < allMethods.size(); i++) {
 			IMethod curr= (IMethod) allMethods.get(i);
 			if (Flags.isAbstract(curr.getFlags()) && !type.equals(curr.getDeclaringType())) {
 				// implement all abstract methods
