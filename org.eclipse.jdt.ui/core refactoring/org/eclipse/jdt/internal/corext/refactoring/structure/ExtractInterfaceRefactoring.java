@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -78,7 +79,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
@@ -353,7 +356,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		Collection nodesToRemove= new HashSet(0);
 		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
-			if (hadDirectProblems(node, new SubProgressMonitor(pm, 1)))
+			if (hasDirectProblems(node, new SubProgressMonitor(pm, 1)))
 				nodesToRemove.add(node);	
 		}
 		boolean reiterate;
@@ -361,7 +364,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			reiterate= false;
 			for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
 				ASTNode node= (ASTNode) iter.next();
-				if (! nodesToRemove.contains(node) && hasIndirectProblems(node, nodesToRemove)){
+				if (! nodesToRemove.contains(node) && hasIndirectProblems(node, nodesToRemove, new NullProgressMonitor())){ //XXX
 					reiterate= true;
 					nodesToRemove.add(node);			
 				}
@@ -371,7 +374,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return nodesToRemove;
 	}
 
-	private boolean hasIndirectProblems(ASTNode node, Collection nodesToRemove) throws JavaModelException {
+	private boolean hasIndirectProblems(ASTNode node, Collection nodesToRemove, IProgressMonitor pm) throws JavaModelException {
 		ASTNode parentNode= node.getParent();
 		if (parentNode instanceof VariableDeclarationStatement){
 			VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
@@ -388,8 +391,53 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		} else if (parentNode instanceof CastExpression){
 			if (! isReferenceUpdatable(parentNode, nodesToRemove))
 				return true;	
+		} else if (parentNode instanceof MethodDeclaration){
+			MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode;
+			if (methodDeclaration.getReturnType() == node){
+				IMethodBinding methodBinding= methodDeclaration.resolveBinding();
+				if (methodBinding != null){
+					IMethod method= Binding2JavaModel.find(methodBinding, getCompilationUnit(methodDeclaration).getJavaProject());
+					if (method == null)
+						return true; //XXX
+					IMethod topMethod= getTopMethod(method, new SubProgressMonitor(pm, 1));
+					IMethod[] methods= RippleMethodFinder.getRelatedMethods(topMethod, new SubProgressMonitor(pm, 1), new ICompilationUnit[0]);
+					if (isAnyMethodReturnTypeNodeExcluded(methods, nodesToRemove)){
+						nodesToRemove.addAll(getAllReturnTypeNodes(methods));
+						return true;
+					}	
+				}	
+			}		
 		}
 		return false;
+	}
+
+	private Collection getAllReturnTypeNodes(IMethod[] methods) throws JavaModelException {
+		List result= new ArrayList(methods.length);
+		for (int i= 0; i < methods.length; i++) {
+			result.add(getMethodDeclarationNode(methods[i]).getReturnType());
+		}
+		return result;
+	}
+
+	private boolean isAnyMethodReturnTypeNodeExcluded(IMethod[] methods, Collection nodesToRemove) throws JavaModelException{
+		for (int i= 0; i < methods.length; i++) {
+			if (nodesToRemove.contains(getMethodDeclarationNode(methods[i]).getReturnType()))
+				return true;
+		}
+		return false;
+	}
+	
+	private static IMethod getTopMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
+		Assert.isNotNull(method);
+		pm.beginTask("", 1);
+		IMethod top= method;
+		IMethod oldTop;
+		do {
+			oldTop = top;
+			top= MethodChecks.overridesAnotherMethod(top, new NullProgressMonitor()); //XXX 	
+		} while(top != null);
+		pm.done();
+		return oldTop;
 	}
 	
 	private boolean hasIndirectProblems(VariableDeclaration tempDeclaration, Collection nodesToRemove) throws JavaModelException{
@@ -459,7 +507,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return parent;
 	}
 	
-	private boolean hadDirectProblems(ASTNode node, IProgressMonitor pm) throws JavaModelException {
+	private boolean hasDirectProblems(ASTNode node, IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
 			ASTNode parentNode= getUnparenthesizedParent(node);
