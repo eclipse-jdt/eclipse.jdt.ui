@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class DeleteRefactoring2 extends Refactoring{
 	
+	private boolean fSuggestGetterSetterDeletion;
 	private IResource[] fResources;
 	private IJavaElement[] fJavaElements;
 	private IReorgQueries fDeleteQueries;	
@@ -96,6 +97,15 @@ public class DeleteRefactoring2 extends Refactoring{
 	private DeleteRefactoring2(IResource[] resources, IJavaElement[] javaElements){
 		fResources= resources;
 		fJavaElements= javaElements;
+		fSuggestGetterSetterDeletion= true;//default
+	}
+	
+	/* 
+	 * This has to be customizable because when drag and drop is performed on a field,
+	 * you don't want to suggest deleting getter/setter if only the field was moved.
+	 */
+	public void setSuggestGetterSetterDeletion(boolean suggest){
+		fSuggestGetterSetterDeletion= suggest;
 	}
 	
 	public void setQueries(IReorgQueries queries){
@@ -173,8 +183,9 @@ public class DeleteRefactoring2 extends Refactoring{
 		removeJavaElementsChildrenOfJavaElements();/*because adding cus may create elements (types in cus)
 												    *whose parents are in selection*/
 		confirmDeletingReadOnly();   /*after empty cus - you want to ask for all cus that are to be deleted*/
-
-		addGettersSetters();/*at the end - this cannot invalidate anything*/
+	
+		if (fSuggestGetterSetterDeletion)
+			addGettersSetters();/*at the end - this cannot invalidate anything*/
 	}
 	
 	//ask for confirmation of deletion of all package fragment roots that are on classpaths of other projects
@@ -304,7 +315,7 @@ public class DeleteRefactoring2 extends Refactoring{
 		for (Iterator iter= getterSetterMapping.keySet().iterator(); iter.hasNext();) {
 			IField field= (IField) iter.next();
 			Assert.isTrue(hasGetter(getterSetterMapping, field) || hasSetter(getterSetterMapping, field));
-			String pattern= "Do you also want to delete getter/setter methods for field ''{0}'' ?";
+			String pattern= "Do you also want to delete getter/setter methods for field ''{0}''?";
 			Object[] args= {JavaElementUtil.createFieldSignature(field)};
 			String deleteGetterSetter= MessageFormat.format(pattern, args);
 			if (getterSetterQuery.confirm(deleteGetterSetter)){
