@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -73,7 +75,7 @@ public class ReorgTests extends RefactoringTest {
 	
 	//--- activation tests 
 	private void checkActivation(List elements, boolean expected)throws Exception{
-		CopyRefactoring ref= new CopyRefactoring(elements);
+		CopyRefactoring ref= new CopyRefactoring(elements, new MockCopyQueries());
 		assertEquals("copy", expected, ref.checkActivation(new NullProgressMonitor()).isOK());		
 		
 		MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings());
@@ -211,7 +213,7 @@ public class ReorgTests extends RefactoringTest {
 			p1= getRoot().createPackageFragment("p1", false, null);
 			folder= createFolder("f");
 			
-			CopyRefactoring copyRef= new CopyRefactoring(elements);
+			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries());
 			assertEquals("copy0", true, copyRef.isValidDestination(cu));
 			assertEquals("copy1", true, copyRef.isValidDestination(p1));
 			assertEquals("copy2", true, copyRef.isValidDestination(getPackageP()));
@@ -253,7 +255,7 @@ public class ReorgTests extends RefactoringTest {
 			elements.add(cu2);
 			
 			p1= getRoot().createPackageFragment("p1", false, null);
-			CopyRefactoring copyRef= new CopyRefactoring(elements);
+			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries());
 			assertEquals("copy0", true, copyRef.isValidDestination(cu));
 			assertEquals("copy0a", true, copyRef.isValidDestination(cu2));
 			assertEquals("copy1", true, copyRef.isValidDestination(p1));
@@ -299,7 +301,7 @@ public class ReorgTests extends RefactoringTest {
 			folder= createFolder("f");
 			
 			p1= getRoot().createPackageFragment("p1", false, null);
-			CopyRefactoring copyRef= new CopyRefactoring(elements);
+			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries());
 			assertEquals("copy0", true, copyRef.isValidDestination(cu));
 			assertEquals("copy0a", true, copyRef.isValidDestination(cu2));
 			assertEquals("copy1", true, copyRef.isValidDestination(p1));
@@ -348,7 +350,7 @@ public class ReorgTests extends RefactoringTest {
 			elements.add(folder);
 			
 			p2= JavaProjectHelper.createJavaProject("P2", "bin");
-			CopyRefactoring copyRef= new CopyRefactoring(elements);
+			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries());
 			copyRef.setDestination(p2);
 			assertTrue("copy read-only", copyRef.checkActivation(new NullProgressMonitor()).isOK());
 			RefactoringStatus status= performRefactoring(copyRef);
@@ -386,7 +388,7 @@ public class ReorgTests extends RefactoringTest {
 			elements.add(srcFolder);
 			
 			p2= JavaProjectHelper.createJavaProject("P2", "bin");
-			CopyRefactoring copyRef= new CopyRefactoring(elements);
+			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries());
 			copyRef.setDestination(p2);
 			assertTrue("copy read-only", copyRef.checkActivation(new NullProgressMonitor()).isOK());
 			RefactoringStatus status= performRefactoring(copyRef);
@@ -426,7 +428,7 @@ public class ReorgTests extends RefactoringTest {
 			elements.add(pack);
 			
 			srcFolder2= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
-			CopyRefactoring copyRef= new CopyRefactoring(elements);
+			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries());
 			copyRef.setDestination(srcFolder2);
 			assertTrue("copy read-only", copyRef.checkActivation(new NullProgressMonitor()).isOK());
 			RefactoringStatus status= performRefactoring(copyRef);
@@ -445,5 +447,27 @@ public class ReorgTests extends RefactoringTest {
 		}
 	}
 	
+	private static class MockCopyQueries implements ICopyQueries{
+		public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu) {
+			return null;
+		}
+
+		public INewNameQuery createNewPackageNameQuery(IPackageFragment pack) {
+			return null;
+		}
+
+		public INewNameQuery createNewResourceNameQuery(IResource res) {
+			return null;
+		}
+
+		public INewNameQuery createNullQuery() {
+			return null;
+		}
+
+		public INewNameQuery createStaticQuery(String newName) {
+			return null;
+		}
+
+	}
 }
 

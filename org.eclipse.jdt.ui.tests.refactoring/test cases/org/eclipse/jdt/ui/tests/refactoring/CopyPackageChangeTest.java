@@ -34,7 +34,7 @@ public class CopyPackageChangeTest extends RefactoringTest {
 		IPackageFragmentRoot newRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "newName");
 		
 		String packName= getPackageP().getElementName();
-		CopyPackageChange change= new CopyPackageChange(getPackageP(), newRoot);
+		CopyPackageChange change= new CopyPackageChange(getPackageP(), newRoot, null);
 		performChange(change);
 		IPackageFragment copied= newRoot.getPackageFragment(packName);
 		assertTrue("copied.exists()", copied.exists());
