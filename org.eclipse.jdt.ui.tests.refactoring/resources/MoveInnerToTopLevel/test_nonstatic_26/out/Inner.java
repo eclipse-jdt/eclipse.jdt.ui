@@ -5,6 +5,6 @@ class Inner {
 		this.a= a;
 	}
 	void f(){
-		this.a.foo();
+		A.foo();
 	}
 }
