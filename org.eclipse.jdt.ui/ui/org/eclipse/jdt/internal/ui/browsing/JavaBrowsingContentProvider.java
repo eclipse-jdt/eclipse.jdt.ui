@@ -273,7 +273,10 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 					postAdjustInputAndSetSelection(((IWorkingCopy)element).getOriginal((IJavaElement)fInput));
 				} else
 					postAdjustInputAndSetSelection(null);
-			} 
+			}
+			
+			if (fInput != null && fInput.equals(element))
+				postRefresh(null);
 			
 			
 			return;
