@@ -499,6 +499,83 @@ public class CodeCompletionTest extends CoreTests {
 	}
 	
 	
+	private final static boolean BUG_80782= true;
+	
+	public void testOverrideCompletion5() throws Exception {
+		if (BUG_80782) {
+			return;
+		}
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            ru//here\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= EditorUtility.openInEditor(cu);
+		try {
+			String str= "//here";
+
+			int offset= contents.indexOf(str);
+
+			ResultCollector collector= new ResultCollector();
+			collector.reset(offset, cu.getJavaProject(), cu);
+			collector.setViewer(null);
+			collector.setReplacementLength(0);
+			collector.setPreventEating(true);
+
+			cu.codeComplete(offset, collector);
+
+			JavaCompletionProposal[] proposals= collector.getResults();
+
+			JavaCompletionProposal toStringProposal= null;
+
+			for (int i= 0; i < proposals.length; i++) {
+				if (proposals[i].getDisplayString().startsWith("run()")) {
+					toStringProposal= proposals[i];
+				}
+			}
+			assertNotNull("no proposal for toString()", toStringProposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+
+			toStringProposal.apply(doc);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        new Runnable() {\n");
+			buf.append("            /* (non-Javadoc)\n");
+			buf.append("             * @see java.lang.Runnable#run()\n");
+			buf.append("             */\n");
+			buf.append("            public void run() {\n");
+			buf.append("                //TODO\n");
+			buf.append("\n");
+			buf.append("            }//here\n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString());
+			
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+		
+	}
+	
 	public void testGetterCompletion1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -563,6 +640,8 @@ public class CodeCompletionTest extends CoreTests {
 			part.getSite().getPage().closeAllEditors(false);
 		}		
 	}
+
+
 	
 	public void testSetterCompletion1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
