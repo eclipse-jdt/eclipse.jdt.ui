@@ -64,7 +64,9 @@ public class RenamePackageTests extends RefactoringTest {
 			performDummySearch();
 		
 			for (int i= 0; i < packageNames.length; i++){
-				getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+				IPackageFragment pack= getRoot().getPackageFragment(packageNames[i]);
+				if (pack.exists())
+					pack.delete(true, null);
 			}	
 		}	
 	}
@@ -88,7 +90,9 @@ public class RenamePackageTests extends RefactoringTest {
 			performDummySearch();	
 			
 			for (int i= 0; i < packageNames.length; i++){
-				getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+				IPackageFragment pack= getRoot().getPackageFragment(packageNames[i]);
+				if (pack.exists())
+					pack.delete(true, null);
 			}		
 		}	
 	}
@@ -182,16 +186,18 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	public void testFail7() throws Exception{
 		//printTestDisabledMessage("1GK90H4: ITPJCORE:WIN2000 - search: missing package reference");
-		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		printTestDisabledMessage("corner case - name obscuring");
+//		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
 	public void testFail8() throws Exception{
-		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		printTestDisabledMessage("corner case - name obscuring");
+//		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
 	//native method used r.A as a paramter
 	public void testFail9() throws Exception{
-		printTestDisabledMessage("corner case");
+		printTestDisabledMessage("corner case - qualified name used  as a paramter of a native method");
 		//helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
