@@ -17,29 +17,49 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -52,25 +72,14 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * Creates delegate methods for a type's fields. Opens a dialog with a list of
@@ -372,7 +381,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		/**Type to add methods to*/
 		IType fType = null;
 
-		ArrayList fCreatedMethods;
+		List fCreatedMethods;
 
 		public ResultRunner(List resultList, IType type) {
 			fList = resultList;
@@ -554,10 +563,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/** The  model (content provider) for the field-methods tree */
 	private static class FieldContentProvider implements ITreeContentProvider {
 
-		private TreeMap fTreeMap = null;
-		private HashMap fFieldMap = null;
+		private Map fTreeMap = null;
+		private Map fFieldMap = null;
 
-		private HashMap fFilter = null;
+		private Map fFilter = null;
 
 		/**
 		 * Method FieldContentProvider.
@@ -594,11 +603,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				if (fieldType == null)
 					continue;
 				IMethod[] methods = resolveMethodsHierarchy(fieldType);
-				ArrayList accessMethods = new ArrayList();
+				List accessMethods = new ArrayList();
 
 				//show public methods; hide constructors + final methods
 				for (int j = 0; j < methods.length; j++) {
-					boolean publicField = Flags.isPublic(methods[j].getFlags());
+					boolean publicField = JdtFlags.isPublic(methods[j]);
 					boolean constructor = methods[j].isConstructor();
 					boolean finalExist = fFilter.get(createSignatureKey(methods[j])) != null;
 					if (publicField && !constructor && !finalExist)
@@ -627,13 +636,12 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 
 		public boolean hasChildren(Object element) {
-			return element instanceof IField ? true : false;
+			return element instanceof IField;
 		}
 
 		public Object[] getElements(Object inputElement) {
 			if ((inputElement != null) && (inputElement instanceof FieldContentProvider)) {
-				Set set = fTreeMap.keySet();
-				Object[] o = set.toArray();
+				Object[] o = fTreeMap.keySet().toArray();
 				Object[] fields = new Object[o.length];
 				for (int i = 0; i < o.length; i++) {
 					fields[i] = fFieldMap.get(o[i]);
@@ -735,25 +743,22 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	/**return all methods of all super types, minus dups*/
 	private static IMethod[] resolveMethodsHierarchy(IType type) throws JavaModelException {
-		HashMap map = new HashMap();
+		Map map = new HashMap();
 
-		ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+		IType[] superTypes = JavaModelUtil.getAllSuperTypes(type, new NullProgressMonitor());
 
-		IType[] types = hierarchy.getAllTypes();
-		for (int i = 0; i < types.length; i++) {
-			IMethod[] methods = types[i].getMethods();
-			for (int j = 0; j < methods.length; j++) {
-				map.put(createSignatureKey(methods[j]), methods[j]);
-			}
+		addMethodsToMapping(map, type);
+		for (int i = 0; i < superTypes.length; i++) {
+			addMethodsToMapping(map, superTypes[i]);
 		}
-		ArrayList list = new ArrayList();
-		list.addAll(map.values());
-		IMethod[] methods = new IMethod[list.size()];
+		return (IMethod[]) map.values().toArray(new IMethod[map.values().size()]);
+	}
+
+	private static void addMethodsToMapping(Map map, IType type) throws JavaModelException {
+		IMethod[] methods = type.getMethods();
 		for (int i = 0; i < methods.length; i++) {
-			methods[i] = (IMethod) list.get(i);
+			map.put(createSignatureKey(methods[i]), methods[i]);
 		}
-
-		return methods;
 	}
 
 	/**returns a non null array of final methods of the type*/
@@ -761,21 +766,17 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		//Interfaces are java.lang.Objects
 		if (type.isInterface()) {
-			type = JavaModelUtil.findType(type.getJavaProject(), "java.lang.Object"); //$NON-NLS-1$
+			type = getJavaLangObject(type.getJavaProject());//$NON-NLS-1$
 		}
 
 		IMethod[] methods = resolveMethodsHierarchy(type);
-		ArrayList list = new ArrayList(methods.length);
+		List list = new ArrayList(methods.length);
 		for (int i = 0; i < methods.length; i++) {
 			boolean isFinal = Flags.isFinal(methods[i].getFlags());
 			if (isFinal)
 				list.add(methods[i]);
 		}
-		IMethod[] finalMethods = new IMethod[list.size()];
-		for (int i = 0; i < finalMethods.length; i++) {
-			finalMethods[i] = (IMethod) list.get(i);
-		}
-		return finalMethods;
+		return (IMethod[]) list.toArray(new IMethod[list.size()]);
 	}
 
 	/**creates a key used for hashmaps for a method signature (name+arguments(fqn))*/
@@ -858,13 +859,16 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		if (!isPrimitive && !isArray) {
 			String typeName = JavaModelUtil.getResolvedTypeName(field.getTypeSignature(), field.getDeclaringType());
 			//if the cu has errors its possible no type name is resolved
-			IType type = typeName != null ? field.getJavaProject().findType(typeName) : null;
-			return type;
+			return typeName != null ? field.getJavaProject().findType(typeName) : null;
 		} else if (isArray) {
-			return JavaModelUtil.findType(field.getJavaProject(), "java.lang.Object"); //$NON-NLS-1$
+			return getJavaLangObject(field.getJavaProject()); 
 		}
 		return null;
 
+	}
+
+	private static IType getJavaLangObject(IJavaProject project) throws JavaModelException {
+		return JavaModelUtil.findType(project, "java.lang.Object");//$NON-NLS-1$
 	}
 
 	private static boolean isArray(IField field) throws JavaModelException {
