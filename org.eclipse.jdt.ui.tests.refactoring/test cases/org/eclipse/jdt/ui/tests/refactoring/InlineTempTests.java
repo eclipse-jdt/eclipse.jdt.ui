@@ -111,8 +111,8 @@ public class InlineTempTests extends RefactoringTest {
 	}
 
 	public void test6() throws Exception{
-		printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
-		//helper1();
+		//printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
+		helper1();
 	}
 
 	public void test7() throws Exception{
@@ -120,8 +120,8 @@ public class InlineTempTests extends RefactoringTest {
 	}
 	
 	public void test8() throws Exception{
-		printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
-		//helper1();
+		//printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
+		helper1();
 	}
 	
 	public void test9() throws Exception{
