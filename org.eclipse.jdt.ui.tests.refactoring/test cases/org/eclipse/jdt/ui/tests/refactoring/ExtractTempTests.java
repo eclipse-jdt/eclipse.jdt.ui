@@ -188,6 +188,12 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(7, 17, 7, 20, false, false, "temp");
 	}		
 	
+	public void test24() throws Exception{
+		//regression test for bug#8116
+		helper1(4, 16, 4, 18, false, false, "temp");
+	}
+	
+	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
 		failHelper1(5, 16, 5, 17, false, false, "temp");
