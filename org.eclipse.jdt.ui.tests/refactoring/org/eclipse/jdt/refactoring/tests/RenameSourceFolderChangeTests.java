@@ -44,7 +44,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 		performChange(change);
 		
 		assertTrue("old folder should not exist", ! oldRoot.exists());
-		assertEquals("expected 3 pfr's", 3, testProject.getPackageFragmentRoots().length);
+		assertEquals("expected 2 pfr's", 2, testProject.getPackageFragmentRoots().length);
 		IPackageFragmentRoot[] newRoots= testProject.getPackageFragmentRoots();
 		for (int i= 0; i < newRoots.length; i++){
 			assertTrue("should exist " + i, newRoots[i].exists());

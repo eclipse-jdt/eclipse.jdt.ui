@@ -201,7 +201,7 @@ public class ReorgTests extends RefactoringTest {
 		CopyRefactoring copyRef= new CopyRefactoring(elements);
 		assertEquals("copy0", false, copyRef.isValidDestination(cu));
 		assertEquals("copy1", true, copyRef.isValidDestination(p1));
-		assertEquals("copy2", false, copyRef.isValidDestination(getPackageP()));
+		assertEquals("copy2", true, copyRef.isValidDestination(getPackageP()));
 		assertEquals("copy3", true, copyRef.isValidDestination(getRoot()));
 		assertEquals("copy4", true, copyRef.isValidDestination(getRoot().getJavaProject()));
 		assertEquals("copy5", false, copyRef.isValidDestination(getRtJar()));
@@ -235,7 +235,7 @@ public class ReorgTests extends RefactoringTest {
 		assertEquals("copy0", false, copyRef.isValidDestination(cu));
 		assertEquals("copy0a", false, copyRef.isValidDestination(cu2));
 		assertEquals("copy1", true, copyRef.isValidDestination(p1));
-		assertEquals("copy2", false, copyRef.isValidDestination(getPackageP()));
+		assertEquals("copy2", true, copyRef.isValidDestination(getPackageP()));
 		assertEquals("copy3", true, copyRef.isValidDestination(getRoot()));
 		assertEquals("copy4", true, copyRef.isValidDestination(getRoot().getJavaProject()));
 		assertEquals("copy5", false, copyRef.isValidDestination(getRtJar()));
@@ -254,6 +254,7 @@ public class ReorgTests extends RefactoringTest {
 		folder.delete(false, null);	
 		p1.delete(false, null);
 		cu.delete(false, null);
+		cu2.delete(false, null);
 	}
 
 	public void testDestination3() throws Exception{
@@ -271,7 +272,7 @@ public class ReorgTests extends RefactoringTest {
 		assertEquals("copy0", false, copyRef.isValidDestination(cu));
 		assertEquals("copy0a", false, copyRef.isValidDestination(cu2));
 		assertEquals("copy1", true, copyRef.isValidDestination(p1));
-		assertEquals("copy2", false, copyRef.isValidDestination(getPackageP()));
+		assertEquals("copy2", true, copyRef.isValidDestination(getPackageP()));
 		assertEquals("copy3", true, copyRef.isValidDestination(getRoot()));
 		assertEquals("copy4", true, copyRef.isValidDestination(getRoot().getJavaProject()));
 		assertEquals("copy5", false, copyRef.isValidDestination(getRtJar()));
@@ -293,6 +294,7 @@ public class ReorgTests extends RefactoringTest {
 		folder.delete(false, null);	
 		p1.delete(false, null);
 		cu.delete(false, null);
+		cu2.delete(false, null);
 	}
 	
 }
