@@ -9,20 +9,30 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
+
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
+import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ModifyParametersWizard;
@@ -36,28 +46,48 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
  */
 public class RefactoringGroup extends ContextMenuGroup {
 	
-	private RefactoringAction[] fRefactoringActions;
+	private IAction[] fRefactoringActions;
+	
+	private SelectionDispatchAction fModifyParametersAction;
+	private SelectionDispatchAction fPullUpAction;
+	
 	private boolean fIntitialized= false;
 	
 	private boolean fCreateSEF;
 	
-	public RefactoringGroup() {
-		this(true);
+	private UnifiedSite fSite;
+	
+	public RefactoringGroup(UnifiedSite site) {
+		this(true, site);
 	}
 	
-	public RefactoringGroup(boolean createSEF) {
+	public RefactoringGroup(boolean createSEF, UnifiedSite site) {
+		Assert.isNotNull(site);
 		fCreateSEF= createSEF;
+		fSite= site;
+		
+		fModifyParametersAction= createModifyParametersAction(fSite);
+		fSite.getSelectionProvider().addSelectionChangedListener(fModifyParametersAction);
+		
+		fPullUpAction= createPullUpAction(fSite);
+		fSite.getSelectionProvider().addSelectionChangedListener(fPullUpAction);
 	}
 	
 	public void fill(IMenuManager manager, GroupContext context) {
 		createActions(context.getSelectionProvider());
 		
 		for (int i= 0; i < fRefactoringActions.length; i++) {
-			RefactoringAction action= fRefactoringActions[i];
-			action.update();
+			IAction action= fRefactoringActions[i];
+			if (action instanceof IUpdate)
+				((IUpdate)action).update();
 			if (action.isEnabled())
 				manager.add(action);
 		}	
+	}
+	
+	public void fillActionBars(IActionBars actionBars) {
+		actionBars.setGlobalActionHandler(RetargetActionIDs.MODIFY_PARAMETERS, fModifyParametersAction);
+		actionBars.setGlobalActionHandler(RetargetActionIDs.PULL_UP, fPullUpAction);
 	}
 	
 	private void createActions(ISelectionProvider p) {
@@ -67,16 +97,16 @@ public class RefactoringGroup extends ContextMenuGroup {
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(p);	
 		
 		if (fCreateSEF) {
-			fRefactoringActions= new RefactoringAction[]{
-				createModifyParametersAction(provider),
-				createPullUpAction(provider),
+			fRefactoringActions= new IAction[]{
+				fModifyParametersAction,
+				fPullUpAction,
 				createMoveMembersAction(provider),
 				new SelfEncapsulateFieldAction(provider)
 			};
 		} else {
-			fRefactoringActions= new RefactoringAction[]{
-				createModifyParametersAction(provider),
-				createPullUpAction(provider),
+			fRefactoringActions= new IAction[]{
+				fModifyParametersAction,
+				fPullUpAction,
 				createMoveMembersAction(provider)
 			};
 		}
@@ -85,10 +115,10 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 		
 	// -------------------- method refactorings ----------------------
-	
-	static OpenRefactoringWizardAction createModifyParametersAction(StructuredSelectionProvider selectionProvider) {
+
+	private static NewOpenRefactoringWizardAction createModifyParametersAction(UnifiedSite site) {
 		String label= RefactoringMessages.getString("RefactoringGroup.modify_Parameters_label"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, selectionProvider, IMethod.class) {
+		return new NewOpenRefactoringWizardAction(label, site, IMethod.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new ModifyParametersRefactoring((IMethod)obj);
 			}
@@ -103,10 +133,10 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 		};
 	}
-	
-	static OpenRefactoringWizardAction createPullUpAction(StructuredSelectionProvider selectionProvider) {
+
+	private static NewOpenRefactoringWizardAction createPullUpAction(UnifiedSite site) {
 		String label= RefactoringMessages.getString("RefactoringGroup.pull_Up_label"); //$NON-NLS-1$
-		return new OpenRefactoringWizardAction(label, selectionProvider, IMember.class) {
+		return new NewOpenRefactoringWizardAction(label, site, IMember.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				Set memberSet= new HashSet();
 				memberSet.addAll(Arrays.asList((Object[])obj));
