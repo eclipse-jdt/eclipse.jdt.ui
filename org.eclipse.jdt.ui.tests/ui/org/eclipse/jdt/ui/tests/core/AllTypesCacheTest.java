@@ -69,7 +69,7 @@ public class AllTypesCacheTest extends TestCase {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AllTypesCacheTest("testNewElementCreation"));
+			suite.addTest(new AllTypesCacheTest("testClasspathChange"));
 			return new ProjectTestSetup(suite);
 		}	
 	}
@@ -172,15 +172,13 @@ public class AllTypesCacheTest extends TestCase {
 		
 		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
 		
-		JavaProjectHelper.removeFromClasspath(fJProject1, fLibrary.getPath());
+		JavaProjectHelper.removeFromClasspath(fJProject1, fLibrary.getPath());	
+		assertTrue("cache not flushed", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
 		
 		res1.clear();
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 		assertNull("mylib.Foo still found", findTypeRef(res1, "mylib.Foo"));
-		
 		assertTrue("539 types in workspace expected, is " + res1.size(), res1.size() == 539);
-		
-		assertTrue("cache not flushed", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
 	}
 	
 	public void testNewElementCreation() throws Exception {
