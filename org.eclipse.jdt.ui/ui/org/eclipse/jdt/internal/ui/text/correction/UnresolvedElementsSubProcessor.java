@@ -1,7 +1,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -18,6 +17,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -138,17 +138,23 @@ public class UnresolvedElementsSubProcessor {
 	public static void getMethodProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 
 		ICompilationUnit cu= problemPos.getCompilationUnit();
-
-		String[] args= problemPos.getArguments();
-		if (args.length < 3) {
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		
+		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
+		SimpleName nameNode= (SimpleName) selectedNode;
 		
+		if (!(selectedNode.getParent() instanceof MethodInvocation)) {
+			return;
+		}
+	
 		// corrections
-		String methodName= args[1];
-		String[] arguments= getArguments(args[2]);
+		String methodName= nameNode.getIdentifier();
 				
-		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, problemPos.getOffset(), methodName, SimilarElementsRequestor.METHODS, arguments, null);
+		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, nameNode, SimilarElementsRequestor.METHODS);
 		for (int i= 0; i < elements.length; i++) {
 			String curr= elements[i].getName();
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
@@ -156,7 +162,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		// new method
-		String typeName= args[0];
+		String typeName= problemPos.getArguments()[0];
 		IType type= JavaModelUtil.findType(cu.getJavaProject(), typeName);
 		if (type != null && type.getCompilationUnit() != null) {
 			ICompilationUnit changedCU= type.getCompilationUnit();
@@ -171,29 +177,17 @@ public class UnresolvedElementsSubProcessor {
 					return; // type does not exist in working copy
 				}
 			}
+			
+			MethodInvocation invocationNode= (MethodInvocation) nameNode.getParent();
 			String label;
 			if (cu.equals(changedCU)) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
 			} else {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, type.getElementName() } ); //$NON-NLS-1$
 			}
-			proposals.add(new NewMethodCompletionProposal(type, problemPos, label, methodName, arguments, 1));
+			proposals.add(new NewMethodCompletionProposal(label, invocationNode, cu, type, 1));
 		}
 	}
 	
-	private static String[] getArguments(String signature) {
-		StringTokenizer tok= new StringTokenizer(signature, ","); //$NON-NLS-1$
-		int nTokens= tok.countTokens();
-		String[] res= new String[nTokens];
-		for (int i= 0; i < nTokens; i++) {
-			String str= tok.nextToken().trim();
-			if (str.startsWith("<")) { //$NON-NLS-1$
-				str= "java.lang.Object"; //$NON-NLS-1$
-			}
-			res[i]= str;
-		}
-		return res;
-	}	
-
 
 }

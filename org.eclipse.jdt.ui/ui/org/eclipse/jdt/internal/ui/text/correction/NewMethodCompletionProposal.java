@@ -11,25 +11,20 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -39,36 +34,29 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends CUCorrectionProposal {
 
-	private IType fParentType;
+	private ICompilationUnit fCurrCU;
+	private IType fDestType;
+	private MethodInvocation fNode;
 
-	private String fMethodName;
-	private String[] fParamTypes;
-	
-	private ProblemPosition fProblemPosition;
-	
 	private MemberEdit fMemberEdit;
 
-	public NewMethodCompletionProposal(IType type, ProblemPosition problemPos, String label, String methodName, String[] paramTypes, int relevance) throws CoreException {
-		super(label, type.getCompilationUnit(), !type.getCompilationUnit().isWorkingCopy(), relevance);
+	public NewMethodCompletionProposal(String label, MethodInvocation node, ICompilationUnit currCU, IType destType, int relevance) throws CoreException {
+		super(label, destType.getCompilationUnit(), !destType.getCompilationUnit().isWorkingCopy(), relevance);
 		
-		fParentType= type;
-		fMethodName= methodName;
-		fParamTypes= paramTypes;
-		
-		fProblemPosition= problemPos;
+		fDestType= destType;
+		fCurrCU= currCU;
+		fNode= node;
 		
 		fMemberEdit= null;
 	}
 	
 	private boolean isLocalChange() {
-		return fParentType.getCompilationUnit().equals(fProblemPosition.getCompilationUnit());
+		return fDestType.getCompilationUnit().equals(fCurrCU);
 	}
 	
 	
@@ -76,24 +64,21 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		ProblemPosition problemPos= fProblemPosition;
-		
+	
 		ICompilationUnit changedCU= changeElement.getCompilationUnit();
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ImportEdit importEdit= new ImportEdit(changedCU, settings);
 
 		IMethod currMethod= null;
-		IJavaElement elem= problemPos.getCompilationUnit().getElementAt(problemPos.getOffset());
+		IJavaElement elem= fCurrCU.getElementAt(fNode.getStartPosition());
 		if (elem != null && elem.getElementType() == IJavaElement.METHOD) {
 			currMethod= (IMethod) elem;
 		}
-		boolean isStatic= false;
-		
-		String content= generateStub(isStatic, importEdit, settings);
+		String content= generateStub(importEdit, settings);
 		
 		int insertPos= MemberEdit.ADD_AT_END;
-		IJavaElement anchor= fParentType;
+		IJavaElement anchor= fDestType;
 		if (isLocalChange() && currMethod != null) {
 			anchor= elem;
 			insertPos= MemberEdit.INSERT_AFTER;			
@@ -113,17 +98,33 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	}
 	
 	
-	private String generateStub(boolean isStatic, ImportEdit importEdit, CodeGenerationSettings settings) throws CoreException {
+	private String generateStub(ImportEdit importEdit, CodeGenerationSettings settings) throws CoreException {
+		boolean isStatic= false;
+		String methodName= fNode.getName().getIdentifier();
+		List arguments= fNode.arguments();
+		
 		StringBuffer buf= new StringBuffer();
 		
-		boolean isInterface= fParentType.isInterface();
+		boolean isInterface= fDestType.isInterface();
 		boolean isSameType= isLocalChange();
 		
 		ITypeBinding returnType= evaluateMethodType(importEdit);
 		String returnTypeName= returnType.getName();
 		
+		String[] paramTypes= new String[arguments.size()];
+		String[] paramNames= new String[arguments.size()];
+		
+		NameProposer nameProposer= new NameProposer();
+		for (int i= 0; i < paramTypes.length; i++) {
+			Expression expr= (Expression) arguments.get(i);
+			ITypeBinding binding= evaluateParameterType(expr, importEdit);
+			paramTypes[i]= (binding != null) ? binding.getName() : "Object";
+			paramNames[i]= nameProposer.proposeParameterName(paramTypes[i]);
+		}
+		
 		if (settings.createComments) {
-			StubUtility.genJavaDocStub("Method " + fMethodName, fParamTypes, Signature.createTypeSignature(returnTypeName, true), null, buf); //$NON-NLS-1$
+			
+			StubUtility.genJavaDocStub("Method " + methodName, paramNames, Signature.createTypeSignature(returnTypeName, true), null, buf); //$NON-NLS-1$
 		}
 		
 		if (isSameType) {
@@ -138,20 +139,15 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		
 		buf.append(returnTypeName);
 		buf.append(' ');
-		buf.append(fMethodName);
+		buf.append(methodName);
 		buf.append('(');
-		if (fParamTypes.length > 0) {
-			String[] paramNames= new NameProposer().proposeParameterNames(fParamTypes);
-			for (int i= 0; i < fParamTypes.length; i++) {
+		
+		if (!arguments.isEmpty()) {
+			for (int i= 0; i < arguments.size(); i++) {
 				if (i > 0) {
 					buf.append(", "); //$NON-NLS-1$
 				}
-				String curr= fParamTypes[i];
-				if (curr.indexOf('.') != -1) {
-					importEdit.addImport(curr);
-					curr= Signature.getSimpleName(curr);
-				}
-				buf.append(curr);
+				buf.append(paramTypes[i]);
 				buf.append(' ');
 				buf.append(paramNames[i]);
 			}
@@ -175,21 +171,28 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	}
 	
 	private ITypeBinding evaluateMethodType(ImportEdit importEdit) {
-		CompilationUnit cu= AST.parseCompilationUnit(fProblemPosition.getCompilationUnit(), true);
-
-		ASTNode node= ASTResolving.findSelectedNode(cu, fProblemPosition.getOffset(), fProblemPosition.getLength());
-		if (node != null) {
-			ITypeBinding binding= ASTResolving.getTypeBinding(node.getParent());
-			if (binding != null) {
-				ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-				if (!baseType.isPrimitive()) {
-					importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
-				}
-				return binding;
+		ITypeBinding binding= ASTResolving.getTypeBinding(fNode);
+		if (binding != null) {
+			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+			if (!baseType.isPrimitive()) {
+				importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
+			}
+			return binding;
+		}
+		return fNode.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
+	}
+	
+	private ITypeBinding evaluateParameterType(Expression expr, ImportEdit importEdit) {
+		ITypeBinding binding= expr.resolveTypeBinding();
+		if (binding != null) {
+			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+			if (!baseType.isPrimitive()) {
+				importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
 			}
 		}
-		return cu.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
-	}	
+		return binding;
+	}
+	
 		
 	/*
 	 * @see ICompletionProposal#getImage()

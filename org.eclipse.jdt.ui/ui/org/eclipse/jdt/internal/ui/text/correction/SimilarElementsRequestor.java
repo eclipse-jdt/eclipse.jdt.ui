@@ -6,8 +6,10 @@ import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
 public class SimilarElementsRequestor extends CompletionRequestorAdapter {
@@ -26,13 +28,12 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	private static final String[] PRIM_TYPES= { "boolean", "byte", "char", "short", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
 	private String fPreferredType;
-	private String[] fArguments;
+	private int fNumberOfArguments;
 	private int fKind;
 	private String fName;
 
 	private HashSet fResult;
 	private HashSet fOthers;
-	
 
 	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, SimpleName name, int kind) throws JavaModelException {
 		int pos= name.getStartPosition();
@@ -42,19 +43,24 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 			pos= statement.getStartPosition();
 		}
 		
+		int nArguments= -1;
+		if (((kind & METHODS) != 0) && name.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
+			nArguments= ((MethodInvocation) name.getParent()).arguments().size();
+		}
+		
 		ITypeBinding binding= ASTResolving.getTypeBinding(name);
 		
 		String returnType= (binding != null) ? binding.getName() : null;
-		return findSimilarElement(cu, pos, name.getIdentifier(), kind, null, returnType);
+		return findSimilarElement(cu, pos, name.getIdentifier(), kind, nArguments, returnType);
 	}
 
 
 	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, int pos, String name, int kind) throws JavaModelException {
-		return findSimilarElement(cu, pos, name, kind, null, null);
+		return findSimilarElement(cu, pos, name, kind, 0, null);
 	}
 	
-	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, int pos, String name, int kind, String[] arguments, String preferredType) throws JavaModelException {
-		SimilarElementsRequestor requestor= new SimilarElementsRequestor(name, kind, arguments, preferredType);
+	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, int pos, String name, int kind, int nArguments, String preferredType) throws JavaModelException {
+		SimilarElementsRequestor requestor= new SimilarElementsRequestor(name, kind, nArguments, preferredType);
 		return requestor.process(cu, pos);
 	}
 	
@@ -62,11 +68,11 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	/**
 	 * Constructor for SimilarElementsRequestor.
 	 */
-	public SimilarElementsRequestor(String name, int kind, String[] arguments, String preferredType) {
+	public SimilarElementsRequestor(String name, int kind, int nArguments, String preferredType) {
 		super();
 		fName= name;
 		fKind= kind;
-		fArguments= arguments;
+		fNumberOfArguments= nArguments;
 		fPreferredType= preferredType;
 		
 		fResult= new HashSet();
@@ -207,7 +213,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 		if ((fKind & METHODS) != 0) {
 			String methodName= new String(selector);
-			if (fArguments.length == parameterTypeNames.length) {
+			if (fNumberOfArguments == -1 || fNumberOfArguments == parameterTypeNames.length) {
 				int similarity= NameMatcher.getSimilarity(fName, methodName);
 				if (similarity >= 0) {
 					SimilarElement elem= new SimilarElement(METHODS, methodName, relevance + similarity);
