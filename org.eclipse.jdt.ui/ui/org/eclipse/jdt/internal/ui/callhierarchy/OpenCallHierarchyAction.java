@@ -25,7 +25,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -114,9 +117,42 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
             if (resolvedElements != null)   
                 candidates.addAll(Arrays.asList(resolvedElements));
         }
+        if (candidates.isEmpty()) {
+            IJavaElement enclosingMethod= getEnclosingMethod(input, selection);
+            if (enclosingMethod != null) {
+                candidates.add(enclosingMethod);
+            }
+        }
         run((IJavaElement[])candidates.toArray(new IJavaElement[candidates.size()]));
     }
     
+    private IJavaElement getEnclosingMethod(IJavaElement input, ITextSelection selection) {
+        IJavaElement enclosingElement= null;
+        try {
+            switch (input.getElementType()) {
+                case IJavaElement.CLASS_FILE :
+                    IClassFile classFile= (IClassFile) input.getAncestor(IJavaElement.CLASS_FILE);
+                    if (classFile != null) {
+                        enclosingElement= classFile.getElementAt(selection.getOffset());
+                    }
+                    break;
+                case IJavaElement.COMPILATION_UNIT :
+                    ICompilationUnit cu= (ICompilationUnit) input.getAncestor(IJavaElement.COMPILATION_UNIT);
+                    if (cu != null) {
+                        enclosingElement= cu.getElementAt(selection.getOffset());
+                    }
+                    break;
+            }
+            if (enclosingElement != null && enclosingElement.getElementType() == IJavaElement.METHOD) {
+                return enclosingElement;
+            }
+        } catch (JavaModelException e) {
+            JavaPlugin.log(e);
+        }
+
+        return null;
+    }
+
     /* (non-Javadoc)
      * Method declared on SelectionDispatchAction.
      */
