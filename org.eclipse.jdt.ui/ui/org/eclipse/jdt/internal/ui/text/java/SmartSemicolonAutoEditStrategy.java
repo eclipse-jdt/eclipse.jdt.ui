@@ -913,7 +913,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			validPosition= getValidPositionForPartition(document, partition, eol);
 			while (validPosition == -1) {
 				nextPartitionPos= partition.getOffset() - 1;
-				if (nextPartitionPos <= docOffset) {
+				if (nextPartitionPos < docOffset) {
 					validPosition= docOffset;
 					break;
 				}
