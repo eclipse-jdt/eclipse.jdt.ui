@@ -3,7 +3,7 @@
 <plugin
    name="Refactoring Tests Pluging"
    id="org.eclipse.jdt.ui.tests.refactoring"
-   version="1.0"
+   version="1.9.0"
    vendor-name="IBM"
    class="org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin">
    
