@@ -14,11 +14,13 @@ package org.eclipse.jdt.internal.junit.launcher;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.CommonTab;
+import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaArgumentsTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaClasspathTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaSourceLookupTab;
  
 public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 	/**
@@ -30,6 +32,8 @@ public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 			new JavaArgumentsTab(),
 			new JavaClasspathTab(),
 			new JavaJRETab(),
+			new JavaSourceLookupTab(),
+			new EnvironmentTab(),
 			new CommonTab()
 		};
 		setTabs(tabs);
