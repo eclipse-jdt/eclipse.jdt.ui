@@ -894,7 +894,6 @@
 		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
       		menubarPath="navigate/open.ext"
       		label="%OpenTypeHierarchyAction.label"
-      		accelerator="F4"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
 			retarget="true" />
 			
@@ -903,7 +902,6 @@
       		label="%OpenAction.label"
 			tooltip="%OpenAction.tooltip"
 			description="%OpenAction.description"
-			accelerator="F3"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.open.editor"
 			retarget="true" 
 			allowLabelUpdate="true"/>
@@ -941,7 +939,6 @@
 		<action id="org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"
       		menubarPath="navigate/open.ext"
       		label="%OpenExternalJavadocAction.label"
-      		accelerator="Shift+F2"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
 			retarget="true" />
 			
@@ -995,12 +992,12 @@
 		<action id="RedoAction"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
 			label="%Refactoring.redoAction.label"
-			accelerator="Ctrl+Shift+Y"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.RedoRefactoringAction"/>
 		<action id="UndoAction"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
 			label="%Refactoring.undoAction.label"
-			accelerator="Ctrl+Shift+Z"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
 				
 		<!-- reorg group  -->
@@ -1166,14 +1163,12 @@
 		<action id="org.eclipse.jdt.ui.actions.AddImport"
       		menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
       		label="%AddImportAction.label"
-      		accelerator="Ctrl+Shift+M"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.add.import"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.OrganizeImports"
       		menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
       		label="%OrganizeImportsAction.label"
-      		accelerator="Ctrl+Shift+O"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.organize.imports"
 			retarget="true" />
 			
@@ -1183,7 +1178,6 @@
 		<action id="org.eclipse.jdt.ui.actions.Format"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%FormatAction.label"
-      		accelerator="Ctrl+Shift+F"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.format"
 			retarget="true" />
 			
@@ -1200,14 +1194,12 @@
 		<action id="org.eclipse.jdt.ui.actions.Uncomment"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%UncommentAction.label"
-      		accelerator="Ctrl+Shift+\\"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.uncomment"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.Comment"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%CommentAction.label"
-      		accelerator="Ctrl+Shift+/"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.comment"
 			retarget="true" />
 
@@ -1612,6 +1604,16 @@
 
 	<!-- refactor -->
 	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
+		name= "%ActionDefinition.refactorRedo.name"
+		description= "%ActionDefinition.refactorRedo.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+		name= "%ActionDefinition.refactorUndo.name"
+		description= "%ActionDefinition.refactorUndo.description"
+	/>
+	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.pull.up"
 		name= "%ActionDefinition.pullUp.name"
 		description= "%ActionDefinition.pullUp.description"
@@ -1852,6 +1854,8 @@
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.previous.problem" />
 	
 		<!-- refactor -->
+		<accelerator key="Ctrl+Shift+Y" id="org.eclipse.jdt.ui.edit.text.java.refactor.redo" />
+		<accelerator key="Ctrl+Shift+Z" id="org.eclipse.jdt.ui.edit.text.java.refactor.undo" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
 		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
@@ -1934,6 +1938,8 @@
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.previous.problem" />
 	
 		<!-- refactor -->
+		<accelerator key="Ctrl+Shift+Y" id="org.eclipse.jdt.ui.edit.text.java.refactor.redo" />
+		<accelerator key="Ctrl+Shift+Z" id="org.eclipse.jdt.ui.edit.text.java.refactor.undo" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
 		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
