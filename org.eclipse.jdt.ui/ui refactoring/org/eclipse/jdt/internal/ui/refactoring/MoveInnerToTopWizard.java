@@ -126,7 +126,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 
 		private void addCreateFieldCheckBox(Composite newControl) {
 			fCreateFieldCheckBox= new Button(newControl, SWT.CHECK);
-			fCreateFieldCheckBox.setText(RefactoringMessages.getString("MoveInnerToTopWizard.5")); //$NON-NLS-1$
+			fCreateFieldCheckBox.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.create_field")); //$NON-NLS-1$
 			Assert.isTrue(getMoveRefactoring().isCreatingInstanceFieldPossible());//checked before page got created
 			fCreateFieldCheckBox.setEnabled(! getMoveRefactoring().isCreatingInstanceFieldMandatory());
 			fCreateFieldCheckBox.setSelection(getMoveRefactoring().getCreateInstanceField());
