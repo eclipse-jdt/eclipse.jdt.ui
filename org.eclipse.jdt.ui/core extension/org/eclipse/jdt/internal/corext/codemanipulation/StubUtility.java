@@ -267,14 +267,20 @@ public class StubUtility {
 		return str;
 	}
 	
-	public static String getTypeComment(ICompilationUnit cu, String destTypeName) throws CoreException {
+	public static String getTypeComment(IType type) throws CoreException {
+		String outer= (type.getDeclaringType() != null) ? JavaModelUtil.getTypeContainerName(type) : ""; //$NON-NLS-1$
+		return getTypeComment(type.getCompilationUnit(), type.getElementName(), outer);
+	}
+	
+	public static String getTypeComment(ICompilationUnit cu, String destTypeName, String outerName) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.TYPECOMMENT);
 		if (template == null) {
 			return null;
 		}
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'), 0);
 		context.setCompilationUnitVariables(cu);
-		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, outerName);
+		context.setVariable(CodeTemplateContextType.TYPENAME, destTypeName);
 		String str= context.evaluate(template).getString();
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;

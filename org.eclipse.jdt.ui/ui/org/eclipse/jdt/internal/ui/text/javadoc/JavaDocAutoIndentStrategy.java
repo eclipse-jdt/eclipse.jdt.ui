@@ -177,7 +177,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
 		throws CoreException, BadLocationException
 	{
-		String comment= StubUtility.getTypeComment(type.getCompilationUnit(), type.getElementName());
+		String comment= StubUtility.getTypeComment(type);
 		if (comment != null) {
 			comment= prepareTemplateComment(comment.trim(), indentation, lineDelimiter);
 		}

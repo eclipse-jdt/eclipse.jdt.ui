@@ -39,6 +39,7 @@ public class CodeTemplateContextType extends ContextType {
 	
 	public static final String TAGS= "tags"; //$NON-NLS-1$
 	
+	public static final String TYPENAME= "type_name"; //$NON-NLS-1$
 	public static final String FILENAME= "file_name"; //$NON-NLS-1$
 	public static final String PACKAGENAME= "package_name"; //$NON-NLS-1$
 	public static final String PROJECTNAME= "project_name"; //$NON-NLS-1$
@@ -96,7 +97,6 @@ public class CodeTemplateContextType extends ContextType {
 		addVariable(new GlobalVariables.User());
 		addVariable(new Todo());
 		
-		
 		if (CATCHBLOCK_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(EXCEPTION_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptiontype"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(EXCEPTION_VAR,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptionvar"))); //$NON-NLS-1$
@@ -108,12 +108,13 @@ public class CodeTemplateContextType extends ContextType {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement")));			 //$NON-NLS-1$
 		} else if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
-			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(TYPENAME,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typename"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(PACKAGE_DECLARATION,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.packdeclaration"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(TYPE_DECLARATION,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typedeclaration"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(TYPE_COMMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typecomment"))); //$NON-NLS-1$
 			addCompilationUnitVariables();
 		} else if (TYPECOMMENT_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(TYPENAME,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typename"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
 			addVariable(new TagsTemplateVariable());
 			addCompilationUnitVariables();

@@ -1445,14 +1445,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (template == null) {
 			return getDefaultCUContent(packDecl, typeContent, lineDelimiter);
 		}
-		String typeComment= StubUtility.getTypeComment(cu, getTypeName());
+		String enclosing= isEnclosingTypeSelected() ? JavaModelUtil.getTypeQualifiedName(getEnclosingType()) : ""; //$NON-NLS-1$
+		String typeComment= StubUtility.getTypeComment(cu, getTypeName(), enclosing);
 		IJavaProject project= cu.getJavaProject();
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, packDecl);
 		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
-		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, getTypeName());
+		context.setVariable(CodeTemplateContextType.TYPENAME, getTypeName());
 		String content= context.evaluate(template).getString();
 		if (content.length() == 0) {
 			return getDefaultCUContent(packDecl, typeContent, lineDelimiter);
@@ -1605,7 +1606,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN__JAVADOC_STUBS)) {
 			try {
-				String comment= StubUtility.getTypeComment(parentCU, getTypeName());
+				String enclosing= isEnclosingTypeSelected() ? JavaModelUtil.getTypeQualifiedName(getEnclosingType()) : ""; //$NON-NLS-1$
+				String comment= StubUtility.getTypeComment(parentCU, getTypeName(), enclosing);
 				if (comment != null && isValidComment(comment)) {
 					return comment;
 				}

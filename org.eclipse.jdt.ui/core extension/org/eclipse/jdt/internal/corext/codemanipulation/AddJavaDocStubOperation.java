@@ -48,7 +48,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	}
 
 	private String createTypeComment(IType type) throws CoreException {
-		return StubUtility.getTypeComment(type.getCompilationUnit(), type.getElementName());
+		return StubUtility.getTypeComment(type);
 	}		
 	
 	private String createMethodComment(IMethod meth) throws CoreException {
