@@ -83,6 +83,11 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 				return true;
 		}
 
+		// always append elements that did not have any range separators
+		if (!next.hasAttribute(COMMENT_STARTS_WITH_RANGE_DELIMITER)) {
+			return true;
+		}
+
 		if (fIndentRoots && !line.hasAttribute(COMMENT_ROOT) && !line.hasAttribute(COMMENT_PARAMETER))
 			count -= stringToLength(line.getIndentationReference());
 
@@ -146,25 +151,12 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#getDelimiter(org.eclipse.jdt.internal.corext.text.comment.CommentRange, org.eclipse.jdt.internal.corext.text.comment.CommentRange)
 	 */
 	protected String getDelimiter(final CommentRange previous, final CommentRange next) {
-
-		if (previous != null) {
-
-			if (previous.hasAttribute(COMMENT_HTML) && next.hasAttribute(COMMENT_HTML))
-				return ""; //$NON-NLS-1$
-
-			else if (next.hasAttribute(COMMENT_OPEN) || previous.hasAttribute(COMMENT_HTML | COMMENT_CLOSE))
-				return ""; //$NON-NLS-1$
-
-			else if (!next.hasAttribute(COMMENT_CODE) && previous.hasAttribute(COMMENT_CODE))
-				return ""; //$NON-NLS-1$
-
-			else if (next.hasAttribute(COMMENT_CLOSE) && previous.getLength() <= 2 && !isAlphaNumeric(previous))
-				return ""; //$NON-NLS-1$
-
-			else if (previous.hasAttribute(COMMENT_OPEN) && next.getLength() <= 2 && !isAlphaNumeric(next))
-				return ""; //$NON-NLS-1$
+		// simply preserve range (~ word) breaks
+		if (previous != null && !previous.hasAttribute(COMMENT_STARTS_WITH_RANGE_DELIMITER)) {
+			return ""; //$NON-NLS-1$
+		} else {
+			return super.getDelimiter(previous, next);
 		}
-		return super.getDelimiter(previous, next);
 	}
 
 	/**

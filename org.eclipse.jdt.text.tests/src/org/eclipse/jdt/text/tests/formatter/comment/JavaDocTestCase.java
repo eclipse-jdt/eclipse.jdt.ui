@@ -82,7 +82,7 @@ public class JavaDocTestCase extends CommentTestCase {
 	}
 	
 	public void testMultiLineCommentBreak1() {
-		String input= PREFIX + " test<br>test" + POSTFIX; //$NON-NLS-1$
+		String input= PREFIX + " test <br>test" + POSTFIX; //$NON-NLS-1$
 		String expected= PREFIX + DELIMITER + INFIX + "test <br>" + DELIMITER + INFIX + "test" + DELIMITER + POSTFIX; //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals(expected, testFormat(input));
 	}
@@ -319,5 +319,105 @@ public class JavaDocTestCase extends CommentTestCase {
 		setUserOption(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMAT, "false");
 		String content= PREFIX + DELIMITER + INFIX + "test" + DELIMITER + INFIX + "test" + DELIMITER + POSTFIX;
 		assertEquals(content, testFormat(content));
+	}
+	
+	/**
+	 * [formatting] Javadoc Formatter mishandles spaces in comments
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=49686
+	 */
+	public void testInlineTag1() {
+		String input= PREFIX + DELIMITER + INFIX + "{@link Object} has many methods." + DELIMITER + POSTFIX;  //$NON-NLS-1$
+		String expected= input;
+		String result= testFormat(input);
+		assertEquals(expected, result);
+	}
+	
+	/**
+	 * [formatting] Javadoc Formatter mishandles spaces in comments
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=49686
+	 */
+	public void testInlineTag2() {
+		String input= PREFIX + DELIMITER + INFIX + "{@link Object}s are cool." + DELIMITER + POSTFIX;  //$NON-NLS-1$
+		String expected= input;
+		String result= testFormat(input);
+		assertEquals(expected, result);
+	}
+	
+	/**
+	 * [formatting] Javadoc Formatter mishandles spaces in comments
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=49686
+	 */
+	public void testMultilineInlineTag1() {
+		setUserOption(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_LINELENGTH, "20"); //$NON-NLS-1$
+		final String prefix= PREFIX + DELIMITER + INFIX + "{@link Object}";
+		final String postfix= "has many methods." + DELIMITER + POSTFIX;
+		String input= prefix + " " + postfix;  //$NON-NLS-1$
+		String expected= prefix + DELIMITER + INFIX + postfix;
+		String result= testFormat(input);
+		assertEquals(expected, result);
+	}
+	
+	/**
+	 * [formatting] Javadoc Formatter mishandles spaces in comments
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=49686
+	 */
+	public void testMultilineInlineTag2() {
+		setUserOption(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_LINELENGTH, "20"); //$NON-NLS-1$
+		final String prefix= PREFIX + DELIMITER + INFIX + "{@link Objecterr}s";
+		final String postfix= "are cool." + DELIMITER + POSTFIX;
+		String input= prefix + " " + postfix;  //$NON-NLS-1$
+		String expected= prefix + DELIMITER + INFIX + postfix;
+		String result= testFormat(input);
+		assertEquals(expected, result);
+	}
+	
+	/**
+	 * [formatting] Javadoc Formatter mishandles spaces in comments
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=49686
+	 */
+	public void testTagWordbreaks1() {
+		String input= PREFIX + DELIMITER + INFIX + "<code>Object</code> rocks." + DELIMITER + POSTFIX;  //$NON-NLS-1$
+		String expected= input;
+		String result= testFormat(input);
+		assertEquals(expected, result);
+	}
+
+	/**
+	 * [formatting] Javadoc Formatter mishandles spaces in comments
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=49686
+	 */
+	public void testTagWordbreaks2() {
+		String input= PREFIX + DELIMITER + INFIX + "<code>Object</code>s are cool." + DELIMITER + POSTFIX;  //$NON-NLS-1$
+		String expected= input;
+		String result= testFormat(input);
+		assertEquals(expected, result);
+	}
+
+	/**
+	 * [formatting] Javadoc Formatter mishandles spaces in comments
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=49686
+	 */
+	public void testMultilineTagWordbreaks1() {
+		setUserOption(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_LINELENGTH, "20"); //$NON-NLS-1$
+		String prefix= PREFIX + DELIMITER + INFIX + "<code>Object</code>";
+		String postfix=  "rocks." + DELIMITER + POSTFIX;  //$NON-NLS-1$
+		String input= prefix + " " + postfix;
+		String expected= prefix + DELIMITER + INFIX + postfix; 
+		String result= testFormat(input);
+		assertEquals(expected, result);
+	}
+
+	/**
+	 * [formatting] Javadoc Formatter mishandles spaces in comments
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=49686
+	 */
+	public void testMultilineTagWordbreaks2() {
+		setUserOption(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_LINELENGTH, "20"); //$NON-NLS-1$
+		final String prefix= PREFIX + DELIMITER + INFIX + "Foo";
+		final String postfix= "<code>Obj</code>s" + DELIMITER + POSTFIX;
+		String input= prefix + " " + postfix;
+		String expected= prefix + DELIMITER + INFIX + postfix;
+		String result= testFormat(input);
+		assertEquals(expected, result);
 	}
 }

@@ -11,6 +11,10 @@
 
 package org.eclipse.jdt.internal.corext.text.comment;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.jface.text.Position;
 
 /**
@@ -204,5 +208,50 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	 */
 	public final void trimEnd(final int delta) {
 		length += delta;
+	}
+	
+	/*
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		List attributes= new ArrayList();
+		if (hasAttribute(COMMENT_BLANKLINE))
+			attributes.add("COMMENT_BLANKLINE"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_BREAK))
+			attributes.add("COMMENT_BREAK"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_CLOSE))
+			attributes.add("COMMENT_CLOSE"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_CODE))
+			attributes.add("COMMENT_CODE"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_HTML))
+			attributes.add("COMMENT_HTML"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_IMMUTABLE))
+			attributes.add("COMMENT_IMMUTABLE"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_NEWLINE))
+			attributes.add("COMMENT_NEWLINE"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_OPEN))
+			attributes.add("COMMENT_OPEN"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_PARAGRAPH))
+			attributes.add("COMMENT_PARAGRAPH"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_PARAMETER))
+			attributes.add("COMMENT_PARAMETER"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_ROOT))
+			attributes.add("COMMENT_ROOT"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_SEPARATOR))
+			attributes.add("COMMENT_SEPARATOR"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_FIRST_TOKEN))
+			attributes.add("COMMENT_FIRST_TOKEN"); //$NON-NLS-1$
+		if (hasAttribute(COMMENT_STARTS_WITH_RANGE_DELIMITER))
+			attributes.add("COMMENT_STARTS_WITH_RANGE_DELIMITER"); //$NON-NLS-1$
+		
+		StringBuffer buf= new StringBuffer("CommentRange [" + offset + "+" + length + "] {"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		for (Iterator it= attributes.iterator(); it.hasNext();) {
+			String string= (String) it.next();
+			buf.append(string);
+			if (it.hasNext())
+				buf.append(", "); //$NON-NLS-1$
+		}
+		
+		return buf.toString() + "}"; //$NON-NLS-1$
 	}
 }

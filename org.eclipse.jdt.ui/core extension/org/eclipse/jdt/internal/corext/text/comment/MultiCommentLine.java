@@ -274,11 +274,13 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 			parent.append(result);
 		}
 
-		int attribute= COMMENT_FIRST_TOKEN;
+		int attribute= COMMENT_FIRST_TOKEN | COMMENT_STARTS_WITH_RANGE_DELIMITER;
 		while (offset < length) {
 
-			while (offset < length && Character.isWhitespace(content.charAt(offset)))
+			while (offset < length && Character.isWhitespace(content.charAt(offset))) {
 				offset++;
+				attribute |= COMMENT_STARTS_WITH_RANGE_DELIMITER;
+			}
 
 			index= offset;
 
@@ -286,7 +288,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 
 				if (content.charAt(index) == HTML_TAG_PREFIX) {
 
-					// in order to avoid recognizign any < in a comment, even those which are part of e.g.
+					// in order to avoid recognizing any < in a comment, even those which are part of e.g.
 					// java source code, we validate the tag content to be one of the recognized
 					// tags (structural, breaks, pre, code).
 					int tag= ++index;

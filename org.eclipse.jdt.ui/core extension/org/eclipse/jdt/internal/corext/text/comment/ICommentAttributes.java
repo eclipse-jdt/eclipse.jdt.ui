@@ -56,4 +56,7 @@ public interface ICommentAttributes {
 
 	/** Range is the first token on the line in the original source */
 	public static final int COMMENT_FIRST_TOKEN= 1 << 13;
+	
+	/** Range was preceded by whitespace / line delimiters */
+	public static final int COMMENT_STARTS_WITH_RANGE_DELIMITER= 1 << 14;
 }
