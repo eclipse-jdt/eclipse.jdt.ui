@@ -13,11 +13,15 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -25,7 +29,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 /**
@@ -59,11 +62,12 @@ public class NewASTRewrite {
 	/** root node for the rewrite: Only nodes under this root are accepted */
 	private ASTNode fRootNode;
 		
-	/** cach for last access */
+	/** cache for last access */
 	private EventHolder fLastEvent;
 	
 	private HashMap fPlaceholderNodes;
 	private HashMap fNodeSourceDatas;
+	private HashSet fCollapsedNodes;
 	
 	private HashSet fInsertBoundToPrevious;
 	
@@ -78,48 +82,62 @@ public class NewASTRewrite {
 	}
 	
 	/**
-	 * Perform rewriting: Analyses AST modifications and creates text edits that describe changes to the
+	 * Perform rewriting: Analyses the rewrite events and creates text edits that describe changes to the
 	 * underlying code. Edits do only change code when the corresponding node has changed. New code
 	 * is formatted using the standard code formatter.
-	 * @param textBuffer Text buffer which is describing the code of the AST passed in in the
-	 * constructor. This buffer is accessed read-only.
+	 * @param document Document which describes the code of the AST that is passed in in the
+	 * constructor. This document is accessed read-only.
+	 * @return Returns the edit describing the text changes.
 	 */
-	public void rewriteNode(IDocument document, TextEdit rootEdit) {
-		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, rootEdit, this);
-		fRootNode.accept(visitor); 
+	public TextEdit rewriteNode(IDocument document) {
+		TextEdit result= new MultiTextEdit();
+		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, result, this);
+		fRootNode.accept(visitor);
+		return result;
 	}
 	
 	/**
-	 * Removes all modifications applied to the given AST.
+	 * Clears all events and other internal structures.
 	 */
-	public final void clearRewrite() {
+	protected final void clearRewrite() {
 		fEvents.clear();
 		fNodeSourceDatas.clear();
 		fPlaceholderNodes= null;
 		fInsertBoundToPrevious= null;
 	}
 	
-	
+	/**
+	 * Returns the root node of the rewrite. All modifications must lie inside the root.
+	 * @return Returns the root node
+	 */
 	public ASTNode getRootNode() {
 		return fRootNode;
 	}
 	
-	public void addEvent(ASTNode parent, int childProperty, RewriteEvent change) {
-		if (change.isListRewrite() && !ASTNodeConstants.isListProperty(childProperty)) {
-			throw new IllegalArgumentException();
-		} else {
-			if (!ASTNodeConstants.hasChildProperty(parent, childProperty)) {
-				throw new IllegalArgumentException();
+	protected void addEvent(ASTNode parent, int childProperty, RewriteEvent event) {
+		validateIsInsideRoot(parent);
+		validateHasChildProperty(parent, childProperty);
+		
+		if (event.isListRewrite()) {
+			validateIsListProperty(childProperty);
+		}
+		
+		EventHolder holder= new EventHolder(parent, childProperty, event);
+		
+		// check if already in list
+		for (int i= 0; i < fEvents.size(); i++) {
+			EventHolder curr= (EventHolder) fEvents.get(i);
+			if (curr.parent == parent && curr.childProperty == childProperty) {
+				fEvents.set(i, holder);
+				return;
 			}
 		}
-		fEvents.add(new EventHolder(parent, childProperty, change));
+		fEvents.add(holder);
 	}
 	
 	
-	public RewriteEvent getEvent(ASTNode parent, int property) {
-		if (!ASTNodeConstants.hasChildProperty(parent, property)) {
-			throw new IllegalArgumentException();
-		}
+	protected RewriteEvent getEvent(ASTNode parent, int property) {
+		validateHasChildProperty(parent, property);
 		
 		if (fLastEvent != null && fLastEvent.parent == parent && fLastEvent.childProperty == property) {
 			return fLastEvent.event;
@@ -136,12 +154,106 @@ public class NewASTRewrite {
 		return null;
 	}
 		
+	protected final NodeRewriteEvent getNodeEvent(ASTNode parent, int childProperty, boolean forceCreation) {
+		validateIsNodeProperty(childProperty);
+		NodeRewriteEvent event= (NodeRewriteEvent) getEvent(parent, childProperty);
+		if (event == null && forceCreation) {
+			Object originalValue= accessOriginalValue(parent, childProperty);
+			event= new NodeRewriteEvent(originalValue, originalValue);
+			addEvent(parent, childProperty, event);
+		}
+		return event;		
+	}
+		
+	protected final ListRewriteEvent getListEvent(ASTNode parent, int childProperty, boolean forceCreation) {
+		validateIsListProperty(childProperty);
+		ListRewriteEvent event= (ListRewriteEvent) getEvent(parent, childProperty);
+		if (event == null && forceCreation) {
+			List originalValue= (List) accessOriginalValue(parent, childProperty);
+			event= new ListRewriteEvent(originalValue);
+			addEvent(parent, childProperty, event);
+		}
+		return event;
+	}
+	
+	protected RewriteEvent findEventByOriginal(Object original) {
+		for (int i= 0; i < fEvents.size(); i++) {
+			RewriteEvent event= ((EventHolder) fEvents.get(i)).event;
+			if (event.getOriginalValue() == original) {
+				return event;
+			}
+			if (event.isListRewrite()) {
+				RewriteEvent[] children= event.getChildren();
+				for (int k= 0; k < children.length; k++) {
+					if (children[k].getOriginalValue() == original) {
+						return children[k];
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	public boolean isRemoved(ASTNode node) {
+		RewriteEvent event= findEventByOriginal(node);
+		return event != null && event.getChangeKind() == RewriteEvent.REMOVED;
+	}	
+	
+	public boolean isReplaced(ASTNode node) {
+		RewriteEvent event= findEventByOriginal(node);
+		return event != null && event.getChangeKind() == RewriteEvent.REPLACED;
+	}
+	
+	
+	/*
+	 * Gets an original child from the AST. Override this method if the AST can be modified when accessing that.
+	 * Temporarily overridden to port. All rewriters should prevent AST modification without their control.
+	 */
+	protected Object accessOriginalValue(ASTNode parent, int childProperty) {
+		return ASTNodeConstants.getNodeChild(parent, childProperty);
+	}
+	
+	
+	protected final void validateIsNodeProperty(int property) {
+		if (ASTNodeConstants.isListProperty(property)) {
+			String message= ASTNodeConstants.getPropertyName(property) + " is not a node property"; //$NON-NLS-1$
+			throw new IllegalArgumentException(message);
+		}
+	}
+	
+	protected final void validateIsListProperty(int property) {
+		if (!ASTNodeConstants.isListProperty(property)) {
+			String message= ASTNodeConstants.getPropertyName(property) + " is not a list property"; //$NON-NLS-1$
+			throw new IllegalArgumentException(message);
+		}
+	}
+	
+	protected final void validateHasChildProperty(ASTNode parent, int property) {
+		if (!ASTNodeConstants.hasChildProperty(parent, property)) {
+			String message= Signature.getSimpleName(parent.getClass().getName()) + " has no property " + ASTNodeConstants.getPropertyName(property); //$NON-NLS-1$
+			throw new IllegalArgumentException(message);
+		}
+	}
+	
+	protected final void validateIsInsideRoot(ASTNode node) {
+		if (node.getStartPosition() == -1) {
+			throw new IllegalArgumentException("Node is not an existing node"); //$NON-NLS-1$
+		}
+	
+		int endPos= node.getStartPosition() + node.getLength();
+		ASTNode rootNode= getRootNode();
+		if (rootNode.getStartPosition() > node.getStartPosition() || rootNode.getStartPosition() + rootNode.getLength() < endPos) {
+			throw new IllegalArgumentException("Node is not inside of ASTRewrite root"); //$NON-NLS-1$
+		}
+	}
+		
+		
 	public Object getOriginalValue(ASTNode parent, int property) {
 		RewriteEvent event= getEvent(parent, property);
 		if (event != null) {
 			return event.getOriginalValue();
 		}
-		return ASTNodeConstants.getNodeChild(parent, property);
+		return accessOriginalValue(parent, property);
 	}
 	
 	public Object getNewValue(ASTNode parent, int property) {
@@ -149,7 +261,7 @@ public class NewASTRewrite {
 		if (event != null) {
 			return event.getNewValue();
 		}
-		return ASTNodeConstants.getNodeChild(parent, property);
+		return accessOriginalValue(parent, property);
 	}
 	
 	public boolean hasChildrenChanges(ASTNode parent) {
@@ -170,7 +282,7 @@ public class NewASTRewrite {
 		return (GroupDescription) fGroupDescriptions.get(event);
 	}
 	
-	public final void setDescription(RewriteEvent event, GroupDescription desc) {
+	protected final void setDescription(RewriteEvent event, GroupDescription desc) {
 		if (desc != null) {
 			if (fGroupDescriptions == null) {
 				fGroupDescriptions= new HashMap(5);
@@ -253,7 +365,7 @@ public class NewASTRewrite {
 	 *  <code>SINGLEVAR_DECLARATION</code>,<code> VAR_DECLARATION_FRAGMENT</code>,
 	 * <code>TYPE</code>, <code>EXPRESSION</code>, <code>NAME</code>
 	 * <code>PACKAGE_DECLARATION</code>, <code>IMPORT_DECLARATION</code> and <code>JAVADOC</code>.
-	 * @return the place holder node
+	 * @return Returns the place holder node
 	 */
 	public final ASTNode createPlaceholder(String code, int nodeType) {
 		StringPlaceholderData data= new StringPlaceholderData();
@@ -263,16 +375,18 @@ public class NewASTRewrite {
 
 	/**
 	 * Creates a target node for a node to be copied. A target node can be inserted or used
-	 * to replace at the target position. 
+	 * to replace at the target position.
+	 * @param node The node to create a copy placeholder for.
+	 * @return The placeholder to be used at the copy destination.
 	 */
 	public final ASTNode createCopyPlaceholder(ASTNode node) {
-		Assert.isTrue(node.getStartPosition() != -1, "Tries to copy a non-existing node"); //$NON-NLS-1$
+		validateIsInsideRoot(node);
 		
 		createNodeSourceData(node).copyCount++;
 		
 		int placeHolderType= getPlaceholderType(node);
 		if (placeHolderType == UNKNOWN) {
-			Assert.isTrue(false, "Can not create copy for elements of type " + node.getClass().getName()); //$NON-NLS-1$
+			throw new IllegalArgumentException("Copy placeholders are not supported for nodes of type " + node.getClass().getName()); //$NON-NLS-1$
 		}
 		CopyPlaceholderData data= new CopyPlaceholderData();
 		data.node= node;
@@ -282,14 +396,15 @@ public class NewASTRewrite {
 	/**
 	 * Creates a target node for a node to be moved. A target node can be inserted or used
 	 * to replace at the target position. The source node has to be marked as removed or replaced.
+	 * @param node The node to create a move placeholder for.
+	 * @return The placeholder to be used at the move destination.
 	 */
 	public final ASTNode createMovePlaceholder(ASTNode node) {
-		Assert.isTrue(node.getStartPosition() != -1, "Tries to move a non-existing node"); //$NON-NLS-1$
-		Assert.isTrue(!isMoveSource(node), "Node already marked as moved"); //$NON-NLS-1$
+		validateIsInsideRoot(node);
 
 		int placeHolderType= getPlaceholderType(node);
 		if (placeHolderType == UNKNOWN) {
-			Assert.isTrue(false, "Can not create move for elements of type " + node.getClass().getName()); //$NON-NLS-1$
+			throw new IllegalArgumentException("Move placeholders are not supported for nodes of type " + node.getClass().getName()); //$NON-NLS-1$
 		}
 		
 		createNodeSourceData(node).isMoveSource= true;
@@ -299,14 +414,15 @@ public class NewASTRewrite {
 		return createPlaceholder(data, placeHolderType);
 	}	
 	
-	
-	
 	protected final Block createCollapsePlaceholder() {
 		Block placeHolder= getRootNode().getAST().newBlock();
-		setPlaceholderData(placeHolder, new CollapsedPlaceholderData());
+		if (fCollapsedNodes == null) {
+			fCollapsedNodes= new HashSet();
+		}
+		fCollapsedNodes.add(placeHolder);
 		return placeHolder;
 	}
-	
+		
 	private final ASTNode createPlaceholder(PlaceholderData data, int nodeType) {
 		AST ast= getRootNode().getAST();
 		ASTNode placeHolder;
@@ -410,7 +526,10 @@ public class NewASTRewrite {
 	}
 	
 	public final boolean isCollapsed(ASTNode node) {
-		return getPlaceholderData(node) instanceof CollapsedPlaceholderData;
+		if (fCollapsedNodes != null) {
+			return fCollapsedNodes.contains(node);
+		}
+		return false;	
 	}
 	
 	
@@ -449,13 +568,7 @@ public class NewASTRewrite {
 	
 	private static class PlaceholderData {
 	}
-	
-	protected static final class CollapsedPlaceholderData extends PlaceholderData {
-		public String toString() {
-			return "[collapsed]"; //$NON-NLS-1$
-		}
-	}
-	
+		
 	public static final class MovePlaceholderData extends PlaceholderData {
 		public ASTNode node;
 		public String toString() {
@@ -476,5 +589,18 @@ public class NewASTRewrite {
 			return "[placeholder string: " + code +"]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
+	
+	public String toString() {
+		StringBuffer buf= new StringBuffer();
+		buf.append("Events:\n"); //$NON-NLS-1$
+		for (int i= 0; i < fEvents.size(); i++) {
+			EventHolder holder= (EventHolder) fEvents.get(i);
+			buf.append(holder.parent).append(" - "); //$NON-NLS-1$
+			buf.append(ASTNodeConstants.getPropertyName(holder.childProperty)).append(": "); //$NON-NLS-1$
+			buf.append(holder.event).append('\n');
+		}
+		return buf.toString();
+	}
+	
 
 }

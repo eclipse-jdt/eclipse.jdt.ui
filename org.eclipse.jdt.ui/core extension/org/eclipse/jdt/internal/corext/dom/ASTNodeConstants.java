@@ -596,7 +596,7 @@ public class ASTNodeConstants {
 	}
 
 	/**
-	 Returns <code>true</code> if property of a node is a list property.
+	  * Returns <code>true</code> if property of a node is a list property.
 	 */
 	public static boolean isListProperty(int property) {
 		switch (property) {
@@ -615,6 +615,28 @@ public class ASTNodeConstants {
 			case THROWN_EXCEPTIONS :
 			case TYPES :
 			case UPDATERS :
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	  * Returns <code>true</code> if property of a node is an attribute property (Not a List and not an ASTNode).
+	 */
+	public static boolean isAttributeProperty(int property) {
+		switch (property) {
+			case COMMENT :
+			case ESCAPED_VALUE :
+			case EXTRA_DIMENSIONS :
+			case IDENTIFIER :
+			case IS_CONSTRUCTOR :
+			case IS_INTERFACE :
+			case IS_ON_DEMAND :
+			case LITERAL_VALUE :
+			case MODIFIERS :
+			case OPERATOR :
+			case PRIMITIVE_TYPE_CODE :
+			case TOKEN :
 				return true;
 		}
 		return false;
@@ -1364,7 +1386,7 @@ public class ASTNodeConstants {
 			case ASTNode.ANONYMOUS_CLASS_DECLARATION :
 				return new int[] { BODY_DECLARATIONS };
 			case ASTNode.ARRAY_ACCESS :
-				return new int[] { INDEX, ARRAY };
+				return new int[] { ARRAY, INDEX };
 			case ASTNode.ARRAY_CREATION :
 				return new int[] { TYPE, DIMENSIONS, INITIALIZER };
 			case ASTNode.ARRAY_INITIALIZER :
@@ -1372,7 +1394,7 @@ public class ASTNodeConstants {
 			case ASTNode.ARRAY_TYPE :
 				return new int[] { COMPONENT_TYPE };
 			case ASTNode.ASSERT_STATEMENT :
-				return new int[] { MESSAGE, EXPRESSION };
+				return new int[] { EXPRESSION, MESSAGE };
 			case ASTNode.ASSIGNMENT :
 				return new int[] { OPERATOR, LEFT_HAND_SIDE, RIGHT_HAND_SIDE };
 			case ASTNode.BLOCK :
@@ -1386,9 +1408,9 @@ public class ASTNodeConstants {
 			case ASTNode.CHARACTER_LITERAL :
 				return new int[] { ESCAPED_VALUE };
 			case ASTNode.CLASS_INSTANCE_CREATION :
-				return new int[] { NAME, ARGUMENTS, EXPRESSION, ANONYMOUS_CLASS_DECLARATION };
+				return new int[] { EXPRESSION, NAME, ARGUMENTS, ANONYMOUS_CLASS_DECLARATION };
 			case ASTNode.COMPILATION_UNIT :
-				return new int[] { IMPORTS, TYPES, PACKAGE };
+				return new int[] { PACKAGE, IMPORTS, TYPES };
 			case ASTNode.CONDITIONAL_EXPRESSION :
 				return new int[] { EXPRESSION, THEN_EXPRESSION, ELSE_EXPRESSION };
 			case ASTNode.CONSTRUCTOR_INVOCATION :
@@ -1400,19 +1422,19 @@ public class ASTNodeConstants {
 			case ASTNode.EXPRESSION_STATEMENT :
 				return new int[] { EXPRESSION };
 			case ASTNode.FIELD_ACCESS :
-				return new int[] { NAME, EXPRESSION };
+				return new int[] { EXPRESSION, NAME };
 			case ASTNode.FIELD_DECLARATION :
-				return new int[] { FRAGMENTS, TYPE, MODIFIERS, JAVADOC };
+				return new int[] { MODIFIERS, TYPE, FRAGMENTS, JAVADOC };
 			case ASTNode.FOR_STATEMENT :
-				return new int[] { EXPRESSION, BODY, INITIALIZERS, UPDATERS };
+				return new int[] { INITIALIZERS, EXPRESSION, UPDATERS, BODY };
 			case ASTNode.IF_STATEMENT :
 				return new int[] { EXPRESSION, THEN_STATEMENT, ELSE_STATEMENT };
 			case ASTNode.IMPORT_DECLARATION :
 				return new int[] { NAME, IS_ON_DEMAND };
 			case ASTNode.INFIX_EXPRESSION :
-				return new int[] { OPERATOR, EXTENDED_OPERANDS, LEFT_OPERAND, RIGHT_OPERAND };
+				return new int[] { OPERATOR, LEFT_OPERAND, RIGHT_OPERAND, EXTENDED_OPERANDS };
 			case ASTNode.INITIALIZER :
-				return new int[] { BODY, MODIFIERS, JAVADOC };
+				return new int[] { MODIFIERS, BODY, JAVADOC };
 			case ASTNode.INSTANCEOF_EXPRESSION :
 				return new int[] { LEFT_OPERAND, RIGHT_OPERAND };
 			case ASTNode.JAVADOC :
@@ -1420,9 +1442,9 @@ public class ASTNodeConstants {
 			case ASTNode.LABELED_STATEMENT :
 				return new int[] { LABEL, BODY };
 			case ASTNode.METHOD_DECLARATION :
-				return new int[] { NAME, PARAMETERS, THROWN_EXCEPTIONS, BODY, EXTRA_DIMENSIONS, MODIFIERS, IS_CONSTRUCTOR, RETURN_TYPE, JAVADOC };
+				return new int[] { IS_CONSTRUCTOR, MODIFIERS, NAME, PARAMETERS, THROWN_EXCEPTIONS, RETURN_TYPE, EXTRA_DIMENSIONS, BODY, JAVADOC };
 			case ASTNode.METHOD_INVOCATION :
-				return new int[] { NAME, ARGUMENTS, EXPRESSION };
+				return new int[] { EXPRESSION, NAME, ARGUMENTS };
 			case ASTNode.NUMBER_LITERAL :
 				return new int[] { TOKEN };
 			case ASTNode.PACKAGE_DECLARATION :
@@ -1436,7 +1458,7 @@ public class ASTNodeConstants {
 			case ASTNode.PRIMITIVE_TYPE :
 				return new int[] { PRIMITIVE_TYPE_CODE };
 			case ASTNode.QUALIFIED_NAME :
-				return new int[] { NAME, QUALIFIER };
+				return new int[] { QUALIFIER, NAME };
 			case ASTNode.RETURN_STATEMENT :
 				return new int[] { EXPRESSION };
 			case ASTNode.SIMPLE_NAME :
@@ -1444,19 +1466,19 @@ public class ASTNodeConstants {
 			case ASTNode.SIMPLE_TYPE :
 				return new int[] { NAME };
 			case ASTNode.SINGLE_VARIABLE_DECLARATION :
-				return new int[] { NAME, TYPE, EXTRA_DIMENSIONS, INITIALIZER, MODIFIERS };
+				return new int[] { MODIFIERS, NAME, TYPE, EXTRA_DIMENSIONS, INITIALIZER };
 			case ASTNode.STRING_LITERAL :
 				return new int[] { ESCAPED_VALUE, LITERAL_VALUE };
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
-				return new int[] { ARGUMENTS, EXPRESSION };
+				return new int[] { EXPRESSION, ARGUMENTS };
 			case ASTNode.SUPER_FIELD_ACCESS :
-				return new int[] { NAME, QUALIFIER };
+				return new int[] { QUALIFIER, NAME };
 			case ASTNode.SUPER_METHOD_INVOCATION :
-				return new int[] { NAME, ARGUMENTS, QUALIFIER };
+				return new int[] { QUALIFIER, NAME, ARGUMENTS };
 			case ASTNode.SWITCH_CASE :
 				return new int[] { EXPRESSION };
 			case ASTNode.SWITCH_STATEMENT :
-				return new int[] { STATEMENTS, EXPRESSION };
+				return new int[] { EXPRESSION, STATEMENTS };
 			case ASTNode.SYNCHRONIZED_STATEMENT :
 				return new int[] { EXPRESSION, BODY };
 			case ASTNode.THIS_EXPRESSION :
@@ -1466,21 +1488,140 @@ public class ASTNodeConstants {
 			case ASTNode.TRY_STATEMENT :
 				return new int[] { BODY, CATCH_CLAUSES, FINALLY };
 			case ASTNode.TYPE_DECLARATION :
-				return new int[] { NAME, SUPER_INTERFACES, BODY_DECLARATIONS, MODIFIERS, IS_INTERFACE, SUPERCLASS, JAVADOC };
+				return new int[] { IS_INTERFACE, MODIFIERS, NAME, SUPERCLASS, SUPER_INTERFACES, BODY_DECLARATIONS, JAVADOC };
 			case ASTNode.TYPE_DECLARATION_STATEMENT :
 				return new int[] { TYPE_DECLARATION };
 			case ASTNode.TYPE_LITERAL :
 				return new int[] { TYPE };
 			case ASTNode.VARIABLE_DECLARATION_EXPRESSION :
-				return new int[] { FRAGMENTS, TYPE, MODIFIERS };
+				return new int[] { MODIFIERS, TYPE, FRAGMENTS };
 			case ASTNode.VARIABLE_DECLARATION_FRAGMENT :
 				return new int[] { NAME, EXTRA_DIMENSIONS, INITIALIZER };
 			case ASTNode.VARIABLE_DECLARATION_STATEMENT :
-				return new int[] { FRAGMENTS, TYPE, MODIFIERS };
+				return new int[] { MODIFIERS, TYPE, FRAGMENTS };
 			case ASTNode.WHILE_STATEMENT :
 				return new int[] { EXPRESSION, BODY };
 		}
 		return new int[0];
+	}
+
+	/**
+	 * Returns the name of a property.
+	 */
+	public static String getPropertyName(int property) {
+		switch (property) {
+			case ANONYMOUS_CLASS_DECLARATION :
+				return "ANONYMOUS_CLASS_DECLARATION"; //$NON-NLS-1$
+			case ARGUMENTS :
+				return "ARGUMENTS"; //$NON-NLS-1$
+			case ARRAY :
+				return "ARRAY"; //$NON-NLS-1$
+			case BODY :
+				return "BODY"; //$NON-NLS-1$
+			case BODY_DECLARATIONS :
+				return "BODY_DECLARATIONS"; //$NON-NLS-1$
+			case CATCH_CLAUSES :
+				return "CATCH_CLAUSES"; //$NON-NLS-1$
+			case COMMENT :
+				return "COMMENT"; //$NON-NLS-1$
+			case COMPONENT_TYPE :
+				return "COMPONENT_TYPE"; //$NON-NLS-1$
+			case DIMENSIONS :
+				return "DIMENSIONS"; //$NON-NLS-1$
+			case ELSE_EXPRESSION :
+				return "ELSE_EXPRESSION"; //$NON-NLS-1$
+			case ELSE_STATEMENT :
+				return "ELSE_STATEMENT"; //$NON-NLS-1$
+			case ESCAPED_VALUE :
+				return "ESCAPED_VALUE"; //$NON-NLS-1$
+			case EXCEPTION :
+				return "EXCEPTION"; //$NON-NLS-1$
+			case EXPRESSION :
+				return "EXPRESSION"; //$NON-NLS-1$
+			case EXPRESSIONS :
+				return "EXPRESSIONS"; //$NON-NLS-1$
+			case EXTENDED_OPERANDS :
+				return "EXTENDED_OPERANDS"; //$NON-NLS-1$
+			case EXTRA_DIMENSIONS :
+				return "EXTRA_DIMENSIONS"; //$NON-NLS-1$
+			case FINALLY :
+				return "FINALLY"; //$NON-NLS-1$
+			case FRAGMENTS :
+				return "FRAGMENTS"; //$NON-NLS-1$
+			case IDENTIFIER :
+				return "IDENTIFIER"; //$NON-NLS-1$
+			case IMPORTS :
+				return "IMPORTS"; //$NON-NLS-1$
+			case INDEX :
+				return "INDEX"; //$NON-NLS-1$
+			case INITIALIZER :
+				return "INITIALIZER"; //$NON-NLS-1$
+			case INITIALIZERS :
+				return "INITIALIZERS"; //$NON-NLS-1$
+			case IS_CONSTRUCTOR :
+				return "IS_CONSTRUCTOR"; //$NON-NLS-1$
+			case IS_INTERFACE :
+				return "IS_INTERFACE"; //$NON-NLS-1$
+			case IS_ON_DEMAND :
+				return "IS_ON_DEMAND"; //$NON-NLS-1$
+			case JAVADOC :
+				return "JAVADOC"; //$NON-NLS-1$
+			case LABEL :
+				return "LABEL"; //$NON-NLS-1$
+			case LEFT_HAND_SIDE :
+				return "LEFT_HAND_SIDE"; //$NON-NLS-1$
+			case LEFT_OPERAND :
+				return "LEFT_OPERAND"; //$NON-NLS-1$
+			case LITERAL_VALUE :
+				return "LITERAL_VALUE"; //$NON-NLS-1$
+			case MESSAGE :
+				return "MESSAGE"; //$NON-NLS-1$
+			case MODIFIERS :
+				return "MODIFIERS"; //$NON-NLS-1$
+			case NAME :
+				return "NAME"; //$NON-NLS-1$
+			case OPERAND :
+				return "OPERAND"; //$NON-NLS-1$
+			case OPERATOR :
+				return "OPERATOR"; //$NON-NLS-1$
+			case PACKAGE :
+				return "PACKAGE"; //$NON-NLS-1$
+			case PARAMETERS :
+				return "PARAMETERS"; //$NON-NLS-1$
+			case PRIMITIVE_TYPE_CODE :
+				return "PRIMITIVE_TYPE_CODE"; //$NON-NLS-1$
+			case QUALIFIER :
+				return "QUALIFIER"; //$NON-NLS-1$
+			case RETURN_TYPE :
+				return "RETURN_TYPE"; //$NON-NLS-1$
+			case RIGHT_HAND_SIDE :
+				return "RIGHT_HAND_SIDE"; //$NON-NLS-1$
+			case RIGHT_OPERAND :
+				return "RIGHT_OPERAND"; //$NON-NLS-1$
+			case STATEMENTS :
+				return "STATEMENTS"; //$NON-NLS-1$
+			case SUPERCLASS :
+				return "SUPERCLASS"; //$NON-NLS-1$
+			case SUPER_INTERFACES :
+				return "SUPER_INTERFACES"; //$NON-NLS-1$
+			case THEN_EXPRESSION :
+				return "THEN_EXPRESSION"; //$NON-NLS-1$
+			case THEN_STATEMENT :
+				return "THEN_STATEMENT"; //$NON-NLS-1$
+			case THROWN_EXCEPTIONS :
+				return "THROWN_EXCEPTIONS"; //$NON-NLS-1$
+			case TOKEN :
+				return "TOKEN"; //$NON-NLS-1$
+			case TYPE :
+				return "TYPE"; //$NON-NLS-1$
+			case TYPE_DECLARATION :
+				return "TYPE_DECLARATION"; //$NON-NLS-1$
+			case TYPES :
+				return "TYPES"; //$NON-NLS-1$
+			case UPDATERS :
+				return "UPDATERS"; //$NON-NLS-1$
+		}
+		throw new IllegalArgumentException();
 	}
 
 }

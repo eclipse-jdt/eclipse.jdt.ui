@@ -73,7 +73,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	
 	private final ASTRewriteFormatter fFormatter;
 	
-	/**
+	/*
 	 * Constructor for ASTChangeAnalyzer.
 	 */
 	public ASTRewriteAnalyzer(IDocument document, TextEdit rootEdit, NewASTRewrite rewrite) {
@@ -184,8 +184,6 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 		return null;
 	}
-	
-	// new
 	
 	private final RewriteEvent getEvent(ASTNode parent, int property) {
 		return fRewrite.getEvent(parent, property);
@@ -566,7 +564,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}	
 	
 	
-	/**
+	/*
 	 * endpos can be -1 -> 
 	 */
 	private int rewriteBodyNode(ASTNode parent, int property, int offset, int endPos, int indent, BlockContext context) {
@@ -924,16 +922,18 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					ASTNode existingNode= ((MovePlaceholderData) data).node;
 					int srcIndentLevel= getIndent(existingNode.getStartPosition());
 					doTextMove(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
+					currPos= offset + curr.length; // continue to insert after the replaced string
 				} else if (data instanceof CopyPlaceholderData) { // replace with a copy target
 					ASTNode existingNode= ((CopyPlaceholderData) data).node;
 					int srcIndentLevel= getIndent(existingNode.getStartPosition());
 					doTextCopy(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
+					currPos= offset + curr.length; // continue to insert after the replaced string
 				} else if (data instanceof StringPlaceholderData) { // replace with a placeholder
 					String code= ((StringPlaceholderData) data).code;
 					String str= Strings.changeIndent(code, 0, tabWidth, destIndentString, getLineDelimiter()); 
 					doTextInsert(insertOffset, str, description);
+					currPos= offset + curr.length; // continue to insert after the replaced string
 				}
-				currPos= offset + curr.length; // continue to insert after the replaced string
 			}
 
 		}

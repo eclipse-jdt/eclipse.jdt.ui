@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 
 /**
  *
@@ -24,7 +23,7 @@ public class NodeRewriteEvent extends RewriteEvent {
 		fOriginalValue= originalValue;
 		fNewValue= newValue;
 	}
-		
+			
 	/**
 	 * @return Returns the new value.
 	 */
@@ -68,10 +67,10 @@ public class NodeRewriteEvent extends RewriteEvent {
 
 	/*
 	 * Sets a new value for the new node. Internal access only.
-	 * @param newEntry The new value to set.
+	 * @param newValue The new value to set.
 	 */
-	/* package */ void setNewValue(ASTNode newEntry) {
-		fNewValue= newEntry;
+	public void setNewValue(Object newValue) {
+		fNewValue= newValue;
 	}
 
 	/* (non-Javadoc)
@@ -79,6 +78,35 @@ public class NodeRewriteEvent extends RewriteEvent {
 	 */
 	public RewriteEvent[] getChildren() {
 		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		StringBuffer buf= new StringBuffer();
+		switch (getChangeKind()) {
+		case INSERTED:
+			buf.append(" [inserted: "); //$NON-NLS-1$
+			buf.append(getNewValue());
+			buf.append(']');
+			break;
+		case REPLACED:
+			buf.append(" [replaced: "); //$NON-NLS-1$
+			buf.append(getOriginalValue());
+			buf.append(" -> "); //$NON-NLS-1$
+			buf.append(getNewValue());
+			buf.append(']');
+			break;
+		case REMOVED:
+			buf.append(" [removed: "); //$NON-NLS-1$
+			buf.append(getOriginalValue());
+			buf.append(']');
+			break;
+		default:
+			buf.append(" [unchanged]"); //$NON-NLS-1$
+		}
+		return buf.toString();
 	}
 	
 

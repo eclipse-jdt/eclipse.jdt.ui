@@ -27,6 +27,18 @@ public class ListRewriteEvent extends RewriteEvent {
 		fOriginalNodes= originalNodes;
 	}
 	
+	public ListRewriteEvent(RewriteEvent[] children) {
+		fListEntries= new ArrayList(children.length * 2);
+		fOriginalNodes= new ArrayList(children.length * 2);
+		for (int i= 0; i < children.length; i++) {
+			RewriteEvent curr= children[i];
+			fListEntries.add(curr);
+			if (curr.getOriginalValue() != null) {
+				fOriginalNodes.add(curr.getOriginalValue());
+			}
+		}
+	}
+		
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.dom.ASTRewriteChange#getChangeKind()
 	 */
@@ -67,7 +79,7 @@ public class ListRewriteEvent extends RewriteEvent {
 				return curr;
 			}
 		}
-		throw new IllegalArgumentException();
+		return null;
 	}
 	
 	private List getEntries() {
@@ -132,6 +144,23 @@ public class ListRewriteEvent extends RewriteEvent {
 			}
 		}
 		return res;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		StringBuffer buf= new StringBuffer();
+		buf.append(" [list change\n\t"); //$NON-NLS-1$
+		
+		RewriteEvent[] events= getChildren();
+		for (int i= 0; i < events.length; i++) {
+			if (i != 0) {
+				buf.append("\n\t"); //$NON-NLS-1$
+			}
+			buf.append(events[i]);
+		}
+		return buf.toString();
 	}
 	
 }

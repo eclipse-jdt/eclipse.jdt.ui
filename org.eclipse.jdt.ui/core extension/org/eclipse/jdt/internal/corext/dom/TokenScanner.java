@@ -220,6 +220,8 @@ public class TokenScanner {
 	/**
 	 * Reads from the given offset until a token is reached and returns the offset after the token.
 	 * @param token The token to be found.
+	 * @param startOffset Offset to start reading from
+	 * @return Returns the
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
 	 */		
@@ -232,6 +234,7 @@ public class TokenScanner {
 	 * Reads from the given offset until a token is reached and returns the offset after the previous token.
 	 * @param token The token to be found.
 	 * @param startOffset The offset to start scanning from.
+	 * @return Returns the end offset of the token previous to the given token.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
 	 */		
@@ -251,6 +254,7 @@ public class TokenScanner {
 	 * 
 	 * @param lastPos An offset to before the node start offset. Can be 0 but better is the end location of the previous node. 
 	 * @param nodeStart Start offset of the node to find the comments for.
+	 * @return Returns the start offset of comments directly ahead of a token.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
 	 */		
@@ -258,7 +262,7 @@ public class TokenScanner {
 		setOffset(lastPos);
 
 		int prevEndPos= lastPos;
-		int prevEndLine= getLineOfOffset(prevEndPos - 1);
+		int prevEndLine= prevEndPos > 0 ? getLineOfOffset(prevEndPos - 1) : 0;
 		int nodeLine= getLineOfOffset(nodeStart);
 		
 		int res= -1;
@@ -296,10 +300,10 @@ public class TokenScanner {
 	
 	/**
 	 * Looks for comments after a node and returns the end position of the comment still belonging to the node.
-	 * @param nodeEndOffset The end position of the node
+	 * @param nodeEnd The end position of the node
 	 * @param nextTokenStart The start positoion of the next node. Optional, can be -1
-	 * @param buffer The text buffer that corresponds to the content that is scanned or <code>null</code> if
 	 * the line information shoould be taken from the scanner object
+	 * @return Returns returns the end position of the comment still belonging to the node.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
 	 */		
@@ -367,7 +371,8 @@ public class TokenScanner {
 			try {
 				return fDocument.getLineOfOffset(offset);
 			} catch (BadLocationException e) {
-				throw new CoreException(JavaUIStatus.createError(DOCUMENT_ERROR, e.getMessage(), e)); //$NON-NLS-1$
+				String message= "Illegal offset: " + offset; //$NON-NLS-1$
+				throw new CoreException(JavaUIStatus.createError(DOCUMENT_ERROR, message, e)); //$NON-NLS-1$
 			}
 		}
 		return getScanner().getLineNumber(offset);
@@ -379,7 +384,8 @@ public class TokenScanner {
 				IRegion region= fDocument.getLineInformation(line);
 				return region.getOffset() + region.getLength();
 			} catch (BadLocationException e) {
-				throw new CoreException(JavaUIStatus.createError(DOCUMENT_ERROR, e.getMessage(), e)); //$NON-NLS-1$
+				String message= "Illegal line: " + line; //$NON-NLS-1$
+				throw new CoreException(JavaUIStatus.createError(DOCUMENT_ERROR, message, e)); //$NON-NLS-1$
 			}
 		}
 		return getScanner().getLineEnd(line);
