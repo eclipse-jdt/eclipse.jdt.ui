@@ -75,12 +75,7 @@ public class ASTResolving {
 		case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
 			if (frag.getInitializer().equals(node)) {
-				ASTNode declaration= frag.getParent();
-				if (declaration instanceof VariableDeclarationStatement) {
-					return ((VariableDeclarationStatement)declaration).getType().resolveBinding();
-				} else if (declaration instanceof FieldDeclaration) {
-					return ((FieldDeclaration)declaration).getType().resolveBinding();
-				}
+				return frag.getName().resolveTypeBinding();
 			}
 			break;
 		case ASTNode.SUPER_METHOD_INVOCATION:
