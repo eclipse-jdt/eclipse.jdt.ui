@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -51,7 +52,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMoveCodeTest("testCopyRangeAndReplace"));
+			suite.addTest(new ASTRewritingMoveCodeTest("testMoveForStatementToForBlock"));
 			return suite;
 		}
 	}
@@ -725,6 +726,58 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	public void testMoveForStatementToForBlock() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for(int i= 0; i < 8; i++)\n");
+		buf.append("            foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		{
+			List statements= methodDecl.getBody().statements();
+			ForStatement forStatement= (ForStatement) statements.get(0);
+			Statement body= forStatement.getBody();
+			
+			ASTNode placeholder= rewrite.createCopy(body);
+			
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(body, newBody);
+		}	
+					
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for(int i= 0; i < 8; i++)\n");
+		buf.append("            {\n");
+		buf.append("                foo();\n");
+		buf.append("            }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
 	
 	
 }
