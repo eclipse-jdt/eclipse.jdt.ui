@@ -35,7 +35,6 @@ public class AddToClasspathChange extends Change {
 	
 	private String fProjectHandle;
 	private int fEntryKind;
-	private int fContentKind;
 	private IPath fPath;
 	private IPath fSourceAttachmentPath;
 	private IPath fSourceAttachmentRootPath;
@@ -58,10 +57,9 @@ public class AddToClasspathChange extends Change {
 		fPath= newProjectEntry;
 	}
 	
-	public AddToClasspathChange(IJavaProject project, int entryKind, int contentKind, IPath path, IPath sourceAttachmentPath, IPath sourceAttachmentRootPath){
+	public AddToClasspathChange(IJavaProject project, int entryKind, IPath path, IPath sourceAttachmentPath, IPath sourceAttachmentRootPath){
 		fProjectHandle= project.getHandleIdentifier();
 		fEntryKind= entryKind;
-		fContentKind= contentKind;
 		fPath=path;
 		fSourceAttachmentPath= sourceAttachmentPath;
 		fSourceAttachmentRootPath= sourceAttachmentRootPath;

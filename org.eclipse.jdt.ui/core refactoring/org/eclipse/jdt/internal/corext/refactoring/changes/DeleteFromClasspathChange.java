@@ -105,8 +105,8 @@ public class DeleteFromClasspathChange extends Change {
 		if (!isActive())
 			return new NullChange();
 
-		return new AddToClasspathChange(getJavaProject(), fEntryKind, fContentKind, 
-										fPath, fSourceAttachmentPath, fSourceAttachmentRootPath);
+		return new AddToClasspathChange(getJavaProject(), fEntryKind, fPath, 
+										fSourceAttachmentPath, fSourceAttachmentRootPath);
 	}
 
 	/* non java-doc
