@@ -652,7 +652,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 */
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
-		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
+		GridData gd= new GridData(GridData.FILL_BOTH);
+		gd.heightHint= tree.getItemHeight() * 12;
+		tree.setLayoutData(gd);
 	
 		final TreeViewer treeViewer= new OutlineTreeViewer(tree);
 	
