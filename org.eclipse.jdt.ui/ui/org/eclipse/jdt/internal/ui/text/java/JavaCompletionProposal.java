@@ -35,7 +35,7 @@ import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
-import org.eclipse.jface.text.ITextViewerExtension3;
+import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
@@ -555,9 +555,9 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			 	// attempts to reduce the redraw area
 			 	ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
 			 	
-			 	if (viewer instanceof ITextViewerExtension3) {
+			 	if (viewer instanceof ITextViewerExtension5) {
 			 		
-			 		ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
+			 		ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
 			 		IRegion widgetRange= extension.modelRange2WidgetRange(new Region(fRememberedStyleRange.start, fRememberedStyleRange.length));
 			 		if (widgetRange != null)
 			 			viewer2.invalidateTextPresentation(widgetRange.getOffset(), widgetRange.getLength());
@@ -580,8 +580,8 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		int widgetCaret= text.getCaretOffset();
 		
 		int modelCaret= 0;
-		if (viewer instanceof ITextViewerExtension3) {
-			ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
+		if (viewer instanceof ITextViewerExtension5) {
+			ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
 			modelCaret= extension.widgetOffset2ModelOffset(widgetCaret);
 		} else {
 			IRegion visibleRegion= viewer.getVisibleRegion();
