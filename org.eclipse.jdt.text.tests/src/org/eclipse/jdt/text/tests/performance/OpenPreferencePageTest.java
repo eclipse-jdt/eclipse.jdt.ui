@@ -94,6 +94,8 @@ public class OpenPreferencePageTest extends TestCase {
 		fMeter.stop();
 		fMeter.commit();
 		
+		d.close();
+		
 		fEvaluator.evaluate(fMeter.getSessionData());
 		
 	}
