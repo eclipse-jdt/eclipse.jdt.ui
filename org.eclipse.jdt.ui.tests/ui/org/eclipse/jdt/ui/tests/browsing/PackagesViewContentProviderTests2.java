@@ -17,7 +17,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -73,20 +72,15 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 	private IPackageFragment fPackJunitSamples;
 	private IPackageFragment fPackJunitSamplesMoney;
 
-	private IFile fFile1;
-	private IFile fFile2;
 	private ICompilationUnit fCUIMoney;
 	private ICompilationUnit fCUMoney;
 	private ICompilationUnit fCUMoneyBag;
 	private ICompilationUnit fCUMoneyTest;
 	
-	private ICompilationUnit fCU1;
-	private ICompilationUnit fCU2;
 	
 	private IWorkbenchPage fPage;
 	private IPackageFragmentRoot fRoot2;
 	private IPackageFragment fPack12;
-	private IPackageFragment fPack22;
 	private IPackageFragment fPack32;
 	private IPackageFragment fPack42;
 	private IPackageFragment fPack52;

@@ -12,9 +12,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
-import org.eclipse.ui.internal.WorkbenchPlugin;
 
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -42,11 +40,6 @@ public class DialogsTest2 extends TestCase {
 	private Shell getShell() {
 		return DialogCheck.getShell();
 	}
-	private IWorkbench getWorkbench() {
-		return WorkbenchPlugin.getDefault().getWorkbench();
-	}
-	
-	
 	public void testCheckedTreeSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		JavaProjectHelper.addSourceContainer(jproject, "src1");

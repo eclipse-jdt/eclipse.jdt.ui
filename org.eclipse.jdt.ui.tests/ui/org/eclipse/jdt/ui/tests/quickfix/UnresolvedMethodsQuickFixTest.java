@@ -57,7 +57,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);			
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
+		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);

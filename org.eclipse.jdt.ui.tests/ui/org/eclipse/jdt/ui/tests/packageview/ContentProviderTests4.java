@@ -23,20 +23,23 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jface.viewers.ITreeContentProvider;
+
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * Tests for the PackageExplorerContentProvider.
@@ -62,25 +65,13 @@ public class ContentProviderTests4 extends TestCase{
 	private IWorkspace fWorkspace;
 	private IWorkbench fWorkbench;
 	private MockPluginView fMyPart;
-	private File fTemp1;
 	
 	private ITreeContentProvider fProvider;
-	private IPackageFragmentRoot fArchiveFragmentRoot;
-	private IPackageFragment fPackJunit;
-	private IPackageFragment fPackJunitSamples;
-	private IPackageFragment fPackJunitSamplesMoney;
 	
-	private ICompilationUnit fCu1;
-	private ICompilationUnit fCu2;
-	private ImageDescriptorRegistry fRegistry;
-	private ICompilationUnit fCu3;
-
-	private File fTemp2;
 	private IPackageFragment fPack5;
 	private IJavaProject fJProject3;
 	private IPackageFragment fPack6;
 	private IPackageFragmentRoot fInternalRoot1;
-	private IPackageFragment fInternalPack1;
 	private IPackageFragment fA;
 	private IPackageFragment fX;
 	private IPackageFragment fB;

@@ -68,13 +68,9 @@ public class PackagesViewDeltaTests extends TestCase {
 	
 	private ITreeContentProvider fProvider;
 
-	private ICompilationUnit fCU1;
-	private ICompilationUnit fCU2;
-	
 	private IWorkbenchPage fPage;
 	private IPackageFragmentRoot fRoot2;
 	private IPackageFragment fPack12;
-	private IPackageFragment fPack22;
 	private IPackageFragment fPack32;
 	private IPackageFragment fPack42;
 	private IPackageFragment fPack52;
@@ -82,7 +78,6 @@ public class PackagesViewDeltaTests extends TestCase {
 	private ICompilationUnit fCU12;
 	private ICompilationUnit fCU22;
 	private IPackageFragment fPack21;
-	private IPackageFragment fPack11;
 	private ICompilationUnit fCU11;
 	private ICompilationUnit fCU21;
 	private IPackageFragment fPack61;
@@ -102,7 +97,6 @@ public class PackagesViewDeltaTests extends TestCase {
 	private IPackageFragment fInternalPack10;
 	private IPackageFragment fInternalPack6;
 	private IPackageFragment fInternalPackMetaInf;
-	private ICompilationUnit fCU23;
 	private IPackageFragment fPack102;
 	private ICompilationUnit fCU33;
 	private ICompilationUnit fCU43;

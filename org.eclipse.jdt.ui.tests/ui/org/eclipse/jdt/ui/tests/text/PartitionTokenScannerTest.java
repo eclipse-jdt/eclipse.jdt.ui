@@ -56,7 +56,7 @@ public class PartitionTokenScannerTest extends TestCase {
 		return null;
 	}
 	
-	private static IDocument getRandomDocument(int size) {
+	public static IDocument getRandomDocument(int size) {
 		final char[] characters= {'/', '*', '\'', '"', '\r', '\n', '\\'};
 		final StringBuffer buffer= new StringBuffer();
 		
@@ -211,7 +211,7 @@ public class PartitionTokenScannerTest extends TestCase {
 	/**
 	 * Escapes CR, LF and TAB in a string.
 	 */
-	private static String escape(String string) {
+	public static String escape(String string) {
 		final StringBuffer buffer= new StringBuffer();
 		
 		final int length= string.length();

@@ -720,10 +720,6 @@ public class TextBufferTest extends TestCase {
 	
 	private void assertFalse(IStatus status) {
 		assertTrue(!status.isOK());
-	}	
-	
-	private void assertFalse(String message, IStatus status) {
-		assertTrue(message, !status.isOK());
 	}
 			
 }

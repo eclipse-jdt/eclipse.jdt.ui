@@ -33,10 +33,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewSnippetFileCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 
 public class WizardsTest extends TestCase {
-	private static final int SIZING_WIZARD_WIDTH    = 470;
-	private static final int SIZING_WIZARD_HEIGHT   = 550;
-	private static final int SIZING_WIZARD_WIDTH_2  = 500;
-	private static final int SIZING_WIZARD_HEIGHT_2 = 500;
 	
 	private static final String PROJECT_NAME = "DummyProject";
 
