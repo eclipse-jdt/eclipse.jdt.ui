@@ -180,9 +180,15 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 			
 			protected Position createPositionFromProblem(IProblem problem) {
+				int start= problem.getSourceStart();
+				if (start < 0)
+					return null;
+					
 				int length= problem.getSourceEnd() - problem.getSourceStart() + 1;
-				if (length < 0) length= 0;
-				return new Position(problem.getSourceStart(), length);
+				if (length < 0)
+					return null;
+					
+				return new Position(start, length);
 			}
 			
 			/*
@@ -209,7 +215,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					IProblem problem= (IProblem) e.next();
 					ProblemAnnotation annotation= new ProblemAnnotation(problem);
 					fGeneratedAnnotations.add(annotation);
-					addAnnotation(annotation, createPositionFromProblem(problem), false);
+					Position p= createPositionFromProblem(problem);
+					if (p != null)
+						addAnnotation(annotation, p, false);
 				}
 				fCollectedProblems.clear();
 				fireModelChanged();
