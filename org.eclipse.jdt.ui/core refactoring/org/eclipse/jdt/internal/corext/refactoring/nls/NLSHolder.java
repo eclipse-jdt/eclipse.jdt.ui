@@ -84,20 +84,17 @@ public class NLSHolder {
 		return (NLSSubstitution[]) result.toArray(new NLSSubstitution[result.size()]);
 	}
 	
+	//for editing in wizard
 	private static String createModifiedValue(String rawValue){
 		return unwindEscapeChars(rawValue);
 	}
 	
 	private static String unwindEscapeChars(String s){
 		StringBuffer sb= new StringBuffer(s.length());
-		int last= s.length() - 1;
 		int length= s.length();
 		for (int i= 0; i < length; i++){
 			char c= s.charAt(i);
-			if ((c == '\"') && (i == 0 || i == last)) //the first and last " should not be converted to \"
-				sb.append(c);
-			else	
-				sb.append(getUnwoundString(c));
+			sb.append(getUnwoundString(c));
 		}
 		return sb.toString();
 	}
@@ -114,16 +111,18 @@ public class NLSHolder {
 				return "\\f";//$NON-NLS-1$	
 			case '\r' :
 				return "\\r";//$NON-NLS-1$
-			case '\"' :
-				return "\\\"";//$NON-NLS-1$
-			case '\'' :
-				return "\\\'";//$NON-NLS-1$
+//These can be used unescaped in properties file:
+//			case '\"' :
+//				return "\\\"";//$NON-NLS-1$
+//			case '\'' :
+//				return "\\\'";//$NON-NLS-1$
 			case '\\' :
 				return "\\\\";//$NON-NLS-1$
-			case '!':
-				return "\\!";//$NON-NLS-1$
-			case '#':
-				return "\\#";//$NON-NLS-1$
+//This is only done when writing to the .properties file in NLSRefactoring.convertToPropertyValue(.)
+//			case '!':
+//				return "\\!";//$NON-NLS-1$
+//			case '#':
+//				return "\\#";//$NON-NLS-1$
 			default: 
 				if (((c < 0x0020) || (c > 0x007e))){
 					return new StringBuffer()

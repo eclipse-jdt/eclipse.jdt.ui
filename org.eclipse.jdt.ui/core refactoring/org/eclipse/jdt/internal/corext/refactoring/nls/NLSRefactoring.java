@@ -180,13 +180,13 @@ public class NLSRefactoring extends Refactoring {
 		fPropertyFilePath= path;
 	}
 	
-	private IPath getPropertyFilePath() throws JavaModelException{
+	private IPath getPropertyFilePath(){
 		if (fPropertyFilePath == null)
 			return getDefaultPropertyFilePath();
 		return fPropertyFilePath;	
 	}
 	
-	private IPath getDefaultPropertyFilePath() throws JavaModelException{
+	private IPath getDefaultPropertyFilePath(){
 		IPath cuName= new Path(fCu.getElementName());
 		return ResourceUtil.getResource(fCu).getFullPath()
 						  .removeLastSegments(cuName.segmentCount())
@@ -194,34 +194,26 @@ public class NLSRefactoring extends Refactoring {
 	}
 	
 	public String getDefaultPropertyFileName(){
-		try{
-			return getDefaultPropertyFilePath().lastSegment();
-		} catch (JavaModelException e){
-			return ""; //$NON-NLS-1$
-		}	
+		return getDefaultPropertyFilePath().lastSegment();	
 	}
 	
 	/**
 	 * returns "" in case of JavaModelException caught during calculation
 	 */
 	public String getDefaultPropertyPackageName(){
-		try{
-			IPath path= getDefaultPropertyFilePath();
-			IResource res= ResourcesPlugin.getWorkspace().getRoot().findMember(path.removeLastSegments(1));
-			IJavaElement je= JavaCore.create(res);
-			if (je instanceof IPackageFragment)
-				return je.getElementName();
-			else	
-				return ""; //$NON-NLS-1$
-		} catch (JavaModelException e){
-			return ""; //$NON-NLS-1$
-		}	
+		IPath path= getDefaultPropertyFilePath();
+		IResource res= ResourcesPlugin.getWorkspace().getRoot().findMember(path.removeLastSegments(1));
+		IJavaElement je= JavaCore.create(res);
+		if (je instanceof IPackageFragment)
+			return je.getElementName();
+		else	
+			return ""; //$NON-NLS-1$	
 	}
 	
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation(IProgressMonitor pm) {
 		if (NLSHolder.create(fCu).getSubstitutions().length == 0)	{
 			String message= NLSMessages.getFormattedString("NLSRefactoring.no_strings", fCu.getElementName());//$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
@@ -262,14 +254,12 @@ public class NLSRefactoring extends Refactoring {
 			return result;
 		} catch (JavaModelException e){
 			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
 	}
 
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify(){
 		List files= new ArrayList(2);
 		if (willModifySource()){
 			IFile file= ResourceUtil.getFile(fCu);
@@ -283,7 +273,7 @@ public class NLSRefactoring extends Refactoring {
 		return (IFile[]) files.toArray(new IFile[files.size()]);
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles(){
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
@@ -301,7 +291,7 @@ public class NLSRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private boolean propertyFileExists() throws JavaModelException{
+	private boolean propertyFileExists(){
 		return Checks.resourceExists(getPropertyFilePath());
 	}
 	
@@ -674,7 +664,7 @@ public class NLSRefactoring extends Refactoring {
 		return tfc;
 	}
 
-	private IFile getPropertyFile() throws JavaModelException {
+	private IFile getPropertyFile() {
 		return ((IFile)ResourcesPlugin.getWorkspace().getRoot().findMember(getPropertyFilePath()));
 	}
 	
@@ -725,15 +715,33 @@ public class NLSRefactoring extends Refactoring {
 	}
 	
 	/*
-	 * see 21.6.7 of the spec
+	 * see 21.6.7 of langspec-1.0
+	 * @see java.util.Properties#load(InputStream)
 	 */
 	private static String convertToPropertyValue(String v){
 		int firstNonWhiteSpace=findFirstNonWhiteSpace(v);
 		if (firstNonWhiteSpace == 0)
 			return v;	
-		return escapeEachChar(v.substring(0, firstNonWhiteSpace), '\\') + v.substring(firstNonWhiteSpace);
+		return escapeEachChar(v.substring(0, firstNonWhiteSpace), '\\') + 
+				escapeCommentChars(v.substring(firstNonWhiteSpace));
 	}
 	
+	private static StringBuffer escapeCommentChars(String string) {
+		StringBuffer sb= new StringBuffer(string.length() + 5);
+		for (int i= 0; i < string.length(); i++) {
+			char c= string.charAt(i);
+			switch (c) {
+				case '!':
+					sb.append("\\!"); //$NON-NLS-1$
+				case '#':
+					sb.append("\\#"); //$NON-NLS-1$
+				default:
+					sb.append(c);
+			}
+		}
+		return sb;
+	}
+
 	private static String escapeEachChar(String s, char escapeChar){
 		char[] chars= new char[s.length() * 2];
 		
@@ -790,7 +798,7 @@ public class NLSRefactoring extends Refactoring {
 		return new CreateTextFileChange(getAccessorCUPath(), createAccessorCUSource(pm), "java");	 //$NON-NLS-1$
 	} 
 		
-	private IPath getAccessorCUPath() throws JavaModelException{
+	private IPath getAccessorCUPath(){
 		IPath cuName= new Path(fCu.getElementName());
 		return ResourceUtil.getResource(fCu).getFullPath()
 						  .removeLastSegments(cuName.segmentCount())
@@ -902,18 +910,18 @@ public class NLSRefactoring extends Refactoring {
 
 	
 	//together with the .properties extension
-	private String getPropertyFileName() throws JavaModelException{
+	private String getPropertyFileName() {
 		return getPropertyFilePath().lastSegment();
 	}
 	
 	//extension removed
-	private String getPropertyFileSimpleName() throws JavaModelException{
+	private String getPropertyFileSimpleName() {
 		String fileName= getPropertyFileName();
 		return fileName.substring(0, fileName.indexOf(PROPERTY_FILE_EXT));
 	}
 	
 	
-	private String getResourceBundleName() throws JavaModelException{
+	private String getResourceBundleName() {
 		//remove filename.properties
 		IResource res= ResourcesPlugin.getWorkspace().getRoot().findMember(getPropertyFilePath().removeLastSegments(1));
 		if (res != null && res.exists()){
