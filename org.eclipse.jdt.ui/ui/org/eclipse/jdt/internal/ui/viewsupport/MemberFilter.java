@@ -53,13 +53,13 @@ public class MemberFilter extends ViewerFilter {
 	}
 	
 	/*
-	 * @see ViewerFilter@isFilterProperty
+	 * @see ViewerFilter#isFilterProperty(java.lang.Object, java.lang.String)
 	 */
 	public boolean isFilterProperty(Object element, Object property) {
 		return false;
 	}
 	/*
-	 * @see ViewerFilter@select
+	 * @see ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */		
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		try {
