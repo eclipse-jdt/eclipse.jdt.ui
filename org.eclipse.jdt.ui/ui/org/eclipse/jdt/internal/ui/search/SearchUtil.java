@@ -422,4 +422,8 @@ public class SearchUtil extends JavaModelUtil {
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_ARRAY)
 			|| (first == Signature.C_RESOLVED && fieldType.substring(1, fieldType.length() - 1).equals(String.class.getName()));
 	}
+	
+	public static String getProjectScopeDescription(IType type) {
+		return SearchMessages.getFormattedString("ProjectScope", type.getJavaProject().getElementName()); //$NON-NLS-1$
+	}
 }

@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -111,15 +112,15 @@ public class JavaSearchScopeFactory {
 		return createJavaSearchScope(javaProjects);
 	}
 	
-	public int getEnclosingProjectsCount(IJavaSearchScope scope) {
+	public IProject[] getJavaProjects(IJavaSearchScope scope) {
 		IPath[] paths= scope.enclosingProjectsAndJars();
-		int count= 0;
+		HashSet temp= new HashSet();
 		for (int i= 0; i < paths.length; i++) {
 			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(paths[i]);
 			if (resource != null && resource.getType() == IResource.PROJECT)
-				count++;
+				temp.add(resource);
 		}
-		return count;
+		return (IProject[]) temp.toArray(new IProject[temp.size()]);
 	}
 
 	private Set getJavaElements(ISelection selection) {
