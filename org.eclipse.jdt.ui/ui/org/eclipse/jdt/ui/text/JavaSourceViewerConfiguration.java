@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -156,7 +158,40 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 3.0
 	 */
 	private IPreferenceStore fNewPreferenceStore;
+	/**
+	 * The color manager
+	 *
+	 * @since 3.0
+	 */
+	private IColorManager fColorManager;
 	
+	/**
+	 * Creates a new Java source viewer configuration for viewers in the given editor 
+	 * using the given preference store, the color manager and the specified document partitioning.
+	 * <p>
+	 * Creates a Java source viewer configuration in the new setup without text tools. Clients are
+	 * allowed to call {@link JavaSourceViewerConfiguration#setNewPreferenceStore(IPreferenceStore)} and
+	 * {@link JavaSourceViewerConfiguration#handlePropertyChangeEvent(PropertyChangeEvent)}
+	 * and disallowed to call {@link JavaSourceViewerConfiguration#getPreferenceStore()} on the resulting
+	 * Java source viewer configuration.</p>
+	 * <p>
+	 * XXX: Note that this is work in progress and API is still subject to change.
+	 * </p>
+	 *
+	 * @param colorManager the color manager
+	 * @param newPreferenceStore the new preference store, can be read-only
+	 * @param editor the editor in which the configured viewer(s) will reside
+	 * @param partitioning the document partitioning for this configuration
+	 * 
+	 * @since 3.0
+	 */
+	public JavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore newPreferenceStore, ITextEditor editor, String partitioning) {
+		fColorManager= colorManager;
+		setNewPreferenceStore(newPreferenceStore);
+		fTextEditor= editor;
+		fDocumentPartitioning= partitioning;
+	}
+
 	/**
 	 * Creates a new Java source viewer configuration for viewers in the given editor 
 	 * using the given Java tools and the specified document partitioning.
@@ -169,9 +204,15 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public JavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor, String partitioning) {
 		fJavaTextTools= tools;
+		fColorManager= tools.getColorManager();
+		fNewPreferenceStore= createCombinedPreferenceStore();
+		fCodeScanner= (AbstractJavaScanner) fJavaTextTools.getCodeScanner();
+		fMultilineCommentScanner= (AbstractJavaScanner) fJavaTextTools.getMultilineCommentScanner();
+		fSinglelineCommentScanner= (AbstractJavaScanner) fJavaTextTools.getSinglelineCommentScanner();
+		fStringScanner= (AbstractJavaScanner) fJavaTextTools.getStringScanner();
+		fJavaDocScanner= (AbstractJavaScanner) fJavaTextTools.getJavaDocScanner();
 		fTextEditor= editor;
 		fDocumentPartitioning= partitioning;
-		setNewPreferenceStore(createNewPreferenceStore());
 	}
 
 	/**
@@ -191,7 +232,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 *
 	 * @return the Java source code scanner
 	 */
-	public RuleBasedScanner getCodeScanner() {
+	protected RuleBasedScanner getCodeScanner() {
 		return fCodeScanner;
 	}
 	
@@ -201,7 +242,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @return the Java multiline comment scanner
 	 * @since 2.0
 	 */
-	public RuleBasedScanner getMultilineCommentScanner() {
+	protected RuleBasedScanner getMultilineCommentScanner() {
 		return fMultilineCommentScanner;
 	}
 	
@@ -211,7 +252,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @return the Java singleline comment scanner
 	 * @since 2.0
 	 */
-	public RuleBasedScanner getSinglelineCommentScanner() {
+	protected RuleBasedScanner getSinglelineCommentScanner() {
 		return fSinglelineCommentScanner;
 	}
 	
@@ -221,7 +262,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @return the Java string scanner
 	 * @since 2.0
 	 */
-	public RuleBasedScanner getStringScanner() {
+	protected RuleBasedScanner getStringScanner() {
 		return fStringScanner;
 	}
 	
@@ -230,7 +271,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 *
 	 * @return the JavaDoc scanner
 	 */
-	public RuleBasedScanner getJavaDocScanner() {
+	protected RuleBasedScanner getJavaDocScanner() {
 		return fJavaDocScanner;
 	}
 	
@@ -240,7 +281,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @return the color manager
 	 */
 	protected IColorManager getColorManager() {
-		return fJavaTextTools.getColorManager();
+		return fColorManager;
 	}
 	
 	/**
@@ -256,6 +297,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the preference store used by this configuration to initialize
 	 * the individual bits and pieces.
 	 * <p>
+	 * Clients are not allowed to call this method if the new setup without
+	 * text tools is in use.
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IPreferenceStore, IColorManager, ITextEditor, String)</p>
+	 * <p>
 	 * FIXME: deprecate when new API is stabilized.
 	 * </p> 
 	 * 
@@ -263,6 +308,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 2.0
 	 */
 	public IPreferenceStore getPreferenceStore() {
+		Assert.isTrue(!isNewSetup());
 		return fJavaTextTools.getPreferenceStore();
 	}
 	
@@ -285,6 +331,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Sets the preference store used by this configuration to initialize
 	 * the individual bits and pieces to the given preference store.
 	 * <p>
+	 * Clients are not allowed to call this method if the old setup with
+	 * text tools is in use.
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IPreferenceStore, IColorManager, ITextEditor, String)</p>
+	 * <p>
 	 * XXX: Note that this is work in progress and API is still subject to change.
 	 * </p>
 	 * 
@@ -293,20 +343,32 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 3.0
 	 */
 	public void setNewPreferenceStore(IPreferenceStore preferenceStore) {
+		Assert.isTrue(isNewSetup());
+		
 		fNewPreferenceStore= preferenceStore;
 		initializeScanners();
 	}
 	
 	/**
+	 * @return <code>true</code> iff the new setup without text tools is in use.
+	 * 
+	 * @since 3.0
+	 */
+	private boolean isNewSetup() {
+		return fJavaTextTools == null;
+	}
+
+	/**
 	 * Creates and returns a new preference store which combines the preference
 	 * stores from the text tools.
 	 *
 	 * @param tools Text tools
-	 * @return Legacy preference store
+	 * @return the combined preference store
 	 * 
 	 * @since 3.0
 	 */
-	private IPreferenceStore createNewPreferenceStore() {
+	private IPreferenceStore createCombinedPreferenceStore() {
+		Assert.isTrue(!isNewSetup());
 		if (fJavaTextTools.getCorePreferenceStore() == null)
 			return fJavaTextTools.getPreferenceStore();
 		
@@ -319,6 +381,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 3.0 
 	 */
 	private void initializeScanners() {
+		Assert.isTrue(isNewSetup());
 		fCodeScanner= new JavaCodeScanner(getColorManager(), getNewPreferenceStore());
 		fMultilineCommentScanner= new JavaCommentScanner(getColorManager(), getNewPreferenceStore(), IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
 		fSinglelineCommentScanner= new JavaCommentScanner(getColorManager(), getNewPreferenceStore(), IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
@@ -739,5 +802,52 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setSizeConstraints(50, 20, true, false);
 		presenter.setRestoreInformationControlBounds(getSettings("hierarchy_presenter_bounds"), true, true); //$NON-NLS-1$
 		return presenter;
+	}
+
+	/**
+	 * Determines whether the preference change encoded by the given event
+	 * changes the behavior of one of its contained components.
+	 * <p>
+	 * XXX: Note that this is work in progress and API is still subject to change.
+	 * </p>
+	 * 
+	 * @param event the event to be investigated
+	 * @return <code>true</code> if event causes a behavioral change
+	 * @since 3.0
+	 */
+	public boolean affectsTextPresentation(PropertyChangeEvent event) {
+		return  fCodeScanner.affectsBehavior(event)
+			|| fMultilineCommentScanner.affectsBehavior(event)
+			|| fSinglelineCommentScanner.affectsBehavior(event)
+			|| fStringScanner.affectsBehavior(event)
+			|| fJavaDocScanner.affectsBehavior(event);
+	}
+	
+	/**
+	 * Adapts the behavior of the contained components to the change
+	 * encoded in the given event.
+	 * <p>
+	 * Clients are not allowed to call this method if the old setup with
+	 * text tools is in use.
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IPreferenceStore, IColorManager, ITextEditor, String)</p>
+	 * <p>
+	 * XXX: Note that this is work in progress and API is still subject to change.
+	 * </p>
+	 * 
+	 * @param event the event to which to adapt
+	 * @since 3.0
+	 */
+	public void handlePropertyChangeEvent(PropertyChangeEvent event) {
+		Assert.isTrue(isNewSetup());
+		if (fCodeScanner.affectsBehavior(event))
+			fCodeScanner.adaptToPreferenceChange(event);
+		if (fMultilineCommentScanner.affectsBehavior(event))
+			fMultilineCommentScanner.adaptToPreferenceChange(event);
+		if (fSinglelineCommentScanner.affectsBehavior(event))
+			fSinglelineCommentScanner.adaptToPreferenceChange(event);
+		if (fStringScanner.affectsBehavior(event))
+			fStringScanner.adaptToPreferenceChange(event);
+		if (fJavaDocScanner.affectsBehavior(event))
+			fJavaDocScanner.adaptToPreferenceChange(event);
 	}
 }

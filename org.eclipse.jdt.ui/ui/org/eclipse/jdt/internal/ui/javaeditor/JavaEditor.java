@@ -170,7 +170,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -203,7 +202,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
-import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
@@ -2020,8 +2018,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 	/** Preference key for matching brackets color */
 	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
-	/** Preference key for compiler task tags */
-	private final static String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	/** Preference key for browser like links */
 	private final static String BROWSER_LIKE_LINKS= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS;
 	/** Preference key for key modifier of browser like links */
@@ -2122,11 +2118,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	public JavaEditor() {
 		super();
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this, IJavaPartitions.JAVA_PARTITIONING));
-		setRangeIndicator(new DefaultRangeIndicator());
 		IPreferenceStore newStore= createNewPreferenceStore(null);
 		setNewPreferenceStore(newStore, JavaPlugin.getDefault().getPreferenceStore());
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), newStore, this, IJavaPartitions.JAVA_PARTITIONING));
+		setRangeIndicator(new DefaultRangeIndicator());
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
 		fMarkOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 		fStickyOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
@@ -2169,47 +2165,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
-		return affectsBehavior(event) || super.affectsTextPresentation(event);
+		return ((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).affectsTextPresentation(event) || super.affectsTextPresentation(event);
 	}
 		
-	/**
-	 * Determines whether the preference change encoded by the given event
-	 * changes the behavior of one of its contained components.
-	 * 
-	 * @param event the event to be investigated
-	 * @return <code>true</code> if event causes a behavioral change
-	 * @since 3.0
-	 */
-	protected boolean affectsBehavior(PropertyChangeEvent event) {
-		JavaSourceViewerConfiguration configuration= (JavaSourceViewerConfiguration) getSourceViewerConfiguration();
-		return  ((AbstractJavaScanner) configuration.getCodeScanner()).affectsBehavior(event)
-			|| ((AbstractJavaScanner) configuration.getMultilineCommentScanner()).affectsBehavior(event)
-			|| ((AbstractJavaScanner) configuration.getSinglelineCommentScanner()).affectsBehavior(event)
-			|| ((AbstractJavaScanner) configuration.getStringScanner()).affectsBehavior(event)
-			|| ((AbstractJavaScanner) configuration.getJavaDocScanner()).affectsBehavior(event);
-	}
-	
-	/**
-	 * Adapts the behavior of the contained components to the change
-	 * encoded in the given event.
-	 * 
-	 * @param event the event to which to adapt
-	 * @since 3.0
-	 */
-	private void adaptTaskTagDependents(PropertyChangeEvent event) {
-		JavaSourceViewerConfiguration svc= (JavaSourceViewerConfiguration) getSourceViewerConfiguration();
-		if (((AbstractJavaScanner) svc.getCodeScanner()).affectsBehavior(event))
-			((AbstractJavaScanner) svc.getCodeScanner()).adaptToPreferenceChange(event);
-		if (((AbstractJavaScanner) svc.getMultilineCommentScanner()).affectsBehavior(event))
-			((AbstractJavaScanner) svc.getMultilineCommentScanner()).adaptToPreferenceChange(event);
-		if (((AbstractJavaScanner) svc.getSinglelineCommentScanner()).affectsBehavior(event))
-			((AbstractJavaScanner) svc.getSinglelineCommentScanner()).adaptToPreferenceChange(event);
-		if (((AbstractJavaScanner) svc.getStringScanner()).affectsBehavior(event))
-			((AbstractJavaScanner) svc.getStringScanner()).adaptToPreferenceChange(event);
-		if (((AbstractJavaScanner) svc.getJavaDocScanner()).affectsBehavior(event))
-			((AbstractJavaScanner) svc.getJavaDocScanner()).adaptToPreferenceChange(event);
-	}
-
 	/**
 	 * Creates and returns the preference store for this Java editor with the given input.
 	 *
@@ -2834,8 +2792,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					}
 				}
 			}
-			if (COMPILER_TASK_TAGS.equals(event.getProperty()))
-				adaptTaskTagDependents(event);
+			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
