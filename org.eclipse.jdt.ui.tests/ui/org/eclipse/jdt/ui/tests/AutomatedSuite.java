@@ -23,6 +23,7 @@ import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests2;
 import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests3;
 import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests4;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
+import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.text.HTML2TextReaderTester;
 import org.eclipse.jdt.ui.tests.text.JavaDoc2HTMLTextReaderTester;
 import org.eclipse.jdt.ui.tests.text.JavaHeuristicScannerTest;
@@ -67,6 +68,8 @@ public class AutomatedSuite extends TestSuite {
 		
 		addTest(JavaHeuristicScannerTest.suite());
 		addTest(SmartSemicolonAutoEditStrategyTest.suite());
+		
+		addTest(SearchTest.suite());
 	}
 	
 }

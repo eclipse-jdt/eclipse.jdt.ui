@@ -22,6 +22,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.search.ui.IContextMenuConstants;
@@ -141,4 +142,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 			viewer.setSorter(new ParentSorter());
 	}
 
+	public void init(IPageSite site) {
+		super.init(site);
+		fActionGroup.fillActionBars(site.getActionBars());
+	}
 }

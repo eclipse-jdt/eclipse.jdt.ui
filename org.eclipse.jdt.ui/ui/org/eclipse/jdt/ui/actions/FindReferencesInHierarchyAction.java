@@ -15,6 +15,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -70,16 +71,20 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
-	IJavaSearchScope getScope(IType type) throws JavaModelException {
-		if (type == null)
+	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
+		IType type= getType(element);
+		if (type != null)
+			return SearchEngine.createHierarchyScope(type);
+		else
 			return super.getScope(type);
-		return SearchEngine.createHierarchyScope(type);
 	}
 	
-	String getScopeDescription(IType type) {
+	String getScopeDescription(IJavaElement element) {
+		IType type= getType(element);
 		String typeName= ""; //$NON-NLS-1$
 		if (type != null)
 			typeName= type.getElementName();
 		return SearchMessages.getFormattedString("HierarchyScope", new String[] {typeName}); //$NON-NLS-1$
 	}
+
 }

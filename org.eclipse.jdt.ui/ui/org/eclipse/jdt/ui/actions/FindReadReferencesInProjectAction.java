@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
@@ -61,11 +61,11 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_PROJECT_ACTION);
 	}
 	
-	IJavaSearchScope getScope(IType element) throws JavaModelException {
+	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
 		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element);
 	}
 
-	String getScopeDescription(IType type) {
+	String getScopeDescription(IJavaElement type) {
 		return SearchUtil.getProjectScopeDescription(type);
 	}
 

@@ -22,12 +22,14 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.ReferenceScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
@@ -78,6 +80,10 @@ public class FindReferencesAction extends FindAction {
 	int getLimitTo() {
 		return IJavaSearchConstants.REFERENCES;
 	}	
+	
+	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
+		return ReferenceScopeFactory.create(element);
+	}
 
 	public void run(IJavaElement element) {
 		SearchUtil.warnIfBinaryConstant(element, getShell());

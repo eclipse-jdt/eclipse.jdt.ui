@@ -14,6 +14,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -22,7 +23,9 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
@@ -59,17 +62,24 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_HIERARCHY_ACTION);
 	}
 	
-	IJavaSearchScope getScope(IType type) throws JavaModelException {
+	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
+		IType type= getType(element);
 		if (type != null)
 			return SearchEngine.createHierarchyScope(type);
 		else
 			return super.getScope(type);
 	}
 	
-	String getScopeDescription(IType type) {
+	String getScopeDescription(IJavaElement element) {
+		IType type= getType(element);
 		String typeName= ""; //$NON-NLS-1$
 		if (type != null)
 			typeName= type.getElementName();
 		return SearchMessages.getFormattedString("HierarchyScope", new String[] {typeName}); //$NON-NLS-1$
 	}
+	
+	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
+		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(element), getScopeDescription(element), getCollector());
+	}
+
 }

@@ -272,7 +272,6 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
 		
-		
 		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_BGSEARCH)) {
 			try {
 			performNewSearch(element);
@@ -333,8 +332,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
-		IType type= getType(element);
-		return new JavaSearchQuery(element, getLimitTo(), getScope(type), getScopeDescription(type));
+		return new JavaSearchQuery(element, getLimitTo(), getScope(element), getScopeDescription(element));
 	}
 
 	protected Object createSearchDescription(IJavaElement element) {
@@ -343,22 +341,22 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		IType type= getType(element);
-		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(type), getScopeDescription(type), getCollector());
+		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(element), getScopeDescription(element), getCollector());
 	}
 
 	abstract int getLimitTo();
 
-	IJavaSearchScope getScope(IType element) throws JavaModelException {
-		return SearchEngine.createWorkspaceScope();
-	}
 
 	JavaSearchResultCollector getCollector() {
 		return new JavaSearchResultCollector();
 	}
 	
-	String getScopeDescription(IType type) {
+	String getScopeDescription(IJavaElement element) {
 		return SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
+	}
+
+	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
+		return SearchEngine.createWorkspaceScope();
 	}
 
 	IType getType(IJavaElement element) {
