@@ -1847,7 +1847,6 @@
             </separator>
          </menu>
          <action
-               definitionId="org.eclipse.ui.edit.text.convert.lineDelimiters.toMac"
                label="%ConvertLineDelimitersToMacAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
@@ -1855,7 +1854,6 @@
                id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac">
          </action>
          <action
-               definitionId="org.eclipse.ui.edit.text.convert.lineDelimiters.toUNIX"
                label="%ConvertLineDelimitersToUNIXAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
@@ -1863,7 +1861,6 @@
                id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX">
          </action>
          <action
-               definitionId="org.eclipse.ui.edit.text.convert.lineDelimiters.toWindows"
                label="%ConvertLineDelimitersToWindowsAction.label"
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
