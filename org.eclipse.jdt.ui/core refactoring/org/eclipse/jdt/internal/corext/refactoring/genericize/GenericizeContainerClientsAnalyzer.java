@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -34,9 +35,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintCreator2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.FullConstraintCreator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintFactory2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
@@ -47,7 +46,7 @@ public class GenericizeContainerClientsAnalyzer {
 	
 	private final IJavaElement[] fElements;
 	private HashSet fProcessedCus;
-	private TypeConstraintFactory2 fTypeConstraintFactory;
+	private AugmentRawTypesTCFactory fTypeConstraintFactory;
 
 	public GenericizeContainerClientsAnalyzer(IJavaElement[] elements) {
 		fElements= elements;
@@ -57,9 +56,10 @@ public class GenericizeContainerClientsAnalyzer {
 	public void analyzeContainerReferences(IProgressMonitor pm, RefactoringStatus result) throws CoreException {
 		pm.beginTask("", 10); //$NON-NLS-1$
 		
-		fTypeConstraintFactory= new TypeConstraintFactory2();
+		IJavaProject project= fElements[0].getJavaProject();
+		fTypeConstraintFactory= new AugmentRawTypesTCFactory(project);
 		
-		GenericContainers genericContainers= GenericContainers.create(fElements[0].getJavaProject(), new SubProgressMonitor(pm, 1));
+		GenericContainers genericContainers= GenericContainers.create(project, new SubProgressMonitor(pm, 1));
 		IType[] containerTypes= genericContainers.getContainerTypes();
 		
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(containerTypes, IJavaSearchConstants.REFERENCES);
@@ -90,7 +90,7 @@ public class GenericizeContainerClientsAnalyzer {
 
 	protected void analyzeCU(ICompilationUnit cu) {
 		
-		ConstraintCreator2 unitCollector= new FullConstraintCreator2(fTypeConstraintFactory);
+		ConstraintCreator2 unitCollector= new AugmentRawTypesConstraintCreator2(fTypeConstraintFactory);
 		CompilationUnit unitAST= new RefactoringASTParser(AST.JLS3).parse(cu, true);
 		unitAST.accept(unitCollector);
 		ITypeConstraint2[] unitConstraints= unitCollector.getConstraints();

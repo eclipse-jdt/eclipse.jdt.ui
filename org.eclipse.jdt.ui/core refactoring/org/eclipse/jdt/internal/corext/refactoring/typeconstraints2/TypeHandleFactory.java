@@ -36,4 +36,11 @@ public class TypeHandleFactory {
 		return stored;
 	}
 
+//	public boolean isSubtype(TypeHandle subtype, TypeHandle supertype) {
+//		if (subtype == supertype)
+//			return true;
+//		
+//		
+//	}
+
 }

@@ -25,6 +25,8 @@ public abstract class ConstraintVariable2 {
 	
 	private Object[] fDatas;
 
+	private ConstraintVariable2 fUpdatableConstraintVariable;
+
 	
 	/**
 	 * @param typeHandle the type binding TODO: allow null?
@@ -89,4 +91,13 @@ public abstract class ConstraintVariable2 {
 	protected abstract int getHash();
 	
 	protected abstract boolean isSameAs(ConstraintVariable2 other);
+
+	/**
+	 * @param updatableConstraintVariable
+	 * 		the updatable ConstraintVariable for <code>this</code>'s equivalence group
+	 */
+	public void setRepresentative(ConstraintVariable2 updatableConstraintVariable) {
+		Assert.isTrue(fUpdatableConstraintVariable == null);
+		fUpdatableConstraintVariable= updatableConstraintVariable;
+	}
 }

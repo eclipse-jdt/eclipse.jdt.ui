@@ -8,23 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import java.util.List;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 
-import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+public interface IUpdatableConstraintVariable {
 
-public class ConstraintCreator2 extends HierarchicalASTVisitor {
-	private List/*<ITypeConstraint2[]>*/ fConstraints;
-	
-	protected void addConstraints(ITypeConstraint2[] typeConstraints) {
-		for (int i= 0; i < typeConstraints.length; i++) {
-			fConstraints.add(typeConstraints[i]);
-		}
-	}
-	
-	public ITypeConstraint2[] getConstraints() {
-		return (ITypeConstraint2[]) fConstraints.toArray(new ITypeConstraint2[fConstraints.size()]);
-	}
+	public void setCompilationUnitRange(CompilationUnitRange range);
 
+	public CompilationUnitRange getCompilationUnitRange();
 }

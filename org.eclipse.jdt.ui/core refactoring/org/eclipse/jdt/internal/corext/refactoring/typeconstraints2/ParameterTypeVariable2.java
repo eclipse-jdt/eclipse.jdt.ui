@@ -13,15 +13,17 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 
 /**
  * A ParameterTypeVariable is a ConstraintVariable which stands for
  * the type of a method parameter.
  */
-public class ParameterTypeVariable2 extends ConstraintVariable2 {
+public class ParameterTypeVariable2 extends ConstraintVariable2 implements IUpdatableConstraintVariable {
 
 	private final int fParameterIndex;
 	private final String fMethodBindingKey;
+	private CompilationUnitRange fCompilationUnitRange;
 	
 	public ParameterTypeVariable2(TypeHandle parameterTypeHandle, int parameterIndex, IMethodBinding methodBinding) {
 		super(parameterTypeHandle);
@@ -32,6 +34,14 @@ public class ParameterTypeVariable2 extends ConstraintVariable2 {
 		fMethodBindingKey= methodBinding.getKey();
 	}
 	
+	public void setCompilationUnitRange(CompilationUnitRange range) {
+		fCompilationUnitRange= range;
+	}
+	
+	public CompilationUnitRange getCompilationUnitRange() {
+		return fCompilationUnitRange;
+	}
+
 	public int getParameterIndex() {
 		return fParameterIndex;
 	}
@@ -43,14 +53,14 @@ public class ParameterTypeVariable2 extends ConstraintVariable2 {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#getHash()
 	 */
-	public int getHash() {
+	protected int getHash() {
 		return getParameterIndex() ^ getMethodBindingKey().hashCode();
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#isSameAs(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2)
 	 */
-	public boolean isSameAs(ConstraintVariable2 other) {
+	protected boolean isSameAs(ConstraintVariable2 other) {
 		if (this == other)
 			return true;
 		if (other.getClass() != ParameterTypeVariable2.class)

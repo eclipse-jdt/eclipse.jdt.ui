@@ -11,16 +11,23 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+import org.eclipse.jdt.core.dom.IMethodBinding;
+
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+
 /**
  * A ReturnTypeVariable is a ConstraintVariable which stands for
  * the return type of a method.
  */
 
-public class ReturnTypeVariable2 extends ConstraintVariable2 {
+public class ReturnTypeVariable2 extends ConstraintVariable2 implements IUpdatableConstraintVariable {
 
-	protected ReturnTypeVariable2(TypeHandle returnTypeHandle) {
+	private String fMethodBindingKey;
+	private CompilationUnitRange fCompilationUnitRange;
+
+	protected ReturnTypeVariable2(TypeHandle returnTypeHandle, IMethodBinding methodBinding) {
 		super(returnTypeHandle);
-		// TODO Auto-generated constructor stub
+		fMethodBindingKey= methodBinding.getKey();
 	}
 
 	protected int getHash() {
@@ -33,4 +40,11 @@ public class ReturnTypeVariable2 extends ConstraintVariable2 {
 		return false;
 	}
 
+	public void setCompilationUnitRange(CompilationUnitRange range) {
+		fCompilationUnitRange= range;
+	}
+
+	public CompilationUnitRange getCompilationUnitRange() {
+		return fCompilationUnitRange;
+	}
 }

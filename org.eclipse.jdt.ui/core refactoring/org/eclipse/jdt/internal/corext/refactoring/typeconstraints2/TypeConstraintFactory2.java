@@ -19,13 +19,11 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Type;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -55,6 +53,14 @@ public class TypeConstraintFactory2 {
 	protected static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/TypeConstraints")); //$NON-NLS-1$//$NON-NLS-2$
 	
 	protected CustomHashtable/*<TypeConstraint2, NULL>*/ fTypeConstraints;
+	
+	/**
+	 * Map from {@link ConstraintVariable2} to
+	 * <ul>
+	 * <li>{@link ITypeConstraint2}, or</li>
+	 * <li>{@link List}&lt;{@link ITypeConstraint2}&gt;</li>
+	 * </ul>
+	 */
 	protected CustomHashtable/*<ConstraintVariable2, Object>*/ fConstraintVariables;
 	protected TypeHandleFactory fTypeHandleFactory;
 	protected boolean fStoreToString;
@@ -81,13 +87,20 @@ public class TypeConstraintFactory2 {
 	 * their constituent ConstraintVariables and ConstraintOperators. Can be used to e.g. 
 	 * avoid creation of constraints for assignments between built-in types.
 	 * 
-	 * @param v1 
-	 * @param v2
+	 * @param cv1 
+	 * @param cv2
 	 * @param operator
-	 * @return whether the constraint should <em>not</em> be created
+	 * @return whether the type constraint should <em>not</em> be created
 	 */
-	public boolean filter(ConstraintVariable2 v1, ConstraintVariable2 v2, ConstraintOperator2 operator) {
-		// TODO Auto-generated method stub
+	public boolean filter(ConstraintVariable2 cv1, ConstraintVariable2 cv2, ConstraintOperator2 operator) {
+		return cv1 == null || cv2 == null;
+	}
+	
+	/**
+	 * @param typeBinding the type binding to check
+	 * @return whether the constraint variable should <em>not</em> be created
+	 */
+	public boolean filterConstraintVariableType(ITypeBinding typeBinding) {
 		return false;
 	}
 	
@@ -110,6 +123,12 @@ public class TypeConstraintFactory2 {
 		return createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createStrictSubtypeOperator());
 	}
 	
+	/**
+	 * @param v1
+	 * @param v2
+	 * @return
+	 * @deprecated resolve on creation
+	 */
 	public ITypeConstraint2[] createEqualsConstraint(ConstraintVariable2 v1, ConstraintVariable2 v2){
 		return createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createEqualsOperator());
 	}
@@ -132,27 +151,27 @@ public class TypeConstraintFactory2 {
 			typeConstraint= (SimpleTypeConstraint2) storedTc;
 		}
 		
-		registerCvInTc(storedCv1, cv1, typeConstraint);
-		registerCvInTc(storedCv2, cv2, typeConstraint);
+		registerCvWithTc(storedCv1, cv1, typeConstraint);
+		registerCvWithTc(storedCv2, cv2, typeConstraint);
 		return new ITypeConstraint2[]{ typeConstraint };
 	}
 
-	private void registerCvInTc(ConstraintVariable2 storedCv, ConstraintVariable2 cv, SimpleTypeConstraint2 typeConstraint) {
+	private void registerCvWithTc(ConstraintVariable2 storedCv, ConstraintVariable2 cv, SimpleTypeConstraint2 typeConstraint) {
 		if (storedCv == null) {
 			// new CV -> directly store TC:
 			fConstraintVariables.put(cv, typeConstraint);
 		} else {
-			// existing CV:
+			// existing stored CV:
 			//TODO: could avoid call to get() if there was a method HashMapEntry getEntry(Object key) 
 			Object storedTcs= fConstraintVariables.get(storedCv);
 			ArrayList/*<ITypeConstraint2>*/ typeConstraintList;
 			if (storedTcs instanceof ITypeConstraint2) {
 				// CV only used in one TC so far:
 				typeConstraintList= new ArrayList(2);
-				fConstraintVariables.put(cv, typeConstraintList);
+				fConstraintVariables.put(storedCv, typeConstraintList);
 				typeConstraintList.add(storedTcs); // typeConstraintList.add((ITypeConstraint2) tcs);
 			} else {
-				// CV already used in multiple TCs:
+				// CV already used in multiple or zero TCs:
 				typeConstraintList= (ArrayList) storedTcs;
 			}
 			typeConstraintList.add(typeConstraint);
@@ -210,15 +229,36 @@ public class TypeConstraintFactory2 {
 //	}
 
 	public ExpressionVariable2 makeExpressionVariable(Expression expression) {
-		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(expression.resolveTypeBinding());
+		ITypeBinding typeBinding= expression.resolveTypeBinding();
+		if (filterConstraintVariableType(typeBinding))
+			return null;
+		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
 		ExpressionVariable2 expressionVariable= new ExpressionVariable2(typeHandle, expression);
 		if (fStoreToString)
 			expressionVariable.setData(ConstraintVariable2.TO_STRING, "[" + expression.toString() + "]"); //$NON-NLS-1$//$NON-NLS-2$
 		return expressionVariable;
 	}
 
+	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding) {
+		ITypeBinding typeBinding= variableBinding.getType();
+		if (filterConstraintVariableType(typeBinding))
+			return null;
+		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
+		VariableVariable2 fieldVariable= new VariableVariable2(typeHandle, variableBinding);
+		//TODO: tostring
+		return fieldVariable;
+	}
+
+	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding, Type variableType) {
+		VariableVariable2 cv= makeVariableVariable(variableBinding);
+		return (VariableVariable2) registerDeclaredTypeReference(cv, variableType);
+	}
+	
 	public TypeVariable2 makeTypeVariable(Type type) {
-		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(type.resolveBinding());
+		ITypeBinding typeBinding= type.resolveBinding();
+		if (filterConstraintVariableType(typeBinding))
+			return null;
+		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(type);
 		CompilationUnitRange range= new CompilationUnitRange(cu, type);
 		TypeVariable2 typeVariable= new TypeVariable2(typeHandle, range);
@@ -235,6 +275,8 @@ public class TypeConstraintFactory2 {
 	 * @exception RuntimeException
 	 */
 	public TypeVariable2 makeTypeVariable(Expression expression, ITypeBinding typeBinding) {
+		if (filterConstraintVariableType(typeBinding))
+			return null;
 		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(expression);
 		CompilationUnitRange range= new CompilationUnitRange(cu, expression);
@@ -245,39 +287,76 @@ public class TypeConstraintFactory2 {
 	}
 	
 	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex) {
-		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(methodBinding.getParameterTypes() [parameterIndex]);
+		ITypeBinding typeBinding= methodBinding.getParameterTypes() [parameterIndex];
+		if (filterConstraintVariableType(typeBinding))
+			return null;
+		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
 		ParameterTypeVariable2 cv= new ParameterTypeVariable2(typeHandle, parameterIndex, methodBinding);
 		if (fStoreToString)
 			cv.setData(ConstraintVariable2.TO_STRING, "[Parameter(" + parameterIndex + "," + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return cv;
 	}
-
-	public DeclaringTypeVariable2 makeDeclaringTypeVariable(IMethodBinding methodBinding) {
-		TypeHandle declaringTypeHandle= fTypeHandleFactory.getTypeHandle(methodBinding.getDeclaringClass());
-		return makeDeclaringTypeVariable(declaringTypeHandle, methodBinding);
-	}
-
-	public DeclaringTypeVariable2 makeDeclaringTypeVariable(IVariableBinding fieldBinding) {
-		Assert.isTrue(fieldBinding.isField());
-		TypeHandle declaringTypeHandle= fTypeHandleFactory.getTypeHandle(fieldBinding.getDeclaringClass());
-		return makeDeclaringTypeVariable(declaringTypeHandle, fieldBinding);
-	}
 	
-	private DeclaringTypeVariable2 makeDeclaringTypeVariable(TypeHandle declaringTypeHandle, IBinding memberBinding) {
-		DeclaringTypeVariable2 cv= new DeclaringTypeVariable2(declaringTypeHandle, memberBinding);
+	/**
+	 * Make a ParameterTypeVariable2 from a method declaration.
+	 * The constraint variable is always stored if it passes the type filter.
+	 * @return the ParameterTypeVariable2, or <code>null</code> 
+	 */
+	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, Type parameterType) {
+		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex);
+		return (ParameterTypeVariable2) registerDeclaredTypeReference(cv, parameterType);
+	}
+
+	private IUpdatableConstraintVariable registerDeclaredTypeReference(IUpdatableConstraintVariable cv, Type typeReference) {
+		if (cv == null)
+			return null;
+		
+		IUpdatableConstraintVariable storedCv= (IUpdatableConstraintVariable) fConstraintVariables.getKey(cv);
+		if (storedCv == null) {
+			storedCv= cv;
+			fConstraintVariables.put(cv, new ArrayList(0));
+		}
+		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(typeReference);
+		CompilationUnitRange range= new CompilationUnitRange(cu, typeReference);
+		storedCv.setCompilationUnitRange(range);
+		return storedCv;
+	}
+
+	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding) {
+		ITypeBinding typeBinding= methodBinding.getReturnType();
+		if (filterConstraintVariableType(typeBinding))
+			return null;
+		TypeHandle returnTypeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
+		ReturnTypeVariable2 cv= new ReturnTypeVariable2(returnTypeHandle, methodBinding);
+		//TODO: toString
 		return cv;
 	}
 
+	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding, Type returnType) {
+		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding);
+		return (ReturnTypeVariable2) registerDeclaredTypeReference(cv, returnType);
+	}
+	
+//	public DeclaringTypeVariable2 makeDeclaringTypeVariable(IMethodBinding methodBinding) {
+//		TypeHandle declaringTypeHandle= fTypeHandleFactory.getTypeHandle(methodBinding.getDeclaringClass());
+//		return makeDeclaringTypeVariable(declaringTypeHandle, methodBinding);
+//	}
+//	
+//	public DeclaringTypeVariable2 makeDeclaringTypeVariable(IVariableBinding fieldBinding) {
+//		Assert.isTrue(fieldBinding.isField());
+//		TypeHandle declaringTypeHandle= fTypeHandleFactory.getTypeHandle(fieldBinding.getDeclaringClass());
+//		return makeDeclaringTypeVariable(declaringTypeHandle, fieldBinding);
+//	}
+//	
+//	private DeclaringTypeVariable2 makeDeclaringTypeVariable(TypeHandle declaringTypeHandle, IBinding memberBinding) {
+//		DeclaringTypeVariable2 cv= new DeclaringTypeVariable2(declaringTypeHandle, memberBinding);
+//		return cv;
+//	}
+	
 	public PlainTypeVariable2 makePlainTypeVariable(ITypeBinding typeBinding) {
 		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
 		PlainTypeVariable2 cv= new PlainTypeVariable2(typeHandle);
 		return cv;
 	}
-
-	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding) {
-		TypeHandle returnTypeHandle= fTypeHandleFactory.getTypeHandle(methodBinding.getReturnType());
-		ReturnTypeVariable2 cv= new ReturnTypeVariable2(returnTypeHandle);
-		return cv;
-	}
-
+	
 }

@@ -33,14 +33,14 @@ public class TypeVariable2 extends ConstraintVariable2 {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#getHash()
 	 */
-	public int getHash() {
+	protected int getHash() {
 		return getRange().hashCode() ^ getTypeHandle().hashCode();
 	}
 	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#isSameAs(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2)
 	 */
-	public boolean isSameAs(ConstraintVariable2 other) {
+	protected boolean isSameAs(ConstraintVariable2 other) {
 		if (this == other)
 			return true;
 		if (other.getClass() != TypeVariable2.class)
