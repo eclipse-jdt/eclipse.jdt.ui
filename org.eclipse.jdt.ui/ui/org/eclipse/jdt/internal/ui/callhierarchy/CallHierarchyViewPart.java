@@ -782,14 +782,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
     }
 
-    /**
-     * Clears both the tree view and the location list.
-     */
-    private void clearView() {
-        fLocationViewer.clearViewer();
-        fCallHierarchyViewer.clearViewer();
-    }
-    
     static CallHierarchyViewPart findAndShowCallersView(IWorkbenchPartSite site) {
         IWorkbenchPage workbenchPage = site.getPage();
         CallHierarchyViewPart callersView = null;
