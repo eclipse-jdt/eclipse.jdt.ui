@@ -619,11 +619,10 @@ public class RemoteTestRunner implements TestListener {
 
 	private String getTestId(Test test) {
 		Object id= fIdMap.get(test);
-		if (id != null) {
+		if (id != null) 
 			return (String)id;
-		}
 		String newId= Integer.toString(fNextId++);
-		fIdMap.put(test, newId);
+		fIdMap.put(test, newId); 
 		return newId;
 	}
 	
