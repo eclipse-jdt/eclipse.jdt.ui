@@ -18,7 +18,7 @@ public class TempDeclarationFinder {
 	private TempDeclarationFinder(){}
 	
 	/**
-	 * @return <code>null</code> if the selection is invalid of does not cover a temp
+	 * @return <code>null</code> if the selection is invalid or does not cover a temp
 	 * declaration or reference.
 	 */
 	public static VariableDeclaration findTempDeclaration(CompilationUnit cu, int selectionOffset, int selectionLength) {
