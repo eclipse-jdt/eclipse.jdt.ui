@@ -232,7 +232,6 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 						if (fInsert instanceof IMethod)
 							insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
 						ImportRewrite imports= rewrite.getImportRewrite();
-						fCreatedImports= imports.getCreatedImports();
 						String key= null;
 						MethodDeclaration stub= null;
 						for (int index= 0; index < fKeys.length; index++) {

@@ -1530,10 +1530,16 @@ public final class ImportsStructure implements IImportsStructure {
 	}	
 	
 	public String[] getCreatedImports() {
+		if (fImportsCreated == null) {
+			return new String[0];
+		}
 	    return (String[]) fImportsCreated.toArray(new String[fImportsCreated.size()]);
 	}
 	
 	public String[] getCreatedStaticImports() {
+		if (fStaticImportsCreated == null) {
+			return new String[0];
+		}
 	    return (String[]) fStaticImportsCreated.toArray(new String[fStaticImportsCreated.size()]);
 	}
 
