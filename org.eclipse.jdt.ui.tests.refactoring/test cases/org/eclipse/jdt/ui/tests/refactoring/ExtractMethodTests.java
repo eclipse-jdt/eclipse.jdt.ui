@@ -74,10 +74,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
  	}
 	
 	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
-		performTest(packageFragment, id, mode, outputFolder, null, null);
+		performTest(packageFragment, id, mode, outputFolder, null, null, 0);
 	}
 	
-	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder) throws Exception {
+	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder, int destination) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
@@ -109,6 +109,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 				parameters.set(newOrder[i], current.get(i));
 			}
 		}
+		refactoring.setDestination(destination);
 		
 		String out= null;
 		switch (mode) {
@@ -177,6 +178,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	protected void initializerTest() throws Exception {
 		performTest(fgTestSetup.getInitializerPackage(), "A", COMPARE_WITH_OUTPUT, "initializer_out");
+	}
+	
+	protected void destinationTest(int destination) throws Exception {
+		performTest(fgTestSetup.getDestinationPackage(), "A", COMPARE_WITH_OUTPUT, "destination_out",
+			null, null, destination);
 	}
 	
 	//=====================================================================================
@@ -1495,11 +1501,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	//---- Test parameter name changes
 	
 	private void invalidParameterNameTest(String[] newNames) throws Exception {
-		performTest(fgTestSetup.getParameterNamePackage(), "A", INVALID_SELECTION, null, newNames, null);
+		performTest(fgTestSetup.getParameterNamePackage(), "A", INVALID_SELECTION, null, newNames, null, 0);
 	}
 	
 	private void parameterNameTest(String[] newNames, int[] newOrder) throws Exception {
-		performTest(fgTestSetup.getParameterNamePackage(), "A", COMPARE_WITH_OUTPUT, "parameterName_out", newNames, newOrder);
+		performTest(fgTestSetup.getParameterNamePackage(), "A", COMPARE_WITH_OUTPUT, "parameterName_out", newNames, newOrder, 0);
 	}
 	
 	public void test900() throws Exception {
@@ -1576,6 +1582,16 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test1003() throws Exception {
 		initializerTest();
+	}
+	
+	//---- Test destination -----------------------------------------------
+	
+	public void test1050() throws Exception {
+		destinationTest(1);
+	}
+	
+	public void test1051() throws Exception {
+		destinationTest(1);
 	}
 	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod
