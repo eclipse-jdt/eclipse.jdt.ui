@@ -226,7 +226,7 @@ public class EditorTestHelper {
 		AllTypesCache.getTypes(SearchEngine.createJavaSearchScope(new IJavaElement[0]), 
 			IJavaSearchConstants.CLASS, new NullProgressMonitor(), new ArrayList());
 		// Join jobs
-		joinJobs(0, Long.MAX_VALUE, 500);
+		joinJobs(0, 0, 500);
 	}
 	
 	public static boolean joinJobs(long minTime, long maxTime, long intervalTime) {
@@ -235,7 +235,7 @@ public class EditorTestHelper {
 		while (System.currentTimeMillis() < startTime)
 			runEventQueue(intervalTime);
 		
-		long endTime= maxTime > 0 ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
+		long endTime= maxTime > 0  && maxTime < Long.MAX_VALUE ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
 		boolean calm= allJobsQuiet();
 		while (!calm && System.currentTimeMillis() < endTime) {
 			runEventQueue(intervalTime);
@@ -311,7 +311,7 @@ public class EditorTestHelper {
 		if (minTime > 0)
 			runEventQueue(minTime);
 		
-		long endTime= maxTime > 0 ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
+		long endTime= maxTime > 0 && maxTime < Long.MAX_VALUE ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
 		AbstractReconciler reconciler= getReconciler(sourceViewer);
 		if (reconciler == null)
 			return true;
