@@ -361,7 +361,12 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 			fFrameColor= null;
 		}			
 		
-		StyledText text= fViewer.getTextWidget();	
+		StyledText text= fViewer.getTextWidget();
+		// bail out if the styled text is null, meaning the viewer has been disposed (-> document is null as well)
+		// see pr https://bugs.eclipse.org/bugs/show_bug.cgi?id=46821
+		if (text == null)
+			return;
+		
 		text.removePaintListener(this);
 		text.removeModifyListener(this);
 		text.removeVerifyListener(this);
