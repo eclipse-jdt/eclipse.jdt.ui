@@ -164,7 +164,8 @@ public abstract class TypePage extends ContainerPage {
 		String[] addButtons= new String[] { NewWizardMessages.getString("TypePage.interfaces.add") }; //$NON-NLS-1$
 		fSuperInterfacesDialogField= new ListDialogField(adapter, addButtons, new InterfacesListLabelProvider(), 0);
 		fSuperInterfacesDialogField.setDialogFieldListener(adapter);
-		fSuperInterfacesDialogField.setLabelText(NewWizardMessages.getString("TypePage.interfaces.label")); //$NON-NLS-1$
+		String interfaceLabel= fIsClass ? NewWizardMessages.getString("TypePage.interfaces.class.label") : NewWizardMessages.getString("TypePage.interfaces.ifc.label"); //$NON-NLS-1$ //$NON-NLS-2$
+		fSuperInterfacesDialogField.setLabelText(interfaceLabel);
 		fSuperInterfacesDialogField.setRemoveButtonLabel(NewWizardMessages.getString("TypePage.interfaces.remove")); //$NON-NLS-1$
 	
 		String[] buttonNames1= new String[] {
