@@ -4,6 +4,6 @@ class A {
 	void foo() {
 	}
 	int bar;
-	void foo() {
-	}
+	int baz;
+	int bar;
 }

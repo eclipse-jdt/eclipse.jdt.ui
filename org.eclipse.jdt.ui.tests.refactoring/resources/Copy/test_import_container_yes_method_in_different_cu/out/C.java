@@ -1,9 +1,8 @@
 package p;
+
 import java.util.*;
-class A {
-	void foo() {
-	}
-	int bar;
+import java.lang.Object;
+class C {
 	void foo() {
 	}
 }
