@@ -18,11 +18,10 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
 /**
- * TODO: this class should
- * <br>- be called TextSearchTableContentProvider and
- * <br>- replace JavaSearchTableContentProvider (must generalize type of fSearchResult to AbstractTextSearchResult)
+ * TODO: this class should replace JavaSearchTableContentProvider
+ * (must generalize type of fResult to AbstractTextSearchResult in JavaSearchContentProvider)
  */
-public class OccurrencesSearchContentProvider implements IStructuredContentProvider {
+public class TextSearchTableContentProvider implements IStructuredContentProvider {
 	protected final Object[] EMPTY_ARRAY= new Object[0];
 	private AbstractTextSearchResult fSearchResult;
 	private TableViewer fTableViewer;

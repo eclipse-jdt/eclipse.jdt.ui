@@ -98,7 +98,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 		if (enclosingElement.getElementType() == IJavaElement.FIELD) {
 			IField field= (IField)enclosingElement;
 			String source= field.getSource();
-			if (source != null && fgGetClassNameMatcher.match(source))
+			if (source != null && fgGetClassNameMatcher.match(source)) //undocumented convention!
 				return;
 		}
 		/*

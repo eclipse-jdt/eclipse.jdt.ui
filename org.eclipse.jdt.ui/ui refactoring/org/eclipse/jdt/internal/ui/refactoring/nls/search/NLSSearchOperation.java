@@ -32,6 +32,7 @@ class NLSSearchOperation extends WorkspaceModifyOperation {
 	private IWorkspace fWorkspace;
 	private IJavaElement fElementPattern;
 	private int fLimitTo;
+	/** @deprecated TODO: remove dead code */
 	private String fStringPattern;
 	private int fSearchFor;
 	private IJavaSearchScope fScope;
@@ -64,6 +65,7 @@ class NLSSearchOperation extends WorkspaceModifyOperation {
 		fElementPattern= pattern;
 	}
 	
+	/** @deprecated TODO: remove dead code */
 	public NLSSearchOperation(
 				IWorkspace workspace,
 				String pattern,
@@ -73,7 +75,7 @@ class NLSSearchOperation extends WorkspaceModifyOperation {
 				String scopeDescription,
 				NLSSearchResultCollector collector) {
 		this(workspace, limitTo, scope, scopeDescription, collector);
-		fStringPattern= pattern;
+		fStringPattern= pattern; /** @deprecated TODO: remove dead code */
 		fSearchFor= searchFor;
 	}
 
@@ -82,7 +84,7 @@ class NLSSearchOperation extends WorkspaceModifyOperation {
 		SearchEngine engine= new SearchEngine();
 		if (fElementPattern != null)
 			engine.search(fWorkspace, fElementPattern, fLimitTo, fScope, fCollector);
-		else
+		else /** @deprecated TODO: remove dead code */
 			engine.search(fWorkspace, fStringPattern, fSearchFor, fLimitTo, fScope, fCollector);
 	}
 
@@ -100,11 +102,11 @@ class NLSSearchOperation extends WorkspaceModifyOperation {
 		if (fElementPattern != null) {
 			if (fLimitTo == IJavaSearchConstants.REFERENCES
 			&& fElementPattern.getElementType() == IJavaElement.METHOD)
-				return PrettySignature.getUnqualifiedMethodSignature((IMethod)fElementPattern);
+				return PrettySignature.getUnqualifiedMethodSignature((IMethod)fElementPattern); /** @deprecated TODO: remove dead code */
 			else
 				return fElementPattern.getElementName();
 		}
-		else
+		else /** @deprecated TODO: remove dead code */
 			return fStringPattern;
 	}
 	

@@ -69,6 +69,7 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -154,6 +155,56 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	//---- Action Handling ------------------------------------------------
 
 	public boolean performAction() {
+		if (true) //TODO: remove old search support
+			return performNewSearch();
+		else
+			return performOldSearch();
+	}
+
+	private boolean performNewSearch() {
+		NewSearchUI.activateSearchResultView();
+		SearchPatternData data= getPatternData();
+		if (data.wrapperClass == null || data.propertyFile == null)
+			return false;
+		
+		// Setup search scope
+		IJavaSearchScope scope= null;
+		String scopeDescription= ""; //$NON-NLS-1$
+		switch (getContainer().getSelectedScope()) {
+			case ISearchPageContainer.WORKSPACE_SCOPE :
+				scopeDescription= NLSSearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
+				scope= SearchEngine.createWorkspaceScope();
+				break;
+			case ISearchPageContainer.SELECTION_SCOPE :
+				scopeDescription= NLSSearchMessages.getString("SelectionScope"); //$NON-NLS-1$
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getSelection());
+				break;
+			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
+				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(getSelection());
+				IProject[] projects= JavaSearchScopeFactory.getInstance().getJavaProjects(scope);
+				if (projects.length > 1)
+					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
+				else if (projects.length == 1)
+					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectScope", projects[0].getName()); //$NON-NLS-1$
+				else 
+					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				break;
+			case ISearchPageContainer.WORKING_SET_SCOPE :
+				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
+				// should not happen - just to be sure
+				if (workingSets == null || workingSets.length < 1)
+					return false;
+				scopeDescription= NLSSearchMessages.getFormattedString("WorkingSetScope", new String[] { SearchUtil.toString(workingSets)}); //$NON-NLS-1$
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
+				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
+		}
+		
+		NLSSearchQuery query= new NLSSearchQuery(data.wrapperClass, data.propertyFile, scope, scopeDescription);
+		NewSearchUI.runQuery(query);
+		return true;
+	}
+
+	private boolean performOldSearch() {
 		SearchUI.activateSearchResultView();
 		SearchPatternData data= getPatternData();
 		if (data.wrapperClass == null || data.propertyFile == null)

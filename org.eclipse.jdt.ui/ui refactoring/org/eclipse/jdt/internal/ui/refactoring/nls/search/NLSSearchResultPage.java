@@ -9,7 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.search;
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -19,19 +21,22 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
 
 
-public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
+public class NLSSearchResultPage extends AbstractTextSearchViewPage {
 
 	private TextSearchTableContentProvider fContentProvider;
 
-	public OccurrencesSearchResultPage() {
+	public NLSSearchResultPage() {
 		super(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
 	}
 
@@ -40,22 +45,27 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	 */
 	protected void showMatch(Match match, int currentOffset, int currentLength) throws PartInitException {
 		IEditorPart editor= null;
-		JavaElementLine element= (JavaElementLine) match.getElement();
-		IJavaElement javaElement= element.getJavaElement();
-		try {
-			editor= EditorUtility.openInEditor(javaElement, false);
-		} catch (PartInitException e1) {
-			return;
-		} catch (JavaModelException e1) {
-			return;
+		if (match.getElement() instanceof IJavaElement) {
+			IJavaElement javaElement= (IJavaElement) match.getElement();
+			try {
+				editor= EditorUtility.openInEditor(javaElement, false);
+			} catch (PartInitException e1) {
+				return;
+			} catch (JavaModelException e1) {
+				return;
+			}
+		} else if (match.getElement() instanceof FileEntry) {
+			FileEntry fileEntry= (FileEntry) match.getElement();
+			IFile file= fileEntry.getPropertiesFile();
+			editor= IDE.openEditor(JavaPlugin.getActivePage(), file, false);
 		}
-
+		
 		if (editor instanceof ITextEditor) {
 			ITextEditor textEditor= (ITextEditor) editor;
 			textEditor.selectAndReveal(currentOffset, currentLength);
 		}
 	}
-
+	
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#elementsChanged(java.lang.Object[])
 	 */
@@ -83,8 +93,8 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
 	protected void configureTableViewer(TableViewer viewer) {
-		viewer.setSorter(new JavaElementLineSorter());
-		viewer.setLabelProvider(new OccurrencesSearchLabelProvider(this));
+		viewer.setSorter(new NLSSorter());
+		viewer.setLabelProvider(new NLSSearchResultLabelProvider2(this));
 		fContentProvider= new TextSearchTableContentProvider();
 		viewer.setContentProvider(fContentProvider);
 	}

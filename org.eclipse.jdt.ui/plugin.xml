@@ -947,12 +947,25 @@
 			targetClass="org.eclipse.jdt.internal.ui.search.JavaSearchResult"
 			class="org.eclipse.jdt.internal.ui.search.JavaSearchResultPage">
 		</viewPage>
+   </extension>
+   <extension
+    	id="OccurrencesSearchResultPage"
+        point="org.eclipse.search.searchResultViewPages">
 		<viewPage
+			id="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage"
 			targetClass="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResult"
-			class="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage"
-			id="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage">
+			class="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage">
 		</viewPage>
-	</extension>
+   </extension>
+   <extension
+    	id="NLSSearchResultPage"
+        point="org.eclipse.search.searchResultViewPages">
+		<viewPage
+			id="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResultPage"
+			targetClass="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResult"
+			class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResultPage">
+		</viewPage>
+   </extension>
   
 <!-- =========================================================================== -->
 <!-- Java Compare                                                                -->
