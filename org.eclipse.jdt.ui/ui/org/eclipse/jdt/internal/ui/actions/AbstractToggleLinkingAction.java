@@ -25,12 +25,12 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  * 
  * @since 3.0
  */
-public abstract class AbstractToggleLinkAction extends Action {
+public abstract class AbstractToggleLinkingAction extends Action {
 	
 	/**
 	 * Constructs a new action.
 	 */
-	public AbstractToggleLinkAction() {
+	public AbstractToggleLinkingAction() {
 		super(JavaUIMessages.getString("ToggleLinkingAction.label")); //$NON-NLS-1$
 		setDescription(JavaUIMessages.getString("ToggleLinkingAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("ToggleLinkingAction.tooltip")); //$NON-NLS-1$
