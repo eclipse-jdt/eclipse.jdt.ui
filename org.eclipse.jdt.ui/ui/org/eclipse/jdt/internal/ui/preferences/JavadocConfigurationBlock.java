@@ -226,20 +226,21 @@ public class JavadocConfigurationBlock {
 		fArchiveRadioButton.setSelection(isArchive);
 		
 		if (isArchive) {
-			String jarPath;
+			String jarPathStr;
 			String insidePath= ""; //$NON-NLS-1$
 			int excIndex= initialValue.indexOf('!');
 			if (excIndex == -1) {
-				jarPath= initialValue.substring(prefix.length());
+				jarPathStr= initialValue.substring(prefix.length());
 			} else {
-				jarPath= initialValue.substring(prefix.length(), excIndex);
+				jarPathStr= initialValue.substring(prefix.length(), excIndex);
 				insidePath= initialValue.substring(excIndex + 1);
 				if (insidePath.length() > 0 && insidePath.charAt(0) == '/') {
 					insidePath= insidePath.substring(1);
 				}
 			}
+			IPath jarPath= new Path(jarPathStr);
 			fArchivePathField.setText(insidePath);
-			fArchiveField.setText(jarPath);
+			fArchiveField.setText(jarPath.makeAbsolute().toOSString());
 		} else {
 			fURLField.setText(initialValue);
 		}		
@@ -533,6 +534,10 @@ public class JavadocConfigurationBlock {
 			StatusInfo status= new StatusInfo();
 			String jdocLocation= fArchiveField.getText();
 			if (jdocLocation.length() > 0)  {
+				if (!Path.ROOT.isValidPath(jdocLocation)) {
+					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.invalidarchivepath")); //$NON-NLS-1$
+					return status;	
+				}
 				File jarFile= new File(jdocLocation);
 				if (jarFile.isDirectory())  {
 					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafile")); //$NON-NLS-1$
@@ -541,6 +546,11 @@ public class JavadocConfigurationBlock {
 				if (!jarFile.exists())  {
 					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafile")); //$NON-NLS-1$
 					return status;													
+				}
+				IPath path= new Path(jdocLocation);
+				if (!path.isAbsolute()) {
+					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.archivepathnotabsolute")); //$NON-NLS-1$
+					return status;	
 				}
 				fArchiveURLResult= getArchiveURL();
 			}
