@@ -425,7 +425,7 @@ public class UnresolvedElementsSubProcessor {
 			// import only
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", arg); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
-			proposal= new CUCorrectionProposal(label, cu, relevance + 20, image);
+			proposal= new CUCorrectionProposal(label, cu, relevance + 100, image);
 		} else {
 			String label;
 			if (packName.length() == 0) {
