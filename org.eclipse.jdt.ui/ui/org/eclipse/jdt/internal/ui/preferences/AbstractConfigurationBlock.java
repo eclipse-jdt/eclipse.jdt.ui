@@ -332,11 +332,11 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 				String[] strings= (String[]) tokens[i];
 				text= strings[0];
 				final String target= strings[1];
-				CHyperLink link= new CHyperLink(description, SWT.NONE);
+				final CHyperLink link= new CHyperLink(description, SWT.NONE);
 				link.setText(text);
 				link.addSelectionListener(new SelectionAdapter() {
 						public void widgetSelected(SelectionEvent e) {
-								PreferencesUtil.createPreferenceDialogOn(target, null, null);
+								PreferencesUtil.createPreferenceDialogOn(link.getShell(), target, null, null);
 						}
 				});
 				if (strings.length > 2)
