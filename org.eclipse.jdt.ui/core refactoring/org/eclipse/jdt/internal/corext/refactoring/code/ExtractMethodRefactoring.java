@@ -435,7 +435,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 		buffer.append(methodName);
 
-		appendArguments(buffer);
+		appendParameters(buffer);
 		appendThrownExceptions(buffer);		
 		return buffer.toString();
 	}
@@ -575,7 +575,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		for (int i= 0; i < fParameterInfos.size(); i++) {
 			if (i > 0)
 				code.append(COMMA_BLANK);
-			code.append(((ParameterInfo)fParameterInfos.get(i)).getNewName());
+			code.append(((ParameterInfo)fParameterInfos.get(i)).getOldName());
 		}		
 		code.append(")"); //$NON-NLS-1$
 						
@@ -617,7 +617,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return node instanceof Expression;
 	}	
 	
-	private void appendArguments(StringBuffer buffer) {
+	private void appendParameters(StringBuffer buffer) {
 		buffer.append('('); //$NON-NLS-1$
 		int size= fParameterInfos.size();
 		for (int i= 0; i < size; i++) {
