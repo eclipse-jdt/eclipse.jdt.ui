@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -102,7 +103,10 @@ public class ExtractConstantTests extends RefactoringTest {
 		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, constantName, constantName);
 	}	
 	
-	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception{
+	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception {
+		failHelper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, constantName, 0, false);	
+	}
+	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, int errorCode, boolean checkCode) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractConstantRefactoring ref= new ExtractConstantRefactoring(cu, selection.getOffset(), selection.getLength(), 
@@ -115,7 +119,9 @@ public class ExtractConstantTests extends RefactoringTest {
 			return;
 			
 		assertNotNull("precondition was supposed to fail", result);
-	}	
+		if(checkCode)
+			assertEquals(errorCode, result.getFirstEntry(RefactoringStatus.ERROR).getCode());
+	}
 
 	//--- TESTS
 	
@@ -202,6 +208,22 @@ public class ExtractConstantTests extends RefactoringTest {
 		
 	public void testFail11() throws Exception{
 		failHelper1(8, 16, 8, 22, true, false, "CONSTANT");
-	}	
+	}
+	
+	public void testFail12() throws Exception{
+		failHelper1(4, 7, 4, 8, true, true, "CONSTANT", RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, true);
+	}
+	
+	public void testFail13() throws Exception {
+		failHelper1(2, 9, 2, 10, true, true, "CONSTANT", RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, true);	
+	}
+	
+	public void testFail14() throws Exception {
+		failHelper1(5, 9, 5, 11, true, true, "CONSTANT", RefactoringStatusCodes.EXTRANEOUS_TEXT, true);	
+	}
+	
+	public void testFail15() throws Exception {
+		failHelper1(5, 10, 5, 13, true, true, "CONSTANT", RefactoringStatusCodes.EXTRANEOUS_TEXT, true);	
+	}
 }
 
