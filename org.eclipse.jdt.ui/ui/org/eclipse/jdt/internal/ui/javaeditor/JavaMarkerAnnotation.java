@@ -23,6 +23,8 @@ import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 
+import org.eclipse.ui.IMarkerHelpRegistry;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -31,11 +33,15 @@ import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.internal.core.Util;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 
 
 
-public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAnnotation {		
-		
+public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAnnotation {
+	
+	private static Image fgImage;
+	private static boolean fgImageInitialized= false;
+	
 	private IDebugModelPresentation fPresentation;
 	private IProblemAnnotation fOverlay;
 	private boolean fNotRelevant= false;
@@ -98,7 +104,17 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 			}
 			
 			super.initialize();
-		
+			
+			if (JavaEditorPreferencePage.indicateQuixFixableProblems()) {
+				IMarkerHelpRegistry registry= PlatformUI.getWorkbench().getMarkerHelpRegistry();
+				if (registry != null && registry.hasResolutions(marker)) {
+					if (!fgImageInitialized) {
+						fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+						fgImageInitialized= true;
+					}
+					setImage(fgImage);
+				}
+			}
 		}
 	}
 

@@ -160,7 +160,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			public void paint(GC gc, Canvas canvas, Rectangle r) {
 				initializeImage();
 				if (fImage != null)
-					drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.CENTER);
+					drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.TOP);
 			}
 			
 			/*
