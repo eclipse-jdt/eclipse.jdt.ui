@@ -87,7 +87,7 @@ public class JarPackageData {
 	public void setExportJavaFiles(boolean state) {
 		fExportJavaFiles= state;
 	}
-	/**	 * Tells whether the source folder hierarchy is used.	 * <p>	 * Using the source folder hierarchy only makes sense if	 * java files are but class files aren't exported.	 * </p>	 * 	 * @return	<code>true</code> if source folder hierarchy is used	 */	public boolean useSourceFolderHierarchy() {		return areJavaFilesExported() && !areClassFilesExported() && fUseSourceFolderHierarchy;	}	/**	 * Set the option to export the source folder hierarchy	 * 	 * @param state the new state	 */	public void setUseSourceFolderHierarchy(boolean state) {		fUseSourceFolderHierarchy= state;	}	/**
+	/**	 * Tells whether the source folder hierarchy is used.	 * <p>	 * Using the source folder hierarchy only makes sense if	 * java files are but class files aren't exported.	 * </p>	 * 	 * @return	<code>true</code> if source folder hierarchy is used	 */	public boolean useSourceFolderHierarchy() {		return fUseSourceFolderHierarchy;	}	/**	 * Set the option to export the source folder hierarchy	 * 	 * @param state the new state	 */	public void setUseSourceFolderHierarchy(boolean state) {		fUseSourceFolderHierarchy= state;	}	/**
 	 * Gets the location of the JAR file.	 * This path is normally external to the workspace.	 * 
 	 * @return the path representing the location of the JAR file
 	 */
