@@ -838,6 +838,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 
 	private static int getPeerPosition(IDocument document, DocumentCommand command) {
+		if (document.getLength() == 0)
+			return 0;
     	/*
     	 * Search for scope closers in the pasted text and find their opening peers
     	 * in the document. 
