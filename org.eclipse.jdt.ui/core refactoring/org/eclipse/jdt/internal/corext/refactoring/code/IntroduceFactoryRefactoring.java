@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -832,6 +833,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		} else if (node instanceof ConstructorInvocation) {
 			// This is a call we can bypass; it's from one constructor flavor
 			// to another flavor on the same class.
+			return null;
+		} else if (node instanceof SuperConstructorInvocation) {
+			// This is a call we can bypass; it's from one constructor flavor
+			// to another flavor on the same class.
+			fConstructorVisibility= Modifier.PROTECTED;
 			return null;
 		} else if (node instanceof ExpressionStatement) {
 			Expression	expr= ((ExpressionStatement) node).getExpression();
