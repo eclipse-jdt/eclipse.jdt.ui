@@ -813,12 +813,12 @@ public class NLSRefactoring extends Refactoring {
 		//XXX should the class be public?
 		b.append("public class ").append(fAccessorClassName).append(" {").append(ld) //$NON-NLS-2$ //$NON-NLS-1$
 		 .append(ld)
-		 .append("\tprivate static final String ") //$NON-NLS-1$
+		 .append("private static final String ") //$NON-NLS-1$
 		 .append(getBundleStringName())
 		 .append("= \"") //$NON-NLS-1$
 		 .append(getResourceBundleName()).append("\";").append(NLSElement.createTagText(1)).append(ld) //$NON-NLS-1$
 		 .append(ld)
-		 .append("\tprivate static final ResourceBundle ") //$NON-NLS-1$
+		 .append("private static final ResourceBundle ") //$NON-NLS-1$
 		 .append(getResourceBundleConstantName())
 		 .append("= ResourceBundle.getBundle(") //$NON-NLS-1$
 		 .append(getBundleStringName())
@@ -843,23 +843,23 @@ public class NLSRefactoring extends Refactoring {
 	private StringBuffer createConstructor(){
 		String ld= fgLineDelimiter; //want shorter name
 		StringBuffer b= new StringBuffer();
-		b.append("\tprivate ").append(fAccessorClassName).append("() {").append(ld) //$NON-NLS-2$ //$NON-NLS-1$
-		 .append("\t}").append(ld); //$NON-NLS-1$
+		b.append("private ").append(fAccessorClassName).append("() {").append(ld) //$NON-NLS-2$ //$NON-NLS-1$
+		 .append("}").append(ld); //$NON-NLS-1$
 		return b;
 	}
 	
 	private StringBuffer createGetStringMethod(){
 		String ld= fgLineDelimiter; //want shorter name
 		StringBuffer b= new StringBuffer();
-		b.append("\tpublic static String getString(String key) {").append(ld) //$NON-NLS-1$
-		 .append("\t\ttry {").append(ld) //$NON-NLS-1$
-		 .append("\t\t\treturn ") //$NON-NLS-1$
+		b.append("public static String getString(String key) {").append(ld) //$NON-NLS-1$
+		 .append("try {").append(ld) //$NON-NLS-1$
+		 .append("return ") //$NON-NLS-1$
 		 .append(getResourceBundleConstantName())
 		 .append(".getString(key);").append(ld) //$NON-NLS-1$
-		 .append("\t\t} catch (MissingResourceException e) {").append(ld) //$NON-NLS-1$
-		 .append("\t\t\treturn '!' + key + '!';").append(ld) //$NON-NLS-1$
-		 .append("\t\t}").append(ld) //$NON-NLS-1$
-		 .append("\t}").append(ld); //$NON-NLS-1$
+		 .append("} catch (MissingResourceException e) {").append(ld) //$NON-NLS-1$
+		 .append("return '!' + key + '!';").append(ld) //$NON-NLS-1$
+		 .append("}").append(ld) //$NON-NLS-1$
+		 .append("}").append(ld); //$NON-NLS-1$
 		return b;
 	}
 	
