@@ -30,6 +30,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -37,9 +40,11 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -52,8 +57,11 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -73,7 +81,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private AppearanceAwareLabelProvider fInnerLabelProvider;
 	protected Color fForegroundColor;
 	
+	private boolean fShowOnlyMainType;
 
+	
 	private class OutlineLabelProvider extends AppearanceAwareLabelProvider {
 
 		private OutlineLabelProvider() {
@@ -101,6 +111,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		}
 	}
 
+	
 	private class OutlineTreeViewer extends TreeViewer {
 		
 		private boolean fIsFiltering= false;
@@ -158,6 +169,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		}
 	}
 	
+	
 	private class OutlineContentProvider extends StandardJavaElementContentProvider {
 
 		private Map fTypeHierarchies= new HashMap();
@@ -196,6 +208,24 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * {@inheritDoc}
 		 */
 		public Object[] getChildren(Object element) {
+			if (fShowOnlyMainType) {
+				if (element instanceof ICompilationUnit) {
+					try {
+						IType type= getMainType((ICompilationUnit)element);
+						return type != null ? type.getChildren() : NO_CHILDREN;
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
+					}
+				} else if (element instanceof IClassFile) {
+					try {
+						IType type= getMainType((IClassFile)element);
+						return type != null ? type.getChildren() : NO_CHILDREN;
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
+					}							
+				}
+			}
+			
 			if (fShowInheritedMembers && element instanceof IType) {
 				IType type= (IType)element;
 				if (type.getDeclaringType() == null) {
@@ -253,7 +283,77 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			super.dispose();
 			fTypeHierarchies.clear();
 		}
+		
+		/**
+		 * Returns the primary type of a compilation unit (has the same
+		 * name as the compilation unit).
+		 * 
+		 * @param compilationUnit the compilation unit
+		 * @return returns the primary type of the compilation unit, or
+		 * <code>null</code> if is does not have one
+		 */
+		private IType getMainType(ICompilationUnit compilationUnit) {
+			
+			if (compilationUnit == null)
+				return null;
+			
+			String name= compilationUnit.getElementName();
+			int index= name.indexOf('.');
+			if (index != -1)
+				name= name.substring(0, index);
+			IType type= compilationUnit.getType(name);
+			return type.exists() ? type : null;
+		}
+
+		/**
+		 * Returns the primary type of a class file.
+		 * 
+		 * @param classFile the class file
+		 * @return returns the primary type of the class file, or <code>null</code>
+		 * if is does not have one
+		 */
+		private IType getMainType(IClassFile classFile) {
+			try {
+				IType type= classFile.getType();
+				return type != null && type.exists() ? type : null;
+			} catch (JavaModelException e) {
+				return null;	
+			}
+		}
 	}
+	
+	
+	private class ShowOnlyMainType extends Action {
+
+		public ShowOnlyMainType() {
+			super(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.label"), IAction.AS_CHECK_BOX); //$NON-NLS-1$
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GO_INTO_TOP_LEVEL_TYPE_ACTION);
+			setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.tooltip")); //$NON-NLS-1$
+			setDescription(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.description")); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.gif"); //$NON-NLS-1$
+
+			boolean showclass= getDialogSettings().getBoolean("GoIntoTopLevelTypeAction.isChecked"); //$NON-NLS-1$
+			setTopLevelTypeOnly(showclass);
+		}
+
+		/*
+		 * @see org.eclipse.jface.action.Action#run()
+		 */
+		public void run() {
+			setTopLevelTypeOnly(!fShowOnlyMainType);
+		}
+
+		private void setTopLevelTypeOnly(boolean show) {
+			fShowOnlyMainType= show;
+			setChecked(show);
+			getTreeViewer().refresh(false);
+			if (!fShowOnlyMainType)
+				getTreeViewer().expandToLevel(2);
+			
+			getDialogSettings().put("GoIntoTopLevelTypeAction.isChecked", show); //$NON-NLS-1$
+		}
+	}
+	
 
 	/**
 	 * Creates a new Java outline information control.
@@ -387,5 +487,13 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		fInnerLabelProvider.setTextFlags(flags);
 		fOutlineContentProvider.toggleShowInheritedMembers();
 		updateStatusFieldText();
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#fillViewMenu(org.eclipse.jface.action.IMenuManager)
+	 */
+	protected void fillViewMenu(IMenuManager viewMenu) {
+		super.fillViewMenu(viewMenu);
+		viewMenu.add(new ShowOnlyMainType()); //$NON-NLS-1$
 	}
 }
