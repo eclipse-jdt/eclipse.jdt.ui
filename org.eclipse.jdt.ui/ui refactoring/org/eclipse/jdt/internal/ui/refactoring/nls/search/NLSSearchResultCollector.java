@@ -222,7 +222,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 					marker= fPropertyFile.createMarker(SearchUI.SEARCH_MARKER);
 				} catch (CoreException ex) {
 					// skip this marker
-					// XXX: log error
+					JavaPlugin.log(ex);
 					continue;
 				}
 				int start= findPropertyNameStartPosition(propertyName);
@@ -234,7 +234,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 					marker.setAttributes(attributes);
 				} catch (CoreException ex) {
 					// Skip this marker
-					// XXX: log error
+					JavaPlugin.log(ex);
 					continue;
 				}
 				fView.addMatch(fPropertyFile.getName(), key, fPropertyFile, marker);
@@ -292,13 +292,13 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 				}
 			}
 		} catch (IOException ex) {
-			// XXX: log error			
+			JavaPlugin.log(ex);			
 			return -1;
 		} finally {
 			try {
 				lineReader.close();
 			} catch (IOException ex) {
-				// XXX: log error
+				JavaPlugin.log(ex);
 			}
 		}
 		return start;
@@ -336,7 +336,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 				marker= fPropertyFile.createMarker(SearchUI.SEARCH_MARKER);
 			} catch (CoreException ex) {
 				// skip this marker
-				// XXX: log error
+				JavaPlugin.log(ex);
 				continue;
 			}
 			String propertyName= (String)duplicateKeys.next();
@@ -350,7 +350,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 				marker.setAttributes(attributes);
 			} catch (CoreException ex) {
 				// Skip this marker
-				// XXX: log error
+				JavaPlugin.log(ex);
 				continue;
 			}
 			fView.addMatch(fPropertyFile.getName(), key, fPropertyFile, marker);
