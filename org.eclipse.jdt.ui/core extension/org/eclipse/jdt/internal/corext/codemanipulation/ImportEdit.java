@@ -63,15 +63,19 @@ public class ImportEdit extends SimpleTextEdit {
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 */			
 	public void addImport(String qualifiedTypeName) {
-		int index= qualifiedTypeName.lastIndexOf('.');
-		if (index == -1)	// no default package
+		int lastDotIndex= qualifiedTypeName.lastIndexOf('.');
+		if (lastDotIndex == -1)	// no default package
 			return;
-		if ("java.lang".equals(qualifiedTypeName.substring(0, index)))
+		if ("java.lang".equals(qualifiedTypeName.substring(0, lastDotIndex)))
 			return;
-		if (fAddedImports.contains(qualifiedTypeName))	//do not add twice
+		
+		//XXX workaround for 11622, 11537 and related problems with array types
+		String bracketsRemoved= removeTrailingBrackets(qualifiedTypeName);			
+		
+		if (fAddedImports.contains(bracketsRemoved))	//do not add twice
 			return;
 			
-		fAddedImports.add(qualifiedTypeName);
+		fAddedImports.add(bracketsRemoved);
 	}
 	
 	public void removeImport(String qualifiedTypeName) {
@@ -79,6 +83,13 @@ public class ImportEdit extends SimpleTextEdit {
 			return;
 		
 		fRemovedImports.add(qualifiedTypeName);
+	}
+	
+	private static String removeTrailingBrackets(String s){
+		if (s.indexOf('[') == -1)
+			return s;
+		else
+			return s.substring(0, s.indexOf('['));	
 	}
 	
 	/**
