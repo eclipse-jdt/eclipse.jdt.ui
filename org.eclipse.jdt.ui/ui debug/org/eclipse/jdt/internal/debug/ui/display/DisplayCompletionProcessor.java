@@ -18,6 +18,7 @@ import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaParameterListValidator;
+import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -35,12 +36,12 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class DisplayCompletionProcessor implements IContentAssistProcessor {
 	
-	private DisplayResultCollector fCollector;
+	private ResultCollector fCollector;
 	private DisplayView fView;
 	private IContextInformationValidator fValidator;
 	
 	public DisplayCompletionProcessor(DisplayView view) {
-		fCollector= new DisplayResultCollector();
+		fCollector= new ResultCollector();
 		fView= view;
 	}
 	
@@ -127,16 +128,10 @@ public class DisplayCompletionProcessor implements IContentAssistProcessor {
 	 */
 	protected void configureResultCollector(IJavaProject project, ITextSelection selection, int editorOffset) {
 		fCollector.reset(project, null);
-		fCollector.setEditorOffset(editorOffset);	
+		fCollector.setReplacementOffset(editorOffset);	
 		if (selection.getLength() != 0) {
-			fCollector.setRegionToReplace(selection.getOffset(), selection.getOffset() + selection.getLength());
-			fCollector.setStart(selection.getOffset());
-			fCollector.setEnd(selection.getOffset() + selection.getLength());
-		} else {
-			//no selection
-			fCollector.setStart(selection.getOffset() - fView.getSnippet().length());
-			fCollector.setEnd(selection.getOffset());
-		}
+			fCollector.setReplacementLength(selection.getLength());
+		} 
 	}
 	
 	/**

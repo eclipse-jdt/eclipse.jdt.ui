@@ -11,8 +11,8 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-
 import org.eclipse.jface.text.contentassist.IContextInformation;
+
 import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jdt.core.Flags;
@@ -30,43 +30,43 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 public class ResultCollector implements ICodeCompletionRequestor {
 	
 	
-	protected final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-' };
-	protected final static char[] GENERAL_TRIGGERS= new char[] { ';', ',', '.', '\t', '(', '{', '[' };
+	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-' };
+	private final static char[] GENERAL_TRIGGERS= new char[] { ';', ',', '.', '\t', '(', '{', '[' };
 	
-	protected ArrayList fFields= new ArrayList(), fKeywords= new ArrayList(), 
+	private ArrayList fFields= new ArrayList(), fKeywords= new ArrayList(), 
 						fLabels= new ArrayList(), fMethods= new ArrayList(), 
 						fModifiers= new ArrayList(), fPackages= new ArrayList(),
 						fTypes= new ArrayList(), fVariables= new ArrayList();
 
-	protected IMarker fLastProblem;
+	private IMarker fLastProblem;
 	
-	protected IJavaProject fJavaProject;
-	protected ICompilationUnit fCompilationUnit;
+	private IJavaProject fJavaProject;
+	private ICompilationUnit fCompilationUnit;
 	
-	protected ArrayList[] fResults = new ArrayList[] {
+	private ArrayList[] fResults = new ArrayList[] {
 		fVariables, fFields, fMethods, fTypes, fKeywords, fModifiers, fLabels, fPackages
 	};
 	
-	protected int fOffset;
-	protected int fLength;
+	private int fUserReplacementLength;
+	private int fUserReplacementOffset;
 	
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptClass
 	 */	
 	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createCompletionWithImport(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false, info));
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), info));
 	}
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptError
 	 */	
 	public void acceptError(IMarker problemMarker) {
 		fLastProblem= problemMarker;
 	}
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptField
 	 */	
 	public void acceptField(
@@ -89,49 +89,70 @@ public class ResultCollector implements ICodeCompletionRequestor {
 			nameBuffer.append("   "); //$NON-NLS-1$
 			nameBuffer.append(typeName);
 		}
-	
-		String declaringClass= null;
-		if (declaringTypeName.length > 0)
-			declaringClass= new String(declaringTypeName);
-			
-		ProposalInfo info= new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name);
-		fFields.add(createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString(), declaringClass, false, info));
+		if (declaringTypeName != null && declaringTypeName.length > 0) {
+			nameBuffer.append(" - "); //$NON-NLS-1$
+			nameBuffer.append(declaringTypeName);
+		}	
+		
+		JavaCompletionProposal proposal= createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString());
+		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name));
+		
+		fFields.add(proposal);
 	}
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptInterface
 	 */	
 	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createCompletionWithImport(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_INTERFACE, new String(typeName), new String(packageName), false, info));
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_INTERFACE, new String(typeName), new String(packageName), info));
 	}
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptKeyword
 	 */	
 	public void acceptKeyword(char[] keyword, int start, int end) {
 		String kw= new String(keyword);
-		fKeywords.add(createCompletion(start, end, kw, null, kw, null, true, null));
+		fKeywords.add(createCompletion(start, end, kw, null, kw));
 	}
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptLabel
 	 */	
 	public void acceptLabel(char[] labelName, int start, int end) {
 		String ln= new String(labelName);
-		fLabels.add(createCompletion(start, end, ln, null, ln, null, false, null));
+		fLabels.add(createCompletion(start, end, ln, null, ln));
 	}
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptLocalVariable
 	 */	
 	public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int start, int end) {
-		StringBuffer nameBuffer= new StringBuffer();
-		nameBuffer.append(name);
-		nameBuffer.append("   "); //$NON-NLS-1$
-		nameBuffer.append(typeName);
+		StringBuffer buf= new StringBuffer();
+		buf.append(name);
+		if (typeName != null) {
+			buf.append("    ");
+			buf.append(typeName);
+		}	
+		fVariables.add(createCompletion(start, end, new String(name), null, buf.toString()));
+	}
 	
-		fVariables.add(createCompletion(start, end, new String(name), null, nameBuffer.toString(), null, false, null));
+	private String getParameterSignature(char[][] parameterTypeNames, char[][] parameterNames) {
+		StringBuffer buf = new StringBuffer();
+		if (parameterTypeNames != null) {
+			for (int i = 0; i < parameterTypeNames.length; i++) {
+				if (i > 0) {
+					buf.append(',');
+					buf.append(' ');
+				}
+				buf.append(parameterTypeNames[i]);
+				if (parameterNames[i] != null) {
+					buf.append(' ');
+					buf.append(parameterNames[i]);
+				}
+			}
+		}
+		return buf.toString();
 	}
 	
 	/*
@@ -142,87 +163,62 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
 		int start, int end) {
 	
-		String iconName= JavaPluginImages.IMG_MISC_DEFAULT;
-		if (Flags.isPublic(modifiers)) {
-			iconName= JavaPluginImages.IMG_MISC_PUBLIC;
-		} else if (Flags.isProtected(modifiers)) {
-			iconName= JavaPluginImages.IMG_MISC_PROTECTED;
-		} else if (Flags.isPrivate(modifiers)) {
-			iconName= JavaPluginImages.IMG_MISC_PRIVATE;
-		}
-		
-		ProposalContextInformation contextInformation= null;
-		StringBuffer nameBuffer= new StringBuffer();
-		nameBuffer.append(name);
-		nameBuffer.append('(');
-		if (parameterTypeNames != null) {
-			int length= parameterTypeNames.length;
-			if (length > 0) {
-				StringBuffer paramBuffer= new StringBuffer();
-				for (int i= 0; i < length; i++) {
-					if (i != 0) 
-						paramBuffer.append(", ");
-					paramBuffer.append(parameterTypeNames[i]);
-					if (parameterNames[i] != null) {
-						paramBuffer.append(' ');
-						paramBuffer.append(parameterNames[i]);
-					}
-				}
-				contextInformation= new ProposalContextInformation();
-				String parameters= paramBuffer.toString();
-				contextInformation.setInformationDisplayString(parameters);
-				nameBuffer.append(parameters);
-			}
-		}
-		nameBuffer.append(")   "); //$NON-NLS-1$
-		nameBuffer.append(returnTypeName);
-		
-		String signature= nameBuffer.toString();
-		if (contextInformation != null)
-			contextInformation.setContextDisplayString(signature);
-		
-		ProposalInfo info= new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames);
-	
+		JavaCompletionProposal proposal= createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames));
+
 		boolean hasClosingBracket= completionName.length > 0 && completionName[completionName.length - 1] == ')';
-		if (!hasClosingBracket && completionName.length > 0) {
-			// it's just a method name and no parameter list
-			contextInformation= null;
+	
+		ProposalContextInformation contextInformation= null;
+		if (hasClosingBracket && parameterTypeNames.length > 0) {
+			contextInformation= new ProposalContextInformation();
+			contextInformation.setInformationDisplayString(getParameterSignature(parameterTypeNames, parameterNames));		
+			contextInformation.setContextDisplayString(proposal.getDisplayString());			
+			proposal.setContextInformation(contextInformation);
 		}
-		
+	
 		boolean userMustCompleteParameters= (contextInformation != null && completionName.length > 0);
 		char[] triggers= userMustCompleteParameters ? METHOD_WITH_ARGUMENTS_TRIGGERS : GENERAL_TRIGGERS;
-		fMethods.add(createCompletion(start, end, new String(completionName), iconName, signature, new String(declaringTypeName), false, !userMustCompleteParameters, contextInformation, null, triggers, info));
+		proposal.setTriggerCharacters(triggers);
+		
+		if (userMustCompleteParameters) {
+			// set the cursor before the closing bracket
+			proposal.setCursorPosition(completionName.length - 1);
+		}
+		
+		fMethods.add(proposal);
 	}
+
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptModifier
 	 */	
 	public void acceptModifier(char[] modifier, int start, int end) {
 		String mod= new String(modifier);
-		fModifiers.add(createCompletion(start, end, mod, null, mod, null, true, null));
+		fModifiers.add(createCompletion(start, end, mod, null, mod));
 	}
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptPackage
 	 */	
 	public void acceptPackage(char[] packageName, char[] completionName, int start, int end) {
-		fPackages.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_PACKAGE, new String(packageName), null, false, null));
+		fPackages.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_PACKAGE, new String(packageName)));
 	}
 	
-	/**
+	/*
 	 * @see ICompletionRequestor#acceptType
 	 */	
 	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end) {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createCompletionWithImport(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false, info));
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), info));
 	}
 	
 	/*
 	 * @see ICodeCompletionRequestor#acceptMethodDeclaration(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
 	 */
-	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd) {
+	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
 		// XXX: To be revised
-		acceptMethod(declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, parameterNames, returnTypePackageName, returnTypeName, completionName, modifiers, completionStart, completionEnd);
+		JavaCompletionProposal proposal= createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+		fMethods.add(proposal);
 	}
 	
 	/*
@@ -230,12 +226,13 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	 */
 	public void acceptVariableName(char[] typePackageName, char[] typeName, char[] name, char[] completionName, int start, int end) {
 		// XXX: To be revised
-		StringBuffer nameBuffer= new StringBuffer();
-		nameBuffer.append(name);
-		nameBuffer.append("   "); //$NON-NLS-1$
-		nameBuffer.append(typeName);
-	
-		fVariables.add(createCompletion(start, end, new String(completionName), null, nameBuffer.toString(), null, false, null));
+		StringBuffer buf= new StringBuffer();
+		buf.append(name);
+		if (typeName != null && typeName.length > 0) {
+			buf.append(" - ");
+			buf.append(typeName);
+		}	
+		fVariables.add(createCompletion(start, end, new String(completionName), null, buf.toString()));
 	}	
 	
 	public String getErrorMessage() {
@@ -261,51 +258,74 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		}		
 		return (ICompletionProposal[]) result.toArray(new ICompletionProposal[result.size()]);
 	}
-	
-	protected Image getIcon(String name) {
-		if (name != null)
-			return JavaPluginImages.get(name);
-		return null;
+
+	protected JavaCompletionProposal createMethodCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
+		String iconName= JavaPluginImages.IMG_MISC_DEFAULT;
+		if (Flags.isPublic(modifiers)) {
+			iconName= JavaPluginImages.IMG_MISC_PUBLIC;
+		} else if (Flags.isProtected(modifiers)) {
+			iconName= JavaPluginImages.IMG_MISC_PROTECTED;
+		} else if (Flags.isPrivate(modifiers)) {
+			iconName= JavaPluginImages.IMG_MISC_PRIVATE;
+		}
+
+		StringBuffer nameBuffer= new StringBuffer();
+		nameBuffer.append(name);
+		nameBuffer.append('(');
+		if (parameterTypeNames.length > 0) {
+			nameBuffer.append(getParameterSignature(parameterTypeNames, parameterNames));
+		}
+		nameBuffer.append(')'); 
+		if (returnTypeName.length > 0) {
+			nameBuffer.append("  "); //$NON-NLS-1$
+			nameBuffer.append(returnTypeName);
+		}
+		if (declaringTypeName.length > 0) {
+			nameBuffer.append(" - "); //$NON-NLS-1$
+			nameBuffer.append(declaringTypeName);
+		}
+		return createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString());
 	}
 
-	protected Object createCompletionWithImport(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, ProposalInfo proposalInfo) {
+	
+	protected JavaCompletionProposal createTypeCompletion(int start, int end, String completion, String iconName, String typeName, String containerName, ProposalInfo proposalInfo) {
 		IImportDeclaration importDeclaration= null;
-		if (qualification != null && fCompilationUnit != null) {
-			if (completion.equals(JavaModelUtil.concatenateName(qualification, name))) {
+		if (containerName != null && fCompilationUnit != null) {
+			if (completion.equals(JavaModelUtil.concatenateName(containerName, typeName))) {
 				importDeclaration= fCompilationUnit.getImport(completion);
-				completion= name;
+				completion= typeName;
 			}
 		}
-		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, null, importDeclaration, proposalInfo);
+		StringBuffer buf= new StringBuffer(typeName);
+		if (containerName != null) {
+			buf.append(" - ");
+			buf.append(containerName);
+		}
+		String name= buf.toString();
+		
+		JavaCompletionProposal proposal= createCompletion(start, end, completion, iconName, name);
+		proposal.setImportDeclaration(importDeclaration);
+		proposal.setProposalInfo(proposalInfo);
+		return proposal;
 	}
 	
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, ProposalInfo proposalInfo) {
-		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, null, null, GENERAL_TRIGGERS, proposalInfo);
-	}
-	
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration,  ProposalInfo proposalInfo) {
-		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, placeCursorBehindInsertion, contextInformation, importDeclaration, GENERAL_TRIGGERS, proposalInfo);
-	}
-	
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration, char[] triggers, ProposalInfo proposalInfo) {
+	protected JavaCompletionProposal createCompletion(int start, int end, String completion, String iconName, String name) {
+		int length;
+		if (fUserReplacementLength == -1) {
+			length= end - start;
+		} else {
+			length= fUserReplacementLength;
+		}
+		if (fUserReplacementOffset != -1) {
+			start= fUserReplacementOffset;
+		}
+		
+		Image icon= null;
+		if (iconName != null)
+			icon= JavaPluginImages.get(iconName);		
 
-		if (qualification != null)
-			name += (" - " + qualification); //$NON-NLS-1$
-			
-		int cursorPosition= completion == null ? 0 : completion.length();
-		if (!placeCursorBehindInsertion)
-			-- cursorPosition;
-		
-		int length= end - start;
-		if (fOffset > -1 && fLength > -1)
-			length= fLength + (fOffset - start);
-		
-		Image icon= getIcon(iconName);
-		if (contextInformation != null)
-			contextInformation.setImage(icon);
-		
-		return new JavaCompletionProposal(completion, start, length, cursorPosition, icon, name, contextInformation, importDeclaration, triggers, proposalInfo);
-	} 
+		return new JavaCompletionProposal(completion, start, length, icon, name);
+	}
 		
 	protected int compare(Object o1, Object o2) {
 		ICompletionProposal c1= (ICompletionProposal) o1;
@@ -349,14 +369,14 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	 * @param jproject The Java project to which the underlying source belongs.
 	 * Needed to find types referred.
 	 * @param cu The compilation unit that is edited. Used to add import statements.
-	 * Can be <code>null</code> i no import statements should be added.
+	 * Can be <code>null</code> if no import statements should be added.
 	 */
 	public void reset(IJavaProject jproject, ICompilationUnit cu) {
 		fJavaProject= jproject;
 		fCompilationUnit= cu;
 		
-		fOffset= -1;
-		fLength= -1;
+		fUserReplacementLength= -1;
+		fUserReplacementOffset= -1;
 		
 		fLastProblem= null;
 		
@@ -365,13 +385,21 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	}
 	
 	/**
-	 * If the region is set, it overrules the range specified by
+	 * If the replacement length is set, this overrides the length returned from
 	 * the content assist infrastructure.
+	 * Use this setting if code assist is called with a none empty selection.
 	 */
-	public void setRegionToReplace(int offset, int length) {
-		fOffset= offset;
-		fLength= length;
+	public void setReplacementLength(int length) {
+		fUserReplacementLength= length;
 	}
 
+	/**
+	 * If the replacement offset is set this overrides the offset used for the content assist.
+	 * Use this setting if the code assist proposals generated will be applied on a document different than
+	 * the one used for evaluating the code assist.
+	 */
+	public void setReplacementOffset(int offset) {
+		fUserReplacementOffset= offset;
+	}
 
 }

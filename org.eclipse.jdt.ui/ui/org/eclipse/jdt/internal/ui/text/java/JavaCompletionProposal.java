@@ -43,69 +43,78 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	private char[] fTriggerCharacters;
 
 	/**
-	 * Creates a new completion proposal based on the provided information.  The replacement string is
-	 * considered being the display string too. All remaining fields are set to <code>null</code>.
-	 *
-	 * @param replacementString the actual string to be inserted into the document
-	 * @param replacementOffset the offset of the text to be replaced
-	 * @param replacementLength the length of the text to be replaced
-	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
-	 */
-	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition) {
-		this(replacementString, replacementOffset, replacementLength, cursorPosition, null, null, null, null, null);
-	}
-
-	/**
 	 * Creates a new completion proposal. All fields are initialized based on the provided information.
 	 *
 	 * @param replacementString the actual string to be inserted into the document
 	 * @param replacementOffset the offset of the text to be replaced
 	 * @param replacementLength the length of the text to be replaced
-	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
 	 * @param image the image to display for this proposal
 	 * @param displayString the string to be displayed for the proposal
-	 * @param contentInformation the context information associated with this proposal
-	 * @param optional import declaration to be added. Can be <code>null</code>. The underlying compilation unit
-	 * is assumed to be compatible with the document passed in <code>apply</code>.
-	 * @param additionalProposalInfo the additional information associated with this proposal or <code>null</code>
+	 * If set to <code>null</code>, the replacement string will be taken as display string.
 	 */
-	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, IImportDeclaration importDeclaration, ProposalInfo proposalInfo) {
-		this(replacementString, replacementOffset, replacementLength, cursorPosition, image, displayString,  contextInformation,  importDeclaration,  null, proposalInfo);
-	}
-	
-	/**
-	 * Creates a new completion proposal. All fields are initialized based on the provided information.
-	 *
-	 * @param replacementString the actual string to be inserted into the document
-	 * @param replacementOffset the offset of the text to be replaced
-	 * @param replacementLength the length of the text to be replaced
-	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
-	 * @param image the image to display for this proposal
-	 * @param displayString the string to be displayed for the proposal
-	 * @param contentInformation the context information associated with this proposal
-	 * @param optional import declaration to be added. Can be <code>null</code>. The underlying compilation unit
-	 * is assumed to be compatible with the document passed in <code>apply</code>.
-	 * @param triggerCharacters the set of characters which can trigger the application of this completion proposal
-	 * @param additionalProposalInfo the additional information associated with this proposal or <code>null</code>
-	 */
-	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, IImportDeclaration importDeclaration, char[] triggerCharacters, ProposalInfo proposalInfo) {
+	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
-		Assert.isTrue(cursorPosition >= 0);
 		
 		fReplacementString= replacementString;
 		fReplacementOffset= replacementOffset;
 		fReplacementLength= replacementLength;
-		fCursorPosition= cursorPosition;
 		fImage= image;
-		fDisplayString= displayString;
+		fDisplayString= displayString != null ? displayString : replacementString;
+
+		fCursorPosition= replacementString.length();
+	
+		fContextInformation= null;
+		fContextInformationPosition= -1;
+		fImportDeclaration= null;
+		fTriggerCharacters= null;
+		fProposalInfo= null;
+	}
+	
+	/**
+	 * Sets the context information.
+	 * @param contentInformation The context information associated with this proposal
+	 */
+	public void setContextInformation(IContextInformation contextInformation) {
 		fContextInformation= contextInformation;
 		fContextInformationPosition= (fContextInformation != null ? fCursorPosition : -1);
+	}
+	
+	/**
+	 * Sets the import declaration to import when applied.
+	 * @param importDeclaration Optional import declaration to be added. Can be <code>null</code>. The underlying compilation unit
+	 * is assumed to be compatible with the document passed in <code>apply</code>.
+	 */
+	public void setImportDeclaration(IImportDeclaration importDeclaration) {
 		fImportDeclaration= importDeclaration;
+	}
+	
+	/**
+	 * Sets the trigger characters.
+	 * @param triggerCharacters The set of characters which can trigger the application of this completion proposal
+	 */
+	public void setTriggerCharacters(char[] triggerCharacters) {
 		fTriggerCharacters= triggerCharacters;
+	}
+	
+	/**
+	 * Sets the proposal info.
+	 * @param additionalProposalInfo The additional information associated with this proposal or <code>null</code>
+	 */
+	public void setProposalInfo(ProposalInfo proposalInfo) {
 		fProposalInfo= proposalInfo;
 	}
+	
+	/**
+	 * Sets the cursor position relative to the insertion offset. By default this is the length of the completion string
+	 * (Cursor positioned after the completion)
+	 * @param cursorPosition The cursorPosition to set
+	 */
+	public void setCursorPosition(int cursorPosition) {
+		Assert.isTrue(cursorPosition >= 0);
+		fCursorPosition= cursorPosition;
+	}	
 	
 	private void applyImport(IDocument document) {
 		ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(fImportDeclaration, IJavaElement.COMPILATION_UNIT);
@@ -187,9 +196,7 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		if (fDisplayString != null)
-			return fDisplayString;
-		return fReplacementString;
+		return fDisplayString;
 	}
 
 	/*
@@ -215,4 +222,5 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	public int getContextInformationPosition() {
 		return fReplacementOffset + fContextInformationPosition;
 	}
+
 }
