@@ -50,9 +50,6 @@ public class AlreadyExistsDialog extends StatusDialog {
 	private final CustomProfile fProfile;
 	private final ProfileManager fProfileManager;
 	
-	/**
-	 * Create a new <code>AlreadyExistsDialog</code>.
-	 */
 	public AlreadyExistsDialog(Shell parentShell, CustomProfile profile, ProfileManager profileManager) {
 		super(parentShell);
 		fProfile= profile;

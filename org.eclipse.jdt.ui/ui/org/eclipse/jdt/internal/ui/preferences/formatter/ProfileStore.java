@@ -204,6 +204,7 @@ public class ProfileStore {
 	/**
 	 * Read the available profiles from the internal XML file and return them
 	 * as collection.
+	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 */
 	private static List readOldForCompatibility() {
 		
@@ -242,6 +243,9 @@ public class ProfileStore {
 	/**
 	 * Read the available profiles from the internal XML file and return them
 	 * as collection or <code>null</code> if the file is not a profile file.
+	 * @param file The file to read from
+	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
+	 * @throws CoreException
 	 */
 	public static List readProfilesFromFile(File file) throws CoreException {
 		try {
@@ -258,6 +262,9 @@ public class ProfileStore {
 	
 	/**
 	 * Load profiles from a XML stream and add them to a map or <code>null</code> if the source is not a profile store.
+	 * @param inputSource The input stream
+	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
+	 * @throws CoreException
 	 */
 	private static List readProfilesFromStream(InputSource inputSource) throws CoreException {
 		
@@ -278,6 +285,9 @@ public class ProfileStore {
 	
 	/**
 	 * Write the available profiles to the internal XML file.
+	 * @param profiles List of <code>CustomProfile</code>
+	 * @param file File to write
+	 * @throws CoreException
 	 */
 	public static void writeProfilesToFile(Collection profiles, File file) throws CoreException {
 		final OutputStream writer;
@@ -295,6 +305,9 @@ public class ProfileStore {
 	
 	/**
 	 * Save profiles to an XML stream
+	 * @param profiles List of <code>CustomProfile</code>
+	 * @param stream Stream to write
+	 * @throws CoreException
 	 */
 	private static void writeProfilesToStream(Collection profiles, OutputStream stream) throws CoreException {
 
@@ -329,7 +342,7 @@ public class ProfileStore {
 	}
 
 	
-	/**
+	/*
 	 * Create a new profile element in the specified document. The profile is not added
 	 * to the document by this method. 
 	 */
@@ -377,7 +390,7 @@ public class ProfileStore {
 	}
 	
 		
-	/**
+	/*
 	 * Creates a UI exception for logging purposes
 	 */
 	private static JavaUIException createException(Throwable t, String message) {

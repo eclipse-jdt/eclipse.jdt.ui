@@ -708,6 +708,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	/**
 	 * Constructor to be used when programatically showing the page
 	 * @param selectedLibrary The entry to be selected by default. 
+	 * @param createIfNotFound Create the library if not found
 	 */
 	public UserLibraryPreferencePage(String selectedLibrary, boolean createIfNotFound) {
 		this();

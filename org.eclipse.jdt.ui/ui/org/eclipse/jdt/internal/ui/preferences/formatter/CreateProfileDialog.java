@@ -66,9 +66,6 @@ public class CreateProfileDialog extends StatusDialog {
 	private CustomProfile fCreatedProfile;
 	protected boolean fOpenEditDialog;
 	
-	/**
-	 * Create a new CreateProfileDialog.
-	 */
 	public CreateProfileDialog(Shell parentShell, ProfileManager profileManager) {
 		super(parentShell);
 		fProfileManager= profileManager;

@@ -347,6 +347,8 @@ public class CodingStyleConfigurationBlock {
 
 	/**
 	 * Create the contents
+	 * @param parent Parent composite
+	 * @return Created control
 	 */
 	public Composite createContents(Composite parent) {
 

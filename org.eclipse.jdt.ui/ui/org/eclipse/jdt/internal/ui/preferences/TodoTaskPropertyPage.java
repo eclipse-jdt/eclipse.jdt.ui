@@ -140,16 +140,11 @@ public class TodoTaskPropertyPage extends PropertyPage {
 			doStatusChanged();
 		}
 	}	
-	/**
-	 * Method statusChanged.
-	 */
+
 	private void doStatusChanged() {
 		updateStatus(useProjectSettings() ? fBlockStatus : new StatusInfo());
 	}
 	
-	/**
-	 * Method getProject.
-	 */
 	private IJavaProject getProject() {
 		return (IJavaProject) getElement().getAdapter(IJavaElement.class);		
 	}

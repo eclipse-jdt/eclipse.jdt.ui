@@ -88,7 +88,7 @@ public abstract class ModifyDialogTabPage {
 	        fKey= key;
 	    }
 	    /**
-	     * Get the map of this Preference.
+	     * @return Gets the map of this Preference.
 	     */
 	    protected final Map getPreferences() {
 	        return fPreferences;
@@ -96,6 +96,7 @@ public abstract class ModifyDialogTabPage {
 
 	    /**
 	     * Set the enabled state of all SWT widgets of this preference. 
+	     * @param enabled new value
 	     */
 	    public final void setEnabled(boolean enabled) {
 	        fEnabled= enabled;
@@ -103,7 +104,7 @@ public abstract class ModifyDialogTabPage {
 	    }
 	    
 	    /**
-	     * Get the enabled state of all SWT widgets of this Preference.
+	     * @return Gets the enabled state of all SWT widgets of this Preference.
 	     */
 	    public final boolean getEnabled() {
 	        return fEnabled;
@@ -111,6 +112,7 @@ public abstract class ModifyDialogTabPage {
 	    
 	    /**
 	     * Set the key which is used to store the value.
+	     * @param key New value
 	     */
 	    public final void setKey(String key) {
 	        if (key == null || !fKey.equals(key)) {
@@ -119,7 +121,7 @@ public abstract class ModifyDialogTabPage {
 	        }
 	    }
 	    /**
-	     * Get the currently used key which is used to store the value.
+	     * @return Gets the currently used key which is used to store the value.
 	     */	    
 	    public final String getKey() {
 	        return fKey;
@@ -129,6 +131,7 @@ public abstract class ModifyDialogTabPage {
 	     * Returns the main control of a preference, which is mainly used to 
 	     * manage the focus. This may be <code>null</code> if the preference doesn't
 	     * have a control which is able to have the focus. 
+	     * @return The main control
 	     */
 	    public abstract Control getControl();
 	    
@@ -538,6 +541,8 @@ public abstract class ModifyDialogTabPage {
 	 * Create the contents of this tab page. Subclasses cannot override this, 
 	 * instead they must implement <code>doCreatePreferences</code>. <code>doCreatePreview</code> may also
 	 * be overridden as necessary.
+	 * @param parent The parent composite
+	 * @return Created content control
 	 */
 	public final Composite createContents(Composite parent) {
 		final int numColumns= 4;
@@ -586,6 +591,8 @@ public abstract class ModifyDialogTabPage {
 
 	/**
 	 * Create the left side of the modify dialog. This is meant to be implemented by subclasses. 
+	 * @param composite Composite to create in
+	 * @param numColumns Number of columns to use
 	 */
 	protected abstract void doCreatePreferences(Composite composite, int numColumns);
 	
@@ -594,6 +601,9 @@ public abstract class ModifyDialogTabPage {
 	 * Create the right side of the modify dialog. By default, the preview is displayed there.
 	 * Subclasses can override this method in order to customize the right-hand side of the 
 	 * dialog.
+	 * @param composite Composite to create in
+	 * @param numColumns Number of columns to use
+	 * @return Created composite
 	 */
 	protected Composite doCreatePreviewPane(Composite composite, int numColumns) {
 		
@@ -616,6 +626,8 @@ public abstract class ModifyDialogTabPage {
 	 * Currently, the choice is between CompilationUnitPreview which contains a valid compilation
 	 * unit, or a SnippetPreview which formats several independent code snippets and displays them 
 	 * in the same window.
+	 * @param parent Parent composite
+	 * @return Created preview
 	 */
 	protected abstract JavaPreview doCreateJavaPreview(Composite parent);
 
@@ -653,16 +665,17 @@ public abstract class ModifyDialogTabPage {
     /**
      * Set the status field on the dialog. This can be used by tab pages to report 
      * inconsistent input. The OK button is disabled if the kind is IStatus.ERROR. 
+     * @param status Status describing the current page error state
      */
 	protected void updateStatus(IStatus status) {
 	    fModifyDialog.updateStatus(status);
 	}
 	
-	/**
+	/*
 	 * Factory methods to make GUI construction easier
 	 */
 	
-	/**
+	/*
 	 * Create a GridLayout with the default margin and spacing settings, as
 	 * well as the specified number of columns.
 	 */
@@ -680,7 +693,7 @@ public abstract class ModifyDialogTabPage {
 		return layout;
 	}
 
-	/**
+	/*
 	 * Convenience method to create a GridData.
 	 */
 	protected static GridData createGridData(int numColumns, int style, int widthHint) {
@@ -691,14 +704,14 @@ public abstract class ModifyDialogTabPage {
 	}
 
 
-	/** 
+	/* 
 	 * Convenience method to create a label.  
 	 */
 	protected static Label createLabel(int numColumns, Composite parent, String text) {
 		return createLabel(numColumns, parent, text, GridData.FILL_HORIZONTAL);
 	}
 	
-	/** 
+	/*
 	 * Convenience method to create a label
 	 */
 	protected static Label createLabel(int numColumns, Composite parent, String text, int gridDataStyle) {
@@ -708,7 +721,7 @@ public abstract class ModifyDialogTabPage {
 		return label;
 	}
 
-	/**
+	/*
 	 * Convenience method to create a group
 	 */
 	protected Group createGroup(int numColumns, Composite parent, String text ) {
@@ -727,7 +740,7 @@ public abstract class ModifyDialogTabPage {
 	}
 	
 
-	/**
+	/*
 	 * Convenience method to create a NumberPreference. The widget is registered as 
 	 * a potential focus holder, and the default updater is added.
 	 */
@@ -740,7 +753,7 @@ public abstract class ModifyDialogTabPage {
 		return pref;
 	}
 	
-	/**
+	/*
 	 * Convenience method to create a ComboPreference. The widget is registered as 
 	 * a potential focus holder, and the default updater is added.
 	 */
@@ -753,7 +766,7 @@ public abstract class ModifyDialogTabPage {
 		return pref;
 	}
 
-	/**
+	/*
 	 * Convenience method to create a CheckboxPreference. The widget is registered as 
 	 * a potential focus holder, and the default updater is added.
 	 */
@@ -767,7 +780,7 @@ public abstract class ModifyDialogTabPage {
 	}
 	
 
-	/**
+	/*
 	 * Create a nice javadoc comment for some string.
 	 */
 	protected static String createPreviewHeader(String title) {

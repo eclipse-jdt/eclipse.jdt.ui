@@ -58,6 +58,7 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	
 	/**
 	 * Create a new BlankLinesTabPage.
+	 * @param modifyDialog The main configuration dialog
 	 * 
 	 * @param workingValues The values wherein the options are stored. 
 	 */
@@ -93,7 +94,7 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	    fPreview.setPreviewText(PREVIEW);
 	}
 	
-	/**
+	/*
 	 * A helper method to create a number preference for blank lines.
 	 */
 	protected void createBlankLineTextField(Composite composite, int numColumns, String messagesKey, String key) {

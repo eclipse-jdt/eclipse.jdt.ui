@@ -44,9 +44,6 @@ public class RenameProfileDialog extends StatusDialog {
 	private final CustomProfile fProfile;
 	private final ProfileManager fManager;
 	
-	/**
-	 * Create a new CreateProfileDialog.
-	 */
 	public RenameProfileDialog(Shell parentShell, CustomProfile profile, ProfileManager manager) {
 		super(parentShell);
 		fManager= manager;

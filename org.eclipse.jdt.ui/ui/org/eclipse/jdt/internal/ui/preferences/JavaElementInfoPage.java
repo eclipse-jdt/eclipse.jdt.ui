@@ -144,11 +144,4 @@ public class JavaElementInfoPage extends PropertyPage {
 		return composite;
 	}
 
-	/**
-	 */
-	protected boolean doOk() {
-		// nothing to do - read-only page
-		return true;
-	}
-
 }
