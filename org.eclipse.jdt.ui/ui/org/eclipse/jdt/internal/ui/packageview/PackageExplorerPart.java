@@ -1263,14 +1263,15 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Sets the decorator for the package explorer.
 	 *
 	 * @param decorator a label decorator or <code>null</code> for no decorations.
+	 * @deprecated To be removed
 	 */
-//	public void setLabelDecorator(ILabelDecorator decorator) {
-//		fJavaElementLabelProvider= new PackageExplorerLabelProvider();
-//		if (decorator == null)
-//			fViewer.setLabelProvider(fJavaElementLabelProvider);
-//		else
-//			fViewer.setLabelProvider(new DecoratingLabelProvider(fJavaElementLabelProvider, decorator));
-//	}
+	public void setLabelDecorator(ILabelDecorator decorator) {
+		fJavaElementLabelProvider= new PackageExplorerLabelProvider();
+		if (decorator == null)
+			fViewer.setLabelProvider(fJavaElementLabelProvider);
+		else
+			fViewer.setLabelProvider(new DecoratingLabelProvider(fJavaElementLabelProvider, decorator));
+	}
 	
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
