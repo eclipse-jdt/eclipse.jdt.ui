@@ -85,7 +85,7 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * @return Returns a int
 	 */
 	protected int evaluateImageFlags(Object element) {
-		return getTextFlags();
+		return getImageFlags();
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * @return Returns a int
 	 */
 	protected int evaluateTextFlags(Object element) {
-		return getImageFlags();
+		return getTextFlags();
 	}
 	
 
