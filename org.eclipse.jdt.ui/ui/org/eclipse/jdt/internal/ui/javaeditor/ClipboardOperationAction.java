@@ -295,12 +295,26 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		
 		if (clipboardData != null) {
 			Clipboard clipboard= new Clipboard(getDisplay());
+
+			// see bug 61876, I currently make assumptions about what the styled text widget sets
 			Object textData= clipboard.getContents(TextTransfer.getInstance());
 			Object rtfData= clipboard.getContents(RTFTransfer.getInstance());
-			// see bug 61876, I currently make assumptions about what the styled text widget sets
 			
-			Transfer[] dataTypes= new Transfer[] { TextTransfer.getInstance(), RTFTransfer.getInstance(), fgTransferInstance};
-			Object[] data= new Object[] { textData, rtfData, clipboardData};
+			ArrayList datas= new ArrayList(3);
+			ArrayList transfers= new ArrayList(3);
+			if (textData != null) {
+				datas.add(textData);
+				transfers.add(TextTransfer.getInstance());
+			}
+			if (rtfData != null) {
+				datas.add(rtfData);
+				transfers.add(RTFTransfer.getInstance());
+			}
+			datas.add(clipboardData);
+			transfers.add(fgTransferInstance);
+
+			Transfer[] dataTypes= (Transfer[]) transfers.toArray(new Transfer[transfers.size()]);
+			Object[] data= datas.toArray();
 			clipboard.setContents(data, dataTypes);
 		}
 	}
