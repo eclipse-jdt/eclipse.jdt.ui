@@ -219,7 +219,6 @@ public class PushDownRefactoring extends Refactoring {
 	private TextChangeManager fChangeManager;
 	
 	private final ImportEditManager fImportEditManager;
-	private final CodeGenerationSettings fPreferenceSettings;
 
 	//caches
 	private IType fCachedDeclaringClass;
@@ -230,7 +229,6 @@ public class PushDownRefactoring extends Refactoring {
 		Assert.isTrue(members.length > 0);
 		Assert.isNotNull(preferenceSettings);
 		fSelectedMembers= (IMember[])SourceReferenceUtil.sortByOffset(members);
-		fPreferenceSettings= preferenceSettings;
 		fImportEditManager= new ImportEditManager(preferenceSettings);
 	}
 
