@@ -60,6 +60,10 @@ public class CopyTest extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 
+	public static Test setUpTest(Test test) {
+		return new MySetup(test);
+	}
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -679,13 +683,13 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_root_no_5() throws Exception{
+	public void testDestination_root_yes_2() throws Exception{
 		IJavaElement[] javaElements= { getRoot()};
 		IResource[] resources= {};
 		CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 		Object destination= getRoot();
-		verifyInvalidDestination(ref, destination);
+		verifyValidDestination(ref, destination);
 	}
 	
 	public void testDestination_cu_yes_0() throws Exception{

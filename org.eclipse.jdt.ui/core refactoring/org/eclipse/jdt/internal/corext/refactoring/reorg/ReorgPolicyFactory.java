@@ -900,20 +900,27 @@ class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.cannot1")); //$NON-NLS-1$
 			if (javaElement instanceof IJavaModel)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.jmodel")); //$NON-NLS-1$
-			if (! (javaElement instanceof IJavaProject))
+			if (! (javaElement instanceof IJavaProject || javaElement instanceof IPackageFragmentRoot))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2proj")); //$NON-NLS-1$
 			if (javaElement.isReadOnly())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2writable")); //$NON-NLS-1$
-			if (ReorgUtils.isPackageFragmentRoot((IJavaProject)javaElement))
+			if (ReorgUtils.isPackageFragmentRoot(javaElement.getJavaProject()))
 				//TODO: adapt message to archives:
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2nosrc")); //$NON-NLS-1$
 			return new RefactoringStatus();
 		}
 	
 		protected IJavaProject getDestinationJavaProject(){
-			return (IJavaProject) getJavaElementDestination();
+			return getDestinationAsJavaProject(getJavaElementDestination());
 		}
 	
+		private IJavaProject getDestinationAsJavaProject(IJavaElement javaElementDestination) {
+			if (javaElementDestination == null)
+				return null;
+			else
+				return javaElementDestination.getJavaProject();
+		}
+
 		protected IPackageFragmentRoot[] getPackageFragmentRoots(){
 			return fPackageFragmentRoots;
 		}

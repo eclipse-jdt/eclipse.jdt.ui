@@ -299,8 +299,14 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		int count= 0;
 		for (int i= 0; i < javaElementsCopied.length; i++) {
 			IJavaElement element= javaElementsCopied[i];
-			if (element instanceof ICompilationUnit)
-				count++;
+			switch (element.getElementType()) {
+				case IJavaElement.JAVA_PROJECT :
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
+				case IJavaElement.PACKAGE_FRAGMENT :
+				case IJavaElement.COMPILATION_UNIT :
+				case IJavaElement.CLASS_FILE :
+					count++;
+			}
 		}
 		return count;
 	}

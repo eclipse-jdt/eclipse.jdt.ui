@@ -67,6 +67,10 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		return new MySetup(new TestSuite(clazz));
 	}
 	
+	public static Test setUpTest(Test test) {
+		return new MySetup(test);
+	}
+
 	private IFile createFile(IFolder folder, String fileName) throws Exception {
 		IFile file= folder.getFile(fileName);
 		file.create(getStream("aa"), true, null);	
@@ -237,15 +241,15 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 //		System.out.println("PasteResourcesFromClipboardActionTest#testPackage - disabled due to failure under Motif");
 //		if (true)
 //			return;
-//		checkEnabled(new Object[]{getPackageP()}, new Object[]{fSimpleProject});
+		checkEnabled(new Object[]{getPackageP()}, new Object[]{fSimpleProject});
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{getRoot()});
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{getPackageP()});
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{fPackageQ});
 		
-		checkDisabled(new Object[]{getPackageP()}, new Object[]{fAnotherProject});
-		checkDisabled(new Object[]{getPackageP()}, new Object[]{MySetup.getProject()});		
-		checkDisabled(new Object[]{getPackageP()}, new Object[]{fCuA});
-		checkDisabled(new Object[]{getPackageP()}, new Object[]{faTxt});
+		checkEnabled(new Object[]{getPackageP()}, new Object[]{fAnotherProject});
+		checkEnabled(new Object[]{getPackageP()}, new Object[]{MySetup.getProject()});		
+		checkEnabled(new Object[]{getPackageP()}, new Object[]{fCuA});
+		checkEnabled(new Object[]{getPackageP()}, new Object[]{faTxt});
 	}
 	
 	public void testRoot() throws Exception {		
@@ -255,12 +259,12 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		checkEnabled(new Object[]{getRoot()}, new Object[]{fAnotherProject});
 		checkEnabled(new Object[]{getRoot()}, new Object[]{MySetup.getProject()});		
 		
-		checkDisabled(new Object[]{getRoot()}, new Object[]{getRoot()});
-//		checkDisabled(new Object[]{getRoot()}, new Object[]{fSimpleProject});
-		checkDisabled(new Object[]{getRoot()}, new Object[]{getPackageP()});
-		checkDisabled(new Object[]{getRoot()}, new Object[]{fPackageQ});
-		checkDisabled(new Object[]{getRoot()}, new Object[]{fCuA});
-		checkDisabled(new Object[]{getRoot()}, new Object[]{faTxt});
+		checkEnabled(new Object[]{getRoot()}, new Object[]{getRoot()});
+		checkEnabled(new Object[]{getRoot()}, new Object[]{fSimpleProject});
+		checkEnabled(new Object[]{getRoot()}, new Object[]{getPackageP()});
+		checkEnabled(new Object[]{getRoot()}, new Object[]{fPackageQ});
+		checkEnabled(new Object[]{getRoot()}, new Object[]{fCuA});
+		checkEnabled(new Object[]{getRoot()}, new Object[]{faTxt});
 	}
 	
 

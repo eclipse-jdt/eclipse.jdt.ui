@@ -205,8 +205,17 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		private void processJavaElements(Set fileNames, StringBuffer namesBuf) {
 			for (int i= 0; i < fJavaElements.length; i++) {
 				IJavaElement element= fJavaElements[i];
-				if (element instanceof ICompilationUnit)
-					addFileName(fileNames, ReorgUtils.getResource(element));
+				switch (element.getElementType()) {
+					case IJavaElement.JAVA_PROJECT :
+					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
+					case IJavaElement.PACKAGE_FRAGMENT :
+					case IJavaElement.COMPILATION_UNIT :
+					case IJavaElement.CLASS_FILE :
+						addFileName(fileNames, ReorgUtils.getResource(element));
+						break;
+					default :
+						break;
+				}
 
 				if (fResources.length > 0 || i > 0)
 					namesBuf.append('\n');
