@@ -158,6 +158,9 @@ public class JavadocTagsSubProcessor {
 		 	} else if (location == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
 				newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_THROWS);
+				TextElement excNode= ast.newTextElement();
+				excNode.setText(ASTNodes.asString(missingNode));
+				newTag.fragments().add(excNode);
 				List exceptions= ((MethodDeclaration) bodyDecl).thrownExceptions();
 				insertTag(tagsRewriter, newTag, getPreviousExceptionNames(exceptions, missingNode));
 		 	} else {
@@ -246,7 +249,9 @@ public class JavadocTagsSubProcessor {
 		 			if (findThrowsTag(javadoc, name) == null) {
 		 				TagElement newTag= ast.newTagElement();
 		 				newTag.setTagName(TagElement.TAG_THROWS);
-		 				newTag.fragments().add(ast.newSimpleName(name));
+						TextElement excNode= ast.newTextElement();
+						excNode.setText(ASTNodes.asString(exception));
+		 				newTag.fragments().add(excNode);
 						insertTabStop(rewriter, newTag.fragments(), "exception" + i); //$NON-NLS-1$
 		 				insertTag(tagsRewriter, newTag, getPreviousExceptionNames(thrownExceptions, exception));
 		 			}
