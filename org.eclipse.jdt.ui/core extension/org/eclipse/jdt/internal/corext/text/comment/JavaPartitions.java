@@ -16,9 +16,36 @@ package org.eclipse.jdt.internal.corext.text.comment;
  * 
  * @since 3.1
  */
-public interface IJavaPartitions {
+public class JavaPartitions {
 	
 	public final static String JAVA_SINGLE_LINE_COMMENT= "__java_singleline_comment"; //$NON-NLS-1$
 	public final static String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
 	public final static String JAVA_DOC= "__java_javadoc"; //$NON-NLS-1$
+
+	public static final int K_SINGLE_LINE_COMMENT= 0x10;
+	public static final int K_MULTI_LINE_COMMENT= 0x20;
+	public static final int K_JAVA_DOC= 0x40;
+
+	public static String getPartitionType(int kind) {
+		switch (kind) {
+			case K_SINGLE_LINE_COMMENT:
+				return JAVA_SINGLE_LINE_COMMENT;
+			case K_MULTI_LINE_COMMENT:
+				return JAVA_MULTI_LINE_COMMENT;
+			case K_JAVA_DOC:
+				return JAVA_DOC;
+			default:
+				return null;
+		}
+	}
+
+	public static int getPartitionKind(String type) {
+		if (JAVA_SINGLE_LINE_COMMENT.equals(type))
+				return K_SINGLE_LINE_COMMENT;
+		if (JAVA_MULTI_LINE_COMMENT.equals(type))
+				return K_MULTI_LINE_COMMENT;
+		if (JAVA_DOC.equals(type))
+				return K_JAVA_DOC;
+		return -1;
+	}
 }

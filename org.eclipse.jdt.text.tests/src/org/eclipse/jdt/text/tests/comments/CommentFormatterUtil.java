@@ -16,12 +16,10 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
-import org.eclipse.jdt.internal.corext.text.comment.CommentRegion;
+import org.eclipse.jdt.internal.corext.text.comment.CommentFormatter;
 import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
@@ -68,8 +66,6 @@ public class CommentFormatterUtil {
 		final IDocument document= new Document(source);
 		final TypedPosition position= new TypedPosition(offset, length, type);
 
-		final CommentRegion region= CommentObjectFactory.createRegion(document, position, TextUtilities.getDefaultLineDelimiter(document), preferences, textMeasurement);
-
-		return region.format(region.getIndentation());
+		return new CommentFormatter(textMeasurement, preferences).format(document, position);
 	}
 }

@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 
 /**
@@ -32,7 +34,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
  * 
  * @since 3.1
  */
-public class CommentFormatter { // TODO: extends CodeFormatter {
+public class CommentFormatter extends CodeFormatter {
 
 	/** Text measurement */
 	private ITextMeasurement fTextMeasurement;
@@ -63,32 +65,51 @@ public class CommentFormatter { // TODO: extends CodeFormatter {
 		fPreferences= preferences;
 	}
 
-//	/*
-//	 * @see org.eclipse.jdt.core.formatter.CodeFormatter#format(int, java.lang.String, int, int, int, java.lang.String)
-//	 */
-//	public TextEdit format(int kind, String source, int offset, int length, int indentationLevel, String lineSeparator) {
-//		return null;
-//	}
+	/*
+	 * @see org.eclipse.jdt.core.formatter.CodeFormatter#format(int, java.lang.String, int, int, int, java.lang.String)
+	 */
+	public TextEdit format(int kind, String source, int offset, int length, int indentationLevel, String lineSeparator) {
+		String type= JavaPartitions.getPartitionType(kind);
+		if (type != null)
+			return format(new Document(source), new TypedPosition(offset, length, type), indentationLevel, lineSeparator);
+		return null;
+	}
 
 	/**
-	 * Compute a text edit for formatting the given partition in the given document with the given preferences.
+	 * Compute a text edit for formatting the given partition in the given document.
+	 * 
 	 * @param document the document
 	 * @param position the partition
 	 * 
 	 * @return the text edit for formatting
 	 */
 	public TextEdit format(final IDocument document, final TypedPosition position) {
+		return format(document, position, CommentRegion.INFER_INDENTATION, TextUtilities.getDefaultLineDelimiter(document));
+	}
+
+	/**
+	 * Compute a text edit for formatting the given partition in the given
+	 * document with the given indentation level and line delimiter.
+	 * 
+	 * @param document the document
+	 * @param partition the partition
+	 * @param indentationLevel the indentation level, {@link CommentRegion#INFER_INDENTATION} for inferring it automatically from the context
+	 * @param lineDelimiter the line delimiter
+	 * @return the text edit for formatting
+	 * @since 3.1
+	 */
+	private TextEdit format(IDocument document, TypedPosition partition, int indentationLevel, String lineDelimiter) {
 		String trueProperty= Boolean.toString(true);
-		final boolean isFormmatingComments= fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMAT).equals(trueProperty);
-		final boolean isFormattingHeader= fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHEADER).equals(trueProperty);
+		final boolean isFormattingComments= trueProperty.equals(fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMAT));
+		final boolean isFormattingHeader= trueProperty.equals(fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHEADER));
 		
 		int documentsHeaderEnd= computeHeaderEnd(document);
 		
 		TextEdit edit= null;
-		if (isFormmatingComments && (isFormattingHeader || position.offset >= documentsHeaderEnd)) {
+		if (isFormattingComments && (isFormattingHeader || partition.offset >= documentsHeaderEnd)) {
 			
-			final CommentRegion region= CommentObjectFactory.createRegion(document, position, TextUtilities.getDefaultLineDelimiter(document), fPreferences, fTextMeasurement);
-			edit= region.format(region.getIndentation());
+			final CommentRegion region= CommentObjectFactory.createRegion(document, partition, lineDelimiter, fPreferences, fTextMeasurement);
+			edit= region.format(indentationLevel);
 		}
 		return edit;
 	}

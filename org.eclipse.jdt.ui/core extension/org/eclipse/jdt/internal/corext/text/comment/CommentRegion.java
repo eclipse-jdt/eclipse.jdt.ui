@@ -38,11 +38,14 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
  */
 public class CommentRegion extends TypedPosition implements IHtmlTagConstants, IBorderAttributes, ICommentAttributes {
 
-	/** Default line prefix length */
-	public static final int COMMENT_PREFIX_LENGTH= 3;
-
+	/** Infer initial indentation from context */
+	public static final int INFER_INDENTATION= -1;
+	
 	/** Default comment range delimiter */
 	protected static final String COMMENT_RANGE_DELIMITER= " "; //$NON-NLS-1$
+
+	/** Default line prefix length */
+	private static final int COMMENT_PREFIX_LENGTH= 3;
 
 	/** The borders of this region */
 	private int fBorders= 0;
@@ -116,7 +119,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			}
 		else
 			fTabSize= 4;
-		fUseTab= JavaCore.TAB.equals(getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
+		fUseTab= JavaCore.TAB.equals(fPreferences.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
 
 		final ILineTracker tracker= new ConfigurableLineTracker(new String[] { delimiter });
 
@@ -193,11 +196,19 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	}
 
 	/**
-	 * Formats the comment region.
+	 * Formats the comment region with the given indentation level.
 	 * 
-	 * @return The resulting text edit of the formatting process
+	 * @param indentationLevel the indentation level, {@link CommentRegion#INFER_INDENTATION} lets the region infer it from its context
+	 * @return the resulting text edit of the formatting process
+	 * @since 3.1
 	 */
-	public final TextEdit format(final String indentation) {
+	public final TextEdit format(int indentationLevel) {
+		String indentation;
+		if (indentationLevel == INFER_INDENTATION)
+			indentation= inferIndentation();
+		else
+			indentation= computeIndentation(indentationLevel);
+		
 		fResult= new MultiTextEdit();
 
 		final String probe= getText(0, CommentLine.NON_FORMAT_START_PREFIX.length());
@@ -478,12 +489,38 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	}
 
 	/**
-	 * Returns the indentation of this region.
+	 * Returns the indentation of the given indentation level.
+	 * 
+	 * @param indentationLevel the indentation level
+	 * @return the indentation of the given indentation level
+	 * @since 3.1
+	 */
+	private String computeIndentation(int indentationLevel) {
+		return replicate(fUseTab ? "\t" : replicate(" ", fTabSize), indentationLevel);  //$NON-NLS-1$//$NON-NLS-2$
+	}
+	
+	/**
+	 * Returns the given string n-times replicated.
+	 * 
+	 * @param string the string
+	 * @param n n
+	 * @return the given string n-times replicated
+	 * @since 3.1
+	 */
+	private String replicate(String string, int n) {
+		StringBuffer buffer= new StringBuffer(n*string.length());
+		for (int i= 0; i < n; i++)
+			buffer.append(string);
+		return buffer.toString();
+	}
+
+	/**
+	 * Returns the indentation of this region from its context.
 	 * 
 	 * @return the indentation of this region
 	 * @since 3.1
 	 */
-	public final String getIndentation() {
+	private String inferIndentation() {
 		String result= ""; //$NON-NLS-1$
 		
 		try {
@@ -550,7 +587,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	}
 
 	/**
-	 * Returns the length of the in expanded characters.
+	 * Returns the length of the string in expanded characters.
 	 * 
 	 * @param reference
 	 *                   The string to get the length for
@@ -578,7 +615,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 *                   The string to get the width for
 	 * @return The width of the string in pixels
 	 */
-	protected final int stringToPixels(final String reference) {
+	private int stringToPixels(final String reference) {
 
 		final StringBuffer buffer= new StringBuffer();
 

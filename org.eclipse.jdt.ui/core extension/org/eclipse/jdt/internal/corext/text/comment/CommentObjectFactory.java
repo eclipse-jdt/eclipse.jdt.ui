@@ -39,11 +39,11 @@ public class CommentObjectFactory {
 
 		final String type= region.getType();
 
-		if (type.equals(IJavaPartitions.JAVA_DOC))
+		if (type.equals(JavaPartitions.JAVA_DOC))
 			return new JavaDocLine(region);
-		else if (type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
+		else if (type.equals(JavaPartitions.JAVA_MULTI_LINE_COMMENT))
 			return new MultiCommentLine(region);
-		else if (type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT))
+		else if (type.equals(JavaPartitions.JAVA_SINGLE_LINE_COMMENT))
 			return new SingleCommentLine(region);
 
 		return null;
@@ -69,9 +69,9 @@ public class CommentObjectFactory {
 
 		final String type= range.getType();
 
-		if (type.equals(IJavaPartitions.JAVA_DOC))
+		if (type.equals(JavaPartitions.JAVA_DOC))
 			return new JavaDocRegion(document, range, delimiter, preferences, textMeasurement);
-		else if (type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
+		else if (type.equals(JavaPartitions.JAVA_MULTI_LINE_COMMENT))
 			return new MultiCommentRegion(document, range, delimiter, preferences, textMeasurement);
 
 		return new CommentRegion(document, range, delimiter, preferences, textMeasurement);
