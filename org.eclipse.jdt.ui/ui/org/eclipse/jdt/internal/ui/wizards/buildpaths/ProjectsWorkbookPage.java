@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -250,8 +253,13 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				attrib.getParent().setAttribute(attrib.getKey(), null);
-				selElements.remove(i);				
+				String key= attrib.getKey();
+				Object value= null;
+				if (key.equals(CPListElement.EXCLUSION) || key.equals(CPListElement.INCLUSION)) {
+					value= new Path[0];
+				}
+				attrib.getParent().setAttribute(key, value);
+				selElements.remove(i);
 			}
 		}
 		if (selElements.isEmpty()) {
@@ -269,7 +277,17 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		for (int i= 0; i < selElements.size(); i++) {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
-				if (((CPListElementAttribute)elem).getValue() == null) {
+				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				String key= attrib.getKey();
+				if (CPListElement.INCLUSION.equals(key)) {
+					if (((IPath[]) attrib.getValue()).length == 0) {
+						return false;
+					}
+				} else if (CPListElement.EXCLUSION.equals(key)) {
+					if (((IPath[]) attrib.getValue()).length == 0) {
+						return false;
+					}
+				} else if (attrib.getValue() == null) {
 					return false;
 				}
 			} else if (elem instanceof CPListElement) {
