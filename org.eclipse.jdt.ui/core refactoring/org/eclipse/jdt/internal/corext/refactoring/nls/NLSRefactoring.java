@@ -733,7 +733,7 @@ public class NLSRefactoring extends Refactoring {
 			.append(createImports())
 			.append(fgLineDelimiter)
 			.append(createClass());
-		return new CodeFormatter(null).format(buff.toString());
+		return new CodeFormatter((Map)null).format(buff.toString());
 	}
 	
 	private StringBuffer createPackageDeclaration(){
