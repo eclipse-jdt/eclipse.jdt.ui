@@ -3,7 +3,7 @@
 <plugin
    name="Java Test Plugin"
    id="org.eclipse.jdt.ui.tests"
-   version="1.0"
+   version="1.9.0"
    vendor-name="IBM"
    class="org.eclipse.jdt.testplugin.JavaTestPlugin">
    
