@@ -390,7 +390,9 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 			threshold= Integer.MAX_VALUE;
 		}
 		boolean ignoreLowerCase= prefs.getDefaultBoolean(PREF_IGNORELOWERCASE);
-		initialize(order, threshold, ignoreLowerCase);		
+		initialize(order, threshold, ignoreLowerCase);
+		
+		super.performDefaults();	
     }
 
     /**

@@ -32,7 +32,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		fVariableBlock.performDefaults();
+		fVariableBlock.performDefaults();		super.performDefaults();
 	}
 
 	/**

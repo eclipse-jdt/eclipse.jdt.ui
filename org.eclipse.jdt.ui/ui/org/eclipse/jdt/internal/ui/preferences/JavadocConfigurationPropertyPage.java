@@ -80,8 +80,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 		IJavaProject project= getJavaProject();
 		URL location= null;
 		if (project != null) {
-			IPath path= project.getProject().getFullPath();
-			location= JavaDocLocations.getJavadocLocation(path);
+			location= JavaDocLocations.getProjectJavadocLocation(project);
 		}
 		if (location != null)
 			fJavaDocField.setText(location.toExternalForm());
@@ -95,6 +94,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	 */
 	protected void performDefaults() {
 		fJavaDocField.setText("");
+		super.performDefaults();
 	}
 
 	private void jdocChangeControlPressed(DialogField field) {
@@ -174,7 +174,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	public boolean performOk() {
 		IJavaProject jproject= getJavaProject();
 		if (jproject != null) {
-			JavaDocLocations.setJavadocLocation(jproject.getProject().getFullPath(), fJavaDocLocation);
+			JavaDocLocations.setProjectJavadocLocation(jproject, fJavaDocLocation);
 		}
 		return true;
 	}
