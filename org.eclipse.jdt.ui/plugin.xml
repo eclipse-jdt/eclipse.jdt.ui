@@ -642,14 +642,17 @@
 <extension
 	point="org.eclipse.compare.structureCreators">
 	<structureCreator
+		id="org.eclipse.jdt.internal.ui.compare.JarStructureCreator"
 		extensions="jar"
 		class="org.eclipse.jdt.internal.ui.compare.JarStructureCreator">
 	</structureCreator>
 	<structureCreator
+		id="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator"
 		extensions="properties"
 		class="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator">
 	</structureCreator>
 	<structureCreator
+		id="org.eclipse.jdt.internal.ui.compare.JavaStructureCreator"
 		extensions="java"
 		class="org.eclipse.jdt.internal.ui.compare.JavaStructureCreator">
 	</structureCreator>
@@ -658,6 +661,7 @@
 <extension
 	point="org.eclipse.compare.contentViewers">
 	<viewer
+		id="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator"
 		extensions="java,java2"
 		class="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator">
 	</viewer>
@@ -666,10 +670,12 @@
 <extension
 	point="org.eclipse.compare.contentMergeViewers">
 	<viewer
+		id="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator"
 		extensions="java,java2"
 		class="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator">
 	</viewer>
 	<viewer
+		id="org.eclipse.jdt.internal.ui.compare.TextMergeViewerCreator"
 		extensions="properties"
 		class="org.eclipse.jdt.internal.ui.compare.TextMergeViewerCreator">
 	</viewer>
@@ -677,10 +683,11 @@
 
 <extension
 	point="org.eclipse.compare.structureMergeViewers">
-	<structureMergeViewer
-         extensions="java"
-         class="org.eclipse.jdt.internal.ui.compare.JavaStructureDiffViewerCreator">
-	</structureMergeViewer>
+	<viewer
+		id="org.eclipse.jdt.internal.ui.compare.JavaStructureDiffViewerCreator"
+		extensions="java"
+		class="org.eclipse.jdt.internal.ui.compare.JavaStructureDiffViewerCreator">
+	</viewer>
 </extension>
 
 <!-- End Java Compare -->
