@@ -23,11 +23,13 @@ public class JUnitPreferencePage extends PreferencePage
 	private Table fTable;
 	private Button fAddButton;
 	private Button fRemoveButton;
+	private Button fShowOnErrorCheck;
 	
 	public static String STACK_FILTER_ENTRIES_COUNT= "NOF_STACK_FILTER_ENTRIES"; //$NON-NLS-1$
 	public static String STACK_FILTER_ENTRY_= "STACK_FILTER_ENTRY_"; //$NON-NLS-1$
 	public static String DO_FILTER_STACK= "DO_FILTER_STACK"; //$NON-NLS-1$
-
+	public static String SHOW_ON_ERROR_ONLY= "SHOW_ON_ERROR"; //$NON-NLS-1$
+	
 	private static String[] fgDefaultFilterPatterns= new String[] {
 		"org.eclipse.jdt.internal.junit.runner", //$NON-NLS-1$
 		"org.eclipse.jdt.internal.junit.ui", //$NON-NLS-1$
@@ -65,6 +67,7 @@ public class JUnitPreferencePage extends PreferencePage
 	
 	public static void initializeDefaults(IPreferenceStore store) {
 		store.setDefault(JUnitPreferencePage.DO_FILTER_STACK, true); 
+		store.setDefault(JUnitPreferencePage.SHOW_ON_ERROR_ONLY, false); 
 		int count= store.getInt(STACK_FILTER_ENTRIES_COUNT);
 		if (count == 0) {
 			store.setValue(STACK_FILTER_ENTRIES_COUNT, fgDefaultFilterPatterns.length);
@@ -84,14 +87,35 @@ public class JUnitPreferencePage extends PreferencePage
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		composite.setLayout(layout);
-		GridData data = new GridData();
-		data.verticalAlignment = GridData.FILL;
-		data.horizontalAlignment = GridData.FILL;
+		GridData data= new GridData();
+		data.verticalAlignment= GridData.FILL;
+		data.horizontalAlignment= GridData.FILL;
+		
 		composite.setLayoutData(data);
 		
+		createShowCheck(composite);
 		createFilterTable(composite);
 		createListButtons(composite);
 		return composite;
+	}
+
+	private void createShowCheck(Composite composite) {
+		GridData data;
+		fShowOnErrorCheck= new Button(composite, SWT.CHECK);
+		fShowOnErrorCheck.setText(JUnitMessages.getString("JUnitPreferencePage.showcheck.label")); //$NON-NLS-1$
+		data= new GridData();
+		data.horizontalAlignment= GridData.FILL;
+		data.horizontalSpan= 2;
+		fShowOnErrorCheck.setLayoutData(data);		
+		fShowOnErrorCheck.setSelection(getShowOnErrorOnly());
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public static boolean getShowOnErrorOnly() {
+		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(SHOW_ON_ERROR_ONLY);
 	}
 		
 	protected void createListButtons(Composite composite) {
@@ -197,6 +221,7 @@ public class JUnitPreferencePage extends PreferencePage
 		for (int i= 0; i < filterEntriesCount; i++) {
 			store.setValue(STACK_FILTER_ENTRY_ + i, fTable.getItem(i).getText());
 		}
+		store.setValue(SHOW_ON_ERROR_ONLY, fShowOnErrorCheck.getSelection());
 		return true;			
 	}
 	

@@ -196,6 +196,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		super.startup();
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.addLaunchListener(this);	
+		ProgressImages.load();
 	}
 
 	/*
@@ -205,6 +206,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		super.shutdown();
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.removeLaunchListener(this);
+		ProgressImages.dispose();
 	}
 
 	public static Display getDisplay() {

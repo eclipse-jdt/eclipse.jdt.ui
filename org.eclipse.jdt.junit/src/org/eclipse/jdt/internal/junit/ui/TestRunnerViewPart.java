@@ -38,11 +38,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorActionBarContributor;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -68,6 +73,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
  	 * Number of failures during this test run
  	 */
 	protected int fFailures;	
+ 	/**
+ 	 * Number of tests run
+ 	 */
+	private int fTestCount; 
 	/**
 	 * Map storing TestInfos for each executed test keyed by
 	 * the test name.
@@ -80,7 +89,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	private TestRunInfo fFirstFailure;
 	
 	private ProgressBar fProgressBar;
+	private Image fProgressImage;
 	private CounterPanel fCounterPanel;
+	private boolean fShowOnErrorOnly= false;
+	
 	/** 
 	 * The view that shows the stack trace of a failure
 	 */
@@ -166,6 +178,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 */
 	public void testRunStarted(final int testCount){
 		reset(testCount);
+		fShowOnErrorOnly= JUnitPreferencePage.getShowOnErrorOnly();
 		fExecutedTests++;
 	}
 	
@@ -184,7 +197,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 					fActiveRunView.setSelectedTest(fFirstFailure.fTestName);
 					handleTestSelected(fFirstFailure.fTestName);
 				}
-				firePropertyChange(IWorkbenchPart.PROP_TITLE);
 			}
 		});	
 	}
@@ -219,7 +231,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 */
 	public void testStarted(String testName) {
 		// reveal the part when the first test starts
-		if (fExecutedTests == 1) 
+		if (!fShowOnErrorOnly && fExecutedTests == 1) 
 			postShowTestResultsView();
 			
 		postInfo(JUnitMessages.getFormattedString("TestRunnerViewPart.message.started", testName)); //$NON-NLS-1$
@@ -254,8 +266,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		if (fFirstFailure == null)
 			fFirstFailure= testInfo;
 		// show the view on the first error only
-		//if (fErrors + fFailures == 1) 
-		//	postShowTestResultsView();
+		if (fShowOnErrorOnly && (fErrors + fFailures == 1)) 
+			postShowTestResultsView();
 	}
 	
 	/*
@@ -422,6 +434,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		refreshCounters();
 		updateProgressColor(fFailures+fErrors);
 		fProgressBar.setSelection(fProgressBar.getSelection() + 1);
+		if (fShowOnErrorOnly) {
+			Image progress= ProgressImages.getImage(fExecutedTests, fTestCount, fErrors, fFailures);
+			if (progress != fProgressImage) {
+				fProgressImage= progress;
+				firePropertyChange(IWorkbenchPart.PROP_TITLE);
+			}
+		}
 	}
 
 	private void updateProgressColor(int failures) {
@@ -568,6 +587,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		fExecutedTests= 0;
 		fFailures= 0;
 		fErrors= 0;
+		fTestCount= testCount;
 		aboutToStart();
 		fTestInfos.clear();
 		fFirstFailure= null;
@@ -602,6 +622,25 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	}
 
 	private IStatusLineManager getStatusLine() {
+		// we want to show messages globally hence we
+		// have to go throgh the active part
+		IViewSite site= getViewSite();
+		IWorkbenchPage page= site.getPage();
+		IWorkbenchPart activePart= page.getActivePart();
+	
+		if (activePart instanceof IViewPart) {
+			IViewPart activeViewPart= (IViewPart)activePart;
+			IViewSite activeViewSite= activeViewPart.getViewSite();
+			return activeViewSite.getActionBars().getStatusLineManager();
+		}
+		
+		if (activePart instanceof IEditorPart) {
+			IEditorPart activeEditorPart= (IEditorPart)activePart;
+			IEditorActionBarContributor contributor= activeEditorPart.getEditorSite().getActionBarContributor();
+			if (contributor instanceof EditorActionBarContributor) 
+				return ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
+		}
+		// no active part
 		return getViewSite().getActionBars().getStatusLineManager();
 	}
 
@@ -653,4 +692,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	private Display getDisplay() {
 		return fCounterPanel.getDisplay();
 	}
+	/**
+	 * @see IWorkbenchPart#getTitleImage()
+	 */
+	public Image getTitleImage() {
+		if (fProgressImage == null || !fShowOnErrorOnly)
+			return super.getTitleImage();
+		return fProgressImage;
+	}
+
 }
