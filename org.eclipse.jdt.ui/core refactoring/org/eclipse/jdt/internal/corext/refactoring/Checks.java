@@ -457,11 +457,7 @@ public class Checks {
 	
 	private static final String getFullPath(ICompilationUnit cu) {
 		Assert.isTrue(cu.exists());
-		try {
-			return ResourceUtil.getResource(cu).getFullPath().toString();
-		} catch (JavaModelException e) {
-			return cu.getElementName();
-		}
+		return ResourceUtil.getResource(cu).getFullPath().toString();
 	}
 	
 	
@@ -555,6 +551,8 @@ public class Checks {
 	}
 
 	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify) {
+//		if (true)
+//			return RefactoringStatus.createFatalErrorStatus("CANT DO IT"); 
 		RefactoringStatus result= new RefactoringStatus();
 		IStatus status= Resources.checkInSync(filesToModify);
 		if (!status.isOK())

@@ -10,18 +10,16 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ResourceUtil {
 	
 	private ResourceUtil(){
 	}
 	
-	public static IFile[] getFiles(ICompilationUnit[] cus) throws JavaModelException{
+	public static IFile[] getFiles(ICompilationUnit[] cus) {
 		List files= new ArrayList(cus.length);
 		for (int i= 0; i < cus.length; i++) {
 			IResource resource= ResourceUtil.getResource(cus[i]);
@@ -31,7 +29,7 @@ public class ResourceUtil {
 		return (IFile[]) files.toArray(new IFile[files.size()]);
 	}
 
-	public static IFile getFile(ICompilationUnit cu) throws JavaModelException{
+	public static IFile getFile(ICompilationUnit cu) {
 		IResource resource= ResourceUtil.getResource(cu);
 		if (resource.getType() == IResource.FILE)
 			return (IFile)resource;
@@ -46,7 +44,7 @@ public class ResourceUtil {
 	 * If the parameter is a working copy then the <code>IResource</code> for
 	 * the original element is returned.
 	 */
-	public static IResource getResource(ICompilationUnit cu) throws JavaModelException{
+	public static IResource getResource(ICompilationUnit cu) {
 		return JavaModelUtil.toOriginal(cu).getResource();
 	}
 
@@ -55,7 +53,7 @@ public class ResourceUtil {
 	 * Returns the <code>IResource</code> that the given <code>IMember</code> is defined in.
 	 * @see #getResource
 	 */
-	public static IResource getResource(IMember member) throws JavaModelException{
+	public static IResource getResource(IMember member) {
 		Assert.isTrue(!member.isBinary());
 		return getResource(member.getCompilationUnit());
 	}
@@ -69,18 +67,11 @@ public class ResourceUtil {
 	}
 
 	private static IResource getResource(IJavaElement element){
-		try {
-			if (element.getElementType() == IJavaElement.COMPILATION_UNIT) 
-				return getResource((ICompilationUnit) element);
-			else if (element instanceof IOpenable) 
-				return element.getResource();
-			else	
-				return null;	
-		} catch (JavaModelException e) {
-			if (e.isDoesNotExist())
-				return null;
-			JavaPlugin.log(e);
+		if (element.getElementType() == IJavaElement.COMPILATION_UNIT) 
+			return getResource((ICompilationUnit) element);
+		else if (element instanceof IOpenable) 
+			return element.getResource();
+		else	
 			return null;	
-		}
 	}
 }
