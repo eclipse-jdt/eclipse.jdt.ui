@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +22,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -49,13 +49,13 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -79,22 +79,26 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private final List fParameterInfos;
+	private final CodeGenerationSettings fCodeGenerationSettings;
+	private final ImportEditManager fImportEditManager;
+	private final ASTNodeMappingManager fAstManager;
+	private final ASTRewriteManager fRewriteManager;
+
 	private TextChangeManager fChangeManager;
 	private IMethod fMethod;
 	private IMethod[] fRippleMethods;
-	private ASTNodeMappingManager fAstManager;
-	private ASTRewriteManager fRewriteManager;
 	private ASTNode[] fOccurrenceNodes;
 	private Set fDescriptionGroups;
 	private String fReturnTypeName;
@@ -104,23 +108,16 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
 	private static final String DEFAULT_NEW_PARAM_TYPE= "int";//$NON-NLS-1$
 	private static final String DEFAULT_NEW_PARAM_VALUE= "0"; //$NON-NLS-1$
-	private static final Collection KEYWORD_TYPE_NAMES= Arrays.asList(new String[]{
-                                                           	"boolean",  //$NON-NLS-1$
-                                                           	"byte",		//$NON-NLS-1$
-															"char", 	//$NON-NLS-1$
-															"double", 	//$NON-NLS-1$
-															"float",	//$NON-NLS-1$
-															"int", 		//$NON-NLS-1$
-															"long", 	//$NON-NLS-1$
-															"short"});	//$NON-NLS-1$
 
-	public ChangeSignatureRefactoring(IMethod method){
+	public ChangeSignatureRefactoring(IMethod method, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(method);
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
 		fAstManager= new ASTNodeMappingManager();
 		fRewriteManager= new ASTRewriteManager(fAstManager);
 		fDescriptionGroups= new HashSet(0);
+		fCodeGenerationSettings= codeGenerationSettings;
+		fImportEditManager= new ImportEditManager(fCodeGenerationSettings);
 		try {
 			fReturnTypeName= getInitialReturnTypeName();
 			fVisibility= getInitialMethodVisibility();
@@ -342,12 +339,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return false;
 		if (! string.trim().equals(string))
 			return false;
-		if (string.equals("void")) //$NON-NLS-1$
+		if (PrimitiveType.toCode(string) == PrimitiveType.VOID)
 			return isVoidAllowed;
 		if (! Checks.checkTypeName(string).hasFatalError())
 			return true;
-		if (KEYWORD_TYPE_NAMES.contains(string))
-			return true;	
+		if (isPrimitiveTypeName(string))
+			return true;
 		StringBuffer cuBuff= new StringBuffer();
 		cuBuff.append(CONST_CLASS_DECL);
 		int offset= cuBuff.length();
@@ -476,6 +473,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 
+			result.merge(collectAndCheckImports());
+
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 
 			result.merge(checkIfDeletedParametersUsed());
@@ -492,6 +491,86 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			pm.done();
 		}
 	}
+
+	private RefactoringStatus collectAndCheckImports() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (! info.isTypeNameChanged())
+				continue;
+			String typeName= getSimpleParameterTypeName(info);
+			if (isPrimitiveTypeName(typeName))
+				continue;
+			if (tryResolvingType(typeName))
+				continue;
+			result.merge(tryFinidingInTypeCache(typeName, info));
+		}
+		return result;
+	}
+
+	//returns true iff succeeded
+	private boolean tryResolvingType(String typeName) throws JavaModelException{
+		String[][] fqns= getMethod().getDeclaringType().resolveType(typeName);
+		if (fqns == null || fqns.length != 1)
+			return false;
+		String fullName= JavaModelUtil.concatenateName(fqns[0][0], fqns[0][1]);
+		importToAllCusOfRippleMethods(fullName);
+		return true;
+	}
+	
+	private RefactoringStatus tryFinidingInTypeCache(String typeName, ParameterInfo info) throws JavaModelException{
+		List typeRefsFound= findTypeInfos(typeName);
+
+		if (typeRefsFound.size() == 0){
+			String[] keys= {info.getNewTypeName()};
+			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.not_unique", keys); //$NON-NLS-1$
+			return RefactoringStatus.createErrorStatus(msg);
+		} else if (typeRefsFound.size() == 1){
+			TypeInfo typeInfo= (TypeInfo) typeRefsFound.get(0);
+			String fullName= typeInfo.getFullyQualifiedName();
+			importToAllCusOfRippleMethods(fullName);
+			return new RefactoringStatus();
+		} else {
+			Assert.isTrue(typeRefsFound.size() > 1);
+			String[] keys= {info.getNewTypeName(), String.valueOf(typeRefsFound.size())};
+			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.ambiguous", keys); //$NON-NLS-1$
+			return RefactoringStatus.createErrorStatus(msg);
+		}
+	}
+
+	private List findTypeInfos(String typeName) throws JavaModelException {
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[]{getMethod().getJavaProject()}, true);
+		IPackageFragment currPackage= getMethod().getDeclaringType().getPackageFragment();
+		TypeInfo[] infos= AllTypesCache.findTypeRefs(typeName, scope);
+		List typeRefsFound= new ArrayList();
+		for (int i= 0; i < infos.length; i++) {
+			TypeInfo curr= infos[i];
+			IType type= curr.resolveType(scope);
+			if (type != null && JavaModelUtil.isVisible(type, currPackage)) {
+				typeRefsFound.add(curr);
+			}
+		}
+		return typeRefsFound;
+	}
+	
+	private void importToAllCusOfRippleMethods(String fullName) throws JavaModelException {
+		for (int i= 0; i < fRippleMethods.length; i++) {
+			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(fRippleMethods[i].getCompilationUnit());
+			fImportEditManager.addImportTo(fullName, wc);
+		}
+	}	
+	
+	private static boolean isPrimitiveTypeName(String typeName){
+		return PrimitiveType.toCode(typeName) != null;
+	}
+	
+	private static String getSimpleParameterTypeName(ParameterInfo info) {
+		String typeName= info.getNewTypeName();
+		if (typeName.indexOf('[') != -1)
+			typeName= typeName.substring(0, typeName.indexOf('['));
+		return typeName.trim();
+	}
+	
 	private RefactoringStatus checkIfDeletedParametersUsed() {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fOccurrenceNodes.length; i++) {
@@ -615,35 +694,22 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
-			if (problem.isError())
+			if (shouldReport(problem))
 				result.addEntry(RefactoringStatusEntry.create(problem, newCuSource));
 		}
 		return result;
 	}
 		
-	private static GroupDescription findEditGroupDescription(Set descriptions, ParameterInfo info){
-		for (Iterator iter= descriptions.iterator(); iter.hasNext();) {
-			GroupDescription desc= (GroupDescription) iter.next();
-			if (desc.getName().equals(createGroupDescriptionString(info.getOldName())))
-				return desc;
-		}
-		Assert.isTrue(false);
-		return null;
+	private boolean shouldReport(IProblem problem) {
+		if (! problem.isError())
+			return false;
+		if (problem.getID() == IProblem.ArgumentTypeNotFound) //reported when trying to import
+			return false;
+		return true;	
 	}
-	
+
 	private static String createGroupDescriptionString(String oldParamName){
 		return "rename." + oldParamName; //$NON-NLS-1$
-	}
-	
-	private VariableDeclaration getVariableDeclaration(ParameterInfo info, IMethod method) throws JavaModelException {
-		MethodDeclaration md= getDeclarationNode(method);
-		for (Iterator iter= md.parameters().iterator(); iter.hasNext();) {
-			SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) iter.next();
-			if (paramDecl.getName().getIdentifier().equals(info.getOldName()))
-				return paramDecl;
-		}
-		Assert.isTrue(false);
-		return null;
 	}
 	
 	public String getReturnTypeString() {
@@ -920,8 +986,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			TextBuffer textBuffer= TextBuffer.create(fAstManager.getCompilationUnit(cuNode).getBuffer().getContents());
 			TextEdit resultingEdits= new MultiTextEdit();
 			rewrite.rewriteNode(textBuffer, resultingEdits, fDescriptionGroups);
-			manager.get(fAstManager.getCompilationUnit(cuNode)).addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
+
+			ICompilationUnit cu= fAstManager.getCompilationUnit(cuNode);
+			TextChange textChange= manager.get(fAstManager.getCompilationUnit(cuNode));
+			if (fImportEditManager.hasImportEditFor(cu))
+				resultingEdits.add(fImportEditManager.getImportEdit(cu));
+			textChange.addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
 			rewrite.removeModifications();
+
 		}
 	}
 
@@ -1000,6 +1072,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		ASTNode[] newPermutation= new ASTNode[nonDeletedInfos.size()];
 		for (int i=0; i < newPermutation.length; i++) {
 			ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
+			
 			if (info.isAdded())
 				newPermutation[i]= createNewElementForList(rewrite, ast, info, isReference);
 			 else if (info.getOldIndex() != i)
@@ -1055,10 +1128,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return ASTNodes.clearAccessModifiers(md.getModifiers()) | fVisibility;
 	}
 	
-	private MethodDeclaration getDeclarationNode(IMethod method) throws JavaModelException {
-		return ASTNodeSearchUtil.getMethodDeclarationNode(method, fAstManager);
-	}
-		
 	private IMethod getMethod(MethodDeclaration methodDeclaration) throws JavaModelException{
 		return (IMethod)fAstManager.getCompilationUnit(methodDeclaration).getElementAt(methodDeclaration.getName().getStartPosition());
 	}
