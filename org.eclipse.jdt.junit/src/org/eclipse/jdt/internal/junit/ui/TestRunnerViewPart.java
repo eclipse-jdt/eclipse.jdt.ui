@@ -847,7 +847,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 		if (isDisposed())
 			return;
 
-		if (event.getProperty() == JUnitPreferencePage.SHOW_ON_ERROR_ONLY) {
+		if (JUnitPreferencePage.SHOW_ON_ERROR_ONLY.equals(event.getProperty())) {
 			if (!JUnitPreferencePage.getShowOnErrorOnly()) {
 				fViewImage= fOriginalViewImage;
 				firePropertyChange(IWorkbenchPart.PROP_TITLE);

@@ -864,7 +864,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		boolean refreshViewer= false;
 	
-		if (event.getProperty() == AppearancePreferencePage.SHOW_CU_CHILDREN) {
+		if (AppearancePreferencePage.SHOW_CU_CHILDREN.equals(event.getProperty())) {
 			IActionBars actionBars= getViewSite().getActionBars();
 			fActionSet.fillToolBar(actionBars.getToolBarManager());
 			actionBars.updateActionBars();
