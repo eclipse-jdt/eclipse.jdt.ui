@@ -3630,36 +3630,38 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				matches= exceptionFinder.perform();
 			}
 		}
-		if (matches.size() == 0 && fMarkMethodExitPoints) {
-			MethodExitsFinder finder= new MethodExitsFinder();
-			message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
-			if (message == null) {
-				matches= finder.perform();
-			}
-		}
 		if (matches.size() == 0) {
-			ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
-			if (!(node instanceof Name)) {
-				if (!fStickyOccurrenceAnnotations)
-					removeOccurrenceAnnotations();
-				return;
+			if (fMarkMethodExitPoints || fMarkTypeOccurrences) {
+				MethodExitsFinder finder= new MethodExitsFinder();
+				message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+				if (message == null) {
+					matches= finder.perform();
+				}
 			}
-			
-			IBinding binding= ((Name)node).resolveBinding();
-			if (binding == null && fStickyOccurrenceAnnotations)
-				return;
-			
-			if (!markOccurrencesOfType(binding)) {
-				if (!fStickyOccurrenceAnnotations)
-					removeOccurrenceAnnotations();
-				return;
+			if (matches.size() == 0) {
+				ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
+				if (!(node instanceof Name)) {
+					if (!fStickyOccurrenceAnnotations)
+						removeOccurrenceAnnotations();
+					return;
+				}
+				
+				IBinding binding= ((Name)node).resolveBinding();
+				if (binding == null && fStickyOccurrenceAnnotations)
+					return;
+				
+				if (!markOccurrencesOfType(binding)) {
+					if (!fStickyOccurrenceAnnotations)
+						removeOccurrenceAnnotations();
+					return;
+				}
+				
+				// Find the matches && extract positions so we can forget the AST
+				OccurrencesFinder finder = new OccurrencesFinder(binding);
+				message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+				if (message == null)
+					matches= finder.perform();
 			}
-			
-			// Find the matches && extract positions so we can forget the AST
-			OccurrencesFinder finder = new OccurrencesFinder(binding);
-			message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
-			if (message == null)
-				matches= finder.perform();
 		} else if (!fMarkExceptionOccurrences) {
 			if (!fStickyOccurrenceAnnotations)
 				removeOccurrenceAnnotations();
