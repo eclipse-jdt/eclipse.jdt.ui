@@ -1,5 +1,7 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -101,8 +103,27 @@ class SourceReferenceAction extends RefactoringAction {
 	}
 			
 	protected ISourceReference[] getSelectedElements(){
-		List l= getStructuredSelection().toList();
-		return (ISourceReference[]) l.toArray(new ISourceReference[l.size()]);
+		return getWorkingCopyElements(getStructuredSelection().toList());
+	}
+	
+	private static ISourceReference[] getWorkingCopyElements(List l) {
+		List wcList= new ArrayList(l.size());
+		for (Iterator iter= l.iterator(); iter.hasNext();) {
+			ISourceReference element= (ISourceReference) iter.next();
+			if (! (element instanceof IJavaElement)) //can this happen ?
+				wcList.add(element); 
+			ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(element);
+			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+			try {
+				IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, (IJavaElement)element);
+				if (wcElement != null && wcElement.exists())
+					wcList.add(wcElement);
+			} catch(JavaModelException e) {
+				JavaPlugin.log(e); //cannot show dialog here
+				//do nothing - do not add to selection (?)
+			}
+		}
+		return (ISourceReference[]) wcList.toArray(new ISourceReference[wcList.size()]);
 	}	
 }
 
