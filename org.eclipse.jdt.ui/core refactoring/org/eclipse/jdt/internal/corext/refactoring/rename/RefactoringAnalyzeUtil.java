@@ -88,8 +88,12 @@ public class RefactoringAnalyzeUtil {
 
 	public static String getFullBindingKey(VariableDeclaration decl){
 		StringBuffer buff= new StringBuffer();
-		buff.append(decl.resolveBinding().getVariableId());
-		buff.append('/');
+		if (decl.resolveBinding() != null) {
+			buff.append(decl.resolveBinding().getVariableId());
+			buff.append('/');
+		} else {
+			buff.append(decl.getStartPosition()).append('*').append('/'); //ensure unique key if unresolvable
+		}
 		
 		AnonymousClassDeclaration acd= (AnonymousClassDeclaration)ASTNodes.getParent(decl, AnonymousClassDeclaration.class);
 		if (acd != null && acd.resolveBinding() != null){

@@ -38,6 +38,10 @@ public class RenameTempTests extends RefactoringTest{
 		return new MySetup(new TestSuite(clazz));
 	}
 	
+	public static Test setUpTest(Test test) {
+		return new MySetup(test);
+	}
+	
 	private String getSimpleTestFileName(boolean canRename, boolean input){
 		String fileName = "A_" + getName();
 		if (canRename)
@@ -346,6 +350,11 @@ public class RenameTempTests extends RefactoringTest{
 		helper1("newname", true, 4, 16, 4, 20);
 	}
 	
+	public void test51() throws Exception {
+//		printTestDisabledMessage("regression test for Bug#47822");
+		helper1("qwerty", true, 5, 19, 5, 20);
+	}
+	
 // -----
 	public void testFail0() throws Exception{
 		printTestDisabledMessage("fails - must revisit");
@@ -481,5 +490,10 @@ public class RenameTempTests extends RefactoringTest{
 	}
 	public void testFail31() throws Exception{
 		helper2("j", true, 3, 9, 3, 13);
-	}	
+	}
+	
+	public void testFail32() throws Exception {
+//		printTestDisabledMessage("bug#47822");
+		helper2("j", true, 6, 19, 6, 20);
+	}
 }

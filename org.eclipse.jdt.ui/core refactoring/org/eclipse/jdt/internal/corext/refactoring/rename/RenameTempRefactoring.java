@@ -203,7 +203,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		initAST();
-		if (fTempDeclarationNode == null)
+		if (fTempDeclarationNode == null || fTempDeclarationNode.resolveBinding() == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.must_select_local")); //$NON-NLS-1$
 		if (! Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class) 
 		 && ! Checks.isDeclaredIn(fTempDeclarationNode, Initializer.class))
