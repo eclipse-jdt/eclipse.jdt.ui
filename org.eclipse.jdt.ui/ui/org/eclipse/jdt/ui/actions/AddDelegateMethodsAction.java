@@ -347,14 +347,21 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		try {
 			AddDelegateMethodsContentProvider provider = new AddDelegateMethodsContentProvider(type);
 			Methods2FieldLabelProvider methodLabel = new Methods2FieldLabelProvider();
+
 			SourceActionDialog dialog = new SourceActionDialog(getShell(), methodLabel, provider, fEditor, type);			
 			dialog.setValidator(createValidator(provider.getNumEntries()));
-			dialog.setSorter(new Methods2FieldSorter());
-			dialog.setInput(provider);
+			Methods2FieldSorter sorter= new Methods2FieldSorter();
+			dialog.setSorter(sorter);
+			dialog.setInput(new Object());			
 			dialog.setContainerMode(true);
 			dialog.setMessage(ActionMessages.getString("AddDelegateMethodsAction.message")); //$NON-NLS-1$
 			dialog.setTitle(ActionMessages.getString("AddDelegateMethodsAction.title")); //$NON-NLS-1$
-			dialog.setExpandedElements(preselected);
+			
+			Object[] elements= provider.getElements(null);			
+			sorter.sort(null, elements);
+			Object[] expand= {elements[0]};
+			dialog.setExpandedElements(expand);
+			dialog.setInitialSelections(preselected);
 			dialog.setSize(60, 18);
 			int result = dialog.open();
 			if (result == Window.OK) {
