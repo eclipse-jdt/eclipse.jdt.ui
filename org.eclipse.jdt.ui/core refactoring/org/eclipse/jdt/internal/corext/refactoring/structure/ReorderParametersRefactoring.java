@@ -143,7 +143,7 @@ class ReorderParametersRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 
-		if (MethodChecks.isVirtual(fMethod)){
+		if (! fMethod.isConstructor() && MethodChecks.isVirtual(fMethod)){
 			result.merge(MethodChecks.checkIfComesFromInterface(getMethod(), new SubProgressMonitor(pm, 1)));
 			if (result.hasFatalError())
 				return result;	
@@ -152,7 +152,7 @@ class ReorderParametersRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;			
 		} 
-		if (fMethod.getDeclaringType().isInterface()){
+		if (! fMethod.isConstructor() && fMethod.getDeclaringType().isInterface()){
 			result.merge(MethodChecks.checkIfOverridesAnother(getMethod(), new SubProgressMonitor(pm, 1)));
 			if (result.hasFatalError())
 				return result;
