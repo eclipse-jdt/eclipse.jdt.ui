@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -379,12 +380,25 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 				addLocalDeclarationRemoval(rewrite);
     		if (fInitializeIn == INITIALIZE_IN_CONSTRUCTOR)
     			addInitializersToConstructors(rewrite);
+    		if (! fFieldName.equals(fTempDeclarationNode.getName().getIdentifier()))	
+    			addTempRenames(rewrite);
             return createChange(rewrite);
     	} catch (CoreException e) {
     		throw new JavaModelException(e);
         } finally{
     		pm.done();
     	}
+    }
+    
+    private void addTempRenames(ASTRewrite rewrite) {
+    	ASTNode[] tempRefs= TempOccurrenceFinder.findTempOccurrenceNodes(fTempDeclarationNode, true, false);
+		for (int j= 0; j < tempRefs.length; j++) {
+			ASTNode occurence= tempRefs[j];
+			if (occurence instanceof SimpleName){
+				SimpleName newName= getAST().newSimpleName(fFieldName);
+				rewrite.markAsReplaced(occurence, newName);
+			}
+		}
     }
     
     private void addInitializersToConstructors(ASTRewrite rewrite) throws JavaModelException {
@@ -402,11 +416,11 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	}
     }
     private void addNewConstructorWithInitializing(ASTRewrite rewrite, TypeDeclaration typeDeclaration) throws JavaModelException {
-        MethodDeclaration newConstructor= fTempDeclarationNode.getAST().newMethodDeclaration();
+        MethodDeclaration newConstructor= getAST().newMethodDeclaration();
         newConstructor.setConstructor(true);
         newConstructor.setExtraDimensions(0);
         newConstructor.setModifiers(getModifiersForDefaultConstructor(typeDeclaration));
-        newConstructor.setName(fTempDeclarationNode.getAST().newSimpleName(typeDeclaration.getName().getIdentifier()));
+        newConstructor.setName(getAST().newSimpleName(typeDeclaration.getName().getIdentifier()));
         addFieldInitializationToConstructor(rewrite, newConstructor);
         rewrite.markAsInserted(newConstructor);
         int constructorInsertIndex= computeInsertIndexForNewConstructor(typeDeclaration);
@@ -434,7 +448,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     
     private void addFieldInitializationToConstructor(ASTRewrite rewrite, MethodDeclaration constructor) throws JavaModelException {
     	if (constructor.getBody() == null)
-	    	constructor.setBody(fTempDeclarationNode.getAST().newBlock());
+	    	constructor.setBody(getAST().newBlock());
         List statements= constructor.getBody().statements();
         ExpressionStatement initialization= createExpressionStatementThatInitializesField(rewrite);
         rewrite.markAsInserted(initialization);
@@ -509,7 +523,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         if (fragmentIndex + 1 < fragments.size()){
             VariableDeclarationFragment firstFragmentAfter= (VariableDeclarationFragment)fragments.get(fragmentIndex + 1);
             VariableDeclarationFragment copyfirstFragmentAfter= (VariableDeclarationFragment)rewrite.createCopy(firstFragmentAfter);
-        	VariableDeclarationStatement statement= fTempDeclarationNode.getAST().newVariableDeclarationStatement(copyfirstFragmentAfter);
+        	VariableDeclarationStatement statement= getAST().newVariableDeclarationStatement(copyfirstFragmentAfter);
         	for (int i= fragmentIndex + 2; i < fragments.size(); i++) {
         		VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i);
                 VariableDeclarationFragment fragmentCopy= (VariableDeclarationFragment)rewrite.createCopy(fragment);
@@ -522,15 +536,15 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
     private ExpressionStatement createExpressionStatementThatInitializesField(ASTRewrite rewrite) throws JavaModelException{
-        Assignment assignment= fTempDeclarationNode.getAST().newAssignment();
-        SimpleName fieldName= fTempDeclarationNode.getAST().newSimpleName(fFieldName);
+        Assignment assignment= getAST().newAssignment();
+        SimpleName fieldName= getAST().newSimpleName(fFieldName);
         assignment.setLeftHandSide(fieldName);
         String initializerCode= fCu.getBuffer().getText(getTempInitializer().getStartPosition(), getTempInitializer().getLength());
         Expression tempInitializerCopy= (Expression)rewrite.createPlaceholder(initializerCode, ASTRewrite.EXPRESSION);
-        ///XXX workaround 
+        ///XXX workaround for bug 25178
         ///(Expression)rewrite.createCopy(getTempInitializer());
         assignment.setRightHandSide(tempInitializerCopy);
-        ExpressionStatement assignmentStatement= fTempDeclarationNode.getAST().newExpressionStatement(assignment);
+        ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignment);
         return assignmentStatement;
     }
 
@@ -561,15 +575,14 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
     private FieldDeclaration createNewFieldDeclaration(ASTRewrite rewrite) {
-    	AST ast= fTempDeclarationNode.getAST();
-        VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
-        SimpleName variableName= ast.newSimpleName(fFieldName);
+    	VariableDeclarationFragment fragment= getAST().newVariableDeclarationFragment();
+        SimpleName variableName= getAST().newSimpleName(fFieldName);
         fragment.setName(variableName);
         if (fInitializeIn == INITIALIZE_IN_FIELD && tempHasInitializer()){
 	        Expression initializer= (Expression)rewrite.createCopy(getTempInitializer());
 	        fragment.setInitializer(initializer);
         }
-    	FieldDeclaration fieldDeclaration= ast.newFieldDeclaration(fragment);
+    	FieldDeclaration fieldDeclaration= getAST().newFieldDeclaration(fragment);
     	
     	VariableDeclarationStatement vds= getTempDeclarationStatement();
     	Type type= (Type)rewrite.createCopy(vds.getType());
@@ -585,6 +598,10 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	if (fDeclareStatic)	
     		flags |= Modifier.STATIC;
         return flags;
+    }
+    
+    private AST getAST(){
+    	return fTempDeclarationNode.getAST();
     }
 
     private static class LocalTypeAndVariableUsageAnalyzer extends HierarchicalASTVisitor{
