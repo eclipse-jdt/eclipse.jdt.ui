@@ -6,7 +6,7 @@ public class TestParenthesis {
 	Object list;
 	
 	public void main() {
-		Object element= /*]*/((List)list)/*[*/.get(0);
+		Object element= /*]*/((List)list).get(0);
 	}
 	
 	public List getList() {

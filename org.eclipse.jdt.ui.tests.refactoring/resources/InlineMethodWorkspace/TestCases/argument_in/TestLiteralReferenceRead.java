@@ -2,7 +2,7 @@ package argument_in;
 
 public class TestLiteralReferenceRead {
 	public void main() {
-		/*]*/foo(10);/*[*/
+		/*[*/foo(10);/*]*/
 	}
 	
 	public void foo(int x) {

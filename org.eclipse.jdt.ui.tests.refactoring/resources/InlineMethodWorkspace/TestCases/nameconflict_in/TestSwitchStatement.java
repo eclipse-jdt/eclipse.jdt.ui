@@ -7,7 +7,7 @@ public class TestSwitchStatement {
 			case 0:
 				break;
 			case 10:
-				/*]*/foo();/*[*/
+				/*[*/foo();/*]*/
 				break;
 		}
 	}

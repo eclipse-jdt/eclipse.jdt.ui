@@ -4,8 +4,8 @@ public class TestLocalReferenceRead2 {
 	public void main() {
 		int i= 10;
 		int x = i;
-		/*]*/x= x + 10;
-		bar(x);/*[*/
+		x= x + 10;
+		bar(x);
 		System.out.println(i);
 	}
 	

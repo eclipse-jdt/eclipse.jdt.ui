@@ -4,7 +4,7 @@ public class TestParameterNameUnused2 {
 	public void main() {
 		for (int x= 10; x < 20; x++)
 			main();
-		/*]*/foo(10);/*[*/
+		/*[*/foo(10);/*]*/
 	}
 	
 	public void foo(int x) {

@@ -4,8 +4,8 @@ public class TestParameterNameUsed1 {
 	public void main() {
 		int x= 20;
 		int x1 = 10;
-		/*]*/x1= 20;
-		bar(x1);/*[*/
+		x1= 20;
+		bar(x1);
 	}
 	
 	public void foo(int x) {

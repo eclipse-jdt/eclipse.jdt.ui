@@ -5,6 +5,6 @@ import java.io.File;
 public class TestUseInClassLiteral {
 	public void main() {
 		Provider p= null;
-		/*]*/Class clazz= File.class;/*[*/
+		Class clazz= File.class;
 	}
 }

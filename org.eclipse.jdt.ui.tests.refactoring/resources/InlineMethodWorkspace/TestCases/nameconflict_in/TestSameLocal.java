@@ -3,7 +3,7 @@ package nameconflict_in;
 public class TestSameLocal {
 	public void main() {
 		int i= 10;
-		/*]*/foo();/*[*/
+		/*[*/foo();/*]*/
 	}
 	
 	public void foo() {

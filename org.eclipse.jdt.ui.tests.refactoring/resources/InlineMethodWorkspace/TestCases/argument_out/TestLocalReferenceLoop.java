@@ -5,8 +5,8 @@ public class TestLocalReferenceLoop {
 		int i= 10;
 		for (int z= 0; z < i; z++) {
 			int x = i;
-			/*]*/x= x + 10;
-			bar(x);/*[*/
+			x= x + 10;
+			bar(x);
 		}
 	}
 	

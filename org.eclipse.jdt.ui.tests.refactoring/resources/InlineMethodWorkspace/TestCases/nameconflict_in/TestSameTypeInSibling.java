@@ -6,7 +6,7 @@ public class TestSameTypeInSibling {
 			public T() {}
 		}
 		int x= 10;
-		/*]*/foo();/*[*/
+		/*[*/foo();/*]*/
 	}
 	
 	public void foo() {

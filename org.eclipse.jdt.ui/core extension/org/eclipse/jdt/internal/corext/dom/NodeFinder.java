@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.ASTNode;
 /**
  * For a give range finds the node covered and the node covering.
@@ -40,6 +46,50 @@ public class NodeFinder extends GenericVisitor {
 			return finder.getCoveringNode();
 		}
 		return result;
+	}
+	
+	/**
+	 * A visitor that maps a selection to a given ASTNode. The result node is
+	 * determined as follows:
+	 * <ul>
+	 *   <li>first the visitor tries to find a node that is covered by <code>start</code> and
+	 *       <code>length</code> where either <code>start</code> and <code>length</code> exactly
+	 *       matches the node or where the text covered before and after the node only consists
+	 *       of white spaces or comments.</li>
+	 * 	 <li>if no such node exists than the node that encloses the range defined by
+	 *       start and end is returned.</li>
+	 *   <li>if the length is zero than also nodes are considered where the node's
+	 *       start or end position matches <code>start</code>.</li>
+	 *   <li>otherwise <code>null</code> is returned.</li>
+	 * </ul>
+	 * 
+	 * @since		3.0
+	 */
+	public static ASTNode perform(ASTNode root, int start, int length, ICompilationUnit source) throws JavaModelException {
+		NodeFinder finder= new NodeFinder(start, length);
+		root.accept(finder);
+		ASTNode result= finder.getCoveredNode();
+		if (result == null)
+			return null;
+		Selection selection= Selection.createFromStartLength(start, length);
+		if (selection.covers(result)) {
+			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			scanner.setSource(source.getBuffer().getText(start, length).toCharArray());
+			try {
+				int token= scanner.getNextToken();
+				if (token != ITerminalSymbols.TokenNameEOF) {
+					int tStart= scanner.getCurrentTokenStartPosition();
+					if (tStart == result.getStartPosition() - start) {
+						scanner.resetTo(tStart + result.getLength(), length - 1);
+						token= scanner.getNextToken();
+						if (token == ITerminalSymbols.TokenNameEOF)
+							return result;
+					}
+				}
+			} catch (InvalidInputException e) {
+			}
+		}
+		return finder.getCoveringNode();
 	}
 
 	private int fStart;

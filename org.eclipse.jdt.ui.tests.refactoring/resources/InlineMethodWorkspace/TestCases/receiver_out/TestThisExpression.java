@@ -20,11 +20,11 @@ class Client{
 	void f(){
 		TestThisExpression t= null;
 		C c= null;
-		/*]*/c.m(t);
+		c.m(t);
 		class X {
 			void foo() {
 				foo();
 			}
-		}/*[*/
+		}
 	}
 }

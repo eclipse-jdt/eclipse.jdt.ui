@@ -15,7 +15,7 @@ public class TestReceiverWithStatic {
 	public void main() {
 		ThisReceiver a= new ThisReceiver();
 		
-		/*]*/a.bar();
-		ThisReceiver.baz();/*[*/
+		a.bar();
+		ThisReceiver.baz();
 	}
 }

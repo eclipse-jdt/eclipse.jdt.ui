@@ -5,10 +5,10 @@ public class TestSameType {
 		class T {
 			public T() {}
 		}
-		/*]*/class T1 {
+		class T1 {
 			T1 t;
 			public T1() {}
-		}/*[*/
+		}
 	}
 	
 	public void foo() {

@@ -5,10 +5,10 @@ public class TestIfElseTwo {
 		if (true)
 			main();
 		else
-			/*]*/{
+			{
 				bar();
 				bar();
-			}/*[*/
+			}
 	}
 	
 	public void foo() {

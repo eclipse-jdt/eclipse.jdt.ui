@@ -5,7 +5,7 @@ public class TestSameType {
 		class T {
 			public T() {}
 		}
-		/*]*/foo();/*[*/
+		/*[*/foo();/*]*/
 	}
 	
 	public void foo() {

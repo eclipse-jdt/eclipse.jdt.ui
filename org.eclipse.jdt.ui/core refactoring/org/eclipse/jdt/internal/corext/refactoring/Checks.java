@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
@@ -277,7 +278,7 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding returnType, ITypeBinding[] parameters, IJavaProject scope) {
 		RefactoringStatus result= new RefactoringStatus();
-		IMethodBinding method= org.eclipse.jdt.internal.corext.dom.Bindings.findMethodInHierarchy(type, methodName, parameters);
+		IMethodBinding method= Bindings.findMethodInHierarchy(type, methodName, parameters);
 		if (method != null) {
 			boolean returnTypeClash= false;
 			ITypeBinding methodReturnType= method.getReturnType();

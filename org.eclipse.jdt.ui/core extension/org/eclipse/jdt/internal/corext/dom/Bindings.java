@@ -402,7 +402,7 @@ public class Bindings {
 		IMethod[] candidates= type.getMethods();
 		for (int i= 0; i < candidates.length; i++) {
 			IMethod candidate= candidates[i];
-			if (candidate.getElementName().equals(method.getName()) && Bindings.sameParameters(method, candidate)) {
+			if (candidate.getElementName().equals(method.getName()) && sameParameters(method, candidate)) {
 				return candidate;
 			}
 		}

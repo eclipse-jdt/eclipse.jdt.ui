@@ -3,7 +3,7 @@ package nameconflict_in;
 public class TestBlocks {
 	public void main() {
 		if (true) {
-			/*]*/foo();/*[*/
+			/*[*/foo();/*]*/
 		}
 		if (true) {
 			int x= 1;

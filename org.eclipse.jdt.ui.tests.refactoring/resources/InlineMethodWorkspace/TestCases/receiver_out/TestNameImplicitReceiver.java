@@ -12,6 +12,6 @@ public class TestNameImplicitReceiver {
 	public void main() {
 		ImplicitReceiver a= new ImplicitReceiver();
 		
-		/*]*/a.bar();/*[*/
+		a.bar();
 	}
 }

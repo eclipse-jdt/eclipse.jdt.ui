@@ -5,7 +5,7 @@ public class TestParameterNameUnused3 {
 		class T {
 			int x;
 		}
-		/*]*/foo(10);/*[*/
+		/*[*/foo(10);/*]*/
 	}
 	
 	public void foo(int x) {

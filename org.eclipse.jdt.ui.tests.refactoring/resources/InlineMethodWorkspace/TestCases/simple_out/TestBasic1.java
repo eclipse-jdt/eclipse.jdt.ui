@@ -2,7 +2,7 @@ package simple_out;
 
 public class TestBasic1 {
 	public void main() {
-		/*]*/baz();/*[*/
+		baz();
 	}
 	
 	public void bar() {

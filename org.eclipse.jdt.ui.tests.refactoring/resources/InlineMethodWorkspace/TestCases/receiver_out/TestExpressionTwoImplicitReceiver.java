@@ -12,8 +12,8 @@ public class TestExpressionTwoImplicitReceiver {
 
 	public void main() {
 		ImplicitReceiver r = getObject();
-		/*]*/r.bar();
-		r.bar();/*[*/
+		r.bar();
+		r.bar();
 	}
 	
 	private ImplicitReceiver getObject() {

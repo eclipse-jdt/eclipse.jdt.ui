@@ -2,7 +2,7 @@ package nameconflict_in;
 
 public class TestFieldInType {
 	public void main() {
-		/*]*/foo();/*[*/
+		/*[*/foo();/*]*/
 		class T {
 			int x;
 		}

@@ -10,6 +10,6 @@ public class TestNoImplicitReceiver {
 	public void main() {
 		NoImplicitReceiver a= new NoImplicitReceiver();
 		
-		/*]*/System.out.println("Eclipse");/*[*/
+		System.out.println("Eclipse");
 	}
 }

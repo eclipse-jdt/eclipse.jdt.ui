@@ -310,7 +310,12 @@ public class InlineMethodRefactoring extends Refactoring {
 	
 	private static ASTNode getTargetNode(ICompilationUnit unit, int offset, int length) {
 		CompilationUnit root= AST.parseCompilationUnit(unit, true);
-		ASTNode node= NodeFinder.perform(root, offset, length);
+		ASTNode node;
+		try {
+			node= NodeFinder.perform(root, offset, length, unit);
+		} catch (JavaModelException e) {
+			node= NodeFinder.perform(root, offset, length);
+		}
 		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
 			node= node.getParent();
 		} else if (node.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {

@@ -6,6 +6,6 @@ public class TestUseInDeclClash {
 	List fList;
 	public void main() {
 		Provider p= null;
-		/*]*/import_use.List list= null;/*[*/
+		import_use.List list= null;
 	}
 }

@@ -9,7 +9,7 @@ public class TestExpressionZeroImplicitReceiver {
 
 	public void main() {
 		ImplicitReceiver r = getObject();
-		/*]*/System.out.println("Eclipse");/*[*/
+		System.out.println("Eclipse");
 	}
 	
 	private ImplicitReceiver getObject() {

@@ -2,7 +2,7 @@ package nameconflict_in;
 
 public class TestSameTypeAfter {
 	public void main() {
-		/*]*/foo();/*[*/
+		/*[*/foo();/*]*/
 		class T {
 			public T() {}
 		}

@@ -10,7 +10,7 @@ public class TestSuper {
   }
   private static class B extends A {
     void foo() {
-      /*]*/bar();/*[*/
+      bar();
     }
   }
 }

@@ -3,7 +3,7 @@ package argument_in;
 public class TestParameterNameUsed4 {
 	public void main() {
 		class x {}
-		/*]*/foo(10);/*[*/
+		/*[*/foo(10);/*]*/
 	}
 	
 	public void foo(int x) {

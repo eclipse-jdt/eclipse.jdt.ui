@@ -23,7 +23,7 @@ public class AllRefactoringTests {
 
 		//--code
 		suite.addTest(ExtractMethodTests.suite());
-//		suite.addTest(InlineMethodTests.suite());
+		suite.addTest(InlineMethodTests.suite());
 		suite.addTest(SefTests.suite());
 		suite.addTest(InlineTempTests.suite());
 		suite.addTest(ExtractTempTests.suite());

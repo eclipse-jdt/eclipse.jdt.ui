@@ -2,7 +2,7 @@ package simple_in;
 
 public class TestInitializer {
 	static {
-		/*]*/foo();/*[*/
+		/*[*/foo();/*]*/
 	}
 	
 	public static void foo() {

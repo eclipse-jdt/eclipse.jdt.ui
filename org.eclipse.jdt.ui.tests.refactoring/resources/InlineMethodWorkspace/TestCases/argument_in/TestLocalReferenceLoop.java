@@ -4,7 +4,7 @@ public class TestLocalReferenceLoop {
 	public void main() {
 		int i= 10;
 		for (int z= 0; z < i; z++) {
-			/*]*/foo(i);/*[*/
+			/*[*/foo(i);/*]*/
 		}
 	}
 	

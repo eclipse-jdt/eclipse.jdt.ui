@@ -3,7 +3,7 @@ package argument_in;
 public class TestLocalReferenceWrite {
 	public void main() {
 		int i= 10;
-		/*]*/foo(i);/*[*/
+		/*[*/foo(i);/*]*/
 		i= 10;
 		System.out.println(i);
 	}

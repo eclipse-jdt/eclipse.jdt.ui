@@ -4,7 +4,7 @@ public class TestFieldReference {
 	private String field;
 	
 	public void main() {
-		/*]*/field.toString();/*[*/
+		field.toString();
 	}
 
 	public void bar(Object o) {

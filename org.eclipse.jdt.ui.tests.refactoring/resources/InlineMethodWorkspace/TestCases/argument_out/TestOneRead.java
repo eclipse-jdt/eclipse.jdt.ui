@@ -2,7 +2,7 @@ package argument_out;
 
 public class TestOneRead {
 	public void main() {
-		/*]*/int i= value();/*[*/
+		int i= value();
 	}
 	
 	public void foo(int x) {

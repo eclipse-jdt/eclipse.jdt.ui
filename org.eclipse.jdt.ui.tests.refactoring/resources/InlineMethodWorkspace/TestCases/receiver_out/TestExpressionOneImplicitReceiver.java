@@ -10,7 +10,7 @@ public class TestExpressionOneImplicitReceiver {
 	}
 
 	public void main() {
-		/*]*/getObject().bar();/*[*/
+		getObject().bar();
 	}
 	
 	private ImplicitReceiver getObject() {

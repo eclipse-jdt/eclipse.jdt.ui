@@ -6,7 +6,7 @@ public class TestSameTypeInSibling {
 			public T() {}
 		}
 		int x= 10;
-		/*]*/class T1 {
+		class T1 {
 			T1 t;
 			public T1() {}
 		}
@@ -16,7 +16,7 @@ public class TestSameTypeInSibling {
 				int x;
 				T1 t;
 			}
-		}/*[*/
+		}
 	}
 	
 	public void foo() {

@@ -2,7 +2,7 @@ package simple_in;
 
 public class TestPrimitiveArray {
 	public void main() {
-		/*]*/foo(null);/*[*/
+		/*[*/foo(null);/*]*/
 	}
 	
 	public void foo(int[][] x) {

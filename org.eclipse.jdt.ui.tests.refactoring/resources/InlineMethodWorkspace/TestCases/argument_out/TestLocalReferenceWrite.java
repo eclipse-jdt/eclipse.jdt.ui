@@ -3,8 +3,8 @@ package argument_out;
 public class TestLocalReferenceWrite {
 	public void main() {
 		int i= 10;
-		/*]*/i= i + 10;
-		bar(i);/*[*/
+		i= i + 10;
+		bar(i);
 		i= 10;
 		System.out.println(i);
 	}

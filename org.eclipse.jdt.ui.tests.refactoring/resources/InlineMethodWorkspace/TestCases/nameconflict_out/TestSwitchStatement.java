@@ -7,8 +7,8 @@ public class TestSwitchStatement {
 			case 0:
 				break;
 			case 10:
-				/*]*/int i1= 20;
-				i1++;/*[*/
+				int i1= 20;
+				i1++;
 				break;
 		}
 	}

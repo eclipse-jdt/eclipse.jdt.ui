@@ -6,7 +6,7 @@ public class TestForAssignmentTwo {
 		for (int i= 0; i < 10; i++)
 			{
 				int x1;
-				x= /*]*/20/*[*/;
+				x= 20;
 			}
 	}
 	

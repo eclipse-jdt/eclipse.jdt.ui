@@ -2,7 +2,7 @@ package simple_in;
 
 public class TestBasic1 {
 	public void main() {
-		/*]*/bar();/*[*/
+		/*[*/bar();/*]*/
 	}
 	
 	public void bar() {

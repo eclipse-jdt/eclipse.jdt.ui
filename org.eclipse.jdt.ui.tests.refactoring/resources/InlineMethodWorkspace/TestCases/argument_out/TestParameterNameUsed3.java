@@ -3,8 +3,8 @@ package argument_out;
 public class TestParameterNameUsed3 {
 	public void main() {
 		int x1 = 10;
-		/*]*/x1= 20;
-		bar(x1);/*[*/
+		x1= 20;
+		bar(x1);
 		{
 			int x= 20;
 		}

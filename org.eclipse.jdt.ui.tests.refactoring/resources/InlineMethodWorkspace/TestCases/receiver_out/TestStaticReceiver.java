@@ -10,6 +10,6 @@ public class TestStaticReceiver {
 	}
 
 	public void main() {
-		/*]*/StaticReceiver.bar();/*[*/
+		StaticReceiver.bar();
 	}
 }

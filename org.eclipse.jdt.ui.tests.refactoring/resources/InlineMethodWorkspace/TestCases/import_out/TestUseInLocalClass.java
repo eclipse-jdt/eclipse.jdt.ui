@@ -6,7 +6,7 @@ import java.util.Map;
 public class TestUseInLocalClass {
 	public void main() {
 		Provider p= null;
-		/*]*/class Local extends File implements Comparable {
+		class Local extends File implements Comparable {
 			public Local(String s) {
 				super(s);
 			}
@@ -15,6 +15,6 @@ public class TestUseInLocalClass {
 			public int compareTo(Object o) {
 				return 0;
 			}
-		}/*[*/
+		}
 	}
 }

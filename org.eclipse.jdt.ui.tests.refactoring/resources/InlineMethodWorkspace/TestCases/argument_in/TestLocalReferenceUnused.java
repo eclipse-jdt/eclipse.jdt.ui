@@ -3,7 +3,7 @@ package argument_in;
 public class TestLocalReferenceUnused {
 	public void main() {
 		int i= 10;
-		/*]*/foo(i);/*[*/
+		/*[*/foo(i);/*]*/
 		int x= 7;
 	}
 	

@@ -3,8 +3,8 @@ package nameconflict_out;
 public class TestSameLocal {
 	public void main() {
 		int i= 10;
-		/*]*/int i1= 20;
-		i1++;/*[*/
+		int i1= 20;
+		i1++;
 	}
 	
 	public void foo() {

@@ -5,8 +5,8 @@ public class TestParameterNameUnused2 {
 		for (int x= 10; x < 20; x++)
 			main();
 		int x = 10;
-		/*]*/x= 20;
-		bar(x);/*[*/
+		x= 20;
+		bar(x);
 	}
 	
 	public void foo(int x) {

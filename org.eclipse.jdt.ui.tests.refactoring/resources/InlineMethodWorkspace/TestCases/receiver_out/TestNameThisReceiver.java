@@ -12,6 +12,6 @@ public class TestNameThisReceiver {
 	public void main() {
 		ThisReceiver a= new ThisReceiver();
 		
-		/*]*/a.bar();/*[*/
+		a.bar();
 	}
 }
