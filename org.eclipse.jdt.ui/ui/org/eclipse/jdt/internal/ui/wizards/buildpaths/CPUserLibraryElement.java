@@ -18,10 +18,9 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
 
 public class CPUserLibraryElement {
 	
@@ -105,7 +104,7 @@ public class CPUserLibraryElement {
 	}
 	
 	public IPath getPath() {
-		return new Path(UserLibraryClasspathContainer.CONTAINER_ID).append(fName);
+		return new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(fName);
 	}
 
 	public boolean isSystemLibrary() {

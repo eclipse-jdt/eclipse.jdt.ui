@@ -43,7 +43,6 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
-import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
@@ -882,7 +881,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			assertTrue("lib does not exist",  lib != null && lib.exists());
 			IPath path= new Path(lib.getPath());
 			final IClasspathEntry[] entries= { JavaCore.newLibraryEntry(path, null, null) };
-			final IPath containerPath= new Path(UserLibraryClasspathContainer.CONTAINER_ID).append("MyUserLibrary");
+			final IPath containerPath= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append("MyUserLibrary");
 
 			
 			IClasspathContainer newContainer= new IClasspathContainer() {
@@ -902,7 +901,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 					return containerPath;
 				}
 			};
-			ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(UserLibraryClasspathContainer.CONTAINER_ID);
+			ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(JavaCore.USER_LIBRARY_CONTAINER_ID);
 			initializer.requestClasspathContainerUpdate(containerPath, otherProject, newContainer);
 			
 			IClasspathEntry entry= JavaCore.newContainerEntry(containerPath);

@@ -38,7 +38,6 @@ import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
-import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -90,13 +89,13 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	}
 	
 	private void updateLibraryList(String nameToSelect) {
-		String[] names= UserLibraryClasspathContainer.getUserLibraryNames();
+		String[] names= JavaCore.getUserLibraryNames();
 		Arrays.sort(names, Collator.getInstance());
 		CPUserLibraryElement elementToSelect= null;
 		ArrayList elements= new ArrayList(names.length);
 		for (int i= 0; i < names.length; i++) {
 			String curr= names[i];
-			IPath path= new Path(UserLibraryClasspathContainer.CONTAINER_ID).append(curr);
+			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(curr);
 			try {
 				IClasspathContainer container= JavaCore.getClasspathContainer(path, fProject);
 				CPUserLibraryElement elem= new CPUserLibraryElement(curr, container);

@@ -4099,14 +4099,6 @@
 <!--- classpath conatainer -->
    
    <extension
-         point="org.eclipse.jdt.core.classpathContainerInitializer">
-      <classpathContainerInitializer
-            class="org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainerInitializer"
-            id="org.eclipse.jdt.USER_LIBRARY">
-      </classpathContainerInitializer>
-   </extension>
-   
-   <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
       <classpathContainerPage
             name="%userLibrary.name"

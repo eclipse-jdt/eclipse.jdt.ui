@@ -88,7 +88,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
-import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -626,12 +625,12 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		fLibraryList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fLibraryList.setLabelText(PreferencesMessages.getString("UserLibraryPreferencePage.libraries.label")); //$NON-NLS-1$
 		
-		String[] names= UserLibraryClasspathContainer.getUserLibraryNames();
+		String[] names= JavaCore.getUserLibraryNames();
 		ArrayList elements= new ArrayList();
 		
 		IJavaProject jproject= getDummyProject();
 		for (int i= 0; i < names.length; i++) {
-			IPath path= new Path(UserLibraryClasspathContainer.CONTAINER_ID).append(names[i]);
+			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(names[i]);
 			try {
 				IClasspathContainer container= JavaCore.getClasspathContainer(path, jproject);
 				elements.add(new CPUserLibraryElement(names[i], container));
@@ -745,7 +744,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 		
 		List list= fLibraryList.getElements();
-		HashSet oldNames= new HashSet(Arrays.asList(UserLibraryClasspathContainer.getUserLibraryNames()));
+		HashSet oldNames= new HashSet(Arrays.asList(JavaCore.getUserLibraryNames()));
 		int nExisting= list.size();
 		
 		for (int i= 0; i < nExisting; i++) {
@@ -757,7 +756,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		monitor.beginTask(PreferencesMessages.getString("UserLibraryPreferencePage.operation"), len); //$NON-NLS-1$
 		MultiStatus multiStatus= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, PreferencesMessages.getString("UserLibraryPreferencePage.operation.error"), null); //$NON-NLS-1$
 		
-		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(UserLibraryClasspathContainer.CONTAINER_ID);
+		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(JavaCore.USER_LIBRARY_CONTAINER_ID);
 		IJavaProject jproject= getDummyProject();
 		
 		ArrayList paths= new ArrayList();
@@ -782,7 +781,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		while (iter.hasNext()) {
 			String name= (String) iter.next();
 			
-			IPath path= new Path(UserLibraryClasspathContainer.CONTAINER_ID).append(name);
+			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(name);
 			try {
 				initializer.requestClasspathContainerUpdate(path, jproject, null);
 			} catch (CoreException e) {

@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
-import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
@@ -81,7 +80,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 		final IPath path= new Path(arguments[0]);
 		final IJavaProject project= getJavaProject(marker);
 		
-		if (path.segment(0).equals(UserLibraryClasspathContainer.CONTAINER_ID)) {
+		if (path.segment(0).equals(JavaCore.USER_LIBRARY_CONTAINER_ID)) {
 			String label= NewWizardMessages.getString("UserLibraryMarkerResolutionGenerator.changetouserlib.label"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
 			resolutions.add(new UserLibraryMarkerResolution(label, image) {
