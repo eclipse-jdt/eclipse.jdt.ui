@@ -32,21 +32,25 @@ public class AddImportTest extends TestCase {
 	public AddImportTest(String name) {
 		super(name);
 	}
+	
+	public static Test allTests() {
+		return new ProjectTestSetup(new TestSuite(THIS));
+	}
 
 	public static Test suite() {
 		if (true) {
-			return new TestSuite(THIS);
+			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new AddImportTest("testAddImports_bug25113"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}	
 	}
 
 
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 	}
 
 

@@ -39,9 +39,13 @@ public class NameProposerTest extends TestCase {
 		super(name);
 	}
 
+	public static Test allTests() {
+		return new TestSuite(THIS);
+	}
+
 	public static Test suite() {
 		if (true) {
-			return new TestSuite(THIS);
+			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new NameProposerTest("testGetterSetterName"));

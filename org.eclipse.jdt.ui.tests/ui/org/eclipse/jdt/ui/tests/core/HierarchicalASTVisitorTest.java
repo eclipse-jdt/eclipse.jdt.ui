@@ -218,6 +218,10 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		super(name);
 	}
 
+	public static Test allTests() {
+		return new TestSuite(THIS_CLASS);
+	}
+
 	public static Test suite() {
 		return new TestSuite(THIS_CLASS);
 	}

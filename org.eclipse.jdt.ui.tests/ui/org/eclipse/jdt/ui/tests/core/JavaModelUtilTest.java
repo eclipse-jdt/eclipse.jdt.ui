@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class JavaModelUtilTest extends TestCase {
@@ -56,9 +57,13 @@ public class JavaModelUtilTest extends TestCase {
 		super(name);
 	}
 
+	public static Test allTests() {
+		return new ProjectTestSetup(new TestSuite(THIS));
+	}
+
 	public static Test suite() {
 		if (true) {
-			return new TestSuite(THIS);
+			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new JavaModelUtilTest("testFindType"));

@@ -40,6 +40,10 @@ public class TextBufferTest extends TestCase {
 		super(name);
 	}
 
+	public static Test allTests() {
+		return new TestSuite(THIS);
+	}
+
 	public static Test suite() {
 		TestSuite result= new TestSuite(THIS);
 		if (false) {	// For hot code replace when debugging test cases

@@ -37,10 +37,14 @@ public class CallHierarchyTest extends TestCase {
     public CallHierarchyTest(String name) {
         super(name);
     }
+    
+	public static Test allTests() {
+		return new TestSuite(THIS);
+	}
 
-    public static Test suite() {
-        if (true) {
-            return new TestSuite(THIS);
+	public static Test suite() {
+		if (true) {
+			return allTests(); 
         } else {
             TestSuite suite= new TestSuite();
             suite.addTest(new CallHierarchyTest("test1"));

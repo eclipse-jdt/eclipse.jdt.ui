@@ -16,6 +16,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -27,20 +28,20 @@ public class CoreTests extends TestCase {
 	public static Test suite() {
 		
 		TestSuite suite= new TestSuite();
-		suite.addTest(new TestSuite(AddImportTest.class));
-		suite.addTest(new TestSuite(AddUnimplementedMethodsTest.class));
-		//suite.addTest(new TestSuite(AllTypesCacheTest.suite.class));
-		suite.addTest(new TestSuite(BindingsNameTest.class));
-		suite.addTest(new TestSuite(ClassPathDetectorTest.class));
-		suite.addTest(new TestSuite(HierarchicalASTVisitorTest.class));
-		suite.addTest(new TestSuite(ImportOrganizeTest.class));
-		suite.addTest(new TestSuite(JavaModelUtilTest.class));
-		//suite.addTest(new TestSuite(NameProposerTest.class));
-		suite.addTest(new TestSuite(TextBufferTest.class));
-		suite.addTest(new TestSuite(TypeInfoTest.class));	
-		suite.addTest(new TestSuite(CallHierarchyTest.class));
-		suite.addTest(new TestSuite(ScopeAnalyzerTest.class));	
-		return suite;
+		suite.addTest(AddImportTest.allTests());
+		suite.addTest(AddUnimplementedMethodsTest.allTests());
+		suite.addTest(AllTypesCacheTest.allTests());
+		suite.addTest(BindingsNameTest.allTests());
+		suite.addTest(ClassPathDetectorTest.allTests());
+		suite.addTest(HierarchicalASTVisitorTest.allTests());
+		suite.addTest(ImportOrganizeTest.allTests());
+		suite.addTest(JavaModelUtilTest.allTests());
+		suite.addTest(NameProposerTest.allTests());
+		suite.addTest(TextBufferTest.allTests());
+		suite.addTest(TypeInfoTest.allTests());	
+		suite.addTest(CallHierarchyTest.allTests());
+		suite.addTest(ScopeAnalyzerTest.allTests());	
+		return new ProjectTestSetup(suite);
 	}
 
 	public CoreTests(String name) {

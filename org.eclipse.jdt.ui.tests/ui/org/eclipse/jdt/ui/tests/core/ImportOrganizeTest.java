@@ -47,13 +47,17 @@ public class ImportOrganizeTest extends CoreTests {
 		super(name);
 	}
 
+	public static Test allTests() {
+		return new ProjectTestSetup(new TestSuite(THIS));
+	}
+
 	public static Test suite() {
-		if (false) {
-			return new TestSuite(THIS);
+		if (true) {
+			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new ImportOrganizeTest("testOrganizeImportOnRange2"));
-			return suite;
+			return new ProjectTestSetup(suite);
 		}	
 	}
 

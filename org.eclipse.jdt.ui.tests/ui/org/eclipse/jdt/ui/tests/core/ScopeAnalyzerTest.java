@@ -42,9 +42,13 @@ public class ScopeAnalyzerTest extends CoreTests {
 		super(name);
 	}
 
+	public static Test allTests() {
+		return new ProjectTestSetup(new TestSuite(THIS));
+	}
+
 	public static Test suite() {
 		if (true) {
-			return new TestSuite(THIS);
+			return allTests(); 
 		} else {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new ScopeAnalyzerTest("testDeclarationsAfter"));
