@@ -96,7 +96,7 @@ class DeleteResourceAction extends ReorgAction {
 		if (projects.isEmpty())
 			return confirmNonProjects();
 	 	else
-			return confirmProjets(projects);
+			return confirmProjects(projects);
 	}
 	
 	private boolean confirmNonProjects() {	
@@ -106,7 +106,7 @@ class DeleteResourceAction extends ReorgAction {
 		return MessageDialog.openConfirm(parent, title, label);
 	}
 	
-	private boolean confirmProjets(List projects) {
+	private boolean confirmProjects(List projects) {
 		MessageDialog dialog =
 			new MessageDialog(JavaPlugin.getActiveWorkbenchShell(), 
 				ReorgMessages.getString("deleteAction.deleteContents.title"),  //$NON-NLS-1$
