@@ -712,7 +712,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			int y= minLocation.y + text.getLineHeight() - 1;
 			
 			GC gc= event.gc;
-			gc.setForeground(fColor);
+			if (fColor != null && !fColor.isDisposed())
+				gc.setForeground(fColor);
 			gc.drawLine(x1, y, x2, y);
 		}
 
@@ -1527,7 +1528,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	protected int[] getBidiLineSegments(int lineOffset, String line) {
 		IDocumentProvider provider= getDocumentProvider();
-		if (provider != null) {
+		if (provider != null && line != null && line.length() > 0) {
 			IDocument document= provider.getDocument(getEditorInput());
 			if (document != null)
 				try {
