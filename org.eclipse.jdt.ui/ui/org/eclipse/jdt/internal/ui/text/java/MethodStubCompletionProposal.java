@@ -77,6 +77,7 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 				
 				String stub= StubUtility.genStub(fCompilationUnit, definingTypeName, method, declaringType, settings, impStructure);
 
+
 				// use the code formatter
 				String lineDelim= StubUtility.getLineDelimiterFor(document);
 				IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
@@ -84,6 +85,10 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 				int indent= Strings.computeIndent(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth);
 
 				String replacement= StubUtility.codeFormat(stub, indent, lineDelim);
+				if (replacement.endsWith(lineDelim)) {
+					replacement= replacement.substring(0, replacement.length() - lineDelim.length());
+				}
+				
 				setReplacementString(Strings.trimLeadingTabsAndSpaces(replacement));
 				return true;
 			}
