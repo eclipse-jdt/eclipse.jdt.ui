@@ -51,7 +51,7 @@ public class RenameFieldASTAnalyzer extends RenameRefactoringASTAnalyzer {
 	private void addError(AstNode node){
 		addError(RefactoringCoreMessages.getFormattedString("RenameFieldASTAnalyzer.error", //$NON-NLS-1$
 															new Object[]{cuFullPath(), new Integer(getLineNumber(node)), fNewName}),
-						node.sourceStart(), node.sourceEnd());
+						node.sourceStart, node.sourceEnd);
 	}
 	
 	//- type member analysis

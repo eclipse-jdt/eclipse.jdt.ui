@@ -46,7 +46,7 @@ public class TempOccurrenceFinder extends AbstractRefactoringASTAnalyzer{
 			return true;
 		LocalVariableBinding localBinding= (LocalVariableBinding)nameReference.binding;
 		if (fTempDeclaration.equals(localBinding.declaration)){
-			fOffsets.add(new Integer(nameReference.sourceStart()));
+			fOffsets.add(new Integer(nameReference.sourceStart));
 			fReferences.add(nameReference);
 		}	
 		return true;
@@ -59,7 +59,7 @@ public class TempOccurrenceFinder extends AbstractRefactoringASTAnalyzer{
 			return true;
 			
 		if (fTempDeclaration.equals(localDeclaration))
-			fOffsets.add(new Integer(localDeclaration.sourceStart()));
+			fOffsets.add(new Integer(localDeclaration.sourceStart));
 			
 		return true;
 	}

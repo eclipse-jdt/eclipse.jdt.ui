@@ -36,7 +36,7 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	private void addShadowingError(AstNode node, char[] name){
 		addError(RefactoringCoreMessages.getFormattedString("RenameParameterASTAnalyzer.error",  //$NON-NLS-1$
 															new Object[]{new Integer(getLineNumber(node)), new String(name)}),
-															node.sourceStart(), node.sourceEnd());
+															node.sourceStart, node.sourceEnd);
 	}
 	
 	private boolean withinMethod(AstNode node){
@@ -151,7 +151,7 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 				addError(RefactoringCoreMessages.getFormattedString("RenameParameterASTAnalyzer.error2", //$NON-NLS-1$
 																	new Object[]{new Integer(getLineNumber(localDeclaration)),
 																				 new String(localDeclaration.name)}),
-								localDeclaration.sourceStart(), localDeclaration.sourceEnd());
+								localDeclaration.sourceStart, localDeclaration.sourceEnd);
 		return true;
 	}
 	

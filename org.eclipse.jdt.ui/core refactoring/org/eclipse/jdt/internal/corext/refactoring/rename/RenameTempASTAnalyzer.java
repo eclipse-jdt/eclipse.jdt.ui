@@ -35,7 +35,7 @@ public class RenameTempASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	}
 	
 	private void addShadowingError(AstNode node){
-		addError("Renaming will cause in shadowing in line: " + getLineNumber(node) + " Name: '" + fNewName + "' is already visible.", node.sourceStart(), node.sourceEnd());
+		addError("Renaming will cause in shadowing in line: " + getLineNumber(node) + " Name: '" + fNewName + "' is already visible.", node.sourceStart, node.sourceEnd);
 	}
 	
 	private void analyzeLocalReference(NameReference nameReference, BlockScope blockScope){
@@ -58,7 +58,7 @@ public class RenameTempASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 			if (sourceTypeBinding == null || sourceTypeBinding.scope == null)
 				return;
 			TypeDeclaration typeDeclaration= sourceTypeBinding.scope.referenceType();
-			if (typeDeclaration.sourceStart() <= fTempDeclaration.sourceStart())
+			if (typeDeclaration.sourceStart <= fTempDeclaration.sourceStart)
 				return;
 			if (! typeDeclaration.scope.compilationUnitScope().equals(fTempDeclaration.binding.declaringScope.compilationUnitScope()))
 				return;	
@@ -66,7 +66,7 @@ public class RenameTempASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 			return;
 		} else if (newBinding instanceof LocalVariableBinding){
 			LocalVariableBinding localVariableBinding= (LocalVariableBinding)newBinding;
-			if (localVariableBinding.declaration.sourceStart() <= fTempDeclaration.sourceStart())
+			if (localVariableBinding.declaration.sourceStart <= fTempDeclaration.sourceStart)
 				return;
 			addShadowingError(nameReference);
 			return;	
@@ -96,7 +96,7 @@ public class RenameTempASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	}
 	
 	public boolean visit(SingleNameReference singleNameReference, BlockScope blockScope){
-		if (singleNameReference.sourceStart() < fTempDeclaration.sourceStart())
+		if (singleNameReference.sourceStart < fTempDeclaration.sourceStart)
 			return true;
 		
 		if (fUpdateReferences && singleNameReference.binding instanceof LocalVariableBinding){
@@ -108,7 +108,7 @@ public class RenameTempASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 		} else if (fNewName.equals(new String(singleNameReference.token))){
 				if (singleNameReference.binding instanceof FieldBinding){
 					FieldDeclaration fieldDeclaration = getFieldDeclaration((FieldBinding)singleNameReference.binding);
-					if (fieldDeclaration != null && fieldDeclaration.sourceStart() > fTempDeclaration.sourceStart())
+					if (fieldDeclaration != null && fieldDeclaration.sourceStart > fTempDeclaration.sourceStart)
 						return true;
 				}
 			char[] newName= fTempDeclaration.name;
@@ -120,7 +120,7 @@ public class RenameTempASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	}
 		
 	public boolean visit(QualifiedNameReference qualifiedNameReference, BlockScope blockScope) {
-		if (qualifiedNameReference.sourceStart() < fTempDeclaration.sourceStart())
+		if (qualifiedNameReference.sourceStart < fTempDeclaration.sourceStart)
 			return true;
 		
 		if (fUpdateReferences && qualifiedNameReference.binding instanceof LocalVariableBinding){
@@ -132,7 +132,7 @@ public class RenameTempASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 		} else if (fNewName.equals(new String(qualifiedNameReference.tokens[0]))){
 			if (qualifiedNameReference.binding instanceof FieldBinding){
 				FieldDeclaration fieldDeclaration = getFieldDeclaration((FieldBinding)qualifiedNameReference.binding);
-				if (fieldDeclaration != null && fieldDeclaration.sourceStart() > fTempDeclaration.sourceStart())
+				if (fieldDeclaration != null && fieldDeclaration.sourceStart > fTempDeclaration.sourceStart)
 					return true;
 			}
 			

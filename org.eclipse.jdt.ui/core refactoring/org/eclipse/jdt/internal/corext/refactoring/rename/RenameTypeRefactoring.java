@@ -491,7 +491,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private static SourceRange createSourceRange(AstNode node){
-		return new SourceRange(node.sourceStart(), node.sourceEnd() - node.sourceStart() + 1);
+		return new SourceRange(node.sourceStart, node.sourceEnd - node.sourceStart + 1);
 	}
 	
 	private static boolean isInType(String typeName, Scope scope){

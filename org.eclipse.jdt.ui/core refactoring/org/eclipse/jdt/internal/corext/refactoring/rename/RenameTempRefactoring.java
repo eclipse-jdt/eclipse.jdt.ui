@@ -177,8 +177,8 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 				continue;
 			if (locals[i].declaration == null)	
 				continue;
-			int offset= locals[i].declaration.sourceStart();
-			int length= locals[i].declaration.sourceEnd() - locals[i].declaration.sourceStart() + 1; 
+			int offset= locals[i].declaration.sourceStart;
+			int length= locals[i].declaration.sourceEnd - locals[i].declaration.sourceStart + 1; 
 			result.put(new String(locals[i].name), new SourceRange(offset, length));
 		}	
 		

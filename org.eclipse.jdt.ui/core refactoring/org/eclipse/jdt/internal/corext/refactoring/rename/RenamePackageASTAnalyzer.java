@@ -162,7 +162,7 @@ class RenamePackageASTAnalyzer extends RenameRefactoringASTAnalyzer {
 	private void addError(AstNode node){
 		addError(RefactoringCoreMessages.getFormattedString("RenamePackageASTAnalyzer.error",  //$NON-NLS-1$
 															new Object[]{cuFullPath(), new Integer(getLineNumber(node)), fFirstNameSegment}),
-						node.sourceStart(), node.sourceEnd());
+						node.sourceStart, node.sourceEnd);
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {

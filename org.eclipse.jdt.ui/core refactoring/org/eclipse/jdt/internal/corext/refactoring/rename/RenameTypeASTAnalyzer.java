@@ -117,7 +117,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 		if (imp != null)
 			addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.import_conflict",  //$NON-NLS-1$
 																new Object[]{fNewName, cuFullPath()}),
-							imp.sourceStart(), imp.sourceEnd());
+							imp.sourceStart, imp.sourceEnd);
 	
 		if (!typeImported(compilationUnitDeclaration))
 			return true;
@@ -126,7 +126,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 		if (type != null)
 			addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.conflict_with_declared_type",  //$NON-NLS-1$
 																new String[]{cuFullPath(), fType.getFullyQualifiedName(), fNewName}),
-							type.sourceStart(), type.sourceEnd());
+							type.sourceStart, type.sourceEnd);
 		return true;
 	}
 
@@ -144,7 +144,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 																				new String(methodDeclaration.selector),
 																				cuFullPath(),
 																				new Integer(getLineNumber(methodDeclaration))}),
-									methodDeclaration.sourceStart(), methodDeclaration.sourceEnd());
+									methodDeclaration.sourceStart, methodDeclaration.sourceEnd);
 		return true;
 	}
 
@@ -175,7 +175,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 																			fNewName,
 																			new Integer(getLineNumber(singleTypeReference)),
 																			fType.getFullyQualifiedName()}),
-								singleTypeReference.sourceStart(), singleTypeReference.sourceEnd());
+								singleTypeReference.sourceStart, singleTypeReference.sourceEnd);
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
 			addError(singleTypeReference);
 		return true;
@@ -189,7 +189,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 																			fNewName,
 																			new Integer(getLineNumber(singleTypeReference)),
 																			fType.getFullyQualifiedName()}),
-							singleTypeReference.sourceStart(), singleTypeReference.sourceEnd());
+							singleTypeReference.sourceStart, singleTypeReference.sourceEnd);
 			
 		if (isNewNameHiddenByAnotherType(singleTypeReference, scope))
 			addError(singleTypeReference);
@@ -204,7 +204,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 																			fNewName,
 																			new Integer(getLineNumber(arrayTypeReference)),
 																			fType.getFullyQualifiedName()}),
-							arrayTypeReference.sourceStart(), arrayTypeReference.sourceEnd());
+							arrayTypeReference.sourceStart, arrayTypeReference.sourceEnd);
 			
 		if (sourceRangeOnList(arrayTypeReference.sourceStart, arrayTypeReference.sourceStart + arrayTypeReference.token.length) && localTypeExists(scope, fNewNameArray)) {
 			addError(arrayTypeReference);
@@ -220,7 +220,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 																			fNewName,
 																			new Integer(getLineNumber(arrayTypeReference)),
 																			fType.getFullyQualifiedName()}),
-							arrayTypeReference.sourceStart(), arrayTypeReference.sourceEnd());
+							arrayTypeReference.sourceStart, arrayTypeReference.sourceEnd);
 			
 		return true;
 	}
@@ -228,7 +228,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 	private void addError(AstNode node){
 		addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.name_visible",  //$NON-NLS-1$
 															new Object[]{fNewName, 									cuFullPath(),
-																		new Integer(getLineNumber(node))}), node.sourceStart(), node.sourceEnd());
+																		new Integer(getLineNumber(node))}), node.sourceStart, node.sourceEnd);
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {
@@ -323,7 +323,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 				&& (typeDeclaration.superclass instanceof SingleTypeReference)) {
 				addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.subclass",  //$NON-NLS-1$
 																new String[]{fType.getElementName(), fNewName}),
-								typeDeclaration.sourceStart(), typeDeclaration.sourceEnd());
+								typeDeclaration.sourceStart, typeDeclaration.sourceEnd);
 			}
 			if (fType.isInterface()
 				&& typeDeclaration.superInterfaces != null
@@ -331,7 +331,7 @@ class RenameTypeASTAnalyzer extends RenameRefactoringASTAnalyzer {
 				&& nameInConflictWithSuperInterfaces(typeDeclaration, fNewNameArray)) {
 				addError(RefactoringCoreMessages.getFormattedString("RenameTypeASTAnalyzer.superinterface_conflict", //$NON-NLS-1$
 																	new String[]{fNewName, new String(typeDeclaration.name)}),
-								typeDeclaration.sourceStart(), typeDeclaration.sourceEnd());
+								typeDeclaration.sourceStart, typeDeclaration.sourceEnd);
 			}
 		} catch (JavaModelException e) {
 			//ignore it

@@ -57,7 +57,7 @@ public class TempDeclarationFinder {
 		//overridden
 		public boolean visit(LocalDeclaration node, BlockScope scope) {
 			int start= node.declarationSourceStart;
-			int end= node.sourceEnd();
+			int end= node.sourceEnd;
 			if (fSelection.start >= start && fSelection.end <= end) {
 				fNode= node;
 				return true;
