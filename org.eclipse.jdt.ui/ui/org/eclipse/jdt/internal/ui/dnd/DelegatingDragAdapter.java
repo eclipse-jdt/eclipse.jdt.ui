@@ -78,17 +78,20 @@ public class DelegatingDragAdapter implements DragSourceListener {
 	 * @see DragSourceListener
 	 */
 	public void dragFinished(DragSourceEvent event) {
-		if (fFinishListener != null) {
-			fFinishListener.dragFinished(event);
-		} else {
-			// If the user presses Escape then we get a dragFinished without
-			// getting a dragSetData before.
-			fFinishListener= getListener(event.dataType);
-			if (fFinishListener != null)
+		try{
+			if (fFinishListener != null) {
 				fFinishListener.dragFinished(event);
-		}
-		fFinishListener= null;
-		fActiveListeners= null;
+			} else {
+				// If the user presses Escape then we get a dragFinished without
+				// getting a dragSetData before.
+				fFinishListener= getListener(event.dataType);
+				if (fFinishListener != null)
+					fFinishListener.dragFinished(event);
+			}
+		} finally{
+			fFinishListener= null;
+			fActiveListeners= null;
+		}	
 	}
 	
 	private TransferDragSourceListener getListener(TransferData type) {
