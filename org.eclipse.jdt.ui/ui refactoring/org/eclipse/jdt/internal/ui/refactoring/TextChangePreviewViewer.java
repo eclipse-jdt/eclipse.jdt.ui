@@ -37,8 +37,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 public class TextChangePreviewViewer implements IChangePreviewViewer {
 
 	private ComparePreviewer fViewer;
@@ -53,7 +51,6 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 	
 	private static class ComparePreviewer extends CompareViewerSwitchingPane {
 		private CompareConfiguration fCompareConfiguration;
-		private ChangeElementLabelProvider fLabelProvider;
 		public ComparePreviewer(Composite parent) {
 			super(parent, SWT.BORDER | SWT.FLAT, true);
 			fCompareConfiguration= new CompareConfiguration();
@@ -61,8 +58,6 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 			fCompareConfiguration.setLeftLabel(RefactoringMessages.getString("ComparePreviewer.original_source")); //$NON-NLS-1$
 			fCompareConfiguration.setRightEditable(false);
 			fCompareConfiguration.setRightLabel(RefactoringMessages.getString("ComparePreviewer.refactored_source")); //$NON-NLS-1$
-			fLabelProvider= new ChangeElementLabelProvider(
-				JavaElementLabelProvider.SHOW_POST_QUALIFIED| JavaElementLabelProvider.SHOW_SMALL_ICONS);
 		}
 		protected Viewer getViewer(Viewer oldViewer, Object input) {
 			return CompareUI.findContentViewer(oldViewer, (ICompareInput)input, this, fCompareConfiguration);

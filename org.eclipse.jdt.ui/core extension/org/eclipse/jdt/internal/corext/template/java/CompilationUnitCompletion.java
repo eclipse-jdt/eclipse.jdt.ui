@@ -159,37 +159,6 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 		return (String) fTypes.get(qualifiedName);	
 	}
 
-	private LocalVariable[] findLocalIntegers() {
-		Vector vector= new Vector();
-
-		for (Iterator iterator= fLocalVariables.iterator(); iterator.hasNext();) {
-			LocalVariable localVariable= (LocalVariable) iterator.next();
-
-			if (localVariable.typeName.equals("int")) //$NON-NLS-1$
-				vector.add(localVariable);
-		}
-
-		return (LocalVariable[]) vector.toArray(new LocalVariable[vector.size()]);
-	}
-
-	private LocalVariable[] findLocalIterator() throws JavaModelException {
-		Vector vector= new Vector();
-
-		for (Iterator iterator= fLocalVariables.iterator(); iterator.hasNext();) {
-			LocalVariable localVariable= (LocalVariable) iterator.next();
-
-			String typeName= qualify(localVariable.typeName);			
-
-			if (typeName == null)
-				continue;
-
-			if (isSubclassOf(typeName, "java.util.Iterator")) //$NON-NLS-1$
-				vector.add(localVariable);
-		}
-
-		return (LocalVariable[]) vector.toArray(new LocalVariable[vector.size()]);
-	}	
-
 	private static boolean isArray(String type) {
 		return type.endsWith("[]"); //$NON-NLS-1$
 	}
