@@ -30,6 +30,7 @@ import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
