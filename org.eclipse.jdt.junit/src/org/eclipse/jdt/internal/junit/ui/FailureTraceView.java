@@ -97,6 +97,9 @@ class FailureTraceView implements IMenuListener {
 			testName= testName.substring(testName.indexOf(FRAME_PREFIX)); //$NON-NLS-1$
 			testName= testName.substring(FRAME_PREFIX.length(), testName.indexOf('(')).trim();
 			testName= testName.substring(0, testName.lastIndexOf('.'));
+			int innerSeparatorIndex= testName.indexOf('$');
+			if (innerSeparatorIndex != -1)
+				testName= testName.substring(0, innerSeparatorIndex);
 			
 			String lineNumber= traceLine;
 			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.indexOf(")")); //$NON-NLS-1$
