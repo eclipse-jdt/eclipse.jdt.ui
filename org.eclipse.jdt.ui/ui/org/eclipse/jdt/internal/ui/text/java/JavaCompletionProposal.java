@@ -572,7 +572,14 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 
 		repairPresentation(viewer);
 		fRememberedStyleRange= new StyleRange(offset, length, foreground, background);
-		text.setStyleRange(fRememberedStyleRange);
+		
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34754
+		try {
+			text.setStyleRange(fRememberedStyleRange);
+		} catch (IllegalArgumentException x) {
+			// catching exception as offset + length might be outside of the text widget
+			fRememberedStyleRange= null;
+		}
 	}
 
 	/*
