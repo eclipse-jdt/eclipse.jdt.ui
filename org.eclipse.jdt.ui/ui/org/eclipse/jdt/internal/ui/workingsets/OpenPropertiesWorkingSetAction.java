@@ -39,7 +39,7 @@ public class OpenPropertiesWorkingSetAction extends SelectionDispatchAction {
 		if (!(element instanceof IWorkingSet))
 			return null;
 		IWorkingSet ws= (IWorkingSet)element;
-		if (!WorkingSetConfigurationDialog.isEditable(ws))
+		if (!ws.isEditable())
 			return null;
 		return ws;
 	}

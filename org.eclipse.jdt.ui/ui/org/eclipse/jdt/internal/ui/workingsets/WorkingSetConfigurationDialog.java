@@ -58,10 +58,7 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetEditWizard;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.dialogs.WorkingSetNewWizard;
-import org.eclipse.ui.internal.registry.WorkingSetDescriptor;
-import org.eclipse.ui.internal.registry.WorkingSetRegistry;
 
 public class WorkingSetConfigurationDialog extends SelectionDialog {
 
@@ -493,7 +490,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		boolean hasSingleSelection= selection.size() == 1;
 
 		fRemoveButton.setEnabled(hasSelection && areAllGlobalWorkingSets(selection));
-		fEditButton.setEnabled(hasSingleSelection && isEditable((IWorkingSet)selection.getFirstElement()));
+		fEditButton.setEnabled(hasSingleSelection && ((IWorkingSet)selection.getFirstElement()).isEditable());
 		if (fUpButton != null) {
 			fUpButton.setEnabled(canMoveUp());
 		}
@@ -510,20 +507,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		}
 		return true;
 	}
-	
-	public static boolean isEditable(IWorkingSet workingSet) {
-		// TODO use IWorkingSet#isEditable
-		WorkingSetRegistry registry = WorkbenchPlugin.getDefault().getWorkingSetRegistry();
-		String id= workingSet.getId();
-		if (id == null)
-			return false;
-		WorkingSetDescriptor descriptor= registry.getWorkingSetDescriptor(id);
-		if (descriptor == null)
-			return false;
-		return descriptor.getPageClassName() != null;
-	}
-
-	//---- moving elements --------------------------------------------------
 	
 	private void moveUp(List toMoveUp) {
 		if (toMoveUp.size() > 0) {
