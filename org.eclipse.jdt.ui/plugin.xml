@@ -1501,7 +1501,7 @@ JavaStructureDiffViewerCreator
 
 		<!-- source -->
 		<accelerator key="Ctrl+/" id="org.eclipse.jdt.ui.edit.text.java.comment" />
-		<accelerator key="Ctrl+\\" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
+		<accelerator key="Ctrl+\" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
 		<accelerator key="Ctrl+Shift+F" id="org.eclipse.jdt.ui.edit.text.java.format" />
 		<accelerator key="Ctrl+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.add.import" />
 		<accelerator key="Ctrl+Shift+O" id="org.eclipse.jdt.ui.edit.text.java.organize.imports" />
@@ -1576,7 +1576,7 @@ JavaStructureDiffViewerCreator
 
 		<!-- source -->
 		<accelerator key="Ctrl+/" id="org.eclipse.jdt.ui.edit.text.java.comment" />
-		<accelerator key="Ctrl+\\" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
+		<accelerator key="Ctrl+\" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
 		<accelerator key="Ctrl+Shift+F" id="org.eclipse.jdt.ui.edit.text.java.format" />
 		<accelerator key="Ctrl+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.add.import" />
 		<accelerator key="Ctrl+Shift+O" id="org.eclipse.jdt.ui.edit.text.java.organize.imports" />
