@@ -135,7 +135,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	}
 	
 	private void launch(IType type, String mode) {
-		String fullyQualifiedName= type.getFullyQualifiedName();
+		String fullyQualifiedName= type.getFullyQualifiedName('.');
 		ILaunchConfiguration config = findLaunchConfiguration(
 			mode, 
 			type, 
@@ -157,7 +157,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 
 	private void launchMethod(IMethod method, String mode) {
 		IType declaringType= method.getDeclaringType();
-		String fullyQualifiedName= declaringType.getFullyQualifiedName();
+		String fullyQualifiedName= declaringType.getFullyQualifiedName('.');
 		ILaunchConfiguration config = findLaunchConfiguration(
 			mode, 
 			method, 

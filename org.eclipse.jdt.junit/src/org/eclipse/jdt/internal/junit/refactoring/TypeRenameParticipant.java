@@ -41,7 +41,7 @@ public class TypeRenameParticipant extends JUnitRenameParticipant {
 	}
 
 	protected void createChangeForConfigs(List changes, ILaunchConfiguration[] configs) throws CoreException {
-		String typeName= fType.getFullyQualifiedName();
+		String typeName= fType.getFullyQualifiedName('.');
 		for (int i= 0; i < configs.length; i++) {
 			String mainType= configs[i].getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
 			if (typeName.equals(mainType)) {

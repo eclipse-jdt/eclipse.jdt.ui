@@ -267,7 +267,7 @@ public class TestSearchEngine {
 		
 		IType[] interfaces= type.newSupertypeHierarchy(null).getAllSuperInterfaces(type);
 		for (int i= 0; i < interfaces.length; i++)
-			if(interfaces[i].getFullyQualifiedName().equals(JUnitPlugin.TEST_INTERFACE_NAME))
+			if(interfaces[i].getFullyQualifiedName('.').equals(JUnitPlugin.TEST_INTERFACE_NAME))
 				return true;
 		return false;
 	}
@@ -284,7 +284,7 @@ public class TestSearchEngine {
 		ITypeHierarchy typeHier= type.newSupertypeHierarchy(null);
 		IType[] superInterfaces= typeHier.getAllInterfaces();
 		for (int i= 0; i < superInterfaces.length; i++) {
-			if (superInterfaces[i].getFullyQualifiedName().equals(JUnitPlugin.TEST_INTERFACE_NAME))
+			if (superInterfaces[i].getFullyQualifiedName('.').equals(JUnitPlugin.TEST_INTERFACE_NAME))
 				return true;
 		}
 		return false;

@@ -893,7 +893,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		fLastLaunch= launch;
 		setViewPartTitle(type);
 		if (type instanceof IType)
-			setTitleToolTip(((IType)type).getFullyQualifiedName());
+			setTitleToolTip(((IType)type).getFullyQualifiedName('.'));
 		else
 			setTitleToolTip(type.getElementName());
 			

@@ -179,7 +179,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements 
 			if (classToTest != null) {
 				try {
 					if (!TestSearchEngine.isTestImplementor(classToTest)) {
-						fDefaultClassToTest= classToTest.getFullyQualifiedName();
+						fDefaultClassToTest= classToTest.getFullyQualifiedName('.');
 					}
 				} catch (JavaModelException e) {
 					JUnitPlugin.log(e);

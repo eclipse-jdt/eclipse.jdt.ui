@@ -15,40 +15,12 @@ package org.eclipse.jdt.internal.junit.launcher;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.debug.ui.ILaunchConfigurationTab;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.window.Window;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -63,9 +35,47 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
+
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+
+import org.eclipse.debug.ui.ILaunchConfigurationTab;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 /**
  * This tab appears in the LaunchConfigurationDialog for launch configurations that
@@ -354,7 +364,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			fContainerText.setText(getPresentationName(fContainerElement));
 		fTestText.setText(""); //$NON-NLS-1$
 	}
-	/**
+	/*
 	 * @see ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy config) {
@@ -363,7 +373,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, fContainerElement.getHandleIdentifier());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
 			 //workaround for bug 65399
-			config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, "");
+			config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
 		} else {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText.getText());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, fTestText.getText());
@@ -372,8 +382,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		}
 		config.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
 	}
-
-	/**
+	/*
 	 * @see ILaunchConfigurationTab#dispose()
 	 */
 	public void dispose() {
@@ -382,7 +391,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fJavaElementLabelProvider.dispose();
 	}
 
-	/**
+	/*
 	 * @see AbstractLaunchConfigurationTab#getImage()
 	 */
 	public Image getImage() {
@@ -431,7 +440,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		IType type = (IType)results[0];
 		
 		if (type != null) {
-			fTestText.setText(type.getFullyQualifiedName());
+			fTestText.setText(type.getFullyQualifiedName('.'));
 			javaProject = type.getJavaProject();
 			fProjText.setText(javaProject.getElementName());
 		}
@@ -452,7 +461,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fProjText.setText(projectName);		
 	}
 	
-	/**
+	/*
 	 * Realize a Java Project selection dialog and return the first selected project,
 	 * or null if there was none.
 	 */
@@ -481,7 +490,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		return null;		
 	}
 	
-	/**
+	/*
 	 * Return the IJavaProject corresponding to the project name in the project name
 	 * text field, or null if the text does not match a project name.
 	 */
@@ -493,21 +502,21 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		return getJavaModel().getJavaProject(projectName);		
 	}
 	
-	/**
+	/*
 	 * Convenience method to get the workspace root.
 	 */
 	private IWorkspaceRoot getWorkspaceRoot() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 	
-	/**
+	/*
 	 * Convenience method to get access to the java model.
 	 */
 	private IJavaModel getJavaModel() {
 		return JavaCore.create(getWorkspaceRoot());
 	}
 
-	/**
+	/*
 	 * @see ILaunchConfigurationTab#isValid(ILaunchConfiguration)
 	 */
 	public boolean isValid(ILaunchConfiguration config) {		
@@ -554,7 +563,6 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 				setErrorMessage(JUnitMessages.getString("JUnitMainTab.error.notJavaProject")); //$NON-NLS-1$
 				return;
 			}
-			IJavaProject jProject = getJavaProject();
 			String className = fTestText.getText().trim();
 			if (className.length() == 0) {
 				setErrorMessage(JUnitMessages.getString("JUnitMainTab.error.testnotdefined")); //$NON-NLS-1$
@@ -579,7 +587,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fTestMethodLabel.setEnabled(enabled);
 	}
 
-	/**
+	/*
 	 * @see ILaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
@@ -624,7 +632,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		}
 	}
 
-	/**
+	/*
 	 * Set the main type & name attributes on the working copy based on the IJavaElement
 	 */
 	protected void initializeTestType(IJavaElement javaElement, ILaunchConfigurationWorkingCopy config) {
@@ -641,7 +649,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 					return;
 				}
 				// Simply grab the first main type found in the searched element
-				name = types[0].getFullyQualifiedName();
+				name = types[0].getFullyQualifiedName('.');
 			}	
 		} catch (InterruptedException ie) {
 		} catch (InvocationTargetException ite) {
@@ -652,7 +660,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		initializeName(config, name);
 	}
 	
-	/**
+	/*
 	 * @see ILaunchConfigurationTab#getName()
 	 */
 	public String getName() {

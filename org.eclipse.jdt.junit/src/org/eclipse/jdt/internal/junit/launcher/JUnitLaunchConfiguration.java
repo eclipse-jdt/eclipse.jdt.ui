@@ -70,7 +70,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 		// a testname was specified just run the single test
 		if (testName.length() > 0) {
 			argv.add("-test"); //$NON-NLS-1$
-			argv.add(testTypes[0].getFullyQualifiedName()+":"+testName);			 //$NON-NLS-1$
+			argv.add(testTypes[0].getFullyQualifiedName('.')+":"+testName);			 //$NON-NLS-1$
 		} else if (testTypes.length > 1) {
 			String fileName= createTestNamesFile(testTypes);
 			argv.add("-testNameFile"); //$NON-NLS-1$
@@ -78,7 +78,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 		} else {
 			argv.add("-classNames"); //$NON-NLS-1$
 			for (int i= 0; i < testTypes.length; i++) 
-				argv.add(testTypes[i].getFullyQualifiedName());
+				argv.add(testTypes[i].getFullyQualifiedName('.'));
 		}
 		if (testFailureNames.length() > 0) {
 			argv.add("-testfailures"); //$NON-NLS-1$
@@ -98,7 +98,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 			try {
 				bw= new BufferedWriter(new FileWriter(file));
 				for (int i= 0; i < testTypes.length; i++) {
-					String testName= testTypes[i].getFullyQualifiedName();
+					String testName= testTypes[i].getFullyQualifiedName('.');
 					bw.write(testName);
 					bw.newLine();
 				}

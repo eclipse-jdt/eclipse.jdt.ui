@@ -666,7 +666,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		Object[] types= dialog.getResult();
 		if (types != null && types.length > 0) {
 			IType type= (IType) types[0];
-			fStackFilterContentProvider.addFilter(type.getFullyQualifiedName(), true);
+			fStackFilterContentProvider.addFilter(type.getFullyQualifiedName('.'), true);
 		}
 	}
 
