@@ -28,16 +28,15 @@ public class NewSearchResultCollector extends SearchRequestor {
 		fIgnorePotentials= ignorePotentials;
 	}
 	
-	public boolean acceptSearchMatch(SearchMatch match) throws CoreException {
+	public void acceptSearchMatch(SearchMatch match) throws CoreException {
 		IJavaElement enclosingElement= (IJavaElement) match.getElement();
 		if (enclosingElement != null) {
 			if (fIgnoreImports && enclosingElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
-				return true;
+				return;
 			if (fIgnorePotentials && (match.getAccuracy() == SearchMatch.A_INACCURATE))
-				return true;
+				return;
 			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getOffset(), match.getLength(), match.getAccuracy()));
 		}
-		return true;
 	}
 
 	public void beginReporting() {
