@@ -233,7 +233,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 					throw e;
 				if (fAutoRepeatOnFailure) {
 					try {
-						Thread.sleep(500);
+						Thread.currentThread().sleep(500);
 					} catch (InterruptedException e1) {
 						// do nothing.
 					}
