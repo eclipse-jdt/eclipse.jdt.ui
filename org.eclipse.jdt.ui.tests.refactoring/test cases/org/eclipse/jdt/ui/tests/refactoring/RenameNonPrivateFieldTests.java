@@ -39,7 +39,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private static final Class clazz= RenameNonPrivateFieldTests.class;
 	private static final String REFACTORING_PATH= "RenameNonPrivateField/";
 
-	private static final boolean BUG_79030= true;
+	private static final boolean BUG_79990_CORE_SEARCH_METHOD_DECL= true;
 	
 	private Object fPrefixPref;
 	
@@ -318,10 +318,6 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
 //--- test 1.5 features: ---
 	public void test19() throws Exception{
-		if (BUG_79030) {
-			printTestDisabledMessage("79030: generics not supported yet");
-			return;
-		}
 		fRenameGetter= true;
 		fRenameSetter= true;
 		helper2("list", "items");
@@ -387,4 +383,31 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		}
 		
 	}
+	
+	public void testGenerics1() throws Exception {
+		helper2();
+	}
+	
+	public void testGenerics2() throws Exception {
+		fRenameSetter= true;
+		fRenameGetter= true;
+		helper2();
+	}
+	
+	public void testGenerics3() throws Exception {
+		if (BUG_79990_CORE_SEARCH_METHOD_DECL) {
+			printTestDisabledMessage("BUG_79990_CORE_SEARCH_METHOD_DECL");
+			return;
+		}
+		fRenameSetter= true;
+		fRenameGetter= true;
+		helper2();
+	}
+	
+	public void testGenerics4() throws Exception {
+		fRenameSetter= true;
+		fRenameGetter= true;
+		helper2("count", "number");
+	}
+	
 }
