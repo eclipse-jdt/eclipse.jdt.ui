@@ -283,12 +283,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 		
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);		
+		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fFilterAction);
 		if (selectionHasElements) {
 			// update the action to use the right selection since the refresh
 			// action doesn't listen to selection changes.
 			fRefreshAction.selectionChanged(selection);
 			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, fRefreshAction);
-			menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fFilterAction);
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);
 		}	
 	}
