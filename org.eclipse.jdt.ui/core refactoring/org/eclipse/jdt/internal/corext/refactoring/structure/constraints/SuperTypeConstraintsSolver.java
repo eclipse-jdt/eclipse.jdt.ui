@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,6 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IDeclaredConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstrai
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
 
 /**
- * Type constraints solver to solve supertype constraint models.
+ * Type constraint solver to solve supertype constraint models.
  * 
  * @since 3.1
  */
@@ -45,14 +45,14 @@ public final class SuperTypeConstraintsSolver {
 	/** The type constraint model to solve */
 	private final SuperTypeConstraintsModel fModel;
 
-	/** the obsolete casts (element type: <code>&ltICompilationUnit, Collection&ltCastVariable2&gt&gt</code>) */
+	/** The obsolete casts (element type: <code>&ltICompilationUnit, Collection&ltCastVariable2&gt&gt</code>) */
 	private Map fObsoleteCasts= null;
 
 	/** The list of constraint variables to be processed */
-	private final LinkedList fProcessable= new LinkedList();
+	private LinkedList fProcessable= null;
 
-	/** The type occurrences (element type: <code>&ltICompilationUnit, Collection&ltConstraintVariable2&gt&gt</code>) */
-	private Map fTypeOccurrences= null;
+	/** The type matches (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt</code>) */
+	private Map fTypeMatches= null;
 
 	/**
 	 * Creates a new super type constraints solver.
@@ -79,7 +79,7 @@ public final class SuperTypeConstraintsSolver {
 			final TType type= (TType) variable.getExpressionVariable().getData(DATA_TYPE_ESTIMATE);
 			if (type != null && type.canAssignTo(variable.getType())) {
 				final ICompilationUnit unit= variable.getCompilationUnit();
-				List casts= (List) fObsoleteCasts.get(unit);
+				Collection casts= (Collection) fObsoleteCasts.get(unit);
 				if (casts != null)
 					casts.add(variable);
 				else {
@@ -127,15 +127,28 @@ public final class SuperTypeConstraintsSolver {
 	 * 
 	 * @param variables the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
-	private void computeTypes(final Collection variables) {
+	private void computeTypeMatches(final Collection variables) {
 		Assert.isNotNull(variables);
-		fTypeOccurrences= new HashMap();
+		fTypeMatches= new HashMap();
 		ConstraintVariable2 variable= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
 			variable= (ConstraintVariable2) iterator.next();
-			final TypeSet set= (TypeSet) variable.getData(DATA_TYPE_ESTIMATE);
-			if (set != null)
-				variable.setData(DATA_TYPE_ESTIMATE, set.chooseSingleType());
+			if (variable instanceof IDeclaredConstraintVariable) {
+				final ITypeSet set= (ITypeSet) variable.getData(DATA_TYPE_ESTIMATE);
+				if (set != null) {
+					variable.setData(DATA_TYPE_ESTIMATE, set.chooseSingleType());
+					final IDeclaredConstraintVariable declaration= (IDeclaredConstraintVariable) variable;
+					final ICompilationUnit unit= declaration.getCompilationUnit();
+					Collection matches= (Collection) fTypeMatches.get(unit);
+					if (matches != null)
+						matches.add(variable);
+					else {
+						matches= new ArrayList(1);
+						matches.add(variable);
+						fTypeMatches.put(unit, matches);
+					}
+				}
+			}
 		}
 	}
 
@@ -149,12 +162,12 @@ public final class SuperTypeConstraintsSolver {
 	}
 
 	/**
-	 * Returns the computed type occurrences.
+	 * Returns the computed type matches.
 	 * 
-	 * @return the type occurrences (element type: <code>&ltICompilationUnit, Collection&ltConstraintVariable2&gt&gt</code>)
+	 * @return the type matches (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt</code>)
 	 */
-	public final Map getTypeOccurrences() {
-		return fTypeOccurrences;
+	public final Map getTypeMatches() {
+		return fTypeMatches;
 	}
 
 	/**
@@ -191,15 +204,16 @@ public final class SuperTypeConstraintsSolver {
 	 * Solves the constraints of the associated model.
 	 */
 	public final void solveConstraints() {
+		fProcessable= new LinkedList();
 		final Collection variables= fModel.getConstraintVariables();
 		computeTypeEstimates(variables);
 		fProcessable.addAll(variables);
 		ConstraintVariable2 variable= null;
 		while (!fProcessable.isEmpty()) {
 			variable= (ConstraintVariable2) fProcessable.removeFirst();
-			processConstraints(SuperTypeConstraintsModel.getUsage(variable), variable);
+			processConstraints(SuperTypeConstraintsModel.getVariableUsage(variable), variable);
 		}
-		computeTypes(variables);
+		computeTypeMatches(variables);
 		computeObsoleteCasts(fModel.getCastVariables());
 	}
 }
