@@ -252,6 +252,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			return;
 			
 		StyledText styledText= sourceViewer.getTextWidget();
+		if (styledText == null)
+			return;
+		
 		int offset= sourceViewer.getVisibleRegion().getOffset();
 		int caret= offset + styledText.getCaretOffset();
 		
