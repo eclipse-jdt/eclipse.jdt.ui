@@ -21,7 +21,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Table;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -31,7 +30,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -187,11 +185,11 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		fTodoTasksList.doFillIntoGrid(markersComposite, 3);
 		LayoutUtil.setHorizontalSpan(fTodoTasksList.getLabelControl(null), 2);
 		
-		Table table= fTodoTasksList.getTableViewer().getTable();
 		GridData data= (GridData)fTodoTasksList.getListControl(null).getLayoutData();
 		data.grabExcessHorizontalSpace= true;
-		data.verticalAlignment= 0;
-		data.heightHint= SWTUtil.getTableHeightHint(table, 6);
+		data.grabExcessVerticalSpace= true;
+		data.verticalAlignment= GridData.FILL;
+		//data.heightHint= SWTUtil.getTableHeightHint(table, 6);
 
 		return markersComposite;
 	}
