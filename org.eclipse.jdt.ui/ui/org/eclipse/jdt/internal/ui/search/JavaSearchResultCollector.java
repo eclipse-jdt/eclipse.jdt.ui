@@ -4,31 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import java.util.HashMap;
-
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.IInputSelectionProvider;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.ui.IWorkbenchPage;
-
-import org.eclipse.search.ui.IContextMenuContributor;
-import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.SearchUI;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
-import org.eclipse.jdt.ui.JavaUI;
+import java.util.HashMap;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.viewers.IInputSelectionProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.search.ui.IContextMenuContributor;import org.eclipse.search.ui.ISearchResultView;import org.eclipse.search.ui.ISearchResultViewEntry;import org.eclipse.search.ui.SearchUI;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.search.IJavaSearchResultCollector;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;import org.eclipse.jdt.internal.ui.util.SelectionUtil;import org.eclipse.jdt.ui.JavaUI;
 
 
 public class JavaSearchResultCollector implements IJavaSearchResultCollector {
@@ -47,17 +23,29 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			new FindDeclarationsAction(),
 			new FindHierarchyDeclarationsAction(),
 			new FindImplementorsAction()};
-		private ShowTypeHierarchyAction fOpenTypeAction= new ShowTypeHierarchyAction();
-			
-			
+						
 		public void fill(IMenuManager menu, IInputSelectionProvider inputProvider) {
+			JavaPlugin.createStandardGroups(menu);
 			for (int i= 0; i < fSearchActions.length; i++) {
 				ElementSearchAction action= fSearchActions[i];
 				if (action.canOperateOn(inputProvider.getSelection()))
 					menu.add(action);
 			}
-			if (fOpenTypeAction.canOperateOn(inputProvider.getSelection()))
-				menu.add(fOpenTypeAction);
+			// XXX should get the workbench window from the site. 
+			OpenTypeHierarchyHelper.addToMenu(JavaPlugin.getActiveWorkbenchWindow(), 
+				menu, convertSelection(inputProvider.getSelection()));
+		}
+		
+		private Object convertSelection(ISelection selection) {
+			Object element= SelectionUtil.getSingleElement(selection);
+			if (!(element instanceof ISearchResultViewEntry))
+				return null;
+			IMarker marker= ((ISearchResultViewEntry)element).getSelectedMarker();
+			try {
+				return JavaCore.create((String) ((IMarker) marker).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));	
+			} catch (CoreException e) {
+				return null;
+			}
 		}
 	}
 	

@@ -50,4 +50,13 @@ public class SelectionUtil {
 		return ((IStructuredSelection)selection).getFirstElement();
 	}
 
+	public static Object getSingleElement(ISelection s) {
+		if (!(s instanceof IStructuredSelection))
+			return null;
+		IStructuredSelection selection= (IStructuredSelection)s;
+		if (selection.size() != 1)
+			return null;
+	
+		return selection.getFirstElement();		
+	}
 }

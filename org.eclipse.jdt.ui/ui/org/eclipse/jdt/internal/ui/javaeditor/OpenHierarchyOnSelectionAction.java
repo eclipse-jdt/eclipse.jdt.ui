@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
 
 /**
  * This action opens a java editor on the element represented by text selection of
@@ -44,8 +44,10 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	 * @see OpenJavaElementAction#open
 	 */
 	protected void open(ISourceReference sourceReference) throws JavaModelException, PartInitException {
-		super.open(sourceReference);
-		openClassHierarchy(getType(sourceReference), getMember(sourceReference));
+		IType type= getType(sourceReference);
+		OpenTypeHierarchyHelper helper= new OpenTypeHierarchyHelper();
+		helper.open(new IType[] { type }, fEditor.getSite().getWorkbenchWindow());
+		helper.selectMember(getMember(sourceReference));
 	}
 	
 	protected void openClassHierarchy(IType type, IMember member) {
@@ -54,24 +56,22 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 		} else {
 			IWorkbenchPage page= JavaPlugin.getDefault().getActivePage();
 			try {
-				
 				IViewPart view= view= page.showView(JavaUI.ID_TYPE_HIERARCHY);
 				if (view instanceof TypeHierarchyViewPart) {
 					TypeHierarchyViewPart part= (TypeHierarchyViewPart) view;
-					
+				
 					if (type != null)
 						part.setInput(type);
-					
+				
 					if (member != null)
 						part.selectMember(member);
 				}
-				
 			} catch (PartInitException e) {
 				MessageDialog.openError(getShell(), "Error in OpenHierarchyOnSelectionAction", e.getMessage());
 			}
 		}
 	}
-	
+
 	protected IType getType(ISourceReference sourceReference) {
 		if ( !(sourceReference instanceof IJavaElement))
 			return null;

@@ -107,12 +107,9 @@ public class OpenOnSelectionAction extends OpenJavaElementAction {
 		
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null && fEditor.getSelectionProvider() != null) {
-			ISelection s= fEditor.getSelectionProvider().getSelection();
-			if (!s.isEmpty()) {
-				
-				ITextSelection selection= (ITextSelection) s;
-				
-				try {
+			ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
+			try {
+				if (selection.getLength() > 0) {
 					IJavaElement[] result= resolve.codeSelect(selection.getOffset(), selection.getLength());
 					if (result != null && result.length > 0) {
 						List filtered= filterResolveResults(result);
@@ -122,9 +119,9 @@ public class OpenOnSelectionAction extends OpenJavaElementAction {
 							return;
 						}
 					}
-				} catch (JavaModelException x) {
-				} catch (PartInitException x) {
 				}
+			} catch (JavaModelException x) {
+			} catch (PartInitException x) {
 			}
 		}
 		

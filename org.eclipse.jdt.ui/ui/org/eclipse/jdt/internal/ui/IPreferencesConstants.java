@@ -13,8 +13,10 @@ public interface IPreferencesConstants {
 	
 	// keys
 	static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor";
-	static final String OPEN_TYPE_DIALOG_OPEN_TYPE_HIERARCHY_PERSPECTIVE= "org.eclipse.jdt.ui.openType.openTypeHierarchyPerspective";
 	static final String SRCBIN_FOLDERS_IN_NEWPROJ= "org.eclipse.jdt.ui.wizards.srcBinFoldersInNewProjects";
+	static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.openTypeHierarchy";
+	static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective";
+	static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart";
 	
 	static final String ATTACH_LAUNCH_PORT= "org.eclipse.jdt.ui.attachlaunch.port";
 	static final String ATTACH_LAUNCH_HOST= "org.eclipse.jdt.ui.attachlaunch.host";
