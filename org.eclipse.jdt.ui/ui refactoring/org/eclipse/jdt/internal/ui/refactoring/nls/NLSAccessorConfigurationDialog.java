@@ -141,7 +141,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private void initFields() {
 		initAccessorClassFields();
 		String resourceBundleName= fRefactoring.getResourceBundleName();
-		fResourceBundleFile.setText(resourceBundleName != null ? resourceBundleName : NLSRefactoring.getDefaultPropertiesFilename());
+		fResourceBundleFile.setText(resourceBundleName != null ? resourceBundleName : (NLSRefactoring.DEFAULT_PROPERTY_FILENAME + NLSRefactoring.PROPERTY_FILE_EXT));
 	}
 
 	private void initAccessorClassFields() {

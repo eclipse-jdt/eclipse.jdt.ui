@@ -14,19 +14,18 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
+
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -34,9 +33,6 @@ import org.eclipse.jdt.internal.ui.refactoring.InferTypeArgumentsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Infers type argumnets for raw references to generic types.
@@ -75,35 +71,24 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	public void selectionChanged(ITextSelection selection) {
 		// do nothing
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		try {
-			setEnabled(canEnable(getSelectedElements(selection)));
-		} catch (JavaModelException e) {
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
-			setEnabled(false);//no ui
-		}
+		setEnabled(RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(selection));
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void run(IStructuredSelection selection) {
-		try {
-			IJavaElement[] elements= getSelectedElements(selection);
-			if (canEnable(elements)) {
-				startRefactoring(elements);
-			} else {
-				String unavailable= RefactoringMessages.getString("InferTypeArgumentsAction.unavailable"); //$NON-NLS-1$;
-				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
-			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		IJavaElement[] elements= getSelectedElements(selection);
+		if (RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) {
+			startRefactoring(elements);
+		} else {
+			String unavailable= RefactoringMessages.getString("InferTypeArgumentsAction.unavailable"); //$NON-NLS-1$;
+			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
 		}
 	}
 
@@ -111,19 +96,15 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
 	public void run(ITextSelection selection) {
-		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
-				return;
-			IJavaElement element= SelectionConverter.getInput(fEditor);
-			IJavaElement[] array= new IJavaElement[] {element};
-			if (element != null && canEnable(array)){
-				startRefactoring(array);	
-			} else {
-				String unavailable= RefactoringMessages.getString("InferTypeArgumentsAction.unavailable"); //$NON-NLS-1$;
-				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
-			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
+			return;
+		IJavaElement element= SelectionConverter.getInput(fEditor);
+		IJavaElement[] array= new IJavaElement[] {element};
+		if (element != null && RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(array)){
+			startRefactoring(array);	
+		} else {
+			String unavailable= RefactoringMessages.getString("InferTypeArgumentsAction.unavailable"); //$NON-NLS-1$;
+			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
 		}
 	}
 	
@@ -140,23 +121,14 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 		return elements;
 	}
 
-	private static boolean canEnable(IJavaElement[] elements) throws JavaModelException {
-		//TODO: LogicalPackages?
-		return InferTypeArgumentsRefactoring.isAvailable(elements);
-	}
-	
 	private void startRefactoring(IJavaElement[] elements) {
 		try {
 			InferTypeArgumentsRefactoring refactoring= InferTypeArgumentsRefactoring.create(elements);
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
+			new RefactoringStarter().activate(refactoring, new InferTypeArgumentsWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
 		} catch (CoreException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$
 		}
-	}
-
-	private static RefactoringWizard createWizard(InferTypeArgumentsRefactoring refactoring) {
-		return new InferTypeArgumentsWizard(refactoring);
 	}
 }

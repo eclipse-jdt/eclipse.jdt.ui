@@ -15,19 +15,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -42,8 +44,6 @@ import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Action to pull up method and fields into a superclass.
@@ -90,12 +90,12 @@ public class PullUpAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(getSelectedMembers(selection)));
+			setEnabled(RefactoringAvailabilityTester.isPullUpAvailable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
 				JavaPlugin.log(e);
-			setEnabled(false);//no ui
+			setEnabled(false);// no ui
 		}
 	}
 
@@ -105,7 +105,7 @@ public class PullUpAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember[] members= getSelectedMembers(selection);
-			if (canEnable(members))
+			if (RefactoringAvailabilityTester.isPullUpAvailable(members))
 				startRefactoring(members);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -126,19 +126,12 @@ public class PullUpAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isPullUpAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
 	}
-	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement element= selection.resolveEnclosingElement();
-		if (!(element instanceof IMember))
-			return false;
-		return PullUpRefactoring.isAvailable(new IMember[] {(IMember)element});
-	}
-	
+
 	/*
 	 * @see SelectionDispatchAction#run(ITextSelection)
 	 */
@@ -148,7 +141,7 @@ public class PullUpAction extends SelectionDispatchAction {
 				return;
 			IMember member= getSelectedMember();
 			IMember[] array= new IMember[]{member};
-			if (member != null && canEnable(array)){
+			if (member != null && RefactoringAvailabilityTester.isPullUpAvailable(array)){
 				startRefactoring(array);	
 			} else {
 				String unavailable= RefactoringMessages.getString("PullUpAction.unavailable"); //$NON-NLS-1$
@@ -169,13 +162,11 @@ public class PullUpAction extends SelectionDispatchAction {
 			if (! (iter.next() instanceof IMember))
 				return null;
 		}
-		return convertToMemberArray(selection.toArray());
+		Set memberSet= new HashSet();
+		memberSet.addAll(Arrays.asList(selection.toArray()));
+		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
 	}
 		
-	private static boolean canEnable(IMember[] members) throws JavaModelException {
-		return PullUpRefactoring.isAvailable(members);
-	}
-			
 	private IMember getSelectedMember() throws JavaModelException {
 		IJavaElement element= SelectionConverter.resolveEnclosingElement(
 			fEditor, (ITextSelection)fEditor.getSelectionProvider().getSelection());
@@ -191,18 +182,6 @@ public class PullUpAction extends SelectionDispatchAction {
 		return PullUpRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
 	}
 
-	private static IMember[] convertToMemberArray(Object[] obj) {
-		if (obj == null)
-			return null;
-		Set memberSet= new HashSet();
-		memberSet.addAll(Arrays.asList(obj));
-		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-	}
-
-	private static RefactoringWizard createWizard(PullUpRefactoring refactoring) {
-		return new PullUpWizard(refactoring);
-	}
-		
 	private void startRefactoring(IMember[] members) throws JavaModelException {
 		PullUpRefactoring refactoring= createNewRefactoringInstance(members);
 		Assert.isNotNull(refactoring);
@@ -210,7 +189,7 @@ public class PullUpAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), refactoring.getDeclaringType()))
 			return;
 	
-		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), 
+		new RefactoringStarter().activate(refactoring, new PullUpWizard(refactoring), getShell(), 
 			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 	}	
 }

@@ -94,14 +94,14 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.getString("SurroundWithTryCatchAction.label")); //$NON-NLS-1$);
 		fEditor= editor;
-		setEnabled(checkEditor());
+		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SURROUND_WITH_TRY_CATCH_ACTION);
 	}
 
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
-		ICompilationUnit cu= getCompilationUnit();
+		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
 			return;
 		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selection, new Query(getShell()));
@@ -139,17 +139,9 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	public void selectionChanged(ITextSelection selection) {
-		setEnabled(selection.getLength() > 0 && checkEditor());
+		setEnabled(selection.getLength() > 0 && (fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 	}
-	
-	private final ICompilationUnit getCompilationUnit() {
-		return SelectionConverter.getInputAsCompilationUnit(fEditor);
-	}
-	
-	private boolean checkEditor() {
-		return fEditor != null && getCompilationUnit() != null;
-	}
-	
+
 	private static String getDialogTitle() {
 		return RefactoringMessages.getString("SurroundWithTryCatchAction.dialog.title"); //$NON-NLS-1$
 	}

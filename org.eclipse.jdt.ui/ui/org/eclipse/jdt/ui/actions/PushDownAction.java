@@ -23,13 +23,12 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -90,7 +89,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(getSelectedMembers(selection)));
+			setEnabled(RefactoringAvailabilityTester.isPushDownAvailable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
@@ -105,7 +104,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember[] members= getSelectedMembers(selection);
-			if (canEnable(members))
+			if (RefactoringAvailabilityTester.isPushDownAvailable(members))
 				startRefactoring(members);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -127,19 +126,12 @@ public class PushDownAction extends SelectionDispatchAction{
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isPushDownAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
 	}
-	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement element= selection.resolveEnclosingElement();
-		if (!(element instanceof IMember))
-			return false;
-		return PushDownRefactoring.isAvailable(new IMember[] {(IMember)element});
-	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(ITextSelection)
 	 */
@@ -149,7 +141,7 @@ public class PushDownAction extends SelectionDispatchAction{
 				return;
 			IMember member= getSelectedMember();
 			IMember[] array= new IMember[]{member};
-			if (member != null && canEnable(array)){
+			if (member != null && RefactoringAvailabilityTester.isPushDownAvailable(array)){
 				startRefactoring(array);	
 			} else {
 				String unavailable= RefactoringMessages.getString("PushDownAction.To_activate"); //$NON-NLS-1$
@@ -170,13 +162,11 @@ public class PushDownAction extends SelectionDispatchAction{
 			if (! (iter.next() instanceof IMember))
 				return null;
 		}
-		return convertToMemberArray(selection.toArray());
+		Set memberSet= new HashSet();
+		memberSet.addAll(Arrays.asList(selection.toArray()));
+		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
 	}
 	
-	private static boolean canEnable(IMember[] members) throws JavaModelException {
-		return PushDownRefactoring.isAvailable(members);
-	}
-			
 	private IMember getSelectedMember() throws JavaModelException{
 		IJavaElement element= SelectionConverter.resolveEnclosingElement(
 			fEditor, (ITextSelection)fEditor.getSelectionProvider().getSelection());
@@ -185,30 +175,14 @@ public class PushDownAction extends SelectionDispatchAction{
 		return (IMember)element;
 	}
 
-	private static PushDownRefactoring createNewRefactoringInstance(IMember[] members) throws JavaModelException {
-		return PushDownRefactoring.create(members);
-	}
-
-	private static IMember[] convertToMemberArray(Object[] obj) {
-		if (obj == null)
-			return null;
-		Set memberSet= new HashSet();
-		memberSet.addAll(Arrays.asList(obj));
-		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-	}
-
-	private static RefactoringWizard createWizard(PushDownRefactoring refactoring) {
-		return new PushDownWizard(refactoring);
-	}
-
 	private void startRefactoring(IMember[] members) throws JavaModelException {
-		PushDownRefactoring refactoring= createNewRefactoringInstance(members);
+		PushDownRefactoring refactoring= PushDownRefactoring.create(members);
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (!ActionUtil.isProcessable(getShell(), refactoring.getDeclaringType()))
 			return;
 	
-		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), 
+		new RefactoringStarter().activate(refactoring, new PushDownWizard(refactoring), getShell(), 
 			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 	}	
 }

@@ -10,21 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -74,7 +73,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isInlineMethodAvailable(selection));
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
@@ -85,7 +84,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		try {
-			Assert.isTrue(canEnable(selection));
+			Assert.isTrue(RefactoringAvailabilityTester.isInlineMethodAvailable(selection));
 
 			Object first= selection.getFirstElement();
 			Assert.isTrue(first instanceof IMethod);
@@ -95,14 +94,6 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.unexpected_exception")); //$NON-NLS-1$
 		}
-	}
-
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		if (selection.isEmpty() || selection.size() != 1)
-			return false;
-
-		Object first= selection.getFirstElement();
-		return (first instanceof IMethod) && InlineMethodRefactoring.isAvailable(((IMethod)first));
 	}
 
 	/*
@@ -117,37 +108,22 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isInlineMethodAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
 	}
 	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length != 1)
-			return false;
-		return (elements[0] instanceof IMethod) && InlineMethodRefactoring.isAvailable(((IMethod)elements[0]));
-	}
-
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void run(ITextSelection selection) {
-		ICompilationUnit cu= getCompilationUnit();
+		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (cu == null)
 			return;
 		run(selection.getOffset(), selection.getLength(), cu);
 	}
 		
-	private ICompilationUnit getCompilationUnit() {
-		return SelectionConverter.getInputAsCompilationUnit(fEditor);
-	}
-	
-	private static RefactoringWizard createWizard(InlineMethodRefactoring refactoring) {
-		return new InlineMethodWizard(refactoring);
-	}
-
 	private void run(int selectionOffset, int selectionLength, ICompilationUnit cu) {
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
@@ -158,13 +134,9 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			return;
 		}
 		try {
-			activate(refactoring);
+			new RefactoringStarter().activate(refactoring, new InlineMethodWizard(refactoring), getShell(), DIALOG_TITLE, true);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.unexpected_exception")); //$NON-NLS-1$
 		}
-	}
-
-	private void activate(InlineMethodRefactoring refactoring) throws JavaModelException {
-		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
 	}
 }

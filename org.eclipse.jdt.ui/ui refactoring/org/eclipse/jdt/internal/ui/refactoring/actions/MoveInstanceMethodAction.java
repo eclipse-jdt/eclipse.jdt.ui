@@ -25,11 +25,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -41,8 +42,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.MoveInstanceMethodWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * <p> This class may be instantiated; it is not intended to be subclassed.
@@ -76,7 +75,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isMoveMethodAvailable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
@@ -94,26 +93,12 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnabled(selection));
+			setEnabled(RefactoringAvailabilityTester.isMoveMethodAvailable(selection));
 		} catch (CoreException e) {
 			setEnabled(false);
 		}
 	}
 	
-	private static boolean canEnabled(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement method= selection.resolveEnclosingElement();
-		if (!(method instanceof IMethod))
-			return false;
-		return MoveInstanceMethodRefactoring.isAvailable((IMethod)method);
-	}
-
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		IMethod method= getSingleSelectedMethod(selection);
-		if (method == null)
-			return false;
-		return MoveInstanceMethodRefactoring.isAvailable(method);
-	}
-
 	private static IMethod getSingleSelectedMethod(IStructuredSelection selection) {
 		if (selection.isEmpty() || selection.size() != 1) 
 			return null;
@@ -128,7 +113,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {		
 		try {
-			Assert.isTrue(canEnable(selection));
+			Assert.isTrue(RefactoringAvailabilityTester.isMoveMethodAvailable(selection));
 			
 			IMethod method= getSingleSelectedMethod(selection);
 			Assert.isNotNull(method);	
@@ -143,7 +128,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 	 */		
 	public void run(ITextSelection selection) {
 		try {
-			run(selection, getCompilationUnitForTextSelection());
+			run(selection, SelectionConverter.getInputAsCompilationUnit(fEditor));
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.unexpected_exception"));	 //$NON-NLS-1$
 		}
@@ -155,7 +140,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.No_reference_or_declaration")); //$NON-NLS-1$
 			return;
 		}
-		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
+		new RefactoringStarter().activate(refactoring, new MoveInstanceMethodWizard(refactoring), getShell(), DIALOG_TITLE, true);
 	}
 		
 	private void run(ITextSelection selection, ICompilationUnit cu) throws JavaModelException{
@@ -167,7 +152,6 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 			return;
 
 		IMethod method= getMethod(cu, selection);
-
 		if (method != null) {
 			run(method);
 		} else {
@@ -181,14 +165,5 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 		if (element instanceof IMethod)
 			return (IMethod) element;
 		return null;
-	}
-
-	private ICompilationUnit getCompilationUnitForTextSelection() {
-		Assert.isNotNull(fEditor);
-		return SelectionConverter.getInputAsCompilationUnit(fEditor);
-	}
-	
-	private static RefactoringWizard createWizard(MoveInstanceMethodRefactoring refactoring) {
-		return new MoveInstanceMethodWizard(refactoring);
 	}
 }

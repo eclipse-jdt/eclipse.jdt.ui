@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 public class InlineTempWizard extends RefactoringWizard {
 
@@ -38,12 +39,13 @@ public class InlineTempWizard extends RefactoringWizard {
 
 		protected String getMessageString() {
 			InlineTempRefactoring refactoring= (InlineTempRefactoring)getRefactoring();
-			int occurences= refactoring.getReferencesCount();
+			int occurences= refactoring.getReferenceOffsets().length;
+			final String identifier= refactoring.getTempDeclaration().getName().getIdentifier();
 			if (occurences == 1) 
-				return RefactoringMessages.getFormattedString("InlineTempInputPage.message.one",  refactoring.getTempName()); //$NON-NLS-1$
+				return RefactoringMessages.getFormattedString("InlineTempInputPage.message.one",  identifier); //$NON-NLS-1$
 			else
 				return RefactoringMessages.getFormattedString("InlineTempInputPage.message.multi",  //$NON-NLS-1$
-					new Object[] { new Integer(occurences),  refactoring.getTempName() });
+					new Object[] { new Integer(occurences),  identifier });
 		}
 	}
 }

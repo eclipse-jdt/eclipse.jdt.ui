@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 
@@ -213,7 +214,7 @@ public class MoveAction extends SelectionDispatchAction{
 			return false;
 		
 		IMethod method= (IMethod)element;
-		if (! MoveInstanceMethodRefactoring.isAvailable(method))
+		if (! RefactoringAvailabilityTester.isMoveMethodAvailable(method))
 			return false;	
 		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject()));
 		if (refactoring == null)
@@ -226,7 +227,7 @@ public class MoveAction extends SelectionDispatchAction{
 		IMethod method= getSingleSelectedMethod(selection);
 		if (method == null)
 			return false;	
-		if (! MoveInstanceMethodRefactoring.isAvailable(method))
+		if (! RefactoringAvailabilityTester.isMoveMethodAvailable(method))
 			return false;	
 		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject()));
 		if (refactoring == null)

@@ -12,12 +12,11 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -29,8 +28,6 @@ import org.eclipse.jdt.internal.ui.refactoring.IntroduceParameterWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Introduces a new method parameter from a selected expression.
@@ -61,23 +58,14 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void selectionChanged(ITextSelection selection) {
-		setEnabled(canEnable(selection));
-	}
-	
-	private boolean canEnable(ITextSelection selection) {
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 	}
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
-		setEnabled(canEnable(selection));
-	}
-	
-	private boolean canEnable(JavaTextSelection selection) {
-		return selection.resolveInMethodBody() && 
-			IntroduceParameterRefactoring.isAvailable(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
+		setEnabled(RefactoringAvailabilityTester.isIntroduceParameterAvailable(selection));
 	}
 	
 	/* (non-Javadoc)
@@ -87,21 +75,14 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			IntroduceParameterRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			IntroduceParameterRefactoring refactoring= IntroduceParameterRefactoring.create(
+			SelectionConverter.getInputAsCompilationUnit(fEditor), 
+			selection.getOffset(), selection.getLength());
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
+			new RefactoringStarter().activate(refactoring, new IntroduceParameterWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);
 		} catch (CoreException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}
-	}
-	private static IntroduceParameterRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return IntroduceParameterRefactoring.create(
-			cunit, 
-			selection.getOffset(), selection.getLength());
-	}
-
-	private static RefactoringWizard createWizard(IntroduceParameterRefactoring refactoring) {
-		return new IntroduceParameterWizard(refactoring);
 	}
 }

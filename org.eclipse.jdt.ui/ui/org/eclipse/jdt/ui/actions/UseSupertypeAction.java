@@ -18,13 +18,12 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -72,18 +71,18 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	}
 	
 	//---- structured selection ---------------------------------------------------
-	
+
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isUseSuperTypeAvailable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
 				JavaPlugin.log(e);
-			setEnabled(false);//no ui - happens on selection changes
+			setEnabled(false);// no ui - happens on selection changes
 		}
 	}
 
@@ -92,17 +91,13 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	 */
 	public void run(IStructuredSelection selection) {
 		try {
-			if (canEnable(selection))
+			if (RefactoringAvailabilityTester.isUseSuperTypeAvailable(selection))
 				startRefactoring(getSingleSelectedType(selection));
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		return canRunOn(getSingleSelectedType(selection));
-	}
-	
 	private static IType getSingleSelectedType(IStructuredSelection selection) throws JavaModelException{
 		if (selection.isEmpty() || selection.size() != 1) 
 			return null;
@@ -129,26 +124,21 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isUseSuperTypeAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
 	}
 	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IType type= RefactoringActions.getEnclosingOrPrimaryType(selection);
-		return UseSuperTypeRefactoring.isAvailable(type);
-	}
-	
-    /*
+	/*
      * @see SelectionDispatchAction#run(ITextSelection)
      */
 	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
 				return;
-			IType type= getSingleSelectedType();
-			if (canRunOn(type)){
+			IType type= RefactoringActions.getEnclosingOrPrimaryType(fEditor);
+			if (RefactoringAvailabilityTester.isUseSuperTypeAvailable(type)){
 				startRefactoring(type);
 			} else {
 				String unavailable= RefactoringMessages.getString("UseSupertypeAction.to_activate"); //$NON-NLS-1$
@@ -159,27 +149,13 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 		}
 	}
 		
-	private IType getSingleSelectedType() throws JavaModelException {
-		return RefactoringActions.getEnclosingOrPrimaryType(fEditor);
-	}
-	
-	//---- helper methods ---------------------------------------------------
-	
-	private static boolean canRunOn(IType type) throws JavaModelException{
-		return UseSuperTypeRefactoring.isAvailable(type);
-	}
-	
-	private static RefactoringWizard createWizard(UseSuperTypeRefactoring refactoring){
-		return new UseSupertypeWizard(refactoring);
-	}
-	
 	private void startRefactoring(IType type) throws JavaModelException {
 		UseSuperTypeRefactoring refactoring= UseSuperTypeRefactoring.create(type);
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (!ActionUtil.isProcessable(getShell(), refactoring.getUseSuperTypeProcessor().getSubType()))
 			return;
-		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), 
+		new RefactoringStarter().activate(refactoring, new UseSupertypeWizard(refactoring), getShell(), 
 			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 	}
 }

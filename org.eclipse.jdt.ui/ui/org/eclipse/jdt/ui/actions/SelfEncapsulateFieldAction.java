@@ -10,17 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -86,18 +88,10 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
-	}
-	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length != 1)
-			return false;
-		return (elements[0] instanceof IField) && 
-			SelfEncapsulateFieldRefactoring.isAvailable((IField)elements[0]);
 	}
 	
 	/* (non-Javadoc)
@@ -113,7 +107,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		}
 		IField field= (IField)elements[0];
 		try {
-			if (!SelfEncapsulateFieldRefactoring.isAvailable(field)) {
+			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) {
 				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$
 				return;
 			}
@@ -130,27 +124,14 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(checkEnabled(selection));
-	}
-	
-	private boolean checkEnabled(IStructuredSelection selection) {
-		if (selection.size() != 1)
-			return false;
-		Object element= selection.getFirstElement();
-		if (!(element instanceof IField))
-			return false;
-		try {
-			return SelfEncapsulateFieldRefactoring.isAvailable((IField)element);
-		} catch (JavaModelException e) {
-			return false;
-		}
+		setEnabled(RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection));
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(IStructuredSelection selection) {
-		if (!checkEnabled(selection))
+		if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection))
 			return;
 		run((IField)selection.getFirstElement());
 	}
@@ -166,7 +147,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			return;
 		
 		try  {	
-			SelfEncapsulateFieldRefactoring refactoring= createRefactoring(field);
+			SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(
@@ -178,10 +159,6 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		}
 	}
 
-	private SelfEncapsulateFieldRefactoring createRefactoring(IField field) throws JavaModelException {
-		return SelfEncapsulateFieldRefactoring.create(field);
-	}
-		
 	private String getDialogTitle() {
 		return ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title"); //$NON-NLS-1$
 	}	

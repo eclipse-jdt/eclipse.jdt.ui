@@ -10,17 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ILocalVariable;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -32,9 +34,6 @@ import org.eclipse.jdt.internal.ui.refactoring.InlineTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Inlines the value of a local variable at all places where a read reference
@@ -80,17 +79,10 @@ public class InlineTempAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isInlineTempAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
-	}
-	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length != 1)
-			return false;
-		return (elements[0] instanceof ILocalVariable) && InlineTempRefactoring.isAvailable((ILocalVariable)elements[0]);
 	}
 	
 	/* (non-Javadoc)
@@ -101,28 +93,13 @@ public class InlineTempAction extends SelectionDispatchAction {
 			ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
 			if (!ActionUtil.isProcessable(getShell(), input))
 				return;
-			Refactoring refactoring= createRefactoring(input, selection);
+			Refactoring refactoring= InlineTempRefactoring.create(input, selection.getOffset(), selection.getLength());
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			new RefactoringStarter().activate(refactoring, new InlineTempWizard((InlineTempRefactoring)refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}	
-	}
-	
-	/**
-	 * Note: this method is for internal use only. Clients should not call this method.
-	 */
-	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return InlineTempRefactoring.create(cunit, selection.getOffset(), selection.getLength());
-	}
-
-	/**
-	 * Note: this method is for internal use only. Clients should not call this method.
-	 */
-	protected RefactoringWizard createWizard(Refactoring refactoring) {
-		RefactoringWizard result= new InlineTempWizard((InlineTempRefactoring)refactoring);
-		return result;
 	}
 	
 	/*
@@ -138,5 +115,4 @@ public class InlineTempAction extends SelectionDispatchAction {
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
 	}
-
 }

@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
@@ -1410,7 +1411,7 @@ public class PullUpTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement1() throws Exception {
@@ -1418,84 +1419,84 @@ public class PullUpTests extends RefactoringTest {
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= {typeB, typeD};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement2() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement3() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement4() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement5() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement6() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement7() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement8() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement9() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement10() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement11() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement12() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement13() throws Exception {
@@ -1503,7 +1504,7 @@ public class PullUpTests extends RefactoringTest {
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= {typeB, typeD};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement14() throws Exception {
@@ -1511,7 +1512,7 @@ public class PullUpTests extends RefactoringTest {
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= {typeB, typeD};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement15() throws Exception {
@@ -1519,7 +1520,7 @@ public class PullUpTests extends RefactoringTest {
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= {typeB, typeD};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement16() throws Exception {
@@ -1527,63 +1528,63 @@ public class PullUpTests extends RefactoringTest {
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= {typeB, typeD};
-		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+		assertTrue("should be disabled", ! RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement17() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement18() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement19() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement20() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement21() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement22() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement23() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	public void testEnablement24() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeB};
-		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
 	//------------------ tests -------------

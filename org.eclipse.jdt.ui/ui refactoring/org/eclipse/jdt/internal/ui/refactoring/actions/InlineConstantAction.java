@@ -18,14 +18,12 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -77,7 +75,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isInlineConstantAvailable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
@@ -86,20 +84,12 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		if (selection.isEmpty() || selection.size() != 1) 
-			return false;
-		
-		Object first= selection.getFirstElement();
-		return (first instanceof IField) && InlineConstantRefactoring.isAvailable(((IField)first));
-	}
-
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	public void run(IStructuredSelection selection) {		
 		try {
-			Assert.isTrue(canEnable(selection));
+			Assert.isTrue(RefactoringAvailabilityTester.isInlineConstantAvailable(selection));
 			
 			Object first= selection.getFirstElement();
 			Assert.isTrue(first instanceof IField);
@@ -125,24 +115,17 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isInlineConstantAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
 	}
 	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length != 1)
-			return false;
-		return (elements[0] instanceof IField) && InlineConstantRefactoring.isAvailable(((IField)elements[0]));
-	}
-
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void run(ITextSelection selection) {
-		run(selection.getOffset(), selection.getLength(), getCompilationUnitForTextSelection());
+		run(selection.getOffset(), selection.getLength(), SelectionConverter.getInputAsCompilationUnit(fEditor));
 	}
 	
 	private void run(int selectionOffset, int selectionLength, ICompilationUnit cu) {
@@ -158,18 +141,9 @@ public class InlineConstantAction extends SelectionDispatchAction {
 			return;
 		}
 		try {
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
+			new RefactoringStarter().activate(refactoring, new InlineConstantWizard(refactoring), getShell(), DIALOG_TITLE, true);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineConstantAction.unexpected_exception")); //$NON-NLS-1$
 		}
-	}
-	
-	private ICompilationUnit getCompilationUnitForTextSelection() {
-		Assert.isNotNull(fEditor);
-		return SelectionConverter.getInputAsCompilationUnit(fEditor);
-	}
-	
-	private static RefactoringWizard createWizard(InlineConstantRefactoring refactoring) {
-		return new InlineConstantWizard(refactoring);
 	}
 }

@@ -13,21 +13,27 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -43,11 +49,6 @@ import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Action to start the modify parameters refactoring. The refactoring supports 
@@ -93,7 +94,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isChangeSignatureAvailable(selection));
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
@@ -108,37 +109,25 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isChangeSignatureAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
 	}
-	
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		//see getSingleSelectedMethod(ITextSelection)
-		IJavaElement[] elements= selection.resolveElementAtOffset(); 
-		if (elements.length > 1)
-			return false;
-		if (elements.length == 1 && (elements[0] instanceof IMethod))
-			return ChangeSignatureRefactoring.isAvailable((IMethod)elements[0]);
-		
-		IJavaElement elementAt= selection.resolveEnclosingElement();
-		return (elementAt instanceof IMethod) && ChangeSignatureRefactoring.isAvailable((IMethod)elementAt);
-	}
-	
+
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	public void run(IStructuredSelection selection) {
 		try {
-			//we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
-			if (canEnable(selection)) 
+			// we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
+			if (RefactoringAvailabilityTester.isChangeSignatureAvailable(selection))
 				startRefactoring(getSingleSelectedMethod(selection));
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -152,9 +141,9 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		try {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
 				return;
-			IMethod singleSelectedMethod= getSingleSelectedMethod(selection);
-			if (canRunOn(singleSelectedMethod)){
-				startRefactoring(singleSelectedMethod);
+			IMethod method= getSingleSelectedMethod(selection);
+			if (RefactoringAvailabilityTester.isChangeSignatureAvailable(method)){
+				startRefactoring(method);
 			} else {
 				String unavailable= RefactoringMessages.getString("ModifyParametersAction.unavailable"); //$NON-NLS-1$
 				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
@@ -163,11 +152,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
-		
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		return canRunOn(getSingleSelectedMethod(selection));
-	}
-	
+
 	private static IMethod getSingleSelectedMethod(IStructuredSelection selection){
 		if (selection.isEmpty() || selection.size() != 1) 
 			return null;
@@ -175,14 +160,13 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 			return (IMethod)selection.getFirstElement();
 		return null;
 	}
-	
+
 	private IMethod getSingleSelectedMethod(ITextSelection selection) throws JavaModelException{
 		//- when caret/selection on method name (call or declaration) -> that method
 		//- otherwise: caret position's enclosing method declaration
 		//  - when caret inside argument list of method declaration -> enclosing method declaration
 		//  - when caret inside argument list of method call -> enclosing method declaration (and NOT method call)
-
-		IJavaElement[] elements= resolveElements();
+		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring")); //$NON-NLS-1$
 		if (elements.length > 1)
 			return null;
 		if (elements.length == 1 && elements[0] instanceof IMethod)
@@ -193,24 +177,8 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		return null;
 	}
 	
-	private static boolean canRunOn(IMethod method) throws JavaModelException{
-		return ChangeSignatureRefactoring.isAvailable(method);
-	}
-	
-	private static ChangeSignatureRefactoring createRefactoring(IMethod method) throws JavaModelException{
-		return ChangeSignatureRefactoring.create(method);
-	}
-	
-	private IJavaElement[] resolveElements() {
-		return SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"));  //$NON-NLS-1$
-	}
-
-	private static RefactoringWizard createWizard(ChangeSignatureRefactoring refactoring){
-		return new ChangeSignatureWizard(refactoring);
-	}
-	
 	private void startRefactoring(IMethod method) throws JavaModelException {
-		ChangeSignatureRefactoring changeSigRefactoring= createRefactoring(method); 
+		ChangeSignatureRefactoring changeSigRefactoring= ChangeSignatureRefactoring.create(method); 
 		Assert.isNotNull(changeSigRefactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (!ActionUtil.isProcessable(getShell(), changeSigRefactoring.getMethod()))
@@ -247,7 +215,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 				super.activate(refactoring, parent, save);
 			}
 		};
-		starter.initialize(createWizard(changeSigRefactoring));
+		starter.initialize(new ChangeSignatureWizard(changeSigRefactoring));
 		try {
 			starter.activate(changeSigRefactoring, getShell(), true);
 		} catch (CoreException e) {

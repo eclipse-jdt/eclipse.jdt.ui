@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -91,7 +92,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		IType parentClas= getClassFromTestFile(getPackage(packageName), parentClassName);
 		IType clas= parentClas.getType(className);
 		
-		assertTrue("should be enabled", MoveInnerToTopRefactoring.isAvailable(clas));
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isMoveInnerAvailable(clas));
 		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());

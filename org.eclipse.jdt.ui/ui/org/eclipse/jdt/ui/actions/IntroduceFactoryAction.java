@@ -20,14 +20,12 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -87,7 +85,7 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isIntroduceFactoryAvailable(selection));
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.filterNotPresentException(e))
 				JavaPlugin.log(e);
@@ -101,63 +99,40 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			//we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
-			if (canEnable(selection)) {
-				IMethod	method= getSingleSelectedMethod(selection);
+			if (RefactoringAvailabilityTester.isIntroduceFactoryAvailable(selection)) {
+				IMethod	method= (IMethod)selection.getFirstElement();
 				ICompilationUnit unit= method.getCompilationUnit();
 				ISourceRange nameRange= method.getNameRange();
 				ITextSelection textSel= new TextSelection(nameRange.getOffset(), nameRange.getLength());
-				IntroduceFactoryRefactoring refactoring= createRefactoring(unit, textSel);
+				IntroduceFactoryRefactoring refactoring= IntroduceFactoryRefactoring.create(unit, textSel.getOffset(), textSel.getLength());
 
 				if (refactoring == null)
 					return;
-				new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+				new RefactoringStarter().activate(refactoring, new IntroduceFactoryWizard(refactoring, RefactoringMessages.getString("IntroduceFactoryAction.use_factory")), getShell(), DIALOG_MESSAGE_TITLE, false); //$NON-NLS-1$
 			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("IntroduceFactoryAction.exception")); //$NON-NLS-1$
 		}
 	}
 
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		return IntroduceFactoryRefactoring.isAvailable(getSingleSelectedMethod(selection));
-	}
-
-	private static IMethod getSingleSelectedMethod(IStructuredSelection selection){
-		if (selection.isEmpty() || selection.size() != 1) 
-			return null;
-		if (selection.getFirstElement() instanceof IMethod)
-			return (IMethod)selection.getFirstElement();
-		return null;
-	}
-	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void selectionChanged(ITextSelection selection) {
-		setEnabled(canEnable(selection));
+		setEnabled(fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
 
-	private boolean canEnable(ITextSelection selection) {
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
-	}
-	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
-			setEnabled(canEnable(selection));
+			setEnabled(RefactoringAvailabilityTester.isIntroduceFactoryAvailable(selection));
 		} catch (JavaModelException e) {
 			setEnabled(false);
 		}
 	}
 
-	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
-		IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length == 1 && elements[0] instanceof IMethod)
-			return IntroduceFactoryRefactoring.isAvailable((IMethod)elements[0]);
-		return false;
-	}
-	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
@@ -165,22 +140,12 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			IntroduceFactoryRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			IntroduceFactoryRefactoring refactoring= IntroduceFactoryRefactoring.create(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			new RefactoringStarter().activate(refactoring, new IntroduceFactoryWizard(refactoring, RefactoringMessages.getString("IntroduceFactoryAction.use_factory")), getShell(), DIALOG_MESSAGE_TITLE, false); //$NON-NLS-1$
 		} catch (CoreException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("IntroduceFactoryAction.exception")); //$NON-NLS-1$
 		}
-	}
-
-	private static IntroduceFactoryRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return IntroduceFactoryRefactoring.create(cunit, selection.getOffset(), selection.getLength());
-	}
-
-	private RefactoringWizard createWizard(IntroduceFactoryRefactoring refactoring) {
-		String pageTitle= RefactoringMessages.getString("IntroduceFactoryAction.use_factory"); //$NON-NLS-1$
-
-		return new IntroduceFactoryWizard(refactoring, pageTitle);
 	}
 }
