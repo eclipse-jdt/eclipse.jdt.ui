@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
@@ -74,6 +75,7 @@ import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -564,6 +566,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);		
+		addActionIfEnabled(menu, ITextEditorActionConstants.GROUP_EDIT,  ITextEditorActionConstants.REVERT_TO_SAVED);
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
 		
 		MenuManager submenu= new MenuManager("&Add", ITextEditorActionConstants.GROUP_ADD);
@@ -577,6 +580,22 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fContextMenuGroup.setContext(null);
 	}
 	
+	private void addActionIfEnabled(IMenuManager menu, String group, String actionId) {
+	 	IAction action= getAction(actionId);
+	 	if (action != null) {
+	 		if (action instanceof IUpdate)
+	 			((IUpdate) action).update();
+	 		
+	 		if (!action.isEnabled())	
+	 			return;
+	 		IMenuManager subMenu= menu.findMenuUsingPath(group);
+	 		if (subMenu != null)
+	 			subMenu.add(action);
+	 		else
+	 			menu.appendToGroup(group, action);
+	 	}
+	}
+	 
 	/*
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
