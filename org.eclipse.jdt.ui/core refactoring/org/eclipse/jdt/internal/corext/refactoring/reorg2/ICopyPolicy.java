@@ -13,8 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 
-public interface ICopyPolicy extends IReorgEnablementPolicy{
-	public boolean canCopyTo(IJavaElement javaElement);
-	public boolean canCopyTo(IResource resource);
+interface ICopyPolicy extends IReorgEnablementPolicy{
+	public boolean canCopyTo(IJavaElement javaElement) throws JavaModelException;
+	public boolean canCopyTo(IResource resource) throws JavaModelException;
 }
