@@ -255,7 +255,7 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 		}
 
 		protected Point getInitialSize() {
-			return getShell().computeSize(450, SWT.DEFAULT, true);
+			return getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 		}
 
 		protected Control createDialogArea(Composite parent) {
