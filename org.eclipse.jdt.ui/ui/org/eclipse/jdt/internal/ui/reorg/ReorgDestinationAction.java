@@ -265,9 +265,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 			return null;
 		Object parent= elements.get(0);
 		for (Iterator iter= elements.iterator(); iter.hasNext(); ){
-			Object o2= iter.next();
-			Object oldParent= parent;
-			parent= computeCommonParent(parent, o2);
+			parent= computeCommonParent(parent, iter.next());
 		}
 		IResource parentRes= getResource(parent);
 		IJavaElement parentElement= JavaCore.create(parentRes);

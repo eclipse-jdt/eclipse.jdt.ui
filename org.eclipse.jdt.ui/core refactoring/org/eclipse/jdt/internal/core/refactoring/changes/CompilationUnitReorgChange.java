@@ -44,8 +44,6 @@ abstract class CompilationUnitReorgChange extends Change {
 		try{
 			if (!isActive())
 				return;
-			ICompilationUnit cu= getCu();
-			String oldName= cu.getElementName();
 			doPeform(new SubProgressMonitor(pm, 1));
 		}catch (Exception e) {
 			handleException(context, e);

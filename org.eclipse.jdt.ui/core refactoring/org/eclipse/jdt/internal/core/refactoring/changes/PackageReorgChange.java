@@ -37,10 +37,6 @@ abstract class PackageReorgChange extends Change {
 		try{
 			if (!isActive())
 				return;
-			
-			IPackageFragment pkg= getPackage();
-			String oldName= pkg.getElementName();
-			IPackageFragmentRoot destination= getDestination();
 			doPerform(new SubProgressMonitor(pm, 1));
 		}catch (Exception e) {
 			handleException(context, e);
