@@ -1291,7 +1291,7 @@ public class JavaIndenter {
 				tabLen= -1; // results in no tabs being substituted for space runs
 			else
 				// if we use tabs, get the formatter length setting for tab width
-				tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, 4);
+				tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
 		else
 			tabLen= 4; // sensible default for testing
 

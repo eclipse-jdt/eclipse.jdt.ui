@@ -29,9 +29,9 @@ public class ProfileVersioner {
 	public static final int VERSION_4= 4; 
 	public static final int VERSION_5= 5; // after splitting of FORMATTER_INDENT_BLOCK_STATEMENTS
 	public static final int VERSION_6= 6; // after splitting of new_line_in_control_statements
-	public static final int VERSION_7= 7; // after splitting tabSize -> tabLength / indentSize
+//	public static final int VERSION_7= 7; // after splitting tabSize -> tabLength / indentSize
 	
-	public static final int CURRENT_VERSION= VERSION_7;
+	public static final int CURRENT_VERSION= VERSION_6;
 	
 	public static void updateAndComplete(CustomProfile profile) {
 		final Map oldSettings= profile.getSettings();
@@ -53,9 +53,9 @@ public class ProfileVersioner {
 		    
 		case VERSION_5:
 		    version5to6(oldSettings);
-		    
-		case VERSION_6:
-		    version6to7(oldSettings);
+//		    
+//		case VERSION_6:
+//		    version6to7(oldSettings);
 		    
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -519,14 +519,14 @@ public class ProfileVersioner {
 				});
 	}
 	
-	private static void version6to7(Map oldSettings) {
-		checkAndReplace(oldSettings,
-			"org.eclipse.jdt.core.formatter.tabulation.size", //$NON-NLS-1$
-			new String[] {
-					DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH,
-					DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE
-				});
-	}
+//	private static void version6to7(Map oldSettings) {
+//		checkAndReplace(oldSettings,
+//			"org.eclipse.jdt.core.formatter.tabulation.size", //$NON-NLS-1$
+//			new String[] {
+//					DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH,
+//					DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE
+//				});
+//	}
 
 	
 	/* old format constant values */
