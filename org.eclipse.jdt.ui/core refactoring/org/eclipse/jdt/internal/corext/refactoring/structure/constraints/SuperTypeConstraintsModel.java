@@ -269,6 +269,7 @@ public final class SuperTypeConstraintsModel {
 	public final ConstraintVariable2 createDeclaringTypeVariable(ITypeBinding type) {
 		if (type.isArray())
 			type= type.getElementType();
+		type= type.getTypeDeclaration();
 		return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(fEnvironment.create(type)));
 	}
 
@@ -314,9 +315,7 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created exception variable
 	 */
 	public final ConstraintVariable2 createExceptionVariable(final Name name) {
-		ITypeBinding binding= name.resolveTypeBinding();
-		if (binding.isArray())
-			binding= binding.getElementType();
+		final ITypeBinding binding= name.resolveTypeBinding();
 		if (isConstrainedType(binding))
 			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(fEnvironment.create(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(name), name)));
 		return null;
@@ -455,17 +454,18 @@ public final class SuperTypeConstraintsModel {
 			type= type.getElementType();
 		if (isConstrainedType(type)) {
 			ConstraintVariable2 variable= null;
-			if (binding.isField()) {
-				final ITypeBinding declaring= binding.getDeclaringClass();
+			final IVariableBinding declaration= binding.getVariableDeclaration();
+			if (declaration.isField()) {
+				final ITypeBinding declaring= declaration.getDeclaringClass();
 				if (!declaring.isFromSource())
 					variable= new ImmutableTypeVariable2(fEnvironment.create(type));
 			} else {
-				final IMethodBinding declaring= binding.getDeclaringMethod();
+				final IMethodBinding declaring= declaration.getDeclaringMethod();
 				if (declaring != null && !declaring.getDeclaringClass().isFromSource())
 					variable= new ImmutableTypeVariable2(fEnvironment.create(type));
 			}
 			if (variable == null)
-				variable= new VariableVariable2(fEnvironment.create(type), binding);
+				variable= new VariableVariable2(fEnvironment.create(type), declaration);
 			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
 		}
 		return null;
