@@ -1,0 +1,11 @@
+package p;
+class A implements I {
+	int x;
+}
+class ST{
+}
+class T extends ST{
+	void add(A c){
+		new A[]{null}[0]= c;//could maybe allow, but will not for now
+	}
+}
