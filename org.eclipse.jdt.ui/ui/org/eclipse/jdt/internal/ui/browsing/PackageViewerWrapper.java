@@ -56,8 +56,10 @@ class PackageViewerWrapper extends StructuredViewer {
 		Assert.isNotNull(viewer);
 
 		StructuredViewer oldViewer= fViewer;
-		this.fViewer= viewer;
+		fViewer= viewer;
 
+		if (fViewer.getContentProvider() != null)
+			super.setContentProvider(fViewer.getContentProvider());
 		transferFilters(oldViewer);
 		transferListeners();
 	}
@@ -116,7 +118,7 @@ class PackageViewerWrapper extends StructuredViewer {
 			IStructuredSelection sel= (IStructuredSelection) selection;
 
 			//try and give the two a common super class
-			IContentProvider provider= fViewer.getContentProvider();
+			IContentProvider provider= getContentProvider();
 			if (provider instanceof LogicalPackagesProvider) {
 				LogicalPackagesProvider fprovider= (LogicalPackagesProvider) provider;
 
