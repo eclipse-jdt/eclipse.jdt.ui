@@ -84,7 +84,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 			int hitCount= -1;
 			public String isValid(String value) {
 				try {
-					hitCount= Integer.valueOf(value).intValue();
+					hitCount= Integer.valueOf(value.trim()).intValue();
 				} catch (NumberFormatException nfe) {
 					hitCount= -1;
 				}
@@ -110,7 +110,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 			return -1;
 		}
 
-		return Integer.parseInt(dialog.getValue());
+		return Integer.parseInt(dialog.getValue().trim());
 	}
 
 	/**
