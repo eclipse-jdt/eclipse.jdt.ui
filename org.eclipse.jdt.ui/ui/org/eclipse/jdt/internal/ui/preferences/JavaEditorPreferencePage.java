@@ -20,17 +20,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,7 +34,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
@@ -53,7 +47,6 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
 import org.eclipse.ui.internal.editors.text.CHyperLink;
 
@@ -63,15 +56,12 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * The page for setting the editor options.
  */
 public class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
-	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.delimiter"); //$NON-NLS-1$
-
 	private OverlayPreferenceStore fOverlayStore;
 	
 	private FoldingConfigurationBlock fFoldingConfigurationBlock;
@@ -91,23 +81,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private Map fTextFields= new HashMap();
-	private ModifyListener fTextFieldListener= new ModifyListener() {
-		public void modifyText(ModifyEvent e) {
-			Text text= (Text) e.widget;
-			fOverlayStore.setValue((String) fTextFields.get(text), text.getText());
-		}
-	};
-
-	private ArrayList fNumberFields= new ArrayList();
-	private ModifyListener fNumberFieldListener= new ModifyListener() {
-		public void modifyText(ModifyEvent e) {
-			numberFieldChanged((Text) e.widget);
-		}
-	};
-	
-	private Text fBrowserLikeLinksKeyModifierText;
-	private Button fBrowserLikeLinksCheckBox;
-	private StatusInfo fBrowserLikeLinksKeyModifierStatus;
 	
 	/**
 	 * Tells whether the fields are initialized.
@@ -163,10 +136,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE));
 
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK));
-		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_SEMICOLON));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE));
@@ -416,126 +385,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.subWordNavigation"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 1);
 
-		addFiller(composite);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinks"); //$NON-NLS-1$
-		fBrowserLikeLinksCheckBox= addCheckBox(composite, label, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, 0);
-		fBrowserLikeLinksCheckBox.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {
-				boolean state= fBrowserLikeLinksCheckBox.getSelection();
-				fBrowserLikeLinksKeyModifierText.setEnabled(state);
-				handleBrowserLikeLinksKeyModifierModified();
-			}
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-		});
-		
-		// Text field for modifier string
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinksKeyModifier"); //$NON-NLS-1$
-		fBrowserLikeLinksKeyModifierText= addTextField(composite, label, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, 20, 0, false);
-		fBrowserLikeLinksKeyModifierText.setTextLimit(Text.LIMIT);
-		
-		if (computeStateMask(fOverlayStore.getString(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER)) == -1) {
-			// Fix possible illegal modifier string
-			int stateMask= fOverlayStore.getInt(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
-			if (stateMask == -1)
-				fBrowserLikeLinksKeyModifierText.setText(""); //$NON-NLS-1$
-			else
-				fBrowserLikeLinksKeyModifierText.setText(EditorUtility.getModifierString(stateMask));
-		}
-		
-		fBrowserLikeLinksKeyModifierText.addKeyListener(new KeyListener() {
-			private boolean isModifierCandidate;
-			public void keyPressed(KeyEvent e) {
-				isModifierCandidate= e.keyCode > 0 && e.character == 0 && e.stateMask == 0;
-			}
-		
-			public void keyReleased(KeyEvent e) {
-				if (isModifierCandidate && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
-					String modifierString= fBrowserLikeLinksKeyModifierText.getText();
-					Point selection= fBrowserLikeLinksKeyModifierText.getSelection();
-					int i= selection.x - 1;
-					while (i > -1 && Character.isWhitespace(modifierString.charAt(i))) {
-						i--;
-					}
-					boolean needsPrefixDelimiter= i > -1 && !String.valueOf(modifierString.charAt(i)).equals(DELIMITER);
-
-					i= selection.y;
-					while (i < modifierString.length() && Character.isWhitespace(modifierString.charAt(i))) {
-						i++;
-					}
-					boolean needsPostfixDelimiter= i < modifierString.length() && !String.valueOf(modifierString.charAt(i)).equals(DELIMITER);
-
-					String insertString;
-
-					if (needsPrefixDelimiter && needsPostfixDelimiter)
-						insertString= PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.insertDelimiterAndModifierAndDelimiter", new String[] {Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
-					else if (needsPrefixDelimiter)
-						insertString= PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.insertDelimiterAndModifier", new String[] {Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
-					else if (needsPostfixDelimiter)
-						insertString= PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.insertModifierAndDelimiter", new String[] {Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
-					else
-						insertString= Action.findModifierString(e.stateMask);
-
-					fBrowserLikeLinksKeyModifierText.insert(insertString);
-				}
-			}
-		});
-
-		fBrowserLikeLinksKeyModifierText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				handleBrowserLikeLinksKeyModifierModified();
-			}
-		});
-
 		return composite;
-	}
-
-	private void handleBrowserLikeLinksKeyModifierModified() {
-		String modifiers= fBrowserLikeLinksKeyModifierText.getText();
-		int stateMask= computeStateMask(modifiers);
-
-		if (fBrowserLikeLinksCheckBox.getSelection() && (stateMask == -1 || (stateMask & SWT.SHIFT) != 0)) {
-			if (stateMask == -1)
-				fBrowserLikeLinksKeyModifierStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.modifierIsNotValid", modifiers)); //$NON-NLS-1$
-			else
-				fBrowserLikeLinksKeyModifierStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getString("JavaEditorPreferencePage.navigation.shiftIsDisabled")); //$NON-NLS-1$
-			setValid(false);
-			StatusUtil.applyToStatusLine(this, fBrowserLikeLinksKeyModifierStatus);
-		} else {
-			fBrowserLikeLinksKeyModifierStatus= new StatusInfo();
-			updateStatus(fBrowserLikeLinksKeyModifierStatus);
-		}
-	}
-	
-	private IStatus getBrowserLikeLinksKeyModifierStatus() {
-		if (fBrowserLikeLinksKeyModifierStatus == null)
-		fBrowserLikeLinksKeyModifierStatus= new StatusInfo();
-		return fBrowserLikeLinksKeyModifierStatus;
-	}
-
-	/**
-	 * Computes the state mask for the given modifier string.
-	 * 
-	 * @param modifiers	the string with the modifiers, separated by '+', '-', ';', ',' or '.'
-	 * @return the state mask or -1 if the input is invalid
-	 */
-	private int computeStateMask(String modifiers) {
-		if (modifiers == null)
-			return -1;
-		
-		if (modifiers.length() == 0)
-			return SWT.NONE;
-
-		int stateMask= 0;
-		StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
-		while (modifierTokenizer.hasMoreTokens()) {
-			int modifier= EditorUtility.findLocalizedModifier(modifierTokenizer.nextToken());
-			if (modifier == 0 || (stateMask & modifier) == modifier)
-				return -1;
-			stateMask= stateMask | modifier;
-		}
-		return stateMask;
 	}
 
 	/*
@@ -667,8 +517,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			t.setText(fOverlayStore.getString(key));
 		}
 		
-		fBrowserLikeLinksKeyModifierText.setEnabled(fBrowserLikeLinksCheckBox.getSelection());
-
         fFieldsInitialized= true;
         updateStatus(validatePositiveNumber("0")); //$NON-NLS-1$
         
@@ -687,7 +535,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fOccurrencesBlock.performOk();
 		fFoldingConfigurationBlock.performOk();
 		fAppearanceBlock.performOk();
-		fOverlayStore.setValue(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, computeStateMask(fBrowserLikeLinksKeyModifierText.getText()));
 		fOverlayStore.propagate();
 		JavaPlugin.getDefault().savePluginPreferences();
 		return true;
@@ -739,61 +586,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return checkBox;
 	}
 	
-	private Text addTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
-		return getTextControl(addLabelledTextField(composite, label, key, textLimit, indentation, isNumber));
-	}
-	
-	private static Text getTextControl(Control[] labelledTextField){
-		return (Text)labelledTextField[1];
-	}
-	
-	/**
-	 * Returns an array of size 2:
-	 *  - first element is of type <code>Label</code>
-	 *  - second element is of type <code>Text</code>
-	 * Use <code>getLabelControl</code> and <code>getTextControl</code> to get the 2 controls.
-	 * 
-	 * @param composite 	the parent composite
-	 * @param label			the text field's label
-	 * @param key			the preference key
-	 * @param textLimit		the text limit
-	 * @param indentation	the field's indentation
-	 * @param isNumber		<code>true</code> iff this text field is used to e4dit a number
-	 * @return the array containing the label and text controls
-	 */
-	private Control[] addLabelledTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
-		Label labelControl= new Label(composite, SWT.NONE);
-		labelControl.setText(label);
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= indentation;
-		labelControl.setLayoutData(gd);
-		
-		Text textControl= new Text(composite, SWT.BORDER | SWT.SINGLE);		
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.widthHint= convertWidthInCharsToPixels(textLimit + 1);
-		textControl.setLayoutData(gd);
-		textControl.setTextLimit(textLimit);
-		fTextFields.put(textControl, key);
-		if (isNumber) {
-			fNumberFields.add(textControl);
-			textControl.addModifyListener(fNumberFieldListener);
-		} else {
-			textControl.addModifyListener(fTextFieldListener);
-		}
-		
-		makeScrollableCompositeAware(textControl);
-			
-		return new Control[]{labelControl, textControl};
-	}
-	
-	private void numberFieldChanged(Text textControl) {
-		String number= textControl.getText();
-		IStatus status= validatePositiveNumber(number);
-		if (!status.matches(IStatus.ERROR))
-			fOverlayStore.setValue((String) fTextFields.get(textControl), number);
-		updateStatus(status);
-	}
-	
 	private IStatus validatePositiveNumber(String number) {
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
@@ -814,14 +606,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		if (!fFieldsInitialized)
 			return;
 		
-		if (!status.matches(IStatus.ERROR)) {
-			for (int i= 0; i < fNumberFields.size(); i++) {
-				Text text= (Text) fNumberFields.get(i);
-				IStatus s= validatePositiveNumber(text.getText());
-				status= StatusUtil.getMoreSevere(s, status);
-			}
-		}	
-		status= StatusUtil.getMoreSevere(getBrowserLikeLinksKeyModifierStatus(), status);
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}

@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
@@ -23,10 +21,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.StringTokenizer;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IStorage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BidiSegmentEvent;
+import org.eclipse.swt.custom.BidiSegmentListener;
+import org.eclipse.swt.custom.ST;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -35,34 +42,7 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BidiSegmentEvent;
-import org.eclipse.swt.custom.BidiSegmentListener;
-import org.eclipse.swt.custom.ST;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -71,9 +51,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -90,7 +68,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IInformationControl;
@@ -101,7 +78,6 @@ import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextOperationTarget;
-import org.eclipse.jface.text.ITextPresentationListener;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
@@ -110,7 +86,6 @@ import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.information.IInformationProvider;
@@ -133,6 +108,11 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.IEncodingSupport;
+import org.eclipse.ui.editors.text.IFoldingCommandIds;
+
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -143,13 +123,8 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.IEncodingSupport;
-import org.eclipse.ui.editors.text.IFoldingCommandIds;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -158,7 +133,6 @@ import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -172,7 +146,6 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -190,7 +163,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -206,14 +178,12 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
@@ -698,885 +668,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 	}
 
-	
-	/*
-	 * Link mode.  
-	 */
-	class MouseClickListener implements KeyListener, MouseListener, MouseMoveListener,
-		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener, ITextPresentationListener {
-
-		/** The session is active. */
-		private boolean fActive;
-
-		/** The currently active style range. */
-		private IRegion fActiveRegion;
-		/** The currently active style range as position. */
-		private Position fRememberedPosition;
-		/** The hand cursor. */
-		private Cursor fCursor;
-		
-		/** The link color. */
-		private Color fColor;
-		/** The key modifier mask. */
-		private int fKeyModifierMask;
-		
-		/**
-		 * The URL string if a URL was detected or <code>null</code> otherwise.
-		 * @since 3.1
-		 */
-		private String fURLString;
-
-		/**
-		 * The NLS key if an NLS key was detected or <code>null</code> otherwise.
-		 * @since 3.1
-		 */
-		private StringLiteral fNLSKeyStringLiteral;
-
-		
-		public void deactivate() {
-			deactivate(false);
-		}
-
-		public void deactivate(boolean redrawAll) {
-			if (!fActive)
-				return;
-
-			repairRepresentation(redrawAll);			
-			fActive= false;
-		}
-
-		public void install() {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer == null)
-				return;
-				
-			StyledText text= sourceViewer.getTextWidget();			
-			if (text == null || text.isDisposed())
-				return;
-				
-			updateColor(sourceViewer);
-
-			sourceViewer.addTextInputListener(this);
-			
-			IDocument document= sourceViewer.getDocument();
-			if (document != null)
-				document.addDocumentListener(this);			
-
-			text.addKeyListener(this);
-			text.addMouseListener(this);
-			text.addMouseMoveListener(this);
-			text.addFocusListener(this);
-			text.addPaintListener(this);
-			
-			((ITextViewerExtension4)sourceViewer).addTextPresentationListener(this);
-			
-			updateKeyModifierMask();
-			
-			IPreferenceStore preferenceStore= getPreferenceStore();
-			preferenceStore.addPropertyChangeListener(this);
-		}
-		
-		private void updateKeyModifierMask() {
-			String modifiers= getPreferenceStore().getString(BROWSER_LIKE_LINKS_KEY_MODIFIER);
-			fKeyModifierMask= computeStateMask(modifiers);
-			if (fKeyModifierMask == -1) {
-				// Fall back to stored state mask
-				fKeyModifierMask= getPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
-			}
-		}
-
-		private int computeStateMask(String modifiers) {
-			if (modifiers == null)
-				return -1;
-		
-			if (modifiers.length() == 0)
-				return SWT.NONE;
-
-			int stateMask= 0;
-			StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
-			while (modifierTokenizer.hasMoreTokens()) {
-				int modifier= EditorUtility.findLocalizedModifier(modifierTokenizer.nextToken());
-				if (modifier == 0 || (stateMask & modifier) == modifier)
-					return -1;
-				stateMask= stateMask | modifier;
-			}
-			return stateMask;
-		}
-		
-		public void uninstall() {
-
-			if (fColor != null) {
-				fColor.dispose();
-				fColor= null;
-			}
-			
-			if (fCursor != null) {
-				fCursor.dispose();
-				fCursor= null;
-			}
-			
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer != null)
-				sourceViewer.removeTextInputListener(this);
-			
-			IDocumentProvider documentProvider= getDocumentProvider();
-			if (documentProvider != null) {
-				IDocument document= documentProvider.getDocument(getEditorInput());
-				if (document != null)
-					document.removeDocumentListener(this);
-			}
-				
-			IPreferenceStore preferenceStore= getPreferenceStore();
-			if (preferenceStore != null)
-				preferenceStore.removePropertyChangeListener(this);
-			
-			if (sourceViewer == null)
-				return;
-			
-			StyledText text= sourceViewer.getTextWidget();
-			if (text == null || text.isDisposed())
-				return;
-				
-			text.removeKeyListener(this);
-			text.removeMouseListener(this);
-			text.removeMouseMoveListener(this);
-			text.removeFocusListener(this);
-			text.removePaintListener(this);
-			
-			((ITextViewerExtension4)sourceViewer).removeTextPresentationListener(this);
-		}
-				
-		/*
-		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
-		 */
-		public void propertyChange(PropertyChangeEvent event) {
-			if (event.getProperty().equals(JavaEditor.LINK_COLOR)) {
-				ISourceViewer viewer= getSourceViewer();
-				if (viewer != null)	
-					updateColor(viewer);
-			} else if (event.getProperty().equals(BROWSER_LIKE_LINKS_KEY_MODIFIER)) {
-				updateKeyModifierMask();
-			}
-		}
-
-		private void updateColor(ISourceViewer viewer) {
-			if (fColor != null)
-				fColor.dispose();
-	
-			StyledText text= viewer.getTextWidget();
-			if (text == null || text.isDisposed())
-				return;
-
-			Display display= text.getDisplay();
-			fColor= createColor(getPreferenceStore(), JavaEditor.LINK_COLOR, display);
-		}
-
-		/**
-		 * Creates a color from the information stored in the given preference store.
-		 * 
-		 * @param store the preference store
-		 * @param key the key
-		 * @param display the display
-		 * @return the color or <code>null</code> if there is no such information available 
-		 */
-		private Color createColor(IPreferenceStore store, String key, Display display) {
-		
-			RGB rgb= null;		
-			
-			if (store.contains(key)) {
-				
-				if (store.isDefault(key))
-					rgb= PreferenceConverter.getDefaultColor(store, key);
-				else
-					rgb= PreferenceConverter.getColor(store, key);
-			
-				if (rgb != null)
-					return new Color(display, rgb);
-			}
-			
-			return null;
-		}		
-	
-		private void repairRepresentation() {			
-			repairRepresentation(false);
-		}
-
-		private void repairRepresentation(boolean redrawAll) {			
-
-			if (fActiveRegion == null)
-				return;
-			
-			int offset= fActiveRegion.getOffset();
-			int length= fActiveRegion.getLength();
-			fActiveRegion= null;
-				
-			ISourceViewer viewer= getSourceViewer();
-			if (viewer != null) {
-				
-				resetCursor(viewer);
-				
-				// Invalidate ==> remove applied text presentation
-				if (!redrawAll && viewer instanceof ITextViewerExtension2)
-					((ITextViewerExtension2) viewer).invalidateTextPresentation(offset, length);
-				else
-					viewer.invalidateTextPresentation();
-				
-				// Remove underline
-				if (viewer instanceof ITextViewerExtension5) {
-					ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
-					offset= extension.modelOffset2WidgetOffset(offset);
-				} else {
-					offset -= viewer.getVisibleRegion().getOffset();
-				}
-				try {
-					StyledText text= viewer.getTextWidget();
-
-					text.redrawRange(offset, length, false);
-				} catch (IllegalArgumentException x) {
-//					JavaPlugin.log(x);
-				}
-			}
-		}
-
-		// will eventually be replaced by a method provided by jdt.core		
-		private IRegion selectWord(IDocument document, int anchor) {
-		
-			try {		
-				int offset= anchor;
-				char c;
-	
-				while (offset >= 0) {
-					c= document.getChar(offset);
-					if (!Character.isJavaIdentifierPart(c))
-						break;
-					--offset;
-				}
-	
-				int start= offset;
-	
-				offset= anchor;
-				int length= document.getLength();
-	
-				while (offset < length) {
-					c= document.getChar(offset);
-					if (!Character.isJavaIdentifierPart(c))
-						break;
-					++offset;
-				}
-				
-				int end= offset;
-				
-				if (start == end)
-					return new Region(start, 0);
-				else
-					return new Region(start + 1, end - start - 1);
-				
-			} catch (BadLocationException x) {
-				return null;
-			}
-		}
-
-		IRegion getCurrentTextRegion(ISourceViewer viewer) {
-
-			int offset= getCurrentTextOffset(viewer);				
-			if (offset == -1)
-				return null;
-
-			IJavaElement input= SelectionConverter.getInput(JavaEditor.this);
-			if (input == null)
-				return null;
-
-			try {
-				
-				IJavaElement[] elements= null;
-				synchronized (input) {
-					elements= ((ICodeAssist) input).codeSelect(offset, 0);
-				}
-				
-				IDocument document= viewer.getDocument();
-				
-				// Java element link
-				if (elements != null && elements.length > 0)
-					return selectWord(document, offset);
-				
-				// URL link
-			    	IRegion urlRegion= findAndSetURLText(document, offset);
-				if (urlRegion != null)
-					return urlRegion;
-				
-				// NLS key link
-				CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(input, ASTProvider.WAIT_NO, null);
-				if (ast == null)
-					return null;
-				
-				ASTNode node= NodeFinder.perform(ast, offset, 1);
-				if (!(node instanceof StringLiteral))
-					return null;
-				
-				fNLSKeyStringLiteral= (StringLiteral)node;
-				IRegion region= new Region(fNLSKeyStringLiteral.getStartPosition(), fNLSKeyStringLiteral.getLength());
-				AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, region);
-				if (ref != null)
-					return region;
-				
-				fNLSKeyStringLiteral= null;
-				return null;
-				
-					
-			} catch (JavaModelException e) {
-				return null;	
-			}
-		}
-		
-		private IRegion findAndSetURLText(IDocument document, int offset) {
-			fURLString= null;
-			if (document == null)
-				return null;
-			
-			IRegion lineInfo;
-			String line;
-			try {
-				lineInfo= document.getLineInformationOfOffset(offset);
-				line= document.get(lineInfo.getOffset(), lineInfo.getLength());
-			} catch (BadLocationException ex) {
-				return null;
-			}
-			
-			int offsetInLine= offset - lineInfo.getOffset();
-			
-			int urlSeparatorOffset= line.indexOf("://"); //$NON-NLS-1$
-			if (urlSeparatorOffset < 0)
-				return null;
-			
-			// URL protocol (left to "://")
-			int urlOffsetInLine= urlSeparatorOffset;
-			char ch;
-			do {
-				urlOffsetInLine--;
-				ch= ' ';
-				if (urlOffsetInLine > -1)
-					ch= line.charAt(urlOffsetInLine);
-			} while (!Character.isWhitespace(ch));
-			urlOffsetInLine++;
-			
-			// Right to "://"
-			StringTokenizer tokenizer= new StringTokenizer(line.substring(urlSeparatorOffset + 3));
-			if (!tokenizer.hasMoreTokens())
-				return null;
-			
-			int urlLength= tokenizer.nextToken().length() + 3 + urlSeparatorOffset - urlOffsetInLine;
-			if (offsetInLine < urlOffsetInLine || offsetInLine > urlOffsetInLine + urlLength)
-				return null;
-			
-			// Set and validate URL string
-			try {
-				fURLString= line.substring(urlOffsetInLine, urlOffsetInLine + urlLength);
-				new URL(fURLString);
-			} catch (MalformedURLException ex) {
-				fURLString= null;
-				return null;
-			}
-			
-			return new Region(lineInfo.getOffset() + urlOffsetInLine, urlLength);
-		}
-
-		private int getCurrentTextOffset(ISourceViewer viewer) {
-
-			try {					
-				StyledText text= viewer.getTextWidget();			
-				if (text == null || text.isDisposed())
-					return -1;
-
-				Display display= text.getDisplay();				
-				Point absolutePosition= display.getCursorLocation();
-				Point relativePosition= text.toControl(absolutePosition);
-				
-				int widgetOffset= text.getOffsetAtLocation(relativePosition);
-				if (viewer instanceof ITextViewerExtension5) {
-					ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
-					return extension.widgetOffset2ModelOffset(widgetOffset);
-				} else {
-					return widgetOffset + viewer.getVisibleRegion().getOffset();
-				}
-
-			} catch (IllegalArgumentException e) {
-				return -1;
-			}			
-		}
-
-		public void applyTextPresentation(TextPresentation textPresentation) {
-			if (fActiveRegion == null)
-				return;
-			IRegion region= textPresentation.getExtent();
-			if (fActiveRegion.getOffset() + fActiveRegion.getLength() >= region.getOffset() && region.getOffset() + region.getLength() > fActiveRegion.getOffset())
-				textPresentation.mergeStyleRange(new StyleRange(fActiveRegion.getOffset(), fActiveRegion.getLength(), fColor, null));
-		}
-		
-		private void highlightRegion(ISourceViewer viewer, IRegion region) {
-
-			if (region.equals(fActiveRegion))
-				return;
-
-			repairRepresentation();
-			
-			StyledText text= viewer.getTextWidget();
-			if (text == null || text.isDisposed())
-				return;
-
-			
-			// Underline
-			int offset= 0;
-			int length= 0;
-			if (viewer instanceof ITextViewerExtension5) {
-				ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
-				IRegion widgetRange= extension.modelRange2WidgetRange(region);
-				if (widgetRange == null)
-					return;
-					
-				offset= widgetRange.getOffset();
-				length= widgetRange.getLength();
-				
-			} else {
-				offset= region.getOffset() - viewer.getVisibleRegion().getOffset();
-				length= region.getLength();
-			}
-			text.redrawRange(offset, length, false);
-			
-			// Invalidate region ==> apply text presentation
-			fActiveRegion= region;
-			if (viewer instanceof ITextViewerExtension2)
-				((ITextViewerExtension2) viewer).invalidateTextPresentation(region.getOffset(), region.getLength());
-			else
-				viewer.invalidateTextPresentation();
-		}
-		
-		private void activateCursor(ISourceViewer viewer) {
-			StyledText text= viewer.getTextWidget();
-			if (text == null || text.isDisposed())
-				return;
-			Display display= text.getDisplay();
-			if (fCursor == null)
-				fCursor= new Cursor(display, SWT.CURSOR_HAND);
-			text.setCursor(fCursor);
-		}
-		
-		private void resetCursor(ISourceViewer viewer) {
-			StyledText text= viewer.getTextWidget();
-			if (text != null && !text.isDisposed())
-				text.setCursor(null);
-						
-			if (fCursor != null) {
-				fCursor.dispose();
-				fCursor= null;
-			}
-		}
-
-		/*
-		 * @see org.eclipse.swt.events.KeyListener#keyPressed(org.eclipse.swt.events.KeyEvent)
-		 */
-		public void keyPressed(KeyEvent event) {
-
-			if (fActive) {
-				deactivate();
-				return;	
-			}
-
-			if (event.keyCode != fKeyModifierMask) {
-				deactivate();
-				return;
-			}
-			
-			fActive= true;
-
-//			removed for #25871			
-//
-//			ISourceViewer viewer= getSourceViewer();
-//			if (viewer == null)
-//				return;
-//			
-//			IRegion region= getCurrentTextRegion(viewer);
-//			if (region == null)
-//				return;
-//			
-//			highlightRegion(viewer, region);
-//			activateCursor(viewer);												
-		}
-
-		/*
-		 * @see org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt.events.KeyEvent)
-		 */
-		public void keyReleased(KeyEvent event) {
-			
-			if (!fActive)
-				return;
-
-			deactivate();				
-		}
-
-		/*
-		 * @see org.eclipse.swt.events.MouseListener#mouseDoubleClick(org.eclipse.swt.events.MouseEvent)
-		 */
-		public void mouseDoubleClick(MouseEvent e) {}
-		/*
-		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
-		 */
-		public void mouseDown(MouseEvent event) {
-			
-			if (!fActive)
-				return;
-				
-			if (event.stateMask != fKeyModifierMask) {
-				deactivate();
-				return;	
-			}
-			
-			if (event.button != 1) {
-				deactivate();
-				return;	
-			}			
-		}
-
-		/*
-		 * @see org.eclipse.swt.events.MouseListener#mouseUp(org.eclipse.swt.events.MouseEvent)
-		 */
-		public void mouseUp(MouseEvent e) {
-
-			if (!fActive) {
-				fURLString= null;
-				fNLSKeyStringLiteral= null;
-				return;
-			}
-				
-			if (e.button != 1) {
-				deactivate();
-				fURLString= null;
-				return;
-			}
-			
-			boolean wasActive= fCursor != null;
-				
-			deactivate();
-
-			if (wasActive) {
-				
-				// NLS key link
-				if (fNLSKeyStringLiteral != null) {
-					openPropertiesFile(fNLSKeyStringLiteral);
-					fNLSKeyStringLiteral= null;
-					return;
-				}
-				
-				// URL link
-				if (fURLString != null) {
-					String platform= SWT.getPlatform();
-					if ("motif".equals(platform) || "gtk".equals(platform)) { //$NON-NLS-1$ //$NON-NLS-2$
-						Program program= Program.findProgram("html"); //$NON-NLS-1$
-						if (program == null)
-							program= Program.findProgram("htm"); //$NON-NLS-1$
-						if (program != null)
-							program.execute(fURLString);
-					} else
-						Program.launch(fURLString);
-					fURLString= null;
-					return;
-				}
-				
-				// Java element link
-				IAction action= getAction("OpenEditor");  //$NON-NLS-1$
-				if (action != null)
-					action.run();
-			}
-		}
-		
-		/**
-		 * Open the properties file in which the given NLS
-		 * key resides.
-		 * 
-		 * @since 3.1
-		 */
-		private void openPropertiesFile(StringLiteral nlsKeyStringLiteral) {
-
-			IJavaElement input= SelectionConverter.getInput(JavaEditor.this);
-			if (input == null)
-				return;
-
-			CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(input, ASTProvider.WAIT_ACTIVE_ONLY, null);
-			if (ast == null)
-				return;
-			
-			IRegion literalRegion= new Region(nlsKeyStringLiteral.getStartPosition(), nlsKeyStringLiteral.getLength());
-			AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, literalRegion);
-			if (ref == null)
-				return;
-			
-			IStorage propertiesFile= null;
-			try {
-				propertiesFile= NLSHintHelper.getResourceBundle(input.getJavaProject(), ref.getBinding());
-			} catch (JavaModelException e) {
-				// Don't open the file
-			}
-			if (propertiesFile == null) {
-				// Can't write to status line because it gets immediately cleared
-				MessageDialog.openError(
-						JavaEditor.this.getEditorSite().getShell(),
-						JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.fileNotFound.dialogTitle"), //$NON-NLS-1$
-						JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.fileNotFound.dialogMessage")); //$NON-NLS-1$
-				
-				return;
-			}
-			
-			IEditorPart editor;
-			try {
-				editor= EditorUtility.openInEditor(propertiesFile, true);
-			} catch (PartInitException e) {
-				handleOpenPropertiesFileFailed(propertiesFile);
-				return;
-			} catch (JavaModelException e) {
-				handleOpenPropertiesFileFailed(propertiesFile);
-				return;
-			}
-			
-			// Reveal the key in the properties file
-			if (editor instanceof ITextEditor) {
-				IRegion region= null;
-				// Find key in document
-				IDocument document= JavaPlugin.getDefault().getPropertiesFileDocumentProvider().getDocument(editor.getEditorInput());
-				if (document != null) {
-					FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
-					try {
-						region= finder.find(document.getLength() - 1, nlsKeyStringLiteral.getLiteralValue(), false, true, false, false);
-					} catch (BadLocationException ex) {
-					}
-				}
-				if (region != null)
-					((ITextEditor)editor).selectAndReveal(region.getOffset(), region.getLength());
-				else {
-					((ITextEditor)editor).selectAndReveal(0, 0);
-					IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
-					if (statusLine != null)
-						statusLine.setMessage(true, JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.keyNotFound", nlsKeyStringLiteral.getLiteralValue()), null); //$NON-NLS-1$
-				}
-			}
-		}
-		
-		private void handleOpenPropertiesFileFailed(IStorage propertiesFile) {
-			// Can't write to status line because it gets immediately cleared
-			MessageDialog.openError(
-					JavaEditor.this.getEditorSite().getShell(),
-					JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.openEditor.dialogTitle"), //$NON-NLS-1$
-					JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.openEditor.dialogMessage", propertiesFile.getFullPath().toOSString())); //$NON-NLS-1$
-		}
-
-		/*
-		 * @see org.eclipse.swt.events.MouseMoveListener#mouseMove(org.eclipse.swt.events.MouseEvent)
-		 */
-		public void mouseMove(MouseEvent event) {
-			
-			if (event.widget instanceof Control && !((Control) event.widget).isFocusControl()) {
-				deactivate();
-				return;
-			}
-			
-			if (!fActive) {
-				if (event.stateMask != fKeyModifierMask)
-					return;
-				// modifier was already pressed
-				fActive= true;
-			}
-	
-			ISourceViewer viewer= getSourceViewer();
-			if (viewer == null) {
-				deactivate();
-				return;
-			}
-				
-			StyledText text= viewer.getTextWidget();
-			if (text == null || text.isDisposed()) {
-				deactivate();
-				return;
-			}
-				
-			if ((event.stateMask & SWT.BUTTON1) != 0 && text.getSelectionCount() != 0) {
-				deactivate();
-				return;
-			}
-		
-			fURLString= null;
-			IRegion region= getCurrentTextRegion(viewer);
-			if (region == null || region.getLength() == 0) {
-				repairRepresentation();
-				return;
-			}
-			
-			highlightRegion(viewer, region);
-			activateCursor(viewer);												
-		}
-
-		/*
-		 * @see org.eclipse.swt.events.FocusListener#focusGained(org.eclipse.swt.events.FocusEvent)
-		 */
-		public void focusGained(FocusEvent e) {}
-
-		/*
-		 * @see org.eclipse.swt.events.FocusListener#focusLost(org.eclipse.swt.events.FocusEvent)
-		 */
-		public void focusLost(FocusEvent event) {
-			deactivate();
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
-		 */
-		public void documentAboutToBeChanged(DocumentEvent event) {
-			if (fActive && fActiveRegion != null) {
-				fRememberedPosition= new Position(fActiveRegion.getOffset(), fActiveRegion.getLength());
-				try {
-					event.getDocument().addPosition(fRememberedPosition);
-				} catch (BadLocationException x) {
-					fRememberedPosition= null;
-				}
-			}
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
-		 */
-		public void documentChanged(DocumentEvent event) {
-			if (fRememberedPosition != null) {
-				if (!fRememberedPosition.isDeleted()) {
-					
-					event.getDocument().removePosition(fRememberedPosition);
-					fActiveRegion= new Region(fRememberedPosition.getOffset(), fRememberedPosition.getLength());
-					fRememberedPosition= null;
-					
-					ISourceViewer viewer= getSourceViewer();
-					if (viewer != null) {
-						StyledText widget= viewer.getTextWidget();
-						if (widget != null && !widget.isDisposed()) {
-							widget.getDisplay().asyncExec(new Runnable() {
-								public void run() {
-									deactivate();
-								}
-							});
-						}
-					}
-					
-				} else {
-					fActiveRegion= null;
-					fRememberedPosition= null;
-					deactivate();
-				}
-			}
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
-		 */
-		public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
-			if (oldInput == null)
-				return;
-			deactivate();
-			oldInput.removeDocumentListener(this);
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
-		 */
-		public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
-			if (newInput == null)
-				return;
-			newInput.addDocumentListener(this);
-		}
-
-		/*
-		 * @see PaintListener#paintControl(PaintEvent)
-		 */
-		public void paintControl(PaintEvent event) {	
-			if (fActiveRegion == null)
-				return;
-	
-			ISourceViewer viewer= getSourceViewer();
-			if (viewer == null)
-				return;
-				
-			StyledText text= viewer.getTextWidget();
-			if (text == null || text.isDisposed())
-				return;
-				
-				
-			int offset= 0;
-			int length= 0;
-
-			if (viewer instanceof ITextViewerExtension5) {
-				
-				ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
-				IRegion widgetRange= extension.modelRange2WidgetRange(fActiveRegion);
-				if (widgetRange == null)
-					return;
-					
-				offset= widgetRange.getOffset();
-				length= widgetRange.getLength();
-				
-			} else {
-				
-				IRegion region= viewer.getVisibleRegion();			
-				if (!includes(region, fActiveRegion))
-					return;		    
-				
-				offset= fActiveRegion.getOffset() - region.getOffset();
-				length= fActiveRegion.getLength();
-			}
-			
-			// support for bidi
-			Point minLocation= getMinimumLocation(text, offset, length);
-			Point maxLocation= getMaximumLocation(text, offset, length);
-	
-			int x1= minLocation.x;
-			int x2= minLocation.x + maxLocation.x - minLocation.x - 1;
-			int y= minLocation.y + text.getLineHeight() - 1;
-			
-			GC gc= event.gc;
-			if (fColor != null && !fColor.isDisposed())
-			gc.setForeground(fColor);
-			gc.drawLine(x1, y, x2, y);
-		}
-
-		private boolean includes(IRegion region, IRegion position) {
-			return
-				position.getOffset() >= region.getOffset() &&
-				position.getOffset() + position.getLength() <= region.getOffset() + region.getLength();
-		}
-
-		private Point getMinimumLocation(StyledText text, int offset, int length) {
-			Point minLocation= new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
-	
-			for (int i= 0; i <= length; i++) {
-				Point location= text.getLocationAtOffset(offset + i);
-				
-				if (location.x < minLocation.x)
-					minLocation.x= location.x;			
-				if (location.y < minLocation.y)
-					minLocation.y= location.y;			
-			}	
-			
-			return minLocation;
-		}
-	
-		private Point getMaximumLocation(StyledText text, int offset, int length) {
-			Point maxLocation= new Point(Integer.MIN_VALUE, Integer.MIN_VALUE);
-	
-			for (int i= 0; i <= length; i++) {
-				Point location= text.getLocationAtOffset(offset + i);
-				
-				if (location.x > maxLocation.x)
-					maxLocation.x= location.x;			
-				if (location.y > maxLocation.y)
-					maxLocation.y= location.y;			
-			}	
-			
-			return maxLocation;
-		}
-	}
 	
 	/**
 	 * Cancels the occurrences finder job upon document changes.
@@ -2304,24 +1395,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 	}
 
-	/** Preference key for the link color */
-	protected final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
 	/** Preference key for matching brackets */
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 	/** Preference key for matching brackets color */
 	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
-	/** Preference key for browser like links */
-	private final static String BROWSER_LIKE_LINKS= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS;
-	/** Preference key for key modifier of browser like links */
-	private final static String BROWSER_LIKE_LINKS_KEY_MODIFIER= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER;
-	/**
-	 * Preference key for key modifier mask of browser like links.
-	 * The value is only used if the value of <code>EDITOR_BROWSER_LIKE_LINKS</code>
-	 * cannot be resolved to valid SWT modifier bits.
-	 * 
-	 * @since 2.1.1
-	 */
-	private final static String BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK;
 	
 	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']', '<', '>' };
 
@@ -2341,8 +1418,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
 	/** This editor's encoding support */
 	private DefaultEncodingSupport fEncodingSupport;
-	/** The mouse listener */
-	private MouseClickListener fMouseListener;
 	/** The information presenter. */
 	private InformationPresenter fInformationPresenter;
 	/** History for structure select action */
@@ -2446,7 +1521,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	private ActivationListener fActivationListener= new ActivationListener();
 	private ISelectionListenerWithAST fPostSelectionListenerWithAST;
 	private OccurrencesFinderJob fOccurrencesFinderJob;
-	/** The occcurrences finder job canceler */
+	/** The occurrences finder job canceler */
 	private OccurrencesFinderJobCanceler fOccurrencesFinderJobCanceler;
 	/** 
 	 * This editor's projection support 
@@ -3009,8 +2084,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		// uninstall & unregister preference store listener
-		if (isBrowserLikeLinks())
-			disableBrowserLikeLinks();
 		getSourceViewerDecorationSupport(sourceViewer).uninstall();
 		((ISourceViewerExtension2)sourceViewer).unconfigure();
 		
@@ -3019,8 +2092,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		// install & register preference store listener 
 		sourceViewer.configure(getSourceViewerConfiguration());
 		getSourceViewerDecorationSupport(sourceViewer).install(getPreferenceStore());
-		if (isBrowserLikeLinks())
-			enableBrowserLikeLinks();
 		
 		internalDoSetInput(input);
 	}
@@ -3095,9 +2166,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fActivationListener= null;
 		}
 		
-		if (isBrowserLikeLinks())
-			disableBrowserLikeLinks();
-			
 		if (fEncodingSupport != null) {
 			fEncodingSupport.dispose();
 			fEncodingSupport= null;
@@ -3234,14 +2302,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (isJavaEditorHoverProperty(property))
 				updateHoverBehavior();
 			
-			if (BROWSER_LIKE_LINKS.equals(property)) {
-				if (isBrowserLikeLinks())
-					enableBrowserLikeLinks();
-				else
-					disableBrowserLikeLinks();
-				return;
-			}
-			
 			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(property)) {
 				if ((event.getNewValue() instanceof Boolean) && ((Boolean)event.getNewValue()).booleanValue())
 					selectionChanged();
@@ -3375,43 +2435,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 	
 	/**
-	 * Return whether the browser like links should be enabled
-	 * according to the preference store settings.
-	 * @return <code>true</code> if the browser like links should be enabled
-	 */
-	private boolean isBrowserLikeLinks() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(BROWSER_LIKE_LINKS);
-	}
-	
-	/**
-	 * Enables browser like links.
-	 */
-	private void enableBrowserLikeLinks() {
-		if (fMouseListener == null) {
-			fMouseListener= new MouseClickListener();
-			fMouseListener.install();
-		}
-	}
-	
-	/**
-	 * Disables browser like links.
-	 */
-	private void disableBrowserLikeLinks() {
-		if (fMouseListener != null) {
-			fMouseListener.uninstall();
-			fMouseListener= null;
-		}
-	}
-	
-	/**
 	 * Returns a segmentation of the line of the given viewer's input document appropriate for
-	 * bidi rendering. The default implementation returns only the string literals of a java code
+	 * BIDI rendering. The default implementation returns only the string literals of a java code
 	 * line as segments.
 	 * 
 	 * @param viewer the text viewer
 	 * @param lineOffset the offset of the line
-	 * @return the line's bidi segmentation
+	 * @return the line's BIDI segmentation
 	 * @throws BadLocationException in case lineOffset is not valid in document
 	 */
 	public static int[] getBidiLineSegments(ITextViewer viewer, int lineOffset) throws BadLocationException {
@@ -3463,12 +2493,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 		
 	/**
-	 * Returns a segmentation of the given line appropriate for bidi rendering. The default
+	 * Returns a segmentation of the given line appropriate for BIDI rendering. The default
 	 * implementation returns only the string literals of a java code line as segments.
 	 * 
 	 * @param widgetLineOffset the offset of the line
 	 * @param line the content of the line
-	 * @return the line's bidi segmentation
+	 * @return the line's BIDI segmentation
 	 */
 	protected int[] getBidiLineSegments(int widgetLineOffset, String line) {
 		if (line != null && line.length() > 0) {
@@ -3593,9 +2623,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fEditorSelectionChangedListener= new EditorSelectionChangedListener();
 		fEditorSelectionChangedListener.install(getSelectionProvider());
 		
-		if (isBrowserLikeLinks())
-			enableBrowserLikeLinks();
-
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE))
 			enableOverwriteMode(false);
 

@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text;
 
+import java.util.StringTokenizer;
 import java.util.Vector;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -37,6 +38,9 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
+import org.eclipse.jface.text.hyperlink.DefaultHyperlinkController;
+import org.eclipse.jface.text.hyperlink.IHyperlinkController;
+import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
@@ -63,6 +67,9 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector;
+import org.eclipse.jdt.internal.ui.javaeditor.NLSKeyHyperlinkDetector;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.CompoundContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
@@ -119,7 +126,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 2.0
 	 */
 	public final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
-
+	
 	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
@@ -168,6 +175,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 3.1
 	 */
 	private JavaDoubleClickSelector fJavaDoubleClickSelector;
+
 	
 	/**
 	 * Creates a new Java source viewer configuration for viewers in the given editor 
@@ -818,5 +826,80 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		if (fJavaDoubleClickSelector != null && JavaCore.COMPILER_SOURCE.equals(event.getProperty()))
 			if (event.getNewValue() instanceof String)
 				fJavaDoubleClickSelector.setVersion((String) event.getNewValue());
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinksEnabled(org.eclipse.jface.text.source.ISourceViewer)
+	 * @since 3.1
+	 */
+	public boolean getHyperlinksEnabled(ISourceViewer sourceViewer) {
+		return fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkDetectors(org.eclipse.jface.text.source.ISourceViewer)
+	 * @since 3.1
+	 */
+	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+		IHyperlinkDetector[] inheritedDetectors= super.getHyperlinkDetectors(sourceViewer);
+		
+		if (fTextEditor == null)
+			return inheritedDetectors;
+		
+		int inheritedDetectorsLength= inheritedDetectors != null ? inheritedDetectors.length : 0;
+		IHyperlinkDetector[] detectors= new IHyperlinkDetector[inheritedDetectorsLength + 2];
+		detectors[0]= new JavaElementHyperlinkDetector(fTextEditor); 
+		detectors[1]= new NLSKeyHyperlinkDetector(fTextEditor);
+		for (int i= 0; i < inheritedDetectorsLength; i++)
+			detectors[i+2]= inheritedDetectors[i];
+		
+		return detectors;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkStateMask(org.eclipse.jface.text.source.ISourceViewer)
+	 * @since 3.1
+	 */
+	public int getHyperlinkStateMask(ISourceViewer sourceViewer) {
+		String modifiers= fPreferenceStore.getString(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINK_KEY_MODIFIER);
+		int modifierMask= computeStateMask(modifiers);
+		if (modifierMask == -1) {
+			// Fall back to stored state mask
+			modifierMask= fPreferenceStore.getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINK_KEY_MODIFIER_MASK);
+		}
+		return modifierMask;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkController(org.eclipse.jface.text.source.ISourceViewer)
+	 * @since 3.1
+	 */
+	public IHyperlinkController getHyperlinkController(ISourceViewer sourceViewer) {
+		return new DefaultHyperlinkController(fPreferenceStore);
+	}
+	
+	/**
+	 * Computes the state mask out of the given modifiers string.
+	 * 
+	 * @param modifiers a string containing modifiers
+	 * @return the state mask
+	 * @since 3.1
+	 */
+	protected static final int computeStateMask(String modifiers) {
+		if (modifiers == null)
+			return -1;
+	
+		if (modifiers.length() == 0)
+			return SWT.NONE;
+
+		int stateMask= 0;
+		StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
+		while (modifierTokenizer.hasMoreTokens()) {
+			int modifier= EditorUtility.findLocalizedModifier(modifierTokenizer.nextToken());
+			if (modifier == 0 || (stateMask & modifier) == modifier)
+				return -1;
+			stateMask= stateMask | modifier;
+		}
+		return stateMask;
 	}
 }
