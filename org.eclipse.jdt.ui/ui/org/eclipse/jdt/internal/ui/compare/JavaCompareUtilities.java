@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,12 +24,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.EncodingSupport;
 import org.eclipse.jdt.internal.ui.*;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -291,9 +291,7 @@ class JavaCompareUtilities {
 			String encoding= null;
 			if (sa instanceof IEncodedStreamContentAccessor)
 				encoding= ((IEncodedStreamContentAccessor)sa).getCharset();
-			if (encoding == null)
-				encoding= ResourcesPlugin.getEncoding();
-			return readString(is, encoding);
+			return readString(is, EncodingSupport.verifyCharset(encoding));
 		}
 		return null;
 	}
