@@ -70,11 +70,7 @@ public class GotoTypeAction extends OpenJavaElementAction {
 	public void dispose() {
 		// do nothing.
 	}
-	
-	public void init(IWorkbenchWindow window) {
-		// do nothing.
-	}
-	
+		
 	public void selectionChanged(IAction action, ISelection selection) {
 		// do nothing. Action doesn't depend on selection.
 	}
