@@ -1575,10 +1575,26 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				
 				return end != maxEnd && Character.isJavaIdentifierPart(document.getChar(end));
 
-
 			} catch (BadLocationException e) {
+				// be conservative
 				return true;
 			}			
+		}
+
+		private boolean hasCharacterToTheRight(IDocument document, int offset, char character) {
+			try {
+				int end= offset;
+				IRegion endLine= document.getLineInformationOfOffset(end);
+				int maxEnd= endLine.getOffset() + endLine.getLength();
+				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
+					++end;
+
+				return end != maxEnd && document.getChar(end) == character;
+
+			} catch (BadLocationException e) {
+				// be conservative
+				return true;
+			}
 		}
 		
 		/*
@@ -1598,11 +1614,18 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 			switch (event.character) {
 			case '(':
+				if (hasCharacterToTheRight(document, offset + length, '('))
+					return;
+
+				// fall through
+
 			case '[':
-					if (!fCloseBrackets)
-						return;
- 					if (hasIdentifierToTheRight(document, offset + length))
- 						return;
+				if (!fCloseBrackets)
+					return;
+				if (hasIdentifierToTheRight(document, offset + length))
+					return;
+
+				// fall through
 			
 			case '"':
 				if (event.character == '"') {
