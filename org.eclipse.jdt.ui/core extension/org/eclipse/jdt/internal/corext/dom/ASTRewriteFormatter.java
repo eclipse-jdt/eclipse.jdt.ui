@@ -168,7 +168,11 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	}
 	
 	public static interface Prefix {
-		String getPrefix(int indent, String lineDelim, ASTNode node);
+		String getPrefix(int indent, String lineDelim);
+	}
+	
+	public static interface BlockContext {
+		String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node);
 	}	
 	
 	public static class ConstPrefix implements Prefix {
@@ -178,7 +182,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			fPrefix= prefix;
 		}
 		
-		public String getPrefix(int indent, String lineDelim, ASTNode node) {
+		public String getPrefix(int indent, String lineDelim) {
 			return fPrefix;
 		}
 	}
@@ -196,30 +200,37 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			fKind= kind;
 		}
 		
-		public String getPrefix(int indent, String lineDelim, ASTNode node) {
+		public String getPrefix(int indent, String lineDelim) {
 			int[] pos= new int[] { fStart, fEnd }; 
 			String res= CodeFormatterUtil.format(fKind, fString, indent, pos, lineDelim, null);
 			return res.substring(pos[0] + 1, pos[1]);
 		}
 	}
 	
-	private static class BlockFormattingPrefix implements Prefix {
-		private int fKind;
-		private String fString;
+	private static class BlockFormattingPrefix implements BlockContext {
+		private String fPrefix;
+		private String fSuffix;
 		private int fStart;
+		private int fEnd;
 		
-		public BlockFormattingPrefix(String string, char start, int kind) {
-			fStart= string.indexOf(start);
-			fString= string;
-			fKind= kind;
+		public BlockFormattingPrefix(String prefix, String suffix, int start, int end) {
+			fEnd= end;
+			fStart= start;
+			fSuffix= suffix;
+			fPrefix= prefix;
 		}
 		
-		public String getPrefix(int indent, String lineDelim, ASTNode node) {
-			String s= fString + ASTNodes.asString(node);			
+		public String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node) {
+			String nodeString= ASTNodes.asString(node);
+			int nodeStart= fPrefix.length();
+			int nodeEnd= nodeStart + nodeString.length();
 			
-			int[] pos= new int[] { fStart, fString.length() }; 
-			String res= CodeFormatterUtil.format(fKind, s, indent, pos, lineDelim, null);
-			return res.substring(pos[0] + 1, pos[1]);
+			String s= fPrefix + nodeString + fSuffix;
+		
+			
+			int[] pos= new int[] { fStart, nodeStart, nodeEnd - 1, nodeEnd + fEnd }; 
+			String res= CodeFormatterUtil.format(CodeFormatterUtil.K_STATEMENTS, s, indent, pos, lineDelim, null);
+			return new String[] { res.substring(pos[0] + 1, pos[1]), res.substring(pos[2] + 1, pos[3]) };
 		}
 	}	
 	
@@ -233,7 +244,8 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch {}", "} c" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
 
 
-	public final static Prefix ELSE_BLOCK= new BlockFormattingPrefix("if (true) {} else", '}' , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$
-
-	
+	public final static BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefix("if (true)", "else{} ", 8, 0); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", "", 8, 0); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext ELSE_AFTER_STATEMENT= new BlockFormattingPrefix("if (true) foo(); else ", "", 15, 0); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext ELSE_AFTER_BLOCK= new BlockFormattingPrefix("if (true) {} else ", "", 11, 0); //$NON-NLS-1$ //$NON-NLS-2$
 }

@@ -50,7 +50,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingStatementsTest("testRemove3"));
+			suite.addTest(new ASTRewritingStatementsTest("testIfStatementReplaceElse2"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -1055,6 +1055,1111 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	public void testIfStatement1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            hoo(11);\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 5", statements.size() == 3);
+
+		{ // replace then block by statement
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+	
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+		}
+		{ // replace then block by statement
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+	
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+		}
+		{ // replace then block by statement
+			IfStatement ifStatement= (IfStatement) statements.get(2);
+	
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            hoo(11);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	public void testIfStatement2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            hoo(11);\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace then block by statement, add else statement
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+	
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+			
+			Statement returnStatement= ast.newReturnStatement();
+			rewrite.markAsInserted(returnStatement);
+			
+			ifStatement.setElseStatement(returnStatement);
+			
+		}
+		{ // replace then block by statement, remove else statement
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+	
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsRemoved(ifStatement.getElseStatement());
+		}
+		{ // replace then block by statement, add else statement
+			IfStatement ifStatement= (IfStatement) statements.get(2);
+	
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+			
+			Block newElseBlock= ast.newBlock();
+			Statement returnStatement= ast.newReturnStatement();
+			newElseBlock.statements().add(returnStatement);
+			
+			rewrite.markAsInserted(newElseBlock);
+			
+			ifStatement.setElseStatement(newElseBlock);
+			
+		}
+		{ // replace then block by statement, remove else statement
+			IfStatement ifStatement= (IfStatement) statements.get(3);
+	
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+			rewrite.markAsRemoved(ifStatement.getElseStatement());
+		}				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            return;\n");		
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	public void testIfStatement3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            hoo(11);\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 3", statements.size() == 3);
+
+		{ // replace then block by statement
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+		}
+		{ // replace then block by statement
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+		}
+		{ // replace then block by statement
+			IfStatement ifStatement= (IfStatement) statements.get(2);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            hoo(11);\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	public void testIfStatement4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            hoo(11);\n");	
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace then statement by block , add else statement
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			Statement returnStatement= ast.newReturnStatement();
+			rewrite.markAsInserted(returnStatement);
+			
+			ifStatement.setElseStatement(returnStatement);
+			
+		}
+		{ // replace then statement by block, remove else statement
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			rewrite.markAsRemoved(ifStatement.getElseStatement());
+		}
+		{ // replace then block by statement, add else statement
+			IfStatement ifStatement= (IfStatement) statements.get(2);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			Block newElseBlock= ast.newBlock();
+			Statement returnStatement= ast.newReturnStatement();
+			newElseBlock.statements().add(returnStatement);
+			
+			rewrite.markAsInserted(newElseBlock);
+			
+			ifStatement.setElseStatement(newElseBlock);
+			
+		}
+		{ // replace then block by statement, remove else statement
+			IfStatement ifStatement= (IfStatement) statements.get(3);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			rewrite.markAsRemoved(ifStatement.getElseStatement());
+		}				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            return;\n");		
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	public void testIfStatement5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else if (true) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else if (true)\n");
+		buf.append("            hoo(11);\n");	
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace then statement by block , add else statement
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Block newBody2= ast.newBlock();
+			Statement returnStatement= ast.newReturnStatement();
+			newBody2.statements().add(returnStatement);			
+
+			newElseBlock.setThenStatement(newBody2);
+			rewrite.markAsInserted(newElseBlock);
+						
+			ifStatement.setElseStatement(newElseBlock);
+			
+		}
+		{ // replace then statement by block, remove else statement
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			rewrite.markAsRemoved(ifStatement.getElseStatement());
+		}
+		{ // replace then block by statement, add else statement
+			IfStatement ifStatement= (IfStatement) statements.get(2);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Statement returnStatement= ast.newReturnStatement();
+
+			newElseBlock.setThenStatement(returnStatement);
+			rewrite.markAsInserted(newElseBlock);
+						
+			ifStatement.setElseStatement(newElseBlock);
+		}
+		{ // replace then block by statement, remove else statement
+			IfStatement ifStatement= (IfStatement) statements.get(3);
+	
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			ASTNode placeholder= rewrite.createMove(statement);
+			Block newBody= ast.newBlock();
+			newBody.statements().add(placeholder);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			rewrite.markAsRemoved(ifStatement.getElseStatement());
+		}				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else if (true) {\n");
+		buf.append("            return;\n");		
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else if (true)\n");
+		buf.append("            return;\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	
+	public void testIfStatementReplaceElse1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            hoo(11);\n");			
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            hoo(11);\n");	
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace then statement by block , replace else statement
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+			
+			Block newElseBlock= ast.newBlock();
+			Statement returnStatement= ast.newReturnStatement();
+			newElseBlock.statements().add(returnStatement);			
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			
+		}
+		{ // replace then statement by block, replace else statement
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+				
+			Block newElseBlock= ast.newBlock();
+			Statement returnStatement= ast.newReturnStatement();
+			newElseBlock.statements().add(returnStatement);			
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+		}
+		{ // replace then block by statement, replace else statement
+			IfStatement ifStatement= (IfStatement) statements.get(2);
+				
+			Statement returnStatement= ast.newReturnStatement();
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
+			
+		}
+		{ // replace then block by statement, replace else statement
+			IfStatement ifStatement= (IfStatement) statements.get(3);
+				
+			Statement returnStatement= ast.newReturnStatement();
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
+		}				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");	
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            return;\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            return;\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	
+	public void testIfStatementReplaceElse2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            hoo(11);\n");			
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            hoo(11);\n");	
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace then statement by block , replace else statement
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+			
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			Block newBody= ast.newBlock();
+			ASTNode newStatement= rewrite.createMove(statement);
+			newBody.statements().add(newStatement);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			Block newElseBlock= ast.newBlock();
+			Statement returnStatement= ast.newReturnStatement();
+			newElseBlock.statements().add(returnStatement);			
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			
+		}
+		{ // replace then statement by block, replace else statement
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+			
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+				
+			Block newElseBlock= ast.newBlock();
+			Statement returnStatement= ast.newReturnStatement();
+			newElseBlock.statements().add(returnStatement);			
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+		}
+		{ // replace then block by statement, replace else statement
+			IfStatement ifStatement= (IfStatement) statements.get(2);
+			
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			Block newBody= ast.newBlock();
+			ASTNode newStatement= rewrite.createMove(statement);
+			newBody.statements().add(newStatement);
+			
+			rewrite.markAsReplaced(statement, newBody);				
+			
+			Statement returnStatement= ast.newReturnStatement();
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
+			
+		}
+		{ // replace then block by statement, replace else statement
+			IfStatement ifStatement= (IfStatement) statements.get(3);
+			
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+				
+			Statement returnStatement= ast.newReturnStatement();
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), returnStatement);
+		}				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");	
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            return;\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            return;\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	public void testIfStatementReplaceElse3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            hoo(11);\n");			
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            hoo(11);\n");	
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace then statement by block , replace else with if statement (no block)
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+			
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			Block newBody= ast.newBlock();
+			ASTNode newStatement= rewrite.createMove(statement);
+			newBody.statements().add(newStatement);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Statement newBody2= (Statement) rewrite.createMove(ifStatement.getElseStatement());
+			newElseBlock.setThenStatement(newBody2);
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+		}
+		{ // replace then statement by block, replace else with if statement (no block)
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+			
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+				
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Statement newBody2= (Statement) rewrite.createMove(ifStatement.getElseStatement());
+			newElseBlock.setThenStatement(newBody2);
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+		}
+		{ // replace then block by statement, replace else with if statement (block)
+			IfStatement ifStatement= (IfStatement) statements.get(2);
+			
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			Block newBody= ast.newBlock();
+			ASTNode newStatement= rewrite.createMove(statement);
+			newBody.statements().add(newStatement);
+			
+			rewrite.markAsReplaced(statement, newBody);				
+			
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Statement newBody2= (Statement) rewrite.createMove(ifStatement.getElseStatement());
+			newElseBlock.setThenStatement(newBody2);
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			
+		}
+		{ // replace then block by statement, replace else with if statement (block)
+			IfStatement ifStatement= (IfStatement) statements.get(3);
+			
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+				
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Statement newBody2= (Statement) rewrite.createMove(ifStatement.getElseStatement());
+			newElseBlock.setThenStatement(newBody2);
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+		}				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else if (true)\n");
+		buf.append("            hoo(11);\n");			
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else if (true)\n");
+		buf.append("            hoo(11);\n");	
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else if (true) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else if (true) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	public void testIfStatementReplaceElse4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else\n");
+		buf.append("            hoo(11);\n");			
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else\n");
+		buf.append("            hoo(11);\n");	
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 4", statements.size() == 4);
+
+		{ // replace then statement by block , replace else with if statement (block)
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+			
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			Block newBody= ast.newBlock();
+			ASTNode newStatement= rewrite.createMove(statement);
+			newBody.statements().add(newStatement);
+			
+			rewrite.markAsReplaced(statement, newBody);
+			
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Block newBody2= ast.newBlock();
+			Statement returnStatement= ast.newReturnStatement();
+			newBody2.statements().add(returnStatement);			
+
+			newElseBlock.setThenStatement(newBody2);
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+		}
+		{ // replace then statement by block, replace else with if statement (block)
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+			
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+				
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Block newBody2= ast.newBlock();
+			Statement returnStatement= ast.newReturnStatement();
+			newBody2.statements().add(returnStatement);	
+			
+			newElseBlock.setThenStatement(newBody2);
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+		}
+		{ // replace then block by statement, replace else with if statement (no block)
+			IfStatement ifStatement= (IfStatement) statements.get(2);
+			
+			ASTNode statement= ifStatement.getThenStatement();
+			
+			Block newBody= ast.newBlock();
+			ASTNode newStatement= rewrite.createMove(statement);
+			newBody.statements().add(newStatement);
+			
+			rewrite.markAsReplaced(statement, newBody);				
+			
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Statement newBody2= ast.newReturnStatement();
+			newElseBlock.setThenStatement(newBody2);
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+			
+		}
+		{ // replace then block by statement, replace else with if statement (no block)
+			IfStatement ifStatement= (IfStatement) statements.get(3);
+			
+			Block body= (Block) ifStatement.getThenStatement();
+			ASTNode statement= (ASTNode) body.statements().get(0);
+			
+			ASTNode newBody= rewrite.createMove(statement);
+			
+			rewrite.markAsReplaced(body, newBody);
+				
+			IfStatement newElseBlock= ast.newIfStatement();
+			newElseBlock.setExpression(ast.newBooleanLiteral(true));
+			
+			Statement newBody2= ast.newReturnStatement();
+			newElseBlock.setThenStatement(newBody2);
+
+			rewrite.markAsReplaced(ifStatement.getElseStatement(), newElseBlock);
+		}				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else if (true) {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");			
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else if (true) {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");		
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } else if (true)\n");
+		buf.append("            return;\n");	
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        else if (true)\n");
+		buf.append("            return;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}	
 	
 	public void testLabeledStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

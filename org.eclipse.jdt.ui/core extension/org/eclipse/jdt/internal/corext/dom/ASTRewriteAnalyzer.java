@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.CopyPlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.MovePlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.StringPlaceholderData;
+import org.eclipse.jdt.internal.corext.dom.ASTRewriteFormatter.BlockContext;
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteFormatter.ConstPrefix;
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteFormatter.NodeMarker;
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteFormatter.Prefix;
@@ -540,7 +541,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		if (changeKind == ASTRewrite.INSERTED) {
 			GroupDescription description= getDescription(node);
 			int indent= getIndent(offset);
-			doTextInsert(offset, prefix.getPrefix(indent, fTextBuffer.getLineDelimiter(), node), description);
+			doTextInsert(offset, prefix.getPrefix(indent, fTextBuffer.getLineDelimiter()), description);
 			doTextInsert(offset, node, indent, true, description);
 			return offset;
 		} else if (changeKind == ASTRewrite.REMOVED) {
@@ -558,6 +559,39 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			doTextRemoveAndVisit(nodeOffset, nodeLen, node);
 			doTextInsert(nodeOffset, getReplacingNode(node), getIndent(offset), true, getDescription(node));
 			return nodeOffset + nodeLen;
+		} else {
+			return doVisit(node);
+		}
+	}
+	
+	private int rewriteBodyNode(ASTNode node, int offset, int endPos, int indent, BlockContext context) {
+		int changeKind= getChangeKind(node);
+		
+		if (changeKind == ASTRewrite.INSERTED) {
+			GroupDescription description= getDescription(node);
+			
+			String[] strings= context.getPrefixAndSuffix(indent, fTextBuffer.getLineDelimiter(), node);
+			
+			doTextInsert(offset, strings[0], description);
+			doTextInsert(offset, node, indent, true, description);
+			doTextInsert(offset, strings[1], description);
+			return offset;
+		} else if (changeKind == ASTRewrite.REMOVED) {
+			// if there is a prefix, remove the prefix as well
+			int len= endPos - offset;
+			doTextRemoveAndVisit(offset, len, node);
+			return endPos;
+		} else if (changeKind == ASTRewrite.REPLACED) {
+			int nodeLen= endPos - offset; 
+			
+			ASTNode replacingNode= getReplacingNode(node);
+			String[] strings= context.getPrefixAndSuffix(indent, fTextBuffer.getLineDelimiter(), replacingNode);
+			GroupDescription description= getDescription(node);
+			doTextRemoveAndVisit(offset, nodeLen, node);
+			doTextInsert(offset, strings[0], description);
+			doTextInsert(offset, replacingNode, indent, true, description);
+			doTextInsert(offset, strings[1], description);
+			return endPos;
 		} else {
 			return doVisit(node);
 		}
@@ -708,7 +742,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			GroupDescription description= getDescription(body);
 			doTextRemove(startPos, endPos - startPos, description);
 			int indent= getIndent(methodDecl.getStartPosition());
-			String prefix= ASTRewriteFormatter.METHOD_BODY.getPrefix(indent, fTextBuffer.getLineDelimiter(), body);
+			String prefix= ASTRewriteFormatter.METHOD_BODY.getPrefix(indent, fTextBuffer.getLineDelimiter());
 			doTextInsert(startPos, prefix, description); 
 			doTextInsert(startPos, body, indent, true, description);
 		} else if (changeKind == ASTRewrite.REMOVED) {
@@ -1585,15 +1619,45 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(IfStatement)
 	 */
 	public boolean visit(IfStatement node) {
-		rewriteRequiredNode(node.getExpression()); // statement
+		int pos= rewriteRequiredNode(node.getExpression()); // statement
 		
 		Statement thenStatement= node.getThenStatement();
-		rewriteRequiredNode(thenStatement); // then statement
-
 		Statement elseStatement= node.getElseStatement();
+		ASTNode newThenStatement= thenStatement;
+		if (isReplaced(thenStatement)) {
+			try {
+				pos= getScanner().getNextStartOffset(pos, true) + 1; // after the closing parent
+				int indent= getIndent(node.getStartPosition());
+				
+				int endPos= thenStatement.getStartPosition() + thenStatement.getLength();
+				if (elseStatement != null && !isInserted(elseStatement)) {
+					endPos= getScanner().getNextStartOffset(endPos, true); // else statement
+				}
+				if (elseStatement == null || isChanged(elseStatement)) {
+					pos= rewriteBodyNode(thenStatement, pos, endPos, indent, ASTRewriteFormatter.IF_BLOCK_NO_ELSE); 
+				} else {
+					pos= rewriteBodyNode(thenStatement, pos, endPos, indent, ASTRewriteFormatter.IF_BLOCK_WITH_ELSE); 
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+			newThenStatement= getReplacingNode(thenStatement);
+		} else {
+			pos= doVisit(thenStatement);
+		}
+
 		if (elseStatement != null) {
-			int startPos= thenStatement.getStartPosition() + thenStatement.getLength();
-			rewriteNode(elseStatement, startPos, ASTRewriteFormatter.ELSE_BLOCK); //$NON-NLS-1$
+			if (isChanged(elseStatement)) {
+				int indent= getIndent(node.getStartPosition());
+				int endPos= elseStatement.getStartPosition() + elseStatement.getLength();
+				if (newThenStatement.getNodeType() == ASTNode.BLOCK) {
+					rewriteBodyNode(elseStatement, pos, endPos, indent, ASTRewriteFormatter.ELSE_AFTER_BLOCK);
+				} else {
+					rewriteBodyNode(elseStatement, pos, endPos, indent, ASTRewriteFormatter.ELSE_AFTER_STATEMENT);
+				}
+			} else {
+				doVisit(elseStatement);
+			}
 		}
 		return false;
 	}
@@ -2017,7 +2081,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		List catchBlocks= node.catchClauses();
 		if (hasChanges(catchBlocks)) {
 			int indent= getIndent(node.getStartPosition());
-			String prefix= ASTRewriteFormatter.CATCH_BLOCK.getPrefix(indent, fTextBuffer.getLineDelimiter(), node);
+			String prefix= ASTRewriteFormatter.CATCH_BLOCK.getPrefix(indent, fTextBuffer.getLineDelimiter());
 			pos= getDefaultRewriter().rewriteList(catchBlocks, pos, prefix, prefix); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			pos= visitList(catchBlocks, pos);
