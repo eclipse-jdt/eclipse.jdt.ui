@@ -244,6 +244,11 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		init(type, isSubType);
 	}
 	
+	public boolean hasMethodsToOverride() {
+		return getContentProvider().getElements(null).length > 0;
+	}
+	
+	
 	private void init(IType type, boolean isSubType) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= type.newSupertypeHierarchy(null);
 		IMethod[] inheritedMethods= StubUtility.getOverridableMethods(type, typeHierarchy, isSubType);
