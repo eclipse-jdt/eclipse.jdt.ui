@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.core.runtime.IPath;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.util.Assert;
 
 
 public class CPVariableElement {
@@ -6,7 +6,7 @@ public class CPVariableElement {
 	private String fName;
 	private IPath fPath;		private boolean fIsReserved;
 
-	public CPVariableElement(String name, IPath path, boolean reserved) {
+	public CPVariableElement(String name, IPath path, boolean reserved) {		Assert.isNotNull(name);		Assert.isNotNull(path);
 		fName= name;
 		fPath= path;		fIsReserved= reserved;
 	}
