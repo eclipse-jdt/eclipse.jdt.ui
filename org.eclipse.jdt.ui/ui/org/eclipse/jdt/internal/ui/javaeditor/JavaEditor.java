@@ -3214,7 +3214,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 	
 	private boolean isProjectionEnabled() {
-		return Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection");
+		return Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection"); //$NON-NLS-1$
 	}
 
 	/*
@@ -3228,8 +3228,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
 			
 			fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
-			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error");
-			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning");
+			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
+			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 			fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
 				public IInformationControl createInformationControl(Shell parent) {
 					return new CustomSourceInformationControl(parent, IDocument.DEFAULT_CONTENT_TYPE);
