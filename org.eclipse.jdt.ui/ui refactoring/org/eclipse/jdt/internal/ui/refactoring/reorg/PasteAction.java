@@ -76,7 +76,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -125,31 +124,10 @@ public class PasteAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		try {
-			setEnabled(canOperateOn(selection));
-		} catch (JavaModelException e) {
-			//no ui here - this happens on selection changes
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
-			setEnabled(false);
-		}
+		setEnabled(true);
+		// enablement is now checked in run 
 	}
 
-	private boolean canOperateOn(IStructuredSelection selection) throws JavaModelException {
-		TransferData[] availableDataTypes= fClipboard.getAvailableTypes();
-
-		List elements= selection.toList();
-		IResource[] resources= ReorgUtils.getResources(elements);
-		IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-		Paster[] pasters= createEnabledPasters(availableDataTypes);
-		for (int i= 0; i < pasters.length; i++) {
-			if (pasters[i].canPasteOn(javaElements, resources))
-				return true;
-		}
-		return false;
-	}
-	
 	private Paster[] createEnabledPasters(TransferData[] availableDataTypes) throws JavaModelException {
 		Paster paster;
 		Shell shell = getShell();
@@ -215,6 +193,7 @@ public class PasteAction extends SelectionDispatchAction {
 					return; //one is enough
 				}	
 			}
+			getShell().getDisplay().beep();
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			if (paster instanceof ResultTrackable) {
