@@ -274,10 +274,10 @@ public abstract class FindAction extends SelectionDispatchAction {
 		
 		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_BGSEARCH)) {
 			try {
-			performNewSearch(element);
-		} catch (JavaModelException ex) {
-			ExceptionHandler.handle(ex, getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+				performNewSearch(element);
+			} catch (JavaModelException ex) {
+				ExceptionHandler.handle(ex, getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		} else {
 			SearchUI.activateSearchResultView();
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
