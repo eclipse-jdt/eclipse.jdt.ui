@@ -161,8 +161,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 		InputStream stream= file.getContents();
 		InputStreamReader in= null;
 		try {		
-			document= new Document();
-			in= new InputStreamReader(new BufferedInputStream(stream), ResourcesPlugin.getEncoding());
+			document= new Document();	
+			in= new InputStreamReader(new BufferedInputStream(stream), file.getCharset());
 			StringBuffer buffer= new StringBuffer();
 			char[] readBuffer= new char[2048];
 			int n= in.read(readBuffer);
