@@ -3214,7 +3214,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 	
 	private boolean isProjectionEnabled() {
-		return Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection"); //$NON-NLS-1$
+		return Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection");
 	}
 
 	/*
