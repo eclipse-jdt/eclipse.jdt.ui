@@ -159,9 +159,12 @@ public class MoveMembersRefactoring extends Refactoring {
 		}	
 	}
 	
-	private RefactoringStatus checkDestinationType() throws JavaModelException {
+	private RefactoringStatus checkDestinationType() throws JavaModelException {			
 		if (fDestinationType == null)
 			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationTypeName + "\' not be found.");
+		
+		if (fDestinationType.equals(getDeclaringType()))
+			return RefactoringStatus.createFatalErrorStatus("Destination and source types are the same (" + JavaElementUtil.createSignature(fDestinationType) + ")");	
 		
 		if (! fDestinationType.exists())
 			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + JavaElementUtil.createSignature(fDestinationType) + "\' does not exist.");
