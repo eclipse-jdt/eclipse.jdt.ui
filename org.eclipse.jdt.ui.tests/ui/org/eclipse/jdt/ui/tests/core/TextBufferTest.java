@@ -474,14 +474,7 @@ public class TextBufferTest extends TestCase {
 		doUndoRedo(undo, "0561234789");
 	}
 	
-	private static final boolean BUG_39227= true;
-	
 	public void testMoveWithSourceDelete2() throws Exception {
-		if (BUG_39227) {
-			return;
-		}
-		
-
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 	
@@ -494,7 +487,7 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fEditor.canPerformEdits());
 		UndoMemento undo= fEditor.performEdits(null);
 		assertEquals("Buffer content", "0145623789", fBuffer.getContent());
-		assertEquals(s1.getTextRange(), 2, 0);
+		assertTrue(s1.getTextRange().isDeleted());
 		assertEquals(t1.getTextRange(), 5, 2);
 		doUndoRedo(undo, "0145623789");
 	}		
