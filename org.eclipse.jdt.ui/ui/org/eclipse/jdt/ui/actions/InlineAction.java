@@ -62,7 +62,7 @@ public class InlineAction extends SelectionDispatchAction {
 		fInlineTemp		= new InlineTempAction(editor);
 		fInlineMethod	= new InlineMethodAction(editor);
 		fInlineConstant	= new InlineConstantAction(editor);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.RENAME_ACTION);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 
 	/*
