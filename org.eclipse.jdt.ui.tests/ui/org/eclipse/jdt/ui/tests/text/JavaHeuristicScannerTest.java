@@ -51,8 +51,10 @@ public class JavaHeuristicScannerTest extends TestCase {
 			Hashtable options= JavaCore.getDefaultOptions();
 			options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.TAB);
 			options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
-			options.put(DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT, DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN);
-			options.put(DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT, DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN);
+
+			final String indentOnColumn= DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_ON_COLUMN);
+			options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION, indentOnColumn);
+			options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER, indentOnColumn);
 			options.put(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, "1");
 			JavaCore.setOptions(options);
 		}

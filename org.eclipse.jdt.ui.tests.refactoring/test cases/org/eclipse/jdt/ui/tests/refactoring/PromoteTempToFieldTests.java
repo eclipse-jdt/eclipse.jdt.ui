@@ -57,7 +57,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		super.setUp();
 		Hashtable options= JavaCore.getOptions();
 		
-		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS;
+		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR;
 		fCompactPref= options.get(setting);
 		options.put(setting, DefaultCodeFormatterConstants.TRUE);
 		JavaCore.setOptions(options);
@@ -66,7 +66,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		Hashtable options= JavaCore.getOptions();
-		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS, fCompactPref);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
 		JavaCore.setOptions(options);	
 	}
 	

@@ -60,7 +60,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		fOldOptions= JavaCore.getOptions();
 		
 	    Hashtable options= JavaCore.getDefaultOptions();
-	    options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS, DefaultCodeFormatterConstants.TRUE);
+	    options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, DefaultCodeFormatterConstants.TRUE);
 	    options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 	    options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.TAB);
 
