@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.Comparator;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 public class JavaCompletionProposalComparator implements Comparator {
 

@@ -30,36 +30,7 @@
 
 <extension-point name="%elementFiltersName" id="javaElementFilters" schema="schema/javaElementFilters.exsd"/>
 <extension-point name="%javaEditorTextHoversName" id="javaEditorTextHovers" schema="schema/javaEditorTextHovers.exsd"/>
-
-<!-- =================================================================================== -->
-<!-- Extension Point: Wizard page to create or edit a Classpath Container Entry          -->
-<!--                                                                                     -->
-<!-- <!ELEMENT classpathContainerPage>                                                   -->
-<!--   <!ATTLIST classpathContainerPage                                                  -->
-<!--    id           CDATA #REQUIRED                                                     -->
-<!--    name         CDATA #REQUIRED                                                     -->
-<!--    class        CDATA #REQUIRED                                                     -->
-<!--   >                                                                                 -->
-<!-- where:                                                                              -->
-<!--    - id      identifying the classpath container as defined by jdt.core             -->
-<!--              org.eclipse.jdt.core.classpathVariableInitializer                      -->
-<!--    - name    name of the classpath container.                                       -->
-<!--    - class   the class that implements this container page.                         -->
-<!--              The class must implement a public subclass of                          -->
-<!--              org.eclipse.jdt.ui.wizards.IClasspathContainerPage with a public       -->
-<!--              0-argument constructor.                                                -->
-<!--                                                                                     -->
-<!-- Example of a ClasspathContainerPage to create a container representing classpath    -->
-<!-- entries for the JDK                                                                 -->
-<!-- <extension                                                                          -->
-<!--      point="org.eclipse.jdt.ui.classpathContainerPage">                             -->
-<!--    <classpathContainerPage                                                          -->
-<!--         id="JRE"                                                                    -->
-<!--         name="JRE System Libraries"                                                 -->
-<!--         class="com.example.NewJDKEntryPage"/>                                       -->
-<!-- </extension>                                                                        -->
-<!--                                                                                     -->
-<!-- =================================================================================== -->
+<extension-point name="%javadocCompletionProcessor" id="javadocCompletionProcessor" schema="schema/javadoccompletion.exsd"/>
 <extension-point name="classpathContainerPageExtensionPoint" id="classpathContainerPage" schema="schema/classpathContainerPage.exsd"/>
 
 <extension
@@ -71,6 +42,14 @@
    </classpathContainerPage>
 </extension>
 
+<extension
+      point="org.eclipse.jdt.ui.javadocCompletionProcessor">
+   <javadocCompletionProcessor
+         id= "org.eclipse.jdt.ui.text.javadoc.JavaDocCompletionEvaluator"
+         class="org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionEvaluator"
+         name="%defaultJavadocCompletionProcessor">
+   </javadocCompletionProcessor>
+</extension>
 
 <extension
       point="org.eclipse.jdt.ui.javaEditorTextHovers">

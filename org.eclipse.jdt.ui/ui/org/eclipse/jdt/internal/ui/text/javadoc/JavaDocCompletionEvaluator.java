@@ -8,11 +8,17 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -25,13 +31,16 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 
-public class JavaDocCompletionEvaluator {
+public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 	
 	protected final static String[] fgTagProposals= {
 		"@author", //$NON-NLS-1$
@@ -58,31 +67,17 @@ public class JavaDocCompletionEvaluator {
 	private int fCurrentPos;
 	private int fCurrentLength;
 	
+	private String fErrorMessage;
+	
 	private JavaElementLabelProvider fLabelProvider;
 	private List fResult;
 	
 	private boolean fRestrictToMatchingCase;
 	
-	public JavaDocCompletionEvaluator(ICompilationUnit cu, IDocument doc, int pos, int length) {
-		fCompilationUnit= cu;
-		fDocument= doc;
-		fCurrentPos= pos;
-		fCurrentLength= length;
+	public JavaDocCompletionEvaluator() {
 		fResult= new ArrayList();
-		fRestrictToMatchingCase= false;
 	}
-
-
-	/**
-	 * Tells this evaluator to restrict is proposals to those
-	 * starting with matching cases.
-	 * 
-	 * @param restrict <code>true</code> if proposals should be restricted
-	 */
-	public void restrictProposalsToMatchingCases(boolean restrict) {
-		fRestrictToMatchingCase= restrict;
-	}
-		
+	
 	private static boolean isWordPart(char ch) {
 		return Character.isJavaIdentifierPart(ch) || (ch == '#') || (ch == '.') || (ch == '/');
 	}
@@ -156,16 +151,31 @@ public class JavaDocCompletionEvaluator {
 		}
 		return pos;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IJavaDocCompletionProcessor#computeCompletionProposals(org.eclipse.jdt.core.ICompilationUnit, int, int, int)
+	 */
+	public IJavaCompletionProposal[] computeCompletionProposals(ICompilationUnit cu, int offset, int length, int flags) {
+		fCompilationUnit= cu;
+		fCurrentPos= offset;
+		fCurrentLength= length;
+		fRestrictToMatchingCase= (flags & RESTRICT_TO_MATCHING_CASE) != 0;
 		
-	public JavaCompletionProposal[] computeProposals() throws JavaModelException {
+		IEditorInput editorInput= new FileEditorInput((IFile) cu.getOriginalElement().getResource());
+		fDocument= JavaUI.getDocumentProvider().getDocument(editorInput);
+		
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_PARAMETERS);
 		try {
 			evalProposals();
 			return (JavaCompletionProposal[]) fResult.toArray(new JavaCompletionProposal[fResult.size()]);
+		} catch (JavaModelException e) {
+			fErrorMessage= e.getLocalizedMessage();
 		} finally {
 			fLabelProvider.dispose();
+			fLabelProvider= null;
 			fResult.clear();
 		}
+		return null;
 	}	
 	
 	private void evalProposals() throws JavaModelException {
@@ -461,6 +471,20 @@ public class JavaDocCompletionEvaluator {
 		proposal.setTriggerCharacters( new char[] { '#' });
 		return proposal;
 	}
-	
 
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IJavaDocCompletionProcessor#computeContextInformation(org.eclipse.jdt.core.ICompilationUnit, int)
+	 */
+	public IContextInformation[] computeContextInformation(ICompilationUnit cu, int offset) {
+		fErrorMessage= null;
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IJavaDocCompletionProcessor#getErrorMessage()
+	 */
+	public String getErrorMessage() {
+		return fErrorMessage;
+	}
 }

@@ -11,14 +11,12 @@
 
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
-
 /*
  * CompletionProposal with a relevance value.
  * The relevance value is used to sort the completion proposals. Proposals with higher relevance
  * should be listed before proposals with lower relevance.
  */
-public interface IJavaCompletionProposal extends ICompletionProposal {
+public interface IJavaCompletionProposal extends org.eclipse.jdt.ui.text.java.IJavaCompletionProposal {
 	
 	/**
 	 * Returns the relevance of the proposal.

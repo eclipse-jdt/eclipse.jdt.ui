@@ -5,12 +5,16 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  * All Rights Reserved.
  */
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IPluginRegistry;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -22,49 +26,63 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
-import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
-
-
 /**
- * Simple Java doc completion processor.
+ * Java doc completion processor using contributed IJavaDocCompletionProcessor's
+ * to evaluate proposals.
  */
 public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	
-	private static class JavaDocCompletionProposalComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			ICompletionProposal c1= (ICompletionProposal) o1;
-			ICompletionProposal c2= (ICompletionProposal) o2;
-			return c1.getDisplayString().compareTo(c2.getDisplayString());
-		}
-	};
+	private static final String PROCESSOR_CONTRIBUTION_ID= "javadocCompletionProcessor";
 	
 	private IEditorPart fEditor;
-	private IWorkingCopyManager fManager;
 	private char[] fProposalAutoActivationSet;
 	private JavaCompletionProposalComparator fComparator;
 	private TemplateEngine fTemplateEngine;
+	private int fSubProcessorFlags;
+	private String fErrorMessage;
 	
-	private boolean fRestrictToMatchingCase;
-	
+	private IJavadocCompletionProcessor[] fSubProcessors;
 	
 	public JavaDocCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
-		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("javadoc"); //$NON-NLS-1$
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
-		fRestrictToMatchingCase= false;
-		
+		fSubProcessorFlags= 0;
 		fComparator= new JavaCompletionProposalComparator();
+		fSubProcessors= null;
+		fErrorMessage= null;
 	}
+
+
+	private IJavadocCompletionProcessor[] getContributedProcessors() {
+		if (fSubProcessors == null) {
+			try {
+				IPluginRegistry registry= Platform.getPluginRegistry();
+				IConfigurationElement[] elements=	registry.getConfigurationElementsFor(JavaUI.ID_PLUGIN, PROCESSOR_CONTRIBUTION_ID);
+				IJavadocCompletionProcessor[] result= new IJavadocCompletionProcessor[elements.length];
+				for (int i= 0; i < elements.length; i++) {
+					result[i]= (IJavadocCompletionProcessor) elements[i].createExecutableExtension("class");
+				}
+				fSubProcessors= result;
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+				fSubProcessors= new IJavadocCompletionProcessor[] { new JavaDocCompletionEvaluator() };
+			}
+		}
+		return fSubProcessors;
+	}
+
 	
 	/**
 	 * Tells this processor to order the proposals alphabetically.
@@ -82,7 +100,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	 * @param restrict <code>true</code> if proposals should be restricted
 	 */
 	public void restrictProposalsToMatchingCases(boolean restrict) {
-		fRestrictToMatchingCase= restrict;
+		fSubProcessorFlags= restrict ? IJavadocCompletionProcessor.RESTRICT_TO_MATCHING_CASE : 0;
 	}
 	
 	/**
@@ -127,62 +145,75 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
 	 */
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
-		return null;
+		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
+
+		ArrayList result= new ArrayList();
+		String errorMessage= null;
+
+		IJavadocCompletionProcessor[] processors= getContributedProcessors();
+		for (int i= 0; i < processors.length; i++) {
+			IJavadocCompletionProcessor curr= processors[i];
+			IContextInformation[] contextInfos= curr.computeContextInformation(cu, offset);
+			if (contextInfos != null) {
+				for (int k= 0; k < contextInfos.length; k++) {
+					result.add(contextInfos[k]);
+				}
+			}
+			if (curr.getErrorMessage() != null) {
+				errorMessage= curr.getErrorMessage();
+			}
+		}
+		fErrorMessage= result.isEmpty() ? errorMessage : null;
+		return (IContextInformation[]) result.toArray(new IContextInformation[result.size()]);
 	}
 
 	/**
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
-		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
-		IDocument document= viewer.getDocument();
-
-		IJavaCompletionProposal[] results= new IJavaCompletionProposal[0];
-
-		try {
-			if (unit != null) {
-				
-				int offset= documentOffset;
-				int length= 0;
-				
-				Point selection= viewer.getSelectedRange();
-				if (selection.y > 0) {
-					offset= selection.x;
-					length= selection.y;
-				}
-				
-				JavaDocCompletionEvaluator evaluator= new JavaDocCompletionEvaluator(unit, document, offset, length);
-				evaluator.restrictProposalsToMatchingCases(fRestrictToMatchingCase);
-				results= evaluator.computeProposals();
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
+	
+		int offset= documentOffset;
+		int length= 0;	
+		Point selection= viewer.getSelectedRange();
+		if (selection.y > 0) {
+			offset= selection.x;
+			length= selection.y;
 		}
 
+		ArrayList result= new ArrayList();
+		String errorMessage= null;
+
+		IJavadocCompletionProcessor[] processors= getContributedProcessors();
+		for (int i= 0; i < processors.length; i++) {
+			IJavadocCompletionProcessor curr= processors[i];
+			IJavaCompletionProposal[] proposals= curr.computeCompletionProposals(cu, offset, length, fSubProcessorFlags);
+			if (proposals != null) {
+				for (int k= 0; k < proposals.length; k++) {
+					result.add(proposals[k]);
+				}
+			}
+			if (curr.getErrorMessage() != null) {
+				errorMessage= curr.getErrorMessage();
+			}
+		}
 		if (fTemplateEngine != null) {
 			try {
 				fTemplateEngine.reset();
-				fTemplateEngine.complete(viewer, documentOffset, unit);
+				fTemplateEngine.complete(viewer, offset, cu);
 			} catch (JavaModelException x) {
+				errorMessage= x.getLocalizedMessage();
 			}				
 			
 			IJavaCompletionProposal[] templateResults= fTemplateEngine.getResults();
-			if (results.length == 0) {
-				results= templateResults;
-			} else {
-				// concatenate arrays
-				IJavaCompletionProposal[] total= new IJavaCompletionProposal[results.length + templateResults.length];
-				System.arraycopy(templateResults, 0, total, 0, templateResults.length);
-				System.arraycopy(results, 0, total, templateResults.length, results.length);
-				results= total;
+			for (int k= 0; k < templateResults.length; k++) {
+				result.add(templateResults[k]);
 			}
 		}
-
-		/*
-		 * Order here and not in result collector to make sure that the order
-		 * applies to all proposals and not just those of the compilation unit. 
-		 */
-		return order(results);
+		fErrorMessage= result.isEmpty() ? errorMessage : null;
+		
+		IJavaCompletionProposal[] total= (IJavaCompletionProposal[]) result.toArray(new IJavaCompletionProposal[result.size()]);	
+		return order(total);			
 	}
 	
 	/**
