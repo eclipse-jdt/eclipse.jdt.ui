@@ -1041,7 +1041,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		return null;
 	}
 	
-	private IDialogSettings getDialogSettings() {
+	protected IDialogSettings getDialogSettings() {
 		String sectionName= getId();
 		
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings().getSection(sectionName);
