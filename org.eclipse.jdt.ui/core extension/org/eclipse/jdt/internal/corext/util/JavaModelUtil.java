@@ -4,12 +4,21 @@
  */
 package org.eclipse.jdt.internal.corext.util;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -27,6 +36,8 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 /**
  * Utility methods for the Java Model.
  */
@@ -37,11 +48,63 @@ public class JavaModelUtil {
 	 * @param jproject The java project to search in
 	 * @param str The fully qualified name (type name with enclosing type names and package (all separated by dots))
 	 * @return The type found, or null if not existing
-	 * @deprecated Use IJavaProject.findType(String) instead
 	 */	
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
-		return jproject.findType(fullyQualifiedName);
+		//workaround for bug 22883
+		IType type= jproject.findType(fullyQualifiedName);
+		if (type != null)
+			return type;
+		IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			IPackageFragmentRoot root= roots[i];
+			type= findType(root, fullyQualifiedName);
+			if (type != null && type.exists())
+				return type;
+		}	
+		return null;
 	}
+	
+	private static IType findType(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException{
+		IJavaElement[] children= root.getChildren();
+		for (int i= 0; i < children.length; i++) {
+			IJavaElement element= children[i];
+			if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
+				IPackageFragment pack= (IPackageFragment)element;
+				IType type= findType(pack, fullyQualifiedName);
+				if (type != null && type.exists())
+					return type;
+			}
+		}		
+		return null;
+	}
+	
+	private static IType findType(IPackageFragment pack, String fullyQualifiedName) throws JavaModelException{
+		ICompilationUnit[] cus= pack.getCompilationUnits();
+		for (int k= 0; k < cus.length; k++) {
+			ICompilationUnit unit= cus[k];
+			IType type= findType(unit, fullyQualifiedName);
+			if (type != null && type.exists())
+				return type;
+		}
+		return null;
+	}
+	
+	private static IType findType(ICompilationUnit cu, String fullyQualifiedName) throws JavaModelException{
+		IType[] types= cu.getAllTypes();
+		for (int i= 0; i < types.length; i++) {
+			IType type= types[i];
+			if (getFullyQualifiedName(type).equals(fullyQualifiedName))
+				return type;
+		}
+		return null;
+	}
+	
+	private static IType findType(IClassFile classFile, String fullyQualifiedName) throws JavaModelException{
+		if (getFullyQualifiedName(classFile.getType()).equals(fullyQualifiedName))
+			return classFile.getType();
+		return null;
+	}
+	
 
 	/** 
 	 * Finds a type by package and type name.
@@ -555,5 +618,40 @@ public class JavaModelUtil {
 				return true;
 		}
 		return false;		
+	}
+
+	public static IType[] getAllSuperTypes(IType type, IProgressMonitor pm) throws JavaModelException {
+		try{
+			pm.beginTask("", 3);
+			ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1));
+			
+			IProgressMonitor subPm= new SubProgressMonitor(pm, 2);
+			List typeList= Arrays.asList(hierarchy.getAllSupertypes(type));
+			subPm.beginTask("", typeList.size());
+			Set types= new HashSet(typeList);
+			for (Iterator iter= typeList.iterator(); iter.hasNext();) {
+				IType superType= (IType)iter.next();
+				IType[] superTypes= getAllSuperTypes(superType, new SubProgressMonitor(subPm, 1));
+				types.addAll(Arrays.asList(superTypes));
+			}
+			types.add(getObject(type.getJavaProject()));
+			subPm.done();
+			return (IType[]) types.toArray(new IType[types.size()]);
+		} finally {
+			pm.done();
+		}	
+	}
+	private static IType getObject(IJavaProject jProject) throws JavaModelException {
+		return jProject.findType("java.lang.Object");//$NON-NLS-1$
+	}
+	
+	public static IType getMethodParameterType(IMethod method, int parameterIndex) throws JavaModelException{
+		Assert.isTrue(parameterIndex >=0);
+		if (method.getNumberOfParameters() < parameterIndex)
+			return null;
+		String fqn= getResolvedTypeName(method.getParameterTypes()[parameterIndex], method.getDeclaringType());
+		if (fqn == null)
+			return null;
+		return JavaModelUtil.findType(method.getJavaProject(), fqn);	
 	}
 }
