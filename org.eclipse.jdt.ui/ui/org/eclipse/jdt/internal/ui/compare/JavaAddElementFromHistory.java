@@ -124,10 +124,6 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			if (! buffer.makeCommittable(shell).isOK())
 				return;
 			
-			// workaround for #?????
-			if (buffer.getLength() == 0)
-			    buffer.replace(0, 0, buffer.getLineDelimiter());
-
 			// configure EditionSelectionDialog and let user select an edition
 			ITypedElement target= new JavaTextBufferNode(buffer, inEditor);
 
