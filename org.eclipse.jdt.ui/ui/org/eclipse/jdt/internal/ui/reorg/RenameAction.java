@@ -65,16 +65,16 @@ public class RenameAction extends ReorgAction {
 	 */
 	public void doActionPerformed() {
 		Object element= getStructuredSelection().getFirstElement();
-		if (isReadOnlyResource(element)) {
-			if (!confirmReadOnly(ReorgMessages.getString("renameAction.checkRename.title"),  //$NON-NLS-1$
-					ReorgMessages.getString("renameAction.checkRename.message"))) //$NON-NLS-1$
-					return;
-		}
 		if (fRefactoringSupport != null) {
 			fRefactoringSupport.rename(element);
 			fRefactoringSupport= null;
 			return;
 		}	
+		if (isReadOnlyResource(element)) {
+			if (!confirmReadOnly(ReorgMessages.getString("renameAction.checkRename.title"),  //$NON-NLS-1$
+					ReorgMessages.getString("renameAction.checkRename.message"))) //$NON-NLS-1$
+					return;
+		}
 		renameElement(element);
 	}
 	

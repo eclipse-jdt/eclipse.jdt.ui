@@ -125,6 +125,16 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		if (fNeedsImportToCurrentPackage)
 			result.merge(checkTopLevelTypeNameConflict(fNewPackage, getCu()));
 							
+		// Begin: Clear Case save problem.
+		IResource resource= getResource(getCompilationUnit());
+		if (resource != null) {
+			if (!resource.isAccessible())
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_not_accessible", resource.getFullPath())); //$NON-NLS-1$
+			if (resource.isReadOnly())
+				result.addError(RefactoringCoreMessages.getFormattedString("Checks.resource_read_only", resource.getFullPath())); //$NON-NLS-1$
+		}
+		// End: Clear Case save problem.
+	
 		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 11))));
 		pm.worked(5);
 		result.merge(checkReferencesInOurCompilationUnit(new SubProgressMonitor(pm, 11)));

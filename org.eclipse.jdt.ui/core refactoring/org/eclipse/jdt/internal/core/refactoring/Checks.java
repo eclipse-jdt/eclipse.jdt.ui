@@ -127,7 +127,8 @@ public class Checks {
 			if (!resource.isAccessible())
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_not_accessible", resource.getFullPath())); //$NON-NLS-1$
 			if (resource.isReadOnly())
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_read_only", resource.getFullPath())); //$NON-NLS-1$
+				// Clear Case save problem.
+				result.addError(RefactoringCoreMessages.getFormattedString("Checks.resource_read_only", resource.getFullPath())); //$NON-NLS-1$
 		}
 		return result;
 	}	
