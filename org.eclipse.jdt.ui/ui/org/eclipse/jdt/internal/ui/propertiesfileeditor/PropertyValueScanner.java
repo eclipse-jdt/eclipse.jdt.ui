@@ -43,15 +43,15 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 		 * @see IWordDetector#isWordStart
 		 */
 		public boolean isWordStart(char c) {
-			if ('=' != c || fDocument == null)
+			if ('=' != c && ':' != c || fDocument == null)
 				return false;
 			
 			try {
 				// check whether it is the first '='
 				IRegion lineInfo= fDocument.getLineInformationOfOffset(fOffset);
 				int offset= lineInfo.getOffset();
-				String line= fDocument.get(offset, offset + lineInfo.getLength());
-				int i= line.indexOf('=');
+				String line= fDocument.get(offset, lineInfo.getLength());
+				int i= line.indexOf(c);
 				return i != -1 && i + lineInfo.getOffset() + 1 == fOffset;
 			} catch (BadLocationException ex) {
 				return false;
