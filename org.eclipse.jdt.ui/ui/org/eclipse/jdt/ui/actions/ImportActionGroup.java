@@ -14,13 +14,14 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.ExportResourcesAction;
 import org.eclipse.ui.actions.ImportResourcesAction;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.ui.IContextMenuConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Action group to add the Import and Export action to a view part's
@@ -47,11 +48,11 @@ public class ImportActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public ImportActionGroup(IViewPart part) {
-		IWorkbench workbench = part.getSite().getWorkbenchWindow().getWorkbench();
-		fImportAction= new ImportResourcesAction(workbench);
+		IWorkbenchWindow workbenchWindow = part.getSite().getWorkbenchWindow();
+		fImportAction= new ImportResourcesAction(workbenchWindow);
 		JavaPluginImages.setToolImageDescriptors(fImportAction, "import_wiz.gif"); //$NON-NLS-1$
 		
-		fExportAction= new ExportResourcesAction(workbench);			
+		fExportAction= new ExportResourcesAction(workbenchWindow);			
 		JavaPluginImages.setToolImageDescriptors(fExportAction, "export_wiz.gif"); //$NON-NLS-1$
 	}
 	
