@@ -580,7 +580,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         TextChange change= new CompilationUnitChange("", fCu); //$NON-NLS-1$
         TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
         TextEdit resultingEdits= new MultiTextEdit();
-        rewrite.rewriteNode(textBuffer, resultingEdits, null);
+        rewrite.rewriteNode(textBuffer, resultingEdits);
         change.addTextEdit(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.editName"), resultingEdits); //$NON-NLS-1$
         rewrite.removeModifications();
         return change;
