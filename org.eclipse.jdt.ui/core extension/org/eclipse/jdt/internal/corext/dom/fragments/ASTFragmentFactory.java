@@ -148,9 +148,8 @@ public class ASTFragmentFactory {
 				setFragment(createInfixExpressionSubPartFragmentBySourceRange(node, fRange, fCu));
 			} catch(JavaModelException e) {
 				javaModelException= e;
-			} finally {
-				return false;	
 			}
+			return false;	
 		}
 		
 		public boolean visit(ASTNode node) {
