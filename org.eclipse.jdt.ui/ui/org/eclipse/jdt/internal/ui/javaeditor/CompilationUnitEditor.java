@@ -104,23 +104,25 @@ public class CompilationUnitEditor extends JavaEditor {
 	/**
 	 * Responsible for highlighting matching pairs of brackets.
 	 */
-	class BracketHighlighter implements KeyListener, MouseListener, ISelectionChangedListener, ITextListener {		
+	class BracketHighlighter implements KeyListener, MouseListener, ISelectionChangedListener, ITextListener, ITextInputListener {		
 		
 		/**
 		 * Highlights the brackets.
 		 */
 		class HighlightBrackets implements PaintListener {
-						
-			private boolean fHooked= false;
+			
 			private JavaPairMatcher fMatcher= new JavaPairMatcher(new char[] { '{', '}', '(', ')', '[', ']' });
+			private Position fBracketPosition= new Position(0, 0);
+			private boolean fIsActive= false;
 			private StyledText fTextWidget;
 			private Color fColor;
+			
 			
 			public HighlightBrackets() {
 				fTextWidget= fSourceViewer.getTextWidget();
 				fColor= fTextWidget.getDisplay().getSystemColor(SWT.COLOR_MAGENTA);
 			}
-			
+						
 			public void dispose() {
 				if (fMatcher != null) {
 					fMatcher.dispose();
@@ -130,30 +132,54 @@ public class CompilationUnitEditor extends JavaEditor {
 				fTextWidget= null;
 				fColor= null;
 			}
+						
+			public void deactivate(boolean redraw) {
+				if (fIsActive) {
+					fIsActive= false;
+					fTextWidget.removePaintListener(this);
+					fManager.unmanage(fBracketPosition);
+					if (redraw)
+						handleDrawRequest(null);
+				}
+			}
 			
 			public void run() {
-				
+								
 				Point selection= fSourceViewer.getSelectedRange();
 				if (selection.y > 0) {
-					removeStyles();
+					deactivate(true);
 					return;
 				}
 					
 				IRegion pair= fMatcher.match(fSourceViewer.getDocument(), selection.x);
 				if (pair == null) {
-					removeStyles();
-				} else {
-					
+					deactivate(true);
+					return;
+				}
+				
+				if (fIsActive) {
+					// only if different
 					if (pair.getOffset() != fBracketPosition.getOffset() || pair.getLength() != fBracketPosition.getLength()) {
-						
-						removeStyles();
-						
+						// remove old highlighting
+						handleDrawRequest(null);
+						// update position
+						fBracketPosition.isDeleted= false;
 						fBracketPosition.offset= pair.getOffset();
 						fBracketPosition.length= pair.getLength();
-						fBracketPosition.isDeleted= false;
+						// apply new highlighting
+						handleDrawRequest(null);
 					}
-										
-					applyStyles();
+				} else {
+					
+					fIsActive= true;
+					
+					fBracketPosition.isDeleted= false;
+					fBracketPosition.offset= pair.getOffset();
+					fBracketPosition.length= pair.getLength();
+					
+					fTextWidget.addPaintListener(this);
+					fManager.manage(fBracketPosition);
+					handleDrawRequest(null);
 				}
 			}
 			
@@ -187,28 +213,12 @@ public class CompilationUnitEditor extends JavaEditor {
 					fTextWidget.redrawRange(offset, length, true);
 				}
 			}
-						
-			private void removeStyles() {
-				if (fHooked) {
-					fHooked= false;
-					fTextWidget.removePaintListener(this);
-					handleDrawRequest(null);
-				}
-			}
-			
-			private void applyStyles() {
-				if (!fHooked) {
-					fHooked= true;
-					fTextWidget.addPaintListener(this);
-				}
-				handleDrawRequest(null);
-			}
 		};
 		
 		/**
-		 * Monitors the input document of the source viewer.
+		 * Manages the registration and updating of the bracket position.
 		 */
-		class BracketPositionManager implements ITextInputListener {
+		class BracketPositionManager {
 			
 			private IDocument fDocument;
 			private IPositionUpdater fPositionUpdater;
@@ -219,37 +229,21 @@ public class CompilationUnitEditor extends JavaEditor {
 				fPositionUpdater= new DefaultPositionUpdater(fCategory);
 			}
 			
-			public void install() {
-				fSourceViewer.addTextInputListener(this);
-				start(fSourceViewer.getDocument());
-			}
-			
-			public void dispose() {
-				fSourceViewer.removeTextInputListener(this);
-				if (fDocument != null) {
-					stop(fDocument);
-					fDocument= null;
-				}
-			}
-			
-			private void start(IDocument document) {
+			public void install(IDocument document) {
 				fDocument= document;
 				fDocument.addPositionCategory(fCategory);
 				fDocument.addPositionUpdater(fPositionUpdater);
-				try {
-					fDocument.addPosition(fCategory, fBracketPosition);
-				} catch (BadPositionCategoryException x) {
-					// should not happen
-				} catch (BadLocationException x) {
-					// should not happen
-				}
 			}
 			
-			private void stop(IDocument document) {
-				if (document == fDocument) {
+			public void dispose() {
+				uninstall(fDocument);
+			}
+			
+			public void uninstall(IDocument document) {
+				if (document == fDocument && document != null) {
 					try {
-						document.removePositionUpdater(fPositionUpdater);
-						document.removePositionCategory(fCategory);			
+						fDocument.removePositionUpdater(fPositionUpdater);
+						fDocument.removePositionCategory(fCategory);			
 					} catch (BadPositionCategoryException x) {
 						// should not happen
 					}
@@ -257,30 +251,32 @@ public class CompilationUnitEditor extends JavaEditor {
 				}
 			}
 			
-			/*
-			 * @see ITextInputListener#inputDocumentAboutToBeChanged(IDocument, IDocument)
-			 */
-			public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
-				if (oldInput != null)
-					stop(oldInput);
+			public void manage(Position position) {
+				try {
+					fDocument.addPosition(fCategory, position);
+				} catch (BadPositionCategoryException x) {
+					// should not happen
+				} catch (BadLocationException x) {
+					// should not happen
+				}
 			}
 			
-			/*
-			 * @see ITextInputListener#inputDocumentChanged(IDocument, IDocument)
-			 */
-			public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
-				if (newInput != null)
-					start(newInput);
+			public void unmanage(Position position) {
+				try {
+					fDocument.removePosition(fCategory, position);
+				} catch (BadPositionCategoryException x) {
+					// should not happen
+				}
 			}
 		};
 		
-		private Position fBracketPosition= new Position(0, 0);
-		private BracketPositionManager fManager= new BracketPositionManager();
 		
-		private ISourceViewer fSourceViewer;
+		private BracketPositionManager fManager= new BracketPositionManager();
 		private HighlightBrackets fHighlightBrackets;
+		private ISourceViewer fSourceViewer;
 		private boolean fTextChanged= false;
 
+		
 		public BracketHighlighter(ISourceViewer sourceViewer) {
 			fSourceViewer= sourceViewer;
 			fHighlightBrackets= new HighlightBrackets();
@@ -288,7 +284,9 @@ public class CompilationUnitEditor extends JavaEditor {
 		
 		public void install() {
 			
-			fManager.install();
+			fManager.install(fSourceViewer.getDocument());
+			
+			fSourceViewer.addTextInputListener(this);
 			
 			ISelectionProvider provider= fSourceViewer.getSelectionProvider();
 			provider.addSelectionChangedListener(this);
@@ -313,6 +311,8 @@ public class CompilationUnitEditor extends JavaEditor {
 			}
 			
 			if (fSourceViewer != null && fBracketHighlighter != null) {
+				
+				fSourceViewer.removeTextInputListener(this);
 				
 				ISelectionProvider provider= fSourceViewer.getSelectionProvider();
 				provider.removeSelectionChangedListener(this);
@@ -349,13 +349,13 @@ public class CompilationUnitEditor extends JavaEditor {
 		 */
 		public void mouseDoubleClick(MouseEvent e) {
 		}
-
+		
 		/*
 		 * @see MouseListener#mouseDown(MouseEvent)
 		 */
 		public void mouseDown(MouseEvent e) {
 		}
-
+		
 		/*
 		 * @see MouseListener#mouseUp(MouseEvent)
 		 */
@@ -374,8 +374,34 @@ public class CompilationUnitEditor extends JavaEditor {
 		 * @see ITextListener#textChanged(TextEvent)
 		 */
 		public void textChanged(TextEvent event) {
-			fHighlightBrackets.run();
 			fTextChanged= true;
+			Control control= fSourceViewer.getTextWidget();
+			if (control != null) {
+				control.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						if (fTextChanged && fHighlightBrackets != null) 
+							fHighlightBrackets.run();
+					}
+				});
+			}
+		}
+		
+		/*
+		 * @see ITextInputListener#inputDocumentAboutToBeChanged(IDocument, IDocument)
+		 */
+		public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
+			if (oldInput != null) {
+				fHighlightBrackets.deactivate(false);
+				fManager.uninstall(oldInput);
+			}
+		}
+		
+		/*
+		 * @see ITextInputListener#inputDocumentChanged(IDocument, IDocument)
+		 */
+		public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
+			if (newInput != null)
+				fManager.install(newInput);
 		}
 	};
 	
