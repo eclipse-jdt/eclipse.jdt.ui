@@ -22,6 +22,7 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -56,17 +57,19 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	private IRegion fSelectedRegion; // initialized by apply()
 	private ICompilationUnit fCompilationUnit;
 	private String fLabel;
+	private String fValueSuggestion;
 			
 	public LinkedNamesAssistProposal(ICompilationUnit cu, SimpleName node) {
-		this(CorrectionMessages.getString("LinkedNamesAssistProposal.description"), cu, node); //$NON-NLS-1$
+		this(CorrectionMessages.getString("LinkedNamesAssistProposal.description"), cu, node, null); //$NON-NLS-1$
 		fNode= node;
 		fCompilationUnit= cu;
 	}
 	
-	public LinkedNamesAssistProposal(String label, ICompilationUnit cu, SimpleName node) {
+	public LinkedNamesAssistProposal(String label, ICompilationUnit cu, SimpleName node, String valueSuggestion) {
 		fLabel= label;
 		fNode= node;
 		fCompilationUnit= cu;
+		fValueSuggestion= valueSuggestion;
 	}
 	
 	/* (non-Javadoc)
@@ -132,6 +135,11 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			ui.enter();
 			
 			fSelectedRegion= ui.getSelectedRegion();
+			if (fValueSuggestion != null && fSelectedRegion != null) {
+				document.replace(fSelectedRegion.getOffset(), fSelectedRegion.getLength(), fValueSuggestion);
+				fSelectedRegion= new Region(fSelectedRegion.getOffset(), fValueSuggestion.length());
+			}
+			
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}

@@ -595,13 +595,16 @@ public class LocalCorrectionsSubProcessor {
 		proposals.add(proposal);
 	}
 
-	public static void addHidingVariablesProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addInvalidVariableNameProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		// hiding, redefined or future keyword 
+		
 		CompilationUnit root= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(root);
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
 		SimpleName nameNode= (SimpleName) selectedNode;
+		String valueSuggestion= null;
 		
 		String name;
 		switch (problem.getProblemId()) {
@@ -618,9 +621,16 @@ public class LocalCorrectionsSubProcessor {
 				name= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.hiding.argument.label", nameNode.getIdentifier()); //$NON-NLS-1$
 				break;
 			default:
-				return;
+				name= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.rename.var.label", nameNode.getIdentifier()); //$NON-NLS-1$
 		}
-		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(name, context.getCompilationUnit(), nameNode);
+		
+		if (problem.getProblemId() == IProblem.UseEnumAsAnIdentifier) {
+			valueSuggestion= "enumeration"; //$NON-NLS-1$
+		} else {
+			valueSuggestion= nameNode.getIdentifier() + '1';
+		}
+
+		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(name, context.getCompilationUnit(), nameNode, valueSuggestion);
 		proposals.add(proposal);
 	}
 

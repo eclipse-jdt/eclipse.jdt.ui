@@ -148,6 +148,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MissingSerialVersion:
 			case IProblem.UnnecessaryElse:
 			case IProblem.SuperclassMustBeAClass:
+			case IProblem.UseAssertAsAnIdentifier:
+			case IProblem.UseEnumAsAnIdentifier:
+			case IProblem.RedefinedLocal:
+			case IProblem.RedefinedArgument:
 				return true;
 			default:
 				return false;
@@ -403,7 +407,11 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.FieldHidingField:
 			case IProblem.ArgumentHidingLocalVariable:
 			case IProblem.ArgumentHidingField:
-				LocalCorrectionsSubProcessor.addHidingVariablesProposals(context, problem, proposals);
+			case IProblem.UseAssertAsAnIdentifier:
+			case IProblem.UseEnumAsAnIdentifier:
+			case IProblem.RedefinedLocal:
+			case IProblem.RedefinedArgument:
+				LocalCorrectionsSubProcessor.addInvalidVariableNameProposals(context, problem, proposals);
 				break;
 			case IProblem.NoMessageSendOnArrayType:
 				UnresolvedElementsSubProcessor.getArrayAccessProposals(context, problem, proposals); 
