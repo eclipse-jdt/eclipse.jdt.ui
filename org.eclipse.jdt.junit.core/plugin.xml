@@ -408,12 +408,6 @@
             category="org.eclipse.ui.category.views"
             id="org.eclipse.jdt.junit.ResultView">
       </command>
-      <keyBinding
-            string=""
-            contextId="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.junit.ResultView"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
       
       <command
             name="%JUnitShortcut.description.debug"
