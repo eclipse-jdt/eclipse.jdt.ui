@@ -25,15 +25,17 @@ public abstract class DisplayHelper {
 	/**
 	 * Creates a new instance.
 	 */
-	public DisplayHelper() {
+	protected DisplayHelper() {
 	}
 	
 	/**
 	 * Until {@link #condition()} becomes <code>true</code> or the timeout
 	 * elapses, call {@link Display#sleep()} and run the event loop.
 	 * <p>
-	 * If <code>timeout &lt;= 0</code>, the event loop is driven at most
-	 * once, but <code>Display.sleep()</code> is never invoked.
+	 * If <code>timeout &lt; 0</code>, the event loop is never driven and
+	 * only the condition is checked. If <code>timeout == 0</code>, the event
+	 * loop is driven at most once, but <code>Display.sleep()</code> is never
+	 * invoked.
 	 * </p>
 	 * 
 	 * @param display the display to run the event loop of
@@ -46,6 +48,9 @@ public abstract class DisplayHelper {
 		if (condition())
 			return true;
 		
+		if (timeout < 0)
+			return false;
+		
 		// if driving the event loop once makes the condition hold, succeed
 		// without spawning a thread.
 		runEventQueue(display);
@@ -53,7 +58,7 @@ public abstract class DisplayHelper {
 			return true;
 		
 		// if the timeout is negative or zero, fail
-		if (timeout <= 0)
+		if (timeout == 0)
 			return false;
 
 		// repeatedly sleep until condition becomes true or timeout elapses
@@ -74,10 +79,11 @@ public abstract class DisplayHelper {
 	 * Call {@link Display#sleep()} and run the event loop until the given
 	 * timeout has elapsed.
 	 * <p>
-	 * If <code>timeout &lt;= 0</code>, the event loop is driven at most
-	 * once, but <code>Display.sleep()</code> is never invoked.
+	 * If <code>timeout &lt; 0</code>, nothing happens. If
+	 * <code>timeout == 0</code>, the event loop is driven exactly once, but
+	 * <code>Display.sleep()</code> is never invoked.
 	 * </p>
-
+	 * 
 	 * @param display the display to run the event loop of
 	 * @param millis the timeout in milliseconds
 	 */
