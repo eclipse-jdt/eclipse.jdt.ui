@@ -91,7 +91,6 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 		return null;
 	}
 	
-	
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
