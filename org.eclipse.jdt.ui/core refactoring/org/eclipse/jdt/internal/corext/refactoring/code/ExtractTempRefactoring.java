@@ -156,7 +156,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 1);
+			pm.beginTask("Checking preconditions", 1);
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkTempName(fTempName));
 			return result;
@@ -167,7 +167,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {		
 		try{
-			pm.beginTask("", 1);	
+			pm.beginTask("Preparing preview", 1);	
 			TextChange change= new CompilationUnitChange("Extract Temp", fCu);
 			addTempDeclaration(change);
 			addImportIfNeeded(change);
