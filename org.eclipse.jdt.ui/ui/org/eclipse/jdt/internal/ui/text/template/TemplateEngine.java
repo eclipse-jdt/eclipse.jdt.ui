@@ -12,6 +12,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -56,12 +57,13 @@ public class TemplateEngine {
 	 * @param completionPosition the context position in the document of the text viewer
 	 * @param unit               the compilation unit (may be <code>null</code>)
 	 */
-	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit sourceUnit)
-		throws JavaModelException
+	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit sourceUnit,
+		IEditorPart editor) throws JavaModelException
 	{
 		Assert.isNotNull(viewer);
-
-		TemplateContext context= new TemplateContext(viewer, completionPosition, sourceUnit, fContextType);
+		Assert.isNotNull(editor);
+		
+		TemplateContext context= new TemplateContext(viewer, completionPosition, sourceUnit, editor, fContextType);
 		Template[] templates= TemplateSet.getInstance().getMatchingTemplates(context);
 
 		for (int i= 0; i != templates.length; i++) {

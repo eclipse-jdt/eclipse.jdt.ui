@@ -106,7 +106,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 
 		try {
 			fTemplateEngine.reset();
-			fTemplateEngine.complete(viewer, documentOffset, unit);
+			fTemplateEngine.complete(viewer, documentOffset, unit, fEditor);
 		} catch (JavaModelException x) {
 		}				
 		

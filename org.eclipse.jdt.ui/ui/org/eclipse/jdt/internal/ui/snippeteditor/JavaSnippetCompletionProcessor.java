@@ -88,7 +88,7 @@ public class JavaSnippetCompletionProcessor implements IContentAssistProcessor {
 		
 		try {
 			fTemplateEngine.reset();
-			fTemplateEngine.complete(viewer, position, null);
+			fTemplateEngine.complete(viewer, position, null, fEditor);
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
 			ErrorDialog.openError(shell, SnippetMessages.getString("CompletionProcessor.errorTitle"), SnippetMessages.getString("CompletionProcessor.errorMessage"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$

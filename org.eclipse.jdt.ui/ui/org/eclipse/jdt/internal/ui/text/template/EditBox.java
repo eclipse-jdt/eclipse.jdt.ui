@@ -10,6 +10,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -32,7 +33,7 @@ public class EditBox {
 	public EditBox(Composite parent, TemplateContext context, TemplateModel model, int rangeIndex) {
 		fComposite= new Composite(parent, SWT.NONE);
 		
-		fViewer= createEditor(fComposite);
+		fViewer= createEditor(fComposite, (ITextEditor) context.getEditor());
 
 		fText= fViewer.getTextWidget();
 		fText.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
@@ -52,10 +53,10 @@ public class EditBox {
 		return fRangeIndex;
 	}
 
-	private static SourceViewer createEditor(Composite parent) {
+	private static SourceViewer createEditor(Composite parent, ITextEditor editor) {
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.SINGLE);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		viewer.configure(new JavaSourceViewerConfiguration(tools, editor));
 		viewer.setEditable(true);
 		viewer.setDocument(new Document());
 

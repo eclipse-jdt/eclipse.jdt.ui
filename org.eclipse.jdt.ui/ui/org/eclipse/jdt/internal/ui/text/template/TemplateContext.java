@@ -11,9 +11,11 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.core.Assert;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TemplateContext implements VariableEvaluator {
 	
@@ -27,6 +29,7 @@ public class TemplateContext implements VariableEvaluator {
 	private static final String FILE= "file"; //$NON-NLS-1$
 	private static final String LINE= "line"; //$NON-NLS-1$
 	private static final String DATE= "date"; //$NON-NLS-1$
+	private static final String TIME= "time"; //$NON-NLS-1$
 
 	private static final String INDEX= "index"; //$NON-NLS-1$
 	private static final String ARRAY= "array"; //$NON-NLS-1$
@@ -44,12 +47,13 @@ public class TemplateContext implements VariableEvaluator {
 	private String fKey;
 	private String fType;
 	private ICompilationUnit fUnit;
+	private IEditorPart fEditor;
 
 	/**
 	 * compilation unit can be null.
 	 */
 	public TemplateContext(ITextViewer viewer, int completionPosition, ICompilationUnit unit,
-	    String contextType)
+	    IEditorPart editor, String contextType)
 	{
 		Assert.isNotNull(viewer);
 		Assert.isTrue(completionPosition >= 0);
@@ -57,6 +61,7 @@ public class TemplateContext implements VariableEvaluator {
 		fViewer= viewer;
 		fEnd= completionPosition;
 		fUnit= unit;
+		fEditor= editor;
 		fType= contextType;
 		
 		String source= fViewer.getDocument().get();
@@ -74,6 +79,10 @@ public class TemplateContext implements VariableEvaluator {
 	
 	public ITextViewer getViewer() {
 		return fViewer;
+	}
+	
+	public IEditorPart getEditor() {		
+		return fEditor;
 	}
 	
 	public String getKey() {
@@ -101,26 +110,26 @@ public class TemplateContext implements VariableEvaluator {
 	 */
 	public String evaluateVariable(String variable, int offset) {
 		if (variable.equals(FILE)) {
-			if (fUnit == null)
-				return null;
-			else
+			if (fUnit != null)
 				return fUnit.getElementName();
 
-		// line number			
 		} else if (variable.equals(LINE)) {
 			try {
 				int line= fViewer.getDocument().getLineOfOffset(offset) + 1;
 				return Integer.toString(line);
-			} catch (BadLocationException e) {} // ignore
-			
-			return null;
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
 			
 		} else if (variable.equals(DATE)) {
 			return DateFormat.getDateInstance().format(new Date());
+
+		} else if (variable.equals(TIME)) {
+			return DateFormat.getTimeInstance().format(new Date());
 		
-		} else {
-			return null;
 		}
+		
+		return null;
 	}
 
 	private static int guessStart(String source, int end, String contextType) {
