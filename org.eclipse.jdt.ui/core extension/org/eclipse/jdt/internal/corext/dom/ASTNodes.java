@@ -367,6 +367,21 @@ public class ASTNodes {
 		return -1;
 	}
 	
+	public static int getRewriteNodeType(BodyDeclaration member) {
+		switch(member.getNodeType()) {
+			case ASTNode.TYPE_DECLARATION:
+				return ASTRewrite.TYPE_DECLARATION;
+			case ASTNode.METHOD_DECLARATION:
+				return ASTRewrite.METHOD_DECLARATION;
+			case ASTNode.FIELD_DECLARATION:
+				return ASTRewrite.FIELD_DECLARATION;
+			case ASTNode.INITIALIZER:
+				return ASTRewrite.INITIALIZER;
+		}
+		Assert.isTrue(false, "Cannot happen"); //$NON-NLS-1$
+		return -1;
+	}
+	
 	public static boolean needsParentheses(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.INFIX_EXPRESSION || type == ASTNode.CONDITIONAL_EXPRESSION ||

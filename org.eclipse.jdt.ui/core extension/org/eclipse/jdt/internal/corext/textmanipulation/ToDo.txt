@@ -7,3 +7,5 @@
 - get text range could return a copy, but then we have to adjust all the TextEdit.adjust*
   methods. No this is not necessary since outside the text edit infrastructure nobody
   can modify a text range. The methods are package visible.
+  
+- need way to head-less batch changes in editors into one undo object.

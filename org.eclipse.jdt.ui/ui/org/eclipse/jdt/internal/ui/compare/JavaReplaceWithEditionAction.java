@@ -13,27 +13,49 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ResourceBundle;
 
+import org.eclipse.compare.EditionSelectionDialog;
+import org.eclipse.compare.HistoryItem;
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.ResourceNode;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFileState;
+
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.*;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.ui.*;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
-import org.eclipse.compare.*;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
@@ -116,21 +138,28 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				ti= d.selectEdition(target, editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
-														
-				// from the edition get the lines (text) to insert
-				String[] lines= null;
-				try {
-					lines= JavaCompareUtilities.readLines(((IStreamContentAccessor) ti).getContents());								
-				} catch (CoreException ex) {
-					JavaPlugin.log(ex);
+																		
+				String newContent= JavaCompareUtilities.readString(((IStreamContentAccessor)ti).getContents());
+				if (newContent == null) {
+					MessageDialog.openError(shell, errorTitle, errorMessage);
+					return;
 				}
-				if (lines == null) {
+				String[] lines= Strings.convertIntoLines(newContent);
+				Strings.trimIndentation(lines, JavaCompareUtilities.getTabSize());
+				newContent= Strings.concatenate(lines, buffer.getLineDelimiter());
+				
+				CompilationUnit root= AST.parsePartialCompilationUnit(input.getCompilationUnit(), 0, false);
+				BodyDeclaration node= (BodyDeclaration)ASTNodes.getParent(NodeFinder.perform(root, input.getNameRange()), BodyDeclaration.class);
+				if (node == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;
 				}
 				
-				MemberEdit edit= new MemberEdit(input, MemberEdit.REPLACE, lines, JavaCompareUtilities.getTabSize());
-				edit.setAddLineSeparators(false);
+				ASTRewrite rewriter= new ASTRewrite(root);
+				rewriter.markAsReplaced(node,
+					rewriter.createPlaceholder(newContent, ASTNodes.getRewriteNodeType(node)));
+				MultiTextEdit edit= new MultiTextEdit();
+				rewriter.rewriteNode(buffer, edit);
 										
 				IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
 				
