@@ -133,7 +133,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	private String formatSingleMessage(String message) {
 		StringBuffer buffer= new StringBuffer();
 		HTMLPrinter.addPageProlog(buffer);
-		HTMLPrinter.addParagraph(buffer, message);
+		HTMLPrinter.addParagraph(buffer, HTMLPrinter.convertToHTMLContent(message));
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
@@ -144,12 +144,12 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	private String formatMultipleMessages(List messages) {
 		StringBuffer buffer= new StringBuffer();
 		HTMLPrinter.addPageProlog(buffer);
-		HTMLPrinter.addParagraph(buffer, "Multiple markers at this line.");
+		HTMLPrinter.addParagraph(buffer, HTMLPrinter.convertToHTMLContent("Multiple markers at this line."));
 		
 		HTMLPrinter.startBulletList(buffer);
 		Iterator e= messages.iterator();
 		while (e.hasNext())
-			HTMLPrinter.addBullet(buffer, (String) e.next());
+			HTMLPrinter.addBullet(buffer, HTMLPrinter.convertToHTMLContent((String) e.next()));
 		HTMLPrinter.endBulletList(buffer);	
 		
 		HTMLPrinter.addPageEpilog(buffer);

@@ -38,9 +38,8 @@ public class HTMLPrinter {
 	}
 	
 	public static String convertToHTMLContent(String content) {
-		return content;
-//		content= replace(content, '<', "&lt;");
-//		return replace(content, '>', "&gt;");
+		content= replace(content, '<', "&lt;");
+		return replace(content, '>', "&gt;");
 	}
 	
 	public static String read(Reader rd) {
@@ -84,7 +83,7 @@ public class HTMLPrinter {
 	public static void addBullet(StringBuffer buffer, String bullet) {
 		if (bullet != null) {
 			buffer.append("<li>");
-			buffer.append(convertToHTMLContent(bullet));
+			buffer.append(bullet);
 			buffer.append("</li>");
 		}
 	}
@@ -92,7 +91,7 @@ public class HTMLPrinter {
 	public static void addSmallHeader(StringBuffer buffer, String header) {
 		if (header != null) {
 			buffer.append("<h5>");
-			buffer.append(convertToHTMLContent(header));
+			buffer.append(header);
 			buffer.append("</h5>");
 		}
 	}
@@ -100,7 +99,7 @@ public class HTMLPrinter {
 	public static void addParagraph(StringBuffer buffer, String paragraph) {
 		if (paragraph != null) {
 			buffer.append("<p>");
-			buffer.append(convertToHTMLContent(paragraph));
+			buffer.append(paragraph);
 			buffer.append("</p>");
 		}
 	}
