@@ -1,0 +1,9 @@
+//7, 14 -> 7, 30
+package p;
+
+class A {
+	private void foo() {
+		Object str= null; 
+		if(! str.equals(null));
+	}
+}
