@@ -29,6 +29,7 @@ org.eclipse.platform.source/*
 org.apache.ant/*
 org.eclipse.help.webapp/*
 org.eclipse.pde.ui/*
+org.eclipse.pde.build/*
 org.eclipse.debug.core/*
 org.eclipse.jdt.debug/*
 org.eclipse.jdt.debug.ui/*
