@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectRefactoring;
@@ -64,12 +65,18 @@ public class RefactoringSupport {
 			fRefactoring= refactoring;
 		}
 
+		public RefactoringStatus lightCheck() throws JavaModelException {
+			return lightCheck(fRefactoring);
+		}
+
+		public abstract RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException; 
+			
 		public IRenameRefactoring getRefactoring() {
 			return fRefactoring;
 		}
 
 		public boolean canRename(Object element) throws JavaModelException{
-			boolean canRename= canAddToMenu(fRefactoring);
+			boolean canRename= lightCheck().isOK();
 			 if (!canRename)	
 			 	fRefactoring= null;
 			 return canRename;	
@@ -150,8 +157,6 @@ public class RefactoringSupport {
 			return null;
 		}
 				
-		abstract boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException;
-
 		String getNameEntryMessage(){
 			return ""; //$NON-NLS-1$
 		}
@@ -164,8 +169,8 @@ public class RefactoringSupport {
 		public RenameJavaProjectRefactoring getSpecificRefactoring() {
 			return (RenameJavaProjectRefactoring)fRefactoring;
 		}
-		public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameJavaProjectRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
+			return ((RenameJavaProjectRefactoring)refactoring).checkActivation(new NullProgressMonitor());
 		}
 		String getNameEntryMessage(){
 			return RefactoringMessages.getString("RefactoringSupportFactory.project_name"); //$NON-NLS-1$
@@ -179,8 +184,8 @@ public class RefactoringSupport {
 		public RenameSourceFolderRefactoring getSpecificRefactoring() {
 			return (RenameSourceFolderRefactoring)fRefactoring;
 		}
-		public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameSourceFolderRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
+			return ((RenameSourceFolderRefactoring)refactoring).checkActivation(new NullProgressMonitor());
 		}
 		String getNameEntryMessage(){
 			return RefactoringMessages.getString("RefactoringSupportFactory.source_folder_name"); //$NON-NLS-1$
@@ -194,8 +199,8 @@ public class RefactoringSupport {
 		public RenamePackageRefactoring getSpecificRefactoring() {
 			return (RenamePackageRefactoring)fRefactoring;
 		}
-		public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenamePackageRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
+			return ((RenamePackageRefactoring)refactoring).checkActivation(new NullProgressMonitor());
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringSupportFactory.rename_Package"); //$NON-NLS-1$
@@ -214,8 +219,8 @@ public class RefactoringSupport {
 		public RenameCompilationUnitRefactoring getSpecificRefactoring() {
 			return (RenameCompilationUnitRefactoring)fRefactoring;
 		}
-		public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameCompilationUnitRefactoring)refactoring).checkPreactivation().isOK();
+		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
+			return ((RenameCompilationUnitRefactoring)refactoring).checkPreactivation();
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringSupportFactory.rename_Cu"); //$NON-NLS-1$
@@ -240,8 +245,8 @@ public class RefactoringSupport {
 		public RenameTypeRefactoring getSpecificRefactoring() {
 			return (RenameTypeRefactoring)fRefactoring;
 		}
-		public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameTypeRefactoring)refactoring).checkPreactivation().isOK();
+		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
+			return ((RenameTypeRefactoring)refactoring).checkPreactivation();
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringGroup.rename_type_title"); //$NON-NLS-1$
@@ -260,8 +265,8 @@ public class RefactoringSupport {
 		public RenameMethodRefactoring getSpecificRefactoring() {
 			return (RenameMethodRefactoring)fRefactoring;
 		}
-		public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameMethodRefactoring)refactoring).checkPreactivation().isOK();
+		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
+			return ((RenameMethodRefactoring)refactoring).checkPreactivation();
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringGroup.rename_method_title"); //$NON-NLS-1$
@@ -280,8 +285,8 @@ public class RefactoringSupport {
 		public RenameFieldRefactoring getSpecificRefactoring() {
 			return (RenameFieldRefactoring)fRefactoring;
 		}
-		public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameFieldRefactoring)refactoring).checkPreactivation().isOK();
+		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
+			return ((RenameFieldRefactoring)refactoring).checkPreactivation();
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring){
 			String title= RefactoringMessages.getString("RefactoringGroup.rename_field_title"); //$NON-NLS-1$
@@ -306,8 +311,8 @@ public class RefactoringSupport {
 		public Resource(IResource element) {
 			super(new RenameResourceRefactoring(element));
 		}
-		public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameResourceRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
+			return ((RenameResourceRefactoring)refactoring).checkActivation(new NullProgressMonitor());
 		}
 		String getNameEntryMessage(){
 			return RefactoringMessages.getString("RefactoringSupportFactory.resource_name"); //$NON-NLS-1$

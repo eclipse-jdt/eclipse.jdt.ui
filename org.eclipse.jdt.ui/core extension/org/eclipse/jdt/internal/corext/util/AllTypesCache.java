@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
  */
 public class AllTypesCache {
 	
-	public static TypeInfo[] fgTypeCache= null;
+	private static TypeInfo[] fgTypeCache= null;
 	private static int fgSizeHint= 2000;
 	
 	private static int fgNumberOfCacheFlushes= 0;

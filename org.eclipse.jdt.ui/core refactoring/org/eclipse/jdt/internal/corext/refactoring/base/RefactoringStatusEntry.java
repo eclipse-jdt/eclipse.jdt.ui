@@ -4,7 +4,12 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jdt.core.compiler.IProblem;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -192,6 +197,33 @@ public class RefactoringStatusEntry{
 
 	public int getCode() {
 		return fCode;
+	}
+	
+	/**
+	 * Converts this <tt>RefactoringStatusEntry</tt> into an <tt>IStatus</tt>.
+	 * The mapping is done as follows: 
+	 * <ul>
+	 *   <li>Fatal and error entries are mapped to <code>IStatus.ERROR</code>.
+	 * </li>
+	 *   <li>Warning entries are mapped to <code>IStatus.WARNING</code>.</li>
+	 *   <li>Information entries are mapped to <code>IStatus.INFO</code>.</li>
+	 * </ul>
+	 * @return IStatus
+	 */
+	public IStatus asStatus () {
+		int statusSeverity= IStatus.ERROR;
+		switch (fSeverity) {
+			case RefactoringStatus.OK:
+				statusSeverity= IStatus.OK;
+				break;
+			case RefactoringStatus.INFO:
+				statusSeverity= IStatus.INFO;
+				break;
+			case RefactoringStatus.WARNING:
+				statusSeverity= IStatus.WARNING;
+				break; 
+		}
+		return new Status(statusSeverity, JavaPlugin.getPluginId(), fCode, fMessage, null);
 	}
 	
 	/* non java-doc

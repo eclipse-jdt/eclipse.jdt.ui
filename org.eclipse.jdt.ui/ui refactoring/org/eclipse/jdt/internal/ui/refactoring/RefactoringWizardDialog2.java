@@ -16,10 +16,8 @@ import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -107,8 +105,8 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 			if (msg == null || msg.length() == 0) {
 				msg= page.getMessage();
 				type= IMessageProvider.NONE;
-				if (msg != null && page instanceof IMessageProvider) 
-					type = ((IMessageProvider)page).getMessageType();
+			if (msg != null && page instanceof IMessageProvider) 
+				type = ((IMessageProvider)page).getMessageType();
 			}
 			Image image= null;
 			switch (type) {
@@ -146,57 +144,6 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 		}
 	}
 	
-	private static class RefactoringStatusDialog extends Dialog {
-		private ErrorWizardPage fPage;
-		public RefactoringStatusDialog(Shell parent, ErrorWizardPage page) {
-			super(parent);
-			fPage= page;
-		}		
-		protected void configureShell(Shell newShell) {
-			super.configureShell(newShell);
-			newShell.setText(getParentShell().getText());
-		}
-		protected Control createDialogArea(Composite parent) {
-			Composite result= new Composite(parent, SWT.NONE);
-			initializeDialogUnits(result);
-			GridLayout layout= new GridLayout();
-			result.setLayout(layout);
-			GridData gd= new GridData(GridData.FILL_BOTH);
-			gd.widthHint= 600;
-			gd.heightHint= 400;
-			result.setLayoutData(gd);
-			Color background= parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
-			ViewForm messagePane= new ViewForm(result, SWT.BORDER | SWT.FLAT);
-			messagePane.marginWidth= layout.marginWidth;
-			messagePane.marginHeight= layout.marginHeight;
-			gd= new GridData(GridData.FILL_HORIZONTAL);
-			// XXX http://bugs.eclipse.org/bugs/show_bug.cgi?id=27572
-			Rectangle rect= messagePane.computeTrim(0, 0, 0, convertHeightInCharsToPixels(2) + messagePane.marginHeight * 2);
-			gd.heightHint= rect.height;
-			messagePane.setLayoutData(gd);
-			messagePane.setBackground(background);
-			Label label= new Label(messagePane, SWT.LEFT | SWT.WRAP);
-			if (fPage.getStatus().hasFatalError())
-				label.setText("Cannot proceed due to the following problems.");
-			else 
-				label.setText("Please look at the information given in the list below. If you want to proceed, please press 'Continue'.");
-			label.setBackground(background);
-			messagePane.setContent(label);
-			fPage.createControl(result);
-			fPage.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
-			fPage.setVisible(true);
-			return result;
-		}
-		protected void createButtonsForButtonBar(Composite parent) {
-			if (!fPage.getStatus().hasFatalError()) {
-				createButton(parent, IDialogConstants.OK_ID, "Con&tinue", true);
-				createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-			} else {
-				createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, true);
-			}
-		}
-	}
-
 	public RefactoringWizardDialog2(Shell shell, RefactoringWizard wizard) {
 		super(shell);
 		Assert.isNotNull(wizard);

@@ -10,9 +10,16 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.refactoring;
 
-import org.eclipse.core.runtime.CoreException;
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -23,6 +30,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectRefactoring;
@@ -32,18 +40,14 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderRefa
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSupport;
 import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
 
 /**
- * Central access point to launch rename refactorings. Refactorings triggered
- * through this class will perform the following steps:
- * <ul>
- *   <li>check if the element can be renamed</li>
- *   <li>save all unsaved files</li>
- *   <li>open a corresponding refactoring dialog to gather user input</li>
- *   <li>execute or cancel the refactoring depending on user action</li>
- * </ul>
+ * Central access point to execute rename refactorings.
  * 
  * @since 2.1
  */
@@ -51,28 +55,79 @@ public class RenameSupport {
 
 	private IRefactoringRenameSupport fSupport;
 	private IJavaElement fElement;
+	private RefactoringStatus fPreCheckStatus;
 	
 	/**
-	 * Checks whether the rename support can actually rename the Java
-	 * element passed to the create method.
-	 * @return <code>true</code> if the element can be renamed; otherwise
-	 * <code>false</code> is returned.
-	 * @throws CoreException if an unexpected exception occurs while checking
-	 * renaming.
+	 * Executes some light weight precondition checking. If the returned status
+	 * is an error then the refactoring can't be executed at all. However,
+	 * returning an OK status doesn't guarantee that the refactoring can be
+	 * executed. It may still fail while performing the exhaustive precondition
+	 * checking done via the methods <code>openDialog</code> or
+	 * <code>perform</code>.
+	 * 
+	 * The method is mainly used to determine enable/disablement of actions.
+	 * 
+	 * @return the result of the light weight precondition checking.
+	 * 
+	 * @throws if an unexpected exception occurs while performing the checking.
+	 * 
+	 * @see #openDialog(Shell)
+	 * @see #perform(Shell, IRunnableContext)
 	 */
-	public boolean canRename() throws CoreException {
-		return fSupport.canRename(fElement);
+	public IStatus preCheck() throws CoreException {
+		ensureChecked();
+		if (fPreCheckStatus.hasFatalError())
+			return fPreCheckStatus.getFirstEntry(RefactoringStatus.FATAL).asStatus();
+		else
+			return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null);
 	}
-	
+
 	/**
-	 * Opens the refactoring dialog for this rename support.
+	 * Opens the refactoring dialog for this rename support. 
 	 * 
 	 * @param parent a shell used as a parent for the refactoring dialog.
 	 * @throws CoreException if an unexpected exception occurs while opening the
 	 * dialog.
 	 */
 	public void openDialog(Shell parent) throws CoreException {
+		ensureChecked();
+		if (fPreCheckStatus.hasFatalError()) {
+			showInformation(parent, fPreCheckStatus);
+			return; 
+		}
 		fSupport.rename(parent, fElement);
+	}
+	
+	/**
+	 * Executes the rename refactoring without showing a dialog to gather
+	 * additional user input (e.g. the new name of the <tt>IJavaElement</tt>,
+	 * ...). Only an error dialog is shown (if necessary) to present the result
+	 * of the refactoring's full precondition checking.
+	 * 
+	 * @param parent a shell used as a parent for the error dialog.
+	 * @param context a <tt>IRunnableContext</tt> to execute the operation.
+	 * 
+	 * @throws InterruptedException if the operation has been canceled by the
+	 * user.
+	 * @throws InvocationTargetException if an error occured while executing the
+	 * operation.
+	 * 
+	 * @see #openDialog(Shell)
+	 * @see IRunnableContext#run(boolean, boolean, org.eclipse.jface.operation.IRunnableWithProgress)
+	 */
+	public void perform(Shell parent, IRunnableContext context) throws InterruptedException, InvocationTargetException {
+		try {
+			ensureChecked();
+			if (fPreCheckStatus.hasFatalError()) {
+				showInformation(parent, fPreCheckStatus);
+				return; 
+			}
+		} catch (CoreException e){
+			throw new InvocationTargetException(e);
+		}
+		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(fSupport.getRefactoring(),
+			RefactoringPreferences.getStopSeverity(), parent, context);
+		helper.perform();
 	}
 	
 	/** Flag indication that no additional update is to be performed. */
@@ -333,5 +388,15 @@ public class RenameSupport {
 	
 	private static boolean updateSetterMethod(int flags) {
 		return (flags & UPDATE_SETTER_METHOD) != 0;
+	}
+	
+	private void ensureChecked() throws CoreException {
+		if (fPreCheckStatus == null)
+			fPreCheckStatus= fSupport.lightCheck();
+	}
+	
+	private void showInformation(Shell parent, RefactoringStatus status) {
+		String message= status.getFirstMessage(RefactoringStatus.FATAL);
+		MessageDialog.openInformation(parent, fSupport.getRefactoring().getName(), message);
 	}
 }

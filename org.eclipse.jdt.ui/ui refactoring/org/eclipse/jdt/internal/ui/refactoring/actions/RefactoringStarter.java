@@ -4,15 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import java.util.Arrays;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -20,21 +11,11 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.actions.GlobalBuildAction;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -52,19 +33,17 @@ import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog2;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 /**
  * A helper class to activate the UI of a refactoring
  */
 public class RefactoringStarter {
 	
-	private boolean fSavedFiles;
-	private boolean fAutobuildState;
+	private RefactoringSaveHelper fSaveHelper= new RefactoringSaveHelper();
 	
 	public Object activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
 		if (! canActivate(mustSaveEditors))
@@ -78,7 +57,7 @@ public class RefactoringStarter {
 			else 
 				dialog= new RefactoringWizardDialog2(parent, wizard);
 			if (dialog.open() == Dialog.CANCEL)
-				triggerBuild();
+				fSaveHelper.triggerBuild();
 			return null;	
 		} else{
 			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
@@ -112,7 +91,7 @@ public class RefactoringStarter {
 			InputDialog dialog= new RenameInputDialog(parent, dialogTitle, dialogMessage, renameRefactoring.getCurrentName(), validator, renameRefactoring);
 			int result= dialog.open();
 			if (result != Window.OK) {
-				triggerBuild();
+				fSaveHelper.triggerBuild();
 				return null;
 			}
 			renameRefactoring.setNewName(dialog.getValue());
@@ -151,78 +130,7 @@ public class RefactoringStarter {
 	}
 	
 	private boolean canActivate(boolean mustSaveEditors) {
-		return ! mustSaveEditors || areAllEditorsSaved();
-	}
-	
-	private boolean areAllEditorsSaved(){
-		if (JavaPlugin.getDirtyEditors().length == 0)
-			return true;
-		if (! saveAllDirtyEditors())
-			return false;
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		try {
-			// Save isn't cancelable.
-			IWorkspace workspace= ResourcesPlugin.getWorkspace();
-			IWorkspaceDescription description= workspace.getDescription();
-			boolean autoBuild= description.isAutoBuilding();
-			description.setAutoBuilding(false);
-			workspace.setDescription(description);
-			try {
-				JavaPlugin.getActiveWorkbenchWindow().getWorkbench().saveAllEditors(false);
-				fSavedFiles= true;
-			} finally {
-				description.setAutoBuilding(autoBuild);
-				workspace.setDescription(description);
-			}
-			return true;
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, shell, 
-				RefactoringMessages.getString("RefactoringStarter.saving"), RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));  //$NON-NLS-1$ //$NON-NLS-2$
-			return false;
-		}
-	}
-
-	private boolean saveAllDirtyEditors() {
-		if (RefactoringPreferences.getSaveAllEditors()) //must save everything
-			return true;
-		ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell()) {
-			protected Control createDialogArea(Composite parent) {
-				Composite result= (Composite) super.createDialogArea(parent);
-				final Button check= new Button(result, SWT.CHECK);
-				check.setText(RefactoringMessages.getString("RefactoringStarter.always_save")); //$NON-NLS-1$
-				check.setSelection(RefactoringPreferences.getSaveAllEditors());
-				check.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-						RefactoringPreferences.setSaveAllEditors(check.getSelection());
-					}
-				});
-				return result;
-			}
-		};
-		dialog.setTitle(RefactoringMessages.getString("RefactoringStarter.save_all_resources")); //$NON-NLS-1$
-		dialog.setAddCancelButton(true);
-		dialog.setLabelProvider(createDialogLabelProvider());
-		dialog.setMessage(RefactoringMessages.getString("RefactoringStarter.must_save")); //$NON-NLS-1$
-		dialog.setContentProvider(new ListContentProvider());
-		dialog.setInput(Arrays.asList(JavaPlugin.getDirtyEditors()));
-		return dialog.open() == Dialog.OK;
-	}
-
-	private ILabelProvider createDialogLabelProvider() {
-		return new LabelProvider() {
-			public Image getImage(Object element) {
-				return ((IEditorPart) element).getTitleImage();
-			}
-			public String getText(Object element) {
-				return ((IEditorPart) element).getTitle();
-			}
-		};
-	}
-	
-	private void triggerBuild() {
-		if (fSavedFiles && ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding()) {
-			new GlobalBuildAction(JavaPlugin.getActiveWorkbenchWindow(), IncrementalProjectBuilder.INCREMENTAL_BUILD).run();
-		}
+		return ! mustSaveEditors || fSaveHelper.saveEditors();
 	}
 	
 	private boolean mustUseWizardUI(RefactoringWizard wizard) {
