@@ -448,6 +448,106 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
 	
+	
+	public void testAddMissing1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		
+		// Accessor class
+		createDefaultAccessor(pack1);
+		
+		// property file
+		StringBuffer buf= new StringBuffer();
+		buf.append("Test.1=Hello1\n");
+		buf.append("Test.2=Hello2\n");
+		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+
+		// class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Test {\n");
+		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
+		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
+		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
+		buf.append("}\n");
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		NLSRefactoring nls= NLSRefactoring.create(cu);
+
+		NLSSubstitution[] substitutions= nls.getSubstitutions();
+		assertEquals("number of substitutions", 3, substitutions.length);
+		NLSSubstitution sub= substitutions[2];
+		sub.setValue("Hello3");
+
+		performChange(nls);
+		
+		buf= new StringBuffer();
+		buf.append("Test.1=Hello1\n");
+		buf.append("Test.2=Hello2\n");
+		buf.append("Test.3=Hello3\n");
+		checkContentOfFile("property file", file, buf.toString());
+
+		// class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Test {\n");
+		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
+		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
+		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
+		buf.append("}\n");
+		checkContentOfCu("nls file", cu, buf.toString());
+	}
+	
+	public void testAddMissing2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		
+		// Accessor class
+		createDefaultAccessor(pack1);
+		
+		// property file
+		StringBuffer buf= new StringBuffer();
+		buf.append("Test.1=Hello1\n");
+		buf.append("Test.2=Hello2\n");
+		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+
+		// class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Test {\n");
+		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
+		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
+		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
+		buf.append("}\n");
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		NLSRefactoring nls= NLSRefactoring.create(cu);
+
+		NLSSubstitution[] substitutions= nls.getSubstitutions();
+		assertEquals("number of substitutions", 3, substitutions.length);
+		NLSSubstitution sub= substitutions[1];
+		sub.setValue("Hello22");
+		
+		NLSSubstitution sub2= substitutions[2];
+		sub2.setValue("Hello3");
+
+		performChange(nls);
+		
+		buf= new StringBuffer();
+		buf.append("Test.1=Hello1\n");
+		buf.append("Test.2=Hello22\n");
+		buf.append("Test.3=Hello3\n");
+		checkContentOfFile("property file", file, buf.toString());
+
+		// class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Test {\n");
+		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
+		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
+		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
+		buf.append("}\n");
+		checkContentOfCu("nls file", cu, buf.toString());
+	}
+	
 	private IFile createPropertyFile(IPackageFragment pack, String name, String content) throws UnsupportedEncodingException, CoreException {
 		ByteArrayInputStream is= new ByteArrayInputStream(content.getBytes("8859_1"));
 		IFile file= ((IFolder) pack.getResource()).getFile(name);
