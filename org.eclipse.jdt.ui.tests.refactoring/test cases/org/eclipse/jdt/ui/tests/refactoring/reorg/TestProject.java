@@ -29,7 +29,8 @@ public class TestProject {
 	
 	public TestProject(String name) throws Exception {
 		fTestProject= JavaProjectHelper.createJavaProject(name, "bin");
-		Assert.assertTrue("rt not found", JavaProjectHelper.addRTJar(fTestProject) != null);
+		// we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
+		Assert.assertTrue("rt not found", JavaProjectHelper.addRTJar13(fTestProject) != null);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fTestProject, "src");
 	}
 	

@@ -17,8 +17,6 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,7 +26,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
@@ -52,7 +49,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		}
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("Testing", "bin");
-			// we must make sure that the performance test are compatible to 2.1.3 & 3.0
+			// we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
 			assertTrue("rt not found", JavaProjectHelper.addRTJar13(fJProject1) != null);
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
@@ -82,10 +79,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	public void testOpen() throws Exception {
 		tagAsGlobalSummary("Open Package Explorer", Dimension.CPU_TIME);
 		joinBackgroudActivities();
-		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		activeWorkbenchWindow.getActivePage().close();
-		activeWorkbenchWindow.openPage("org.eclipse.ui.resourcePerspective", ResourcesPlugin.getWorkspace().getRoot());
-		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
+		IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		startMeasuring();
 		page.showView(JavaUI.ID_PACKAGES);
 		finishMeasurements();
