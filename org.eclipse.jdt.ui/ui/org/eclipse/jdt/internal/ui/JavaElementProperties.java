@@ -36,24 +36,24 @@ public class JavaElementProperties implements IPropertySource {
 		return fgPropertyDescriptors;
 	}
 	
-	public Object getPropertyValue(String name) {
+	public Object getPropertyValue(Object name) {
 		if (name.equals(IBasicPropertyConstants.P_TEXT)) {
 			return fSource.getElementName();
 		}
 		return null;
 	}
 	
-	public void setPropertyValue(String name, Object value) {
+	public void setPropertyValue(Object name, Object value) {
 	}
 	
 	public Object getEditableValue() {
 		return null;
 	}
 	
-	public boolean isPropertySet(String property) {
+	public boolean isPropertySet(Object property) {
 		return false;
 	}
 	
-	public void resetPropertyValue(String property) {
+	public void resetPropertyValue(Object property) {
 	}
 }
