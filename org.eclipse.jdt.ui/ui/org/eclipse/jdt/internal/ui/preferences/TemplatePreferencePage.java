@@ -262,8 +262,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 
 		updateButtons();
 
-		// XXX
-		WorkbenchHelp.setHelp(parent, new DialogPageContextComputer(this, IJavaHelpContextIds.JRE_PREFERENCE_PAGE));		
+		WorkbenchHelp.setHelp(parent, new DialogPageContextComputer(this, IJavaHelpContextIds.TEMPLATE_PREFERENCE_PAGE));
 		
 		return parent;
 	}
