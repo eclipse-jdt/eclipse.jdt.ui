@@ -2,9 +2,30 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
+
 package org.eclipse.jdt.internal.core.refactoring;
 
-import java.util.Stack;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRunnable;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.IUndoManager;import org.eclipse.jdt.internal.core.refactoring.base.IUndoManagerListener;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import java.util.Stack;
+
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.IUndoManager;
+import org.eclipse.jdt.internal.core.refactoring.base.IUndoManagerListener;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 /**
  * Default implementation of IUndoManager.
@@ -13,7 +34,46 @@ public class UndoManager implements IUndoManager {
 
 	private class FlushListener implements IElementChangedListener {
 		public void elementChanged(ElementChangedEvent event) {
-			flush();
+			// If we don't have anything to undo or redo don't examine the tree.
+			if (fUndoChanges.isEmpty() && fRedoChanges.isEmpty())
+				return;
+			
+			processDelta(event.getDelta());				
+		}
+		private boolean processDelta(IJavaElementDelta delta) {
+			int kind= delta.getKind();
+			int details= delta.getFlags();
+			int type= delta.getElement().getElementType();
+			
+			switch (type) {
+				// Consider containers for class files.
+				case IJavaElement.JAVA_MODEL:
+				case IJavaElement.JAVA_PROJECT:
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				case IJavaElement.PACKAGE_FRAGMENT:
+					// If we did some different than changing a child we flush the the undo / redo stack.
+					if (kind != IJavaElementDelta.CHANGED || details != IJavaElementDelta.F_CHILDREN) {
+						flush();
+						return false;
+					}
+					break;
+				case IJavaElement.CLASS_FILE:
+					// Don't examine children of a class file but keep on examining siblings.
+					return true;
+				default:
+					flush();
+					return false;	
+			}
+				
+			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
+			if (affectedChildren == null)
+				return true;
+	
+			for (int i= 0; i < affectedChildren.length; i++) {
+				if (!processDelta(affectedChildren[i]))
+					return false;
+			}
+			return true;			
 		}
 	}
 
