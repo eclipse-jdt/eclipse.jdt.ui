@@ -183,6 +183,10 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	
 	public void endTest(String testName) {	
 		TreeItem treeItem= findFirstNotRunItem(testName);
+		// workaround for bug 8657
+		if (treeItem == null)  
+			return;
+			
 		TestRunInfo testInfo= fTestRunnerPart.getTestInfo(testName);
 			
 		updateItem(treeItem, testInfo);
