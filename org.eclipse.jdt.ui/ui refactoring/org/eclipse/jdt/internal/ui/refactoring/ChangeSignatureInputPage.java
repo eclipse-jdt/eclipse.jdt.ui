@@ -1,16 +1,10 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -18,7 +12,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -44,21 +37,35 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout((new GridLayout()));
 		
-		createVisibilityControl(composite);
-		if ( getChangeMethodSignatureRefactoring().canChangeReturnType())
-			createReturnTypeControl(composite);
-		createParameterTableComposite(composite);
-		
-		Label label= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
-		label.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
-		
-		fSignaturePreview= new Label(composite, SWT.WRAP);
-		GridData gl= new GridData(GridData.FILL_BOTH);
-		gl.widthHint= convertWidthInCharsToPixels(50);
-		fSignaturePreview.setLayoutData(gl);
-		update(false);
-		
-		setControl(composite);
+        try {
+            int[] availableVisibilities= getChangeMethodSignatureRefactoring().getAvailableVisibilities();
+            int currectVisibility= getChangeMethodSignatureRefactoring().getVisibility();
+            IVisibilityChangeListener visibilityChangeListener= new IVisibilityChangeListener(){
+            	public void visibilityChanged(int newVisibility) {
+            		getChangeMethodSignatureRefactoring().setVisibility(newVisibility);
+            		update(true);
+                }
+            };
+            Composite visibilityComposite= VisibilityControlUtil.createVisibilityControl(composite, visibilityChangeListener, availableVisibilities, currectVisibility);
+       		visibilityComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+            
+            if ( getChangeMethodSignatureRefactoring().canChangeReturnType())
+            	createReturnTypeControl(composite);
+            createParameterTableComposite(composite);
+            
+            Label label= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+            label.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+            
+            fSignaturePreview= new Label(composite, SWT.WRAP);
+            GridData gl= new GridData(GridData.FILL_BOTH);
+            gl.widthHint= convertWidthInCharsToPixels(50);
+            fSignaturePreview.setLayoutData(gl);
+            update(false);
+            
+            setControl(composite);
+        } catch (JavaModelException e) {
+        	ExceptionHandler.handle(e, "Change Signature", "Internal Error. See log for details.");
+        }
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
 	}
 
@@ -85,73 +92,9 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 			});
 	}
 	
-	private void createVisibilityControl(Composite parent) {
-		try {
-			List allowedVisibilities= convertToIntegerList(getChangeMethodSignatureRefactoring().getAvailableVisibilities());
-			if (allowedVisibilities.size() == 1)
-				return;
-			
-			Composite composite= new Composite(parent, SWT.NONE);
-			composite.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
-			GridLayout layout= new GridLayout();
-			layout.numColumns= 2; layout.marginWidth= 0;
-			composite.setLayout(layout);
-			
-			
-			Label label= new Label(composite, SWT.NONE);
-			label.setText("Access modifier:");
-			
-			Composite group= new Composite(composite, SWT.NONE);
-			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			layout= new GridLayout();
-			layout.numColumns= 4; layout.marginWidth= 0;
-			group.setLayout(layout);
-			
-			String[] labels= new String[] {
-				"&public",
-				"pro&tected",
-				"defa&ult",
-				"pri&vate"
-			};
-			Integer[] data= new Integer[] {
-						new Integer(Modifier.PUBLIC),
-						new Integer(Modifier.PROTECTED),
-						new Integer(Modifier.NONE),
-						new Integer(Modifier.PRIVATE)};
-			Integer initialVisibility= new Integer(getChangeMethodSignatureRefactoring().getVisibility());
-			for (int i= 0; i < labels.length; i++) {
-				Button radio= new Button(group, SWT.RADIO);
-				Integer visibilityCode= data[i];
-				radio.setText(labels[i]);
-				radio.setData(visibilityCode);
-				radio.setSelection(visibilityCode.equals(initialVisibility));
-				radio.setEnabled(allowedVisibilities.contains(visibilityCode));
-				radio.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent event) {
-						getChangeMethodSignatureRefactoring().setVisibility(((Integer)event.widget.getData()).intValue());
-						if (((Button)event.widget).getSelection())
-							update(true);
-					}
-				});
-			}
-			label.setLayoutData((new GridData()));
-			group.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			return;
-		}
-	}
-	private static List convertToIntegerList(int[] array) {
-		List result= new ArrayList(array.length);
-		for (int i= 0; i < array.length; i++) {
-			result.add(new Integer(array[i]));
-		}
-		return result;
-	}
-	
 	private void createParameterTableComposite(Composite composite) {
 		String labelText= RefactoringMessages.getString("ChangeSignatureInputPage.parameters");
-		ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new ParameterListChangeListener() {
+		ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new IParameterListChangeListener() {
 			public void parameterChanged(ParameterInfo parameter) {
 				update(true);
 			}
