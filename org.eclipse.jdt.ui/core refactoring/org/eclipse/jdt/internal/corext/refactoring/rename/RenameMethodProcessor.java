@@ -334,8 +334,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
 		pm.beginTask("", 3); //$NON-NLS-1$
-		try{
-//			if (fWorkingCopyOwner != null) {
+		try {
 			ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
 			fNewWorkingCopies= RenameAnalyzeUtil.createNewWorkingCopies(
 					compilationUnitsToModify, manager, fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
