@@ -90,4 +90,10 @@ public class RetargetActionIDs {
 	public static String MOVE= "org.eclipse.jdt.ui.actions.Move"; //$NON-NLS-1$
 	
 	public static String RENAME= "org.eclipse.jdt.ui.actions.Rename"; //$NON-NLS-1$
+	
+	public static String INLINE_TEMP= "org.eclipse.jdt.ui.actions.InlineTemp"; //$NON-NLS-1$
+	
+	public static String EXTRACT_TEMP= "org.eclipse.jdt.ui.actions.ExtractTemp"; //$NON-NLS-1$
+	
+	public static String EXTRACT_METHOD= "org.eclipse.jdt.ui.actions.ExtractMethod"; //$NON-NLS-1$
 }

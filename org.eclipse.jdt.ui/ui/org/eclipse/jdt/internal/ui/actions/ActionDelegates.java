@@ -202,5 +202,23 @@ public class ActionDelegates {
 			return RetargetActionIDs.RENAME; 
 		}
 	}
+
+	public static class InlineTemp extends RetargetActionDelegator {
+		protected String getId() {
+			return RetargetActionIDs.INLINE_TEMP; 
+		}
+	}
+
+	public static class ExtractTemp extends RetargetActionDelegator {
+		protected String getId() {
+			return RetargetActionIDs.EXTRACT_TEMP; 
+		}
+	}
+
+	public static class ExtractMethod extends RetargetActionDelegator {
+		protected String getId() {
+			return RetargetActionIDs.EXTRACT_METHOD; 
+		}
+	}
 	
 }
