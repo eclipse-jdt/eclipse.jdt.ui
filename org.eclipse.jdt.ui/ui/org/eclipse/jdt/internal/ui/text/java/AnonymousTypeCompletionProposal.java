@@ -200,7 +200,9 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		String imageName= JavaPluginImages.IMG_OBJS_CLASS; // default
 		if (type != null) {
 			try {
-				if (type.isInterface()) {
+				if (type.isAnnotation()) {
+					imageName= JavaPluginImages.IMG_OBJS_ANNOTATION;
+				} else if (type.isInterface()) {
 					imageName= JavaPluginImages.IMG_OBJS_INTERFACE;
 				}
 			} catch (JavaModelException e) {
