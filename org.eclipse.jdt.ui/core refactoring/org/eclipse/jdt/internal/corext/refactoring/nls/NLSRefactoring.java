@@ -369,13 +369,7 @@ public class NLSRefactoring extends Refactoring {
 		for (int i= 0; i < subs.length; i++) {
 			NLSSubstitution substitution= subs[i];
 			if (substitution.hasPropertyFileChange()) {
-				if (substitution.hasStateChanged()) {
-					if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) || (substitution.getInitialState() == NLSSubstitution.EXTERNALIZED)) {
-						return true;
-					}
-				} else {
-					return true;
-				}
+				return true;
 			}
 		}
 		return false;

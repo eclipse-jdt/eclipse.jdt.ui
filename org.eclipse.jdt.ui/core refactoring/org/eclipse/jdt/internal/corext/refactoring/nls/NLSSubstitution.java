@@ -155,7 +155,10 @@ public class NLSSubstitution {
 	
 	
 	public boolean hasPropertyFileChange() {
-		if (hasStateChanged()) {
+		if (fInitialState != EXTERNALIZED && fState != EXTERNALIZED) {
+			return false;
+		}
+		if (fInitialState != fState) {
 			return true;
 		}
 		if (fState == EXTERNALIZED) {
