@@ -20,6 +20,7 @@ import java.util.Iterator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.text.ITextViewer;
@@ -38,7 +39,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaModelMarker;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -74,52 +74,50 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		}
 	}
 		
-	private static IAssistProcessor[] fAssistProcessors= null;
-	private static ICorrectionProcessor[] fCorrectionProcessors= null;
+	private static ContributedProcessorDescriptor[] fContributedAssistProcessors= null;
+	private static ContributedProcessorDescriptor[] fContributedCorrectionProcessors= null;
 	private static String fErrorMessage;
 	
-	private static ICorrectionProcessor[] getCorrectionProcessors() {
-		if (fCorrectionProcessors == null) {
-			try {
-				IConfigurationElement[] elements= Platform.getPluginRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, QUICKFIX_PROCESSOR_CONTRIBUTION_ID);
-				ICorrectionProcessor[] result= new ICorrectionProcessor[elements.length];
-				for (int i= 0; i < elements.length; i++) {
-					result[i]= (ICorrectionProcessor) elements[i].createExecutableExtension("class"); //$NON-NLS-1$
-				}
-				fCorrectionProcessors= result;
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-				fCorrectionProcessors= new ICorrectionProcessor[] { new QuickFixProcessor() };
+	private static ContributedProcessorDescriptor[] getProcessorDescriptors(String contributionId) {
+		IConfigurationElement[] elements= Platform.getPluginRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, contributionId);
+		ArrayList res= new ArrayList(elements.length);
+		
+		for (int i= 0; i < elements.length; i++) {
+			ContributedProcessorDescriptor desc= new ContributedProcessorDescriptor(elements[i]);
+			IStatus status= desc.checkSyntax();
+			if (status.isOK()) {
+				res.add(desc);
+			} else {
+				JavaPlugin.log(status);
 			}
 		}
-		return fCorrectionProcessors;
+		return (ContributedProcessorDescriptor[]) res.toArray(new ContributedProcessorDescriptor[res.size()]);;		
 	}
 	
-	private static IAssistProcessor[] getAssistProcessors() {
-		if (fAssistProcessors == null) {
+	private static ContributedProcessorDescriptor[] getCorrectionProcessors() {
+		if (fContributedCorrectionProcessors == null) {
+			fContributedCorrectionProcessors= getProcessorDescriptors(QUICKFIX_PROCESSOR_CONTRIBUTION_ID);
+		}
+		return fContributedCorrectionProcessors;
+	}
+	
+	private static ContributedProcessorDescriptor[] getAssistProcessors() {
+		if (fContributedAssistProcessors == null) {
+			fContributedAssistProcessors= getProcessorDescriptors(QUICKASSIST_PROCESSOR_CONTRIBUTION_ID);
+		}
+		return fContributedAssistProcessors;
+	}
+		
+	public static boolean hasCorrections(ICompilationUnit cu, int problemId) {
+		ContributedProcessorDescriptor[] processors= getCorrectionProcessors();
+		for (int i= 0; i < processors.length; i++) {
 			try {
-				IConfigurationElement[] elements= Platform.getPluginRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, QUICKASSIST_PROCESSOR_CONTRIBUTION_ID);
-				IAssistProcessor[] result= new IAssistProcessor[elements.length];
-				for (int i= 0; i < elements.length; i++) {
-					result[i]= (IAssistProcessor) elements[i].createExecutableExtension("class"); //$NON-NLS-1$
+				ICorrectionProcessor processor= (ICorrectionProcessor) processors[i].getProcessor(cu);
+				if (processor != null && processor.hasCorrections(cu, problemId)) {
+					return true;
 				}
-				fAssistProcessors= result;
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
-				fAssistProcessors= new IAssistProcessor[] { // defaults
-					new QuickAssistProcessor(),
-					new QuickTemplateProcessor()
-				};
-			}
-		}
-		return fAssistProcessors;
-	}	
-	
-	public static boolean hasCorrections(int problemId) {
-		ICorrectionProcessor[] processors= getCorrectionProcessors();
-		for (int i= 0; i < processors.length; i++) {
-			if (processors[i].hasCorrections(problemId)) {
-				return true;
 			}
 		}
 		return false;
@@ -131,37 +129,31 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			if (annotation instanceof MarkerAnnotation) {
 				return hasCorrections(((MarkerAnnotation) annotation).getMarker());
 			}
-			return false;
 		} else {
-			return hasCorrections(problemId);
+			ICompilationUnit cu= annotation.getCompilationUnit();
+			if (cu != null) {
+				return hasCorrections(cu, problemId);
+			}
 		}
+		return false;
 	}
 	
-	public static boolean hasCorrections(IMarker marker) {
+	private static boolean hasCorrections(IMarker marker) {
 		if (marker == null || !marker.exists())
 			return false;
-		
-		try {
-			if (marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
-				int problemId= marker.getAttribute(IJavaModelMarker.ID, -1);
-				return problemId != -1 && hasCorrections(problemId);
-			} else {
-				IMarkerHelpRegistry registry= PlatformUI.getWorkbench().getMarkerHelpRegistry();
-				return registry != null && registry.hasResolutions(marker);
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-			return false;
-		}
+			
+		IMarkerHelpRegistry registry= PlatformUI.getWorkbench().getMarkerHelpRegistry();
+		return registry != null && registry.hasResolutions(marker);
 	}
 	
 	public static boolean hasAssists(IAssistContext context) {
-		IAssistProcessor[] processors= getAssistProcessors();
+		ContributedProcessorDescriptor[] processors= getAssistProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
-				if (processors[i].hasAssists(context)) {
+				IAssistProcessor processor= (IAssistProcessor) processors[i].getProcessor(context.getCompilationUnit());
+				if (processor != null && processor.hasAssists(context)) {
 					return true;
-				}
+				}				
 			} catch (Exception e) {
 				// ignore
 			}
@@ -238,10 +230,18 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}
 
 	public static void collectCorrections(IAssistContext context, IProblemLocation[] locations, ArrayList proposals) {
-		ICorrectionProcessor[] processors= getCorrectionProcessors();
+		ContributedProcessorDescriptor[] processors= getCorrectionProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
-				processors[i].process(context, locations, proposals);
+				ICorrectionProcessor curr= (ICorrectionProcessor) processors[i].getProcessor(context.getCompilationUnit());
+				if (curr != null) {
+					IJavaCompletionProposal[] res= curr.getCorrections(context, locations);
+					if (res != null) {
+						for (int k= 0; k < res.length; k++) {
+							proposals.add(res[k]);
+						}
+					}
+				}
 			} catch (Exception e) {
 				fErrorMessage= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickfix.message"); //$NON-NLS-1$
 				JavaPlugin.log(e);
@@ -250,10 +250,18 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}
 	
 	public static void collectAssists(IAssistContext context, IProblemLocation[] locations, ArrayList proposals) {
-		IAssistProcessor[] processors= getAssistProcessors();
+		ContributedProcessorDescriptor[] processors= getAssistProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
-				processors[i].process(context, locations, proposals);
+				IAssistProcessor curr= (IAssistProcessor) processors[i].getProcessor(context.getCompilationUnit());
+				if (curr != null) {
+					IJavaCompletionProposal[] res= curr.getAssists(context, locations);
+					if (res != null) {
+						for (int k= 0; k < res.length; k++) {
+							proposals.add(res[k]);
+						}
+					}				
+				}				
 			} catch (Exception e) {
 				fErrorMessage= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickassist.message"); //$NON-NLS-1$
 				JavaPlugin.log(e);

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,6 +20,8 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
+
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -49,12 +52,12 @@ public class QuickAssistProcessor implements IAssistProcessor {
 
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[], java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
 	 */
-	public void process(IAssistContext context, IProblemLocation[] locations, Collection resultingCollections) throws CoreException {
+	public IJavaCompletionProposal[] getAssists(IAssistContext context, IProblemLocation[] locations) throws CoreException {
 		ASTNode coveringNode= getCoveringNode(context);
 		if (coveringNode != null) {
-		
+			ArrayList resultingCollections= new ArrayList();
 			// quick assists that show up also if there is an error/warning
 			getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
 			getRenameLocalProposals(context, coveringNode, resultingCollections);
@@ -63,7 +66,9 @@ public class QuickAssistProcessor implements IAssistProcessor {
 				getAssignToVariableProposals(context, coveringNode, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
 			}
+			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
+		return null;
 	}
 	
 	private ASTNode getCoveringNode(IAssistContext context) {

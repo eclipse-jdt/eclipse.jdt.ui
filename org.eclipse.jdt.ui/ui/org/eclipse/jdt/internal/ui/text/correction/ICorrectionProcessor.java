@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.Collection;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 /**
   */
@@ -22,14 +24,15 @@ public interface ICorrectionProcessor {
 	 * Returns true if the processor has propsals for the given problem. This test should be an
 	 * optimistic guess and be extremly cheap. 
 	 */
-	boolean hasCorrections(int problemID);
+	boolean hasCorrections(ICompilationUnit unit, int problemId);
 	
 	/**
 	 * Collects corrections or code manipulations for the given context
 	 * @param context Defines current compilation unit, position and the problem ID.
-	 * @param resultingCorrections The resulting proposals. The proposals must be of type
-	 * <code>IJavaCompletionProposal</code>
+	 * @param locations Problems ar the current location
+	 * @return Returns the correction applicable at the location or <code>null</code> if no proposals
+	 * can be offered.
 	 */
-	void process(IAssistContext context, IProblemLocation[] locations, Collection resultingCorrections) throws CoreException;
+	IJavaCompletionProposal[] getCorrections(IAssistContext context, IProblemLocation[] locations) throws CoreException;
 	
 }

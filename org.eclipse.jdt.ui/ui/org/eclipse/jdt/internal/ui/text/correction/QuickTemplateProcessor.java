@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
@@ -73,9 +75,9 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 	}	
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[], java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
 	 */
-	public void process(IAssistContext context, IProblemLocation[] locations, Collection resultingCollections) throws CoreException {
+	public IJavaCompletionProposal[] getAssists(IAssistContext context, IProblemLocation[] locations) throws CoreException {
 		try {
 			ICompilationUnit cu= context.getCompilationUnit();
 			IDocument document= getDocument(cu);
@@ -88,7 +90,7 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 			IRegion endLineRegion= document.getLineInformation(endLine);
 			if (startLine  == endLine) {
 				if (length == 0 || offset != endLineRegion.getOffset() || length != endLineRegion.getLength()) {
-					return;
+					return null;
 				}
 			} else {
 				// expand selection
@@ -96,7 +98,9 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 				length= endLineRegion.getOffset() + endLineRegion.getLength() - offset;
 			}
 
+			ArrayList resultingCollections= new ArrayList();
 			collectSurroundTemplates(document, cu, offset, length, resultingCollections);
+			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, "", e)); //$NON-NLS-1$
 		}

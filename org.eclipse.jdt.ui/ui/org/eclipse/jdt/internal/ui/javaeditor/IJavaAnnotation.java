@@ -15,6 +15,8 @@ import java.util.Iterator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 /**
  * Interface of annotations representing markers
  * and problems.
@@ -89,4 +91,11 @@ public interface IJavaAnnotation {
 	 * @return <code>true</code> if it is a problem annotation
 	 */
 	boolean isProblem();
+	
+	
+	/**
+	 * Returns the compilation unit corresponding to the document on which the annotation is set
+	 * or <code>null</code> if no corresponding co0mpilationunit exists.
+	 */
+	ICompilationUnit getCompilationUnit();
 }

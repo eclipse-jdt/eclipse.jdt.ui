@@ -119,6 +119,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			private static Image fgQuickFixErrorImage;
 			private static boolean fgQuickFixImagesInitialized= false;
 			
+			private ICompilationUnit fCompilationUnit;
 			private List fOverlaids;
 			private IProblem fProblem;
 			private Image fImage;
@@ -126,9 +127,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			private AnnotationType fType;
 			
 			
-			public ProblemAnnotation(IProblem problem) {
+			public ProblemAnnotation(IProblem problem, ICompilationUnit cu) {
 				
 				fProblem= problem;
+				fCompilationUnit= cu;
 				setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
 				
 				if (IProblem.Task == fProblem.getID())
@@ -142,7 +144,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			private void initializeImages() {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
 				if (!fQuickFixImagesInitialized) {
-					if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID())) {
+					if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(this)) {
 						if (!fgQuickFixImagesInitialized) {
 							fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 							fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
@@ -258,6 +260,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			
 			public AnnotationType getAnnotationType() {
 				return fType;
+			}
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit()
+			 */
+			public ICompilationUnit getCompilationUnit() {
+				return fCompilationUnit;
 			}
 		};
 		
@@ -441,7 +450,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 					}
 					
 					if (fCollectedProblems != null && fCollectedProblems.size() > 0) {
-												
+						
+						ICompilationUnit cu= getWorkingCopy(fInput);
 						Iterator e= fCollectedProblems.iterator();
 						while (e.hasNext()) {
 							
@@ -455,7 +465,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 							Position position= createPositionFromProblem(problem);
 							if (position != null) {
 								
-								ProblemAnnotation annotation= new ProblemAnnotation(problem);
+								ProblemAnnotation annotation= new ProblemAnnotation(problem, cu);
 								overlayMarkers(position, annotation);								
 								fGeneratedAnnotations.add(annotation);
 								addAnnotation(annotation, position, false);

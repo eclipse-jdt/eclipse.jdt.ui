@@ -34,7 +34,10 @@ import org.eclipse.debug.ui.IDebugModelPresentation;
 
 import org.eclipse.search.ui.SearchUI;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -131,7 +134,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	}
 	
 	private boolean mustShowQuickFixIcon() {
-		return fQuickFixIconEnabled && JavaCorrectionProcessor.hasCorrections(getMarker());
+		return fQuickFixIconEnabled && JavaCorrectionProcessor.hasCorrections(this);
 	}
 	
 	private Image getQuickFixImage() {
@@ -329,5 +332,21 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 */
 	public AnnotationType getAnnotationType() {
 		return fType;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit()
+	 */
+	public ICompilationUnit getCompilationUnit() {
+		IJavaElement element= JavaCore.create(getMarker().getResource());
+		if (element instanceof ICompilationUnit) {
+			ICompilationUnit cu= getCompilationUnit();
+			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
+			if (workingCopy != null) {
+				return workingCopy;
+			}
+			return cu;
+		}
+		return null;
 	}
 }

@@ -110,7 +110,8 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	 */
 	public boolean hasResolutions(IMarker marker) {
 		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
-		return JavaCorrectionProcessor.hasCorrections(id);
+		ICompilationUnit cu= getCompilationUnit(marker);
+		return cu != null && JavaCorrectionProcessor.hasCorrections(cu, id);
 	}	
 
 	/* (non-Javadoc)

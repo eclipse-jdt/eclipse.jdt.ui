@@ -247,20 +247,20 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 		ASTNode parent= fOriginalNode.getParent();	
 		if (parent instanceof QualifiedName) {
-			Name qualifier= ((QualifiedName)parent).getQualifier();
-			if (qualifier.resolveBinding().getKind() == IBinding.TYPE) {
+			IBinding qualifierBinding= ((QualifiedName)parent).getQualifier().resolveBinding();
+			if (qualifierBinding instanceof ITypeBinding) {
 				modifiers |= Modifier.STATIC;
 			}			
+		} else if (ASTResolving.isInStaticContext(fOriginalNode)) {
+			modifiers |= Modifier.STATIC;
+		}
+		ASTNode node= ASTResolving.findParentType(fOriginalNode);
+		if (newTypeDecl.equals(node)) {
+			modifiers |= Modifier.PRIVATE;
+		} else if (node instanceof AnonymousClassDeclaration) {
+			modifiers |= Modifier.PROTECTED;
 		} else {
-			ASTNode node= ASTResolving.findParentType(fOriginalNode);
-			if (newTypeDecl.equals(node)) {
-				modifiers |= Modifier.PRIVATE;
-				if (ASTResolving.isInStaticContext(fOriginalNode)) {
-					modifiers |= Modifier.STATIC;
-				}
-			} else if (node instanceof AnonymousClassDeclaration) {
-				modifiers |= Modifier.PROTECTED;
-			}
+			modifiers |= Modifier.PUBLIC;
 		}
 		return modifiers;
 	}	

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -20,11 +21,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
 /**
   */
 public class QuickFixProcessor implements ICorrectionProcessor {
 
-	public boolean hasCorrections(int problemId) {
+	public boolean hasCorrections(ICompilationUnit cu, int problemId) {
 		switch (problemId) {
 			case IProblem.UnterminatedString:
 			case IProblem.UnusedImport:
@@ -120,14 +123,15 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 	
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ICorrectionProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[], java.util.List)
+	 * @see IAssistProcessor#getCorrections(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
 	 */
-	public void process(IAssistContext context, IProblemLocation[] locations, Collection resultingCollections) throws CoreException {
+	public IJavaCompletionProposal[] getCorrections(IAssistContext context, IProblemLocation[] locations) throws CoreException {
 		if (locations == null || locations.length == 0) {
-			return;
+			return null;
 		}
 		
 		HashSet handledProblems= new HashSet(locations.length);
+		ArrayList resultingCollections= new ArrayList();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation curr= locations[i];
 			Integer id= new Integer(curr.getProblemId());
@@ -135,6 +139,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 				process(context, curr, resultingCollections);
 			}
 		}
+		return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 	}
 	
 	private void process(IAssistContext context, IProblemLocation problem, Collection proposals) throws CoreException {

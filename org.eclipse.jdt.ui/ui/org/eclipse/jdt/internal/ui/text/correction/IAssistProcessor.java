@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.Collection;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 /**
   */
@@ -20,7 +20,7 @@ public interface IAssistProcessor {
 	
 	
 	/**
-	 * Evluates if assist can be created for the given context. This evaluation must be precice.
+	 * Evluates if assist can be created for the given context. This evaluation must be precise.
 	 */
 	public boolean hasAssists(IAssistContext context) throws CoreException;
 	
@@ -28,9 +28,11 @@ public interface IAssistProcessor {
 	/**
 	 * Collects assists for the given context
 	 * @param context Defines current compilation unit, position and a shared AST
-	 * @param resultingCorrections The resulting proposals. The proposals must be of type
-	 * <code>IJavaCompletionProposal</code>
+	 * @param location the locations of problems at the invoked offset. The processor can descide to only
+	 * add assists when there no problems at the selection offset.
+	 * @return Returns the assist applicable at the location or <code>null</code> if no proposals
+	 * can be offered.
 	 */
-	void process(IAssistContext context, IProblemLocation[] locations, Collection resultingCorrections) throws CoreException;
+	IJavaCompletionProposal[] getAssists(IAssistContext context, IProblemLocation[] locations) throws CoreException;
 	
 }
