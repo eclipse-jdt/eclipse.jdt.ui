@@ -11,6 +11,9 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewerExtension;
@@ -29,12 +32,20 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
+	
+	private static final Class THIS= ScrollAnnotatedJavaEditorTest.class;
 
 	private static final String PAGE_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
 	private static final String LINE_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 
-	private static final int N_OF_RUNS= 3;
+	private static final int N_OF_RUNS= 6;
+
+	private static final int N_OF_COLD_RUNS= 3;
+	
+	public static Test suite() {
+		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
 
 	protected void setUp(IEditorPart editor) throws Exception {
 		super.setUp(editor);
@@ -83,30 +94,30 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 	}
 	
 	public void testScrollJavaEditorLineWise1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, false, N_OF_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, false, N_OF_RUNS, N_OF_COLD_RUNS);
 	}
 
 	public void testScrollJavaEditorPageWise() throws Exception {
-		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, false, N_OF_RUNS);
+		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, false, N_OF_RUNS, N_OF_COLD_RUNS);
 	}
 
 	public void testScrollJavaEditorLineWisePreloaded1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, true, N_OF_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, true, N_OF_RUNS, N_OF_COLD_RUNS);
 	}
 	
 	public void testScrollJavaEditorPageWisePreloaded1() throws Exception {
-		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, true, N_OF_RUNS);
+		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, true, N_OF_RUNS, N_OF_COLD_RUNS);
 	}
 
 	public void testScrollJavaEditorLineWiseMoveCaret1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, false, N_OF_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, false, N_OF_RUNS, N_OF_COLD_RUNS);
 	}
 	
 	public void testScrollJavaEditorLineWiseMoveCaretPreloaded1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, true, N_OF_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, true, N_OF_RUNS, N_OF_COLD_RUNS);
 	}
 	
 	public void testScrollJavaEditorLineWiseSelect1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_SELECT, false, N_OF_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_SELECT, false, N_OF_RUNS, N_OF_COLD_RUNS);
 	}
 }

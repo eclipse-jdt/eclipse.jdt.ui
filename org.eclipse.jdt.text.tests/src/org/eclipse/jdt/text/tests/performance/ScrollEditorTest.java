@@ -82,7 +82,7 @@ public abstract class ScrollEditorTest extends TestCase {
 		fPerformanceMeter.dispose();
 	}
 	
-	protected void measureScrolling(String file, ScrollingMode mode, boolean preload, int nOfRuns) throws Exception {
+	protected void measureScrolling(String file, ScrollingMode mode, boolean preload, int nOfRuns, int nOfColdRuns) throws Exception {
 		IEditorPart editor= null;
 		try {
 			editor= EditorTestHelper.openInEditor(ResourceTestHelper.findFile(file), true);
@@ -103,16 +103,20 @@ public abstract class ScrollEditorTest extends TestCase {
 						// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
 						SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO, false);
 					}
-					fPerformanceMeter.start();
+					if (i >= nOfColdRuns)
+						fPerformanceMeter.start();
 					EditorTestHelper.runEventQueue(100);
-					fPerformanceMeter.stop();
+					if (i >= nOfColdRuns)
+						fPerformanceMeter.stop();
 				} else {
-					fPerformanceMeter.start();
+					if (i >= nOfColdRuns)
+						fPerformanceMeter.start();
 					for (int j= 0; j < operations; j++) {
 						// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
 						SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO);
 					}
-					fPerformanceMeter.stop();
+					if (i >= nOfColdRuns)
+						fPerformanceMeter.stop();
 					EditorTestHelper.runEventQueue(100);
 				}
 				assertTrue("TopIndex: "+text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
