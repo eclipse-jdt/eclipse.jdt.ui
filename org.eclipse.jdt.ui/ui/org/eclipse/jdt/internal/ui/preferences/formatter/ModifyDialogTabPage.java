@@ -572,7 +572,7 @@ public abstract class ModifyDialogTabPage {
 		
 		initializePage();
 	
-		fSashForm.setWeights(new int [] {3, 4});
+		fSashForm.setWeights(new int [] {3, 3});
 		return fSashForm;
 	}
 	

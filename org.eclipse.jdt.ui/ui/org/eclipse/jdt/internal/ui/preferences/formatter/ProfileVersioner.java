@@ -26,8 +26,9 @@ public class ProfileVersioner {
 	public static final int VERSION_2= 2; // before renaming almost all
 	public static final int VERSION_3= 3; // after renaming almost all
 	public static final int VERSION_4= 4; 
+	public static final int VERSION_5= 5; // after splitting of FORMATTER_INDENT_BLOCK_STATEMENTS
 	
-	public static final int CURRENT_VERSION= 4;
+	public static final int CURRENT_VERSION= VERSION_5;
 	
 	public static void updateAndComplete(CustomProfile profile) {
 		final Map oldSettings= profile.getSettings();
@@ -43,6 +44,9 @@ public class ProfileVersioner {
 			
 		case VERSION_3:
 		    version3to4(oldSettings);
+		    
+		case VERSION_4:
+		    version4to5(oldSettings);
 		    
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -482,6 +486,12 @@ public class ProfileVersioner {
 		checkAndReplace(oldSettings, 
 			"org.eclipse.jdt.core.formatter.insert_space_between_empty_arguments_in_method_invocation", //$NON-NLS-1$
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION);
+	}
+	
+	private static void version4to5(Map oldSettings) {
+		checkAndReplace(oldSettings,
+			"org.eclipse.jdt.core.formatter.indent_block_statements", //$NON-NLS-1$
+			new String[] { DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BODY, DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BLOCK });
 	}
 	
 	
