@@ -1051,6 +1051,9 @@ public abstract class TypePage extends ContainerPage {
 		IType createdType;
 		ImportsStructure imports;
 		int indent= 0;
+		
+		// fix for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
+		String lineDelimiter= null;	
 		if (!isInnerClass) {
 			ICompilationUnit parentCU= pack.getCompilationUnit(clName + ".java");
 			
@@ -1058,7 +1061,10 @@ public abstract class TypePage extends ContainerPage {
 			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
 			imports= new ImportsStructure(parentCU, prefOrder, threshold);
 			
-			String content= createTypeBody(imports);
+			//1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
+			lineDelimiter= StubUtility.getLineDelimiterUsed(parentCU);
+			
+			String content= createTypeBody(imports, lineDelimiter);
 			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 5));
 		} else {
 			IType enclosingType= getEnclosingType();
@@ -1073,7 +1079,9 @@ public abstract class TypePage extends ContainerPage {
 			ICompilationUnit parentCU= enclosingType.getCompilationUnit();
 			imports= new ImportsStructure(parentCU);
 			
-			String content= createTypeBody(imports);
+			//1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
+			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
+			String content= createTypeBody(imports, lineDelimiter);
 			createdType= enclosingType.createType(content, null, false, new SubProgressMonitor(monitor, 1));
 		
 			indent= StubUtility.getIndentUsed(enclosingType) + 1;
@@ -1092,9 +1100,8 @@ public abstract class TypePage extends ContainerPage {
 		} 
 		monitor.worked(1);	
 		
-		
-		ConfigurableOption[] options= JavaPlugin.getDefault().getCodeFormatterOptions();
-		String formattedContent= CodeFormatter.format(createdType.getSource(), indent, options);
+		//1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
+		String formattedContent= StubUtility.codeFormat(createdType.getSource(), indent, lineDelimiter);
 		
 		ISourceRange range= createdType.getSourceRange();
 		IBuffer buf= createdType.getCompilationUnit().getBuffer();
@@ -1152,8 +1159,9 @@ public abstract class TypePage extends ContainerPage {
 
 	/*
 	 * Called from createType to construct the source for this type
+	 * fix for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
 	 */		
-	private String createTypeBody(IImportsStructure imports) {	
+	private String createTypeBody(IImportsStructure imports, String lineDelimiter) {	
 		StringBuffer buf= new StringBuffer();
 		
 		int modifiers= getModifiers();
@@ -1165,9 +1173,11 @@ public abstract class TypePage extends ContainerPage {
 		buf.append(getTypeName());
 		writeSuperClass(buf, imports);
 		writeSuperInterfaces(buf, imports);	
-		buf.append(" {\n");
-		buf.append('\n');
-		buf.append("}\n");
+		buf.append(" {");
+		buf.append(lineDelimiter);
+		buf.append(lineDelimiter);
+		buf.append("}");
+		buf.append(lineDelimiter);
 		return buf.toString();
 	}
 
