@@ -575,6 +575,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				SingleVariableDeclaration parDecl= (SingleVariableDeclaration)getMethodDeclarationNode(method).parameters().get(argumentIndex);
 				if (fBadVarSet.contains(parDecl))
 					return false;
+			} else {
+				return isReferenceUpdatable(parent, nodesToRemove);
 			}
 		} else if (parent instanceof ReturnStatement){
 			MethodDeclaration md= (MethodDeclaration)ASTNodes.getParent(parent, MethodDeclaration.class);
