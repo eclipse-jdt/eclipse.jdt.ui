@@ -2,46 +2,42 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
+
 package org.eclipse.jdt.internal.ui.reorg;
-
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ILabelProvider;
-
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ISavePolicy;
-
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.widgets.Shell;
+
 
 public class CUSavePolicy implements ISavePolicy {
 	
-
+	private static final String DEFAULT_PACKAGE= ""; //$NON-NLS-1$
+
 	private String fNewTypeName;
-
-	/**
-	 * 
-	 * @return com.oti.leapfrog.javamodel.ILFType
-	 * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
-	 */
+
 	protected IType getMainType(ICompilationUnit cu) throws JavaModelException {
 		IType[] p= cu.getTypes();
 		if (p.length == 1)
@@ -59,11 +55,6 @@ public class CUSavePolicy implements ISavePolicy {
 		return cuName;
 	}
 	
-	/**
-	 * 
-	 * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
-	 * @param info CompilationUnitInfo
-	 */
 	protected String handleTypeNameChanged(final Shell shell, ICompilationUnit cu, String oldName) throws JavaModelException {
 		IType publicType= getMainType(cu);
 		if (publicType != null) {
@@ -103,11 +94,7 @@ public class CUSavePolicy implements ISavePolicy {
 		
 		return confirmed[0];
 	}
-
-	/**
-	 * 
-	 * @param t com.oti.leapfrog.javamodel.ILFType
-	 */
+
 	protected void renameConstructors(IType t, String oldName, String newName) throws JavaModelException {
 		if (oldName == null)
 			return;
@@ -118,20 +105,14 @@ public class CUSavePolicy implements ISavePolicy {
 		}
 	}
 	
-	/**
-	 * 
-	 * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
-	 * @param typeName java.lang.String
-	 */
 	protected String checkOverwriteCU(final Shell shell, final ICompilationUnit cu, final IPackageFragment newPackage, final String newName) {
-		final INamingPolicy namingPolicy= ReorgSupportFactory.createNamingPolicy(cu);
 		class Runner implements Runnable {
 			public String fNewName= null;
 			
 			public void run() {
 					NameClashDialog dialog= new NameClashDialog(shell, new IInputValidator() {
 						public String isValid(String newText) {
-							return namingPolicy.isValidNewName(cu, newPackage, newText);
+							return isValidNewName(cu, newPackage, newText);
 						}
 					}, newName, true);
 					if (dialog.open() == dialog.CANCEL)
@@ -142,7 +123,7 @@ public class CUSavePolicy implements ISavePolicy {
 						fNewName= newName;
 				}
 		};
-		if (namingPolicy.isValidNewName(cu, newPackage, newName) != null) {
+		if (isValidNewName(cu, newPackage, newName) != null) {
 			Runner r= new Runner();
 			shell.getDisplay().syncExec(r);
 			return r.fNewName;
@@ -150,9 +131,40 @@ public class CUSavePolicy implements ISavePolicy {
 		return newName;
 	}
 	
-	/**
-	 * preSave method comment.
-	 */
+	
+	private static IPackageFragment getDestination(Object dest) {
+		IPackageFragment result= null;
+		try {
+			result= getDestinationAsPackageFragement(dest);
+			if (result != null && !result.isReadOnly())
+				return result;
+		} catch (JavaModelException e) {
+		}
+		return null;	
+	}
+	
+	public static String isValidNewName(Object original, Object destination, String name) {
+		IPackageFragment pkg= getDestination(destination);
+		if (pkg == null)
+			return null;
+			
+		// the order is important here since getCompilationUnit() throws an exception
+		// if the name is invalid.
+		if (original instanceof ICompilationUnit) {
+			if (!name.endsWith(".java")) //$NON-NLS-1$
+				return ReorgMessages.getString("cuFileReorgSupport.error.invalidEnding"); //$NON-NLS-1$
+			if (!JavaConventions.validateCompilationUnitName(name).isOK())
+				return ReorgMessages.getString("cuFileReorgSupport.error.invalidName"); //$NON-NLS-1$
+		}
+		try {
+			if (pkg.getCompilationUnit(name).exists() || getResource(pkg, name) != null)
+				return ReorgMessages.getString("cuFileReorgSupport.error.duplicate"); //$NON-NLS-1$
+		} catch (JavaModelException e) {
+		}
+		return null;
+	}
+	
+	
 	public void preSave(ICompilationUnit workingCopy) {
 		
 		String oldTypeName= null;
@@ -174,11 +186,6 @@ public class CUSavePolicy implements ISavePolicy {
 		}
 	}
 	
-	/**
-	 * 
-	 * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
-	 * @param oldPackageName java.lang.String
-	 */
 	private IPackageFragment handlePackageChanged(final Shell shell, ICompilationUnit cu) throws JavaModelException {
 		IPackageFragment oldPackage= (IPackageFragment)cu.getParent();
 		String oldPkgName= oldPackage.getElementName();
@@ -217,7 +224,7 @@ public class CUSavePolicy implements ISavePolicy {
 		}
 		return (IPackageFragment[])v.toArray(new IPackageFragment[v.size()]);
 	}
-
+
 	IPackageFragment pickPackage(final Shell shell, IPackageFragment[] packages) {
 		if (packages.length == 1)
 			return packages[0];
@@ -239,17 +246,12 @@ public class CUSavePolicy implements ISavePolicy {
 		return null;
 	}
 	
-	/**
-	 * 
-	 * @param cu com.oti.leapfrog.javamodel.LFCompilationUnit
-	 * @param typeName java.lang.String
-	 */
 	private boolean shouldMoveCU(final Shell shell, ICompilationUnit cu, final String newPackage) {
 		String message= ReorgMessages.getString("cuSavePolicy.confirmMoveCU"); //$NON-NLS-1$
 		String title= ReorgMessages.getString("cuSavePolicy.save.title"); //$NON-NLS-1$
 		return confirm(shell, title, message, new Object[] { newPackage });
 	}
-
+
 	private IPackageFragment tryCreatePackage(final Shell shell, IPackageFragmentRoot pkgRoot, String packageName) throws JavaModelException {
 		String title= ReorgMessages.getString("cuSavePolicy.save.title"); //$NON-NLS-1$
 		String message= ReorgMessages.getString("cuSavePolicy.confirmCreatePkg"); //$NON-NLS-1$
@@ -258,9 +260,6 @@ public class CUSavePolicy implements ISavePolicy {
 		return null;
 	}
 	
-	/**
-	 * update method comment.
-	 */
 	public ICompilationUnit postSave(ICompilationUnit original) {
 	
 		IPackageFragment oldPackage= (IPackageFragment) original.getParent();
@@ -312,7 +311,7 @@ public class CUSavePolicy implements ISavePolicy {
 			return null;
 		}
 	}
-
+
 	private String getPackageDeclaration(ICompilationUnit cu) throws JavaModelException {
 		IPackageDeclaration[] pkgs= cu.getPackageDeclarations();
 		if (pkgs.length == 0)
@@ -320,11 +319,65 @@ public class CUSavePolicy implements ISavePolicy {
 		else 
 			return pkgs[0].getElementName();		
 	}
-
+
 	private void showErrorDialog(Shell shell, JavaModelException e) {
 		String title= ReorgMessages.getString("cuSavePolicy.save.title"); //$NON-NLS-1$
 		String message= ReorgMessages.getString("cuSavePolicy.error.exception"); //$NON-NLS-1$
 		ErrorDialog.openError(shell, title, message, e.getStatus());
+	}
+	
+	private static Object getResource(IPackageFragment fragment, String name) throws JavaModelException {
+		Object[] children= fragment.getNonJavaResources();
+		for (int i= 0; i < children.length; i++) {
+			if (children[i] instanceof IResource) {
+				IResource child= (IResource)children[i];
+				if (child.getName().equals(name))
+					return children[i];
+			} else if (children[i] instanceof IStorage) {
+				IStorage child= (IStorage)children[i];
+				if (child.getName().equals(name))
+					return children[i];
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the actual destination for the given <code>dest</code> if the
+	 * elements to be dropped are files or compilation units.
+	 */
+	private static IPackageFragment getDestinationAsPackageFragement(Object dest) throws JavaModelException {
+		if (dest instanceof IPackageFragment)
+			return (IPackageFragment)dest;
+		
+		if (dest instanceof IJavaProject) {
+			dest= getDestinationAsPackageFragmentRoot((IJavaProject)dest);
+		}
+			
+		if (dest instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot)dest;
+			return root.getPackageFragment(DEFAULT_PACKAGE);
+		}
+		
+		return null;
+	}	
+	
+	/**
+	 * Returns the package fragment root to be used as a destination for the
+	 * given project. If the project has more than one package fragment root
+	 * that isn't an archive <code>null</code> is returned.
+	 */
+	public static IPackageFragmentRoot getDestinationAsPackageFragmentRoot(IJavaProject project) throws JavaModelException {
+		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+		IPackageFragmentRoot result= null;
+		for (int i= 0; i < roots.length; i++) {
+			if (! roots[i].isArchive()) {
+				if (result != null)
+					return null;
+				result= roots[i];
+			}
+		}
+		return result;
 	}
 	
 }
