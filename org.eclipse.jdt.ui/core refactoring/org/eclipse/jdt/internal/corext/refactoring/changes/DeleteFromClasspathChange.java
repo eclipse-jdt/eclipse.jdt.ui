@@ -36,7 +36,6 @@ public class DeleteFromClasspathChange extends Change {
 	private IPath fSourceAttachmentPath;
 	private IPath fSourceAttachmentRootPath;
 	private int fEntryKind;
-	private int fContentKind;
 	
 	public DeleteFromClasspathChange(IPackageFragmentRoot root) {
 		this(root.getPath(), root.getJavaProject());
@@ -91,7 +90,6 @@ public class DeleteFromClasspathChange extends Change {
 	
 	private void setDeletedEntryProperties(IClasspathEntry entry){
 		fEntryKind= entry.getEntryKind();
-		fContentKind= entry.getContentKind();
 		fPath= entry.getPath();
 		fSourceAttachmentPath= entry.getSourceAttachmentPath();
 		fSourceAttachmentRootPath= entry.getSourceAttachmentRootPath();
