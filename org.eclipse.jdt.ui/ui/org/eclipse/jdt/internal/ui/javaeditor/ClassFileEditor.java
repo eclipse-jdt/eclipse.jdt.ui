@@ -501,7 +501,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		if (e != null) {
 			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
 			IClassFile file= classFileEditorInput.getClassFile();
-			if (!file.getJavaProject().isOnClasspath(file)) {
+			if (!file.getJavaProject().exists() || !file.getJavaProject().isOnClasspath(file)) {
 				throw new CoreException(JavaUIStatus.createError(
 					IJavaModelStatusConstants.INVALID_RESOURCE, 
 					JavaEditorMessages.getString("ClassFileEditor.error.classfile_not_on_classpath"), //$NON-NLS-1$
