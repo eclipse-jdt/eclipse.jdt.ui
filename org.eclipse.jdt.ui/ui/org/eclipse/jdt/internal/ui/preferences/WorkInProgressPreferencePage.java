@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Preference page for work in progress.
  */
-public class WorkInProgressPreferencePage extends PreferencePage	implements IWorkbenchPreferencePage {
+public class WorkInProgressPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	/** prefix for resources */
 	private static final String PREFIX= "WorkInProgress."; //$NON-NLS-1$
@@ -149,8 +149,6 @@ public class WorkInProgressPreferencePage extends PreferencePage	implements IWor
 		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
 
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "markOccurrences"), PreferenceConstants.EDITOR_MARK_OCCURRENCES); //$NON-NLS-1$
-		
-		addCheckBox(group, PreferencesMessages.getString(PREFIX + "overwriteMode"), PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE); //$NON-NLS-1$
 		createSpacer(group, 1);
 
 		Label label= new Label(group, SWT.NONE);
@@ -369,7 +367,6 @@ public class WorkInProgressPreferencePage extends PreferencePage	implements IWor
 	 * @param store
 	 */
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE, false);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_SEMICOLON, false);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
 		

@@ -2148,7 +2148,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_ESCAPE_STRINGS, false);
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, false);
-
+		store.setDefault(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE, false);
+		
 		String mod1Name= Action.findModifierString(SWT.MOD1);	// SWT.COMMAND on Mac; SWT.CONTROL elsewhere
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + mod1Name); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + SWT.MOD1); //$NON-NLS-1$
