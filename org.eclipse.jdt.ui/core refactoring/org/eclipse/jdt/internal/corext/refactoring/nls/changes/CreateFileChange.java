@@ -86,7 +86,7 @@ public class CreateFileChange extends JDTChange {
 
 		InputStream is= null;
 		try {
-			pm.beginTask(NLSChangesMessages.getString("createFile.creating_resource"), 2); //$NON-NLS-1$
+			pm.beginTask(NLSChangesMessages.getString("createFile.creating_resource"), 3); //$NON-NLS-1$
 
 			initializeEncoding();
 			IFile file= getOldFile(new SubProgressMonitor(pm, 1));
@@ -94,13 +94,17 @@ public class CreateFileChange extends JDTChange {
 				CompositeChange composite= new CompositeChange(getName());
 				composite.add(new DeleteFileChange(file));
 				composite.add(new CreateFileChange(fPath, fSource, fEncoding, fExplicitEncoding));
-				return composite.perform(pm);
+				pm.worked(1);
+				return composite.perform(new SubProgressMonitor(pm, 1));
 			} else {
 				try {
 					is= new ByteArrayInputStream(fSource.getBytes(fEncoding));
-					file.create(is, false, pm);
-					if (fExplicitEncoding)
-						file.setCharset(fEncoding);
+					file.create(is, false, new SubProgressMonitor(pm, 1));
+					if (fExplicitEncoding) {
+						file.setCharset(fEncoding, new SubProgressMonitor(pm, 1));
+					} else {
+						pm.worked(1);
+					}
 					return new DeleteFileChange(file);
 				} catch (UnsupportedEncodingException e) {
 					throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
