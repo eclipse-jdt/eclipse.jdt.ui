@@ -234,23 +234,22 @@ public class AllTypesCache {
 		
 	/**
 	 * Returns all types in the given scope.
-	 * @param kind IJavaSearchConstants.CLASS, IJavaSearchConstants.INTERFACE
-	 * or IJavaSearchConstants.TYPE
+	 * @param kind IJavaSearchConstants.CLASS, IJavaSearchConstants.INTERFACE or IJavaSearchConstants.TYPE
 	 * @param typesFound The resulting <code>TypeInfo</code> elements are added to this collection
 	 */		
 	public static void getTypes(IJavaSearchScope scope, int kind, IProgressMonitor monitor, Collection typesFound) {
-		
 		TypeInfo[] allTypes= getAllTypes(monitor);
-		
-		boolean isWorkspaceScope= scope.equals(SearchEngine.createWorkspaceScope());
-		boolean isBoth= (kind == IJavaSearchConstants.TYPE);
-		boolean isInterface= (kind == IJavaSearchConstants.INTERFACE);
-		
-		for (int i= 0; i < allTypes.length; i++) {
-			TypeInfo info= allTypes[i];
-			if (isWorkspaceScope || info.isEnclosed(scope)) {
-				if (isBoth || (isInterface == info.isInterface())) {
-					typesFound.add(info);
+		if (allTypes != null) {
+			boolean isWorkspaceScope= scope.equals(SearchEngine.createWorkspaceScope());
+			boolean isBoth= (kind == IJavaSearchConstants.TYPE);
+			boolean isInterface= (kind == IJavaSearchConstants.INTERFACE);
+			
+			for (int i= 0; i < allTypes.length; i++) {
+				TypeInfo info= allTypes[i];
+				if (isWorkspaceScope || info.isEnclosed(scope)) {
+					if (isBoth || (isInterface == info.isInterface())) {
+						typesFound.add(info);
+					}
 				}
 			}
 		}
@@ -479,30 +478,32 @@ public class AllTypesCache {
 		Collection result= new ArrayList();
 		Set namesFound= new HashSet();
 		TypeInfo[] allTypes= AllTypesCache.getAllTypes(monitor); // all types in workspace, sorted by type name
-		TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null); //$NON-NLS-1$
-		int index= Arrays.binarySearch(allTypes, key, fgTypeNameComparator);
-		if (index >= 0 && index < allTypes.length) {
-			for (int i= index - 1; i>= 0; i--) {
-				TypeInfo curr= allTypes[i];
-				if (simpleTypeName.equals(curr.getTypeName())) {
-					if (!namesFound.contains(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
-						result.add(curr);
-						namesFound.add(curr.getFullyQualifiedName());
+		if (allTypes != null) {
+			TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null); //$NON-NLS-1$
+			int index= Arrays.binarySearch(allTypes, key, fgTypeNameComparator);
+			if (index >= 0 && index < allTypes.length) {
+				for (int i= index - 1; i>= 0; i--) {
+					TypeInfo curr= allTypes[i];
+					if (simpleTypeName.equals(curr.getTypeName())) {
+						if (!namesFound.contains(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
+							result.add(curr);
+							namesFound.add(curr.getFullyQualifiedName());
+						}
+					} else {
+						break;
 					}
-				} else {
-					break;
 				}
-			}
-	
-			for (int i= index; i < allTypes.length; i++) {
-				TypeInfo curr= allTypes[i];
-				if (simpleTypeName.equals(curr.getTypeName())) {
-					if (!namesFound.contains(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
-						result.add(curr);
-						namesFound.add(curr.getFullyQualifiedName());
+		
+				for (int i= index; i < allTypes.length; i++) {
+					TypeInfo curr= allTypes[i];
+					if (simpleTypeName.equals(curr.getTypeName())) {
+						if (!namesFound.contains(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
+							result.add(curr);
+							namesFound.add(curr.getFullyQualifiedName());
+						}
+					} else {
+						break;
 					}
-				} else {
-					break;
 				}
 			}
 		}
