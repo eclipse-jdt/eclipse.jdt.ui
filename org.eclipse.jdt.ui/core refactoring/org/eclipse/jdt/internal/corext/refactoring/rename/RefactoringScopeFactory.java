@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -25,24 +27,12 @@ public class RefactoringScopeFactory {
 	private RefactoringScopeFactory(){
 	}
 	
-	private static IJavaSearchScope create(IJavaProject javaProject) {
+	private static IJavaSearchScope create(IJavaProject javaProject) throws JavaModelException {
 		List projects= new  ArrayList();
 		projects.add(javaProject);
-		projects.addAll(getReferencingJavaProjects(javaProject));
+		addReferencingProjects(javaProject.getProject(), projects);
 		IJavaProject[] javaProjects= (IJavaProject[]) projects.toArray(new IJavaProject[projects.size()]);
 		return SearchEngine.createJavaSearchScope(javaProjects, false);
-	}
-	
-	private static List getReferencingJavaProjects(IJavaProject javaProject){
-		IProject[] refProjects= javaProject.getProject().getReferencingProjects();
-		List result= new ArrayList(refProjects.length);
-		for (int i= 0; i < refProjects.length; i++) {
-			IProject refProject= refProjects[i];
-			IJavaProject refJavaProject= JavaCore.create(refProject);
-			if (refJavaProject != null)
-				result.add(refJavaProject);
-		}
-		return result;
 	}
 	
 	public static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {
@@ -61,5 +51,24 @@ public class RefactoringScopeFactory {
 		}
 		return create(javaElement.getJavaProject());
 	}
+	
+	private static void addReferencingProjects(IProject focus, List list) throws JavaModelException {
+		IPath path= focus.getProject().getFullPath();
+		IProject[] projects= focus.getProject().getReferencingProjects();
+		for (int i= 0, length= projects.length; i < length; i++) {
+			IProject project= projects[i];
+			IJavaProject javaProject= JavaCore.create(project);
+			IClasspathEntry[] classpath= javaProject.getRawClasspath();
+			for (int j= 0, length2= classpath.length; j < length2; j++) {
+				IClasspathEntry entry= classpath[j];
+				if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT && path.equals(entry.getPath())) {
+					list.add(javaProject);
+					if (entry.isExported())
+						addReferencingProjects(javaProject.getProject(), list);
+					break;
+				}
+			}
+		}
+	}	
 }
 
