@@ -10,9 +10,15 @@ What's new in this drop</h2>
 
 
 <ul>
-<li>Added "Edit Working Set..." to JDT view menus<br>
-</li><li><br>
-</li>
+	<li>Added "Edit Working Set..." to JDT view menus</li>
+	<li>Inline Call - new refactoring to inline a method call. To activate the refactoring select a method
+		invocation in a compilation unit editor and select <i>Inline Call</i> from the refactoring menu. Current
+		limitations are: 
+		<ul>
+			<li>only one single call can be inlined</li>
+			<li>a call can only be inlined if the call and the actual declaration resides in the same compilation unit</li>
+			<li>no checking is done if method to be inlined is reimplemented in subclasses.</li>
+		</ul>	
 </ul>
 
 

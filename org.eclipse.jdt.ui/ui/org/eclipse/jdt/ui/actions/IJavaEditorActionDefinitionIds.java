@@ -220,6 +220,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.edit.text.java.extract.method"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the refactor -> inline method action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.inline.method"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String INLINE_METHOD= "org.eclipse.jdt.ui.edit.text.java.inline.method"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the refactor -> extract interface action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.extract.interface"</code>).
 	 * 

@@ -56,7 +56,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractInterfaceAction;
 	private SelectionDispatchAction fMoveInnerToTopAction;
 	private SelectionDispatchAction fUseSupertypeAction;
-	private SelectionDispatchAction fInlineCallAction;	
+	private SelectionDispatchAction fInlineMethodAction;	
 	private SelectionDispatchAction fExtractConstantAction;
 	
 	/**
@@ -136,6 +136,11 @@ public class RefactorActionGroup extends ActionGroup {
 		initAction(fExtractMethodAction, provider, selection);
 		editor.setAction("ExtractMethod", fExtractMethodAction); //$NON-NLS-1$
 
+		fInlineMethodAction= new InlineMethodAction(editor);
+		fInlineMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE_METHOD);
+		fInlineMethodAction.update(selection);
+		editor.setAction("InlineMethod", fInlineMethodAction); //$NON-NLS-1$
+		
 		fExtractInterfaceAction= new ExtractInterfaceAction(editor);
 		fExtractInterfaceAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
 		fExtractInterfaceAction.update(selection);
@@ -150,9 +155,6 @@ public class RefactorActionGroup extends ActionGroup {
 		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
 		fUseSupertypeAction.update(selection);
 		editor.setAction("UseSupertype", fUseSupertypeAction); //$NON-NLS-1$
-		
-		fInlineCallAction= new InlineMethodAction(editor);
-		fInlineCallAction.update(selection);
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site) {
@@ -209,6 +211,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_CONSTANT, fExtractConstantAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_METHOD, fInlineMethodAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.MOVE_INNER_TO_TOP, fMoveInnerToTopAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
@@ -236,10 +239,10 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fExtractTempAction, provider);
 		disposeAction(fExtractConstantAction, provider);
 		disposeAction(fExtractMethodAction, provider);
+		disposeAction(fInlineMethodAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
 		disposeAction(fMoveInnerToTopAction, provider);
 		disposeAction(fUseSupertypeAction, provider);
-		disposeAction(fInlineCallAction, provider);
 		super.dispose();
 	}
 	
@@ -260,9 +263,9 @@ public class RefactorActionGroup extends ActionGroup {
 		if (! refactorSubmenu.isEmpty())
 			refactorSubmenu.add(new Separator());
 		addAction(refactorSubmenu, fExtractMethodAction);
-//		addAction(refactorSubmenu, fInlineCallAction);
 		addAction(refactorSubmenu, fExtractTempAction);
 		addAction(refactorSubmenu, fExtractConstantAction);
+		addAction(refactorSubmenu, fInlineMethodAction);
 		addAction(refactorSubmenu, fInlineTempAction);
 		addAction(refactorSubmenu, fSelfEncapsulateField);
 		if (!refactorSubmenu.isEmpty())

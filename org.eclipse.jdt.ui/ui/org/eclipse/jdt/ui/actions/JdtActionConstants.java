@@ -249,6 +249,14 @@ public class JdtActionConstants {
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.actions.ExtractMethod"; //$NON-NLS-1$
 
 	/**
+	 * Refactor menu: name of standard Inline Method global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.InlineMethod"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String INLINE_METHOD= "org.eclipse.jdt.ui.actions.InlineMethod"; //$NON-NLS-1$
+
+	/**
 	 * Refactor menu: name of standard Extract Interface global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractInterface"</code>).
 	 * 

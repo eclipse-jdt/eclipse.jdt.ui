@@ -1021,6 +1021,12 @@ JavaStructureDiffViewerCreator
 			definitionId="org.eclipse.jdt.ui.edit.text.java.inline.local.variable"
 			retarget="true" />
 			
+		<action id="org.eclipse.jdt.ui.actions.InlineMethod"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+      		label="%Refactoring.inlineMethodAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.inline.method"
+			retarget="true" />
+			
 		<action id="org.eclipse.jdt.ui.actions.ExtractTemp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.extractTempAction.label"
@@ -1460,6 +1466,7 @@ JavaStructureDiffViewerCreator
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.inline.method" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
@@ -1546,6 +1553,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
