@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class GetterSetterUtil {
@@ -27,11 +29,16 @@ public class GetterSetterUtil {
 	}
 	
 	public static String getGetterName(IField field, String[] excludedNames) throws JavaModelException {
+		boolean useIs= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_IS_FOR_GETTERS);
+		return getGetterName(field, excludedNames, useIs);
+	}
+	
+	private static String getGetterName(IField field, String[] excludedNames, boolean useIsForBoolGetters) throws JavaModelException {
 		if (excludedNames == null) {
 			excludedNames= EMPTY;
 		}
-		return getGetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), JavaModelUtil.isBoolean(field), excludedNames);
-	}
+		return getGetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), useIsForBoolGetters && JavaModelUtil.isBoolean(field), excludedNames);
+	}	
 	
 	private static String getGetterName(IJavaProject project, String fieldName, int flags, boolean isBoolean, String[] excludedNames){
 		return NamingConventions.suggestGetterName(project, fieldName, flags, isBoolean, excludedNames);	
@@ -45,11 +52,11 @@ public class GetterSetterUtil {
 	}	
 
 	public static IMethod getGetter(IField field) throws JavaModelException{
-		IMethod primaryCandidate= JavaModelUtil.findMethod(getGetterName(field, EMPTY), new String[0], false, field.getDeclaringType());
+		IMethod primaryCandidate= JavaModelUtil.findMethod(getGetterName(field, EMPTY, true), new String[0], false, field.getDeclaringType());
 		if (! JavaModelUtil.isBoolean(field) || (primaryCandidate != null && primaryCandidate.exists()))
 			return primaryCandidate;
 		//bug 30906 describes why we need to look for other alternatives here
-		String secondCandidateName= getGetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), false, EMPTY);
+		String secondCandidateName= getGetterName(field, EMPTY, false);
 		return JavaModelUtil.findMethod(secondCandidateName, new String[0], false, field.getDeclaringType());
 	}
 	

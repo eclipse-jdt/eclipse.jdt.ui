@@ -255,7 +255,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 
 		public void customButtonPressed(ListDialogField field, int index) {
-			doEditButtonPressed(index);
+			doEditButtonPressed();
 		}
 
 		public void selectionChanged(ListDialogField field) {
@@ -264,7 +264,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			
 		public void doubleClicked(ListDialogField field) {
 			if (canEdit(field)) {
-				doEditButtonPressed(0);
+				doEditButtonPressed();
 			}
 		}
 
@@ -275,7 +275,9 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		
 	private ListDialogField fNameConventionList;
 	private SelectionButtonDialogField fUseKeywordThisBox;
+	private SelectionButtonDialogField fUseIsForBooleanGettersBox;
 	private static final String PREF_KEYWORD_THIS= PreferenceConstants.CODEGEN_KEYWORD_THIS;
+	private static final String PREF_IS_FOR_GETTERS= PreferenceConstants.CODEGEN_IS_FOR_GETTERS;
 	
 	public NameConventionConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
 		super(context, project);
@@ -308,9 +310,14 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 		
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38879
-		fUseKeywordThisBox=  new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
-		fUseKeywordThisBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.keywordthis.label")); //$NON-NLS-1$		fUseKeywordThisBox.setSelection(false);
+		fUseKeywordThisBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
+		fUseKeywordThisBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.keywordthis.label")); //$NON-NLS-1$
 		fUseKeywordThisBox.setSelection(PreferenceConstants.getPreferenceStore().getBoolean(PREF_KEYWORD_THIS));
+		
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=39044
+		fUseIsForBooleanGettersBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
+		fUseIsForBooleanGettersBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.isforbooleangetters.label")); //$NON-NLS-1$
+		fUseIsForBooleanGettersBox.setSelection(PreferenceConstants.getPreferenceStore().getBoolean(PREF_IS_FOR_GETTERS));		
 	}
 	
 	protected String[] getAllKeys() {
@@ -338,6 +345,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		data.heightHint= SWTUtil.getTableHeightHint(table, 5);
 
 		fUseKeywordThisBox.doFillIntoGrid(composite, 2);
+		fUseIsForBooleanGettersBox.doFillIntoGrid(composite, 2);
 
 		return composite;
 	}
@@ -390,7 +398,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 	}
 		
-	private void doEditButtonPressed(int index) {
+	private void doEditButtonPressed() {
 		NameConventionEntry entry= (NameConventionEntry) fNameConventionList.getSelectedElements().get(0);
 
 		String title;
@@ -426,6 +434,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		super.performDefaults();
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		fUseKeywordThisBox.setSelection(prefs.getDefaultBoolean(PREF_KEYWORD_THIS));
+		fUseIsForBooleanGettersBox.setSelection(prefs.getDefaultBoolean(PREF_IS_FOR_GETTERS));
 	}
 
 	/* (non-Javadoc)
@@ -434,6 +443,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	public boolean performOk(boolean enabled) {
 		IPreferenceStore prefs= PreferenceConstants.getPreferenceStore();
 		prefs.setValue(PREF_KEYWORD_THIS, fUseKeywordThisBox.isSelected());
+		prefs.setValue(PREF_IS_FOR_GETTERS, fUseIsForBooleanGettersBox.isSelected());
 		JavaPlugin.getDefault().savePluginPreferences();
 				
 		packEntries();

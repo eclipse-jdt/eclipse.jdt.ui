@@ -23,6 +23,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 
@@ -50,7 +51,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.dialogs.ISourceActionContentProvider;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -303,7 +303,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		return dialogTitle;
 	}	
 
-	private static class AddUnimplementedConstructorsContentProvider implements ISourceActionContentProvider {
+	private static class AddUnimplementedConstructorsContentProvider implements ITreeContentProvider {
 		
 		private IMethod[] fMethodsList;
 		private static final Object[] EMPTY= new Object[0];
@@ -353,19 +353,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.dialogs.ISourceActionContentProvider#getInsertPosition()
-		 */
-		public int getInsertPosition() {
-			return 0;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.dialogs.ISourceActionContentProvider#setInsertPosition(int)
-		 */
-		public void setInsertPosition(int insert) {
-		}									
+									
 	}
 	
 	private static class AddUnimplementedConstructorsValidator implements ISelectionStatusValidator {

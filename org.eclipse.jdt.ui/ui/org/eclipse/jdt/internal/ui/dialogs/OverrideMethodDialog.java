@@ -77,7 +77,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		
 	}
 	
-	private static class OverrideMethodContentProvider implements ISourceActionContentProvider {
+	private static class OverrideMethodContentProvider implements ITreeContentProvider {
 		private final String SETTINGS_SECTION= "OverrideMethodDialog"; //$NON-NLS-1$
 		private final String SETTINGS_SHOWTYPES= "showtypes"; //$NON-NLS-1$
 	
@@ -173,14 +173,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 					fViewer.refresh();
 				}
 			}
-		}
-
-		public int getInsertPosition() {		
-			return 0;
-		}
-
-		public void setInsertPosition(int insert) {			
-		}												
+		}											
 	}
 	
 	private static class OverrideMethodSorter extends ViewerSorter {

@@ -26,9 +26,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 
@@ -40,6 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -50,17 +53,20 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * extra buttons and composites.
  */
 public class SourceActionDialog extends CheckedTreeSelectionDialog {
-	
-	private int fInsertionIndex;
+	private int fInsertPosition;
+	private IDialogSettings fSettings;
 	private CompilationUnitEditor fEditor;
-	private ISourceActionContentProvider fContentProvider;
+	private ITreeContentProvider fContentProvider;
 	private boolean fGenerateComment;
 	private IType fType;
 	private int fWidth = 60;
 	private int fHeight = 18;
 	private String fCommentString;
+	
+	private final String SETTINGS_SECTION= "SourceActionDialog"; //$NON-NLS-1$
+	public final String SETTINGS_INSERTPOSITION= "InsertPosition"; //$NON-NLS-1$
 
-	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ISourceActionContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
+	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
 		super(parent, labelProvider, contentProvider);
 		fEditor= editor;
 		fContentProvider= contentProvider;		
@@ -71,24 +77,42 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		fGenerateComment= genStubSettings.createComments;		
+
+		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
+		fSettings= dialogSettings.getSection(SETTINGS_SECTION);		
+		if (fSettings == null)  {
+			fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
+			fSettings.put(SETTINGS_INSERTPOSITION, 0); //$NON-NLS-1$
+		}
+
+		fInsertPosition= fSettings.getInt(SETTINGS_INSERTPOSITION);
 	}
 
+	/***
+	 * Returns 0 for the first method, 1 for the last method, > 1  for all else.
+	 */
+	public int getInsertPosition() {
+		return fInsertPosition;
+	}
+	
+	/***
+	 * Set insert position valid input is 0 for the first position, 1 for the last position, > 1 for all else.
+	 */
+	public void setInsertPosition(int insert) {
+		if (fInsertPosition != insert) {
+			fInsertPosition= insert;
+			fSettings.put(SETTINGS_INSERTPOSITION, insert);
+		}
+	}	
+	
 	public void setCommentString(String string) {
 		fCommentString= string;
 	}
 		
-	protected ISourceActionContentProvider getContentProvider() {
+	protected ITreeContentProvider getContentProvider() {
 		return fContentProvider;
 	}
 
-	public int getInsertionIndex() {
-		return fInsertionIndex;
-	}
-
-	private void setInsertionIndex(int index) {
-		fInsertionIndex = index;
-	}
-	
 	public boolean getGenerateComment() {
 		return fGenerateComment;
 	}
@@ -262,8 +286,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			public void widgetSelected(SelectionEvent e) {
 				int index= enterCombo.getSelectionIndex();
 				// Add persistence only if first or last method: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400				
-				getContentProvider().setInsertPosition(index);
-				setInsertionIndex(index);
+				setInsertPosition(index);
 			}
 		});	
 
@@ -314,13 +337,13 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 						break;
 			}	
 			// Add persistence only if first or last method: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
-			int index= getContentProvider().getInsertPosition();
-			if ((index == 0) || (index == 1))
-				combo.select(index);
-			else			
+			int index= getInsertPosition();
+			if (index > 1)
 				combo.select(position);
+			else			
+				combo.select(index);
 
-			setInsertionIndex(combo.getSelectionIndex());
+			setInsertPosition(combo.getSelectionIndex());
 		} catch (JavaModelException e) {
 		}	
 	}
@@ -329,7 +352,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * Determine where in the file to enter the newly created methods.
 	 */
 	public IJavaElement getElementPosition() {
-		int comboBoxIndex= getInsertionIndex();		
+		int comboBoxIndex= getInsertPosition();		
 		
 		try {
 			if (comboBoxIndex == 0)				// as first method

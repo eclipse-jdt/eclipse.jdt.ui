@@ -33,6 +33,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
@@ -67,7 +68,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.dialogs.ISourceActionContentProvider;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -429,7 +429,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	}
 
 	/** The  model (content provider) for the field-methods tree */
-	private static class AddDelegateMethodsContentProvider implements ISourceActionContentProvider {
+	private static class AddDelegateMethodsContentProvider implements ITreeContentProvider {
 
 		private Map fTreeMap= null;
 		private Map fFieldMap= null;
@@ -526,14 +526,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
-
-		public int getInsertPosition() {
-			return 0;
-		}
-
-		public void setInsertPosition(int insert) {
-		}
-
 	}
 
 	/**just to wrap JavaElementLabelProvider using my Methods2Field*/
