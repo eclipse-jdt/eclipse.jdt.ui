@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -42,6 +43,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
@@ -53,9 +55,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -345,7 +349,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		deleteExtractedFields(typeCuNode, typeCu, typeCuRewrite);
 		if (fInputType.isInterface())
 			deleteExtractedMethods(typeCuNode, typeCu, typeCuRewrite);
+		final ITypeParameter[] parameters= fInputType.getTypeParameters();
 		Type type= declaration.getAST().newSimpleType(declaration.getAST().newSimpleName(fNewInterfaceName));
+		if (parameters.length > 0) {
+			final ParameterizedType parameterized= declaration.getAST().newParameterizedType(type);
+			for (int index= 0; index < parameters.length; index++)
+				parameterized.typeArguments().add(declaration.getAST().newSimpleType(declaration.getAST().newSimpleName(parameters[index].getElementName())));
+			type= parameterized;
+		}
 		if (declaration instanceof TypeDeclaration)
 			((TypeDeclaration) declaration).superInterfaceTypes().add(type);
 		else if (declaration instanceof EnumDeclaration)
@@ -500,12 +511,32 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private void addImportsToNewCu(ICompilationUnit newCu, IProgressMonitor pm, CompilationUnit cuNode) throws CoreException {
-		pm.beginTask("", 3); //$NON-NLS-1$
+		pm.beginTask("", 4); //$NON-NLS-1$
 		ImportsStructure is= new ImportsStructure(newCu, fCodeGenerationSettings.importOrder, fCodeGenerationSettings.importThreshold, true);
 		addImportsToTypesReferencedInMethodDeclarations(is, new SubProgressMonitor(pm, 1), cuNode);
 		addImportsToTypesReferencedInFieldDeclarations(is, new SubProgressMonitor(pm, 1));
+		addImportsToTypeParameters(is, new SubProgressMonitor(pm, 1), cuNode);
 		is.create(false, new SubProgressMonitor(pm, 1));
 		pm.done();
+	}
+
+	private void addImportsToTypeParameters(ImportsStructure is, SubProgressMonitor monitor, CompilationUnit cuNode) throws JavaModelException {
+		final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fInputType, cuNode);
+		if (declaration instanceof TypeDeclaration) {
+			final TypeDeclaration type= (TypeDeclaration) declaration;
+			Type bound= null;
+			TypeParameter parameter= null;
+			ITypeBinding binding= null;
+			for (final Iterator parameters= type.typeParameters().iterator(); parameters.hasNext();) {
+				parameter= (TypeParameter) parameters.next();
+				for (final Iterator bounds= parameter.typeBounds().iterator(); bounds.hasNext();) {
+					bound= (Type) bounds.next();
+					binding= bound.resolveBinding();
+					if (binding != null)
+						is.addImport(binding);
+				}
+			}
+		}
 	}
 
 	private String createInterfaceSource(CompilationUnit cuNode) throws JavaModelException {
@@ -513,11 +544,32 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		buff.append(createInterfaceModifierString())
 			 .append("interface ")//$NON-NLS-1$
 			 .append(fNewInterfaceName)
+			 .append(createTypeParameterString(cuNode))
 			 .append(" {")//$NON-NLS-1$
 			 .append(getLineSeperator())
 			 .append(createInterfaceMemberDeclarationsSource(cuNode))
 			 .append("}");//$NON-NLS-1$
 		return buff.toString();
+	}
+
+	private String createTypeParameterString(CompilationUnit cuNode) throws JavaModelException {
+		final StringBuffer buffer= new StringBuffer();
+		final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fInputType, cuNode);
+		if (declaration instanceof TypeDeclaration) {
+			final TypeDeclaration type= (TypeDeclaration) declaration;
+			final List parameters= type.typeParameters();
+			if (!parameters.isEmpty()) {
+			buffer.append('<');
+			for (int index= 0; index < parameters.size(); index++) {
+				buffer.append(parameters.get(index).toString());
+				if (index < parameters.size() - 1)
+					buffer.append(',');
+			}
+			buffer.append('>');
+			return buffer.toString();
+			}
+		}
+		return ""; //$NON-NLS-1$
 	}
 
 	private String createInterfaceModifierString() throws JavaModelException {
