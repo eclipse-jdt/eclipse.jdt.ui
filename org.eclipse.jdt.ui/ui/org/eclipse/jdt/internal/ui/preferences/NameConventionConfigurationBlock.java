@@ -416,7 +416,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	}
 	
 	private String getPreferenceValue(String key) {
-		String value= (String) fWorkingValues.get(key);
+		String value= getValue(key);
 		if (value == null) {
 			value= ""; //$NON-NLS-1$
 			JavaPlugin.logErrorMessage("JavaCore preference is null. Key:" + key); //$NON-NLS-1$
@@ -436,8 +436,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private void packEntries() {
 		for (int i= 0; i < fNameConventionList.getSize(); i++) {
 			NameConventionEntry entry= (NameConventionEntry) fNameConventionList.getElement(i);
-			fWorkingValues.put(entry.suffixkey, entry.suffix);
-			fWorkingValues.put(entry.prefixkey, entry.prefix);
+			setValue(entry.suffixkey, entry.suffix);
+			setValue(entry.prefixkey, entry.prefix);
 		}
 	}
 		

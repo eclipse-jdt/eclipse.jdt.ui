@@ -223,13 +223,13 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	public SpellingConfigurationBlock(final IStatusChangeListener context, final IJavaProject project) {
 		super(context, project, getAllKeys());
 
-		IStatus status= validateAbsoluteFilePath((String)fWorkingValues.get(PREF_SPELLING_USER_DICTIONARY));
+		IStatus status= validateAbsoluteFilePath(getValue(PREF_SPELLING_USER_DICTIONARY));
 		if (status.getSeverity() != IStatus.OK)
-			fWorkingValues.put(PREF_SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
+			setValue(PREF_SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
 
-		status= validateLocale((String)fWorkingValues.get(PREF_SPELLING_LOCALE));
+		status= validateLocale(getValue(PREF_SPELLING_LOCALE));
 		if (status.getSeverity() != IStatus.OK)
-			fWorkingValues.put(PREF_SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
+			setValue(PREF_SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
 	}
 
 	protected Combo addComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
@@ -252,7 +252,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		
 		fLabels.put(comboBox, labelControl);
 		
-		String currValue= (String)fWorkingValues.get(key);	
+		String currValue= getValue(key);	
 		comboBox.select(data.getSelection(currValue));
 		
 		fComboBoxes.add(comboBox);
@@ -421,7 +421,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 
 		for (int index= 0; index < keys.length; index++)
-			store.setValue(keys[index], (String)fWorkingValues.get(keys[index]));
+			store.setValue(keys[index], getValue(keys[index]));
 	}
 
 	/*
@@ -430,10 +430,10 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	protected void validateSettings(final String key, final String oldValue, final String newValue) {
 
 		if (key == null || PREF_SPELLING_PROPOSAL_THRESHOLD.equals(key))
-			fThresholdStatus= validatePositiveNumber((String)fWorkingValues.get(PREF_SPELLING_PROPOSAL_THRESHOLD));
+			fThresholdStatus= validatePositiveNumber(getValue(PREF_SPELLING_PROPOSAL_THRESHOLD));
 
 		if (key == null || PREF_SPELLING_USER_DICTIONARY.equals(key))
-			fFileStatus= validateAbsoluteFilePath((String)fWorkingValues.get(PREF_SPELLING_USER_DICTIONARY));
+			fFileStatus= validateAbsoluteFilePath(getValue(PREF_SPELLING_USER_DICTIONARY));
 
 		fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fThresholdStatus, fFileStatus }));
 	}

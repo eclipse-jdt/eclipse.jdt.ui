@@ -84,8 +84,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		super(context, project, getKeys());
 		
 		// compatibilty code for the merge of the two option PB_SIGNAL_PARAMETER: 
-		if (ENABLED.equals(fWorkingValues.get(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT))) {
-			fWorkingValues.put(PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, ENABLED);
+		if (ENABLED.equals(getValue(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT))) {
+			setValue(PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, ENABLED);
 		}
 	}
 	
@@ -317,7 +317,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				updateEnableStates();
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
 				// merging the two options
-				fWorkingValues.put(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, newValue);
+				setValue(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, newValue);
 			} else {
 				return;
 			}

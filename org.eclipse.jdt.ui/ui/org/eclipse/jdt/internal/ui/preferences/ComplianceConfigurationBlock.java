@@ -99,12 +99,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		fComplianceStatus= new StatusInfo();
 		
 		fRememberedUserCompliance= new String[] { // caution: order depends on IDX_* constants
-			(String) fWorkingValues.get(PREF_PB_ASSERT_AS_IDENTIFIER),
-			(String) fWorkingValues.get(PREF_PB_ENUM_AS_IDENTIFIER),
-			(String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY),
-			(String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM),
-			(String) fWorkingValues.get(PREF_COMPLIANCE),
-			(String) fWorkingValues.get(PREF_CODEGEN_INLINE_JSR_BYTECODE),
+			getValue(PREF_PB_ASSERT_AS_IDENTIFIER),
+			getValue(PREF_PB_ENUM_AS_IDENTIFIER),
+			getValue(PREF_SOURCE_COMPATIBILITY),
+			getValue(PREF_CODEGEN_TARGET_PLATFORM),
+			getValue(PREF_COMPLIANCE),
+			getValue(PREF_CODEGEN_INLINE_JSR_BYTECODE),
 		};
 	}
 	
@@ -263,7 +263,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_COMPLIANCE.equals(changedKey)) {
 			    // set compliance settings to default
-			    Object oldDefault= fWorkingValues.put(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF);
+			    Object oldDefault= setValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF);
 			    updateComplianceEnableState();
 				updateComplianceDefaultSettings(USER_CONF.equals(oldDefault), oldValue);
 				fComplianceStatus= validateCompliance();
@@ -292,9 +292,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private IStatus validateCompliance() {
 		StatusInfo status= new StatusInfo();
-		String compliance= (String) fWorkingValues.get(PREF_COMPLIANCE);
-		String source= (String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY);
-		String target= (String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM);
+		String compliance= getValue(PREF_COMPLIANCE);
+		String source= getValue(PREF_SOURCE_COMPATIBILITY);
+		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
 		
 		if (VERSION_1_3.equals(compliance)) {
 			if (VERSION_1_4.equals(source) || VERSION_1_5.equals(source)) {
@@ -343,7 +343,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private void updateAssertEnumAsIdentifierEnableState() {
 		if (checkValue(INTR_DEFAULT_COMPLIANCE, USER_CONF)) {
-			Object compatibility= fWorkingValues.get(PREF_SOURCE_COMPATIBILITY);
+			String compatibility= getValue(PREF_SOURCE_COMPATIBILITY);
 			
 			boolean isLessThan14= VERSION_1_3.equals(compatibility);
 			updateRememberedComplianceOption(PREF_PB_ASSERT_AS_IDENTIFIER, IDX_ASSERT_AS_IDENTIFIER, isLessThan14);
@@ -358,16 +358,16 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		combo.setEnabled(enabled);
 		
 		if (!enabled) {
-			String val= (String) fWorkingValues.get(prefKey);
+			String val= getValue(prefKey);
 			if (!ERROR.equals(val)) {
-				fWorkingValues.put(prefKey, ERROR);
+				setValue(prefKey, ERROR);
 				updateCombo(combo);
 				fRememberedUserCompliance[idx]= val;
 			}
 		} else {
 			String val= fRememberedUserCompliance[idx];
 			if (!ERROR.equals(val)) {
-				fWorkingValues.put(prefKey, val);
+				setValue(prefKey, val);
 				updateCombo(combo);
 			}
 		}
@@ -379,17 +379,17 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		checkBox.setEnabled(enabled);
 		
 		if (!enabled) {
-			String val= (String) fWorkingValues.get(PREF_CODEGEN_INLINE_JSR_BYTECODE);
+			String val= getValue(PREF_CODEGEN_INLINE_JSR_BYTECODE);
 			fRememberedUserCompliance[IDX_INLINE_JSR_BYTECODE]= val;
 			
 			if (!ENABLED.equals(val)) {
-				fWorkingValues.put(PREF_CODEGEN_INLINE_JSR_BYTECODE, ENABLED);
+				setValue(PREF_CODEGEN_INLINE_JSR_BYTECODE, ENABLED);
 				updateCheckBox(checkBox);
 			}
 		} else {
 			String val= fRememberedUserCompliance[IDX_INLINE_JSR_BYTECODE];
 			if (!ENABLED.equals(val)) {
-				fWorkingValues.put(PREF_CODEGEN_INLINE_JSR_BYTECODE, val);
+				setValue(PREF_CODEGEN_INLINE_JSR_BYTECODE, val);
 				updateCheckBox(checkBox);
 			}
 		}
@@ -401,7 +401,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private void updateComplianceDefaultSettings(boolean rememberOld, String oldComplianceLevel) {
 		String assertAsId, enumAsId, source, target;
 		boolean isDefault= checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF);
-		String complianceLevel= (String) fWorkingValues.get(PREF_COMPLIANCE);
+		String complianceLevel= getValue(PREF_COMPLIANCE);
 		
 		if (isDefault) {
 			if (rememberOld) {
@@ -409,10 +409,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					oldComplianceLevel= complianceLevel;
 				}
 				
-				fRememberedUserCompliance[IDX_ASSERT_AS_IDENTIFIER]= (String) fWorkingValues.get(PREF_PB_ASSERT_AS_IDENTIFIER);
-				fRememberedUserCompliance[IDX_ENUM_AS_IDENTIFIER]= (String) fWorkingValues.get(PREF_PB_ENUM_AS_IDENTIFIER);
-				fRememberedUserCompliance[IDX_SOURCE_COMPATIBILITY]= (String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY);
-				fRememberedUserCompliance[IDX_CODEGEN_TARGET_PLATFORM]= (String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM);
+				fRememberedUserCompliance[IDX_ASSERT_AS_IDENTIFIER]= getValue(PREF_PB_ASSERT_AS_IDENTIFIER);
+				fRememberedUserCompliance[IDX_ENUM_AS_IDENTIFIER]= getValue(PREF_PB_ENUM_AS_IDENTIFIER);
+				fRememberedUserCompliance[IDX_SOURCE_COMPATIBILITY]= getValue(PREF_SOURCE_COMPATIBILITY);
+				fRememberedUserCompliance[IDX_CODEGEN_TARGET_PLATFORM]= getValue(PREF_CODEGEN_TARGET_PLATFORM);
 				fRememberedUserCompliance[IDX_COMPLIANCE]= oldComplianceLevel;
 			}
 
@@ -439,15 +439,18 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				source= fRememberedUserCompliance[IDX_SOURCE_COMPATIBILITY];
 				target= fRememberedUserCompliance[IDX_CODEGEN_TARGET_PLATFORM];
 			} else {
+				updateInlineJSREnableState();
+				updateAssertEnumAsIdentifierEnableState();
 				return;
 			}
 		}
-		fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, assertAsId);
-		fWorkingValues.put(PREF_PB_ENUM_AS_IDENTIFIER, enumAsId);
-		fWorkingValues.put(PREF_SOURCE_COMPATIBILITY, source);
-		fWorkingValues.put(PREF_CODEGEN_TARGET_PLATFORM, target);
+		setValue(PREF_PB_ASSERT_AS_IDENTIFIER, assertAsId);
+		setValue(PREF_PB_ENUM_AS_IDENTIFIER, enumAsId);
+		setValue(PREF_SOURCE_COMPATIBILITY, source);
+		setValue(PREF_CODEGEN_TARGET_PLATFORM, target);
 		updateControls();
 		updateInlineJSREnableState();
+		updateAssertEnumAsIdentifierEnableState();
 	}
 	
 	/*

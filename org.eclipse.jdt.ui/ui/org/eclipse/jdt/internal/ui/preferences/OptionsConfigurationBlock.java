@@ -101,7 +101,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	
-	protected Map fWorkingValues;
+	private Map fWorkingValues;
 
 	protected ArrayList fCheckBoxes;
 	protected ArrayList fComboBoxes;
@@ -129,6 +129,18 @@ public abstract class OptionsConfigurationBlock {
 		fComboBoxes= new ArrayList();
 		fTextBoxes= new ArrayList(2);
 		fLabels= new HashMap();
+		
+//		IScopeContext scopeContext= null;
+//		if (project != null) {
+//			scopeContext= new ProjectScope(project.getProject());
+//		} else {
+//			scopeContext= new InstanceScope();
+//		}
+		
+		// String scopeName=  
+		// currnode= (IEclipsePreferences) Platform.getPreferencesService().getRootNode().node(getName());
+		// fPreferenceScope= 
+		
 	}
 		
 	private void testIfOptionsComplete(Map workingValues, String[] allKeys) {
@@ -227,9 +239,9 @@ public abstract class OptionsConfigurationBlock {
 		checkBox.setLayoutData(gd);
 		checkBox.addSelectionListener(getSelectionListener());
 		
-		adapt(checkBox);
+		makeScrollableCompositeAware(checkBox);
 		
-		String currValue= (String)fWorkingValues.get(key);
+		String currValue= getValue(key);
 		checkBox.setSelection(data.getSelection(currValue) == 0);
 		
 		fCheckBoxes.add(checkBox);
@@ -285,9 +297,9 @@ public abstract class OptionsConfigurationBlock {
 		comboBox.setData(data);
 		comboBox.addSelectionListener(getSelectionListener());
 			
-		adapt(comboBox);
+		makeScrollableCompositeAware(comboBox);
 		
-		String currValue= (String)fWorkingValues.get(key);	
+		String currValue= getValue(key);	
 		comboBox.select(data.getSelection(currValue));
 		
 		fComboBoxes.add(comboBox);
@@ -295,7 +307,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	protected Text addTextField(Composite parent, String label, String key, int indent, int widthHint) {	
-		Label labelControl= new Label(parent, SWT.NONE);
+		Label labelControl= new Label(parent, SWT.WRAP);
 		labelControl.setText(label);
 		labelControl.setLayoutData(new GridData());
 				
@@ -303,11 +315,11 @@ public abstract class OptionsConfigurationBlock {
 		textBox.setData(key);
 		textBox.setLayoutData(new GridData());
 		
-		adapt(textBox);
+		makeScrollableCompositeAware(textBox);
 		
 		fLabels.put(textBox, labelControl);
 		
-		String currValue= (String) fWorkingValues.get(key);	
+		String currValue= getValue(key);	
 		if (currValue != null) {
 			textBox.setText(currValue);
 		}
@@ -336,7 +348,7 @@ public abstract class OptionsConfigurationBlock {
 		return null;
 	}
 	
-	private void adapt(Control control) {
+	private void makeScrollableCompositeAware(Control control) {
 		ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(control);
 		if (parentScrolledComposite != null) {
 			parentScrolledComposite.adaptChild(control);
@@ -405,20 +417,29 @@ public abstract class OptionsConfigurationBlock {
 		} else {
 			return;
 		}
-		String oldValue= (String) fWorkingValues.put(data.getKey(), newValue);
-		
+		String oldValue= setValue(data.getKey(), newValue);
 		validateSettings(data.getKey(), oldValue, newValue);
 	}
 	
 	protected void textChanged(Text textControl) {
 		String key= (String) textControl.getData();
 		String number= textControl.getText();
-		String oldValue= (String) fWorkingValues.put(key, number);
+		String oldValue= setValue(key, number);
 		validateSettings(key, oldValue, number);
 	}	
 
 	protected boolean checkValue(String key, String value) {
-		return value.equals(fWorkingValues.get(key));
+		return value.equals(getValue(key));
+	}
+	
+	protected String getValue(String key) {
+		// Platform.getPreferencesService().getRootNode().node(getName()).node(qualifier)
+		
+		return (String) fWorkingValues.get(key);
+	}
+	
+	protected String setValue(String key, String value) {
+		return (String) fWorkingValues.put(key, value);
 	}
 	
 	/* (non-javadoc)
@@ -450,7 +471,7 @@ public abstract class OptionsConfigurationBlock {
 			String oldVal= (String) actualOptions.get(key);
 			String val= null;
 			if (enabled) {
-				val= (String) fWorkingValues.get(key);
+				val= getValue(key);
 				if (val != null && !val.equals(oldVal)) {
 					hasChanges= true;
 					actualOptions.put(key, val);
@@ -550,21 +571,21 @@ public abstract class OptionsConfigurationBlock {
 	protected void updateCombo(Combo curr) {
 		ControlData data= (ControlData) curr.getData();
 		
-		String currValue= (String) fWorkingValues.get(data.getKey());	
+		String currValue= getValue(data.getKey());	
 		curr.select(data.getSelection(currValue));					
 	}
 	
 	protected void updateCheckBox(Button curr) {
 		ControlData data= (ControlData) curr.getData();
 		
-		String currValue= (String) fWorkingValues.get(data.getKey());	
+		String currValue= getValue(data.getKey());	
 		curr.setSelection(data.getSelection(currValue) == 0);						
 	}
 	
 	protected void updateText(Text curr) {
 		String key= (String) curr.getData();
 		
-		String currValue= (String) fWorkingValues.get(key);
+		String currValue= getValue(key);
 		if (currValue != null) {
 			curr.setText(currValue);
 		}

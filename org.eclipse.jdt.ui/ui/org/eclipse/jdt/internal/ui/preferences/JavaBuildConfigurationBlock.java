@@ -255,7 +255,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private IStatus validateMaxNumberProblems() {
-		String number= (String) fWorkingValues.get(PREF_PB_MAX_PER_UNIT);
+		String number= getValue(PREF_PB_MAX_PER_UNIT);
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
 			status.setError(PreferencesMessages.getString("JavaBuildConfigurationBlock.empty_input")); //$NON-NLS-1$
@@ -273,7 +273,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private IStatus validateResourceFilters() {
-		String text= (String) fWorkingValues.get(PREF_RESOURCE_FILTER);
+		String text= getValue(PREF_RESOURCE_FILTER);
 		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 	

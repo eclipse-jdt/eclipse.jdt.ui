@@ -307,8 +307,8 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	}
 	
 	private void unpackTodoTasks() {
-		String currTags= (String) fWorkingValues.get(PREF_COMPILER_TASK_TAGS);	
-		String currPrios= (String) fWorkingValues.get(PREF_COMPILER_TASK_PRIORITIES);
+		String currTags= getValue(PREF_COMPILER_TASK_TAGS);	
+		String currPrios= getValue(PREF_COMPILER_TASK_PRIORITIES);
 		String[] tags= getTokens(currTags, ","); //$NON-NLS-1$
 		String[] prios= getTokens(currPrios, ","); //$NON-NLS-1$
 		ArrayList elements= new ArrayList(tags.length);
@@ -320,7 +320,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		fTodoTasksList.setElements(elements);
 		
-		boolean isCaseSensitive= ENABLED.equals(fWorkingValues.get(PREF_COMPILER_TASK_CASE_SENSITIVE));
+		boolean isCaseSensitive= checkValue(PREF_COMPILER_TASK_CASE_SENSITIVE, ENABLED);
 		fCaseSensitiveCheckBox.setSelection(isCaseSensitive);
 	}
 	
@@ -337,11 +337,11 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			tags.append(elem.name);
 			prios.append(elem.priority);
 		}
-		fWorkingValues.put(PREF_COMPILER_TASK_TAGS, tags.toString());
-		fWorkingValues.put(PREF_COMPILER_TASK_PRIORITIES, prios.toString());
+		setValue(PREF_COMPILER_TASK_TAGS, tags.toString());
+		setValue(PREF_COMPILER_TASK_PRIORITIES, prios.toString());
 		
 		String state= fCaseSensitiveCheckBox.isSelected() ? ENABLED : DISABLED;
-		fWorkingValues.put(PREF_COMPILER_TASK_CASE_SENSITIVE, state);
+		setValue(PREF_COMPILER_TASK_CASE_SENSITIVE, state);
 		
 	}
 		
