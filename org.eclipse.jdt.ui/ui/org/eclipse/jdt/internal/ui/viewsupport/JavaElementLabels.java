@@ -3,9 +3,6 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;

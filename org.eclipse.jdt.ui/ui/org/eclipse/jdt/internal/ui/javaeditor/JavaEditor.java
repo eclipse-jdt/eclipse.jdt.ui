@@ -1124,7 +1124,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
 		
 		ISharedTextColors sharedColors= JavaPlugin.getDefault().getJavaTextTools().getColorManager();
+		
 		fOverviewRuler= new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);		
+		fOverviewRuler.addHeaderAnnotationType(AnnotationType.WARNING);
+		fOverviewRuler.addHeaderAnnotationType(AnnotationType.ERROR);
+		fOverviewRuler.setHeaderColor(sharedColors.getColor(new RGB(251, 70, 102)));
+		
 		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
 		
 		StyledText text= viewer.getTextWidget();
@@ -1138,6 +1143,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				
 		fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(viewer, fOverviewRuler, fAnnotationAccess, sharedColors);
 		configureSourceViewerDecorationSupport();
+		
 		return viewer;
 	}
 	
