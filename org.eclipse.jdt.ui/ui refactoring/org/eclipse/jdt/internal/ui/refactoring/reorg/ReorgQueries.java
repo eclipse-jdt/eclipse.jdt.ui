@@ -19,7 +19,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
