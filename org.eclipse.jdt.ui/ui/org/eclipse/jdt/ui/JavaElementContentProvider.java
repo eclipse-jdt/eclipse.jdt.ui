@@ -94,6 +94,10 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 		int kind= delta.getKind();
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
+
+		if (element instanceof IWorkingCopy) {
+			return;
+		}
 		
 		// handle open and closing of a solution or project
 		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {			
@@ -270,7 +274,7 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
-			ctrl.getDisplay().syncExec(r); 
+			ctrl.getDisplay().asyncExec(r); 
 		}
 	}
 }
