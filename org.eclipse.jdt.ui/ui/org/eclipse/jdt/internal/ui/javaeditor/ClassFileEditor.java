@@ -76,6 +76,8 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.util.IClassFileDisassembler;
 import org.eclipse.jdt.core.util.IClassFileReader;
 
+
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -309,28 +311,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				styledText.setBackground(fBackgroundColor);
 				styledText.setForeground(fForegroundColor);
 				styledText.setEditable(false);
-				setFont(styledText);
 				return styledText;
-			}
-			
-			private void setFont(StyledText styledText) {
-				IPreferenceStore store= getPreferenceStore();
-				if (store != null) {
-					
-					FontData data= null;
-					if (store.contains(PREFERENCE_FONT) && !store.isDefault(PREFERENCE_FONT))
-						data= PreferenceConverter.getFontData(store, PREFERENCE_FONT);
-					else
-						data= PreferenceConverter.getDefaultFontData(store, PREFERENCE_FONT);
-					
-					if (data != null) {
-						Font font= new Font(styledText.getDisplay(), data);
-						styledText.setFont(font);
-						if (fFont != null)
-							fFont.dispose();
-						fFont= font;
-					}
-				}
 			}
 			
 			private Label createLabel(Composite parent, String text) {
