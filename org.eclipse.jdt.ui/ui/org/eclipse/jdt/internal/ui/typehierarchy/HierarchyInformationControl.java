@@ -12,13 +12,19 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -34,9 +40,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
 import org.eclipse.ui.commands.IKeySequenceBinding;
-import org.eclipse.ui.internal.keys.KeySupport;
+import org.eclipse.ui.keys.CharacterKey;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.KeyStroke;
+import org.eclipse.ui.keys.ModifierKey;
+import org.eclipse.ui.keys.NaturalKey;
 import org.eclipse.ui.keys.SpecialKey;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -98,7 +106,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	private TypeHierarchyLifeCycle fLifeCycle;
 	private HierarchyInformationControlLabelProvider fLabelProvider;
 	private Label fHeaderLabel;
-	private Label fInfoLabel;
+	private Label fStatusTextLabel;
+	private Font fStatusTextFont;
 	private KeyAdapter fKeyAdapter;
 	
 	private Object[] fOtherExpandedElements;
@@ -142,8 +151,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		if (fKeyAdapter == null) {
 			fKeyAdapter= new KeyAdapter() {
 				public void keyPressed(KeyEvent e) {
-					int accelerator = KeySupport.convertEventToUnmodifiedAccelerator(e);
-					KeySequence keySequence = KeySequence.getInstance(KeySupport.convertAcceleratorToKeyStroke(accelerator));
+					int accelerator = convertEventToUnmodifiedAccelerator(e);
+					KeySequence keySequence = KeySequence.getInstance(convertAcceleratorToKeyStroke(accelerator));
 					KeySequence[] sequences= getKeySequences();
 					
 					for (int i= 0; i < sequences.length; i++) {
@@ -158,6 +167,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		return fKeyAdapter;		
 	}
 	
+
+
 	protected Text createFilterText(Composite parent) {
 		fHeaderLabel= new Label(parent, SWT.NONE);
 		// text set later
@@ -196,9 +207,31 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		
 		treeViewer.getTree().addKeyListener(getKeyAdapter());	
 		
-		fInfoLabel= new Label(parent, SWT.NONE);
-		fInfoLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fInfoLabel.setText(getInfoLabel());
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		// Horizontal separator line
+		Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
+		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		// Status field label
+		fStatusTextLabel= new Label(parent, SWT.RIGHT);
+		fStatusTextLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fStatusTextLabel.setText(getInfoLabel());
+		Font font= fStatusTextLabel.getFont();
+		Display display= parent.getDisplay();
+		FontData[] fontDatas= font.getFontData();
+		for (int i= 0; i < fontDatas.length; i++)
+			fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
+		fStatusTextFont= new Font(display, fontDatas);
+		fStatusTextLabel.setFont(fStatusTextFont);
+
+		// Regarding the color see bug 41128
+		fStatusTextLabel.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
 		
 		return treeViewer;
 	}
@@ -209,7 +242,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	public void setForegroundColor(Color foreground) {
 		super.setForegroundColor(foreground);
 		fHeaderLabel.setForeground(foreground);
-		fInfoLabel.setForeground(foreground);
+		fStatusTextLabel.getParent().setForeground(foreground);
 	}
 
 	/* (non-Javadoc)
@@ -218,7 +251,18 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	public void setBackgroundColor(Color background) {
 		super.setBackgroundColor(background);
 		fHeaderLabel.setBackground(background);
-		fInfoLabel.setBackground(background);
+		fStatusTextLabel.setBackground(background);
+		fStatusTextLabel.getParent().setBackground(background);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#dispose()
+	 */
+	public void dispose() {
+		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
+			fStatusTextFont.dispose();
+		
+		super.dispose();
 	}
 	
 
@@ -334,7 +378,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			treeViewer.expandAll();
 		}
 		
-		fInfoLabel.setText(getInfoLabel());
+		fStatusTextLabel.setText(getInfoLabel());
 		
 		fOtherContentProvider= contentProvider;
 		fOtherExpandedElements= expandedElements;
@@ -375,6 +419,114 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			}
 		}
 		return selectedElement;
+	}
+	
+	/*
+	 * Copied from KeySupport
+	 */
+	protected KeyStroke convertAcceleratorToKeyStroke(int accelerator) {
+		final SortedSet modifierKeys = new TreeSet();
+		NaturalKey naturalKey = null;
+
+		if ((accelerator & SWT.ALT) != 0)
+			modifierKeys.add(ModifierKey.ALT);
+
+		if ((accelerator & SWT.COMMAND) != 0)
+			modifierKeys.add(ModifierKey.COMMAND);
+
+		if ((accelerator & SWT.CTRL) != 0)
+			modifierKeys.add(ModifierKey.CTRL);
+
+		if ((accelerator & SWT.SHIFT) != 0)
+			modifierKeys.add(ModifierKey.SHIFT);
+
+		if (((accelerator & SWT.KEY_MASK) == 0) && (accelerator != 0)) {
+			// There were only accelerators
+			naturalKey = null;
+		} else {
+			// There were other keys.
+			accelerator &= SWT.KEY_MASK;
+
+			switch (accelerator) {
+				case SWT.ARROW_DOWN :
+					naturalKey = SpecialKey.ARROW_DOWN;
+					break;
+				case SWT.ARROW_LEFT :
+					naturalKey = SpecialKey.ARROW_LEFT;
+					break;
+				case SWT.ARROW_RIGHT :
+					naturalKey = SpecialKey.ARROW_RIGHT;
+					break;
+				case SWT.ARROW_UP :
+					naturalKey = SpecialKey.ARROW_UP;
+					break;
+				case SWT.END :
+					naturalKey = SpecialKey.END;
+					break;
+				case SWT.F1 :
+					naturalKey = SpecialKey.F1;
+					break;
+				case SWT.F10 :
+					naturalKey = SpecialKey.F10;
+					break;
+				case SWT.F11 :
+					naturalKey = SpecialKey.F11;
+					break;
+				case SWT.F12 :
+					naturalKey = SpecialKey.F12;
+					break;
+				case SWT.F2 :
+					naturalKey = SpecialKey.F2;
+					break;
+				case SWT.F3 :
+					naturalKey = SpecialKey.F3;
+					break;
+				case SWT.F4 :
+					naturalKey = SpecialKey.F4;
+					break;
+				case SWT.F5 :
+					naturalKey = SpecialKey.F5;
+					break;
+				case SWT.F6 :
+					naturalKey = SpecialKey.F6;
+					break;
+				case SWT.F7 :
+					naturalKey = SpecialKey.F7;
+					break;
+				case SWT.F8 :
+					naturalKey = SpecialKey.F8;
+					break;
+				case SWT.F9 :
+					naturalKey = SpecialKey.F9;
+					break;
+				case SWT.HOME :
+					naturalKey = SpecialKey.HOME;
+					break;
+				case SWT.INSERT :
+					naturalKey = SpecialKey.INSERT;
+					break;
+				case SWT.PAGE_DOWN :
+					naturalKey = SpecialKey.PAGE_DOWN;
+					break;
+				case SWT.PAGE_UP :
+					naturalKey = SpecialKey.PAGE_UP;
+					break;
+				default :
+					naturalKey = CharacterKey.getInstance((char) (accelerator & 0xFFFF));
+			}
+		}
+
+		return KeyStroke.getInstance(modifierKeys, naturalKey);
+	}
+
+	/*
+	 * Copied from KeySupport
+	 */
+	protected int convertEventToUnmodifiedAccelerator(KeyEvent e) {
+		int modifiers = e.stateMask & SWT.MODIFIER_MASK;
+		char ch = (char) e.keyCode;
+		
+		return modifiers + (Character.isLetter(ch) ? Character.toUpperCase(ch) : ch);
 	}
 
 }
