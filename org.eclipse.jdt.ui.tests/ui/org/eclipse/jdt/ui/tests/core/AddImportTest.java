@@ -11,19 +11,18 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 
-public class AddImportTest extends TestCase {
+public class AddImportTest extends CoreTests {
 	
 	private static final Class THIS= AddImportTest.class;
 	
@@ -57,33 +56,6 @@ public class AddImportTest extends TestCase {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
-	
-	private static final int printRange= 6;
-	
-	public static void assertEqualString(String str1, String str2) {
-		int len1= Math.min(str1.length(), str2.length());
-
-		int diffPos= -1;
-		for (int i= 0; i < len1; i++) {
-			if (str1.charAt(i) != str2.charAt(i)) {
-				diffPos= i;
-				break;
-			}
-		}
-		if (diffPos == -1 && str1.length() != str2.length()) {
-			diffPos= len1;
-		}
-		if (diffPos != -1) {
-			int diffAhead= Math.max(0, diffPos - printRange);
-			int diffAfter= Math.min(str1.length(), diffPos + printRange);
-
-			String diffStr= str1.substring(diffAhead, diffPos) + '^' + str1.substring(diffPos, diffAfter);
-
-			assertTrue("Content not as expected: is\n" + str1 + "\nDiffers at pos " + diffPos + ": " + diffStr + "\nexpected:\n" + str2, false);
-		}
-	}
-	
-	
 	
 	public void testAddImports1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
