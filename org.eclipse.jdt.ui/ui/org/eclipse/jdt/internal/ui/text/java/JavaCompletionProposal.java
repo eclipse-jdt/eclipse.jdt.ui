@@ -5,8 +5,6 @@ package org.eclipse.jdt.internal.ui.text.java;
  * All Rights Reserved.
  */
  
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -15,16 +13,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.util.Assert;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 
 
 public class JavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension {
