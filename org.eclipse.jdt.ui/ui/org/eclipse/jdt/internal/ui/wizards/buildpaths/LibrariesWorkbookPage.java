@@ -253,7 +253,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				CPListElement curr= libentries[i];
 				if (!cplist.contains(curr) && !elementsToAdd.contains(curr)) {
 					elementsToAdd.add(curr);
-					addAttachmentsFromExistingLibs(curr);
+					curr.setAttribute(CPListElement.SOURCEATTACHMENT, guessAttachment(curr));
+					curr.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
 				}
 			}
 			fLibrariesList.addElements(elementsToAdd);
@@ -694,12 +695,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}	
 	
 	
-	private void addAttachmentsFromExistingLibs(CPListElement elem) {
+	private IPath guessAttachment(CPListElement elem) {
 		if (elem.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-			return;
+			return null;
 		}
 		
 		try {
+			// try if the jar itself contains the source
 			IJavaModel jmodel= fCurrJProject.getJavaModel();
 			IJavaProject[] jprojects= jmodel.getJavaProjects();
 			for (int i= 0; i < jprojects.length; i++) {
@@ -712,17 +714,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 							&& entry.getPath().equals(elem.getPath())) {
 							IPath attachPath= entry.getSourceAttachmentPath();
 							if (attachPath != null && !attachPath.isEmpty()) {
-								elem.setAttribute(CPListElement.SOURCEATTACHMENT, attachPath);
-								return;
+								return attachPath;
 							}
 						}
 					}
 				}
 			}
-			elem.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(elem.getPath()));
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e.getStatus());
 		}
+		return null;
 	}
 	
 	private IClasspathEntry[] getRawClasspath() {
