@@ -335,23 +335,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					fReusedExpandedItem= null;
 				}
 				
-				/*
-				 * @see TreeViewer#createTreeItem
-				 */
-				protected void createTreeItem(Widget parent, Object element, int ix) {
-					Item[] children= getChildren(parent);
-					boolean expand= (parent instanceof Item && (children == null || children.length == 0));
-					
-					Item item= newItem(parent, SWT.NULL, ix);				
-					updateItem(item, element);
-					updatePlus(item, element);
-					
-					if (expand)
-						setExpanded((Item) parent, true);
-						
-					internalExpandToLevel(item, ALL_LEVELS);
-				}
-				
 				protected boolean mustUpdateParent(IJavaElementDelta delta, IJavaElement element) {
 					if (element instanceof IMethod) {
 						if ((delta.getKind() & IJavaElementDelta.ADDED) != 0) {
