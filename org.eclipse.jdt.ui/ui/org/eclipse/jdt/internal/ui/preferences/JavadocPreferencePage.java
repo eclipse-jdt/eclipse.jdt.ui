@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids <sdavids@gmx.de> bug 38692
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -167,7 +168,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	}
 
 	private void initFields() {
-		fJavadocSelection.setText(getJavaDocCommand());
+		fJavadocSelection.setTextWithoutUpdate(getJavaDocCommand());
 	}
 
 	/* (non-Javadoc)
@@ -199,11 +200,14 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 			if (!file.isFile()) {
 				status.setError(PreferencesMessages.getString("JavadocPreferencePage.error.notexists"));	 //$NON-NLS-1$
 			}
+		} else {
+			//bug 38692
+			status.setInfo(PreferencesMessages.getString("JavadocPreferencePage.info.notset")); //$NON-NLS-1$
 		}
 		updateStatus(status);
 	}
 
-	private void updateStatus(IStatus status) {
+	protected void updateStatus(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}
