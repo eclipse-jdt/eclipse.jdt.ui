@@ -10,7 +10,7 @@ import java.util.ResourceBundle;
 
 public class JarPackagerMessages {
 
-	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages";//$NON-NLS-1$
+	private static final String RESOURCE_BUNDLE= JarPackagerMessages.class.getName();
 
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 
