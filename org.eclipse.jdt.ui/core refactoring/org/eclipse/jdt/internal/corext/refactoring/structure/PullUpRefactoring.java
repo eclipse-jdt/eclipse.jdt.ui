@@ -1463,7 +1463,7 @@ public class PullUpRefactoring extends Refactoring {
 			fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
 		}
 		String comment= StubUtility.getMethodComment(cu, enclosingTypeName, newMethodNode, true, false, fullTypeName, fullParamNames, String.valueOf('\n'));
-		return (Javadoc) rewrite.createPlaceholder(comment, ASTNode.JAVADOC);
+		return (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
 	}
 
 	private int createModifiersForMethodStubs(IMethod method, MethodDeclaration methodDeclaration, IProgressMonitor pm) throws JavaModelException {
@@ -1620,7 +1620,7 @@ public class PullUpRefactoring extends Refactoring {
 		String[] lines= Strings.convertIntoLines(newBodySource);
 		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 		newBodySource= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(method));
-		Block newBody= (Block)targetRewrite.createPlaceholder(newBodySource, ASTNode.BLOCK);
+		Block newBody= (Block)targetRewrite.createStringPlaceholder(newBodySource, ASTNode.BLOCK);
 		newMethod.setBody(newBody);
 	}
 	
@@ -1670,7 +1670,7 @@ public class PullUpRefactoring extends Refactoring {
 		String[] lines= Strings.convertIntoLines(source);
 		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 		source= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(member));
-		Javadoc newJavaDoc= (Javadoc)rewrite.createPlaceholder(source, ASTNode.JAVADOC);
+		Javadoc newJavaDoc= (Javadoc)rewrite.createStringPlaceholder(source, ASTNode.JAVADOC);
 		newDeclaration.setJavadoc(newJavaDoc);
 	}
 
@@ -1837,19 +1837,19 @@ public class PullUpRefactoring extends Refactoring {
 	//---- placeholder creators ----
 
 	private static Expression createPlaceholderForExpression(Expression expression, ICompilationUnit cu, OldASTRewrite rewrite) throws JavaModelException{
-		return (Expression)rewrite.createPlaceholder(getBufferText(expression, cu), ASTNode.METHOD_INVOCATION);
+		return (Expression)rewrite.createStringPlaceholder(getBufferText(expression, cu), ASTNode.METHOD_INVOCATION);
 	}
 			
 	private static SingleVariableDeclaration createPlaceholderForSingleVariableDeclaration(SingleVariableDeclaration declaration, ICompilationUnit cu, OldASTRewrite rewrite) throws JavaModelException{
-		return (SingleVariableDeclaration)rewrite.createPlaceholder(getBufferText(declaration, cu), ASTNode.SINGLE_VARIABLE_DECLARATION);
+		return (SingleVariableDeclaration)rewrite.createStringPlaceholder(getBufferText(declaration, cu), ASTNode.SINGLE_VARIABLE_DECLARATION);
 	}
 	
 	private static Type createPlaceholderForType(Type type, ICompilationUnit cu, OldASTRewrite rewrite) throws JavaModelException{
-		return (Type)rewrite.createPlaceholder(getBufferText(type, cu), ASTNode.SIMPLE_TYPE);
+		return (Type)rewrite.createStringPlaceholder(getBufferText(type, cu), ASTNode.SIMPLE_TYPE);
 	}
 
 	private static BodyDeclaration createPlaceholderForTypeDeclaration(BodyDeclaration bodyDeclaration, ICompilationUnit cu, OldASTRewrite rewrite, boolean removeIndentation) throws JavaModelException{
 		String newBufferText= getNewText(bodyDeclaration, cu, removeIndentation);
-		return (BodyDeclaration)rewrite.createPlaceholder(newBufferText, ASTNode.TYPE_DECLARATION);
+		return (BodyDeclaration)rewrite.createStringPlaceholder(newBufferText, ASTNode.TYPE_DECLARATION);
 	}
 }

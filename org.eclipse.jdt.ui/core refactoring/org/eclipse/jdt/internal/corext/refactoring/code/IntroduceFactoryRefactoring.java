@@ -628,7 +628,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		for(int i=0; i < fArgTypes.length; i++) {
 			Expression	actualCtorArg= (Expression) actualCtorArgs.get(i);
-			ASTNode		movedArg= unitRewriter.createMove(actualCtorArg);
+			ASTNode		movedArg= unitRewriter.createMoveTarget(actualCtorArg);
 
 			actualFactoryArgs.add(movedArg);
 //			unitRewriter.createMove(actualCtorArg);

@@ -442,7 +442,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			rewriter.remove(fFieldDeclaration, description);
 			List bodyDeclarations= ASTNodes.getBodyDeclarations(decl.getParent());
 			int index= bodyDeclarations.indexOf(decl);
-			VariableDeclarationFragment newField= (VariableDeclarationFragment)rewriter.createCopy(fFieldDeclaration);
+			VariableDeclarationFragment newField= (VariableDeclarationFragment)rewriter.createCopyTarget(fFieldDeclaration);
 			decl= ast.newFieldDeclaration(newField);
 			decl.setModifiers(Modifier.PRIVATE);
 			bodyDeclarations.add(index + 1, decl);
@@ -462,12 +462,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		result.setName(ast.newSimpleName(fSetterName));
 		result.setModifiers(createModifiers());
 		if (fSetterMustReturnValue) {
-			result.setReturnType((Type)rewriter.createCopy(type));
+			result.setReturnType((Type)rewriter.createCopyTarget(type));
 		}
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		result.parameters().add(param);
 		param.setName(ast.newSimpleName(fArgName));
-		param.setType((Type)rewriter.createCopy(type));
+		param.setType((Type)rewriter.createCopyTarget(type));
 		
 		Block block= ast.newBlock();
 		result.setBody(block);
@@ -491,7 +491,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		rewriter.markAsInserted(result, description);
 		result.setName(ast.newSimpleName(fGetterName));
 		result.setModifiers(createModifiers());
-		result.setReturnType((Type)rewriter.createCopy(type));
+		result.setReturnType((Type)rewriter.createCopyTarget(type));
 		
 		Block block= ast.newBlock();
 		result.setBody(block);

@@ -600,21 +600,21 @@ class ReorgPolicyFactory {
 		}
 
 		private void copyInitializerToDestination(IInitializer initializer, OldASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			BodyDeclaration newInitializer= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(initializer), ASTNode.INITIALIZER);
+			BodyDeclaration newInitializer= (BodyDeclaration) targetRewrite.createStringPlaceholder(getUnindentedSource(initializer), ASTNode.INITIALIZER);
 			targetRewrite.markAsInserted(newInitializer);
 			TypeDeclaration targetClass= getTargetType(destinationCuNode);
 			targetClass.bodyDeclarations().add(newInitializer);
 		}
 
 		private void copyTypeToDestination(IType type, OldASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			TypeDeclaration newType= (TypeDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(type), ASTNode.TYPE_DECLARATION);
+			TypeDeclaration newType= (TypeDeclaration) targetRewrite.createStringPlaceholder(getUnindentedSource(type), ASTNode.TYPE_DECLARATION);
 			targetRewrite.markAsInserted(newType);
 			//always put on top level - we could create member types but that is wrong most of the time
 			destinationCuNode.types().add(newType);
 		}
 
 		private void copyMethodToDestination(IMethod method, OldASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			BodyDeclaration newMethod= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(method), ASTNode.METHOD_DECLARATION);
+			BodyDeclaration newMethod= (BodyDeclaration) targetRewrite.createStringPlaceholder(getUnindentedSource(method), ASTNode.METHOD_DECLARATION);
 			targetRewrite.markAsInserted(newMethod);
 			TypeDeclaration targetClass= getTargetType(destinationCuNode);
 			targetClass.bodyDeclarations().add(newMethod);

@@ -295,7 +295,7 @@ public class SourceProvider {
 			List references= parameter.references();
 			for (Iterator iter= references.iterator(); iter.hasNext();) {
 				ASTNode element= (ASTNode) iter.next();
-				ASTNode newNode= fRewriter.createPlaceholder(expression, element.getNodeType());
+				ASTNode newNode= fRewriter.createStringPlaceholder(expression, element.getNodeType());
 				fRewriter.replace(element, newNode, null);
 			}
 		}
@@ -310,7 +310,7 @@ public class SourceProvider {
 				List references= nd.references();
 				for (Iterator refs= references.iterator(); refs.hasNext();) {
 					SimpleName element= (SimpleName) refs.next();
-					ASTNode newNode= fRewriter.createPlaceholder(newName, ASTNode.METHOD_INVOCATION);
+					ASTNode newNode= fRewriter.createStringPlaceholder(newName, ASTNode.METHOD_INVOCATION);
 					fRewriter.replace(element, newNode, null);
 				}
 			}
@@ -330,7 +330,7 @@ public class SourceProvider {
 				final ClassInstanceCreation inst= (ClassInstanceCreation)node;
 				inst.setExpression(createReceiver(context, inst.resolveConstructorBinding()));
 			} else if (node instanceof Expression) {
-				fRewriter.replace(node, fRewriter.createPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
+				fRewriter.replace(node, fRewriter.createStringPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
 			}
 		}
 	}
@@ -343,7 +343,7 @@ public class SourceProvider {
 			if (binding != null && !binding.isLocal()) {
 				String s= importer.addImport(binding);
 				if (!ASTNodes.asString(element).equals(s)) {
-					fRewriter.replace(element, fRewriter.createPlaceholder(s, ASTNode.METHOD_INVOCATION), null);
+					fRewriter.replace(element, fRewriter.createStringPlaceholder(s, ASTNode.METHOD_INVOCATION), null);
 				}
 			}
 		}
@@ -354,7 +354,7 @@ public class SourceProvider {
 		if (!context.receiverIsStatic && Modifier.isStatic(method.getModifiers())) {
 			receiver= context.importer.addImport(fDeclaration.resolveBinding().getDeclaringClass()); 
 		}
-		Expression exp= (Expression)fRewriter.createPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
+		Expression exp= (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
 		fRewriter.markAsInserted(exp);
 		return exp;
 	}

@@ -473,7 +473,7 @@ public class CallInliner {
 				realArguments[i]= name;
 				fLocals.add(createLocalDeclaration(
 					parameter.getTypeBinding(), name, 
-					(Expression)fRewriter.createCopy(expression)));
+					(Expression)fRewriter.createCopyTarget(expression)));
 			}
 		}
 		fContext.arguments= realArguments;
@@ -497,7 +497,7 @@ public class CallInliner {
 				fLocals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
 					fInvocationScope.createName("r", true),  //$NON-NLS-1$
-					(Expression)fRewriter.createCopy(receiver)));
+					(Expression)fRewriter.createCopyTarget(receiver)));
 				return;
 			case 1:
 				fContext.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
@@ -507,7 +507,7 @@ public class CallInliner {
 					fLocals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
 					local, 
-					(Expression)fRewriter.createCopy(receiver)));
+					(Expression)fRewriter.createCopyTarget(receiver)));
 				fContext.receiver= local;
 				return;
 		}
@@ -532,7 +532,7 @@ public class CallInliner {
 		} else {
 			ASTNode node= null;
 			for (int i= 0; i < blocks.length - 1; i++) {
-				node= fRewriter.createPlaceholder(blocks[i], ASTNode.RETURN_STATEMENT);
+				node= fRewriter.createStringPlaceholder(blocks[i], ASTNode.RETURN_STATEMENT);
 				fRewriter.markAsInserted(node);
 				fStatements.add(fInsertionIndex++, node);
 			}
@@ -546,16 +546,16 @@ public class CallInliner {
 						node= createLocalDeclaration(
 							fSourceProvider.getReturnType(), 
 							fInvocationScope.createName(fSourceProvider.getMethodName(), true), 
-							(Expression)fRewriter.createPlaceholder(block, ASTNode.METHOD_INVOCATION));
+							(Expression)fRewriter.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					} else {
 						node= fTargetNode.getAST().newExpressionStatement(
-							(Expression)fRewriter.createPlaceholder(block, ASTNode.METHOD_INVOCATION));
+							(Expression)fRewriter.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					}
 				} else {
 					node= null;
 				}
 			} else if (fTargetNode instanceof Expression) {
-				node= fRewriter.createPlaceholder(block, ASTNode.METHOD_INVOCATION);
+				node= fRewriter.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION);
 				
 				// fixes bug #24941
 				if(needsExplicitCast()) {
@@ -574,7 +574,7 @@ public class CallInliner {
 					node= pExp;
 				}
 			} else {
-				node= fRewriter.createPlaceholder(block, ASTNode.RETURN_STATEMENT);
+				node= fRewriter.createStringPlaceholder(block, ASTNode.RETURN_STATEMENT);
 			}
 			
 			// Now replace the target node with the source node
@@ -700,7 +700,7 @@ public class CallInliner {
 				Assert.isNotNull(currentStatement);
 				// The method to be inlined is not the body of the control statement.
 				if (currentStatement != fTargetNode) {
-					ASTNode copy= fRewriter.createCopy(currentStatement);
+					ASTNode copy= fRewriter.createCopyTarget(currentStatement);
 					fStatements.add(copy);
 				} else {
 					// We can't replace a copy with something else. So we

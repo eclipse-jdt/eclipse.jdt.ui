@@ -205,8 +205,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			String content= JavaCompareUtilities.readString((IStreamContentAccessor)element);
 			if (content != null) {
 				content= trimTextBlock(content, delimiter);
-				if (content != null)
-					return rewriter.createPlaceholder(content, getPlaceHolderType(element));
+				if (content != null) return rewriter.createStringPlaceholder(content, getPlaceHolderType(element));
 			}
 		}
 		return null;

@@ -242,7 +242,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			if (fStatementsOfSelectedNode == null) {
 				Block block= getAST().newBlock();
 				fStatementsOfSelectedNode= block.statements();
-				fStatementsOfSelectedNode.add(fRewriter.createCopy(fSelectedNode));
+				fStatementsOfSelectedNode.add(fRewriter.createCopyTarget(fSelectedNode));
 				fRewriter.remove(fSelectedNode, null);
 			}
 		}
@@ -283,7 +283,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		boolean isSelectedNode= statement == fSelectedNode;
 		List result= new ArrayList();
 		List fragments= statement.fragments();
-		result.add(fRewriter.createCopy(statement));
+		result.add(fRewriter.createCopyTarget(statement));
 		AST ast= getAST();
 		List newAssignments= new ArrayList(2);
 		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
@@ -292,7 +292,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			if (initializer != null) {
 				Assignment assignment= ast.newAssignment();
 				assignment.setLeftHandSide((Expression)ASTNode.copySubtree(ast, fragment.getName()));
-				assignment.setRightHandSide((Expression)fRewriter.createCopy(initializer));
+				assignment.setRightHandSide((Expression)fRewriter.createCopyTarget(initializer));
 				fRewriter.remove(initializer, null);
 				ExpressionStatement es= ast.newExpressionStatement(assignment);
 				if (isSelectedNode) {
@@ -335,7 +335,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		if (selectedNodeIsDeclaration()) {
 			statements.addAll(fTryBody);
 		} else {
-			statements.add(fRewriter.createCopy(fSelectedNode));
+			statements.add(fRewriter.createCopyTarget(fSelectedNode));
 		}
 		return tryStatement;
 	}
@@ -345,7 +345,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		if (s == null) {
 			return null;
 		} else {
-			return (Statement)fRewriter.createPlaceholder(s, ASTNode.RETURN_STATEMENT);
+			return (Statement)fRewriter.createStringPlaceholder(s, ASTNode.RETURN_STATEMENT);
 		}
 	}
 	

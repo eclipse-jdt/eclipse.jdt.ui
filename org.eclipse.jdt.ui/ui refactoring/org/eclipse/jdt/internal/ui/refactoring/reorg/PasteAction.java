@@ -660,11 +660,11 @@ public class PasteAction extends SelectionDispatchAction{
 			private ASTNode createNewNodeToInsertToCu(TypedSource source, OldASTRewrite rewrite) {
 				switch(source.getType()){
 					case IJavaElement.TYPE:
-						return rewrite.createPlaceholder(source.getSource(), ASTNode.TYPE_DECLARATION);
+						return rewrite.createStringPlaceholder(source.getSource(), ASTNode.TYPE_DECLARATION);
 					case IJavaElement.PACKAGE_DECLARATION:
-						return rewrite.createPlaceholder(source.getSource(), ASTNode.PACKAGE_DECLARATION);
+						return rewrite.createStringPlaceholder(source.getSource(), ASTNode.PACKAGE_DECLARATION);
 					case IJavaElement.IMPORT_DECLARATION:
-						return rewrite.createPlaceholder(source.getSource(), ASTNode.IMPORT_DECLARATION);
+						return rewrite.createStringPlaceholder(source.getSource(), ASTNode.IMPORT_DECLARATION);
 					default: Assert.isTrue(false, String.valueOf(source.getType()));
 						return null;
 				}
@@ -673,13 +673,13 @@ public class PasteAction extends SelectionDispatchAction{
 			private ASTNode createNewNodeToInsertToType(TypedSource source, OldASTRewrite rewrite) {
 				switch(source.getType()){
 					case IJavaElement.TYPE:
-						return rewrite.createPlaceholder(source.getSource(), ASTNode.TYPE_DECLARATION);
+						return rewrite.createStringPlaceholder(source.getSource(), ASTNode.TYPE_DECLARATION);
 					case IJavaElement.METHOD:
-						return rewrite.createPlaceholder(source.getSource(), ASTNode.METHOD_DECLARATION);
+						return rewrite.createStringPlaceholder(source.getSource(), ASTNode.METHOD_DECLARATION);
 					case IJavaElement.FIELD:
-						return rewrite.createPlaceholder(source.getSource(), ASTNode.FIELD_DECLARATION);
+						return rewrite.createStringPlaceholder(source.getSource(), ASTNode.FIELD_DECLARATION);
 					case IJavaElement.INITIALIZER:
-						return rewrite.createPlaceholder(source.getSource(), ASTNode.INITIALIZER);
+						return rewrite.createStringPlaceholder(source.getSource(), ASTNode.INITIALIZER);
 					default: Assert.isTrue(false);
 						return null;
 				}

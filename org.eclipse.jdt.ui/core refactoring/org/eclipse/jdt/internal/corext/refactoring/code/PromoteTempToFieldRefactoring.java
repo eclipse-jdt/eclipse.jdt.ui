@@ -499,7 +499,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     private void addNewConstructorWithInitializing(OldASTRewrite rewrite, TypeDeclaration typeDeclaration) throws CoreException {
     	String constructorSource = CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(typeDeclaration), 0, null, getLineSeperator(), fCu.getJavaProject());
-		BodyDeclaration newConstructor= (BodyDeclaration)rewrite.createPlaceholder(constructorSource, ASTNode.METHOD_DECLARATION);
+		BodyDeclaration newConstructor= (BodyDeclaration)rewrite.createStringPlaceholder(constructorSource, ASTNode.METHOD_DECLARATION);
         rewrite.markAsInserted(newConstructor);
         int constructorInsertIndex= computeInsertIndexForNewConstructor(typeDeclaration);
         typeDeclaration.bodyDeclarations().add(constructorInsertIndex, newConstructor);
@@ -629,11 +629,11 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         
         if (fragmentIndex + 1 < fragments.size()){
             VariableDeclarationFragment firstFragmentAfter= (VariableDeclarationFragment)fragments.get(fragmentIndex + 1);
-            VariableDeclarationFragment copyfirstFragmentAfter= (VariableDeclarationFragment)rewrite.createCopy(firstFragmentAfter);
+            VariableDeclarationFragment copyfirstFragmentAfter= (VariableDeclarationFragment)rewrite.createCopyTarget(firstFragmentAfter);
         	VariableDeclarationStatement statement= getAST().newVariableDeclarationStatement(copyfirstFragmentAfter);
         	for (int i= fragmentIndex + 2; i < fragments.size(); i++) {
         		VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i);
-                VariableDeclarationFragment fragmentCopy= (VariableDeclarationFragment)rewrite.createCopy(fragment);
+                VariableDeclarationFragment fragmentCopy= (VariableDeclarationFragment)rewrite.createCopyTarget(fragment);
                 rewrite.markAsInserted(fragmentCopy);
                 statement.fragments().add(fragmentCopy);
             }
@@ -647,7 +647,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         SimpleName fieldName= getAST().newSimpleName(fFieldName);
         assignment.setLeftHandSide(fieldName);
         String initializerCode= getTempInitializerCode();
-        Expression tempInitializerCopy= (Expression)rewrite.createPlaceholder(initializerCode, ASTNode.METHOD_INVOCATION);
+        Expression tempInitializerCopy= (Expression)rewrite.createStringPlaceholder(initializerCode, ASTNode.METHOD_INVOCATION);
         ///XXX workaround for bug 25178
         ///(Expression)rewrite.createCopy(getTempInitializer());
         assignment.setRightHandSide(tempInitializerCopy);
@@ -690,13 +690,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         fragment.setName(variableName);
         fragment.setExtraDimensions(fTempDeclarationNode.getExtraDimensions());
         if (fInitializeIn == INITIALIZE_IN_FIELD && tempHasInitializer()){
-	        Expression initializer= (Expression)rewrite.createCopy(getTempInitializer());
+	        Expression initializer= (Expression)rewrite.createCopyTarget(getTempInitializer());
 	        fragment.setInitializer(initializer);
         }
     	FieldDeclaration fieldDeclaration= getAST().newFieldDeclaration(fragment);
     	
     	VariableDeclarationStatement vds= getTempDeclarationStatement();
-    	Type type= (Type)rewrite.createCopy(vds.getType());
+    	Type type= (Type)rewrite.createCopyTarget(vds.getType());
     	fieldDeclaration.setType(type);
     	fieldDeclaration.setModifiers(getModifiers());
     	return fieldDeclaration;

@@ -118,10 +118,10 @@ class AccessAnalyzer extends ASTVisitor {
 			invocation.setName(ast.newSimpleName(fSetter));
 			Expression receiver= getReceiver(lhs);
 			if (receiver != null)
-				invocation.setExpression((Expression)fRewriter.createCopy(receiver));
+				invocation.setExpression((Expression)fRewriter.createCopyTarget(receiver));
 			List arguments= invocation.arguments();
 			if (node.getOperator() == Assignment.Operator.ASSIGN) {
-				arguments.add(fRewriter.createCopy(node.getRightHandSide()));
+				arguments.add(fRewriter.createCopyTarget(node.getRightHandSide()));
 			} else {
 				// This is the compound assignment case: field+= 10;
 				boolean needsParentheses= ASTNodes.needsParentheses(node.getRightHandSide());
@@ -130,9 +130,9 @@ class AccessAnalyzer extends ASTVisitor {
 				MethodInvocation getter= ast.newMethodInvocation();
 				getter.setName(ast.newSimpleName(fGetter));
 				if (receiver != null)
-					getter.setExpression((Expression)fRewriter.createCopy(receiver));
+					getter.setExpression((Expression)fRewriter.createCopyTarget(receiver));
 				exp.setLeftOperand(getter);
-				Expression rhs= (Expression)fRewriter.createCopy(node.getRightHandSide());
+				Expression rhs= (Expression)fRewriter.createCopyTarget(node.getRightHandSide());
 				if (needsParentheses) {
 					ParenthesizedExpression p= ast.newParenthesizedExpression();
 					p.setExpression(rhs);
@@ -151,7 +151,7 @@ class AccessAnalyzer extends ASTVisitor {
 		if (!node.isDeclaration() && considerBinding(node.resolveBinding(), node)) {
 			fRewriter.replace(
 				node, 
-				fRewriter.createPlaceholder(fGetter + "()", ASTNode.METHOD_INVOCATION), //$NON-NLS-1$
+				fRewriter.createStringPlaceholder(fGetter + "()", ASTNode.METHOD_INVOCATION), //$NON-NLS-1$
 				createGroupDescription(READ_ACCESS));
 		}
 		return true;
@@ -240,7 +240,7 @@ class AccessAnalyzer extends ASTVisitor {
 		MethodInvocation invocation= ast.newMethodInvocation();
 		invocation.setName(ast.newSimpleName(fSetter));
 		if (receiver != null)
-			invocation.setExpression((Expression)fRewriter.createCopy(receiver));
+			invocation.setExpression((Expression)fRewriter.createCopyTarget(receiver));
 		InfixExpression argument= ast.newInfixExpression();
 		invocation.arguments().add(argument);
 		if ("++".equals(operator)) { //$NON-NLS-1$
@@ -253,7 +253,7 @@ class AccessAnalyzer extends ASTVisitor {
 		MethodInvocation getter= ast.newMethodInvocation();
 		getter.setName(ast.newSimpleName(fGetter));
 		if (receiver != null)
-			getter.setExpression((Expression)fRewriter.createCopy(receiver));
+			getter.setExpression((Expression)fRewriter.createCopyTarget(receiver));
 		argument.setLeftOperand(getter);
 		argument.setRightOperand(ast.newNumberLiteral("1")); //$NON-NLS-1$
 

@@ -891,9 +891,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
 			fSource.rewriter.remove(declaration, delete);
-			ASTNode node= fTarget.rewriter.createPlaceholder(
-				sources[i],
-				declaration.getNodeType());
+			ASTNode node= fTarget.rewriter.createStringPlaceholder(sources[i], declaration.getNodeType());
 			fTarget.rewriter.markAsInserted(node, add);
 			container.add(ASTNodes.getInsertionIndex((BodyDeclaration)node, container), node);
 		}

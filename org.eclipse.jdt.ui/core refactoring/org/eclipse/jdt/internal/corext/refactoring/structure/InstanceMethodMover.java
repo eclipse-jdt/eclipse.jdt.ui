@@ -193,7 +193,7 @@ class InstanceMethodMover {
 		private void addNewMethodToMyClass(TextChangeManager manager, String newMethodText, List allTypesUsedWithoutQualification) throws CoreException {
 			TypeDeclaration myClassDeclaration= getReceiverClassDeclaration();
 			OldASTRewrite rewrite= new OldASTRewrite(myClassDeclaration);
-			BodyDeclaration newMethodNode= (BodyDeclaration) rewrite.createPlaceholder(newMethodText, ASTNode.METHOD_DECLARATION);
+			BodyDeclaration newMethodNode= (BodyDeclaration) rewrite.createStringPlaceholder(newMethodText, ASTNode.METHOD_DECLARATION);
 			myClassDeclaration.bodyDeclarations().add(newMethodNode);
 			rewrite.markAsInserted(newMethodNode);
 
@@ -698,7 +698,7 @@ class InstanceMethodMover {
 			}
 	
 			private void replaceReceiverWithImplicitThis(FieldAccess fieldAccess) {
-				fRewrite.replace(fieldAccess, fRewrite.createCopy(fieldAccess.getName()), null);			
+				fRewrite.replace(fieldAccess, fRewrite.createCopyTarget(fieldAccess.getName()), null);			
 			}
 			
 			/**
@@ -706,7 +706,7 @@ class InstanceMethodMover {
 			 */
 			private void replaceReceiverWithImplicitThis(QualifiedName fieldAccess) {
 				Assert.isTrue(isFieldAccess(fieldAccess));
-				fRewrite.replace(fieldAccess, fRewrite.createCopy(fieldAccess.getName()), null);
+				fRewrite.replace(fieldAccess, fRewrite.createCopyTarget(fieldAccess.getName()), null);
 			}
 	
 			private void replaceExpressionWithExplicitThis(Expression expression) {
@@ -757,7 +757,7 @@ class InstanceMethodMover {
 					name,
 					name.getAST().newQualifiedName(
 						getClassNameQualifiedToTopLevel(declaring, name.getAST()),
-						(SimpleName) fRewrite.createCopy(name)), null);
+						(SimpleName) fRewrite.createCopyTarget(name)), null);
 						
 				fTypeReferences.addOneReference(getTopLevel(declaring));
 				if(nameBinding instanceof ITypeBinding)

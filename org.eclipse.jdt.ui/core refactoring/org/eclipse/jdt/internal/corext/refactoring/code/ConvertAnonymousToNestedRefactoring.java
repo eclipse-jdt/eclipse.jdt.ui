@@ -393,7 +393,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private void copyArguments(OldASTRewrite rewrite, ClassInstanceCreation newClassCreation) {
         for (Iterator iter= getClassInstanceCreation().arguments().iterator(); iter.hasNext(); ) {
             Expression arg= (Expression)iter.next();
-            Expression copy= (Expression)rewrite.createCopy(arg);
+            Expression copy= (Expression)rewrite.createCopyTarget(arg);
             rewrite.markAsInserted(copy);
             newClassCreation.arguments().add(copy);
         }
@@ -523,7 +523,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             IVariableBinding local= usedLocals[i];
             String unformattedAssigmentCode= "this." + local.getName() + "=" + local.getName(); //$NON-NLS-1$ //$NON-NLS-2$
             String assignmentCode= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, unformattedAssigmentCode, 0, null, getLineSeparator(), options);
-            Expression assignmentExpression= (Expression)rewrite.createPlaceholder(assignmentCode, ASTNode.METHOD_INVOCATION);
+            Expression assignmentExpression= (Expression)rewrite.createStringPlaceholder(assignmentCode, ASTNode.METHOD_INVOCATION);
             ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
             constructorBody.statements().add(assignmentStatement);
         }
@@ -544,7 +544,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             Assignment assignmentExpression= getAST().newAssignment();
             assignmentExpression.setOperator(Assignment.Operator.ASSIGN);
             assignmentExpression.setLeftHandSide(getAST().newSimpleName(fragment.getName().getIdentifier()));
-            Expression rhs= (Expression)rewrite.createCopy(fragment.getInitializer());
+            Expression rhs= (Expression)rewrite.createCopyTarget(fragment.getInitializer());
             assignmentExpression.setRightHandSide(rhs);
             ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
             constructorBody.statements().add(assignmentStatement);
@@ -658,7 +658,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private void copyBodyDeclarationsToNestedClass(OldASTRewrite rewrite, TypeDeclaration newType) {
         for (Iterator iter= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iter.hasNext(); ) {
             BodyDeclaration element= (BodyDeclaration)iter.next();
-            BodyDeclaration copy= (BodyDeclaration)rewrite.createCopy(element);
+            BodyDeclaration copy= (BodyDeclaration)rewrite.createCopyTarget(element);
             rewrite.markAsInserted(copy);
             newType.bodyDeclarations().add(copy);
         }

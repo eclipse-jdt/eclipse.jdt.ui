@@ -712,7 +712,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private void createConstructor(TypeDeclaration declaration, OldASTRewrite rewrite) throws CoreException {
-		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(formatConstructorSource(getNewConstructorSource(), 0), ASTNode.METHOD_DECLARATION);
+		BodyDeclaration newConst= (BodyDeclaration)rewrite.createStringPlaceholder(formatConstructorSource(getNewConstructorSource(), 0), ASTNode.METHOD_DECLARATION);
 		declaration.bodyDeclarations().add(0, newConst);
 		rewrite.markAsInserted(newConst);
 	}
@@ -954,7 +954,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private static boolean addAsFirstArgument(OldASTRewrite rewrite, String expression, List arguments) {
 		if (expression == null)
 			return false;
-		Expression newArgument= (Expression)rewrite.createPlaceholder(expression, ASTNode.METHOD_INVOCATION);
+		Expression newArgument= (Expression)rewrite.createStringPlaceholder(expression, ASTNode.METHOD_INVOCATION);
 		arguments.add(0, newArgument);
 		rewrite.markAsInserted(newArgument);
 		return true;

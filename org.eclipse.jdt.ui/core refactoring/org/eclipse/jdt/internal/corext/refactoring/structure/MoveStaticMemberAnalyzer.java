@@ -75,7 +75,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		AST ast= node.getAST();
 		QualifiedName name= ast.newQualifiedName(
 			ast.newSimpleName(type.getName()),
-			(SimpleName)fAst.rewriter.createCopy(node));
+			(SimpleName)fAst.rewriter.createCopyTarget(node));
 		fAst.rewriter.replace(node, name, fAst.createGroupDescription(REFERENCE_UPDATE));
 		fProcessed.add(node);
 		fNeedsImport= true;

@@ -979,7 +979,7 @@ public class PushDownRefactoring extends Refactoring {
 		String[] lines= Strings.convertIntoLines(oldBodySource);
 		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 		oldBodySource= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(method));
-		Block newBody= (Block)targetRewrite.createPlaceholder(oldBodySource, ASTNode.BLOCK);
+		Block newBody= (Block)targetRewrite.createStringPlaceholder(oldBodySource, ASTNode.BLOCK);
 		newMethod.setBody(newBody);
 	}
 	
@@ -1055,7 +1055,7 @@ public class PushDownRefactoring extends Refactoring {
 		String[] lines= Strings.convertIntoLines(source);
 		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 		source= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(member));
-		Javadoc newJavaDoc= (Javadoc)rewrite.createPlaceholder(source, ASTNode.JAVADOC);
+		Javadoc newJavaDoc= (Javadoc)rewrite.createStringPlaceholder(source, ASTNode.JAVADOC);
 		newDeclaration.setJavadoc(newJavaDoc);
 	}
 	
@@ -1236,15 +1236,15 @@ public class PushDownRefactoring extends Refactoring {
 	//---- placeholder creators ----
 	
 	private static Expression createPlaceholderForExpression(Expression expression, ICompilationUnit cu, OldASTRewrite rewrite) throws JavaModelException{
-		return (Expression)rewrite.createPlaceholder(getBufferText(expression, cu), ASTNode.METHOD_INVOCATION);
+		return (Expression)rewrite.createStringPlaceholder(getBufferText(expression, cu), ASTNode.METHOD_INVOCATION);
 	}
 			
 	private static SingleVariableDeclaration createPlaceholderForSingleVariableDeclaration(SingleVariableDeclaration declaration, ICompilationUnit cu, OldASTRewrite rewrite) throws JavaModelException{
-		return (SingleVariableDeclaration)rewrite.createPlaceholder(getBufferText(declaration, cu), ASTNode.SINGLE_VARIABLE_DECLARATION);
+		return (SingleVariableDeclaration)rewrite.createStringPlaceholder(getBufferText(declaration, cu), ASTNode.SINGLE_VARIABLE_DECLARATION);
 	}
 	
 	private static Type createPlaceholderForType(Type type, ICompilationUnit cu, OldASTRewrite rewrite) throws JavaModelException{
-		return (Type)rewrite.createPlaceholder(getBufferText(type, cu), ASTNode.SIMPLE_TYPE);
+		return (Type)rewrite.createStringPlaceholder(getBufferText(type, cu), ASTNode.SIMPLE_TYPE);
 	}
 
 }

@@ -1086,7 +1086,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private static Expression createNewExpression(OldASTRewrite rewrite, ParameterInfo info) {
-		return (Expression) rewrite.createPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
+		return (Expression) rewrite.createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
 	}
 
 	private boolean isVisibilitySameAsInitial() throws JavaModelException {
@@ -1174,7 +1174,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					if (fRewrite.isReplaced(nodes[info.getOldIndex()])) // if actual argument already changed ...
 						newPermutation[i]= fRewrite.getReplacingNode(nodes[info.getOldIndex()]);
 				 	else
-						newPermutation[i]= fRewrite.createCopy(nodes[info.getOldIndex()]);
+						newPermutation[i]= fRewrite.createCopyTarget(nodes[info.getOldIndex()]);
 				} else {
 					newPermutation[i]= nodes[i];
 				}
@@ -1254,7 +1254,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			String importedTypeName= fImportRewrite.addImport(elementTypeName);
 			int dimensions= getArrayDimensions(newTypeName);
 			
-			Type newTypeNode= (Type) fRewrite.createPlaceholder(importedTypeName, ASTNode.SIMPLE_TYPE);
+			Type newTypeNode= (Type) fRewrite.createStringPlaceholder(importedTypeName, ASTNode.SIMPLE_TYPE);
 			if (dimensions != 0)
 				newTypeNode= fRewrite.getAST().newArrayType(newTypeNode, dimensions);
 			return newTypeNode;
@@ -1311,7 +1311,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 
 		private Expression createNewExpressionRecursive(ParameterInfo info) {
-			return (Expression) fRewrite.createPlaceholder(info.getNewName(), ASTNode.METHOD_INVOCATION);
+			return (Expression) fRewrite.createStringPlaceholder(info.getNewName(), ASTNode.METHOD_INVOCATION);
 		}
 
 		protected SimpleName getMethodNameNode() {
@@ -1498,7 +1498,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					return; // don't add it again
 			}
 			String simple= fImportRewrite.addImport(JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType()));
-			ASTNode exNode= fRewrite.createPlaceholder(simple, ASTNode.SIMPLE_NAME);
+			ASTNode exNode= fRewrite.createStringPlaceholder(simple, ASTNode.SIMPLE_NAME);
 			exceptionsNodeList.add(exNode);
 			fRewrite.markAsInserted(exNode);
 		}
@@ -1588,7 +1588,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 								SimpleName tagName= (SimpleName) tag.fragments().get(0);
 								if (oldName.equals(tagName.getIdentifier())) {
 									tagIter.remove();
-									TagElement movedTag= (TagElement) fRewrite.createMove(tag);
+									TagElement movedTag= (TagElement) fRewrite.createMoveTarget(tag);
 									insertTag(movedTag, previousTag, tagsRewrite);
 									previousTag= movedTag;
 								}
@@ -1598,7 +1598,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					// params with bad names:
 					for (Iterator iter= paramTags.iterator(); iter.hasNext();) {
 						TagElement tag= (TagElement) iter.next();
-						TagElement movedTag= (TagElement) fRewrite.createMove(tag);
+						TagElement movedTag= (TagElement) fRewrite.createMoveTarget(tag);
 						insertTag(movedTag, previousTag, tagsRewrite);
 						previousTag= movedTag;
 					}
@@ -1643,7 +1643,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 							Name tagName= (Name) tag.fragments().get(0);
 							if (Bindings.equals(info.getTypeBinding(), tagName.resolveTypeBinding())) {
 								tagIter.remove();
-								TagElement movedTag= (TagElement) fRewrite.createMove(tag);
+								TagElement movedTag= (TagElement) fRewrite.createMoveTarget(tag);
 								insertTag(movedTag, previousTag, tagsRewrite);
 								previousTag= movedTag;
 							}
@@ -1653,7 +1653,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				// exceptions with bad names:
 				for (Iterator iter= exceptionTags.iterator(); iter.hasNext();) {
 					TagElement tag= (TagElement) iter.next();
-					TagElement movedTag= (TagElement) fRewrite.createMove(tag);
+					TagElement movedTag= (TagElement) fRewrite.createMoveTarget(tag);
 					insertTag(movedTag, previousTag, tagsRewrite);
 					previousTag= movedTag;
 				}

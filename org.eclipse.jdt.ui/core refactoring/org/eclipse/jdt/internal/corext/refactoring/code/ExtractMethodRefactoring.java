@@ -682,7 +682,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 					(TypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), TypeDeclaration.class);
 				String string= CodeGeneration.getMethodComment(fCUnit, enclosingType.getName().getIdentifier(), result, null, lineDelimiter);
 				if (string != null) {
-					Javadoc javadoc= (Javadoc)fRewriter.createPlaceholder(string, ASTNode.JAVADOC);
+					Javadoc javadoc= (Javadoc)fRewriter.createStringPlaceholder(string, ASTNode.JAVADOC);
 					result.setJavadoc(javadoc);
 				}
 			}
@@ -723,16 +723,16 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ITypeBinding binding= fAnalyzer.getExpressionBinding();
 			if (binding != null && (!binding.isPrimitive() || !"void".equals(binding.getName()))) { //$NON-NLS-1$
 				ReturnStatement rs= fAST.newReturnStatement();
-				rs.setExpression((Expression)fRewriter.createCopy(selection));
+				rs.setExpression((Expression)fRewriter.createCopyTarget(selection));
 				fRewriter.markAsInserted(rs);
 				statements.add(rs);
 			} else {
-				ExpressionStatement st= fAST.newExpressionStatement((Expression)fRewriter.createCopy(selection));
+				ExpressionStatement st= fAST.newExpressionStatement((Expression)fRewriter.createCopyTarget(selection));
 				fRewriter.markAsInserted(st);
 				statements.add(st);
 			}
 		} else {
-			statements.add(fRewriter.createCopy(selection));
+			statements.add(fRewriter.createCopyTarget(selection));
 			IVariableBinding returnValue= fAnalyzer.getReturnValue();
 			if (returnValue != null) {
 				ReturnStatement rs= fAST.newReturnStatement();
