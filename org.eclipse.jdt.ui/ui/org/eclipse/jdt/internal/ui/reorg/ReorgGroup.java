@@ -15,11 +15,11 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 
 public class ReorgGroup extends ContextMenuGroup {
 	private static final String GROUP_NAME= IContextMenuConstants.GROUP_REORGANIZE;
-	private RefactoringAction[] fActions;
+	private IRefactoringAction[] fActions;
 		
 	public void fill(IMenuManager manager, GroupContext context) {
 		createActions(context.getSelectionProvider());
@@ -36,13 +36,14 @@ public class ReorgGroup extends ContextMenuGroup {
 		if (fActions != null)
 			return;
 			
-		fActions= new RefactoringAction[] {	
+		fActions= new IRefactoringAction[] {	
 			new RenameAction(p),
 			new CutSourceReferencesToClipboardAction(p),
-			new CopyAction(provider),
+			new CopyResourcesToClipboardAction(p),
 			new CopySourceReferencesToClipboardAction(p),
 			new MoveAction(provider),
 			new PasteSourceReferencesAction(p),
+			new PasteResourcesFromClipboardAction(p),
 			//new DuplicateSourceReferenceAction(provider, p),
 			new DeleteAction(p)
 		};		
