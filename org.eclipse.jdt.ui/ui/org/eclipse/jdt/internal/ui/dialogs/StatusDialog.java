@@ -25,8 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
-import org.eclipse.ui.internal.MessageLine;
-
 /**
  * An abstract base class for dialogs with a status bar and ok/cancel buttons.
  * The status message must be passed over as StatusInfo object and can be
