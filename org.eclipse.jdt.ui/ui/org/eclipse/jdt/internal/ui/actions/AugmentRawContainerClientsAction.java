@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.actions;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -46,8 +45,6 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
  */
 public class AugmentRawContainerClientsAction extends SelectionDispatchAction {
 
-	public static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/AugmentRawContainerClientsAction")); //$NON-NLS-1$//$NON-NLS-2$
-	
 	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("AugmentRawContainerClientsAction.dialog_title");//$NON-NLS-1$
 	private CompilationUnitEditor fEditor;
 

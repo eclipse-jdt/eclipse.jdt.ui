@@ -10,5 +10,3 @@ org.eclipse.jdt.ui/debug/allTypesCache=false
 # trace generation of type constraints and create toString info for debugging
 org.eclipse.jdt.ui/debug/TypeConstraints=false
 
-# enable AugmentRawContainerClientsAction
-org.eclipse.jdt.ui/debug/AugmentRawContainerClientsAction=false

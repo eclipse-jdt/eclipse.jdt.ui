@@ -28,6 +28,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
@@ -2879,7 +2880,10 @@ public class PreferenceConstants {
 		SemanticHighlightings.initDefaults(store);
 
 		// do more complicated stuff
-		NewJavaProjectPreferencePage.initDefaults(store);	
+		NewJavaProjectPreferencePage.initDefaults(store);
+		
+		// work in progress
+		WorkInProgressPreferencePage.initDefaults(store);
 	}
 
 	/**

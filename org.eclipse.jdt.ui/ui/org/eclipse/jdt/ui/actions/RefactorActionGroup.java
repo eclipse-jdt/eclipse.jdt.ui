@@ -48,9 +48,11 @@ import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Action group that adds refactor actions (for example 'Rename', 'Move')
@@ -240,7 +242,7 @@ public class RefactorActionGroup extends ActionGroup {
 		editor.setAction("UseSupertype", fUseSupertypeAction); //$NON-NLS-1$
 		fEditorActions.add(fUseSupertypeAction);
 		
-		if (AugmentRawContainerClientsAction.DEBUG) {
+		if (isAugmentRawRefactoringEnabled()) {
 			fAugmentRawContainerClients= new AugmentRawContainerClientsAction(editor);
 //			fAugmentRawContainerClients.setActionDefinitionId(AUGMENT_RAW_CONTAINER_CLIENTS_ACTION);
 			fAugmentRawContainerClients.update(selection);
@@ -346,7 +348,7 @@ public class RefactorActionGroup extends ActionGroup {
 		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
 		initAction(fUseSupertypeAction, provider, selection);
 		
-		if (AugmentRawContainerClientsAction.DEBUG) {
+		if (isAugmentRawRefactoringEnabled()) {
 			fAugmentRawContainerClients= new AugmentRawContainerClientsAction(fSite);
 //			fAugmentRawContainerClients.setActionDefinitionId(AUGMENT_RAW_CONTAINER_CLIENTS_ACTION);
 			initAction(fAugmentRawContainerClients, provider, selection);
@@ -493,7 +495,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
 		added+= addAction(refactorSubmenu, fChangeTypeAction);
 		added+= addAction(refactorSubmenu, fUseSupertypeAction);
-		if (AugmentRawContainerClientsAction.DEBUG) {
+		if (isAugmentRawRefactoringEnabled()) {
 			added+= addAction(refactorSubmenu, fAugmentRawContainerClients);
 		}
 		refactorSubmenu.add(new Separator(GROUP_CODING));
@@ -577,5 +579,9 @@ public class RefactorActionGroup extends ActionGroup {
 		} else {
 			fillRefactorMenu(menu);
 		}
+	}
+	
+	private boolean isAugmentRawRefactoringEnabled() {
+		return PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_AUGMENT_RAW);
 	}
 }
