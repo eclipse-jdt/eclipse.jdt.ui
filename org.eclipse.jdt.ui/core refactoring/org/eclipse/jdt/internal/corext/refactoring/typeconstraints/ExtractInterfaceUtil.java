@@ -121,7 +121,7 @@ public final class ExtractInterfaceUtil {
 				ConstraintVariable right= con.getRight();
 				if (setOfAll.contains(left) && bad.contains(right) && ! bad.contains(left))
 					bad.add(left);
-				if (constraint instanceof EqualsConstraint || constraint instanceof DefinesConstraint){
+				if (con.isEqualsConstraint() || con.isDefinesConstraint()){
 					if (setOfAll.contains(right) && bad.contains(left) && ! bad.contains(right))
 						bad.add(right);
 				}
@@ -141,10 +141,10 @@ public final class ExtractInterfaceUtil {
 		Set result= new HashSet();
 		for (int i= 0; i < constraints.length; i++) {
 			ITypeConstraint constraint= constraints[i];
-			if (constraint instanceof SubtypeConstraint){
-				SubtypeConstraint sc= (SubtypeConstraint)constraint;
-				if (canAddLeftSideToInitialBadSet(sc, setOfAll, interfaceVariable))
-					result.add(sc.getLeft());
+			if (constraint.isSimpleTypeConstraint()){
+				SimpleTypeConstraint simple= (SimpleTypeConstraint)constraint;
+				if (simple.isSubtypeConstraint() && canAddLeftSideToInitialBadSet(simple, setOfAll, interfaceVariable))
+					result.add(simple.getLeft());
 			} else if (constraint instanceof CompositeOrTypeConstraint){
 				ITypeConstraint[] subConstraints= ((CompositeOrTypeConstraint)constraint).getConstraints();
 				if (canAddLeftSideToInitialBadSet(subConstraints, setOfAll, interfaceVariable))
@@ -154,7 +154,7 @@ public final class ExtractInterfaceUtil {
 		return (ConstraintVariable[]) result.toArray(new ConstraintVariable[result.size()]);
 	}
 	
-	private static boolean canAddLeftSideToInitialBadSet(SubtypeConstraint sc, Set setOfAll, ConstraintVariable interfaceVariable) {
+	private static boolean canAddLeftSideToInitialBadSet(SimpleTypeConstraint sc, Set setOfAll, ConstraintVariable interfaceVariable) {
 		ConstraintVariable left= sc.getLeft();
 		ConstraintVariable right= sc.getRight();
 		if (! (left instanceof ExpressionVariable))
