@@ -175,12 +175,13 @@ public class ExtractTempRefactoring extends Refactoring {
 	public String[] guessTempNames() {
 		LinkedHashSet proposals= new LinkedHashSet(); //retain ordering, but prevent duplicates
 		try {
+			String[] excludedVariableNames= getExcludedVariableNames();
 			ASTNode associatedNode= getSelectedExpression().getAssociatedNode();
 			if (associatedNode instanceof MethodInvocation){
-				proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) associatedNode));
+				proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) associatedNode, excludedVariableNames));
 			}
 			if (associatedNode instanceof Expression) {
-				proposals.addAll(guessTempNamesFromExpression((Expression) associatedNode));
+				proposals.addAll(guessTempNamesFromExpression((Expression) associatedNode, excludedVariableNames));
 			}
 		} catch (JavaModelException e) {
 			// too bad ... no proposals this time
@@ -188,7 +189,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		return (String[]) proposals.toArray(new String[proposals.size()]);
 	}
 	
-	private List/*<String>*/ guessTempNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation) {
+	private List/*<String>*/ guessTempNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation, String[] excludedVariableNames) {
 		String methodName= selectedMethodInvocation.getName().getIdentifier();
 		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
 			String prefix= KNOWN_METHOD_NAME_PREFIXES[i];
@@ -204,19 +205,19 @@ public class ExtractTempRefactoring extends Refactoring {
 			methodName= proposal;
 			break;
 		}
-		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), methodName, 0, new String[0]);
+		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), methodName, 0, excludedVariableNames);
 		sortByLength(proposals);
 		return Arrays.asList(proposals);
 	}
 	
-	private List/*<String>*/ guessTempNamesFromExpression(Expression selectedExpression) throws JavaModelException {
+	private List/*<String>*/ guessTempNamesFromExpression(Expression selectedExpression, String[] excluded) {
 		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
 		String typeName= getQualifiedName(expressionBinding);
 		if (typeName.length() == 0)
 			typeName= expressionBinding.getName();
 		if (typeName.length() == 0)			
 			return Collections.EMPTY_LIST;
-		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), typeName, expressionBinding.getDimensions(), getExcludedVariableNames());
+		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), typeName, expressionBinding.getDimensions(), excluded);
 		sortByLength(proposals);
 		return Arrays.asList(proposals);
 	}
