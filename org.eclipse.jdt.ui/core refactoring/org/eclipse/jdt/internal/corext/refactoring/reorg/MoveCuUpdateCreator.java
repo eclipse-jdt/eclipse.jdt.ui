@@ -223,7 +223,9 @@ class MoveCuUpdateCreator {
 		}
 	}
 	
-	private boolean addImport(boolean force, IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {		
+	private boolean addImport(boolean force, IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {
+		if (pack.isDefaultPackage())
+			return false;
 		if (cu.getImport(pack.getElementName() + ".*").exists())  //$NON-NLS-1$
 			return false;
 
