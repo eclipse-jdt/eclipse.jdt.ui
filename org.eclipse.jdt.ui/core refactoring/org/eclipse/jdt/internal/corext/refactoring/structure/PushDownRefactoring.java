@@ -13,7 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -47,6 +49,10 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ISearchPattern;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -55,6 +61,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
+import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -113,8 +122,12 @@ public class PushDownRefactoring extends Refactoring {
 			return new MemberActionInfo(member, NO_ACTION);
 		}
 
-		public boolean isToBeDeletedFromDeclaringClass() {
+		public boolean isToBePushedDown() {
 			return fAction == PUSH_DOWN_ACTION;
+		}
+
+		public boolean isToBeDeletedFromDeclaringClass() {
+			return isToBePushedDown();
 		}
 
 		public boolean isNewMethodToBeDeclaredAbstract() throws JavaModelException {
@@ -173,7 +186,6 @@ public class PushDownRefactoring extends Refactoring {
 			return isToBeDeletedFromDeclaringClass();
 		}
 		
-
 		public static IMember[] getMembers(MemberActionInfo[] infos){
 			IMember[] result= new IMember[infos.length];
 			for (int i= 0; i < result.length; i++) {
@@ -181,6 +193,7 @@ public class PushDownRefactoring extends Refactoring {
 			}
 			return result;
 		}
+
 	}
 	
 	private MemberActionInfo[] fMemberInfos;
@@ -399,11 +412,12 @@ public class PushDownRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 4); //$NON-NLS-1$
+			pm.beginTask("", 5); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			
 			result.merge(checkMembersInDestinationClasses(new SubProgressMonitor(pm, 1)));
-			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
+			result.merge(checkElementsAccessedByModifiedMembers(new SubProgressMonitor(pm, 1)));
+			result.merge(checkReferencesToPushedDownMembers(new SubProgressMonitor(pm, 1)));
 			if (shouldMakeDeclaringClassAbstract())
 				result.merge(checkCallsToDeclaringClassConstructors(new SubProgressMonitor(pm, 1)));
 			else
@@ -424,7 +438,49 @@ public class PushDownRefactoring extends Refactoring {
 		}	
 	}
 
-	private RefactoringStatus checkAccesses(IProgressMonitor pm) throws JavaModelException{
+	private RefactoringStatus checkReferencesToPushedDownMembers(IProgressMonitor pm) throws JavaModelException {
+		IMember[] membersToPush= getMembersToPushDown();
+		RefactoringStatus result= new RefactoringStatus();
+		List movedMembers= Arrays.asList(getMembersToBeCreatedInSubclasses());
+		pm.beginTask("", membersToPush.length);
+		for (int i= 0; i < membersToPush.length; i++) {
+			IMember member= membersToPush[i];
+			String label= createLabel(member);
+			IJavaElement[] referencing= getReferencingElementsFromSameClass(member, new SubProgressMonitor(pm, 1));
+			for (int j= 0; j < referencing.length; j++) {
+				IJavaElement element= referencing[j];
+				if (movedMembers.contains(element))
+					continue;
+				if (! (element instanceof IMember))
+					continue;
+				IMember referencingMember= (IMember)element;	
+				String pattern= "Member ''{0}'' is referenced by ''{1}''";
+				Object[] keys= {label, createLabel(referencingMember)};
+				String msg= MessageFormat.format(pattern, keys);	
+				result.addError(msg, JavaSourceContext.create(referencingMember));
+			}
+		}
+		pm.done();
+		return result;	
+	}
+
+	private static IJavaElement[] getReferencingElementsFromSameClass(IMember member, IProgressMonitor pm) throws JavaModelException {
+		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(new IJavaElement[]{member}, IJavaSearchConstants.REFERENCES);
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{member.getDeclaringType()});
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern);
+		Set result= new HashSet(3);
+		for (int i= 0; i < groups.length; i++) {
+			SearchResultGroup group= groups[i];
+			SearchResult[] results= group.getSearchResults();
+			for (int j= 0; j < results.length; j++) {
+				SearchResult searchResult= results[i];
+				result.add(searchResult.getEnclosingElement());
+			}
+		}
+		return (IJavaElement[]) result.toArray(new IJavaElement[result.size()]);
+	}
+
+	private RefactoringStatus checkElementsAccessedByModifiedMembers(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("Checking referenced elements", 3);
 		IType[] subclasses= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
@@ -455,7 +511,7 @@ public class PushDownRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkAccessedFields(IType[] subclasses, IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		IMember[] membersToPushDown= getMembersToPushDown();
+		IMember[] membersToPushDown= getMembersToBeCreatedInSubclasses();
 		List pushedDownList= Arrays.asList(membersToPushDown);
 		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(membersToPushDown, pm);
 		for (int i= 0; i < subclasses.length; i++) {	
@@ -477,7 +533,7 @@ public class PushDownRefactoring extends Refactoring {
 
 	private RefactoringStatus checkAccessedMethods(IType[] subclasses, IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		IMember[] membersToPushDown= getMembersToPushDown();
+		IMember[] membersToPushDown= getMembersToBeCreatedInSubclasses();
 		List pushedDownList= Arrays.asList(membersToPushDown);
 		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(membersToPushDown, pm);
 		for (int i= 0; i < subclasses.length; i++) {
@@ -542,14 +598,24 @@ public class PushDownRefactoring extends Refactoring {
 
 	private IType[] getTypeReferencedInPushedDownMembers(IProgressMonitor pm) throws JavaModelException {
 		if (fTypesReferencedInPushedDownMembers == null)
-			fTypesReferencedInPushedDownMembers= ReferenceFinderUtil.getTypesReferencedIn(getMembersToPushDown(), pm);
+			fTypesReferencedInPushedDownMembers= ReferenceFinderUtil.getTypesReferencedIn(getMembersToBeCreatedInSubclasses(), pm);
 		return fTypesReferencedInPushedDownMembers;
 	}
 
-	private IMember[] getMembersToPushDown() {
+	private IMember[] getMembersToBeCreatedInSubclasses() {
 		return MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
 	}
 
+	private IMember[] getMembersToPushDown() {
+		List fields= new ArrayList(fMemberInfos.length);
+		for (int i= 0; i < fMemberInfos.length; i++) {
+			MemberActionInfo info= fMemberInfos[i];
+			if (info.isToBePushedDown())
+				fields.add(info.getMember());
+		}
+		return (IMember[]) fields.toArray(new IMember[fields.size()]);
+	}
+	
 	//copied from pull up
 	private RefactoringStatus checkCallsToDeclaringClassConstructors(IProgressMonitor pm) throws JavaModelException {
 		ASTNode[] refNodes= ConstructorReferenceFinder.getConstructorReferenceNodes(getDeclaringClass(), fAstManager, pm);
@@ -569,7 +635,7 @@ public class PushDownRefactoring extends Refactoring {
 	private RefactoringStatus checkMembersInDestinationClasses(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 2);
 		RefactoringStatus result= new RefactoringStatus();
-		IMember[] membersToPushDown= getMembersToPushDown();
+		IMember[] membersToPushDown= getMembersToBeCreatedInSubclasses();
 
 		IType[] destinationClassesForNonAbstract= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
 		result.merge(checkNonAbstractMembersInDestinationClasses(membersToPushDown, destinationClassesForNonAbstract));
@@ -675,7 +741,7 @@ public class PushDownRefactoring extends Refactoring {
 	}
 
 	private void deleteMembersFromDeclaringClass() throws JavaModelException {
-		IMember[] toDelete= getMembersToDelete();
+		IMember[] toDelete= getMembersToDeleteFromDeclaringClass();
 		for (int i= 0; i < toDelete.length; i++) {
 			if (toDelete[i] instanceof IField)
 				deleteFieldFromDeclaringClass((IField)toDelete[i]);
@@ -684,7 +750,7 @@ public class PushDownRefactoring extends Refactoring {
 		}
 	}
 
-	private IMember[] getMembersToDelete() {
+	private IMember[] getMembersToDeleteFromDeclaringClass() {
 		List result= new ArrayList(fMemberInfos.length);
 		for (int i= 0; i < fMemberInfos.length; i++) {
 			MemberActionInfo info= fMemberInfos[i];
@@ -1042,6 +1108,19 @@ public class PushDownRefactoring extends Refactoring {
 	}	
 
 	//--
+	private static String createLabel(IMember member){
+		if (member instanceof IType)
+			return createTypeLabel((IType)member);
+		else if (member instanceof IMethod)
+			return createMethodLabel((IMethod)member);
+		else if (member instanceof IField)
+			return createFieldLabel((IField)member);
+		else if (member instanceof IInitializer)
+			return "initializer";
+		Assert.isTrue(false);
+		return null;	
+	}
+
 	private static String createTypeLabel(IType type){
 		return JavaModelUtil.getFullyQualifiedName(type);
 	}
