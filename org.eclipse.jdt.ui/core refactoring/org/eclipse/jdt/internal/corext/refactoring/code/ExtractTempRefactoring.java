@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -626,13 +627,17 @@ public class ExtractTempRefactoring extends Refactoring {
 		final ITypeBinding type= expression.resolveTypeBinding();
 		if (type.isPrimitive())
 			return null;
-		if (type.isArray() && type.getElementType().isPrimitive())	
+		if (type.isArray() && type.getElementType().isPrimitive())
+			return null;
+		final IPackageBinding pack= type.getPackage();
+		final IPackageDeclaration[] declarations= fCu.getPackageDeclarations();
+		if (pack != null && declarations.length > 0 && pack.getName().equals(declarations[0].getElementName()))
 			return null;
 		final ImportRewrite rewrite= new ImportRewrite(fCu);
 		rewrite.addImport(type);
 		if (rewrite.isEmpty())
 			return null;
-		else	
+		else
 			return rewrite.createEdit(buffer.getDocument());
 	}
 
