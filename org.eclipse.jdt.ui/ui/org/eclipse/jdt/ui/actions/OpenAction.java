@@ -146,11 +146,6 @@ public class OpenAction extends SelectionDispatchAction {
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			try {
-				if (element instanceof IJavaElement) {
-					element= OpenActionUtil.getElementToOpen((IJavaElement)element);
-					if (element == null)
-						element= elements[i];
-				}
 				OpenActionUtil.open(element);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
