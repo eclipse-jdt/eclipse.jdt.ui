@@ -425,7 +425,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 			if (o instanceof IResource)
 				return (IResource)o;
 			else if (o instanceof IJavaElement)
-				return 	((IJavaElement)o).getCorrespondingResource();
+				return ((IJavaElement)o).getCorrespondingResource();
 			else
 				return null;	
 		} catch (JavaModelException e){
