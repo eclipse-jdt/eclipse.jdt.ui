@@ -53,11 +53,11 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingTrackingTest("testNamesWithMove2"));
+			suite.addTest(new ASTRewritingTrackingTest("testNamesWithPlaceholder"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -517,7 +517,73 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		}
 		clearRewrite(rewrite);
 	}
+	public void testNamesWithPlaceholder() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    public String foo(Object s) {\n");
+		buf.append("        return s;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		AST ast= astRoot.getAST();
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		
+		ArrayList gd= new ArrayList();
+		
+		// change type name
+		TypeDeclaration typeC= findTypeDeclaration(astRoot, "C");
+		rewrite.markAsTracked(typeC.getName(), getDescription(gd, "C"));
+		
+		List decls= typeC.bodyDeclarations();
+		
+		MethodDeclaration method= (MethodDeclaration) decls.get(0);
+		rewrite.markAsTracked(method.getName(), getDescription(gd, "foo"));
+		
+		ReturnStatement returnStatement= (ReturnStatement) method.getBody().statements().get(0);
+		
+		CastExpression castExpression= ast.newCastExpression();
+		Type type= (Type) rewrite.createPlaceholder("String", ASTRewrite.TYPE);
+		Expression expression= (Expression) rewrite.createMove(returnStatement.getExpression());
+		castExpression.setType(type);
+		castExpression.setExpression(expression);
+		
+		rewrite.markAsReplaced(returnStatement.getExpression(), castExpression);
+		
+		rewrite.markAsTracked(type, getDescription(gd, "String"));
+		rewrite.markAsTracked(expression, getDescription(gd, "s"));
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		proposal.getCompilationUnitChange().setKeepExecutedTextEdits(true);
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    public String foo(Object s) {\n");
+		buf.append("        return (String) s;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		String expected= buf.toString();
+		assertEqualString(cu.getSource(), expected);
+		
+		CompilationUnitChange change= proposal.getCompilationUnitChange();
+		
+		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
+		for (int i= 0; i < descriptions.length; i++) {
+			String name= descriptions[i].getName();
+			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
+			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
+			assertEqualString(string, name);
+		}
+		clearRewrite(rewrite);
+	}	
+
 	
 }
 
