@@ -181,10 +181,6 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 	 * @see IUpdate
 	 */
 	public void update() {
-		if (fWorkbenchPart instanceof ClassFileEditor) {
-			setEnabled(false);
-			return;
-		}
 		setEnabled(getContext() != null && 
 			textHasContent(((ITextSelection)fWorkbenchPart.getSite().getSelectionProvider().getSelection()).getText()));
 	}
