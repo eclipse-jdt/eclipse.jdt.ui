@@ -17,13 +17,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.runtime.Platform;
-
 import org.eclipse.osgi.service.environment.Constants;
+
+import org.eclipse.core.runtime.Platform;
 
 public class ChkpiiTests extends TestCase {
 	
@@ -33,59 +34,31 @@ public class ChkpiiTests extends TestCase {
 	private static final int PROPERTIES= 1;
 	private static final int XML= 2;
 	
-	/**
-	 * Checks if the given log file contains errors.
-	 * 
-	 * @param logFilePath the path of the chkpii log file
-	 * @return <code>true</code> if there are errors in the log file
-	 */
-	private boolean hasErrors(String logFilePath) {
-		BufferedReader aReader= null;
-		
-		try {
-			aReader= new BufferedReader(new InputStreamReader(new FileInputStream(logFilePath)));
-			String aLine= aReader.readLine();
-			while (aLine != null) {
-				int aNumber= parseLine(aLine);
-				if (aNumber > 0)
-					return true;
-
-				aLine= aReader.readLine();
-			}
-		} catch (FileNotFoundException e) {
-			System.out.println("Could not open log file: " + logFilePath); //$NON-NLS-1$
-			return true;
-		} catch (IOException e) {
-			System.out.println("Error reading log file: " + logFilePath); //$NON-NLS-1$
-			return true;
-		} finally {
-			if (aReader != null) {
-				try {
-					aReader.close();
-				} catch (IOException e) {
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}
-	
 	public void testChkpii() {
 			
+		StringBuffer message= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		boolean testExecuted= testChkpii(HTML);
-		assertTrue("Could not run chkpii test. See console for details.", testExecuted); //$NON-NLS-1$
-		boolean result1= !hasErrors(getOutputFile(HTML));
+		assertTrue("Could not run chkpii test on HTML files. See console for details.", testExecuted); //$NON-NLS-1$
+		boolean result1= checkValidLogFile(getOutputFile(HTML), buf);
+		if (!result1)
+			message.append("\n- HTML: \n" + buf);
 
-		testChkpii(XML);
-		assertTrue("Could not run chkpii test. See console for details.", testExecuted); //$NON-NLS-1$
-		boolean result2= !hasErrors(getOutputFile(XML));
+		buf= new StringBuffer();
+		testExecuted= testChkpii(XML);
+		assertTrue("Could not run chkpii test on XML files. See console for details.", testExecuted); //$NON-NLS-1$
+		boolean result2= checkValidLogFile(getOutputFile(XML), buf);
+		if (!result2)
+			message.append("\n- XML: \n" + buf);
 		
-		testChkpii(PROPERTIES);
-		assertTrue("Could not run chkpii test. See console for details.", testExecuted); //$NON-NLS-1$
-		boolean result3= !hasErrors(getOutputFile(PROPERTIES));
+		buf= new StringBuffer();
+		testExecuted= testChkpii(PROPERTIES);
+		assertTrue("Could not run chkpii test on PROPERTIES files. See console for details.", testExecuted); //$NON-NLS-1$
+		boolean result3= checkValidLogFile(getOutputFile(PROPERTIES), buf);
+		if (!result3)
+			message.append("\n- PROPERTIES: \n" + buf);
 
-		assertTrue("CHKPII warnings or errors in files. See " + fLogDirectoryName + " for details.", (result1 && result2 && result3)); //$NON-NLS-1$ //$NON-NLS-2$
+		assertTrue(message + "\nSee " + fLogDirectoryName + " for details.", (result1 && result2 && result3)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 		
 	private boolean testChkpii(int type) {
@@ -95,7 +68,7 @@ public class ChkpiiTests extends TestCase {
 		StringBuffer consoleLog= new StringBuffer();
 		try {
 			Process aProcess= aRuntime.exec(chkpiiString);
-			aBufferedReader= new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
+			aBufferedReader= new BufferedReader(new InputStreamReader(aProcess.getErrorStream()));
 			String line= aBufferedReader.readLine();
 			while (line != null) {
 				consoleLog.append(line);
@@ -123,12 +96,6 @@ public class ChkpiiTests extends TestCase {
 		return true;
 	}
 	
-	/**
-	 * Method getChkpiiString.
-	 * 
-	 * @param HTML
-	 * @return String
-	 */
 	private String getChkpiiString(int type) {
 		return getExec() + " " + getFilesToTest(type) + " -E -O " + getOutputFile(type) + " -XM @" + getExcludeErrors() + " -X " + getExcludeFile () + " -S"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
@@ -155,12 +122,6 @@ public class ChkpiiTests extends TestCase {
 		return path + File.separator;
 	}
 
-	/**
-	 * Method getFilesToTest.
-	 * 
-	 * @param HTML
-	 * @return String
-	 */
 	private String getFilesToTest(int type) {
 			
 		String aString= getPluginDirectory();
@@ -215,16 +176,16 @@ public class ChkpiiTests extends TestCase {
 		switch (type) {
 
 			case HTML :
-				return fLogDirectoryName + File.separator + "html.txt"; //$NON-NLS-1$
+				return fLogDirectoryName + "html.txt"; //$NON-NLS-1$
 
 			case PROPERTIES :
-				return fLogDirectoryName + File.separator + "properties.txt"; //$NON-NLS-1$
+				return fLogDirectoryName + "properties.txt"; //$NON-NLS-1$
 		
 			case XML : 
-				return fLogDirectoryName + File.separator + "xml.txt"; //$NON-NLS-1$
+				return fLogDirectoryName + "xml.txt"; //$NON-NLS-1$
 
 			default :
-				return fLogDirectoryName + File.separator + "other.txt"; //$NON-NLS-1$
+				return fLogDirectoryName + "other.txt"; //$NON-NLS-1$
 		}
 	}
 	
@@ -237,9 +198,6 @@ public class ChkpiiTests extends TestCase {
 		return new File("chkpii.exe").getPath(); //$NON-NLS-1$
 	}
 	
-	/**
-	 * Method getExcludeErrors.
-	 */
 	private String getExcludeErrors() {
 		
 		String fileName;
@@ -253,29 +211,97 @@ public class ChkpiiTests extends TestCase {
 	}
 		
 	/**
-	 * Method parseLine.
+	 * Checks if the given log file is valid and states no errors.
 	 * 
-	 * @param aLine
-	 * @return -1 if not an error or warning line or the number of errors or
-	 * warnings.
+	 * @param logFilePath the path of the chkpii log file
+	 * @param message a stringbuffer to append error messages to
+	 * @return <code>true</code> if there are errors in the log file
 	 */
-	private int parseLine(String aLine) {
+	private boolean checkValidLogFile(String logFilePath, StringBuffer message) {
+		BufferedReader aReader= null;
+		int errors= -1, notProcessed= -1, endOfSummary= -1;
+		boolean hasErrors= false;
+		
+		try {
+			aReader= new BufferedReader(new InputStreamReader(new FileInputStream(logFilePath), Charset.forName("ISO-8859-1")));
+			String aLine= aReader.readLine();
+			while (aLine != null) {
+				if (errors == -1)
+					errors= parseErrorSummary(aLine);
+				else if (notProcessed == -1)
+					notProcessed= parseNotProcessedSummary(aLine);
+				else if (endOfSummary == -1)
+					endOfSummary= parseEndOfSummary(aLine);
+				else
+					break;
+				
+				aLine= aReader.readLine();
+			}
+			
+			if (errors > 0) {
+				message.append("" + errors + " files containing errors\n");
+				hasErrors= true;
+			}
+			if (notProcessed > 0) { 
+				message.append("" + notProcessed + " files not found\n");
+				hasErrors= true;
+			}
+			if (endOfSummary != 0) {
+				message.append("Incomplete logfile\n");
+				hasErrors= true;
+			}
+			
+		} catch (FileNotFoundException e) {
+			message.append("Could not open log file: " + logFilePath + "\n" + e.getLocalizedMessage() + "\n"); //$NON-NLS-1$
+			hasErrors= true;
+		} catch (IOException e) {
+			message.append("Error reading log file: " + logFilePath + "\n" + e.getLocalizedMessage() + "\n"); //$NON-NLS-1$
+			hasErrors= true;
+		} finally {
+			if (aReader != null) {
+				try {
+					aReader.close();
+				} catch (IOException e) {
+					message.append("Error closing log file: " + logFilePath + "\n" + e.getLocalizedMessage() + "\n"); //$NON-NLS-1$
+					hasErrors= true;
+				}
+			}
+		}
+		
+		return !hasErrors;
+	}
+	
+	private int parseErrorSummary(String aLine) {
 		int index= aLine.indexOf("Files Contain Error"); //$NON-NLS-1$
-		
-//		if (index == -1) {
-//			index= aLine.indexOf("Files Contain Warning"); //$NON-NLS-1$
-//		}
-		
-		if (index == -1) {
-			index= aLine.indexOf("Files Could Not Be Processed"); //$NON-NLS-1$
-		}
-		
-		if (index == -1) {
-			return index;
-		}
+		if (index == -1)
+			return -1;
 		
 		String aString= aLine.substring(0, index).trim();
-		return Integer.parseInt(aString);
+		try {
+			return Integer.parseInt(aString);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+	
+	private int parseNotProcessedSummary(String aLine) {
+		int index= aLine.indexOf("Files Could Not Be Processed"); //$NON-NLS-1$
+		if (index == -1)
+			return -1;
+		
+		String aString= aLine.substring(0, index).trim();
+		try {
+			return Integer.parseInt(aString);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+	
+	private int parseEndOfSummary(String aLine) {
+		int index= aLine.indexOf("End of Listing"); //$NON-NLS-1$
+		if (index == -1)
+			return -1;
+		return 0;
 	}
 	
 	/**
