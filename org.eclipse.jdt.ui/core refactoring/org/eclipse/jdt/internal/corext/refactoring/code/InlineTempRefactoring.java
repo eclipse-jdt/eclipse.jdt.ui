@@ -100,11 +100,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	public int getOccurences() {
-		try {
-			return getOccurrenceOffsets().length;
-		} catch (JavaModelException e) {
-			return 1;
-		}
+		return getOccurrenceOffsets().length;
 	}
 	
 	/*
@@ -175,7 +171,7 @@ public class InlineTempRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 	
-	private RefactoringStatus checkSelection() throws JavaModelException {
+	private RefactoringStatus checkSelection() {
 		RefactoringStatus rs= checkIfTempSelected();
 		if (rs != null && rs.hasFatalError())
 			return rs;
@@ -202,7 +198,7 @@ public class InlineTempRefactoring extends Refactoring {
 		return checkAssignments();
 	}
 	
-	private RefactoringStatus checkAssignments() throws JavaModelException {
+	private RefactoringStatus checkAssignments() {
 		TempAssignmentFinder assignmentFinder= new TempAssignmentFinder(fTempDeclaration);
 		fCompilationUnitNode.accept(assignmentFinder);
 		if (! assignmentFinder.hasAssignments())
@@ -312,8 +308,8 @@ public class InlineTempRefactoring extends Refactoring {
 		return fCu.getSource().substring(start, end);
 	}
 	
-	private Integer[] getOccurrenceOffsets() throws JavaModelException {
+	private Integer[] getOccurrenceOffsets() {
 		return TempOccurrenceFinder.findTempOccurrenceOffsets(fTempDeclaration, true, false);
 	}	
 	
-	}
+}
