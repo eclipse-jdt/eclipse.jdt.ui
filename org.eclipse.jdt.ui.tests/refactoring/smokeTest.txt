@@ -1,5 +1,5 @@
 --------------------------------
-	Refactoring:
+	Setup
  	   0.  import junit into you workspace
  	   1. turn autobuild on
 
