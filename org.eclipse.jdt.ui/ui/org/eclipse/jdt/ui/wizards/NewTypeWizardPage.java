@@ -1252,8 +1252,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			ICompilationUnit parentCU= enclosingType.getCompilationUnit();
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, true);
 
-			// add an import that will be removed again. Having this import solves 14661
-			imports.addImport(parentCU.getParent().getElementName(), Signature.getQualifier(parentCU.getElementName()));
+			// add imports that will be removed again. Having the imports solves 14661
+			IType[] topLevelTypes= parentCU.getTypes();
+			for (int i= 0; i < topLevelTypes.length; i++) {
+				imports.addImport(topLevelTypes[i].getFullyQualifiedName('.'));
+			}
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
 			String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, parentCU);
