@@ -183,11 +183,10 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 *	@return java.lang.String
 	 */
 	protected String getDestinationValue() {
-		String requiredSuffix= getOutputSuffix();
 		String destinationText= fDestinationNamesCombo.getText().trim();
-		if (!destinationText.toLowerCase().endsWith(requiredSuffix.toLowerCase()))
-			destinationText += requiredSuffix;
-	return destinationText;
+		if (destinationText.indexOf('.') < 0)
+			destinationText += getOutputSuffix();
+		return destinationText;
 	}
 
 	/**
@@ -322,7 +321,10 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		fJarPackage.setExportJavaFiles(fExportJavaFilesCheckbox.getSelection());
 
 		// destination
-		fJarPackage.setJarLocation(getPathFromString(fDestinationNamesCombo.getText()));
+		IPath path= getPathFromString(fDestinationNamesCombo.getText());
+		if (path.segmentCount() > 0 && ensureTargetFileIsValid(path.toFile()) && path.getFileExtension() == null) //$NON-NLS-1$
+			path= path.addFileExtension(JarPackage.EXTENSION);
+		fJarPackage.setJarLocation(path);
 
 		// options
 		fJarPackage.setCompress(fCompressCheckbox.getSelection());
@@ -414,7 +416,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 */
 	protected void handleDestinationBrowseButtonPressed() {
 		FileDialog dialog= new FileDialog(getContainer().getShell(), SWT.SAVE);
-		dialog.setFilterExtensions(new String[] {"*.jar"}); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {"*.jar", "*.zip"}); //$NON-NLS-1$ //$NON-NLS-2$
 
 		String currentSourceString= getDestinationValue();
 		int lastSeparatorIndex= currentSourceString.lastIndexOf(File.separator);
@@ -425,13 +427,8 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		else
 			dialog.setFileName(currentSourceString);
 		String selectedFileName= dialog.open();
-
-		if (selectedFileName != null) {
-			IPath path= getPathFromString(selectedFileName);
-			if (path.lastSegment().equals(getOutputSuffix()))
-				selectedFileName= ""; //$NON-NLS-1$
+		if (selectedFileName != null)
 			fDestinationNamesCombo.setText(selectedFileName);
-		}
 	}
 
 	/**
