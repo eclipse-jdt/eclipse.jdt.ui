@@ -66,7 +66,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			mergedStatus= readStatus;
 		
 		if (!mergedStatus.isOK())
-			ProblemDialog.open(getShell(), JarPackagerMessages.getString("CreateJarActionDelegate.jarExportProblems"), null, mergedStatus); //$NON-NLS-1$
+			ProblemDialog.open(getShell(), JarPackagerMessages.getString("CreateJarActionDelegate.jarExport.title"), null, mergedStatus); //$NON-NLS-1$
 	}
 
 	private JarPackageData[] readJarPackages(IFile[] descriptions, MultiStatus readStatus) {

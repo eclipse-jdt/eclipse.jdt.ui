@@ -180,7 +180,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		}
 		IStatus status= op.getStatus();
 		if (!status.isOK()) {
-			ProblemDialog.open(getShell(), JarPackagerMessages.getString("JarPackageWizard.jarExportProblems.title"), null, status); //$NON-NLS-1$
+			ProblemDialog.open(getShell(), JarPackagerMessages.getString("JarPackageWizard.jarExport.title"), null, status); //$NON-NLS-1$
 			return !(status.matches(IStatus.ERROR));
 		}
 		return true;
