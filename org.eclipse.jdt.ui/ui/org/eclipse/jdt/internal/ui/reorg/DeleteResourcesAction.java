@@ -168,25 +168,27 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		if (! isLinkedResource(firstElement))
 			return ReorgMessages.getString("DeleteResourcesAction.sure_delete"); //$NON-NLS-1$
 		
-		if (! isLinkedPackage(firstElement))	
+		if (! isLinkedPackageOrPackageFragmentRoot(firstElement))	
 			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_single"); //$NON-NLS-1$
-		
-		return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_single_package"); //$NON-NLS-1$
+
+		//XXX workaround for jcore bugs - linked packages or source folders cannot be deleted properly		
+		return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_single_package_or_pfr"); //$NON-NLS-1$
 	}
 	
 	private static String createConfirmationStringForMultipleElements(IStructuredSelection selection) throws JavaModelException {
 		if (! containsLinkedResources(selection))
 			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_resources"); //$NON-NLS-1$
 
-		if (! containLinkedPackages(selection))	
+		if (! containLinkedPackagesOrPackageFragmentRoots(selection))	
 			return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_multiple"); //$NON-NLS-1$
-
-		return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_multiple_with_packages"); //$NON-NLS-1$
+		
+		//XXX workaround for jcore bugs - linked packages or source folders cannot be deleted properly
+		return ReorgMessages.getString("DeleteResourcesAction.sure_delete_linked_multiple_with_packages_or_pfr"); //$NON-NLS-1$
 	}
 	
-	private static boolean containLinkedPackages(IStructuredSelection selection) {
+	private static boolean containLinkedPackagesOrPackageFragmentRoots(IStructuredSelection selection) {
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			if (isLinkedPackage(iter.next()))
+			if (isLinkedPackageOrPackageFragmentRoot(iter.next()))
 				return true;
 		}
 		return false;
@@ -203,10 +205,11 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		return false;
 	}
 
-	private static boolean isLinkedPackage(Object object) {
-		if (!(object instanceof IPackageFragment))
-			return false;
-		return isLinkedResource(ResourceUtil.getResource(object));	
+	private static boolean isLinkedPackageOrPackageFragmentRoot(Object object) {
+		if ((object instanceof IPackageFragment) || (object instanceof IPackageFragmentRoot))
+			return isLinkedResource(ResourceUtil.getResource(object));
+		else
+			return false;	
 	}
 	
 	private static boolean isLinkedResource(Object element) {
