@@ -19,8 +19,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
@@ -135,7 +138,9 @@ public class DeleteRefactoring extends Refactoring {
 			prepareElementList();
 			CompositeChange composite= new CompositeChange();
 			for (Iterator iter= fElements.iterator(); iter.hasNext() ;){
-				composite.add(createDeleteChange(iter.next()));
+				IChange change= createDeleteChange(iter.next());
+				if (change != null)
+	                composite.add(change);
 			}
 			if (composite.getChildren() == null)
 				return new NullChange();
@@ -174,7 +179,7 @@ public class DeleteRefactoring extends Refactoring {
 				return false;
 			
 			//special case (2 packages are never parents of each other)
-			if 	(element instanceof IPackageFragment && parent instanceof IPackageFragment)
+			if (element instanceof IPackageFragment && parent instanceof IPackageFragment)
 				continue;
 			
 			if (! parentPath.equals(elementPath) && parentPath.isPrefixOf(elementPath))	
@@ -231,9 +236,10 @@ public class DeleteRefactoring extends Refactoring {
 		return new NullChange();				
 	}
 	
-	private static IResource getResourceToDelete(IJavaElement element) throws JavaModelException {
+	private static IResource getResourceToDelete(IJavaElement element){
 		if (!element.exists())
 			return null;
+	    Assert.isTrue(! (element instanceof ISourceManipulation));
 		return element.getResource();
 	}
 	
@@ -346,6 +352,12 @@ public class DeleteRefactoring extends Refactoring {
 	}
 	
 	private static boolean canDelete(IJavaElement element){
+		if (! element.exists())
+		    return false;
+		if (element instanceof IImportDeclaration || 
+			element instanceof IImportContainer ||
+		    element instanceof IMember)
+	  		return false;
 		IResource res= element.getResource();
 		if (res == null)
 			return false;
