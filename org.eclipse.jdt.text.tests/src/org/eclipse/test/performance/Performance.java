@@ -20,6 +20,10 @@ import org.eclipse.jdt.text.tests.performance.OSPerformanceMeterFactory;
 import org.eclipse.jdt.text.tests.performance.PerformanceMeterFactory;
 import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
 
+/**
+ * Helper for performance measurements. Currently provides performance meter
+ * creation and checking of measurements.
+ */
 public class Performance {
 
 	private static final String PLUGIN_ID= JdtTextTestPlugin.PLUGIN_ID;
@@ -57,16 +61,31 @@ public class Performance {
 		Evaluator.getDefaultEvaluator().evaluate(performanceMeter.getSample());
 	}
 	
-	public PerformanceMeter createPerformanceMeter(TestCase testCase) {
-		return getPeformanceMeterFactory().createPerformanceMeter(testCase);
+	/**
+	 * Creates a performance meter for the given test. Use
+	 * {@link Performance#createPerformanceMeter(TestCase, String)} if more
+	 * than one performance meter is used for the same test.
+	 * 
+	 * @param test the test
+	 * @return a performance meter for the given test
+	 * @throws IllegalArgumentException if a performance meter for the given
+	 *                 test has already been created
+	 */
+	public PerformanceMeter createPerformanceMeter(TestCase test) {
+		return getPeformanceMeterFactory().createPerformanceMeter(test);
 	}
 	
-	public PerformanceMeter createPerformanceMeter(TestCase testCase, String meterId) {
-		return getPeformanceMeterFactory().createPerformanceMeter(testCase, meterId);
-	}
-
-	public PerformanceMeter createPerformanceMeter(String scenario) {
-		return getPeformanceMeterFactory().createPerformanceMeter(scenario);
+	/**
+	 * Creates a performance meter for the given test and meter id.
+	 * 
+	 * @param test the test
+	 * @param meterId the meter id
+	 * @return a performance meter for the given test
+	 * @throws IllegalArgumentException if a performance meter for the given
+	 *                 test and meter id has already been created
+	 */
+	public PerformanceMeter createPerformanceMeter(TestCase test, String meterId) {
+		return getPeformanceMeterFactory().createPerformanceMeter(test, meterId);
 	}
 
 	private PerformanceMeterFactory getPeformanceMeterFactory() {
