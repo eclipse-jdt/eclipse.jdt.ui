@@ -10,48 +10,63 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 /**
  * Simple LineReader Helper. Returns lines including "line-break" characters.
  */
 public class SimpleLineReader {
 
-    private String fInput;
-    private int fIndex;
+    private IDocument fInput;
+    private int fCurrLine;
 
-    public SimpleLineReader(String input) {
-        this.fInput = input;
+    public SimpleLineReader(IDocument input) {
+        fInput = input;
+        fCurrLine= 0;
     }    
     
-    public String readLine() { 
-        if (fIndex >= fInput.length()) {
-            return null;
-        }
-        
-        int lineBreakIndex = -1;
-        int lineBreakIndexLF = fInput.indexOf('\n', fIndex);
-        int lineBreakIndexCR = fInput.indexOf('\r', fIndex);       
-        
-        if ((lineBreakIndexCR) != -1 && (lineBreakIndexLF != -1)) {
-            lineBreakIndex = Math.min(lineBreakIndexLF, lineBreakIndexCR);
-        } else {
-            lineBreakIndex = Math.max(lineBreakIndexCR, lineBreakIndexLF);
-        }
-        
-        if ((lineBreakIndex != -1) &&
-                (lineBreakIndex < fInput.length() - 1) && 
-                (fInput.charAt(lineBreakIndex) == '\r') && 
-                (fInput.charAt(lineBreakIndex+1) == '\n')) {
-            lineBreakIndex++;
-        }        
-        
-        if (lineBreakIndex == -1) {
-            String res = fInput.substring(fIndex);
-            fIndex=fInput.length();
-            return res;
-        }
-        lineBreakIndex++;
-        String res = fInput.substring(fIndex, lineBreakIndex);
-        fIndex = lineBreakIndex;
-        return res;        
-    }
+    public String readLine() {
+    	int nLines= fInput.getNumberOfLines();
+    	if (fCurrLine >= nLines) {
+    		return null;
+    	}
+    	
+    	try {
+			IRegion region= fInput.getLineInformation(fCurrLine++);
+			String content= fInput.get(region.getOffset(), region.getLength());
+			
+			int start= region.getOffset();
+			  	
+			boolean continuesOnNext= content.endsWith("\\") && !isCommentOrWhiteSpace(content); //$NON-NLS-1$
+			
+			while (continuesOnNext && fCurrLine < nLines) {
+				region= fInput.getLineInformation(fCurrLine++);
+				content= fInput.get(region.getOffset(), region.getLength());
+				continuesOnNext= content.endsWith("\\") && !isCommentOrWhiteSpace(content); //$NON-NLS-1$
+			}
+			int end;
+			if (fCurrLine < nLines) {
+				end= fInput.getLineOffset(fCurrLine); // beginning of next
+			} else {
+				end= fInput.getLength();
+				if (end == start) {
+					return null; // nd of file, empty line -> null
+				}
+			}
+			return fInput.get(start, end - start);
+		} catch (BadLocationException e) {
+			// should not happen
+			JavaPlugin.log(e);
+		}
+		return null;
+     }
+    
+    public static boolean isCommentOrWhiteSpace(String line) {
+        line = line.trim();
+        return (line.length() == 0) || line.charAt(0) == '!' || line.charAt(0) == '#';
+    }   
 }

@@ -48,11 +48,7 @@ public class NLSPropertyFileModifier {
 
 		textChange= new TextFileChange(name, getPropertyFile(propertyFilePath));
 
-		try {
-			addChanges(textChange, nlsSubstitutions);
-		} catch (Exception e) {
-			// error while creating some of the changes
-		}
+		addChanges(textChange, nlsSubstitutions);
 
 		return textChange;
 	}
@@ -62,7 +58,7 @@ public class NLSPropertyFileModifier {
 	}
 
 	private static void addChanges(TextChange textChange, NLSSubstitution[] substitutions) throws CoreException {
-		PropertyFileDocumentModel model= new PropertyFileDocumentModel(new Document(textChange.getCurrentContent(new NullProgressMonitor())));
+		PropertyFileDocumentModel model= new PropertyFileDocumentModel(textChange.getCurrentDocument(new NullProgressMonitor()));
 		addInsertEdits(textChange, substitutions, model);
 		addRemoveEdits(textChange, substitutions, model);
 		addReplaceEdits(textChange, substitutions, model);

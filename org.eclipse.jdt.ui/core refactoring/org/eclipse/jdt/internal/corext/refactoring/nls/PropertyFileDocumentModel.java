@@ -94,15 +94,20 @@ public class PropertyFileDocumentModel {
 
     private void parsePropertyDocument(IDocument document) {
         fKeyValuePairs = new ArrayList();
-        SimpleLineReader reader = new SimpleLineReader(document.get());        
+      
+        SimpleLineReader reader = new SimpleLineReader(document);        
         int offset = 0;
         String line = reader.readLine();
         int leadingWhiteSpaces = 0;
         while (line != null) {
-            if (isCommentOrWhiteSpace(line) == false) {
+            if (!SimpleLineReader.isCommentOrWhiteSpace(line)) {
                 int idx = getIndexOfSeparationCharacter(line);
-                fKeyValuePairs.add(new KeyValuePairModell(line.substring(0, idx), line.substring(idx + 1), offset, leadingWhiteSpaces));
-                leadingWhiteSpaces = 0;
+                if (idx != -1) {
+                	String key= line.substring(0, idx);
+                	String value= line.substring(idx + 1);
+                    fKeyValuePairs.add(new KeyValuePairModell(key, value, offset, leadingWhiteSpaces));
+                    leadingWhiteSpaces = 0;
+                }
             } else {
                 leadingWhiteSpaces += line.length();
             }
@@ -133,11 +138,6 @@ public class PropertyFileDocumentModel {
         return minIndex;        
     }
 
-    private boolean isCommentOrWhiteSpace(String line) {
-        line = line.trim();
-        return (line.length() == 0) || line.startsWith("!") || line.startsWith("#"); //$NON-NLS-1$ //$NON-NLS-2$
-    }    
-    
     private class KeyValuePairModell extends KeyValuePair implements Comparable {        
 
         int fOffset;
