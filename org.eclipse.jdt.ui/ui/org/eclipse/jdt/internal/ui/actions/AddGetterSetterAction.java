@@ -101,7 +101,7 @@ public class AddGetterSetterAction extends Action {
 		
 			AddGetterSetterOperation op= new AddGetterSetterOperation(workingCopyFields, prefixes, suffixes, settings, skipSetterForFinalQuery, skipReplaceQuery);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
-			dialog.run(false, true, new WorkbenchRunnableWrapper(op));
+			dialog.run(false, true, new WorkbenchRunnableAdapter(op));
 		
 			IMethod[] createdMethods= op.getCreatedAccessors();
 			if (createdMethods.length > 0) {

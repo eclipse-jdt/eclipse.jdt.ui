@@ -38,7 +38,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableWrapper;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
@@ -126,7 +126,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, settings, false);
 					ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 					try {
-						dialog.run(false, true, new WorkbenchRunnableWrapper(op));
+						dialog.run(false, true, new WorkbenchRunnableAdapter(op));
 					} catch (InvocationTargetException e) {
 						JavaPlugin.log(e);
 						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$

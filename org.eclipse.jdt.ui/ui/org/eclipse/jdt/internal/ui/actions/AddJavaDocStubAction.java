@@ -86,7 +86,7 @@ public class AddJavaDocStubAction extends Action {
 
 			AddJavaDocStubOperation op= new AddJavaDocStubOperation(workingCopyMembers, settings);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
-			dialog.run(false, true, new WorkbenchRunnableWrapper(op));
+			dialog.run(false, true, new WorkbenchRunnableAdapter(op));
 					
 			EditorUtility.revealInEditor(editor, members[0]);	
 		} catch (InvocationTargetException e) {

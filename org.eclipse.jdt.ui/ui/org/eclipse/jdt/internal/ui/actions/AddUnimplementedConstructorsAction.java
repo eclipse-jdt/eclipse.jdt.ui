@@ -71,7 +71,7 @@ public class AddUnimplementedConstructorsAction extends Action {
 			AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, false);
 			try {
 				ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-				dialog.run(false, true, new WorkbenchRunnableWrapper(op));
+				dialog.run(false, true, new WorkbenchRunnableAdapter(op));
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
 					MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedConstructorsAction.error.title"), JavaUIMessages.getString("AddUnimplementedConstructorsAction.error.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$

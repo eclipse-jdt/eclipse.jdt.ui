@@ -72,7 +72,7 @@ public class AddUnimplementedMethodsAction extends Action {
 			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, false);
 			try {
 				ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-				dialog.run(false, true, new WorkbenchRunnableWrapper(op));
+				dialog.run(false, true, new WorkbenchRunnableAdapter(op));
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
 					MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), JavaUIMessages.getString("AddUnimplementedMethodsAction.error.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$

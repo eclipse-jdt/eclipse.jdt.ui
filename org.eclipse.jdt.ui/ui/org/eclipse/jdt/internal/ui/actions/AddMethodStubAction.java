@@ -97,7 +97,7 @@ public class AddMethodStubAction extends Action {
 			AddMethodStubOperation op= new AddMethodStubOperation(usedType, methods, settings, createOverrideQuery(), createReplaceQuery(), false);
 		
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-			dialog.run(false, true, new WorkbenchRunnableWrapper(op));
+			dialog.run(false, true, new WorkbenchRunnableAdapter(op));
 			IMethod[] res= op.getCreatedMethods();
 			if (res != null && res.length > 0 && editor != null) {
 				EditorUtility.revealInEditor(editor, res[0]);

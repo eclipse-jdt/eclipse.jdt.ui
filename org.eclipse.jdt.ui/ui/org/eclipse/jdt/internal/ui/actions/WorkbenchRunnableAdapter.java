@@ -12,19 +12,19 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * A <code>IRunnableWithProgress</code> that runs a wrapped 
- * <code>IWorkspaceRunnable</code>. <code>OperationCanceledException</code> throws
- * by the runnabled are cought and rethrown as a <code>InterruptedException</code>
+ * An <code>IRunnableWithProgress</code> that adapts and  <code>IWorkspaceRunnable</code>
+ * so that is can be executed inside <code>IRunnableContext</code>. <code>OperationCanceledException</code> 
+ * throws by the apapted runnabled are cought and rethrown as a <code>InterruptedException</code>.
  */
-public class WorkbenchRunnableWrapper implements IRunnableWithProgress {
+public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 	
 	private IWorkspaceRunnable fWorkspaceRunnable;
 	
-	public WorkbenchRunnableWrapper(IWorkspaceRunnable runnable) {
+	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable) {
 		fWorkspaceRunnable= runnable;
 	}
 
-		/*
+	/*
 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {

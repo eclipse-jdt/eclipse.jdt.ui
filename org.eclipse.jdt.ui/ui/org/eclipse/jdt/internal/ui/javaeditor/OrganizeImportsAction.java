@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableWrapper;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
@@ -75,7 +75,7 @@ public class OrganizeImportsAction extends Action {
 			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, false, createChooseImportQuery());
 			try {
 				BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-				context.run(false, true, new WorkbenchRunnableWrapper(op));
+				context.run(false, true, new WorkbenchRunnableAdapter(op));
 			} catch (InvocationTargetException e) {
 				JavaPlugin.log(e);
 				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaEditorMessages.getString("OrganizeImportsAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
