@@ -58,7 +58,7 @@ public class AllTypesCache {
 	static class DelegatedProgressMonitor implements IProgressMonitor {
 		private IProgressMonitor fDelegate;
 		private String fTaskName;
-		private String fSubTask;
+//		private String fSubTask;
 		private int fTotalWork= IProgressMonitor.UNKNOWN;
 		private double fWorked;
 		
@@ -86,7 +86,7 @@ public class AllTypesCache {
 				fDelegate.setTaskName(name);
 		}
 		public synchronized void subTask(String name) {
-			fSubTask= name;
+//			fSubTask= name;
 			if (fDelegate != null)
 				fDelegate.subTask(name);
 		}
