@@ -108,6 +108,36 @@ public class PropertiesFilePartitionerTest extends TestCase {
 			fail();
 		}
 	}
+	
+	public void testPartitioningWithLeadingWhitespace() {
+		try {
+			fDocument.replace(40, 0, "\n key value\n  key value\n\tkey value\n\t\tkey value");
+			ITypedRegion[] result= fDocument.computePartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, 0, fDocument.getLength(), false);
+			TypedRegion[] expectation= {
+					new TypedRegion(0, 11, IPropertiesFilePartitions.COMMENT),
+					new TypedRegion(11, 3, IDocument.DEFAULT_CONTENT_TYPE),
+					new TypedRegion(14, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
+					new TypedRegion(21, 3, IDocument.DEFAULT_CONTENT_TYPE),
+					new TypedRegion(24, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
+					new TypedRegion(31, 3, IDocument.DEFAULT_CONTENT_TYPE),
+					new TypedRegion(34, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
+					new TypedRegion(41, 4, IDocument.DEFAULT_CONTENT_TYPE),
+					new TypedRegion(45, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
+					new TypedRegion(52, 5, IDocument.DEFAULT_CONTENT_TYPE),
+					new TypedRegion(57, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
+					new TypedRegion(64, 4, IDocument.DEFAULT_CONTENT_TYPE),
+					new TypedRegion(68, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
+					new TypedRegion(75, 5, IDocument.DEFAULT_CONTENT_TYPE),
+					new TypedRegion(80, 6, IPropertiesFilePartitions.PROPERTY_VALUE),
+			};
+			
+			checkPartitioning(expectation, result);
+		} catch (BadLocationException x) {
+			fail();
+		} catch (BadPartitioningException x) {
+			fail();
+		}
+	}
 		
 	public void testIntraPartitionChange1() {
 		try {
@@ -213,34 +243,6 @@ public class PropertiesFilePartitionerTest extends TestCase {
 			fail();
 		}
 	}
-	
-//	public void testRemoveDefaultPartition() {
-//		
-//		fDocumentPartitioningChanged= false;
-//		
-//		try {
-//			
-//			fDocument.replace(21, 3, null);
-//			
-//			assertTrue(fDocumentPartitioningChanged);
-//			
-//			ITypedRegion[] result= fDocument.computePartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, 0, fDocument.getLength(), false);
-//			TypedRegion[] expectation= {
-//				new TypedRegion(0, 11, IPropertiesFilePartitions.COMMENT),
-//				new TypedRegion(11, 3, IDocument.DEFAULT_CONTENT_TYPE),
-//				new TypedRegion(14, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
-//				new TypedRegion(21, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
-//				new TypedRegion(28, 3, IDocument.DEFAULT_CONTENT_TYPE),
-//				new TypedRegion(31, 6, IPropertiesFilePartitions.PROPERTY_VALUE)
-//			};
-//			
-//			checkPartitioning(expectation, result);
-//		} catch (BadLocationException x) {
-//			fail();
-//		} catch (BadPartitioningException x) {
-//			fail();
-//		}
-//	}
 	
 	public void testRemoveValuePartition() {
 		
