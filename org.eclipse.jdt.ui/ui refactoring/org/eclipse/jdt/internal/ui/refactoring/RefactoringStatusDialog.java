@@ -25,21 +25,22 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class RefactoringStatusDialog extends Dialog {
 	
 	private RefactoringStatus fStatus;
 	private String fWindowTitle;
+	private boolean fBackButton;
 	
-	public RefactoringStatusDialog(Shell parent, RefactoringStatus status, String windowTitle) {
+	public RefactoringStatusDialog(Shell parent, RefactoringStatus status, String windowTitle, boolean backButton) {
 		super(parent);
 		fStatus= status;
 		fWindowTitle= windowTitle;
+		fBackButton= backButton;
 	}
 	
-	public RefactoringStatusDialog(Shell parent, ErrorWizardPage page) {
-		this(parent, page.getStatus(), parent.getText());
+	public RefactoringStatusDialog(Shell parent, ErrorWizardPage page, boolean backButton) {
+		this(parent, page.getStatus(), parent.getText(), backButton);
 	}
 	
 	protected void configureShell(Shell newShell) {
@@ -77,12 +78,25 @@ class RefactoringStatusDialog extends Dialog {
 		viewer.setStatus(fStatus);
 		return result;
 	}
+	protected void buttonPressed(int buttonId) {
+		if (buttonId == IDialogConstants.BACK_ID) {
+			setReturnCode(IDialogConstants.BACK_ID);
+			close();
+		} else {
+			super.buttonPressed(buttonId);
+		}
+	}
+
 	protected void createButtonsForButtonBar(Composite parent) {
 		if (!fStatus.hasFatalError()) {
+			if (fBackButton)
+				createButton(parent, IDialogConstants.BACK_ID, IDialogConstants.BACK_LABEL, false); //$NON-NLS-1$
 			createButton(parent, IDialogConstants.OK_ID, RefactoringMessages.getString("RefactoringStatusDialog.Continue"), true); //$NON-NLS-1$
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		} else {
-			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, true);
+			if (fBackButton)
+				createButton(parent, IDialogConstants.BACK_ID, IDialogConstants.BACK_LABEL, true); //$NON-NLS-1$
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		}
 	}
 }

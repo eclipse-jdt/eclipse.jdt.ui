@@ -67,7 +67,7 @@ public class RefactoringExecutionHelper {
 				pm.subTask(""); //$NON-NLS-1$
 				RefactoringStatus status= fRefactoring.checkPreconditions(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				if (status.getSeverity() >= fStopSeverity) {
-					RefactoringStatusDialog dialog= new RefactoringStatusDialog(fParent, status, fRefactoring.getName());
+					RefactoringStatusDialog dialog= new RefactoringStatusDialog(fParent, status, fRefactoring.getName(), false);
 					if(dialog.open() == IDialogConstants.CANCEL_ID) {
 						throw new InterruptedException();
 					}

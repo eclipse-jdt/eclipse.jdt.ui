@@ -279,6 +279,8 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 				
 			fProgressMonitorPart.attachToCancelComponent(cancelButton);
 			fStatusContainer.showPage(fProgressMonitorPart);
+			// Update the status container since we are blocking the event loop right now.
+			fStatusContainer.update();
 		}
 		return savedState;
 	}
@@ -409,16 +411,15 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	
 	private boolean showErrorDialog(ErrorWizardPage page) {
 		RefactoringStatus status= page.getStatus();
-		RefactoringStatusDialog dialog= new RefactoringStatusDialog(getShell(), page);
+		RefactoringStatusDialog dialog= new RefactoringStatusDialog(getShell(), page, true);
 		switch (dialog.open()) {
 			case IDialogConstants.OK_ID:
 				return true;
+			case IDialogConstants.BACK_ID:
+				fCurrentPage= fCurrentPage.getPreviousPage();
+				break;
 			case IDialogConstants.CANCEL_ID:
-				if (status.hasFatalError()) {
-					super.cancelPressed();
-				} else {
-					fCurrentPage= fCurrentPage.getPreviousPage();
-				}
+				super.cancelPressed();
 		}
 		return false;
 	}
