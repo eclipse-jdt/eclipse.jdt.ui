@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -20,6 +22,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -45,6 +48,7 @@ import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -366,7 +370,14 @@ public class JavaContext extends CompilationUnitContext {
 			String typeName= var.typeName;
 			String baseTypeName= typeName.substring(0, typeName.lastIndexOf('['));
 
-			String[] proposals= NamingConventions.suggestLocalVariableNames(project, var.typePackageName, baseTypeName, 0, completion.getLocalVariableNames());
+			String indexName= getIndex();
+			String[] excludedNames= completion.getLocalVariableNames();
+			if (indexName != null) {
+				ArrayList excludedNamesList= new ArrayList(Arrays.asList(excludedNames));
+				excludedNamesList.add(indexName);
+				excludedNames= (String[])excludedNamesList.toArray(new String[excludedNamesList.size()]);
+			}
+			String[] proposals= NamingConventions.suggestLocalVariableNames(project, var.typePackageName, baseTypeName, 0, excludedNames);
 			if (proposals.length > 0) {
 				return proposals[0];
 			}
