@@ -154,45 +154,9 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			CompositeChange composite= new CompositeChange("Renaming a Java Project");
-			if (fUpdateReferences)
-				addNewProjectToClasspaths(composite);
-			composite.add(new RenameJavaProjectChange(fProject, fNewName));
-			if (fUpdateReferences)
-				removeOldProjectFromClasspaths(composite);
-			return composite;
+			return new RenameJavaProjectChange(fProject, fNewName, fUpdateReferences);
 		} finally{
 			pm.done();
 		}	
-	}
-
-	private void addNewProjectToClasspaths(CompositeChange composite) {
-		IProject[] referencing=getReferencingProjects();
-		IPath newProjectPath= createNewProjectPath();
-		for (int i= 0; i < referencing.length; i++) {
-			IProject project= referencing[i];
-			IJavaProject jp= JavaCore.create(project);
-			if (jp != null)
-				composite.add(new AddToClasspathChange(jp, newProjectPath));
-		}
-	}
-	
-	private void removeOldProjectFromClasspaths(CompositeChange composite) {
-		IProject[] referencing=getReferencingProjects();
-		IPath oldProjectPath= fProject.getProject().getFullPath();
-		for (int i= 0; i < referencing.length; i++) {
-			IProject project= referencing[i];
-			IJavaProject jp= JavaCore.create(project);
-			if (jp != null)
-				composite.add(new DeleteFromClasspathChange(oldProjectPath, jp));
-		}
-	}
-	
-	private IProject[] getReferencingProjects() {
-		return  fProject.getProject().getReferencingProjects();
-	}
-	
-	private IPath createNewProjectPath(){
-		return fProject.getProject().getFullPath().removeLastSegments(1).append(fNewName);
 	}
 }

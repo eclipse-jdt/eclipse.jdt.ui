@@ -4,6 +4,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -127,11 +128,7 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			CompositeChange composite= new CompositeChange("Rename source folder", 3);
-			composite.add(new AddToClasspathChange(fSourceFolder.getJavaProject(), fNewName));
-			composite.add(new RenameSourceFolderChange(fSourceFolder, fNewName));
-			composite.add(new DeleteFromClasspathChange(fSourceFolder));
-			return composite;
+			return new RenameSourceFolderChange(fSourceFolder, fNewName);
 		} finally{
 			pm.done();
 		}	
