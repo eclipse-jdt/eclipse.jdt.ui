@@ -5,6 +5,8 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  * All Rights Reserved.
  */
  
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.DocumentCommand;
@@ -29,6 +31,10 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages;
+import org.eclipse.jdt.internal.corext.template.Template;
+import org.eclipse.jdt.internal.corext.template.Templates;
+import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -101,7 +107,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 									String string= createJavaDocTags(d, c, indentation, lineDelimiter, unit);
 									if (string != null)
 										d.replace(c.offset, 0, string);						
-								} catch (JavaModelException e) {
+								} catch (CoreException e) {
 									// ignore
 								}
 							}
@@ -120,33 +126,75 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}	
 	}
 
-	private String createJavaDocTags(IDocument d, DocumentCommand c, String indentation, String lineDelimiter, ICompilationUnit unit)
-		throws JavaModelException, BadLocationException
+	private String createJavaDocTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, ICompilationUnit unit)
+		throws CoreException, BadLocationException
 	{
-		IJavaElement element= unit.getElementAt(c.offset);
-		if (element instanceof IMethod) {
-			IMethod method= (IMethod) element;									
-			IRegion partition= d.getPartition(c.offset);
-			
-			ISourceRange sourceRange= method.getSourceRange();
-			if (sourceRange != null && sourceRange.getOffset() == partition.getOffset()) {								
-				IMethod inheritedMethod= getInheritedMethod(method);
-		
-				boolean isJavaDoc= partition.getLength() >= 3 && d.get(partition.getOffset(), 3).equals("/**"); //$NON-NLS-1$
-				
-				if (inheritedMethod == null) {
-					if (isJavaDoc)
-						return createJavaDocMethodTags(method, lineDelimiter + indentation, ""); //$NON-NLS-1$
-					
-				} else {
-					if (isJavaDoc || JavaPreferencesSettings.getCodeGenerationSettings().createNonJavadocComments)
-						return createJavaDocInheritedMethodTags(inheritedMethod, lineDelimiter + indentation, ""); //$NON-NLS-1$
-				}
+		IJavaElement element= unit.getElementAt(command.offset);
+		if (element == null)
+			return null;
+
+		switch (element.getElementType()) {
+		case IJavaElement.TYPE:
+			return createTypeTags(document, command, indentation, lineDelimiter, (IType) element);	
+
+		case IJavaElement.METHOD:
+			return createMethodTags(document, command, indentation, lineDelimiter, (IMethod) element);
+
+		default:
+			return null;
+		}		
+	}	
+
+	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
+		throws CoreException, BadLocationException
+	{
+		Template[] templates= Templates.getInstance().getTemplates();
+
+		String comment= null;
+		for (int i= 0; i < templates.length; i++) {
+			if ("typecomment".equals(templates[i].getName())) { //$NON-NLS-1$
+				comment= JavaContext.evaluateTemplate(templates[i], type.getCompilationUnit(), type.getSourceRange().getOffset());
+				break;
 			}
 		}
 
+		// trim comment start and end if any
+		if (comment != null) {
+			comment= comment.trim();
+			if (comment.endsWith("*/")) //$NON-NLS-1$
+				comment= comment.substring(0, comment.length() - 2);
+			comment= comment.trim();
+			if (comment.startsWith("/**")) //$NON-NLS-1$
+				comment= comment.substring(3);
+		}
+
+		return (comment == null || comment.length() == 0)
+			? CodeGenerationMessages.getString("AddJavaDocStubOperation.configure.message") //$NON-NLS-1$
+			: comment;
+	}
+	
+	private String createMethodTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IMethod method)
+		throws BadLocationException, JavaModelException
+	{
+		IRegion partition= document.getPartition(command.offset);
+		ISourceRange sourceRange= method.getSourceRange();
+		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
+			return null;
+				
+		boolean isJavaDoc= partition.getLength() >= 3 && document.get(partition.getOffset(), 3).equals("/**"); //$NON-NLS-1$
+			
+		IMethod inheritedMethod= getInheritedMethod(method);
+		if (inheritedMethod == null) {
+			if (isJavaDoc)
+				return createJavaDocMethodTags(method, lineDelimiter + indentation, ""); //$NON-NLS-1$
+				
+		} else {
+			if (isJavaDoc || JavaPreferencesSettings.getCodeGenerationSettings().createNonJavadocComments)
+				return createJavaDocInheritedMethodTags(inheritedMethod, lineDelimiter + indentation, ""); //$NON-NLS-1$
+		}
+		
 		return null;
-	}	
+	}
 
 	/**
 	 * Returns the method inherited from, <code>null</code> if method is newly defined.
@@ -206,9 +254,8 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))
 			jdocIndentAfterNewLine(d, c);
-		else if ("/".equals(c.text)) { //$NON-NLS-1$
+		else if ("/".equals(c.text)) //$NON-NLS-1$
 			jdocIndentForCommentEnd(d, c);			
-		}
 	}
 
 	/**
@@ -246,19 +293,19 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 		final String[] parameterNames= method.getParameterNames();
 		for (int i= 0; i < parameterNames.length; i++)
-			formatJavaDocLine(buffer, preFix, "param", parameterNames[i], postFix); //$NON-NLS-1$
+			appendJavaDocLine(buffer, preFix, "param", parameterNames[i], postFix); //$NON-NLS-1$
 
 		final String returnType= method.getReturnType();
 		if (returnType != null && !returnType.equals(Signature.SIG_VOID)) {
 			String name= Signature.getSimpleName(Signature.toString(returnType));
-			formatJavaDocLine(buffer, preFix, "return", name, postFix); //$NON-NLS-1$
+			appendJavaDocLine(buffer, preFix, "return", name, postFix); //$NON-NLS-1$
 		}
 
 		final String[] exceptionTypes= method.getExceptionTypes();
 		if (exceptionTypes != null) {
 			for (int i= 0; i < exceptionTypes.length; i++) {
 				String name= Signature.getSimpleName(Signature.toString(exceptionTypes[i]));
-				formatJavaDocLine(buffer, preFix, "throws", name, postFix); //$NON-NLS-1$
+				appendJavaDocLine(buffer, preFix, "throws", name, postFix); //$NON-NLS-1$
 			}
 		}
 		
@@ -274,10 +321,10 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 		final StringBuffer buffer= new StringBuffer();
 		
-		formatJavaDocLine(buffer, preFix, "see", createSeeTagLink(method), postFix); //$NON-NLS-1$
+		appendJavaDocLine(buffer, preFix, "see", createSeeTagLink(method), postFix); //$NON-NLS-1$
 
 		if (Flags.isDeprecated(method.getFlags()))
-			formatJavaDocLine(buffer, preFix, "deprecated", "", postFix); //$NON-NLS-1$ //$NON-NLS-2$
+			appendJavaDocLine(buffer, preFix, "deprecated", "", postFix); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		return buffer.toString();
 	}
@@ -307,7 +354,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	/**
 	 * Appends a single javadoc tag line to the string buffer.
 	 */
-	private static void formatJavaDocLine(StringBuffer buffer, String preFix, String token, String name, String postFix) {
+	private static void appendJavaDocLine(StringBuffer buffer, String preFix, String token, String name, String postFix) {
 		buffer.append(preFix);
 		buffer.append(" * "); //$NON-NLS-1$
 		buffer.append('@');
