@@ -447,11 +447,11 @@ public abstract class OptionsConfigurationBlock {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					if (fProject != null) {
-						monitor.setTaskName(PreferencesMessages.getFormattedString("OptionsConfigurationBlock.buildproject.taskname", fProject.getElementName())); //$NON-NLS-1$
+						monitor.beginTask(PreferencesMessages.getFormattedString("OptionsConfigurationBlock.buildproject.taskname", fProject.getElementName()), 2); //$NON-NLS-1$
 						fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
 						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
 					} else {
-						monitor.setTaskName(PreferencesMessages.getString("OptionsConfigurationBlock.buildall.taskname")); //$NON-NLS-1$
+						monitor.beginTask(PreferencesMessages.getString("OptionsConfigurationBlock.buildall.taskname"), 2); //$NON-NLS-1$
 						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
 					}
 				} catch (CoreException e) {
