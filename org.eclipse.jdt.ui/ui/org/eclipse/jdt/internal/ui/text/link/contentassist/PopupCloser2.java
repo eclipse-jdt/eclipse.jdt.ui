@@ -58,11 +58,10 @@ class PopupCloser2 implements FocusListener, SelectionListener {
 	 * Uninstalls this closer if previously installed.
 	 */
 	public void uninstall() {
-		if (Helper2.okToUse(fTable)) {
+		if (Helper2.okToUse(fScrollbar))
+			fScrollbar.removeSelectionListener(this);
+		if (Helper2.okToUse(fTable))
 			fTable.removeFocusListener(this);
-			if (fScrollbar != null)
-				fScrollbar.removeSelectionListener(this);
-		}
 	}
 	
 	/*
