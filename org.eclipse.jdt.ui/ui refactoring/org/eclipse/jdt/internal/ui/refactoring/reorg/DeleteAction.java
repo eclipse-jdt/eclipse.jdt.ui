@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 public class DeleteAction extends SelectionDispatchAction{
