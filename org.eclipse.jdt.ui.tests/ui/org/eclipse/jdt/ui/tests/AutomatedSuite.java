@@ -45,10 +45,5 @@ public class AutomatedSuite extends TestSuite {
 //		addTest(AllTypesCacheTest.suite());
 	}
 	
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), AutomatedSuite.class, args);
-	}		
-
-
 }
 

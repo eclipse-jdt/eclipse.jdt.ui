@@ -34,9 +34,4 @@ public class UIInteractiveSuite extends TestSuite {
 		addTest(DialogsTest.suite());
 	}
 	
-	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), UIInteractiveSuite.class, args);
-	}		
-
-
 }
