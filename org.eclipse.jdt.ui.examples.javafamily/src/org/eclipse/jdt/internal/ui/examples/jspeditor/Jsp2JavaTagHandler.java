@@ -48,25 +48,25 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 	}
 
 	public void reset(String startTag)  {
-		fInUseBean= "jsp:useBean".equals(startTag);
-		fInTagLib= "c:out".equals(startTag);
-		fInJavaSection= "<%".equals(startTag);
-		fInDeclaration= "<%!".equals(startTag);
+		fInUseBean= "jsp:useBean".equals(startTag); //$NON-NLS-1$
+		fInTagLib= "c:out".equals(startTag); //$NON-NLS-1$
+		fInJavaSection= "<%".equals(startTag); //$NON-NLS-1$
+		fInDeclaration= "<%!".equals(startTag); //$NON-NLS-1$
 	}
 	/*
 	 * @see org.eclipse.jface.text.source.ITagHandler#addAttribute(java.lang.String, java.lang.String)
 	 */
 	public void addAttribute(String name, String value, int sourceLineNumber) {
 		if (fInUseBean) {
-			if ("id".equals(name))
+			if ("id".equals(name)) //$NON-NLS-1$
 				fId= value;
-			else if ("class".equals(name))
+			else if ("class".equals(name)) //$NON-NLS-1$
 				fClass= value;
 		}
 		if (fInTagLib) {
 			fTagLibValue= value;
 		}
-		if ("source".equals(name))
+		if ("source".equals(name)) //$NON-NLS-1$
 			fSource= value;
 	}
 
@@ -79,7 +79,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 			javaPartitionStart= handleJavaSection(originalLine, offsetInTranslatedLine);
 		else if (originalLine.indexOf("<jsp:useBean id=\"") != -1)  { //$NON-NLS-1$
 			javaPartitionStart= handleUseBeanTag(originalLine, offsetInTranslatedLine);
-		} else if (originalLine.indexOf("<c:out value=\"${") != -1)  {
+		} else if (originalLine.indexOf("<c:out value=\"${") != -1)  { //$NON-NLS-1$
 			javaPartitionStart= handleTagLib(originalLine, offsetInTranslatedLine);
 		}
 		return javaPartitionStart;
@@ -90,7 +90,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 	}
 
 	private int handleTagLib(String jspLineStr, int relativeLineOffsetInJava)  {
-		int javaFileOffset= "System.out.println(".length();
+		int javaFileOffset= "System.out.println(".length(); //$NON-NLS-1$
 		return jspLineStr.indexOf("<c:out value=\"${") + 16 - javaFileOffset; //$NON-NLS-1$
 	}
 	
@@ -129,13 +129,13 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 		
 		if (fInUseBean) {
 			if (fId != null && fClass != null) {
-				jspResultCollector.appendLocalDeclaration(fClass + " " + fId + "= new " + fClass + "();\n", sourceLineNumber);
+				jspResultCollector.appendLocalDeclaration(fClass + " " + fId + "= new " + fClass + "();\n", sourceLineNumber); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				fId= fClass= null;
 			}
 			fInUseBean= false;
 		}
 		if (fInTagLib && fTagLibValue != null) {
-			jspResultCollector.appendContent("System.out.println(" + fTagLibValue.substring(2, fTagLibValue.length() - 1) + ");\n", sourceLineNumber);  
+			jspResultCollector.appendContent("System.out.println(" + fTagLibValue.substring(2, fTagLibValue.length() - 1) + ");\n", sourceLineNumber);   //$NON-NLS-1$ //$NON-NLS-2$
 			fTagLibValue= null;
 			fInTagLib= false;
 		}
@@ -145,14 +145,14 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 			while (i < fSource.length()) {
 				char c= fSource.charAt(i++);
 				if (c == '\n') {
-					jspResultCollector.appendContent(out.toString() + "\n", sourceLineNumber++);
+					jspResultCollector.appendContent(out.toString() + "\n", sourceLineNumber++); //$NON-NLS-1$
 					out.setLength(0);
 				} else {
 					out.append(c);	
 				}
 			}
 			if (out.length() > 0)  {
-				jspResultCollector.appendContent(out.toString() + "\n", sourceLineNumber);
+				jspResultCollector.appendContent(out.toString() + "\n", sourceLineNumber); //$NON-NLS-1$
 			}
 		}
 		if (fInDeclaration)  {
@@ -161,14 +161,14 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 			while (i < fSource.length()) {
 				char c= fSource.charAt(i++);
 				if (c == '\n') {
-					jspResultCollector.appendDeclaration(out.toString() + "\n", sourceLineNumber++);
+					jspResultCollector.appendDeclaration(out.toString() + "\n", sourceLineNumber++); //$NON-NLS-1$
 					out.setLength(0);
 				} else {
 					out.append(c);	
 				}
 			}
 			if (out.length() > 0)  {
-				jspResultCollector.appendDeclaration(out.toString() + "\n", sourceLineNumber);
+				jspResultCollector.appendDeclaration(out.toString() + "\n", sourceLineNumber); //$NON-NLS-1$
 			}
 		}
 	}

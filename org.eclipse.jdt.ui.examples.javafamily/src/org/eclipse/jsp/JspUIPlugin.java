@@ -19,28 +19,38 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IStartup;
 import org.eclipse.ui.editors.text.TextEditorPreferenceConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 
 /**
  */
-public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeListener, IStartup {
+public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeListener {
 		
+	/**
+	 * The id of the JavaFamilyExample plugin (value <code>"org.eclipse.jdt.ui.examples.javafamily"</code>).
+	 */	
+	public static final String ID_PLUGIN= "org.eclipse.jdt.ui.examples.javafamily"; //$NON-NLS-1$
+
 	public static final String JSP_TYPE= "jsp"; //$NON-NLS-1$
 	
+	private static final boolean DEBUG= false;
 	private static JspUIPlugin fgDefault;
+	private static boolean fgJSPIndexingIsEnabled= false;
 	
 	private SearchEngine fSearchEngine;
 	
@@ -57,30 +67,53 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 		return fgDefault;
 	}
 
-	/**
-	 * Startup of the JspCore plug-in.
-	 * <p>
-	 * Registers a resource changed listener.
-	 * Starts the background indexing.
-	 * <p>
-	 * @see org.eclipse.core.runtime.Plugin#startup()
-	 */
-	public void startup() {
-		System.out.println("JspUIPlugin: startup"); //$NON-NLS-1$
+	void controlJSPIndexing(boolean enable) {
+		if (fgJSPIndexingIsEnabled != enable) {
+			fgJSPIndexingIsEnabled= enable;
+			IWorkspace workspace= ResourcesPlugin.getWorkspace();
+			if (enable) {
+				
+				IResourceProxyVisitor visitor=
+					new IResourceProxyVisitor() {
+						public boolean visit(IResourceProxy proxy) throws CoreException {
+							String name= proxy.getName();
+							int pos= name.lastIndexOf('.');
+							if (pos >= 0) {
+								String extension= name.substring(pos+1);
+								if (JSP_TYPE.equalsIgnoreCase(extension)) {
+									IResource r= proxy.requestResource();
+									if (r instanceof IFile)
+										jspAdded((IFile)r);
+								}
+							}
+							return true;
+						}
+					};
+				try {
+					workspace.getRoot().accept(visitor, 0);
+				} catch (CoreException e) {
+					log("visiting jsp files", e); //$NON-NLS-1$
+				}
+				
+				workspace.addResourceChangeListener(this,
+	//					IResourceChangeEvent.PRE_AUTO_BUILD |
+	//					IResourceChangeEvent.POST_AUTO_BUILD |
+						IResourceChangeEvent.POST_CHANGE |
+						IResourceChangeEvent.PRE_DELETE |
+						IResourceChangeEvent.PRE_CLOSE
+				);					
+			} else {
+				workspace.removeResourceChangeListener(this);					
+			}
+		}
+	}
 		
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		
-		workspace.addResourceChangeListener(this,
-//				IResourceChangeEvent.PRE_AUTO_BUILD |
-//				IResourceChangeEvent.POST_AUTO_BUILD |
-				IResourceChangeEvent.POST_CHANGE |
-				IResourceChangeEvent.PRE_DELETE |
-				IResourceChangeEvent.PRE_CLOSE
-		);
+	boolean isJSPIndexingOn() {
+		return fgJSPIndexingIsEnabled;
 	}
 	
 	public void resourceChanged(IResourceChangeEvent event) {
-		if (event == null)
+		if ( !fgJSPIndexingIsEnabled || event == null)
 			return;
 		IResourceDelta d= event.getDelta();
 		if (d == null)
@@ -116,20 +149,23 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 				}
 			);
 		} catch (CoreException e) {
-			e.printStackTrace();
+			log("processing resource delta", e); //$NON-NLS-1$
 		}
 	}
 	
+	public static void log(String message, Throwable e) {
+		getDefault().getLog().log(new Status(IStatus.ERROR, ID_PLUGIN, IStatus.ERROR, message, e));
+	}
+	
 	void jspAdded(IFile jspFile) {
-		System.out.println("Added: " + jspFile); //$NON-NLS-1$
-		AddJspFileToIndex job= new AddJspFileToIndex(jspFile, jspFile.getProject().getProject().getFullPath(), fSearchEngine.getIndexManager());
+		if (DEBUG) System.out.println("Added: " + jspFile); //$NON-NLS-1$
+		AddJspFileToIndex job= new AddJspFileToIndex(jspFile, jspFile.getProject().getFullPath(), fSearchEngine.getIndexManager());
 		fSearchEngine.add(job);
-
 	}
 	
 	void jspRemoved(IFile jspFile) {
-		System.out.println("Removed: " + jspFile); //$NON-NLS-1$
-		fSearchEngine.remove(jspFile.getFullPath().toString(), jspFile.getProject().getProject().getFullPath());
+		if (DEBUG) System.out.println("Removed: " + jspFile); //$NON-NLS-1$
+		fSearchEngine.remove(jspFile.getFullPath().toString(), jspFile.getProject().getFullPath());
 	}
 	
 	public void search(IIndexQuery query, ISearchResultCollector resultCollector, IProgressMonitor pm) {
@@ -144,11 +180,9 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	 * @see org.eclipse.core.runtime.Plugin#shutdown()
 	 */
 	public void shutdown() {
-		System.out.println("JspCorePlugin: shutdown"); //$NON-NLS-1$
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		workspace.removeResourceChangeListener(this);
+		controlJSPIndexing(false);
 	}
-
+	
 	public static void triggerLoad() {
 	}
 

@@ -30,7 +30,7 @@ public class JspIndexParser extends AbstractJspParser {
 	}
 		
 	protected void startTag(boolean endTag, String name, int startName) {
-		fInUseBean= "jsp:useBean".equals(name);
+		fInUseBean= "jsp:useBean".equals(name); //$NON-NLS-1$
 	}
 	
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {

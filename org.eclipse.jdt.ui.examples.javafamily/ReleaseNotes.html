@@ -1,8 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"><title>Javafamily Release Notes</title></head><body>
 <h1 style="text-align: left;">Release Notes</h1>
-Daniel Megert, Andre Weinand<br>
-June 15, 2003<br>
+October 6, 2003<br>
 <br>
 The javafamily plug-in is a collection of prototypes that illustrate how
 the existing (mostly Java) infrastructure can be extended to support
@@ -25,14 +24,10 @@ In addition this document contains a collection of findings we made
 while developing the various pieces.<br>
 <h2>Known issues and limitations:</h2>
 <ul>
-  <li>Before using the Rename Type refactoring you'll have to enable
-this experimental feature by going to "Window &gt; Preferences &gt;
-Java &gt; Work in Progress" and checking the "Enabling Refactoring
-Participants..." option.<br>
-  </li>
-  <li>Currently the JSP index isn't persisted. As a consequence you'll
-have to trigger a re-index by saving *.jsp files whenever starting
-Eclipse. Without this, a JSP/Java search or a Rename Type refactoring
+  <li>Currently the JSP index isn't persisted and automatic indexing of JSP files is not enabled.
+So if you want to try the Rename Type refactoring or the JSP/Java search, you'll need to turn on
+JSP indexing via Window > Preferences > Java > JavaFamily Example > Start JSP indexing.
+Without this a JSP/Java search or a Rename Type refactoring
 will not find Java types in non-Java resources.</li>
 </ul>
 <h2>Reconciling Steps</h2>

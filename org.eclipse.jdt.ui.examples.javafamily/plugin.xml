@@ -25,12 +25,6 @@
 		<import plugin="org.eclipse.jdt.debug.ui"/>
 	</requires>
 
-	<extension
-		point="org.eclipse.ui.startup"
-		id="fakejspstarter"
-		name="%startupName">
-	</extension>
-
 	<extension point="org.eclipse.jdt.ui.renameParticipants">
 	  <renameParticipant
 	  	id="org.eclipse.jsp.renameParticipant.IType"
@@ -151,6 +145,7 @@
    			class="org.eclipse.jsp.launching.TomcatClasspathProvider">
    		</classpathProvider>
    </extension>
+   
    <extension
          point="org.eclipse.ui.editorActions">
       <editorContribution
@@ -164,6 +159,7 @@
          </action>
       </editorContribution>
    </extension>   
+   
    <extension
          point="org.eclipse.debug.core.sourceLocators">
       <sourceLocator
@@ -172,5 +168,14 @@
             id="org.eclipse.jsp.TOMCAT_SOURCE_LOCATOR">
       </sourceLocator>
    </extension>
+   
+   	<extension
+		point="org.eclipse.ui.preferencePages">
+		<page name="%JavaFamilyExamplePreferencePage.name"
+			id="org.eclipse.jsp.JavaFamilyExamplePreferencePage"
+			class="org.eclipse.jsp.JavaFamilyExamplePreferencePage"
+			category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+		</page>	
+	</extension>
       
 </plugin>
