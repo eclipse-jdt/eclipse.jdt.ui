@@ -1517,12 +1517,26 @@ JavaStructureDiffViewerCreator
 		name= "%ActionDefinition.selectLast.name"
 		description="%ActionDefinition.selectLast.description"
 	/>
-	
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
-
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals"
+		name= "%ActionDefinition.contentAssistProposals.name"
+		description="%ActionDefinition.contentAssistProposals.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information"
+		name= "%ActionDefinition.contentAssistContextInformation.name"
+		description="%ActionDefinition.contentAssistContextInformation.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"
+		name= "%ActionDefinition.correctionAssistProposals.name"
+		description="%ActionDefinition.correctionAssistProposals.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.show.javadoc"
+		name= "%ActionDefinition.showJavadoc.name"
+		description="%ActionDefinition.showJavadoc.description"
+	/>
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.show.outline"
 		name= "%ActionDefinition.show.outline.name"
@@ -1712,65 +1726,84 @@ JavaStructureDiffViewerCreator
 	/>
 
 	<!-- search -->
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
 		name= "%ActionDefinition.referencesInWorkspace.name"
 		description="%ActionDefinition.referencesInWorkspace.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
 		name= "%ActionDefinition.referencesInHierarchy.name"
 		description="%ActionDefinition.referencesInHierarchy.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
 		name= "%ActionDefinition.referencesInWorkingSet.name"
 		description="%ActionDefinition.referencesInWorkingSet.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
 		name= "%ActionDefinition.readAccessInworkspace.name"
 		description="%ActionDefinition.readAccessInWorkspace.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
 		name= "%ActionDefinition.readAccessInHierarchy.name"
 		description="%ActionDefinition.readAccessInHierarchy.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
 		name= "%ActionDefinition.readAccessInWorkingSet.name"
 		description="%ActionDefinition.readAccessInWorkingSet.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
 		name= "%ActionDefinition.writeAccessInWorkspace.name"
 		description="%ActionDefinition.writeAccessInWorkspace.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
 		name= "%ActionDefinition.writeAccessInHierarchy.name"
 		description="%ActionDefinition.writeAccessInHierarchy.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
 		name= "%ActionDefinition.writeAccessInWorkingSet.name"
 		description="%ActionDefinition.writeAccessInWorkingSet.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
 		name= "%ActionDefinition.declarationsInWorkspace.name"
 		description="%ActionDefinition.declarationsInWorkspace.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
 		name= "%ActionDefinition.declarationsInHierarchy.name"
 		description="%ActionDefinition.declarationsInHierarchy.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
 		name= "%ActionDefinition.declarationsInWorkingSet.name"
 		description="%ActionDefinition.declarationsInWorkingSet.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
 		name= "%ActionDefinition.implementorsInWorkspace.name"
 		description="%ActionDefinition.implementorsInWorkspace.description"
 	/>
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
 		name= "%ActionDefinition.implementorsInWorkingSet.name"
 		description="%ActionDefinition.implementorsInWorkingSet.description"
 	/>
 
 	<!-- miscellaenous -->
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.toggle.presentation" />
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.toggle.presentation"
+		name= "%ActionDefinition.togglePresentation.name"
+		description="%ActionDefinition.togglePresentation.description"
+	/>
+
 </extension>
 
 <!-- =========================================================================== -->
