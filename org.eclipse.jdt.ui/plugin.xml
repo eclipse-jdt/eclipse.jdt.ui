@@ -889,6 +889,7 @@
             textStylePreferenceValue="BOX"
             verticalRulerPreferenceKey="linked.focus.verticalruler"
             verticalRulerPreferenceValue="false"
+            includeOnPreferencePage="false"
             overviewRulerPreferenceKey="linked.focus.overviewruler">
       </specification>      
       <specification
@@ -913,6 +914,7 @@
             textStylePreferenceValue="NONE"
             verticalRulerPreferenceKey="linked.slave.verticalruler"
             verticalRulerPreferenceValue="false"
+            includeOnPreferencePage="false"
             overviewRulerPreferenceKey="linked.slave.overviewruler">
       </specification>      
       <specification
@@ -937,6 +939,7 @@
             textStylePreferenceValue="BOX"
             verticalRulerPreferenceKey="linked.target.verticalruler"
             verticalRulerPreferenceValue="false"
+            includeOnPreferencePage="false"
             overviewRulerPreferenceKey="linked.target.overviewruler">
       </specification>
       <specification
@@ -961,6 +964,7 @@
             textStylePreferenceValue="IBEAM"
             verticalRulerPreferenceKey="linked.exit.verticalruler"
             verticalRulerPreferenceValue="false"
+            includeOnPreferencePage="false"
             overviewRulerPreferenceKey="linked.exit.overviewruler">
       </specification>
 	</extension>
