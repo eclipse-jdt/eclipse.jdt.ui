@@ -5,7 +5,12 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -321,8 +326,23 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return result;
 	}
 
+	private IFile[] getAllCusInPackageAsFiles() throws JavaModelException{
+		ICompilationUnit[] cus= fPackage.getCompilationUnits();
+		List files= new ArrayList(cus.length);
+		for (int i= 0; i < cus.length; i++) {
+            IResource res= ResourceUtil.getResource(cus[i]);
+            if (res != null && res.getType() == IResource.FILE)
+            	files.add(res);
+        }
+		return (IFile[]) files.toArray(new IFile[files.size()]);
+	}
+	
 	private IFile[] getAllFilesToModify() throws CoreException{
-		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+		//cannot use Arrays.asList to create this temp - addAll is not supported on list created by Arrays.asList
+		List combined= new ArrayList();
+		combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
+		combined.addAll(Arrays.asList(getAllCusInPackageAsFiles()));
+		return (IFile[]) combined.toArray(new IFile[combined.size()]);
 	}
 	
 	private RefactoringStatus validateModifiesFiles() throws CoreException{
