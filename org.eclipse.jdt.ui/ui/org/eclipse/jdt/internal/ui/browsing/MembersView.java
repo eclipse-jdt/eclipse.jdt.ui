@@ -8,8 +8,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IMemento;
 
@@ -24,9 +28,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
+
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -207,4 +213,16 @@ public class MembersView extends JavaBrowsingPart {
 		super.restoreState(memento);
 		fMemberFilterActionGroup.restoreState(memento);
 	}	
+
+	protected void hookViewerListeners() {
+		super.hookViewerListeners();
+		getViewer().addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				TreeViewer viewer= (TreeViewer)getViewer();
+				Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
+				if (viewer.isExpandable(element))
+					viewer.setExpandedState(element, !viewer.getExpandedState(element));
+			}
+		});
+	}
 }

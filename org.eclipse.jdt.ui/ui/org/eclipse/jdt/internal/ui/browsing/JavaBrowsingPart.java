@@ -709,6 +709,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Adds additional listeners to this view.
+	 * This method can be overridden but should
+	 * call super.
 	 */
 	protected void hookViewerListeners() {
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {

@@ -7,10 +7,11 @@ package org.eclipse.jdt.internal.ui.browsing;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
-
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -18,13 +19,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.actions.ProjectActionGroup;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
-
-import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 
 public class ProjectsView extends JavaBrowsingPart {
 
@@ -57,6 +58,15 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * Adds additional listeners to this view.
 	 */
 	protected void hookViewerListeners() {
+		super.hookViewerListeners();
+		getViewer().addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				TreeViewer viewer= (TreeViewer)getViewer();
+				Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
+				if (viewer.isExpandable(element))
+					viewer.setExpandedState(element, !viewer.getExpandedState(element));
+			}
+		});
 	}
 
 	protected void setInitialInput() {
