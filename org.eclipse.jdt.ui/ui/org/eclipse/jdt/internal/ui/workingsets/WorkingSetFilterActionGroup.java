@@ -226,8 +226,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 		return new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				String property= event.getProperty();
+				IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
 				if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property)) {
-					IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
 
 					fWorkingSetFilter.setWorkingSet(newWorkingSet);	
 
@@ -239,7 +239,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 				} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
 					if (fTitleUpdater != null)
 						fTitleUpdater.propertyChange(event);
-				} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
+				} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property) 
+						&& newWorkingSet.equals(fWorkingSetFilter.getWorkingSet())) {
 					fViewer.getControl().setRedraw(false);
 					fViewer.refresh();
 					fViewer.getControl().setRedraw(true);
