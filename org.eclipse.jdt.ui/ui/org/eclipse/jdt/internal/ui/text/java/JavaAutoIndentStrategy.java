@@ -40,7 +40,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		int start= d.getLineOffset(line);
 		int brackcount= getBracketCount(d, start, end, false) - closingBracketIncrease;
 
-		// sum up the brackets counts of each line (closing brackets count negative, 
+		// sum up the brackets counts of each line (closing brackets count negative,
 		// opening positive) until we find a line the brings the count to zero
 		while (brackcount < 0) {
 			line--;
@@ -68,7 +68,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 							// a comment starts, advance to the comment end
 							start= getCommentEnd(d, start + 1, end);
 						} else if (next == '/') {
-							// '//'-comment: nothing to do anymore on this line 
+							// '//'-comment: nothing to do anymore on this line
 							start= end;
 						}
 					}
@@ -168,8 +168,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					c.text= replaceText.toString();
 				}
 			}
-		} catch (BadLocationException excp) {
-			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message1")); //$NON-NLS-1$
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
 		}
 	}
 
@@ -198,7 +198,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					ITypedRegion region= partitioner.getPartition(start);
 					if (JavaPartitionScanner.JAVA_DOC.equals(region.getType()))
 						start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
-				}				
+				}
 				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
 				buf.append(d.get(start, whiteend - start));
 				if (getBracketCount(d, start, c.offset, true) > 0) {
@@ -207,8 +207,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			}
 			c.text= buf.toString();
 
-		} catch (BadLocationException excp) {
-			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message2")); //$NON-NLS-1$
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
 		}
 	}
 
@@ -218,46 +218,46 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				return document.getLineDelimiter(0);
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
-		}	
+		}
 
 		return System.getProperty("line.separator"); //$NON-NLS-1$
 	}
-	
+
 	protected void smartPaste(IDocument document, DocumentCommand command) {
 
 		String lineDelimiter= getLineDelimiter(document);
-		
+
 		try {
 			String pastedText= command.text;
 			Assert.isNotNull(pastedText);
 			Assert.isTrue(pastedText.length() > 1);
-			
+
 			String strippedParagraph= stripIndent(pastedText, lineDelimiter);
-			
+
 			// check selection
 			int offset= command.offset;
 			int line= document.getLineOfOffset(offset);
 			int lineOffset= document.getLineOffset(line);
-			
+
 			// format
 			String prefix= document.get(lineOffset, offset - lineOffset);
 			String blockIndent= getIndent(document, command);
-			String indent= blockIndent == null ? "" : blockIndent + createIndent(1); //$NON-NLS-1$ // add one indent level 
+			String indent= blockIndent == null ? "" : blockIndent + createIndent(1); //$NON-NLS-1$ // add one indent level
 			boolean formatFirstLine= prefix.trim().length() == 0;
 			String formattedParagraph= format(strippedParagraph, indent, lineDelimiter, formatFirstLine);
-			
+
 			// paste
 			if (formatFirstLine) {
 				int end= command.offset + command.length;
 				command.offset= lineOffset;
-				command.length= end - command.offset; 
+				command.length= end - command.offset;
 			}
 			command.text= formattedParagraph;
 
 		} catch (BadLocationException e) {
-			JavaPlugin.log(e);			
+			JavaPlugin.log(e);
 		}
-	}	
+	}
 
 	/**
 	 * Returns the displayed width of a string, taking in account the displayed tab width.
@@ -265,22 +265,22 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 */
 	private static int calculateDisplayedWidth(String string) {
 
-		final int tabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH); 
-		
+		final int tabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+
 		int column= 0;
 		for (int i= 0; i < string.length(); i++)
 			if ('\t' == string.charAt(i))
 				column += tabWidth - (column % tabWidth);
 			else
 				column++;
-				
+
 		return column;
 	}
-	
+
 	private String getIndent(IDocument d, DocumentCommand c) {
-		if (c.offset < 0)
+		if (c.offset < 0 || d.getLength() == 0)
 			return null;
-		
+
 		try {
 			int p= (c.offset == d.getLength() ? c.offset - 1 : c.offset);
 			int line= d.getLineOfOffset(p);
@@ -291,24 +291,25 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				// take the indent of the found line
 				return getIndentOfLine(d, indLine);
 
-		} catch (BadLocationException excp) {
-			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message1")); //$NON-NLS-1$
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
 		}
 		return null;
 	}
-	
+
 	private static final class LineIterator implements Iterator {
 		/** The document to iterator over. */
 		private final IDocument fDocument;
 		/** The line index. */
 		private int fLineIndex;
-		
+
 		/**
-		 * Creates a line iterator.		 */
+		 * Creates a line iterator.
+		 */
 		public LineIterator(String string) {
-			fDocument= new Document(string);	
+			fDocument= new Document(string);
 		}
-		
+
 		/*
 		 * @see java.util.Iterator#hasNext()
 		 */
@@ -320,12 +321,12 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		 * @see java.util.Iterator#next()
 		 */
 		public Object next() {
-			try {			
+			try {
 				IRegion region= fDocument.getLineInformation(fLineIndex++);
 				return fDocument.get(region.getOffset(), region.getLength());
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);
-				throw new NoSuchElementException();	
+				throw new NoSuchElementException();
 			}
 		}
 
@@ -337,11 +338,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}
 
 	}
-	
+
 	private static IPreferenceStore getPreferenceStore() {
-		return JavaPlugin.getDefault().getPreferenceStore();		
+		return JavaPlugin.getDefault().getPreferenceStore();
 	}
-	
+
 	private static String createIndent(int level) {
 
 		StringBuffer buffer= new StringBuffer();
@@ -349,22 +350,22 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		if (useSpaces()) {
 			int tabWidth= getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
 			int width= level * tabWidth;
-			for (int i= 0; i != width; ++i)	
+			for (int i= 0; i != width; ++i)
 				buffer.append(' ');
 
 		} else {
 			buffer.append('\t');
 		}
-		
-		return buffer.toString();			
+
+		return buffer.toString();
 	}
-	
+
 	private static String createPrefix(int displayedWidth) {
 
 		StringBuffer buffer= new StringBuffer();
 
 		if (useSpaces()) {
-			for (int i= 0; i != displayedWidth; ++i)	
+			for (int i= 0; i != displayedWidth; ++i)
 				buffer.append(' ');
 
 		} else {
@@ -373,25 +374,25 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int mod= displayedWidth % tabWidth;
 
 			for (int i= 0; i != div; ++i)
-				buffer.append('\t');	
+				buffer.append('\t');
 
-			for (int i= 0; i != mod; ++i)	
-				buffer.append(' ');				 
+			for (int i= 0; i != mod; ++i)
+				buffer.append(' ');
 
-		} 
+		}
 
 		return buffer.toString();
 	}
-	
+
 	private String stripIndent(String paragraph, String lineDelimiter) {
 
-		final StringBuffer buffer= new StringBuffer();		
+		final StringBuffer buffer= new StringBuffer();
 
 		// determine minimum indent width
-		int minIndentWidth= Integer.MAX_VALUE;				
+		int minIndentWidth= Integer.MAX_VALUE;
 		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
 			String line= (String) iterator.next();
-			String trimmedLine= line.trim();			
+			String trimmedLine= line.trim();
 
 			if (trimmedLine.length() == 0)
 				continue;
@@ -405,7 +406,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		// strip prefixes
 		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
 			String line= (String) iterator.next();
-			String trimmedLine= line.trim();			
+			String trimmedLine= line.trim();
 
 			if (trimmedLine.length() != 0) {
 				int index= line.indexOf(trimmedLine);
@@ -413,7 +414,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				int width= calculateDisplayedWidth(indent);
 				int strippedWidth= width - minIndentWidth;
 				String prefix= createPrefix(strippedWidth);
-	
+
 				buffer.append(prefix);
 				buffer.append(trimmedLine);
 			}
@@ -421,17 +422,17 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			if (iterator.hasNext())
 				buffer.append(lineDelimiter);
 		}
-		
-		return buffer.toString();		
+
+		return buffer.toString();
 	}
-	
+
 	private String format(String paragraph, String indent, String lineDelimiter, boolean indentFirstLine) {
-		
-		final StringBuffer buffer= new StringBuffer();		
-				
+
+		final StringBuffer buffer= new StringBuffer();
+
 		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
 			String line= (String) iterator.next();
-			if (indentFirstLine && line.trim().length() != 0)	
+			if (indentFirstLine && line.trim().length() != 0)
 				buffer.append(indent);
 			else
 				indentFirstLine= true;
@@ -439,38 +440,38 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			if (iterator.hasNext())
 				buffer.append(lineDelimiter);
 		}
-		
-		return buffer.toString();	
+
+		return buffer.toString();
 	}
-	
+
 	private String getOneIndentLevel() {
 		return String.valueOf('\t');
-	}	
-	
+	}
+
 	/**
 	 * Returns whether the text ends with one of the given search strings.
 	 */
 	private boolean endsWithDelimiter(IDocument d, String txt) {
-		
+
 		String[] delimiters= d.getLegalLineDelimiters();
-		
+
 		for (int i= 0; i < delimiters.length; i++) {
 			if (txt.endsWith(delimiters[i]))
 				return true;
 		}
-		
+
 		return false;
 	}
 
 	private boolean equalsDelimiter(IDocument d, String txt) {
-		
+
 		String[] delimiters= d.getLegalLineDelimiters();
-		
+
 		for (int i= 0; i < delimiters.length; i++) {
 			if (txt.equals(delimiters[i]))
 				return true;
 		}
-		
+
 		return false;
 	}
 
@@ -491,8 +492,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
 			smartPaste(d, c);
 	}
-	
+
 	private static boolean useSpaces() {
 		return JavaCore.SPACE.equals(JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_CHAR));
-	}	
+	}
 }
