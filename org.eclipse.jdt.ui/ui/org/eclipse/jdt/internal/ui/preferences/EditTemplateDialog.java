@@ -51,6 +51,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextListener;
@@ -170,15 +171,14 @@ public class EditTemplateDialog extends StatusDialog {
 		fTemplate= template;
 		fIsNameModifiable= isNameModifiable;
 		
-		// XXX workaround for bug 63313 - disabling prefix until fixed.
-//		String delim= new Document().getLegalLineDelimiters()[0];
+		String delim= new Document().getLegalLineDelimiters()[0];
 		
 		List contexts= new ArrayList();
 		for (Iterator it= registry.contextTypes(); it.hasNext();) {
 			TemplateContextType type= (TemplateContextType) it.next();
-//			if (type.getId().equals("javadoc")) //$NON-NLS-1$
-//				contexts.add(new String[] { type.getId(), type.getName(), "/**" + delim }); //$NON-NLS-1$
-//			else
+			if (type.getId().equals("javadoc")) //$NON-NLS-1$
+				contexts.add(new String[] { type.getId(), type.getName(), "/**" + delim }); //$NON-NLS-1$
+			else
 				contexts.add(new String[] { type.getId(), type.getName(), "" }); //$NON-NLS-1$
 		}
 		fContextTypes= (String[][]) contexts.toArray(new String[contexts.size()][]);
@@ -196,7 +196,7 @@ public class EditTemplateDialog extends StatusDialog {
 	 */
 	public void create() {
 		super.create();
-		// update initial ok button to be disabled for new templates 
+		// update initial OK button to be disabled for new templates 
 		boolean valid= fNameText == null || fNameText.getText().trim().length() != 0;
 		if (!valid) {
 			StatusInfo status = new StatusInfo();
@@ -307,17 +307,13 @@ public class EditTemplateDialog extends StatusDialog {
 	protected void doTextWidgetChanged(Widget w) {
 		if (w == fNameText) {
 			fSuppressError= false;
-			String name= fNameText.getText();
-			fTemplate.setName(name);
 			updateButtons();			
 		} else if (w == fContextCombo) {
 			String name= fContextCombo.getText();
 			String contextId= getContextId(name);
-			fTemplate.setContextTypeId(contextId);
 			fTemplateProcessor.setContextType(fContextTypeRegistry.getContextType(contextId));
 		} else if (w == fDescriptionText) {
-			String desc= fDescriptionText.getText();
-			fTemplate.setDescription(desc);
+			// nothing
 		}	
 	}
 	
@@ -335,10 +331,8 @@ public class EditTemplateDialog extends StatusDialog {
 
 	protected void doSourceChanged(IDocument document) {
 		String text= document.get();
-		String prefix= getPrefix();
-		fTemplate.setPattern(text.substring(prefix.length(), text.length()));
 		fValidationStatus.setOK();
-		TemplateContextType contextType= fContextTypeRegistry.getContextType(fTemplate.getContextTypeId());
+		TemplateContextType contextType= fContextTypeRegistry.getContextType(getContextId(fContextCombo.getText()));
 		if (contextType != null) {
 			try {
 				contextType.validate(text);
@@ -381,9 +375,7 @@ public class EditTemplateDialog extends StatusDialog {
 		TemplateEditorSourceViewerConfiguration configuration= new TemplateEditorSourceViewerConfiguration(tools.getColorManager(), store, null, fTemplateProcessor);
 		viewer.configure(configuration);
 		viewer.setEditable(true);
-		// XXX workaround for bug 63313 - disabling prefix until fixed.
-//		viewer.setDocument(document, prefix.length(), document.getLength() - prefix.length());
-		viewer.setDocument(document);
+		viewer.setDocument(document, prefix.length(), document.getLength() - prefix.length());
 		
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
@@ -426,7 +418,7 @@ public class EditTemplateDialog extends StatusDialog {
 	
 	private String getPrefix() {
 		String prefix;
-		int idx= getIndex(fTemplate.getContextTypeId());
+		int idx= getIndex(getContextId(fContextCombo.getText()));
 		if (idx != -1)
 			prefix= fContextTypes[idx][2];
 		else
@@ -571,5 +563,22 @@ public class EditTemplateDialog extends StatusDialog {
 		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.EDIT_TEMPLATE_DIALOG);
 	}
 
+
+	/**
+	 * Returns the created template.
+	 * 
+	 * @return the created template
+	 * @since 3.1
+	 */
+	public Template getTemplate() {
+		String prefix= getPrefix();
+		IDocument doc= fPatternEditor.getDocument();
+		try {
+			String pattern= doc.get(prefix.length(), doc.getLength() - prefix.length());
+			return new Template(fNameText.getText(), fDescriptionText.getText(), getContextId(fContextCombo.getText()), pattern);
+		} catch (BadLocationException e) {
+			return null;
+		}
+	}
 
 }
