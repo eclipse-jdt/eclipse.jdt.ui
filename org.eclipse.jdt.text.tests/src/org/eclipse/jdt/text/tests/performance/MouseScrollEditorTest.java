@@ -32,6 +32,8 @@ public class MouseScrollEditorTest extends TestCase {
 	private static final Class THIS= MouseScrollEditorTest.class;
 	
 	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
+
+	private static final int[] CTRL_END= new int[] { SWT.CTRL, SWT.END };
 	
 	private PerformanceMeter fPerformanceMeter;
 
@@ -51,14 +53,14 @@ public class MouseScrollEditorTest extends TestCase {
 		fPerformanceMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
 		EditorTestHelper.bringToTop();
 		fEditor= EditorTestHelper.openInEditor(getFile(), true);
-		EditorTestHelper.calmDown(1000, 10000, 100);
+		EditorTestHelper.calmDown(3000, 10000, 100);
 	}
 
 	protected IFile getFile() {
 		return ResourceTestHelper.findFile("org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java");
 	}
 	public void testMouseScrollEditor() throws PartInitException {
-		measureScrolling(1);
+		measureScrolling(3);
 	}
 	
 	protected void tearDown() throws Exception {
@@ -69,7 +71,7 @@ public class MouseScrollEditorTest extends TestCase {
 		final Display display= SWTEventHelper.getActiveDisplay();
 		
 		final StyledText text= (StyledText) fEditor.getAdapter(Control.class);
-		final Rectangle textBounds= text.getBounds();
+		Rectangle textBounds= text.getBounds();
 		Point scrollBarSize= text.getVerticalBar().getSize();
 		int guessX= textBounds.width - ((int) (0.5*scrollBarSize.x));
 		int guessY= scrollBarSize.x + 5;
@@ -81,37 +83,46 @@ public class MouseScrollEditorTest extends TestCase {
 		final int numberOfLines= text.getLineCount();
 		final int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
 		
-		for (int i= 0; i < nOfRuns; i++) {
-			fPerformanceMeter.start();
-			new Thread() { public void run() {
+		Runnable runnable= new Runnable() {
+			private int fTopIndex;
+			private int fTopPixel;
+			private Runnable fRunnable= new Runnable() {
+				public void run() {
+					fTopIndex= text.getTopIndex();
+					fTopPixel= text.getTopPixel();
+				}
+			};
+			public void run() {
+				fTopIndex= 0;
+				fTopPixel= 0;
+				int i= mappedGuessY + 1;
+				int posts= 0;
 				SWTEventHelper.mouseMoveEvent(display, mappedGuessX, mappedGuessY, false);
 				SWTEventHelper.mouseDownEvent(display, 1, false);
-				final int[] result= new int[2];
-				int j= mappedGuessY + 1;
-				while (result[0] + visibleLinesInViewport < numberOfLines - 1) {
-					SWTEventHelper.mouseMoveEvent(display, mappedGuessX, j++, false);
-					int oldTopPixel= result[1];
-//					int k= 0;
-					while (oldTopPixel == result[1]) {
-						display.syncExec(new Runnable() {
-							public void run() {
-								result[0]= text.getTopIndex();
-								result[1]= text.getTopPixel();
-							}
-						});
-//						k++;
+				while (fTopIndex + visibleLinesInViewport < numberOfLines - 1) {
+					SWTEventHelper.mouseMoveEvent(display, mappedGuessX, i++, false);
+					int oldTopPixel= fTopPixel;
+					while (oldTopPixel == fTopPixel) {
+						posts++;
+						display.syncExec(fRunnable);
 					}
-//					if (k > 1)
-//						System.out.println("k = " + k);
 				}
 				SWTEventHelper.mouseUpEvent(display, 1, false);
 				fDone= true;
-			} }.start();
+				display.wake();
+//				System.out.println("scrolls == " + (i - mappedGuessY - 1) + ", posts == " + posts);
+			}
+		};
+		for (int i= 0; i < nOfRuns; i++) {
+			fDone= false;
+			new Thread(runnable).start();
+			fPerformanceMeter.start();
 			while (!fDone)
 				if (!display.readAndDispatch())
 					display.sleep();
 			fPerformanceMeter.stop();
 			assertTrue(text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
+			SWTEventHelper.pressKeyCodeCombination(display, CTRL_END);
 			SWTEventHelper.pressKeyCodeCombination(display, CTRL_HOME);
 			assertEquals(0, text.getTopIndex());
 		}
