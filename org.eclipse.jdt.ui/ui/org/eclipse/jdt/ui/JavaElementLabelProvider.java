@@ -52,15 +52,14 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_PARAMETERS=				0x002;
 	
 	/**
-	 * Flag (bit mask) indicating that the label should include its container.
+	 * Flag (bit mask) indicating that the label of a member should include the container.
 	 * For example, include the name of the type enclosing a field.
 	 */
 	public final static int SHOW_CONTAINER=				0x004;
 
 	/**
-	 * Flag (bit mask) indicating that the label should include its container
-	 * with full qualification.
-	 * For example, include the fully qualified name of the type enclosing a field.
+	 * Flag (bit mask) indicating that the label of a type should be fully qualified.
+	 * For example, include the fully qualified name of the type enclosing a type.
 	 */
 	public final static int SHOW_CONTAINER_QUALIFICATION=	0x008;
 
@@ -82,7 +81,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_ROOT=					0x040;
 	
 	/**
-	 * Flag (bit mask) indicating that the label's qualification of an element should
+	 * Flag (bit mask) indicating that the label qualification of a type should
 	 * be shown after the name.
 	 */
 	public final static int SHOW_POSTIFIX_QUALIFICATION=		0x080;
