@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
 
 public class StubUtility {
 
+
 	/**
 	 * Generates a stub. Given a template method, a stub with the same signature
 	 * will be constructed so it can be added to a type.
@@ -56,6 +57,21 @@ public class StubUtility {
 	 * @throws JavaModelException
 	 */
 	public static String genStub(IType parenttype, IMethod method, boolean callSuper, boolean addSeeTag, IImportsStructure imports) throws JavaModelException {
+		return  genStub(parenttype.getElementName(), parenttype.isInterface(), method, callSuper, addSeeTag, imports);
+	}
+
+	/**
+	 * Generates a stub. Given a template method, a stub with the same signature
+	 * will be constructed so it can be added to a type.
+	 * @param destTypeName The name of the type to which the method will be added to (Used for the constructor)
+	 * @param createBody Specifies if a method body will be added. Else the method is left abstract.
+	 * @param method A method template (method belongs to different type than the parent)
+	 * @param callSuper If set a super call will be added to the method body
+	 * @param addSeeTag A see tag to the given method is generated in the java doc comment.
+	 * @param imports Imports required by the sub are added to the imports structure
+	 * @throws JavaModelException
+	 */
+	public static String genStub(String destTypeName, boolean createBody, IMethod method, boolean callSuper, boolean addSeeTag, IImportsStructure imports) throws JavaModelException {
 		IType declaringtype= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
 		String[] paramTypes= method.getParameterTypes();
@@ -65,7 +81,7 @@ public class StubUtility {
 		
 		int lastParam= paramTypes.length -1;		
 		if (method.isConstructor()) {
-			String desc= "Constructor for " + parenttype.getElementName(); //$NON-NLS-1$
+			String desc= "Constructor for " + destTypeName; //$NON-NLS-1$
 			genJavaDocStub(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
 		} else {			
 			// java doc
@@ -78,7 +94,7 @@ public class StubUtility {
 			}
 		}		
 		int flags= method.getFlags();
-		if (Flags.isPublic(flags) || (declaringtype.isInterface() && parenttype.isClass())) {
+		if (Flags.isPublic(flags) || (declaringtype.isInterface() && createBody)) {
 			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
 			buf.append("protected "); //$NON-NLS-1$
@@ -99,7 +115,7 @@ public class StubUtility {
 		}		
 			
 		if (method.isConstructor()) {
-			buf.append(parenttype.getElementName());
+			buf.append(destTypeName);
 		} else {
 			String retTypeFrm= Signature.toString(retTypeSig);
 			if (!isBuiltInType(retTypeSig)) {
@@ -138,7 +154,7 @@ public class StubUtility {
 				}
 			}
 		}
-		if (parenttype.isInterface()) {
+		if (!createBody) {
 			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
@@ -302,13 +318,13 @@ public class StubUtility {
 
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethod curr= (IMethod) allMethods.get(i);
-			if (Flags.isAbstract(curr.getFlags()) && (isSubType || !type.equals(curr.getDeclaringType()))) {
+			if ((Flags.isAbstract(curr.getFlags()) || curr.getDeclaringType().isInterface()) && (isSubType || !type.equals(curr.getDeclaringType()))) {
 				// implement all abstract methods. See tag points to declaration
 				IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 				if (desc == null) {
 					desc= curr;
 				}
-				String newStub= genStub(type, desc, false, true, imports);
+				String newStub= genStub(type.getElementName(), true, desc, false, true, imports);
 				newMethods.add(newStub);
 			}
 		}
@@ -326,7 +342,7 @@ public class StubUtility {
 					if (impl == null || curr.getExceptionTypes().length < impl.getExceptionTypes().length) {
 						// implement an interface method when it does not exist in the hierarchy
 						// or when it throws less exceptions that the implemented
-						String newStub= genStub(type, curr, false, true, imports);
+						String newStub= genStub(type.getElementName(), true, curr, false, true, imports);
 						newMethods.add(newStub);
 						allMethods.add(curr);
 					}
