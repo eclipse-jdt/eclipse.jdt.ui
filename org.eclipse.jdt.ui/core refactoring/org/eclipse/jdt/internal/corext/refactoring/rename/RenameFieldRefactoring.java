@@ -163,6 +163,18 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	
 	//-- getter/setter
 	
+	public boolean canEnableGetterRenaming() throws JavaModelException{
+		if (fField.getDeclaringType().isInterface())
+			return false;
+		return getGetter() != null;	
+	}
+	
+	public boolean canEnableSetterRenaming() throws JavaModelException{
+		if (fField.getDeclaringType().isInterface())
+			return false;
+		return getGetter() != null;	
+	}
+	
 	public boolean getRenameGetter() {
 		return fRenameGetter;
 	}
