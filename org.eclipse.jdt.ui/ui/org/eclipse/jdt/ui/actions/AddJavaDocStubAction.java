@@ -25,6 +25,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -215,8 +216,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			ICompilationUnit cu= null;
 			for (int i= 0; i < nElements; i++) {
 				Object curr= elements.get(i);
-				if (curr instanceof IMethod || curr instanceof IType) {
-					IMember member= (IMember)curr; // limit to methods & types
+				if (curr instanceof IMethod || curr instanceof IType || curr instanceof IField) {
+					IMember member= (IMember)curr; // limit to methods, types & fields
 					
 					if (i == 0) {
 						cu= member.getCompilationUnit();

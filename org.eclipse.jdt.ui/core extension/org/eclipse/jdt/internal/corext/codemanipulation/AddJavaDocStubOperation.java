@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -93,8 +94,11 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	}
 	
 	private String createFieldComment(IField field) throws JavaModelException {
-		// not yet supported
-		return null;			
+		StringBuffer buf= new StringBuffer();
+		buf.append("/**\n"); //$NON-NLS-1$
+		buf.append(" *\n"); //$NON-NLS-1$
+		buf.append(" */\n"); //$NON-NLS-1$
+		return buf.toString();			
 	}		
 	
 	private void sortEntries() {
@@ -154,11 +158,13 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 				if (comment != null) {
 					int indent= StubUtility.getIndentUsed(curr);
 					String formattedComment= StubUtility.codeFormat(comment, indent, lineDelim);
-					TextRegion region= buffer.getLineInformationOfOffset(curr.getSourceRange().getOffset());
-					if (region != null) {
-						TextRange range= new TextRange(region.getOffset(), 0);
-						buffer.replace(range, formattedComment);
+					int codeStart= 0;
+					while (Strings.isIndentChar(formattedComment.charAt(codeStart))) {
+						codeStart++;
 					}
+					String insertString= formattedComment.substring(codeStart) + formattedComment.substring(0, codeStart);
+					TextRange range= new TextRange(curr.getSourceRange().getOffset(), 0);
+					buffer.replace(range, insertString);
 				}
 				monitor.worked(1);
 			}				
