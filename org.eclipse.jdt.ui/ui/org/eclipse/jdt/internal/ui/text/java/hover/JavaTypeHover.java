@@ -94,6 +94,7 @@ public class JavaTypeHover implements ITextHover {
 						
 								
 					}
+					renderer.dispose();
 					return buffer.toString();
 				}
 			} catch (JavaModelException x) {
