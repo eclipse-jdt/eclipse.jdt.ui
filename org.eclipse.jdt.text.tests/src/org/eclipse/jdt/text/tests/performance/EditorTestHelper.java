@@ -33,6 +33,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -127,7 +128,14 @@ public class EditorTestHelper {
 	}
 	
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
-		return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbench workbench= PlatformUI.getWorkbench();
+		IWorkbenchWindow window= workbench.getActiveWorkbenchWindow();
+		// work around failures in N20041013's performance tests:
+		// http://fullmoon.rtp.raleigh.ibm.com/downloads/drops/N-N20041013-200410130010/performance/html/org.eclipse.jdt.text.tests_win32perf.html
+		// TODO: investigate further when working with multiple WorkbenchWindows
+		if (window == null && workbench.getWorkbenchWindowCount() > 0)
+			return workbench.getWorkbenchWindows()[0];
+		return window;
 	}
 
 	public static IWorkbenchPage getActivePage() {
