@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.NullChange;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,21 +30,19 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.NullChange;
 
 public class AddToClasspathChange extends JDTChange {
 	
-	private String fProjectHandle;
-	private int fEntryKind;
-	private IPath fPath;
-	private IPath fSourceAttachmentPath;
-	private IPath fSourceAttachmentRootPath;
+	private IJavaProject fProjectHandle;
+	private IClasspathEntry fEntryToAdd;
+	
+	public AddToClasspathChange(IJavaProject project, IClasspathEntry entryToAdd) {
+		fProjectHandle= project;
+		fEntryToAdd= entryToAdd;
+	}
 	
 	public AddToClasspathChange(IJavaProject project, String sourceFolderName){
-		fProjectHandle= project.getHandleIdentifier();
-		fEntryKind= IClasspathEntry.CPE_SOURCE;
-		fPath= project.getProject().getFullPath().append(sourceFolderName);
+		this(project, JavaCore.newSourceEntry(project.getPath().append(sourceFolderName)));
 	}
 	
 	/**
@@ -50,18 +51,11 @@ public class AddToClasspathChange extends JDTChange {
 	 * @param newProjectEntry (must be absolute <code>IPath</code>)
 	 */
 	public AddToClasspathChange(IJavaProject project, IPath newProjectEntry){
-		Assert.isTrue(newProjectEntry.isAbsolute());
-		fProjectHandle= project.getHandleIdentifier();
-		fEntryKind= IClasspathEntry.CPE_PROJECT;
-		fPath= newProjectEntry;
+		this(project, JavaCore.newProjectEntry(newProjectEntry));
 	}
 	
 	public AddToClasspathChange(IJavaProject project, int entryKind, IPath path, IPath sourceAttachmentPath, IPath sourceAttachmentRootPath){
-		fProjectHandle= project.getHandleIdentifier();
-		fEntryKind= entryKind;
-		fPath=path;
-		fSourceAttachmentPath= sourceAttachmentPath;
-		fSourceAttachmentRootPath= sourceAttachmentRootPath;
+		this(project, createNewClasspathEntry(entryKind, path, sourceAttachmentPath, sourceAttachmentRootPath));
 	}
 	
 	/* non java-doc
@@ -72,7 +66,7 @@ public class AddToClasspathChange extends JDTChange {
 		try {
 			if (!entryAlreadyExists()) {
 				getJavaProject().setRawClasspath(getNewClasspathEntries(), new SubProgressMonitor(pm, 1));
-				IPath classpathEntryPath= JavaCore.getResolvedClasspathEntry(createNewClasspathEntry()).getPath();
+				IPath classpathEntryPath= JavaCore.getResolvedClasspathEntry(fEntryToAdd).getPath();
 				return new DeleteFromClasspathChange(classpathEntryPath, getJavaProject());
 			} else {
 				return new NullChange();
@@ -82,30 +76,36 @@ public class AddToClasspathChange extends JDTChange {
 		}		
 	}
 	
-	private boolean entryAlreadyExists() throws JavaModelException{
-		return Arrays.asList(getJavaProject().getRawClasspath()).contains(createNewClasspathEntry());
+	public boolean entryAlreadyExists() throws JavaModelException {
+		IClasspathEntry[] entries= getJavaProject().getRawClasspath();
+		for (int i= 0; i < entries.length; i++) {
+			if (entries[i].equals(fEntryToAdd)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private IClasspathEntry[] getNewClasspathEntries() throws JavaModelException{
 		IClasspathEntry[] entries= getJavaProject().getRawClasspath();
 		List cp= new ArrayList(entries.length + 1);
 		cp.addAll(Arrays.asList(entries));
-		cp.add(createNewClasspathEntry());
+		cp.add(fEntryToAdd);
 		return (IClasspathEntry[])cp.toArray(new IClasspathEntry[cp.size()]);
 	}
 	
-	private IClasspathEntry createNewClasspathEntry(){
-		switch(fEntryKind){
+	private static IClasspathEntry createNewClasspathEntry(int kind, IPath path, IPath sourceAttach, IPath sourceAttachRoot){
+		switch(kind){
 			case IClasspathEntry.CPE_LIBRARY:
-				return JavaCore.newLibraryEntry(fPath, fSourceAttachmentPath, fSourceAttachmentRootPath);
+				return JavaCore.newLibraryEntry(path, sourceAttach, sourceAttachRoot);
 			case IClasspathEntry.CPE_PROJECT:
-				return JavaCore.newProjectEntry(fPath);
+				return JavaCore.newProjectEntry(path);
 			case IClasspathEntry.CPE_SOURCE:
-				return JavaCore.newSourceEntry(fPath);
+				return JavaCore.newSourceEntry(path);
 			case IClasspathEntry.CPE_VARIABLE:
-				return JavaCore.newVariableEntry(fPath, fSourceAttachmentPath, fSourceAttachmentRootPath);	
+				return JavaCore.newVariableEntry(path, sourceAttach, sourceAttachRoot);	
 			case IClasspathEntry.CPE_CONTAINER:
-				return JavaCore.newContainerEntry(fPath);	
+				return JavaCore.newContainerEntry(path);	
 			default:
 				Assert.isTrue(false);
 				return null;	
@@ -113,7 +113,7 @@ public class AddToClasspathChange extends JDTChange {
 	}
 	
 	private IJavaProject getJavaProject(){
-		return (IJavaProject)JavaCore.create(fProjectHandle);
+		return fProjectHandle;
 	}
 
 	/* non java-doc
@@ -130,5 +130,10 @@ public class AddToClasspathChange extends JDTChange {
 	public Object getModifiedElement() {
 		return getJavaProject();
 	}
+	
+	public IClasspathEntry getClasspathEntry() {
+		return fEntryToAdd;
+	}
+	
 }
 

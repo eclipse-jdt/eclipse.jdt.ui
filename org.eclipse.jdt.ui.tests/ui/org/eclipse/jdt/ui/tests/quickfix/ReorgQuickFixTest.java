@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -17,9 +18,14 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -34,6 +40,10 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
+import org.eclipse.jdt.internal.corext.userlibrary.UserLibrary;
+import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainer;
+import org.eclipse.jdt.internal.corext.userlibrary.UserLibraryManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
@@ -64,7 +74,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ReorgQuickFixTest("testMethodWithConstructorName"));
+			suite.addTest(new ReorgQuickFixTest("testAddToClasspath2"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -752,4 +762,150 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	
 	}
+	
+	
+	public void testAddToClasspathSourceFolder() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import mylib.Foo;\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		IClasspathEntry[] prevClasspath= cu.getJavaProject().getRawClasspath();
+		
+		IJavaProject otherProject= JavaProjectHelper.createJavaProject("other", "bin");
+		try {
+			IPackageFragmentRoot otherRoot= JavaProjectHelper.addSourceContainer(otherProject, "src");
+			IPackageFragment otherPack= otherRoot.createPackageFragment("mylib", false, null);
+			buf= new StringBuffer();
+			buf.append("package mylib;\n");
+			buf.append("public class Foo {\n");
+			buf.append("}\n");
+			otherPack.createCompilationUnit("Foo.java", buf.toString(), false, null);
+			
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 3);
+			assertCorrectLabels(proposals);
+			
+			for (int i= 0; i < proposals.size(); i++) {
+				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
+				if (curr.getChange() instanceof AddToClasspathChange) {
+					curr.apply(null);
+					
+					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
+					assertEquals(prevClasspath.length + 1, newClasspath.length);
+					assertEquals(otherProject.getPath(), newClasspath[prevClasspath.length].getPath());
+				}
+			}
+		} finally {
+			JavaProjectHelper.delete(otherProject);
+		}
+	}
+	
+	public void testAddToClasspathIntJAR() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import mylib.Foo;\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		IClasspathEntry[] prevClasspath= cu.getJavaProject().getRawClasspath();
+		
+		IJavaProject otherProject= JavaProjectHelper.createJavaProject("other", "bin");
+		try {
+			File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
+			assertTrue("lib does not exist",  lib != null && lib.exists());
+			IPackageFragmentRoot otherRoot= JavaProjectHelper.addLibraryWithImport(otherProject, new Path(lib.getPath()), null, null);
+			
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 3);
+			assertCorrectLabels(proposals);
+			
+			for (int i= 0; i < proposals.size(); i++) {
+				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
+				if (curr.getChange() instanceof AddToClasspathChange) {
+					curr.apply(null);
+					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
+					assertEquals(prevClasspath.length + 1, newClasspath.length);
+					assertEquals(otherRoot.getPath(), newClasspath[prevClasspath.length].getPath());
+				}
+			}
+		} finally {
+			JavaProjectHelper.delete(otherProject);
+		}
+	}
+	
+	public void testAddToClasspathExportedExtJAR() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import mylib.Foo;\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		IJavaProject otherProject= JavaProjectHelper.createJavaProject("other", "bin");
+		try {
+			File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
+			IPath path= new Path(lib.getPath());
+			assertTrue("lib does not exist",  lib != null && lib.exists());
+			// exported external JAR
+			IClasspathEntry entry= JavaCore.newLibraryEntry(path, null, null, true);
+			JavaProjectHelper.addToClasspath(otherProject, entry);
+			
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 4);
+			assertCorrectLabels(proposals);
+		} finally {
+			JavaProjectHelper.delete(otherProject);
+		}
+	}
+	
+	public void testAddToClasspathContainer() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import mylib.Foo;\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		IClasspathEntry[] prevClasspath= cu.getJavaProject().getRawClasspath();
+		
+		IJavaProject otherProject= JavaProjectHelper.createJavaProject("other", "bin");
+		try {
+			File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
+			assertTrue("lib does not exist",  lib != null && lib.exists());
+			IPath path= new Path(lib.getPath());
+			IClasspathEntry[] entries= { JavaCore.newLibraryEntry(path, null, null) };
+			UserLibraryManager.setUserLibrary("MyUserLibrary", new UserLibrary(entries, false), null);
+			
+			// user library
+			IPath containerPath= new Path(UserLibraryClasspathContainer.CONTAINER_ID).append("MyUserLibrary");
+			IClasspathEntry entry= JavaCore.newContainerEntry(containerPath);
+			JavaProjectHelper.addToClasspath(otherProject, entry);
+			
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 3);
+			assertCorrectLabels(proposals);
+			
+			for (int i= 0; i < proposals.size(); i++) {
+				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
+				if (curr.getChange() instanceof AddToClasspathChange) {
+					curr.apply(null);
+					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
+					assertEquals(prevClasspath.length + 1, newClasspath.length);
+					assertEquals(containerPath, newClasspath[prevClasspath.length].getPath());
+				}
+			}
+		} finally {
+			JavaProjectHelper.delete(otherProject);
+		}
+	}
+
 }

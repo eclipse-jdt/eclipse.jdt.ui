@@ -110,7 +110,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	/*
 	 * @see ChangeCorrectionProposal#getChange()
 	 */
-	protected Change getChange() throws CoreException {
+	public Change getChange() throws CoreException {
 		Change change= super.getChange();
 		if (change == null) {
 			return createCompilationUnitChange(getDisplayString());

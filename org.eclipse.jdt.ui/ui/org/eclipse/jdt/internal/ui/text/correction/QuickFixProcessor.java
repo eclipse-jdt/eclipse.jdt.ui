@@ -182,7 +182,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DuplicateImport:
 			case IProblem.CannotImportPackage:
 			case IProblem.ConflictingImport:
+				ReorgCorrectionsSubProcessor.removeImportStatementProposals(context, problem, proposals);
+			break;
 			case IProblem.ImportNotFound:
+				ReorgCorrectionsSubProcessor.importNotFoundProposals(context, problem, proposals);
 				ReorgCorrectionsSubProcessor.removeImportStatementProposals(context, problem, proposals);
 				break;
 			case IProblem.UndefinedMethod:

@@ -11,7 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -26,11 +28,11 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.FileEditorInput;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -42,13 +44,17 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class ReorgCorrectionsSubProcessor {
 	
@@ -144,4 +150,98 @@ public class ReorgCorrectionsSubProcessor {
 		};
 		proposals.add(proposal);
 	}
+
+	public static void importNotFoundProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		IJavaProject project= cu.getJavaProject();
+		
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode != null) {
+			ImportDeclaration importDeclaration= (ImportDeclaration) ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
+			if (importDeclaration == null) {
+				return;
+			}
+			String name= ASTNodes.asString(importDeclaration.getName());
+			char[] packageName;
+			char[] typeName= null;
+			if (importDeclaration.isOnDemand()) {
+				packageName= name.toCharArray();
+			} else {
+				packageName= Signature.getQualifier(name).toCharArray();
+				typeName= Signature.getSimpleName(name).toCharArray();
+			}
+			IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+			ArrayList res= new ArrayList();
+			ITypeNameRequestor requestor= new TypeInfoRequestor(res);
+			new SearchEngine().searchAllTypeNames(cu.getResource().getWorkspace(), packageName, typeName,
+					IJavaSearchConstants.EXACT_MATCH, true, IJavaSearchConstants.TYPE, scope, requestor,
+					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+			
+			if (res.isEmpty()) {
+				return;
+			}
+			HashSet addedClaspaths= new HashSet();
+			for (int i= 0; i < res.size(); i++) {
+				TypeInfo curr= (TypeInfo) res.get(i);
+				IType type= curr.resolveType(scope);
+				if (type != null) {
+					IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					IClasspathEntry entry= root.getRawClasspathEntry();
+					if (entry == null) {
+						continue;
+					}
+					IJavaProject other= root.getJavaProject();
+					int entryKind= entry.getEntryKind();
+					if ((entry.isExported() || entryKind == IClasspathEntry.CPE_SOURCE) && addedClaspaths.add(other)) {
+						String[] args= { other.getElementName(), project.getElementName() };
+						String label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.project.description", args); //$NON-NLS-1$
+						IClasspathEntry newEntry= JavaCore.newProjectEntry(other.getPath());
+						AddToClasspathChange change= new AddToClasspathChange(project, newEntry);
+						if (!change.entryAlreadyExists()) {
+							ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 8);					
+							proposals.add(proposal);
+						}
+					}
+					if ((entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE || entryKind == IClasspathEntry.CPE_CONTAINER) && addedClaspaths.add(entry)) {
+						String label= getAddClasspathLabel(entry, root, project);
+						if (label != null) {
+							AddToClasspathChange change= new AddToClasspathChange(project, entry);
+							if (!change.entryAlreadyExists()) {
+								ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 7);					
+								proposals.add(proposal);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private static String getAddClasspathLabel(IClasspathEntry entry, IPackageFragmentRoot root, IJavaProject project) {
+		switch (entry.getEntryKind()) {
+			case IClasspathEntry.CPE_LIBRARY:
+				if (root.isArchive()) {
+					String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
+					return CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.archive.description", args); //$NON-NLS-1$
+				} else {
+					String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
+					return CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.classfolder.description", args); //$NON-NLS-1$
+				}
+			case IClasspathEntry.CPE_VARIABLE: {
+					String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
+					return CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.variable.description", args); //$NON-NLS-1$
+				}
+			case IClasspathEntry.CPE_CONTAINER:
+				try {
+					String[] args= { JavaElementLabels.getContainerEntryLabel(entry.getPath(), root.getJavaProject()), project.getElementName() };
+					return CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.addcp.library.description", args); //$NON-NLS-1$
+				} catch (JavaModelException e) {
+					// ignore
+				}
+				break;
+			}
+		return null;
+	}
+	
+	
 }
