@@ -45,7 +45,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -1303,18 +1302,8 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 	  private void setSourceViewerContents(String contents) {
-		  if (fSourceViewer.getDocument() != null){
-			  IDocument document= fSourceViewer.getDocument();
-			  document.getDocumentPartitioner().disconnect();
-			  document.setDocumentPartitioner(null);
-		  }
-		
 		  IDocument document= (contents == null) ? new Document(): new Document(contents);
-		
-		  IDocumentPartitioner partitioner= getJavaTextTools().createDocumentPartitioner();
-		  partitioner.connect(document);
-		  document.setDocumentPartitioner(partitioner);
-		
+		  getJavaTextTools().setupDocument(document);
 		  fSourceViewer.setDocument(document);
 	  }
 	

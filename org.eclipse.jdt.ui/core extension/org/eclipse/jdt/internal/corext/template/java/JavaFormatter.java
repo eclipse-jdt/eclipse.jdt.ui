@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ITypedRegion;
 
 import org.eclipse.jdt.core.ICodeFormatter;
@@ -54,7 +53,6 @@ public class JavaFormatter implements ITemplateEditor {
 	private final int fInitialIndentLevel;
 	
 	/** The java partitioner */
-	private final IDocumentPartitioner fPartitioner= JavaPlugin.getDefault().getJavaTextTools().createDocumentPartitioner(); 
 	private boolean fUseCodeFormatter;
 
 	/**
@@ -92,8 +90,7 @@ public class JavaFormatter implements ITemplateEditor {
 	private boolean isInsideCommentOrString(String string, int offset) {
 
 		IDocument document= new Document(string);
-		document.setDocumentPartitioner(fPartitioner);
-		fPartitioner.connect(document);
+		JavaPlugin.getDefault().getJavaTextTools().setupDocument(document);
 
 		try {		
 			ITypedRegion partition= document.getPartition(offset);
@@ -108,8 +105,6 @@ public class JavaFormatter implements ITemplateEditor {
 
 		} catch (BadLocationException e) {
 			return false;	
-		} finally {
-			fPartitioner.disconnect();
 		}
 	}
 

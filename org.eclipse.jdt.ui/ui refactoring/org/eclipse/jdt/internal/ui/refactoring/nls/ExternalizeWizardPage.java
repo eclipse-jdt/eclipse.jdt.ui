@@ -42,7 +42,6 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLayoutData;
@@ -360,10 +359,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			
 			String contents= getCu().getBuffer().getContents();
 			IDocument document= new Document(contents);
-			
-			IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
-			partitioner.connect(document);
-			document.setDocumentPartitioner(partitioner);
+			tools.setupDocument(document);
 			
 			fSourceViewer.setDocument(document);
 			fSourceViewer.setEditable(false);

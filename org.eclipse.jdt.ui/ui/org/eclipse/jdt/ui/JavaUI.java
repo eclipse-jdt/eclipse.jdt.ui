@@ -50,7 +50,6 @@ import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
@@ -621,10 +620,7 @@ public final class JavaUI {
 	 * @since 2.0
 	 */
 	public static IBufferFactory getBufferFactory() {
-		CompilationUnitDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		if (provider != null)
-			return provider.getBufferFactory();
-		return null;
+		return JavaPlugin.getDefault().getBufferFactory();
 	}
 
 	/**

@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 
 import org.eclipse.core.resources.IFile;
 
@@ -32,6 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 public class JavaStatusContextViewer extends SourceContextViewer {
@@ -76,9 +76,8 @@ public class JavaStatusContextViewer extends SourceContextViewer {
 	
 	private IDocument newJavaDocument(String source) {
 		IDocument result= new Document(source);
-		IDocumentPartitioner partitioner= JavaPlugin.getDefault().getJavaTextTools().createDocumentPartitioner();
-		result.setDocumentPartitioner(partitioner);
-		partitioner.connect(result);
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		textTools.setupDocument(result);
 		return result;
 	}
 }

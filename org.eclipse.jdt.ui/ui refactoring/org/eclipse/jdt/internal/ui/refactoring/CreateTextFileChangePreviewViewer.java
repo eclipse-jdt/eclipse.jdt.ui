@@ -17,7 +17,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
@@ -30,6 +29,7 @@ import org.eclipse.jdt.internal.ui.util.ViewerPane;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 public class CreateTextFileChangePreviewViewer implements IChangePreviewViewer {
@@ -71,10 +71,9 @@ public class CreateTextFileChangePreviewViewer implements IChangePreviewViewer {
 		// This is a temporary work around until we get the
 		// source viewer registry.
 		if ("java".equals(change.getTextType())) { //$NON-NLS-1$
-			IDocumentPartitioner partitioner= JavaPlugin.getDefault().getJavaTextTools().createDocumentPartitioner();
-			document.setDocumentPartitioner(partitioner);
-			partitioner.connect(document);
-			fSourceViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools(), null));
+			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+			textTools.setupDocument(document);
+			fSourceViewer.configure(new JavaSourceViewerConfiguration(textTools, null));
 		} else {
 			fSourceViewer.configure(new SourceViewerConfiguration());
 		}
