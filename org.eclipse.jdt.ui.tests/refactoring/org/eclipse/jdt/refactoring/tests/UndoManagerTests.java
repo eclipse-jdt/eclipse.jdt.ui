@@ -5,16 +5,7 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.jdt.core.refactoring.Refactoring;
-
-import org.eclipse.jdt.testplugin.JavaTestSetup;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.*;
+import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
 
 public class UndoManagerTests extends RefactoringTest {
 	
@@ -47,6 +38,14 @@ public class UndoManagerTests extends RefactoringTest {
 		//assertEquals(iterationCount + "redo stack", redoCount, Refactoring.getUndoManager().getRedoStack().size());
 	}
 	
+	private void performUndo() throws Exception {
+		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+	}
+	
+	private void performRedo() throws Exception {
+		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+	}
+	
 	public void test0() throws Exception{
 		checkState(false, false, 0, 0);
 	}
@@ -58,49 +57,49 @@ public class UndoManagerTests extends RefactoringTest {
 	
 	public void test2() throws Exception{	
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
+		performUndo();
 		checkState(false, true, 0, 1);
 	}
 	
 	public void test3() throws Exception{	
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
-		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
+		performUndo();
+		performRedo();
 		checkState(true, false, 1, 0);
 	}
 	
 	public void test4() throws Exception{	
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
-		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
+		performUndo();
+		performRedo();
+		performUndo();
 		checkState(false, true, 0, 1);
 	}
 
 	public void test5() throws Exception{	
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
-		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
+		performUndo();
+		performRedo();
 		performRefactoring(new NullRefactoring());
 		checkState(true, false, 2, 0);
 	}
 	
 	public void test6() throws Exception{	
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
-		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
+		performUndo();
+		performRedo();
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
+		performUndo();
+		performUndo();
 		checkState(false, true, 0, 2);
 	}	
 	
 	public void test7() throws Exception{	
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
-		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
+		performUndo();
+		performRedo();
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
+		performUndo();
 		checkState(true, true, 1, 1);
 	}	
 	
@@ -112,22 +111,22 @@ public class UndoManagerTests extends RefactoringTest {
 		}
 		for (int i= 0; i < limit; i++){
 			checkState(i, i != limit, i != 0, limit - i, i);			
-			Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
+			performUndo();
 		}
 		
 		for (int i= 0; i < limit; i++){
 			checkState(i, i != 0, i != limit, i, limit - i);			
-			Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
+			performRedo();
 		}
 	}
 	
 
 	public void test9() throws Exception{	
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
-		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
+		performUndo();
+		performRedo();
 		performRefactoring(new NullRefactoring());
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
+		performUndo();
 		Refactoring.getUndoManager().flush();
 		checkState(false, false, 0, 0);
 	}		

@@ -6,12 +6,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.refactoring.IRefactoring;
+import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.IRefactoring;
 import org.eclipse.jdt.core.refactoring.Refactoring;
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.refactoring.fields.RenameNonPrivateFieldRefactoring;
 
-import org.eclipse.jdt.testplugin.JavaTestSetup;
+import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.testplugin.ui.*;
 
@@ -63,13 +63,13 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		assert("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
 		assert("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
+		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
 		assert("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
 		assert("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		
-		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
+		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	

@@ -30,14 +30,8 @@ public class FileDocumentManager implements IDocumentManager{
 		if (fDocument == null)
 			return;
 		String newSource= fDocument.get();
-		try{
-		IPackageFragment pack= (IPackageFragment)fCU.getParent();
-		String name= fCU.getElementName();
-		fCU.delete(true, pm);
-		pack.createCompilationUnit(name, newSource, true, pm);
-		} catch (JavaModelException e){
-			e.printStackTrace();
-		}
+		fCU.getBuffer().setContents(newSource);
+		fCU.save(pm, true);		
 	}
 
 	public void connect(){

@@ -5,7 +5,7 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.code.ExtractMethodRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.code.ExtractMethodRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
 
 public class ExtractMethodTests extends RefactoringTest {
 
@@ -136,7 +136,7 @@ public class ExtractMethodTests extends RefactoringTest {
 				IChange change= refactoring.createChange(pm);
 				assertNotNull(change);
 				change.aboutToPerform();
-				change.perform(pm);
+				change.perform(new ChangeContext(new TestExceptionHandler()), pm);
 				change.performed();
 				assertNotNull(change.getUndoChange());
 				source= unit.getSource();
@@ -646,6 +646,14 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test283() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test284() throws Exception {
+		validSelectionTest();
+	}
+	
+	public void test285() throws Exception {
 		validSelectionTest();
 	}
 	
