@@ -113,6 +113,8 @@ public class RefactoringSupport {
 		 * @see ISetSelectionTarget
 		 */
 		private static void selectAndReveal(Object newElement) {
+			if (newElement == null)
+				return;
 			IWorkbenchWindow dw = JavaPlugin.getActiveWorkbenchWindow();
 			if (dw ==  null)
 				return;
