@@ -325,7 +325,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	
 	private void saveEnableStateAndSet(Control w, Map h, String key, boolean enabled) {
 		if (w != null) {
-			h.put(key, new Boolean(w.isEnabled()));
+			h.put(key, new Boolean(w.getEnabled()));
 			w.setEnabled(enabled);
 		}
 	}
