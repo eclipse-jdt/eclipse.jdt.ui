@@ -28,7 +28,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 	public NewTestCaseCreationWizard() {
 		super();
-		setWindowTitle(WizardMessages.getString("Wizard.title.new")); //$NON-NLS-1$
+		setWindowTitle(WizardMessages.getString("Wizard.title.new.testcase")); //$NON-NLS-1$
 		initDialogSettings();
 	}
 

@@ -249,8 +249,9 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		createContainerControls(composite, nColumns);	
 		createPackageControls(composite, nColumns);
 		createSeparator(composite, nColumns);
-		createTestClassControls(composite, nColumns);		
 		createClassToTestControls(composite, nColumns);
+		createSeparator(composite, nColumns);
+		createTestClassControls(composite, nColumns);		
 		createSuperClassControls(composite, nColumns);
 		createMethodStubSelectionControls(composite, nColumns);
 		setSuperClass(JUnitPlugin.TEST_SUPERCLASS_NAME, true);
