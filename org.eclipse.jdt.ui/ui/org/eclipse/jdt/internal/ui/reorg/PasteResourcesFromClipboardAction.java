@@ -6,8 +6,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -16,14 +14,13 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.CopyProjectAction;
 import org.eclipse.ui.part.ResourceTransfer;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 
@@ -74,6 +71,15 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		if (selection.size() != 1) //only after we checked the 'one project' case
 			return false;
 		
+		/*
+		 * special case: if both source references and resources are in clipboard - disable this action
+		 * if a compilation unit is selected.
+		 * this is important in the case when a type is copied to the clipboard - we put also its compilation unit
+		 */
+		TypedSource[] typedSource= getClipboardSourceReference();
+		if (selection.getFirstElement() instanceof ICompilationUnit && typedSource != null && typedSource.length != 0)
+			return false;
+		
 		if (StructuredSelectionUtil.getResources(selection).length != 1)
 			return false;
 		
@@ -102,12 +108,12 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		return ClipboardActionUtil.getFirstResource(selection);
 	}
 	
-	private Clipboard getClipboard() {
-		return fClipboard;
+	private IResource[] getClipboardResources() {
+		return ((IResource[])fClipboard.getContents(ResourceTransfer.getInstance()));
 	}
 	
-	private IResource[] getClipboardResources() {
-		return ((IResource[])getClipboard().getContents(ResourceTransfer.getInstance()));
+	private TypedSource[] getClipboardSourceReference() {
+		return ((TypedSource[])fClipboard.getContents(TypedSourceTransfer.getInstance()));
 	}
 
 	private static CopyRefactoring createCopyRefactoring(IResource[] resourceData) {
