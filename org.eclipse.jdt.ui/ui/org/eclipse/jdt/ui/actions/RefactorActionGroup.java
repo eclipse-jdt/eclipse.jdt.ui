@@ -92,6 +92,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractMethodAction;
 	private SelectionDispatchAction fExtractTempAction;
 	private SelectionDispatchAction fExtractConstantAction;
+	private SelectionDispatchAction fIntroduceParameterAction;
     private SelectionDispatchAction fConvertLocalToFieldAction;
 	private SelectionDispatchAction fSelfEncapsulateField;
 	
@@ -162,6 +163,11 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_LOCAL_VARIABLE);
 		initAction(fExtractTempAction, provider, selection);
 		editor.setAction("ExtractLocalVariable", fExtractTempAction); //$NON-NLS-1$
+
+		fIntroduceParameterAction= new IntroduceParameterAction(editor);
+		fIntroduceParameterAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER);
+		initAction(fIntroduceParameterAction, provider, selection);
+		editor.setAction("IntroduceParameter", fIntroduceParameterAction); //$NON-NLS-1$
 
 		fExtractConstantAction= new ExtractConstantAction(editor);
 		fExtractConstantAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
@@ -261,6 +267,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.PUSH_DOWN, fPushDownAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_CONSTANT, fExtractConstantAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_PARAMETER, fIntroduceParameterAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
@@ -291,6 +298,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fPushDownAction, provider);
 		disposeAction(fExtractTempAction, provider);
 		disposeAction(fExtractConstantAction, provider);
+		disposeAction(fIntroduceParameterAction, provider);
 		disposeAction(fExtractMethodAction, provider);
 		disposeAction(fInlineAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
@@ -325,6 +333,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fExtractMethodAction);
 		added+= addAction(refactorSubmenu, fExtractTempAction);
 		added+= addAction(refactorSubmenu, fExtractConstantAction);
+		added+= addAction(refactorSubmenu, fIntroduceParameterAction);
 		added+= addAction(refactorSubmenu, fConvertLocalToFieldAction);
 		added+= addAction(refactorSubmenu, fSelfEncapsulateField);
 		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean("org.eclipse.jdt.refactoring.participants")) { //$NON-NLS-1$

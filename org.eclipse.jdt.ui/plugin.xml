@@ -1164,6 +1164,12 @@
 			definitionId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
 			retarget="true" />
 
+		<action id="org.eclipse.jdt.ui.actions.IntroduceParameter"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+      		label="%Refactoring.introduceParameterAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.introduce.parameter"
+			retarget="true" />
+
 		<action id="org.eclipse.jdt.ui.actions.ExtractConstant"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.extractConstantAction.label"
@@ -2430,6 +2436,19 @@
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	
+	<command
+		id="org.eclipse.jdt.ui.edit.text.java.introduce.parameter"
+		category="org.eclipse.jdt.ui.category.refactoring"
+		name= "%ActionDefinition.introduceParameter.name"
+		description= "%ActionDefinition.introduceParameter.description">
+	</command>
+ 	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.introduce.parameter"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+
 	<command
 		id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
 		category="org.eclipse.jdt.ui.category.refactoring"

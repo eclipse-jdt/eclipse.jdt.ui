@@ -303,6 +303,14 @@ public class JdtActionConstants {
 	public static final String EXTRACT_CONSTANT= "org.eclipse.jdt.ui.actions.ExtractConstant"; //$NON-NLS-1$
 
 	/**
+	 * Refactor menu: name of standard Introduce Parameter global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.IntroduceParameter"</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.actions.IntroduceParameter"; //$NON-NLS-1$
+
+	/**
 	 * Refactor menu: name of standard Extract Method global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractMethod"</code>).
 	 */

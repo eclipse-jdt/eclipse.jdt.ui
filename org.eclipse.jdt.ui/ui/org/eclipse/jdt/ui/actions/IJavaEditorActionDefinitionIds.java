@@ -297,6 +297,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String EXTRACT_CONSTANT= "org.eclipse.jdt.ui.edit.text.java.extract.constant"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the refactor -> introduce parameter action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.introduce.parameter"</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.edit.text.java.introduce.parameter"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the refactor -> inline local variable action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.inline.local.variable"</code>).
 	 * @deprecated Use INLINE
