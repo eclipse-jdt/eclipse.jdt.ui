@@ -141,7 +141,10 @@ public class JavaElementSorter extends ViewerSorter {
 				}
 			
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				if (!e.isDoesNotExist()) {
+					JavaPlugin.log(e);
+				}
+				// let none existing elements pass: name can be retrieved without existence
 			}
 			return JAVAELEMENTS;
 		} else if (element instanceof IFile) {
@@ -205,7 +208,7 @@ public class JavaElementSorter extends ViewerSorter {
 	}
 	
 	private int compareWithLabelProvider(Viewer viewer, Object e1, Object e2) {
-		if (viewer == null || !(viewer instanceof ContentViewer)) {
+		if (viewer instanceof ContentViewer) {
 			IBaseLabelProvider prov = ((ContentViewer) viewer).getLabelProvider();
 			if (prov instanceof ILabelProvider) {
 				ILabelProvider lprov= (ILabelProvider) prov;
