@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 
+
 public interface IReorgQueries {
 	public static final int DELETE_GETTER_SETTER= 						1;
 	public static final int DELETE_EMPTY_CUS= 							2;
@@ -18,12 +19,12 @@ public interface IReorgQueries {
 	public static final int DELETE_READ_ONLY_ELEMENTS= 					5;
 	
 	/*
-	 * The ID is used to uniquely identify a query. It's also usesful for testing.
+	 * The ID is used to uniquely identify a query. It's also useful for testing.
 	 */
 	IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, int queryID);
 
 	/*
-	 * The ID is used to uniquely identify a query. It's also usesful for testing.
+	 * The ID is used to uniquely identify a query. It's also useful for testing.
 	 */
 	IConfirmQuery createYesNoQuery(String queryTitle, int queryID);
 }
