@@ -16,7 +16,8 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UnusedImport:
 			case IProblem.DuplicateImport:
 			case IProblem.CannotImportPackage:
-			case IProblem.ConflictingImport:			
+			case IProblem.ConflictingImport:
+			case IProblem.ImportNotFound:
 			case IProblem.UndefinedMethod:
 			case IProblem.UndefinedConstructor:
 			case IProblem.ParameterMismatch:
@@ -102,7 +103,8 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UnusedImport:
 			case IProblem.DuplicateImport:
 			case IProblem.CannotImportPackage:
-			case IProblem.ConflictingImport:            
+			case IProblem.ConflictingImport:
+			case IProblem.ImportNotFound:
 				ReorgCorrectionsSubProcessor.removeImportStatementProposals(context, proposals);
 				break;
 			case IProblem.UndefinedMethod:
