@@ -1647,7 +1647,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected abstract class NextSubWordAction extends TextNavigationAction {
 
-		private JavaWordIterator fIterator= new JavaWordIterator();
+		protected JavaWordIterator fIterator= new JavaWordIterator();
 
 		/**
 		 * Creates a new next sub-word action.
@@ -1673,14 +1673,33 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			final IDocument document= viewer.getDocument();
 			fIterator.setText((CharacterIterator) new DocumentCharacterIterator(document));
 			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+			if (position == -1)
+				return;
 			
-			int next= fIterator.following(position);
+			int next= findNextPosition(position);
 			if (next != BreakIterator.DONE) {
 				setCaretPosition(next);
 				getTextWidget().showSelection();
 				fireSelectionChanged();
 			}
 				
+		}
+
+		/**
+		 * Finds the next position after the given position.
+		 * 
+		 * @param position the current position
+		 * @return the next position
+		 */
+		protected int findNextPosition(int position) {
+			ISourceViewer viewer= getSourceViewer();
+			int widget= -1;
+			while (position != BreakIterator.DONE && widget == -1) { // TODO: optimize
+				position= fIterator.following(position);
+				if (position != BreakIterator.DONE)
+					widget= modelOffset2WidgetOffset(viewer, position);
+			}
+			return position;
 		}
 
 		/**
@@ -1740,6 +1759,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				// Should not happen
 			}
 		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.NextSubWordAction#findNextPosition(int)
+		 */
+		protected int findNextPosition(int position) {
+			return fIterator.following(position);
+		}
 	}
 
 	/**
@@ -1784,7 +1810,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected abstract class PreviousSubWordAction extends TextNavigationAction {
 
-		private JavaWordIterator fIterator= new JavaWordIterator();
+		protected JavaWordIterator fIterator= new JavaWordIterator();
 
 		/**
 		 * Creates a new previous sub-word action.
@@ -1810,14 +1836,33 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			final IDocument document= viewer.getDocument();
 			fIterator.setText((CharacterIterator) new DocumentCharacterIterator(document));
 			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+			if (position == -1)
+				return;
 			
-			int previous= fIterator.preceding(position);
+			int previous= findPreviousPosition(position);
 			if (previous != BreakIterator.DONE) {
 				setCaretPosition(previous);
 				getTextWidget().showSelection();
 				fireSelectionChanged();
 			}
 				
+		}
+
+		/**
+		 * Finds the previous position before the given position.
+		 * 
+		 * @param position the current position
+		 * @return the previous position
+		 */
+		protected int findPreviousPosition(int position) {
+			ISourceViewer viewer= getSourceViewer();
+			int widget= -1;
+			while (position != BreakIterator.DONE && widget == -1) { // TODO: optimize
+				position= fIterator.preceding(position);
+				if (position != BreakIterator.DONE)
+					widget= modelOffset2WidgetOffset(viewer, position);
+			}
+			return position;
 		}
 
 		/**
@@ -1876,6 +1921,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			} catch (BadLocationException exception) {
 				// Should not happen
 			}
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.PreviousSubWordAction#findPreviousPosition(int)
+		 */
+		protected int findPreviousPosition(int position) {
+			return fIterator.preceding(position);
 		}
 	}
 
