@@ -190,7 +190,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	// -------------------- package refactorings ----------------------
 	
 	private AbstractOpenRefactoringWizardAction createRenamePackageAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
-		if (linkRenamePackage())
+		if (linkRenameInPackagesView())
 			return null;
 			
 		String label= RefactoringResources.getResourceString("Refactoring.RenamePackage.label");
@@ -204,10 +204,6 @@ public class RefactoringGroup extends ContextMenuGroup {
 		};
 	}
 	
-	private boolean linkRenamePackage() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(
-			IPreferencesConstants.LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING);
-	}
 	// -------------------- field refactorings ----------------------
 	
 	private AbstractOpenRefactoringWizardAction createRenamePrivateFieldAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
@@ -235,10 +231,8 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 		
 	// --------- compilation unit refactorings  --------------------
+	
 	private AbstractOpenRefactoringWizardAction createMoveCompilationUnitAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {
-		if (linkMoveCompilationUnit())
-			return null;
-			
 		String label= RefactoringResources.getResourceString("Refactoring.MoveCompilationUnit.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, ICompilationUnit.class) {
 			protected Wizard createWizard() { 
@@ -250,8 +244,9 @@ public class RefactoringGroup extends ContextMenuGroup {
 		};
 	}
 	
-	private boolean linkMoveCompilationUnit() {
+	//---- Helpers --------------------------------------------------
+	private boolean linkRenameInPackagesView() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(
-			IPreferencesConstants.LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING);
+			IPreferencesConstants.LINK_RENAME_IN_PACKAGES_TO_REFACTORING);
 	}
 }

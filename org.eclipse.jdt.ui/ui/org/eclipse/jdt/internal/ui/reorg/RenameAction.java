@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
   * Action for renaming file and folder resource elements in the resource explorer.
   */
 public class RenameAction extends ReorgAction {
+	
 	private final static String PREFIX= "action.rename.";
 	private final static String ACTION_NAME= PREFIX+"name";
 	private final static String LABEL= PREFIX+"label";
@@ -59,6 +60,8 @@ public class RenameAction extends ReorgAction {
 		super(viewer, JavaPlugin.getResourceString(LABEL));
 		setDescription(JavaPlugin.getResourceString(DESCRIPTION));
 	}
+
+
 
 	/**
 	 *The user has invoked this action
@@ -93,7 +96,7 @@ public class RenameAction extends ReorgAction {
 		IInputValidator validator= new IInputValidator() {
 			int k= 0;
 			public String isValid(String name) {
-				IJavaElement parent= getJavaParen(element);
+				IJavaElement parent= getJavaParent(element);
 				return policy.isValidNewName(element, parent, name);
 			}
 		};
@@ -151,7 +154,7 @@ public class RenameAction extends ReorgAction {
 		}
 	}
 	
-	private IJavaElement getJavaParen(Object element) {
+	private IJavaElement getJavaParent(Object element) {
 		if (element instanceof IJavaElement) 
 			return ((IJavaElement)element).getParent();
 		if (element instanceof IResource) {

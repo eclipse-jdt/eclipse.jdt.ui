@@ -38,8 +38,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 	public static final String KEY_LIBRARY= "org.eclipse.jdt.ui.build.jdk.library.label";
 	public static final String KEY_LINKING= "org.eclipse.jdt.ui.packages.linkselection";
 	public static final String KEY_DESCRIPTION= "org.eclipse.jdt.ui.build.jdk.library.description";
-	public static final String KEY_LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkMoveCuToRefactoring";
-	public static final String KEY_LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkRenamePackageToRefactoring";
+	public static final String KEY_LINK_RENAME_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkRenamePackageToRefactoring";
 
 	public static final String JDKLIB_VARIABLE= "JDK_LIBRARY";
 
@@ -51,8 +50,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR, true);
-		store.setDefault(IPreferencesConstants.LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING, false);
-		store.setDefault(IPreferencesConstants.LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING, false);
+		store.setDefault(IPreferencesConstants.LINK_RENAME_IN_PACKAGES_TO_REFACTORING, false);
 	}
 
 	protected void createFieldEditors() {
