@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -318,23 +319,24 @@ public class MoveCuUpdateCreator {
 			int accuracy= match.getAccuracy();
 			int start= match.getOffset();
 			int length= match.getLength();
+			boolean insideDocComment= match.isInsideDocComment();
 			IResource res= match.getResource();
 			if (element.getAncestor(IJavaElement.IMPORT_DECLARATION) != null) {
-				super.acceptSearchMatch(TypeReference.createImportReference(element, accuracy, start, length, res));
+				super.acceptSearchMatch(TypeReference.createImportReference(element, accuracy, start, length, insideDocComment, res));
 			} else {
 				ICompilationUnit unit= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (unit != null) {
 					IBuffer buffer= unit.getBuffer();
 					String matchText= buffer.getText(start, length);
 					if (fSource.isDefaultPackage()) {
-						super.acceptSearchMatch(TypeReference.createSimpleReference(element, accuracy, start, length, res, matchText));
+						super.acceptSearchMatch(TypeReference.createSimpleReference(element, accuracy, start, length, insideDocComment, res, matchText));
 					} else {
 						// assert: matchText doesn't start nor end with comment
 						int simpleNameStart= getLastSimpleNameStart(matchText);
 						if (simpleNameStart != 0) {
-							super.acceptSearchMatch(TypeReference.createQualifiedReference(element, accuracy, start, length, res, start + simpleNameStart));
+							super.acceptSearchMatch(TypeReference.createQualifiedReference(element, accuracy, start, length, insideDocComment, res, start + simpleNameStart));
 						} else {
-							super.acceptSearchMatch(TypeReference.createSimpleReference(element, accuracy, start, length, res, matchText));
+							super.acceptSearchMatch(TypeReference.createSimpleReference(element, accuracy, start, length, insideDocComment, res, matchText));
 						}
 					}
 				}
@@ -359,30 +361,32 @@ public class MoveCuUpdateCreator {
 	}
 	
 	
-	private final static class TypeReference extends SearchMatch {
+	private final static class TypeReference extends TypeReferenceMatch {
 		private String fSimpleTypeName;
 		private int fSimpleNameStart;
 		
-		private TypeReference(IJavaElement enclosingElement, int accuracy, int start, int length, IResource resource,
-				int simpleNameStart, String simpleName) {
-			super(enclosingElement, accuracy, start, length, SearchEngine.getDefaultSearchParticipant(), resource);
+		private TypeReference(IJavaElement enclosingElement, int accuracy, int start, int length,
+				boolean insideDocComment, IResource resource, int simpleNameStart, String simpleName) {
+			super(enclosingElement, accuracy, start, length,
+					insideDocComment, SearchEngine.getDefaultSearchParticipant(), resource);
 			fSimpleNameStart= simpleNameStart;
 			fSimpleTypeName= simpleName;
 		}
 		
-		public static TypeReference createQualifiedReference(IJavaElement enclosingElement, int accuracy, int start, int length, IResource resource,
-				int simpleNameStart) {
+		public static TypeReference createQualifiedReference(IJavaElement enclosingElement, int accuracy, int start, int length,
+				boolean insideDocComment, IResource resource, int simpleNameStart) {
 			Assert.isTrue(start < simpleNameStart && simpleNameStart < start + length);
-			return new TypeReference(enclosingElement, accuracy, start, length, resource, simpleNameStart, null);
+			return new TypeReference(enclosingElement, accuracy, start, length, insideDocComment, resource, simpleNameStart, null);
 		}
 		
-		public static TypeReference createImportReference(IJavaElement enclosingElement, int accuracy, int start, int length, IResource resource) {
-			return new TypeReference(enclosingElement, accuracy, start, length, resource, -1, null);
+		public static TypeReference createImportReference(IJavaElement enclosingElement, int accuracy, int start, int length,
+				boolean insideDocComment, IResource resource) {
+			return new TypeReference(enclosingElement, accuracy, start, length, insideDocComment, resource, -1, null);
 		}
 		
-		public static TypeReference createSimpleReference(IJavaElement enclosingElement, int accuracy, int start, int length, IResource resource,
-				String simpleName) {
-			return new TypeReference(enclosingElement, accuracy, start, length, resource, -1, simpleName);
+		public static TypeReference createSimpleReference(IJavaElement enclosingElement, int accuracy, int start, int length,
+				boolean insideDocComment, IResource resource, String simpleName) {
+			return new TypeReference(enclosingElement, accuracy, start, length, insideDocComment, resource, -1, simpleName);
 		}
 		
 		public boolean isImportDeclaration() {
