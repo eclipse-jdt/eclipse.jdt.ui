@@ -37,14 +37,16 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-import org.eclipse.jdt.internal.formatter.DefaultCodeFormatter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
@@ -99,7 +101,7 @@ public class CodeFormatterUtil {
 		TextEdit edit= format2(kind, string, offset, length, indentationLevel, lineSeparator, options);
 		if (edit == null) {
 			JavaPlugin.logErrorMessage("formatter failed to format (no edit returned). Will use unformatted text instead. kind: " + kind + ", string: " + string); //$NON-NLS-1$ //$NON-NLS-2$
-			return string;
+			return string.substring(offset, offset + length);
 		}
 		String formatted= getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
 		return formatted.substring(offset, formatted.length() - (string.length() - (offset + length)));
@@ -184,8 +186,7 @@ public class CodeFormatterUtil {
 		if (useOldFormatter()) {
 			return emulateNewWithOld(string, offset, length, indentationLevel, lineSeparator, options);
 		} else {
-			return new DefaultCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
-			//return ToolFactory.createCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
+			return ToolFactory.createCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
 		}	
 	}
 	
@@ -325,8 +326,7 @@ public class CodeFormatterUtil {
 			JavaPlugin.log(e);
 			Assert.isTrue(false, e.getMessage());
 		} catch (InvalidInputException e) {
-			JavaPlugin.log(e);
-			Assert.isTrue(false, e.getMessage());
+			// error in source code
 		}
 		return null;
 	}
