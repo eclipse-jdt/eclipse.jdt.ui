@@ -414,11 +414,25 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	public IType[] getPossibleTargetClasses(IProgressMonitor pm) throws JavaModelException {
+		return getPossibleTargetClasses(new RefactoringStatus(), pm);
+	}
+	
+	private IType[] getPossibleTargetClasses(RefactoringStatus status, IProgressMonitor pm) throws JavaModelException {
 		IType[] superClasses= getDeclaringType().newSupertypeHierarchy(pm).getAllSuperclasses(getDeclaringType());
-		List superClassList= new ArrayList(superClasses.length);	
+		List superClassList= new ArrayList(superClasses.length);
+		int binary= 0;
 		for (int i= 0; i < superClasses.length; i++) {
-			if (isPossibleTargetClass(superClasses[i]))
-				superClassList.add(superClasses[i]);
+			IType superclass= superClasses[i];
+			if (isPossibleTargetClass(superclass)) {
+				superClassList.add(superclass);
+			} else {
+				if (superclass != null && superclass.isBinary()) {
+					binary++;
+				}
+			}
+		}
+		if (superClasses.length == binary) {
+			status.addFatalError(RefactoringCoreMessages.getString("PullUPRefactoring.no_all_binary")); //$NON-NLS-1$
 		}
 		Collections.reverse(superClassList);
 		return (IType[]) superClassList.toArray(new IType[superClassList.size()]);
@@ -858,9 +872,10 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkSuperclassesOfDeclaringClass(IProgressMonitor pm) throws JavaModelException{
-		if (getPossibleTargetClasses(pm).length == 0)
+		RefactoringStatus result= new RefactoringStatus();
+		if (getPossibleTargetClasses(result, pm).length == 0 && !result.hasFatalError())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.not_this_type"));	 //$NON-NLS-1$
-		return new RefactoringStatus();
+		return result;
 	}
 	
 	private static boolean haveCommonDeclaringType(IMember[] members){
