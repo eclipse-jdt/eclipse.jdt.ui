@@ -12,6 +12,8 @@ public class SourceRange implements ISourceRange{
 	private int fLength;
 
 	public SourceRange(int offset, int length){
+		Assert.isTrue(offset >= 0);
+		Assert.isTrue(length >= 0);
 		fLength= length;
 		fOffset= offset;
 	}
