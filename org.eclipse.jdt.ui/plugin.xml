@@ -128,7 +128,7 @@
 		project="true"
 		finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
 		icon="icons/full/ctool16/newjprj_wiz.gif">
-		<description>Create a Java project</description>
+		<description>%NewJavaProject.description</description>
     </wizard>	
 	<wizard
 		id="org.eclipse.jdt.ui.wizards.NewPackageCreationWizard"
@@ -136,7 +136,7 @@
 		class="org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newpack_wiz.gif">
-		<description>Create a Java package</description>
+		<description>%NewJavaPackage.description</description>
 	</wizard>	
 	<wizard
 		id="org.eclipse.jdt.ui.wizards.NewClassCreationWizard"
@@ -144,7 +144,7 @@
 		class="org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newclass_wiz.gif">
-		<description>Create a Java class</description>
+		<description>%NewJavaClass.description</description>
 	</wizard>
 	<wizard 
 		id="org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard"
@@ -152,7 +152,7 @@
 		class="org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newint_wiz.gif">
-		<description>Create a Java interface</description>
+		<description>%NewJavaInterface.description</description>
 	</wizard>
 	<wizard
 		id="org.eclipse.jdt.ui.wizards.NewSnippetCreationWizard"
@@ -160,7 +160,7 @@
 		class="org.eclipse.jdt.internal.ui.wizards.NewSnippetCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newsbook_wiz.gif">
-		<description>Create a Java snippets file</description>
+		<description>%NewJavaScrapbookPage.description</description>
 	</wizard>	    
   
 </extension>
