@@ -200,16 +200,6 @@
 		class="org.eclipse.jdt.internal.ui.preferences.SourceAttachmentPropertyPage"
 		nameFilter="*.jar">
     </page>  
-  	<page name="%infoPageName"
-		id="org.eclipse.jdt.ui.propertyPages.InfoPage" 
-		objectClass="org.eclipse.jdt.core.IJavaElement"
-		class="org.eclipse.jdt.internal.ui.preferences.JavaElementInfoPage">
-    </page>  
-   	<page name="%referencePageName"
-  	   id="org.eclipse.jdt.ui.propertypages.projectreference"
-           objectClass="org.eclipse.jdt.core.IJavaProject"
-           class="org.eclipse.ui.internal.dialogs.ProjectReferencePage">
-   	</page>
 </extension>
 
 <extension
