@@ -477,11 +477,6 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		IRegion visibleRegion= viewer.getVisibleRegion();			
 		int caretOffset= text.getCaretOffset() + visibleRegion.getOffset();
 
-		// patch
-		int delta= caretOffset - (fReplacementOffset + fReplacementLength);
-		if (delta > 0)
-			fReplacementLength += delta;
-
 		if (caretOffset >= fReplacementOffset + fReplacementLength) {
 			repairPresentation(viewer); 
 			return;
