@@ -1898,6 +1898,55 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testStaticImports_bug81589() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public enum E {\n");
+		buf.append("	A, B, C;\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import pack0.E;\n");
+		buf.append("import static pack0.E.A;\n");
+		buf.append("\n");
+		buf.append("public class Test2 {\n");
+		buf.append("	public void testMe(E e) {\n");
+		buf.append("	    switch (e) {\n");
+		buf.append("	      case A:\n");
+		buf.append("	    }\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test2.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import pack0.E;\n"); // no import for E.A
+		buf.append("\n");
+		buf.append("public class Test2 {\n");
+		buf.append("	public void testMe(E e) {\n");
+		buf.append("	    switch (e) {\n");
+		buf.append("	      case A:\n");
+		buf.append("	    }\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 
 	
 	public void testImportCountAddNew() throws Exception {
