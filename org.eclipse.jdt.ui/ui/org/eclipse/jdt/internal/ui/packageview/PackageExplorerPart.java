@@ -544,7 +544,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (!isActivePart())
 			return;
 		Object obj= selection.getFirstElement();
-		Object element= null;
 
 		if (selection.size() == 1) {
 			IEditorPart part= EditorUtility.isOpenInEditor(obj);
@@ -746,13 +745,38 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			ISelection newSelection= new StructuredSelection(element);
 			if (!fViewer.getSelection().equals(newSelection)) {
 				try {
-					fViewer.removeSelectionChangedListener(fSelectionListener);
+					fViewer.removeSelectionChangedListener(fSelectionListener);						
 					fViewer.setSelection(newSelection);
+
+					while (element != null && fViewer.getSelection().isEmpty()) {
+						// Try to select parent in case element is filtered
+						element= getParent(element);
+						if (element != null) {
+							newSelection= new StructuredSelection(element);
+							fViewer.setSelection(newSelection);
+						}
+					}
 				} finally {
 					fViewer.addSelectionChangedListener(fSelectionListener);
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns the element's parent.
+	 * 
+	 * @return the parent or <code>null</code> if there's no parent
+	 */
+	private Object getParent(Object element) {
+		if (element instanceof IJavaElement)
+			return ((IJavaElement)element).getParent();
+		else if (element instanceof IResource)
+			return ((IResource)element).getParent();
+//		else if (element instanceof IStorage) {
+			// can't get parent - see bug 22376
+//		}
+		return null;
 	}
 	
 	/**
