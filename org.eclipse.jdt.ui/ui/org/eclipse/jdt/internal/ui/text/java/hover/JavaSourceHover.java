@@ -24,6 +24,7 @@ import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -52,7 +53,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 			return null;			
 			
 		IJavaElement curr= result[0];
-		if (curr instanceof IMember && curr instanceof ISourceReference) {
+		if ((curr instanceof IMember || curr instanceof ILocalVariable) && curr instanceof ISourceReference) {
 			try {
 				String source= ((ISourceReference) curr).getSource();
 				if (source == null)

@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -25,6 +24,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
@@ -318,6 +319,9 @@ public class JavaElementLabels {
 			case IJavaElement.FIELD: 
 				getFieldLabel((IField) element, flags, buf);
 				break;
+			case IJavaElement.LOCAL_VARIABLE: 
+				getLocalVariableLabel((ILocalVariable) element, flags, buf);
+				break;
 			case IJavaElement.INITIALIZER:
 				getInitializerLabel((IInitializer) element, flags, buf);
 				break;				
@@ -460,7 +464,22 @@ public class JavaElementLabels {
 			JavaPlugin.log(e); // NotExistsException will not reach this point
 		}			
 	}
+	
+	/**
+	 * Appends the label for a local variable to a StringBuffer.
+	 * 
+	 * @since 3.0
+	 */	
+	public static void getLocalVariableLabel(ILocalVariable localVariable, int flags, StringBuffer buf) {
+		buf.append(Signature.toString(localVariable.getTypeSignature()));
+		buf.append(' ');
+		buf.append(localVariable.getElementName());
+		
+		buf.append(CONCAT_STRING);
+		getElementLabel(localVariable.getParent(), M_PARAMETER_TYPES | M_FULLY_QUALIFIED | T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
 
+	}
+	
 	/**
 	 * Appends the label for a initializer to a StringBuffer. Considers the I_* flags.
 	 */	
