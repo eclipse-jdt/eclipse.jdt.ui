@@ -263,8 +263,8 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			}
 			String name= buf.toString();
 			
-			if ("java.lang".equals(containerName) && typeName.equals(completion)) //$NON-NLS-1$
-				completion= containerName + '.' + completion; //since JDT core swallows java.lang
+			if (! "".equals(containerName) && typeName.equals(completion)) //$NON-NLS-1$
+				completion= containerName + '.' + completion; //since JDT core swallows java.lang and declaring cu's package
 			
 			JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, /*insert fully qualified*/null,
 					start, end-start, getImage(descriptor), name, relevance, typeName, containerName);
