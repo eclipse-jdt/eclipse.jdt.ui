@@ -54,7 +54,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	private Position fPosition;
 	
 	/**
-	 * Constructor for CorrectionAssistant.
+	 * Constructor for JavaCorrectionAssistant.
 	 */
 	public JavaCorrectionAssistant(IEditorPart editor) {
 		super();
@@ -116,46 +116,22 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#showPossibleCompletions()
 	 */
 	public String showPossibleCompletions() {
-		if (fViewer == null)
+		if (fViewer == null || fViewer.getDocument() == null)
 			// Let superclass deal with this
 			return super.showPossibleCompletions();
 		
 		Point selectedRange= fViewer.getSelectedRange();
-		int initalOffset= selectedRange.x;
-		int invocationOffset;
-		int invocationLength;
+		fPosition= null;
 		
-		if (areMultipleLinesSelected()) {
-			try {
-				IDocument document= fViewer.getDocument();
-				IRegion start= document.getLineInformationOfOffset(initalOffset);
-				invocationOffset= start.getOffset();
-				IRegion end= document.getLineInformationOfOffset(initalOffset + selectedRange.y);
-				if (end.getOffset() == initalOffset + selectedRange.y) {
-					int line= document.getLineOfOffset(end.getOffset());
-					end= fViewer.getDocument().getLineInformation(line - 1);
-				}
-				invocationLength= end.getOffset() + end.getLength() - invocationOffset;
-			} catch (BadLocationException ex) {
-				invocationOffset= initalOffset;
-				invocationLength= 0;
+		if (selectedRange.y == 0) {
+			int invocationOffset= computeOffsetWithCorrection(selectedRange.x);
+			if (invocationOffset != -1) {
+				storePosition();
+				fViewer.setSelectedRange(invocationOffset, 0);
+				fViewer.revealRange(invocationOffset, 0);	
 			}
-		} else {
-			invocationOffset= computeOffsetWithCorrection(initalOffset);
-			invocationLength= 0;
 		}
-			
-		if (invocationOffset != -1) {
-			storePosition();
-			fViewer.setSelectedRange(invocationOffset, invocationLength);
-			fViewer.revealRange(invocationOffset, invocationLength);
-		} else {
-			fPosition= null;
-		}
-		
-		String errorMsg= super.showPossibleCompletions();
-
-		return errorMsg;
+		return super.showPossibleCompletions();
 	}
 
 	/**
@@ -167,9 +143,6 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 * @return an offset where corrections are available or -1 if none
 	 */
 	private int computeOffsetWithCorrection(int initalOffset) {
-		if (fViewer == null || fViewer.getDocument() == null)
-			return -1;
-		
 		IRegion lineInfo= null;
 		try {
 			lineInfo= fViewer.getDocument().getLineInformationOfOffset(initalOffset);
@@ -253,32 +226,6 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	protected void possibleCompletionsClosed() {
 		super.possibleCompletionsClosed();
 		restorePosition();
-	}
-
-	/**
-	 * Returns <code>true</code> if one line is completely selected or if multiple lines are selected.
-	 * Being completely selected means that all characters except the new line characters are 
-	 * selected.
-	 * 
-	 * @return <code>true</code> if one or multiple lines are selected
-	 * @since 2.1
-	 */
-	private boolean areMultipleLinesSelected() {
-		Point s= fViewer.getSelectedRange();
-		if (s.y == 0)
-			return false;
-			
-		try {
-			
-			IDocument document= fViewer.getDocument();
-			int startLine= document.getLineOfOffset(s.x);
-			int endLine= document.getLineOfOffset(s.x + s.y);
-			IRegion line= document.getLineInformation(startLine);
-			return startLine != endLine || (s.x == line.getOffset() && s.y == line.getLength());
-		
-		} catch (BadLocationException x) {
-			return false;
-		}
 	}
 
 	private void storePosition() {
