@@ -32,7 +32,7 @@
 <extension-point name="%elementFiltersName" id="javaElementFilters" schema="schema/javaElementFilters.exsd"/>
 <extension-point name="%javaEditorTextHoversName" id="javaEditorTextHovers" schema="schema/javaEditorTextHovers.exsd"/>
 <extension-point name="%javadocCompletionProcessor" id="javadocCompletionProcessor" schema="schema/javadocCompletionProcessor.exsd"/>
-<extension-point name="classpathContainerPageExtensionPoint" id="classpathContainerPage" schema="schema/classpathContainerPage.exsd"/>
+<extension-point name="%classpathContainerPageExtensionPoint" id="classpathContainerPage" schema="schema/classpathContainerPage.exsd"/>
 
 <extension
       point="org.eclipse.jdt.ui.classpathContainerPage">
