@@ -10,12 +10,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -47,8 +45,7 @@ public abstract class JavaSearchSubGroup extends ActionGroup  {
 		JavaElementSearchAction[] actions= getActions();
 		for (int i= 0; i < actions.length; i++) {
 			JavaElementSearchAction action= actions[i];
-			action.update(sel);
-			if (!(sel instanceof IStructuredSelection) || action.isEnabled())
+			if (action.isEnabled())
 				javaSearchMM.add(action);
 		}
 		
@@ -58,13 +55,9 @@ public abstract class JavaSearchSubGroup extends ActionGroup  {
 	public IMenuManager getMenuManagerForGroup() {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID); //$NON-NLS-1$
 		JavaElementSearchAction[] actions= getActions();
-		ActionContext context= getContext();
-		ISelection selection= null;
-		if (context != null)
-			selection= context.getSelection();
+		ISelection selection= getContext().getSelection();
 		if (selection != null && !selection.isEmpty()) {
 			for (int i= 0; i < actions.length; i++) {
-				actions[i].update(selection);
 				if (actions[i].isEnabled())
 					javaSearchMM.add(actions[i]);
 			}

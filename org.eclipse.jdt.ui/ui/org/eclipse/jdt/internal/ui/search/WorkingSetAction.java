@@ -41,4 +41,9 @@ public class WorkingSetAction extends JavaElementSearchAction {
 	int getLimitTo() {
 		return -1;
 	}
+
+	String getOperationUnavailableMessage() {
+		return fAction.getOperationUnavailableMessage();
+	}
+
 }
