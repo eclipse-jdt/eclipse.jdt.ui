@@ -954,16 +954,18 @@
 <!-- Java Compare                                                                -->
 <!-- =========================================================================== -->
    <extension
-         point="org.eclipse.ui.fontDefinitions">
+         point="org.eclipse.ui.themes">
       <fontDefinition
             label="%javaCompareFontDefiniton.label"
             defaultsTo="org.eclipse.jdt.ui.editors.textfont"
+            categoryId="org.eclipse.compare.contentmergeviewer.TextMergeViewer"
             id="org.eclipse.jdt.internal.ui.compare.JavaMergeViewer">
          <description>
             %javaCompareFontDefiniton.description
          </description>
       </fontDefinition>
    </extension>
+   
    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
