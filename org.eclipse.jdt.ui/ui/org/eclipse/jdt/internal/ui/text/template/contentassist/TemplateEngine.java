@@ -24,8 +24,6 @@ import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.Template;
 
-import org.eclipse.ui.texteditor.templates.TemplateProposal;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
