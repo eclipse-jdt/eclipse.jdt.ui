@@ -75,7 +75,7 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
  * 
  * In this case the variable declaration statement gets convert into a
  * declaration without initializer. So the body of the try/catch block 
- * only consists of new assignements. In this case we can't move the 
+ * only consists of new assignments. In this case we can't move the 
  * selected nodes (e.g. the declaration) into the try block.
  */
 public class SurroundWithTryCatchRefactoring extends Refactoring {
