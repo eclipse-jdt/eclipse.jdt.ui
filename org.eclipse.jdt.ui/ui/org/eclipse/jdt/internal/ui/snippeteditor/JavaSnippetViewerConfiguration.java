@@ -141,14 +141,14 @@ public class JavaSnippetViewerConfiguration extends SourceViewerConfiguration {
 	 * @see ISourceViewerConfiguration#getDefaultPrefix
 	 */
 	public String getDefaultPrefix(ISourceViewer sourcePart, String contentType) {
-		return (contentType == null ? "//" : null);
+		return (contentType == null ? "//" : null); //$NON-NLS-1$
 	}
 	
 	/**
 	 * @see ISourceViewerConfiguration#getIndentPrefixes
 	 */
 	public String[] getIndentPrefixes(ISourceViewer sourcePart, String contentType) {
-		return new String[] { "\t", "    " };
+		return new String[] { "\t", "    " }; //$NON-NLS-2$ //$NON-NLS-1$
 	}
 		
 	/**

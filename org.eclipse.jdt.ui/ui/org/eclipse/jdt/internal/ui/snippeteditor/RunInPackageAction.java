@@ -11,11 +11,12 @@ import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFr
  *
  */
 public class RunInPackageAction extends SnippetAction {
-
-	public static final String PREFIX = "SnippetEditor.RunInPackageAction.";
 	
 	public RunInPackageAction(JavaSnippetEditor editor) {
-		super(editor, PREFIX);
+		super(editor);
+		setText(SnippetMessages.getString("RunInPackage.label")); //$NON-NLS-1$
+		setToolTipText(SnippetMessages.getString("RunInPackage.tooltip")); //$NON-NLS-1$
+		setDescription(SnippetMessages.getString("RunInPackage.description")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_PACKSNIPPET);
 	}
 	
@@ -35,8 +36,8 @@ public class RunInPackageAction extends SnippetAction {
 			IJavaProject p= fEditor.getJavaProject();
 			//fix for 1G472LK: ITPJUI:WIN2000 - Package selection dialog must qualify package names regarding source folders
 			SelectionDialog dialog= JavaUI.createPackageDialog(shell, p, IJavaElementSearchConstants.CONSIDER_BINARIES);
-			dialog.setTitle(JavaPlugin.getResourceString(PREFIX + "dialog.title"));
-			dialog.setMessage(JavaPlugin.getResourceString(PREFIX + "dialog.message"));
+			dialog.setTitle(SnippetMessages.getString("RunInPackage.dialog.title")); //$NON-NLS-1$
+			dialog.setMessage(SnippetMessages.getString("RunInPackage.dialog.message")); //$NON-NLS-1$
 			String pkg= fEditor.getPackage();
 			if (pkg != null) {
 				dialog.setInitialSelections(new String[] {pkg});

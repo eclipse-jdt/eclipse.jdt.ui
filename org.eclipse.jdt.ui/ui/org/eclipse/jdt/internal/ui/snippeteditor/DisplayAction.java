@@ -16,11 +16,13 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class DisplayAction extends SnippetAction implements IUpdate {
 
-	public static final String PREFIX = "SnippetEditor.DisplayAction.";
-
 	public DisplayAction(JavaSnippetEditor editor) {
-		super(editor, PREFIX);
+		super(editor);
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_DISPLAYSNIPPET);
+
+		setText(SnippetMessages.getString("DisplayAction.label")); //$NON-NLS-1$
+		setToolTipText(SnippetMessages.getString("DisplayAction.tooltip")); //$NON-NLS-1$
+		setDescription(SnippetMessages.getString("DisplayAction.descriptioni")); //$NON-NLS-1$
 	}
 	
 	public void run() {

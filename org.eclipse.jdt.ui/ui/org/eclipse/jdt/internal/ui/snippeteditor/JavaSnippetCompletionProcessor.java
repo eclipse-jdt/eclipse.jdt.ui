@@ -27,9 +27,6 @@ import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
  */
 public class JavaSnippetCompletionProcessor implements IContentAssistProcessor {
 	
-	private final static String ERROR_TITLE= "Editor.Error.access.title";
-	private final static String ERROR_MESSAGE= "Editor.Error.access.message";
-	
 	private ResultCollector fCollector;
 	private JavaSnippetEditor fEditor;
 	
@@ -81,9 +78,8 @@ public class JavaSnippetCompletionProcessor implements IContentAssistProcessor {
 			fCollector.reset(fEditor.findJavaProject());
 			fEditor.codeComplete(fCollector);
 		} catch (JavaModelException x) {
-			ResourceBundle b= JavaPlugin.getResourceBundle();
 			Shell shell= viewer.getTextWidget().getShell();
-			ErrorDialog.openError(shell, b.getString(ERROR_TITLE), b.getString(ERROR_MESSAGE), x.getStatus());
+			ErrorDialog.openError(shell, SnippetMessages.getString("CompletionProcessor.errorTitle"), SnippetMessages.getString("CompletionProcessor.errorMessage"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		return fCollector.getResults();
 	}

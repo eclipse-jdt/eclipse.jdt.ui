@@ -24,7 +24,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		ILauncher[] launchers = DebugPlugin.getDefault().getLaunchManager().getLaunchers();
 		ILauncher me= null;
 		for (int i = 0; i < launchers.length; i++) {
-			if (launchers[i].getIdentifier().equals("org.eclipse.jdt.ui.launcher.ScrapbookLauncher")) {
+			if (launchers[i].getIdentifier().equals("org.eclipse.jdt.ui.launcher.ScrapbookLauncher")) { //$NON-NLS-1$
 				me = launchers[i];
 				break; 
 			}
@@ -48,7 +48,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 
 		IFile page = (IFile)runnable;
 		
-		if (!page.getFileExtension().equals("jpage")) {
+		if (!page.getFileExtension().equals("jpage")) { //$NON-NLS-1$
 			showNoPageDialog();
 			return false;
 		}
@@ -63,13 +63,13 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		URL pluginInstallURL= JavaPlugin.getDefault().getDescriptor().getInstallURL();
 		URL jarURL = null;
 		try {
-			jarURL = new URL(pluginInstallURL, "snippetsupport.jar");
+			jarURL = new URL(pluginInstallURL, "snippetsupport.jar"); //$NON-NLS-1$
 			jarURL = Platform.asLocalURL(jarURL);
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			JavaPlugin.log(e);
 			return false;
 		} catch (IOException e) {
-			e.printStackTrace();
+			JavaPlugin.log(e);
 			return false;
 		}
 		
@@ -86,7 +86,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 				return false;
 			}
 			
-			VMRunnerConfiguration config= new VMRunnerConfiguration("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain", classPath);
+			VMRunnerConfiguration config= new VMRunnerConfiguration("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain", classPath); //$NON-NLS-1$
 			ISourceLocator sl= new ProjectSourceLocator(p);
 			try {
 				IPath outputLocation =	p.getOutputLocation();
@@ -124,7 +124,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 				return true;
 			}
 		} catch (CoreException e) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), "ScrapbookLauncher", "Exception finding launcher", e.getStatus());
+			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), SnippetMessages.getString("ScrapbookLauncher.error.title"), SnippetMessages.getString("ScrapbookLauncher.error.exception"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		return false;
 	}
@@ -148,7 +148,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 				IResource resource= type.getJavaProject().getProject();
 				// create the marker
 				try {
-					fMagicBreakpoint = resource.createMarker("org.eclipse.jdt.ui.snippetSupportLineBreakpoint");
+					fMagicBreakpoint = resource.createMarker("org.eclipse.jdt.ui.snippetSupportLineBreakpoint"); //$NON-NLS-1$
 				} catch (CoreException e) {
 					fDebugException = new DebugException(e.getStatus());
 					return;
@@ -190,8 +190,8 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 	IType getMainType(IJavaProject jp) {	
 		try {
 			return jp.getPackageFragmentRoot(jp.getUnderlyingResource()).
-				getPackageFragment("org.eclipse.jdt.internal.ui.snippeteditor").
-				getClassFile("ScrapbookMain.class").getType();
+				getPackageFragment("org.eclipse.jdt.internal.ui.snippeteditor"). //$NON-NLS-1$
+				getClassFile("ScrapbookMain.class").getType(); //$NON-NLS-1$
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		}
@@ -211,7 +211,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 				Iterator i = selection.iterator();
 				while (i.hasNext()) {
 					Object o = i.next();
-					if (o instanceof IFile && ((IFile)o).getFileExtension().equals("jpage")) {
+					if (o instanceof IFile && ((IFile)o).getFileExtension().equals("jpage")) { //$NON-NLS-1$
 						list.add(o);
 					}
 				}
@@ -236,8 +236,8 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 	}
 	
 	protected void showNoPageDialog() {
-		String title= JavaPlugin.getResourceString("SnippetEditor.error.nopagetitle");
-		String msg= JavaPlugin.getResourceString("SnippetEditor.error.nopagemsg");
+		String title= SnippetMessages.getString("ScrapbookLauncher.error.title"); //$NON-NLS-1$
+		String msg= SnippetMessages.getString("ScrapbookLauncher.error.pagenotfound"); //$NON-NLS-1$
 		MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(),title, msg);
 	}
 	

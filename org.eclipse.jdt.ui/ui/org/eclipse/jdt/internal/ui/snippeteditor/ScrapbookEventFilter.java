@@ -34,8 +34,8 @@ public class ScrapbookEventFilter implements IDebugUIEventFilter {
 				}
 				if (jt.getLaunch() == fLaunch) {
 					IJavaStackFrame f = (IJavaStackFrame)jt.getTopStackFrame();
-					if (f == null || f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain")
-					 || f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain1")) {
+					if (f == null || f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain") //$NON-NLS-1$
+					 || f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain1")) { //$NON-NLS-1$
 						return false;
 					}
 				}

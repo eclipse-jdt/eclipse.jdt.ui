@@ -11,11 +11,14 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  *
  */
 public class StopAction extends SnippetAction {
-
-	public static final String PREFIX = "SnippetEditor.StopAction.";
 	
 	public StopAction(JavaSnippetEditor editor) {
-		super(editor, PREFIX);
+		super(editor);
+		
+		setText(SnippetMessages.getString("StopAction.label"));  //$NON-NLS-1$
+		setToolTipText(SnippetMessages.getString("StopAction.tooltip")); //$NON-NLS-1$
+		setDescription(SnippetMessages.getString("StopAction.description"));  //$NON-NLS-1$
+
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_TERMSNIPPET);
 	}
 	

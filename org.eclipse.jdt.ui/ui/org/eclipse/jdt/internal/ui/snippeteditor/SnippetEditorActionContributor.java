@@ -23,9 +23,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.BasicEditorActionContributor;
  * Contributions of the Evaluation Editor to the Workbench's tool and menu bar.
  */
 public class SnippetEditorActionContributor extends BasicEditorActionContributor {
-		
-	public static final String PREFIX = "SnippetEditor.";
-	
+ 	
 	protected JavaSnippetEditor fSnippetEditor;
 	
 	private RunAction fRunAction;
@@ -93,12 +91,10 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 		
 		updateStatus(fSnippetEditor);			
 	}
-	
+	 
 	protected void initializeActions() {
-		ResourceBundle bundle= JavaPlugin.getResourceBundle();
-		
-		fOpenOnSelectionAction= new SnippetOpenOnSelectionAction();
-
+		 
+		fOpenOnSelectionAction= new SnippetOpenOnSelectionAction(fSnippetEditor);
 		fDisplayAction= new DisplayAction(fSnippetEditor);		
 		fRunAction= new RunAction(fSnippetEditor);
 		fInspectAction= new InspectAction(fSnippetEditor);
@@ -112,9 +108,9 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 	protected void updateStatus(JavaSnippetEditor editor) {
 		String message;
 		if (editor.isEvaluating())
-			message= JavaPlugin.getResourceString(PREFIX + "evaluating");
+			message= SnippetMessages.getString("SnippetActionContributor.evalMsg");  //$NON-NLS-1$
 		else
-			message= JavaPlugin.getResourceString(PREFIX + "notevaluating");
+			message= ""; //$NON-NLS-1$
 		getActionBars().getStatusLineManager().setMessage(message);
 	}
 }

@@ -32,11 +32,11 @@ public class SnippetOpenOnSelectionAction extends OpenJavaElementAction {
 		
 		fEditor= editor;
 		
-		setText("&Open on Selection@F3");
-		setDescription("Open an editor on the selected element");
-		setToolTipText("Open an editor on the selected element");
-		setDialogTitle("Open on Selection");
-		setDialogMessage("Select or enter the element to open");
+		setText(SnippetMessages.getString("SnippetOpenOnSelectionaction.label")); //$NON-NLS-1$
+		setDescription(SnippetMessages.getString("SnippetOpenOnSelectionaction.tooltip")); //$NON-NLS-1$
+		setToolTipText(SnippetMessages.getString("SnippetOpenOnSelectionaction.desription")); //$NON-NLS-1$
+		setDialogTitle(SnippetMessages.getString("SnippetOpenOnSelectiondialog.title")); //$NON-NLS-1$
+		setDialogMessage(SnippetMessages.getString("SnippetOpenOnSelectiondialog.message")); //$NON-NLS-1$
 	}
 	
 	public SnippetOpenOnSelectionAction() {

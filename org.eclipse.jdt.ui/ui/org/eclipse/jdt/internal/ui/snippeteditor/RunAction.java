@@ -12,11 +12,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.ui.texte
  *
  */
 public class RunAction extends SnippetAction implements IUpdate {
-
-	public static final String PREFIX = "SnippetEditor.RunAction.";
 	
 	public RunAction(JavaSnippetEditor editor) {
-		super(editor, PREFIX);
+		super(editor);
+		setText(SnippetMessages.getString("RunAction.label")); //$NON-NLS-1$
+		setToolTipText(SnippetMessages.getString("RunAction.tooltip")); //$NON-NLS-1$
+		setDescription(SnippetMessages.getString("RunAction.description")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_RUNSNIPPET);
 	}
 	

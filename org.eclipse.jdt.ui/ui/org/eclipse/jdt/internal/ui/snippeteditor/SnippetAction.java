@@ -11,18 +11,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.action.A
  * supports to retarget the action to a different viewer.
  */
 public abstract class SnippetAction extends Action implements ISnippetStateChangedListener {
-	
-	public static final String LABEL = "label";
-	public static final String TOOLTIP = "tooltip";
-	public static final String DESCRIPTION = "description";
-	
+		
 	protected JavaSnippetEditor fEditor;
 	
-	public SnippetAction(JavaSnippetEditor editor, String resourcePrefix) {
-		super(JavaPlugin.getResourceString(resourcePrefix + LABEL));
+	public SnippetAction(JavaSnippetEditor editor) {
 		setEditor(editor);
-		setToolTipText(JavaPlugin.getResourceString(resourcePrefix + TOOLTIP));
-		setDescription(JavaPlugin.getResourceString(resourcePrefix + DESCRIPTION));
 	}
 		
 	public void setEditor(JavaSnippetEditor editor) {
