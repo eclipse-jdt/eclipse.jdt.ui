@@ -966,7 +966,7 @@
       </page>
       <page
             name="%typeFilterPrefName"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            category="org.eclipse.jdt.ui.preferences.AppearancePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage"
             id="org.eclipse.jdt.ui.preferences.TypeFilterPreferencePage">
       </page>
