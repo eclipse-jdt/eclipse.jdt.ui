@@ -1,5 +1,7 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
+import java.io.File;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -124,11 +126,33 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		if (resourceData == null)
 			return ClipboardActionUtil.getFirstResource(selection) instanceof IContainer;	
 		
+		if (! allResourcesExist(resourceData))
+			return false;
+			
 		return canActivateCopyRefactoring(resourceData, ClipboardActionUtil.getFirstResource(selection));
 	}
+	
+    private static boolean allResourcesExist(IResource[] resourceData) {
+    	for (int i= 0; i < resourceData.length; i++) {
+            if (! resourceData[i].exists())
+       	        return false;
+        }
+        return true;
+    }
+    
+    private static boolean allFilesExist(String[] clipboardFiles) {
+    	for (int i= 0; i < clipboardFiles.length; i++) {
+            if (! new File(clipboardFiles[i]).exists())
+       	        return false;
+        }
+        return true;
+    }
 
     private boolean canPasteFiles(IStructuredSelection selection) {
-		return (getClipboardFiles() != null) && canPasteFilesOn(selection.getFirstElement());
+		String[] clipboardFiles= getClipboardFiles();
+        return clipboardFiles != null
+        		&& allFilesExist(clipboardFiles)
+        		&& canPasteFilesOn(selection.getFirstElement());
     }
 
     private static boolean canPasteFilesOn(Object target) {
