@@ -211,11 +211,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRef
 	public void test26() throws Exception{
 		helper1(new String[]{"j"}, new String[]{"I"});
 	}
-	
-	public void test27() throws Exception{
-		printTestDisabledMessage("compile errors");
+
+//removed - see testFail21	
+//	public void test27() throws Exception{
 //		helper1(new String[]{"j"}, new String[]{"I"});
-	}	
+//	}	
 	
 	public void test28() throws Exception{
 		helper1(new String[]{"j"}, new String[]{"[I"});
@@ -339,4 +339,9 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRef
 	public void testFail20() throws Exception{
 		helper2(new String[]{"j"}, new String[]{"I"});
 	}
+	
+	public void testFail21() throws Exception{
+		helper2(new String[]{"j"}, new String[]{"I"});
+	}
+	
 }
