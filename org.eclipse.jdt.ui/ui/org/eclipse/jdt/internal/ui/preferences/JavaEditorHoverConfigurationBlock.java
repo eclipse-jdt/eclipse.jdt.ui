@@ -373,25 +373,6 @@ class JavaEditorHoverConfigurationBlock {
 	}
 
 	private JavaEditorTextHoverDescriptor[] getContributedHovers() {
-		JavaEditorTextHoverDescriptor[] hoverDescriptors= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
-
-		// Move Best Match hover to front
-		JavaEditorTextHoverDescriptor currentHover= hoverDescriptors[0];
-		boolean done= false;
-		for (int i= 0; !done && i < hoverDescriptors.length; i++) {
-			if (PreferenceConstants.ID_BESTMATCH_HOVER.equals(hoverDescriptors[i].getId())) {
-				// Swap with first one
-				hoverDescriptors[0]= hoverDescriptors[i];
-				hoverDescriptors[i]= currentHover;
-				return hoverDescriptors;
-			}
-			if (i > 0) {
-				currentHover= hoverDescriptors[i]; 
-				hoverDescriptors[i]= hoverDescriptors[i-1];
-			}
-		}
-		
-		// return unchanged array if best match hover can't be found
 		return JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
 	}
 

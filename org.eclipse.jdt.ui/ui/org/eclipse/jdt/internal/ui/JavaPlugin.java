@@ -579,8 +579,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fJavaEditorTextHoverDescriptors == null) {
 			fJavaEditorTextHoverDescriptors= JavaEditorTextHoverDescriptor.getContributedHovers();
 			ConfigurationElementSorter sorter= new ConfigurationElementSorter() {
-				/**
-				 * {@inheritDoc}
+				/*
+				 * @see org.eclipse.ui.texteditor.ConfigurationElementSorter#getConfigurationElement(java.lang.Object)
 				 */
 				public IConfigurationElement getConfigurationElement(Object object) {
 					return ((JavaEditorTextHoverDescriptor)object).getConfigurationElement();
