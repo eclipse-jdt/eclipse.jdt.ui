@@ -43,6 +43,12 @@
 		icon="icons/full/cview16/jperspective.gif"
 		class="org.eclipse.jdt.internal.ui.JavaPerspectiveFactory">
 	</perspective>
+	<perspective
+		id="org.eclipse.jdt.ui.JavaHierarchyPerspective"
+		name="Java Type Hierarchy"
+		icon="icons/full/cview16/jperspective.gif"
+		class="org.eclipse.jdt.internal.ui.JavaHierarchyPerspectiveFactory">
+	</perspective>
 </extension>
 
 <extension point="org.eclipse.ui.perspectiveExtensions">
