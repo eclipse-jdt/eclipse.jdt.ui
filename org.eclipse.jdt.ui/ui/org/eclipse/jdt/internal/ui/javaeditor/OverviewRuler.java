@@ -351,7 +351,7 @@ public class OverviewRuler {
 				Annotation a= (Annotation) e.next();
 				Position p= fModel.getPosition(a);
 				
-				if (!p.overlapsWith(visible.getOffset(), visible.getLength()))
+				if (p == null || !p.overlapsWith(visible.getOffset(), visible.getLength()))
 					continue;
 					
 				int problemOffset= Math.max(p.getOffset(), visible.getOffset());
