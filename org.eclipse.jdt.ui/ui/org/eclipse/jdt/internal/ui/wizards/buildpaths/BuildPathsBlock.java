@@ -337,11 +337,18 @@ public class BuildPathsBlock {
 	}
 	
 	protected void updateUI() {
+		if (fSWTWidget == null || fSWTWidget.isDisposed()) {
+			return;
+		}
+		
 		if (Display.getCurrent() != null) {
 			doUpdateUI();
 		} else {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
+					if (fSWTWidget == null || fSWTWidget.isDisposed()) {
+						return;
+					}
 					doUpdateUI();
 				}
 			});
@@ -349,10 +356,6 @@ public class BuildPathsBlock {
 	}
 
 	protected void doUpdateUI() {
-		if (fSWTWidget == null || fSWTWidget.isDisposed()) {
-			return;
-		}
-		
 		fBuildPathDialogField.refresh();
 		fClassPathList.refresh();
 	
