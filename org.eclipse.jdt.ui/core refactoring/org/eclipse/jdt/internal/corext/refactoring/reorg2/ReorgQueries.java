@@ -43,26 +43,28 @@ class ReorgQueries implements IReorgQueries{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries#createYesYesToAllNoNoToAllQuery(java.lang.String)
 	 */
-	public IConfirmQuery createYesYesToAllNoNoToAllQuery(String dialogTitle, int queryID) {
-		return new YesYesToAllNoNoToAllQuery(getShell(), dialogTitle);
+	public IConfirmQuery createYesYesToAllNoNoToAllQuery(String dialogTitle, boolean allowCancel, int queryID) {
+		return new YesYesToAllNoNoToAllQuery(getShell(), allowCancel, dialogTitle);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries#createYesNoQuery(java.lang.String)
 	 */
-	public IConfirmQuery createYesNoQuery(String dialogTitle, int queryID) {
-		return new YesNoQuery(getShell(), dialogTitle);
+	public IConfirmQuery createYesNoQuery(String dialogTitle, boolean allowCancel, int queryID) {
+		return new YesNoQuery(getShell(), allowCancel, dialogTitle);
 	}
 
 	private static class YesYesToAllNoNoToAllQuery implements IConfirmQuery{
+		private final boolean fAllowCancel;
 		private boolean fYesToAll= false;
 		private boolean fNoToAll= false;
 		private final Shell fShell;
 		private final String fDialogTitle;
 		
-		YesYesToAllNoNoToAllQuery(Shell parent, String dialogTitle){
+		YesYesToAllNoNoToAllQuery(Shell parent, boolean allowCancel, String dialogTitle){
 			fShell= parent;
 			fDialogTitle= dialogTitle;
+			fAllowCancel= allowCancel;
 		}
 		
 		/* (non-Javadoc)
@@ -98,12 +100,7 @@ class ReorgQueries implements IReorgQueries{
 		private Runnable createQueryRunnable(final String question, final int[] result) {
 			return new Runnable() {
 				public void run() {
-					int resultId[]= {
-						IDialogConstants.YES_ID,
-						IDialogConstants.YES_TO_ALL_ID,
-						IDialogConstants.NO_ID,
-						IDialogConstants.NO_TO_ALL_ID,
-						IDialogConstants.CANCEL_ID};
+					int[] resultId= getResultIDs();
  
 					MessageDialog dialog= new MessageDialog(
 						fShell, 
@@ -111,15 +108,42 @@ class ReorgQueries implements IReorgQueries{
 						null,
 						question,
 						MessageDialog.QUESTION,
-						new String[] {
+						getButtonLabels(),
+						0);
+					dialog.open();
+					result[0]= resultId[dialog.getReturnCode()];
+				}
+
+				private String[] getButtonLabels() {
+					if (YesYesToAllNoNoToAllQuery.this.fAllowCancel)
+						return new String[] {
 							IDialogConstants.YES_LABEL,
 							IDialogConstants.YES_TO_ALL_LABEL,
 							IDialogConstants.NO_LABEL,
 							IDialogConstants.NO_TO_ALL_LABEL,
-							IDialogConstants.CANCEL_LABEL },
-						0);
-					dialog.open();
-					result[0]= resultId[dialog.getReturnCode()];
+							IDialogConstants.CANCEL_LABEL };
+					else
+						return new String[] {
+							IDialogConstants.YES_LABEL,
+							IDialogConstants.YES_TO_ALL_LABEL,
+							IDialogConstants.NO_LABEL,
+							IDialogConstants.NO_TO_ALL_LABEL};
+				}
+
+				private int[] getResultIDs() {
+					if (YesYesToAllNoNoToAllQuery.this.fAllowCancel)
+						return new int[] {
+							IDialogConstants.YES_ID,
+							IDialogConstants.YES_TO_ALL_ID,
+							IDialogConstants.NO_ID,
+							IDialogConstants.NO_TO_ALL_ID,
+							IDialogConstants.CANCEL_ID};
+					else
+						return new int[] {
+							IDialogConstants.YES_ID,
+							IDialogConstants.YES_TO_ALL_ID,
+							IDialogConstants.NO_ID,
+							IDialogConstants.NO_TO_ALL_ID};
 				}
 			};
 		}
@@ -167,10 +191,12 @@ class ReorgQueries implements IReorgQueries{
 
 		private final Shell fShell;
 		private final String fDialogTitle;
+		private final boolean fAllowCancel;
 
-		YesNoQuery(Shell parent, String dialogTitle){
+		YesNoQuery(Shell parent, boolean allowCancel, String dialogTitle){
 			fShell= parent;
 			fDialogTitle= dialogTitle;
+			fAllowCancel= allowCancel;
 		}
 
 		/* (non-Javadoc)
@@ -194,10 +220,7 @@ class ReorgQueries implements IReorgQueries{
 		private Runnable createQueryRunnable(final String question, final int[] result){
 			return new Runnable() {
 				public void run() {
-					int resultId[]= {
-						IDialogConstants.YES_ID,
-						IDialogConstants.NO_ID,
-						IDialogConstants.CANCEL_ID};
+					int[] resultId= getResultIDs();
  
 					MessageDialog dialog= new MessageDialog(
 						fShell, 
@@ -205,13 +228,24 @@ class ReorgQueries implements IReorgQueries{
 						null,
 						question,
 						MessageDialog.QUESTION,
-						new String[] {
-							IDialogConstants.YES_LABEL,
-							IDialogConstants.NO_LABEL,
-							IDialogConstants.CANCEL_LABEL },
+						getButtonLabels(),
 						0);
 					dialog.open();
 					result[0]= resultId[dialog.getReturnCode()];
+				}
+
+				private String[] getButtonLabels() {
+					if (fAllowCancel)
+						return new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL };
+					else
+						return new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL};
+				}
+
+				private int[] getResultIDs() {
+					if (fAllowCancel)
+						return new int[] { IDialogConstants.YES_ID, IDialogConstants.NO_ID, IDialogConstants.CANCEL_ID};
+					else
+						return new int[] { IDialogConstants.YES_ID, IDialogConstants.NO_ID};
 				}
 			};
 		}

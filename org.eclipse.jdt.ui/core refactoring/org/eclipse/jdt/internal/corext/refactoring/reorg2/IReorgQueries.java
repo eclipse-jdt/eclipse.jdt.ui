@@ -21,10 +21,10 @@ public interface IReorgQueries {
 	/*
 	 * The ID is used to uniquely identify a query. It's also useful for testing.
 	 */
-	IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, int queryID);
+	IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, boolean allowCancel, int queryID);
 
 	/*
 	 * The ID is used to uniquely identify a query. It's also useful for testing.
 	 */
-	IConfirmQuery createYesNoQuery(String queryTitle, int queryID);
+	IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID);
 }

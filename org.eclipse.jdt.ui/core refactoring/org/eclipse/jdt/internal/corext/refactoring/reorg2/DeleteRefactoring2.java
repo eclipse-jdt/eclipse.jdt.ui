@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 public class DeleteRefactoring2 extends Refactoring{
 	
+	private boolean fWasCanceled;
 	private boolean fSuggestGetterSetterDeletion;
 	private IResource[] fResources;
 	private IJavaElement[] fJavaElements;
@@ -95,6 +96,7 @@ public class DeleteRefactoring2 extends Refactoring{
 		fResources= resources;
 		fJavaElements= javaElements;
 		fSuggestGetterSetterDeletion= true;//default
+		fWasCanceled= false;
 	}
 	
 	/* 
@@ -114,6 +116,10 @@ public class DeleteRefactoring2 extends Refactoring{
 		return fJavaElements;
 	}
 
+	public boolean wasCanceled() {
+		return fWasCanceled;
+	}
+	
 	public IResource[] getResourcesToDelete(){
 		return fResources;
 	}
@@ -144,6 +150,7 @@ public class DeleteRefactoring2 extends Refactoring{
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("Analyzing...", 1);
 		try{
+			fWasCanceled= false;
 			RefactoringStatus result= new RefactoringStatus();
 
 			recalculateElementsToDelete();
@@ -188,7 +195,7 @@ public class DeleteRefactoring2 extends Refactoring{
 	//ask for confirmation of deletion of all package fragment roots that are on classpaths of other projects
 	private void removeUnconfirmedReferencedArchives() throws JavaModelException {
 		String queryTitle= "Confirm Referenced Package Fragment Root Delete";
-		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, IReorgQueries.DELETE_REFERENCED_ARCHIVES);
+		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.DELETE_REFERENCED_ARCHIVES);
 		List rootsToSkip= new ArrayList(0);
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement element= fJavaElements[i];
@@ -208,7 +215,7 @@ public class DeleteRefactoring2 extends Refactoring{
 
 	private void removeUnconfirmedFoldersThatContainSourceFolders() throws CoreException {
 		String queryTitle= "Confirm Folder Delete";
-		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, IReorgQueries.DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS);
+		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS);
 		List foldersToSkip= new ArrayList(0);
 		for (int i= 0; i < fResources.length; i++) {
 			IResource resource= fResources[i];
@@ -302,7 +309,7 @@ public class DeleteRefactoring2 extends Refactoring{
 	private List getGettersSettersToDelete(Map getterSetterMapping) {
 		List gettersSettersToAdd= new ArrayList(getterSetterMapping.size());
 		String queryTitle= "Confirm Delete of Getters/Setters";
-		IConfirmQuery getterSetterQuery= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, IReorgQueries.DELETE_GETTER_SETTER);
+		IConfirmQuery getterSetterQuery= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.DELETE_GETTER_SETTER);
 		for (Iterator iter= getterSetterMapping.keySet().iterator(); iter.hasNext();) {
 			IField field= (IField) iter.next();
 			Assert.isTrue(hasGetter(getterSetterMapping, field) || hasSetter(getterSetterMapping, field));
@@ -397,15 +404,31 @@ public class DeleteRefactoring2 extends Refactoring{
 	//----------- read-only confirmation business ------
 	private void confirmDeletingReadOnly() throws CoreException {
 		String queryTitle= "Confirm Delete of Read Only Elements";
-		IResource[] readOnly= ReadOnlyResourceFinder.getReadOnlyResourcesAndSubResources(fJavaElements, fResources);
-		if (readOnly.length > 0){
-			IConfirmQuery query= fDeleteQueries.createYesNoQuery(queryTitle, IReorgQueries.DELETE_READ_ONLY_ELEMENTS);
-			String question= "The following read-only elements will be deleted if you continue. Do you wish to continue?";
-			boolean confirm= query.confirm(question, readOnly);
-			if (! confirm)
+		boolean hasReadOnlyResources= ReadOnlyResourceFinder.hasReadOnlyResourcesAndSubResources(fJavaElements, fResources);
+		if (hasReadOnlyResources) {
+			IConfirmQuery query= fDeleteQueries.createYesNoQuery(queryTitle, false, IReorgQueries.DELETE_READ_ONLY_ELEMENTS);
+			String question= "The selected elements contain read-only resources. Do you still want to delete them?";
+			if (! query.confirm(question)) {
+				fJavaElements= new IJavaElement[0];
+				fResources= new IResource[0];
+				fWasCanceled= true;
 				throw new OperationCanceledException();
+			}
 		}
 	}
+	
+//	private static Object[] convertToJavaWherePossible(IResource[] readOnlyResources) {
+//		Object[] result= new Object[readOnlyResources.length];
+//		for (int i= 0; i < readOnlyResources.length; i++) {
+//			IResource res= readOnlyResources[i];
+//			IJavaElement je= JavaCore.create(res);
+//			if (je != null && je.exists())
+//				result[i]= je;
+//			else
+//				result[i]= res;
+//		}
+//		return result;
+//	}
 
 	//----------- empty CUs related method
 	private void addEmptyCusToDelete() throws JavaModelException {
@@ -768,6 +791,10 @@ public class DeleteRefactoring2 extends Refactoring{
 	
 	private static class ReadOnlyResourceFinder{
 		private ReadOnlyResourceFinder(){
+		}
+		static boolean hasReadOnlyResourcesAndSubResources(IJavaElement[] javaElements, IResource[] resources) throws CoreException {
+			//TODO make smarter
+			return getReadOnlyResourcesAndSubResources(javaElements, resources).length > 0;
 		}
 		static IResource[] getReadOnlyResourcesAndSubResources(IJavaElement[] javaElements, IResource[] resources) throws CoreException {
 			Set readOnlyResources= getReadOnlyResourcesAndSubResources(resources);

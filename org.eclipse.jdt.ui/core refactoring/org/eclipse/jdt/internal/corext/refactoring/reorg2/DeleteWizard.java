@@ -136,6 +136,13 @@ public class DeleteWizard extends RefactoringWizard{
 			return getSelectedJavaElements().length + getSelectedResources().length;
 		}
 
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
+		 */
+		protected boolean performFinish() {
+			return super.performFinish() || getDeleteRefactoring().wasCanceled(); //close the dialog if canceled
+		}
+
 		private String createConfirmationStringForOneElement() throws JavaModelException {
 			IJavaElement[] elements= getSelectedJavaElements();
 			if (elements.length == 1){
