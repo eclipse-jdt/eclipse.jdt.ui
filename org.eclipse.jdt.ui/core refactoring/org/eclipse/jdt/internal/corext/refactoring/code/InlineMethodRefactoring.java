@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -74,7 +75,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	private SourceProvider fSourceProvider;
 	private TargetProvider fTargetProvider;
 	private boolean fSaveChanges;
-	private boolean fRemoveSource;
+	private boolean fDeleteSource;
 	private int fCurrentMode;
 	
 	private static final String SOURCE= "source";
@@ -93,7 +94,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		this(unit, (ASTNode)node, settings);
 		fTargetProvider= TargetProvider.create(unit, node);
 		fSaveChanges= true;
-		fRemoveSource= false;
+		fDeleteSource= false;
 	}
 
 	private InlineMethodRefactoring(ICompilationUnit unit, MethodDeclaration node, CodeGenerationSettings settings) {
@@ -101,7 +102,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		fSourceProvider= new SourceProvider(unit, node);
 		fTargetProvider= TargetProvider.create(unit, node);
 		fSaveChanges= true;
-		fRemoveSource= true;
+		fDeleteSource= true;
 	}
 	
 	public static InlineMethodRefactoring create(ICompilationUnit unit, int offset, int length, CodeGenerationSettings settings) {
@@ -124,12 +125,12 @@ public class InlineMethodRefactoring extends Refactoring {
 		fSaveChanges= save;
 	}
 	
-	public boolean getRemoveSource() {
-		return fRemoveSource;
+	public boolean getDeleteSource() {
+		return fDeleteSource;
 	}
 
 	public void setDeleteSource(boolean remove) {
-		fRemoveSource= remove;
+		fDeleteSource= remove;
 	}
 	
 	public int getInitialMode() {
@@ -177,6 +178,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			sub.subTask("Processing" + unit.getElementName());
 			CallInliner inliner= null;
 			try {
+				boolean added= false;
 				MultiTextEdit root= new MultiTextEdit();
 				CompilationUnitChange change= (CompilationUnitChange)fChangeManager.get(unit);
 				change.setSave(fSaveChanges);
@@ -189,18 +191,26 @@ public class InlineMethodRefactoring extends Refactoring {
 					MethodInvocation[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
 					for (int i= 0; i < invocations.length; i++) {
 						MethodInvocation invocation= invocations[i];
-						result.merge(fTargetProvider.checkInvocation(invocation, pm));
+						RefactoringStatus targetStatus= fTargetProvider.checkInvocation(invocation, pm);
+						result.merge(targetStatus);
 						if (result.hasFatalError())
 							break;
-						result.merge(inliner.initialize(invocation));
-						if (!result.hasFatalError()) {
-							TextEdit edit= inliner.perform();
-							change.addGroupDescription( 
-								new GroupDescription("Inline invocation", new TextEdit[] { edit }));
-							root.add(edit);
+						if (!targetStatus.hasEntryWithCode(RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER)) {
+							result.merge(inliner.initialize(invocation));
+							if (!result.hasFatalError()) {
+								added= true;
+								TextEdit edit= inliner.perform();
+								change.addGroupDescription( 
+									new GroupDescription("Inline invocation", new TextEdit[] { edit }));
+								root.add(edit);
+							}
+						} else {
+							fDeleteSource= false;
 						}
 					}
 				}
+				if (!added)
+					fChangeManager.remove(unit);
 			} catch (CoreException e) {
 				throw new JavaModelException(e);
 			} finally {
@@ -215,7 +225,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 		
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		if (fRemoveSource && fCurrentMode == INLINE_ALL) {
+		if (fDeleteSource && fCurrentMode == INLINE_ALL) {
 			try {
 				TextChange change= fChangeManager.get(fSourceProvider.getCompilationUnit());
 				TextEdit delete= fSourceProvider.getDeleteEdit();

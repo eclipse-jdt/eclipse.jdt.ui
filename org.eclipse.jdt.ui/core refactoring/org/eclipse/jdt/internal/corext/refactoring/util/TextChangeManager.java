@@ -51,6 +51,17 @@ public class TextChangeManager {
 	}
 	
 	/**
+	 * Removes the <tt>TextChange</tt> managed under the given key
+	 * <code>unit<code>.
+	 * 
+	 * @param unit the key determining the <tt>TextChange</tt> to be removed.
+	 * @return the removed <tt>TextChange</tt>.
+	 */
+	public TextChange remove(ICompilationUnit unit) {
+		return (TextChange)fMap.remove(unit);
+	}
+	
+	/**
 	 * Returns all text changes managed by this instance.
 	 * 
 	 * @return all text changes managed by this instance

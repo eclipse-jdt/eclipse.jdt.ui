@@ -313,6 +313,23 @@ public class RefactoringStatus {
 	}
 	
 	/**
+	 * Returns <code>true</code> if the status has an entry with the given code.
+	 * Otherwise <code>false</code> is returned.
+	 * 
+	 * @param code the code of the <tt>RefactoringStatusEntry</tt>.
+	 * @return <code>true</code> if the status has an entry with the given code.
+	 * Otherwise <code>false</code> is returned.
+	 */
+	public boolean hasEntryWithCode(int code) {
+		for (Iterator iter= fEntries.iterator(); iter.hasNext();) {
+			RefactoringStatusEntry entry= (RefactoringStatusEntry) iter.next();
+			if (entry.getCode() == code)
+				return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Merges the receiver and the parameter statuses.
 	 * The resulting list of entries in the receiver will contain entries from both.
 	 * The resuling severity in the reciver will be the more severe of its current severity

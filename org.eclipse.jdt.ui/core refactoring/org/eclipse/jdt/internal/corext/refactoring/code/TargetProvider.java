@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 
@@ -76,9 +77,10 @@ abstract class TargetProvider {
 		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(invocation, BodyDeclaration.class);
 		if (decl instanceof FieldDeclaration) {
 			result.addEntry(new RefactoringStatusEntry(
-				"Can't inline call that is used inside a field initializer.",
+				"Can't inline call that is used as a field initializer.",
 				severity, 
-				JavaSourceContext.create(unit, invocation)));
+				JavaSourceContext.create(unit, invocation),
+				null, RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER));
 		}
 	}
 	
@@ -183,10 +185,13 @@ abstract class TargetProvider {
 		}
 		public boolean visit(FieldDeclaration node) {
 			fBodies.add(fCurrent);
-			fCurrent= null;
-			return false;
+			fCurrent= new BodyData(node);
+			return true;
 		}
 		public void endVisit(FieldDeclaration node) {
+			if (fCurrent.hasInvocations()) {
+				result.put(node, fCurrent);
+			}
 			fCurrent= (BodyData)fBodies.remove(fBodies.size() - 1);
 		}
 		public boolean visit(MethodDeclaration node) {
@@ -255,8 +260,10 @@ abstract class TargetProvider {
 		}
 		
 		public RefactoringStatus checkInvocation(MethodInvocation node, IProgressMonitor pm) throws JavaModelException {
+			RefactoringStatus result= new RefactoringStatus();
+			checkFieldDeclaration(result, fCUnit, node, RefactoringStatus.ERROR);
 			fastDone(pm);
-			return new RefactoringStatus();
+			return result;
 		}
 	}
 	
@@ -305,8 +312,10 @@ abstract class TargetProvider {
 		}
 		
 		public RefactoringStatus checkInvocation(MethodInvocation node, IProgressMonitor pm) throws JavaModelException {
+			RefactoringStatus result= new RefactoringStatus();
+			checkFieldDeclaration(result, fCUnit, node, RefactoringStatus.ERROR);
 			fastDone(pm);
-			return new RefactoringStatus();
+			return result;
 		}
 	}
 }

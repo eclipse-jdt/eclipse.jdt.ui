@@ -21,4 +21,7 @@ public class RefactoringStatusCodes {
 	public static final int LOCAL_AND_ANONYMOUS_NOT_SUPPORTED= 132;
 	public static final int REFERENCE_IN_CLASSFILE= 133;
 	public static final int WILL_NOT_REMOVE_DECLARATION= 134;
+	
+	// inline method error codes
+	public static final int INLINE_METHOD_FIELD_INITIALIZER= 256;
 }
