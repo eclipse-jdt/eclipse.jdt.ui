@@ -35,6 +35,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
@@ -813,83 +814,85 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 		super.disposeFileInfo(element, info);
 	}
 	
+	protected void commitWorkingCopy(IProgressMonitor monitor, Object element, CompilationUnitInfo info, boolean overwrite) throws CoreException {
+		
+		synchronized (info.fCopy) {
+			info.fCopy.reconcile();
+		}
+		
+		IDocument document= info.fTextFileBuffer.getDocument();
+		ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
+		IResource resource= original.getResource();
+		
+		Assert.isTrue(resource instanceof IFile);
+		if (!resource.exists()) {
+			// underlying resource has been deleted, just recreate file, ignore the rest
+			createFileFromDocument(monitor, (IFile) resource, document);
+			return;
+		}
+		
+		if (fSavePolicy != null)
+			fSavePolicy.preSave(info.fCopy);
+		
+		try {
+			
+			fIsAboutToSave= true;
+
+			// commit working copy
+			if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+				info.fCopy.commitWorkingCopy(overwrite, monitor);
+			} else {
+				info.fCopy.commit(overwrite, monitor);
+				// next call required as commiting working copies changed to no longer walk through the right buffer
+				saveDocumentContent(monitor, element, document, overwrite);
+			}
+				
+		} catch (CoreException x) {
+			// inform about the failure
+			fireElementStateChangeFailed(element);
+			throw x;
+		} catch (RuntimeException x) {
+			// inform about the failure
+			fireElementStateChangeFailed(element);
+			throw x;
+		} finally {
+			fIsAboutToSave= false;
+		}
+		
+		// If here, the dirty state of the editor will change to "not dirty".
+		// Thus, the state changing flag will be reset.
+		if (info.fModel instanceof AbstractMarkerAnnotationModel) {
+			AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
+			model.updateMarkers(document);
+		}
+		
+		if (fSavePolicy != null) {
+			ICompilationUnit unit= fSavePolicy.postSave(original);
+			if (unit != null && info.fModel instanceof AbstractMarkerAnnotationModel) {
+				IResource r= unit.getResource();
+				IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
+				if (markers != null && markers.length > 0) {
+					AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;						
+					for (int i= 0; i < markers.length; i++)
+						model.updateMarker(markers[i], document, null);
+				}
+			}
+		}
+	}
+	
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#saveDocument(org.eclipse.core.runtime.IProgressMonitor, java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation(java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
 	 */
-	public void saveDocument(IProgressMonitor monitor, Object element, IDocument ignore, boolean overwrite) throws CoreException {
-		
-		FileInfo fileInfo= getFileInfo(element);
-		
-		if (fileInfo instanceof CompilationUnitInfo) {
-			CompilationUnitInfo info= (CompilationUnitInfo) fileInfo;
-
-			synchronized (info.fCopy) {
-				info.fCopy.reconcile();
-			}
-			
-			ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-			IResource resource= original.getResource();
-			
-			if (resource == null) {
-				// underlying resource has been deleted, just recreate file, ignore the rest
-				super.saveDocument(monitor, element, ignore, overwrite);
-				return;
-			}
-				
-			if (fSavePolicy != null)
-				fSavePolicy.preSave(info.fCopy);
-			
-			try {
-				
-				fIsAboutToSave= true;
-
-				// commit working copy
-				if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-					info.fCopy.commitWorkingCopy(overwrite, monitor);
-				} else {
-					info.fCopy.commit(overwrite, monitor);
-					// next call required as commiting working copies changed to no longer walk through the right buffer
-					saveDocumentContent(monitor, element, ignore, overwrite);
+	protected DocumentProviderOperation createSaveOperation(final Object element, final IDocument document, final boolean overwrite) throws CoreException {
+		final FileInfo info= (FileInfo) getFileInfo(element);
+		if (info instanceof CompilationUnitInfo) {
+			return new DocumentProviderOperation() {
+				protected void execute(IProgressMonitor monitor) throws CoreException {
+					commitWorkingCopy(monitor, element, (CompilationUnitInfo) info, overwrite);
 				}
-					
-			} catch (CoreException x) {
-				// inform about the failure
-				fireElementStateChangeFailed(element);
-				throw x;
-			} catch (RuntimeException x) {
-				// inform about the failure
-				fireElementStateChangeFailed(element);
-				throw x;
-			} finally {
-				fIsAboutToSave= false;
-			}
-			
-			// If here, the dirty state of the editor will change to "not dirty".
-			// Thus, the state changing flag will be reset.
-			
-			IDocument document= getDocument(element);
-			if (info.fModel instanceof AbstractMarkerAnnotationModel) {
-				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
-				model.updateMarkers(document);
-			}
-			
-			if (fSavePolicy != null) {
-				ICompilationUnit unit= fSavePolicy.postSave(original);
-				if (unit != null && info.fModel instanceof AbstractMarkerAnnotationModel) {
-					IResource r= unit.getResource();
-					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
-					if (markers != null && markers.length > 0) {
-						AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;						
-						for (int i= 0; i < markers.length; i++)
-							model.updateMarker(markers[i], document, null);
-					}
-				}
-			}
-				
-			
-		} else {
-			getParentProvider().saveDocument(monitor, element, ignore, overwrite);
-		}		
+			};
+		}
+		return null;
 	}
 
 	/**
