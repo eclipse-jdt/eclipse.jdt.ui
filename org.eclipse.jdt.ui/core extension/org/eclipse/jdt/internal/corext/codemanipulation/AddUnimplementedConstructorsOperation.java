@@ -159,7 +159,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 				}
 			}
 			if (binding != null && rewriter != null) {
-				final IMethodBinding[] bindings= StubUtility2.getOverridableConstructors(binding);
+				final IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(binding);
 				if (bindings != null && bindings.length > 0) {
 					try {
 						final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());

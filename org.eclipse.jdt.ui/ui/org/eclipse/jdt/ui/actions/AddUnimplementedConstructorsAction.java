@@ -115,7 +115,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			if (declaration != null) {
 				ITypeBinding binding= declaration.resolveBinding();
 				if (binding != null)
-					fMethodsList= StubUtility2.getOverridableConstructors(binding);
+					fMethodsList= StubUtility2.getVisibleConstructors(binding);
 			}
 		}
 

@@ -316,7 +316,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 		final GenerateConstructorUsingFieldsContentProvider provider= new GenerateConstructorUsingFieldsContentProvider(type, fields, Arrays.asList(selected));
-		IMethodBinding[] bindings= StubUtility2.getOverridableConstructors(provider.getType());
+		IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(provider.getType());
 		if (bindings.length == 0) {
 			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.nothing_found")); //$NON-NLS-1$
 			return;
