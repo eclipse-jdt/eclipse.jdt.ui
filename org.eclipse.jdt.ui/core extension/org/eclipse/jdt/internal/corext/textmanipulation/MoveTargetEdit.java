@@ -95,7 +95,7 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 	/* package */ void updateTextRange(int delta, List executedEdits) {
 		if (fMode == INSERT) {
 			predecessorExecuted(getSuccessorIterator(), delta);
-			getTextRange().adjustLength(delta);
+			adjustLength(delta);
 			updateParents(delta);
 
 			markAsDeleted(getChildren());
@@ -107,7 +107,7 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 			setChildren(sourceChildren);
 		} else if (fMode == DELETE) {
 			predecessorExecuted(fSource.getSuccessorIterator(), delta);
-			fSource.getTextRange().adjustLength(delta);
+			fSource.adjustLength(delta);
 			fSource.updateParents(delta);
 		} else {
 			Assert.isTrue(false);

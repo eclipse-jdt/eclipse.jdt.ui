@@ -17,6 +17,7 @@ public final class TextRange {
 	private static final int DELETED_VALUE= -2;
 	
 	public static final TextRange UNDEFINED= new TextRange(null, UNDEFINED_VALUE);
+	public static final TextRange DELETED= new TextRange(null, DELETED_VALUE);
 
 	/**
 	 * Creates a insert position with the given offset.
@@ -216,14 +217,14 @@ public final class TextRange {
 		fLength= DELETED_VALUE;
 	}
 	
-	/* package */ void adjustOffset(int delta) {
+	/* package */ void addToOffset(int delta) {
 		if (isUndefined() || isDeleted())
 			return;
 		fOffset+= delta;
 		Assert.isTrue(fOffset >= 0);
 	}
 	
-	/* package */ void adjustLength(int delta) {
+	/* package */ void addToLength(int delta) {
 		if (isUndefined() || isDeleted())
 			return;
 		fLength+= delta;

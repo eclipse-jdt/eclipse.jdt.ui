@@ -40,4 +40,18 @@ public class MultiTextEdit extends TextEdit {
 		Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement copy0");
 		return new MultiTextEdit();
 	}
+
+	/* non Java-doc
+	 * @see TextEdit#adjustOffset
+	 */	
+	protected void adjustOffset(int delta) {
+		// do nothing since this edit doesn't manage its own TextRange
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#adjustLength
+	 */	
+	protected void adjustLength(int delta) {
+		// do nothing since this edit doesn't manage its own TextRange
+	}
 }

@@ -144,13 +144,11 @@ public abstract class TextEdit {
 		return fChildren.iterator();
 	}
 	
-
 	/**
-	 * Returns <code>true</code> if this text edit collection manages any children and <code>false</code> otherwise.
-	 * 
-	 * @return <code>true</code> if this text edit collection manages any children and <code>false</code> otherwise
-	 */
-	public boolean hasChildren(){
+	 * Returns <code>true</code> if this edit has children. Otherwise
+	 * <code>false</code> is returned.
+	 * 	 * @return <code>true</code> if this edit has children	 */
+	public boolean hasChildren() {
 		return fChildren != null && ! fChildren.isEmpty();
 	}
 
@@ -252,15 +250,28 @@ public abstract class TextEdit {
 		if (edits == null || (size= edits.size()) == 0)
 			return TextRange.UNDEFINED;
 			
-		TextRange range= ((TextEdit)edits.get(0)).getTextRange();
-		int offset= range.getOffset();
-		int end= range.getExclusiveEnd();
-		for (int i= 1; i < size; i++) {
-			range= ((TextEdit)edits.get(i)).getTextRange();
-			offset= Math.min(offset, range.getOffset());
-			end= Math.max(end, range.getExclusiveEnd());
+		int offset= Integer.MAX_VALUE;
+		int end= Integer.MIN_VALUE;
+		int deleted= 0;
+		int undefined= 0;
+		for (int i= 0; i < size; i++) {
+			TextRange range= ((TextEdit)edits.get(i)).getTextRange();
+			if (range.isDeleted()) {
+				deleted++;
+			} else if (range.isUndefined()) {
+				undefined++;
+			} else {
+				offset= Math.min(offset, range.getOffset());
+				end= Math.max(end, range.getExclusiveEnd());
+			}
 		}
-		return TextRange.createFromStartAndExclusiveEnd(offset, end);
+		if (size == deleted) {
+			return TextRange.DELETED;
+		} else if (size == undefined) {
+			return TextRange.UNDEFINED;
+		} else {
+			return TextRange.createFromStartAndExclusiveEnd(offset, end);
+		}
 	}	
 	
 	/**
@@ -279,13 +290,15 @@ public abstract class TextEdit {
 		int size= fChildren != null ? fChildren.size() : 0;
 		if (size == 0)
 			return TextRange.UNDEFINED;
-		if (isConnected()) {
-			int offset= ((TextEdit)fChildren.get(0)).getTextRange().getOffset();
-			int end= ((TextEdit)fChildren.get(size - 1)).getTextRange().getExclusiveEnd();
-			return TextRange.createFromStartAndExclusiveEnd(offset, end);
-		} else {
-			return getTextRange(fChildren);
-		}
+		return getTextRange(fChildren);
+	}
+
+	protected void adjustOffset(int delta) {
+		getTextRange().addToOffset(delta);
+	}
+	
+	protected void adjustLength(int delta) {
+		getTextRange().addToLength(delta);
 	}
 	
 	//---- Helpers -------------------------------------------------------------------------------------------
@@ -443,16 +456,16 @@ public abstract class TextEdit {
 		for (Iterator iter= executedEdits.iterator(); iter.hasNext();) {
 			((TextEdit)iter.next()).predecessorExecuted(delta);
 		}
-		getTextRange().adjustLength(delta);
+		adjustLength(delta);
 		updateParents(delta);
 	}
 	
 	/* package */ void childExecuted(int delta) {
-		getTextRange().adjustLength(delta);
+		adjustLength(delta);
 	}
 	
 	/* package */ void predecessorExecuted(int delta) {
-		getTextRange().adjustOffset(delta);
+		adjustOffset(delta);
 	}
 	
 	/* package */ void markAsDeleted(List children) {

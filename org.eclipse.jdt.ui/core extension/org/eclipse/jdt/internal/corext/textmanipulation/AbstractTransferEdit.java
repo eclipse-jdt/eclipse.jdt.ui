@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 		if (children != null) {
 			for (Iterator iter= children.iterator(); iter.hasNext();) {
 				TextEdit element= (TextEdit)iter.next();
-				element.getTextRange().adjustOffset(delta);
+				element.adjustOffset(delta);
 				move(element.getChildren(), delta);
 			}
 		}

@@ -67,7 +67,7 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 	
 	/* package */ void updateTextRange(int delta, List executedEdits) {
 		predecessorExecuted(fTarget.getSuccessorIterator(), delta);
-		fTarget.getTextRange().adjustLength(delta);
+		fTarget.adjustLength(delta);
 		fTarget.updateParents(delta);
 	}
 		

@@ -103,8 +103,8 @@ public class SimpleTextEdit extends TextEdit {
 	}		
 	
 	/* package */ void updateTextRange(int delta, List executedEdits) {
-		super.updateTextRange(delta, executedEdits);
 		markAsDeleted(getChildren());
+		super.updateTextRange(delta, executedEdits);
 	}	
 }
 

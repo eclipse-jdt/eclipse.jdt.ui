@@ -31,11 +31,23 @@ public final class AutoOrganizingTextEdit extends TextEdit {
 		fElements= elements;
 	}
 
+	/* non Java-doc
+	 * @see TextEdit#add
+	 */	
 	public void add(TextEdit edit) {
 		Assert.isTrue(isUnconnected());
 		fElements.add(edit);
 	}
 	
+	/* non Java-doc
+	 * @see TextEdit#hasChildren
+	 */	
+	public boolean hasChildren() {
+		if (fElements != null && isUnconnected())
+			return !fElements.isEmpty();
+		return super.hasChildren();
+	}
+
 	/* non Java-doc
 	 * @see TextEdit#copy0
 	 */	
@@ -65,12 +77,26 @@ public final class AutoOrganizingTextEdit extends TextEdit {
 	}
 
 	/* non Java-doc
-	 * @see TextEdit#perform
+	 * @see TextEdit#iterator
 	 */	
 	public Iterator iterator() {
 		if (fElements != null && isUnconnected())
 			return fElements.iterator();
 		return super.iterator();
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#adjustOffset
+	 */	
+	protected void adjustOffset(int delta) {
+		// do nothing since this edit doesn't manage its own TextRange
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#adjustLength
+	 */	
+	protected void adjustLength(int delta) {
+		// do nothing since this edit doesn't manage its own TextRange
 	}
 	
 	/* package */ void executePostProcessCopy(TextEditCopier copier) {

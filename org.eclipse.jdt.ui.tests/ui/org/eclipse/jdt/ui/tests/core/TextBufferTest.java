@@ -17,6 +17,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveTargetEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -250,6 +251,24 @@ public class TextBufferTest extends TestCase {
 		assertEquals(e2.getTextRange(), 4, 0);
 		assertEquals("Buffer content", "012x456789", fBuffer.getContent());
 		doUndoRedo(undo, "012x456789");
+	}
+	
+	public void testDeleteWithChildren() throws Exception {
+		SimpleTextEdit e1= SimpleTextEdit.createDelete(2, 6);
+		MultiTextEdit e2= new MultiTextEdit();
+		e1.add(e2);
+		SimpleTextEdit e3= SimpleTextEdit.createReplace(3,1,"xx");
+		SimpleTextEdit e4= SimpleTextEdit.createReplace(5,1,"yy");
+		e2.add(e3);
+		e2.add(e4);
+		fEditor.add(e1);
+		assertTrue(fEditor.canPerformEdits());
+		UndoMemento undo= fEditor.performEdits(null);
+		assertEquals("Buffer content", "0189", fBuffer.getContent());
+		assertTrue(e2.getTextRange().isDeleted());
+		assertTrue(e3.getTextRange().isDeleted());
+		assertTrue(e4.getTextRange().isDeleted());
+		doUndoRedo(undo, "0189");
 	}
 	
 	public void testMove1() throws Exception {
