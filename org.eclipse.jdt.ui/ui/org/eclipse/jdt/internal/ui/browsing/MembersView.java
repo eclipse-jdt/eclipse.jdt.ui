@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 
@@ -59,8 +58,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	protected ILabelProvider createLabelProvider() {
 		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
-						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
-						AppearanceAwareLabelProvider.getDecorators(true, new OverrideIndicatorLabelDecorator(null))
+						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
 						);
 	}
 

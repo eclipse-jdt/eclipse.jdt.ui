@@ -228,12 +228,12 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 	
 	private ILabelProvider createTreeLabelProvider() {
-		ILabelDecorator[] decorators= concat(AppearanceAwareLabelProvider.getDecorators(true, null), new ILabelDecorator[] { new TreeHierarchyLayoutProblemsDecorator(null)});
+		ILabelDecorator[] decorators= AppearanceAwareLabelProvider.getDecorators(false, new TreeHierarchyLayoutProblemsDecorator(null));
 		return new PackagesViewLabelProvider(PackagesViewLabelProvider.HIERARCHICAL_VIEW_STATE, decorators);
 	}
 
 	private ILabelProvider createListLabelProvider() {
-		ILabelDecorator[] decorators= AppearanceAwareLabelProvider.getDecorators(true, null);
+		ILabelDecorator[] decorators= AppearanceAwareLabelProvider.getDecorators(false, null);
 		return new PackagesViewLabelProvider(PackagesViewLabelProvider.FLAT_VIEW_STATE,  decorators);
 	}
 	

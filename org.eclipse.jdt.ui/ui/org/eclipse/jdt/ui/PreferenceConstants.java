@@ -56,6 +56,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>: if <code>true</code> override 
 	 * indicators are rendered
 	 * </p>
+	 * @deprecated Not used anymore
 	 */
 	public static final String APPEARANCE_OVERRIDE_INDICATOR= "org.eclipse.jdt.ui.overrideindicator";//$NON-NLS-1$
 
@@ -1518,7 +1519,6 @@ public class PreferenceConstants {
 		// AppearancePreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE, false);
-		store.setDefault(PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR, true);
 		store.setDefault(PreferenceConstants.SHOW_CU_CHILDREN, true);
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$

@@ -25,10 +25,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.ui.part.FileEditorInput;
@@ -40,7 +41,9 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.ListenerList;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
@@ -55,7 +58,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  * 
  * @since 2.0
  */
-public class ProblemsLabelDecorator implements ILabelDecorator {
+public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
 	
 	/**
 	 * This is a special <code>LabelProviderChangedEvent</code> carring additional 
@@ -94,7 +97,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;	
 
 	private ImageDescriptorRegistry fRegistry;
-	private boolean fRegistryNeedsDispose= false;
+	private boolean fUseNewRegistry= false;
 	private IProblemChangedListener fProblemChangedListener;
 	
 	private ListenerList fListeners;
@@ -103,8 +106,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 	 * Creates a new <code>ProblemsLabelDecorator</code>.
 	 */
 	public ProblemsLabelDecorator() {
-		this(new ImageDescriptorRegistry());
-		fRegistryNeedsDispose= true;
+		this(null);
+		fUseNewRegistry= true;
 	}
 	
 	/*
@@ -117,12 +120,17 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public ProblemsLabelDecorator(ImageDescriptorRegistry registry) {
-		if (registry == null) {
-			registry= JavaPlugin.getImageDescriptorRegistry();
-		}
 		fRegistry= registry;
 		fProblemChangedListener= null;
 	}
+	
+	private ImageDescriptorRegistry getRegistry() {
+		if (fRegistry == null) {
+			fRegistry= fUseNewRegistry ? new ImageDescriptorRegistry() : JavaPlugin.getImageDescriptorRegistry();
+		}
+		return fRegistry;
+	}
+	
 
 	/* (non-Javadoc)
 	 * @see ILabelDecorator#decorateText(String, Object)
@@ -139,7 +147,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		if (adornmentFlags != 0) {
 			ImageDescriptor baseImage= new ImageImageDescriptor(image);
 			Rectangle bounds= image.getBounds();
-			return fRegistry.get(new JavaElementImageDescriptor(baseImage, adornmentFlags, new Point(bounds.width, bounds.height)));
+			return getRegistry().get(new JavaElementImageDescriptor(baseImage, adornmentFlags, new Point(bounds.width, bounds.height)));
 		}
 		return image;
 	}
@@ -274,7 +282,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 			JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fProblemChangedListener);
 			fProblemChangedListener= null;
 		}
-		if (fRegistryNeedsDispose) {
+		if (fRegistry != null && fUseNewRegistry) {
 			fRegistry.dispose();
 		}
 	}
@@ -325,6 +333,18 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 				((ILabelProviderListener) listeners[i]).labelProviderChanged(event);
 			}
 		}
-	}	
+	}
+		
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ILightweightLabelDecorator#decorate(java.lang.Object, org.eclipse.jface.viewers.IDecoration)
+	 */
+	public void decorate(Object element, IDecoration decoration) { 
+		int adornmentFlags= computeAdornmentFlags(element);
+		if (adornmentFlags == ERRORTICK_ERROR) {
+			decoration.addOverlay(JavaPluginImages.DESC_OVR_ERROR);
+		} else if (adornmentFlags == ERRORTICK_WARNING) {
+			decoration.addOverlay(JavaPluginImages.DESC_OVR_WARNING);
+		}		
+	}
 
 }

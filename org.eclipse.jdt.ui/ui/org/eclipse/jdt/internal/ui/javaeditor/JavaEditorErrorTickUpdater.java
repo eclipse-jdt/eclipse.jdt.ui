@@ -11,6 +11,8 @@ import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -29,8 +31,8 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 	public JavaEditorErrorTickUpdater(JavaEditor editor) {
 		Assert.isNotNull(editor);
 		fJavaEditor= editor;
-		fLabelProvider=  new JavaUILabelProvider(0, JavaElementImageProvider.SMALL_ICONS, JavaUILabelProvider.getDecorators(true, null));
-		
+		fLabelProvider=  new JavaUILabelProvider(0, JavaElementImageProvider.SMALL_ICONS);
+		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(this);
 	}
 	

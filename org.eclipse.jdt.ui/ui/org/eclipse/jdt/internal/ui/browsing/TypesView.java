@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -43,10 +42,11 @@ public class TypesView extends JavaBrowsingPart {
 	 * @see	ILabelProvider
 	 */
 	protected ILabelProvider createLabelProvider() {
-		return new AppearanceAwareLabelProvider(
+		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
-						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
-						new ILabelDecorator[] { new TopLevelTypeProblemsLabelDecorator(null)});
+						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+		lprovider.addLabelDecorator(new TopLevelTypeProblemsLabelDecorator(null));
+		return lprovider;
 	}
 
 	/**

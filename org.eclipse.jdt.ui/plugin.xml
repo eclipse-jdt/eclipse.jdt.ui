@@ -2134,4 +2134,46 @@
 
 </extension>
 
+<extension
+	point="org.eclipse.ui.decorators">
+	<decorator
+		label="%ProblemsLabelDecorator.label"
+		state="true"
+		lightweight="true"
+		quadrant="BOTTOM_LEFT"
+		class="org.eclipse.jdt.ui.ProblemsLabelDecorator"
+		id="org.eclipse.jdt.ui.problem.decorator">
+		<description>
+			%ProblemsLabelDecorator.description
+		</description>
+		<enablement>
+			<or>
+				<objectClass
+					name="org.eclipse.core.resources.IResource">
+				</objectClass>         
+				<objectClass
+					name="org.eclipse.jdt.core.IJavaElement">
+				</objectClass>
+			</or>                
+		</enablement>
+	</decorator>
+	<decorator
+		label="%OverrideIndicatorLabelDecorator.label"
+		lightweight="true"
+		quadrant="BOTTOM_RIGHT"		
+		state="true"
+		class="org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator"
+		id="org.eclipse.jdt.ui.override.decorator">
+		<description>
+			%OverrideIndicatorLabelDecorator.description
+		</description>
+		<enablement>
+			<objectClass
+				name="org.eclipse.jdt.core.IMethod">
+			</objectClass>
+		</enablement>
+	</decorator>	
+</extension>
+
+
 </plugin>

@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.jdt.core.IPackageFragment;
@@ -34,32 +33,15 @@ class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	private boolean fIsFlatLayout;
 	private TreeHierarchyLayoutProblemsDecorator fProblemDecorator;
 
-	PackageExplorerLabelProvider(int textFlags, int imageFlags, ILabelDecorator[] labelDecorators, ITreeContentProvider cp) {
-		super(textFlags, imageFlags, concat(labelDecorators, new ILabelDecorator[] { new TreeHierarchyLayoutProblemsDecorator(null) }));
+	PackageExplorerLabelProvider(int textFlags, int imageFlags, ITreeContentProvider cp) {
+		super(textFlags, imageFlags);
+		fProblemDecorator= new TreeHierarchyLayoutProblemsDecorator(null);
+		addLabelDecorator(fProblemDecorator);
 		Assert.isNotNull(cp);
 		fContentProvider= cp;
-		assignProblemDecorator();
-		Assert.isNotNull(fProblemDecorator);
 	}
 
-	private static ILabelDecorator[] concat(ILabelDecorator[] d1, ILabelDecorator[] d2){
-		int d1Len= d1.length;
-		int d2Len= d2.length;
-		ILabelDecorator[] decorators= new ILabelDecorator[d1Len + d2Len];
-		System.arraycopy(d1, 0, decorators, 0, d1Len);
-		System.arraycopy(d2, 0, decorators, d1Len, d2Len); 
-		return decorators;	
-	}
 
-	private void assignProblemDecorator()  {
-		int i= 0;
-		while (i < fLabelDecorators.length && fProblemDecorator == null) {
-			if (fLabelDecorators[i] instanceof TreeHierarchyLayoutProblemsDecorator)
-				fProblemDecorator= (TreeHierarchyLayoutProblemsDecorator)fLabelDecorators[i];
-			i++;
-		}
-	}
-	
 	public String getText(Object element) {
 		
 		if (fIsFlatLayout || !(element instanceof IPackageFragment))

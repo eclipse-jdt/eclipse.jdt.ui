@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.swt.graphics.Image;
@@ -12,14 +14,12 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.jdt.ui.ProblemsLabelDecorator;
-
 public class JavaUILabelProvider extends LabelProvider {
 	
 	protected JavaElementImageProvider fImageLabelProvider;
 	protected StorageLabelProvider fStorageLabelProvider;
 	
-	protected ILabelDecorator[] fLabelDecorators;
+	protected ArrayList fLabelDecorators;
 
 	private int fImageFlags;
 	private int fTextFlags;
@@ -28,20 +28,30 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * Creates a new label provider with default flags.
 	 */
 	public JavaUILabelProvider() {
-		this(JavaElementLabels.M_PARAMETER_TYPES, JavaElementImageProvider.OVERLAY_ICONS, null);
+		this(JavaElementLabels.M_PARAMETER_TYPES, JavaElementImageProvider.OVERLAY_ICONS);
 	}
 
 	/**
 	 * @param textFlags Flags defined in <code>JavaElementLabels</code>.
 	 * @param imageFlags Flags defined in <code>JavaElementImageProvider</code>.
 	 */
-	public JavaUILabelProvider(int textFlags, int imageFlags, ILabelDecorator[] labelDecorators) {
+	public JavaUILabelProvider(int textFlags, int imageFlags) {
 		fImageLabelProvider= new JavaElementImageProvider();
-		fLabelDecorators= labelDecorators; 
+		fLabelDecorators= null; 
 		
 		fStorageLabelProvider= new StorageLabelProvider();
 		fImageFlags= imageFlags;
 		fTextFlags= textFlags;
+	}
+	
+	/**
+	 * Adds a decorator to the label provider
+	 */
+	public void addLabelDecorator(ILabelDecorator decorator) {
+		if (fLabelDecorators == null) {
+			fLabelDecorators= new ArrayList(2);
+		}
+		fLabelDecorators.add(decorator);
 	}
 	
 	/**
@@ -104,8 +114,9 @@ public class JavaUILabelProvider extends LabelProvider {
 			result= fStorageLabelProvider.getImage(element);
 		}
 		if (fLabelDecorators != null && result != null) {
-			for (int i= 0; i < fLabelDecorators.length; i++) {
-				result= fLabelDecorators[i].decorateImage(result, element);
+			for (int i= 0; i < fLabelDecorators.size(); i++) {
+				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
+				result= decorator.decorateImage(result, element);
 			}
 		}			
 		return result;
@@ -120,8 +131,9 @@ public class JavaUILabelProvider extends LabelProvider {
 			result= fStorageLabelProvider.getText(element);
 		}
 		if (fLabelDecorators != null && result.length() > 0) {
-			for (int i= 0; i < fLabelDecorators.length; i++) {
-				result= fLabelDecorators[i].decorateText(result, element);
+			for (int i= 0; i < fLabelDecorators.size(); i++) {
+				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
+				result= decorator.decorateText(result, element);
 			}
 		}			
 		return result;
@@ -132,8 +144,9 @@ public class JavaUILabelProvider extends LabelProvider {
 	 */
 	public void dispose() {
 		if (fLabelDecorators != null) {
-			for (int i= 0; i < fLabelDecorators.length; i++) {
-				fLabelDecorators[i].dispose();
+			for (int i= 0; i < fLabelDecorators.size(); i++) {
+				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
+				decorator.dispose();
 			}
 			fLabelDecorators= null;
 		}
@@ -146,8 +159,9 @@ public class JavaUILabelProvider extends LabelProvider {
 	 */
 	public void addListener(ILabelProviderListener listener) {
 		if (fLabelDecorators != null) {
-			for (int i= 0; i < fLabelDecorators.length; i++) {
-				fLabelDecorators[i].addListener(listener);
+			for (int i= 0; i < fLabelDecorators.size(); i++) {
+				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
+				decorator.addListener(listener);
 			}
 		}
 		super.addListener(listener);	
@@ -165,8 +179,9 @@ public class JavaUILabelProvider extends LabelProvider {
 	 */
 	public void removeListener(ILabelProviderListener listener) {
 		if (fLabelDecorators != null) {
-			for (int i= 0; i < fLabelDecorators.length; i++) {
-				fLabelDecorators[i].removeListener(listener);
+			for (int i= 0; i < fLabelDecorators.size(); i++) {
+				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
+				decorator.removeListener(listener);
 			}
 		}
 		super.removeListener(listener);	
@@ -175,9 +190,9 @@ public class JavaUILabelProvider extends LabelProvider {
 	public static ILabelDecorator[] getDecorators(boolean errortick, ILabelDecorator extra) {
 		if (errortick) {
 			if (extra == null) {
-				return new ILabelDecorator[] { new ProblemsLabelDecorator(null) };
+				return new ILabelDecorator[] {};
 			} else {
-				return new ILabelDecorator[] { new ProblemsLabelDecorator(null), extra };
+				return new ILabelDecorator[] { extra };
 			}
 		}
 		if (extra != null) {

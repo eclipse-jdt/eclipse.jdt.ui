@@ -20,6 +20,8 @@ import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -58,10 +60,12 @@ public class ConfirmSaveModifiedResourcesDialog extends MessageDialog {
 	protected Control createCustomArea(Composite parent) {
 		fList= new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		fList.setContentProvider(new ListContentProvider());
-		fList.setLabelProvider(new AppearanceAwareLabelProvider(
+		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
 			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
-			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-			AppearanceAwareLabelProvider.getDecorators(true, null)));
+			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
+		);
+		lprovider.addLabelDecorator(new ProblemsLabelDecorator());
+		fList.setLabelProvider(lprovider);
 		fList.setInput(Arrays.asList(fUnsavedFiles));
 		Control control= fList.getControl();
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);

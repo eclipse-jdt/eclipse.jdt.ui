@@ -137,8 +137,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		AppearanceAwareLabelProvider fJavaElementLabelProvider= 
 			new AppearanceAwareLabelProvider(
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
-				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-				AppearanceAwareLabelProvider.getDecorators(true, null)
+				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 			);
 		
 		fTree.setLabelProvider(new DecoratingLabelProvider(

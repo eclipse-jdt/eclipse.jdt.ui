@@ -15,8 +15,10 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
@@ -27,6 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
@@ -40,18 +43,18 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  * 
  * @since 2.0
  */
-public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
+public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
 
 	private ImageDescriptorRegistry fRegistry;
-	private boolean fRegistryNeedsDispose= false;
+	private boolean fUseNewRegistry= false;
 
 	/**
 	 * Creates a decorator. The decorator creates an own image registry to cache
 	 * images. 
 	 */
 	public OverrideIndicatorLabelDecorator() {
-		this(new ImageDescriptorRegistry());
-		fRegistryNeedsDispose= true;
+		this(null);
+		fUseNewRegistry= true;
 	}	
 
 	/*
@@ -64,11 +67,16 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public OverrideIndicatorLabelDecorator(ImageDescriptorRegistry registry) {
-		if (registry == null) {
-			registry= JavaPlugin.getImageDescriptorRegistry();
-		}
 		fRegistry= registry;
 	}
+	
+	private ImageDescriptorRegistry getRegistry() {
+		if (fRegistry == null) {
+			fRegistry= fUseNewRegistry ? new ImageDescriptorRegistry() : JavaPlugin.getImageDescriptorRegistry();
+		}
+		return fRegistry;
+	}	
+	
 	
 	/* (non-Javadoc)
 	 * @see ILabelDecorator#decorateText(String, Object)
@@ -85,7 +93,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 		if (adornmentFlags != 0) {
 			ImageDescriptor baseImage= new ImageImageDescriptor(image);
 			Rectangle bounds= image.getBounds();
-			return fRegistry.get(new JavaElementImageDescriptor(baseImage, adornmentFlags, new Point(bounds.width, bounds.height)));
+			return getRegistry().get(new JavaElementImageDescriptor(baseImage, adornmentFlags, new Point(bounds.width, bounds.height)));
 		}
 		return image;
 	}
@@ -94,20 +102,16 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	public int computeAdornmentFlags(Object element) {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR)) {
-			if (element instanceof IMethod) {
-				try {
-					IMethod method= (IMethod) element;
-					if (method.exists()) {
-						int flags= method.getFlags();
-						if (method.getDeclaringType().isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
-							return getOverrideIndicators(method);
-						}
-					}
-				} catch (JavaModelException e) {
-					if (!e.isDoesNotExist()) {
-						JavaPlugin.log(e);
-					}
+		if (element instanceof IMethod) {
+			try {
+				IMethod method= (IMethod) element;
+				int flags= method.getFlags();
+				if (method.getDeclaringType().isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
+					return getOverrideIndicators(method);
+				}
+			} catch (JavaModelException e) {
+				if (!e.isDoesNotExist()) {
+					JavaPlugin.log(e);
 				}
 			}
 		}
@@ -152,6 +156,9 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 	 * @see IBaseLabelProvider#dispose()
 	 */
 	public void dispose() {
+		if (fRegistry != null && fUseNewRegistry) {
+			fRegistry.dispose();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -165,6 +172,16 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 	 * @see IBaseLabelProvider#removeListener(ILabelProviderListener)
 	 */
 	public void removeListener(ILabelProviderListener listener) {
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ILightweightLabelDecorator#decorate(java.lang.Object, org.eclipse.jface.viewers.IDecoration)
+	 */
+	public void decorate(Object element, IDecoration decoration) { 
+		int adornmentFlags= computeAdornmentFlags(element);
+		if (adornmentFlags != 0) {
+			decoration.addOverlay(JavaPluginImages.DESC_OVR_OVERRIDES);
+		}
 	}
 
 }

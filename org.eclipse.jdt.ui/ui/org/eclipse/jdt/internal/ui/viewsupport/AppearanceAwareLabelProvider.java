@@ -3,11 +3,9 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
 /**
  * JavaUILabelProvider that respects settings from the Appearance preference page.
@@ -24,17 +22,17 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/**
 	 * Constructor for AppearanceAwareLabelProvider.
 	 */
-	public AppearanceAwareLabelProvider(int textFlags, int imageFlags, ILabelDecorator[] labelDecorators) {
-		super(textFlags, imageFlags, labelDecorators);
+	public AppearanceAwareLabelProvider(int textFlags, int imageFlags) {
+		super(textFlags, imageFlags);
 		initMasks();
 		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);
 	}
 
 	/**
-	 * Creates a labelProvider with DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS and the ErrorTickLabelDecorator.
+	 * Creates a labelProvider with DEFAULT_TEXTFLAGS and DEFAULT_IMAGEFLAGS
 	 */	
 	public AppearanceAwareLabelProvider() {
-		this(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS, new ILabelDecorator[] { new ProblemsLabelDecorator(null) });
+		this(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
 	}
 	
 	private void initMasks() {

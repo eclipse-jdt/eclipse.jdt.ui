@@ -723,8 +723,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	protected ILabelProvider createLabelProvider() {
 		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
-						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-						AppearanceAwareLabelProvider.getDecorators(true, null)
+						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 						);
 	}
 

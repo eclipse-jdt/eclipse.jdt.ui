@@ -26,8 +26,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -107,8 +105,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 	private ILabelProvider createLabelProvider(){
 		ILabelProvider lprovider= new AppearanceAwareLabelProvider(
 			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
-			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
-			AppearanceAwareLabelProvider.getDecorators(true, new OverrideIndicatorLabelDecorator(null))
+			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
 		);
 		
 		return new DecoratingLabelProvider(lprovider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());

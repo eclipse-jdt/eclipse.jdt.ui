@@ -61,13 +61,10 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
-
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -328,8 +325,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 		
 		ILabelProvider lprovider= new AppearanceAwareLabelProvider(
 			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
-			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
-			AppearanceAwareLabelProvider.getDecorators(true, new OverrideIndicatorLabelDecorator(null))
+			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
 		);
 		fTreeViewer.setLabelProvider(new DecoratingLabelProvider(lprovider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 
