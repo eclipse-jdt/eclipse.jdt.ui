@@ -28,7 +28,8 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 	 * Creates a new extract method action when used as an action delegate.
 	 */
 	public ExtractMethodAction() {
-		super(RefactoringMessages.getString("ExtractMethodAction.extract_method")); //$NON-NLS-1$
+		super(RefactoringMessages.getString("ExtractMethodAction.extract_method"),  //$NON-NLS-1$
+				  "Extract Method", "This action in unavailable on the current text selection. Select an expression or a set of statements."); 
 	}
 	
 	/**
@@ -52,13 +53,6 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 			CodeFormatterPreferencePage.isCompactingAssignment(),
 			CodeFormatterPreferencePage.getTabSize(),
 			JavaPreferencesSettings.getCodeGenerationSettings());
-	}
-
-	/*
-	 * @see TextSelectionBasedRefactoringAction#getDialogTitle()
-	 */
-	protected String getDialogTitle() {
-		return "Extract Method";
 	}
 
 	/*

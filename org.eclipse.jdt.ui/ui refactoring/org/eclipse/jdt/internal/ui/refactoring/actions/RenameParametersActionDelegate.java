@@ -10,6 +10,7 @@ import org.eclipse.jdt.internal.ui.actions.*;
 public class RenameParametersActionDelegate extends RefactoringActionDelegate {
 
 	public RenameParametersActionDelegate() {
+		super("Rename Method Parameters", "Operation unavailable on the current selection. Select a method that has parameters.");
 	}
 	
 	/* (non-Javadoc)
