@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class PullUpAction extends OpenRefactoringWizardAction {
 
 	private static final String TITLE= RefactoringMessages.getString("RefactoringGroup.pull_Up_label"); //$NON-NLS-1$
-	private static final String UNAVAILABLE= "To activate this refactoring, please select the name of a method";
+	private static final String UNAVAILABLE= RefactoringMessages.getString("PullUpAction.unavailable"); //$NON-NLS-1$
 	
 	public PullUpAction(CompilationUnitEditor editor) {
 		super(TITLE, UNAVAILABLE, editor, IMember.class, true);

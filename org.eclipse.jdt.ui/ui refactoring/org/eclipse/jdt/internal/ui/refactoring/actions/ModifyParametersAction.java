@@ -16,7 +16,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class ModifyParametersAction extends OpenRefactoringWizardAction {
 	
 	private static final String TITLE= RefactoringMessages.getString("RefactoringGroup.modify_Parameters_label"); //$NON-NLS-1$
-	private static final String UNAVAILABLE= "To activate this refactoring, plase select the name of a method with one or more parameters";
+	private static final String UNAVAILABLE= RefactoringMessages.getString("ModifyParametersAction.unavailable"); //$NON-NLS-1$
 	
 	public ModifyParametersAction(CompilationUnitEditor editor) {
 		super(TITLE, UNAVAILABLE, editor, IMethod.class, false);

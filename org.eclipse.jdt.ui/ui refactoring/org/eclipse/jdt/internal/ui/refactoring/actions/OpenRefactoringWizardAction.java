@@ -68,7 +68,7 @@ abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
 
 	protected void run(ITextSelection selection) {
 		if (! canRun(selection)){
-			MessageDialog.openInformation(getShell(), "Operation Unavailable", fUnavailableMessage);
+			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), fUnavailableMessage); //$NON-NLS-1$
 			fRefactoring= null;
 			return;
 		}
