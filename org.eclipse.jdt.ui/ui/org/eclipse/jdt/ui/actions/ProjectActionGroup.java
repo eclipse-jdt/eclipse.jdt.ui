@@ -59,9 +59,9 @@ public class ProjectActionGroup extends ActionGroup {
 		ISelection selection= provider.getSelection();
 		
 		fCloseAction= new CloseResourceAction(shell);
-		fCloseAction.setActionDefinitionId("org.eclipse.ui.project.closeProject");
+		fCloseAction.setActionDefinitionId("org.eclipse.ui.project.closeProject"); //$NON-NLS-1$
 		fOpenAction= new OpenProjectAction(fSite);
-		fOpenAction.setActionDefinitionId("org.eclipse.ui.project.openProject");
+		fOpenAction.setActionDefinitionId("org.eclipse.ui.project.openProject"); //$NON-NLS-1$
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection s= (IStructuredSelection)selection;
 			fOpenAction.selectionChanged(s);

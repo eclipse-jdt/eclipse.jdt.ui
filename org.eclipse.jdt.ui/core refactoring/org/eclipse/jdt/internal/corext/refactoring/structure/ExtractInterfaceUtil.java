@@ -226,16 +226,20 @@ class ExtractInterfaceUtil {
 			        ImportRewrite importRewrite= new ImportRewrite(cu);
 			        cuToImportType.put(cu, importRewrite.addImport(supertypeToUse.getFullyQualifiedName()));
 			        TextEdit importEdit= importRewrite.createEdit(new Document(cu.getSource()));
-			        TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_imports"), importEdit);
+			        TextChangeCompatibility.addTextEdit(
+			        	change, 
+						RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_imports"), importEdit); //$NON-NLS-1$
 			    }
-				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_reference"), createTypeUpdateEdit(range.getSourceRange(), typeName, (String)cuToImportType.get(cu)));
+				TextChangeCompatibility.addTextEdit(change, 
+					RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_reference"),  //$NON-NLS-1$
+					createTypeUpdateEdit(range.getSourceRange(), typeName, (String)cuToImportType.get(cu)));
 			}
 		}
 		return ranges;
 	}
 
 	public static TextChange getTextChange(TextChangeManager manager, ICompilationUnit cu) throws CoreException {
-		//XXX workaround for bug 39630 CompilationUnitChange cannot handle in-memory-only compilation units 
+		// workaround for bug 39630 CompilationUnitChange cannot handle in-memory-only compilation units 
 		if (manager.containsChangesIn(cu) || cu.getResource().exists())
 			return manager.get(cu);
 		DocumentChange result= new DocumentChange(cu.getElementName(), new Document(cu.getSource()));
@@ -243,7 +247,6 @@ class ExtractInterfaceUtil {
 		return result;
 	}
 
-	//TODO to be deleted
 	private static TextEdit createTypeUpdateEdit(ISourceRange sourceRange, String className, String interfaceName) {
 		int offset= sourceRange.getOffset() + sourceRange.getLength() - className.length();
 		return new ReplaceEdit(offset, className.length(), interfaceName);
@@ -596,7 +599,7 @@ class ExtractInterfaceUtil {
 
 	private CompilationUnitRange[] getCompilationUnitRanges(ConstraintVariable[] variables, IType inputType, ITypeBinding inputTypeBinding) throws CoreException {
 		Set ranges= new HashSet();
-		IJavaProject scope= inputType.getJavaProject();//XXX scope is bogus
+		IJavaProject scope= inputType.getJavaProject(); //TODO check if scope is correct
 		for (int i= 0; i < variables.length; i++) {
 			CompilationUnitRange range= getRange(variables[i], scope, inputTypeBinding);
 			if (range != null)
@@ -722,7 +725,6 @@ class ExtractInterfaceUtil {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCreator#create(org.eclipse.jdt.core.dom.ArrayCreation)
 		 */
-		// TODO check implementation
 		public ITypeConstraint[] create(ArrayCreation node) {
 			ConstraintVariable arrayCreationVar= getConstraintVariableFactory().makeExpressionOrTypeVariable(node, getContext());
 			ConstraintVariable typeVar= getConstraintVariableFactory().makeTypeVariable(node.getType());
@@ -733,7 +735,6 @@ class ExtractInterfaceUtil {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCreator#create(org.eclipse.jdt.core.dom.ArrayAccess)
 		 */
-		 // TODO check implementation
 		public ITypeConstraint[] create(ArrayAccess node) {
 			Expression expression= node.getArray();
 			ITypeConstraint[] equals= getConstraintFactory().createEqualsConstraint(getConstraintVariableFactory().makeExpressionOrTypeVariable(node, getContext()), getConstraintVariableFactory().makeExpressionOrTypeVariable(expression, getContext()));
@@ -743,7 +744,6 @@ class ExtractInterfaceUtil {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCreator#create(org.eclipse.jdt.core.dom.ArrayType)
 		 */
-		// TODO check implementation
 		public ITypeConstraint[] create(ArrayType node) {
 			ConstraintVariable component= getConstraintVariableFactory().makeTypeVariable(node.getComponentType());
 			ITypeConstraint[] equals= getConstraintFactory().createEqualsConstraint(getConstraintVariableFactory().makeTypeVariable(node), component);

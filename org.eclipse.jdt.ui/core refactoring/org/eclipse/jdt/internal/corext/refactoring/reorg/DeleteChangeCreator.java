@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -65,7 +65,7 @@ class DeleteChangeCreator {
 	}
 	
 	static Change createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements, String changeName) throws CoreException {
-		final ValidationStateChange result= new ValidationStateChange(changeName) {
+		final DynamicValidationStateChange result= new DynamicValidationStateChange(changeName) {
 			public Change perform(IProgressMonitor pm) throws CoreException {
 				super.perform(pm);
 				return null;

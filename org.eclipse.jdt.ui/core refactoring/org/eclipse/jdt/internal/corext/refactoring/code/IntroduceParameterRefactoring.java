@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring.ASTData;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -314,7 +314,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		
 		// TODO: check for name clashes in ripple methods, ...
 		
-		fChange= new ValidationStateChange(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.introduce_parameter")); //$NON-NLS-1$
+		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.introduce_parameter")); //$NON-NLS-1$
 		fSource.reset(fSettings);
 		changeSource();
 		pm.worked(1);

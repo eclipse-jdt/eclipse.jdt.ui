@@ -71,7 +71,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
@@ -471,7 +471,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			  new HashMap/*<ICompilationUnit,HashSet<ConstraintVariable>>*/();
 			groupChangesByCompilationUnit(relevantVarsByUnit);
 			
-			final ValidationStateChange result= new ValidationStateChange(RefactoringCoreMessages.getString("ChangeTypeRefactoring.allChanges"));  //$NON-NLS-1$
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("ChangeTypeRefactoring.allChanges"));  //$NON-NLS-1$
 			for (Iterator/*<ICompilationUnit>*/ it= relevantVarsByUnit.keySet().iterator(); it.hasNext(); ){
 				ICompilationUnit icu= (ICompilationUnit)it.next();
 				Set/*<ConstraintVariable>*/ cVars = (Set)relevantVarsByUnit.get(icu);
@@ -1191,7 +1191,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				
 				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, project);
 				if (selectedMethod == null){
-					throw new Error(RefactoringCoreMessages.getString("ChangeTypeAction.exception")); //$NON-NLS-1$
+					throw new Error(RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_method")); //$NON-NLS-1$
 				}
 				
 				// the following code fragment appears to be the source of a memory leak, when
@@ -1228,7 +1228,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			try {
 				IField iField= Bindings.findField(fFieldBinding, fCu.getJavaProject());
 				if (iField == null){
-					throw new Error(RefactoringCoreMessages.getString("ChangeTypeAction.exception")); //$NON-NLS-1$
+					throw new Error(RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_filed")); //$NON-NLS-1$
 				}
 				ISearchPattern pattern=
 					SearchEngine.createSearchPattern(iField,

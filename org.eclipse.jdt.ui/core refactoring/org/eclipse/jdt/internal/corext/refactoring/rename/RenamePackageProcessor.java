@@ -56,7 +56,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
@@ -580,7 +580,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.creating_change"), 1); //$NON-NLS-1$
-			final ValidationStateChange result= new ValidationStateChange(
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(
 				RefactoringCoreMessages.getString("Change.javaChanges")); //$NON-NLS-1$
 	
 			result.addAll(fChangeManager.getAllChanges());

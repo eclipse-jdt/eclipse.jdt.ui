@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
@@ -351,7 +352,7 @@ public class RenameSupport {
 	private void ensureChecked() throws CoreException {
 		if (fPreCheckStatus == null) {
 			if (!fRefactoring.isApplicable()) {
-				fPreCheckStatus= RefactoringStatus.createFatalErrorStatus("The refactoring is not enabled.");
+				fPreCheckStatus= RefactoringStatus.createFatalErrorStatus(JavaUIMessages.getString("RenameSupport.not_available")); //$NON-NLS-1$
 			} else {
 				fPreCheckStatus= new RefactoringStatus();
 			}
@@ -360,7 +361,7 @@ public class RenameSupport {
 	
 	private void showInformation(Shell parent, RefactoringStatus status) {
 		String message= status.getMessageMatchingSeverity(RefactoringStatus.FATAL);
-		MessageDialog.openInformation(parent, "Rename", message);
+		MessageDialog.openInformation(parent, JavaUIMessages.getString("RenameSupport.dialog.title"), message); //$NON-NLS-1$
 	}
 	
 	private static IStatus asStatus(RefactoringStatusEntry entry) {

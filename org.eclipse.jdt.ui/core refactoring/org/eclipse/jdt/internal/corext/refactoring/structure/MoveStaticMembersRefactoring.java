@@ -70,7 +70,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -543,7 +543,8 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus checkMovedMembersAvailability(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("Check availability of members after move.", fMembersToMove.length);
+		pm.beginTask("", fMembersToMove.length); //$NON-NLS-1$
+		pm.setTaskName(RefactoringCoreMessages.getString("MoveMembersRefactoring.check_availability")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fMembersToMove.length; i++) {
 			result.merge(checkMovedMemberAvailability(fMembersToMove[i], new SubProgressMonitor(pm, 1)));
@@ -743,7 +744,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	
 	private void createChange(RefactoringStatus status, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
-		fChange= new ValidationStateChange(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_members")); //$NON-NLS-1$
+		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_members")); //$NON-NLS-1$
 		fTarget= getASTData(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
@@ -848,7 +849,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 					}
 				}
 			}
-			TextEditGroup group= new TextEditGroup("moved member declaration");
+			TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_declaration")); //$NON-NLS-1$
 			fSource.rewriter.markAsTracked(declaration, group);
 			declaration.setProperty("group", group); //$NON-NLS-1$
 			targetNeedsSourceImport |= analyzer.targetNeedsSourceImport();

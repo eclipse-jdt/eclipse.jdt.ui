@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -169,7 +169,7 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 	public Change createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			return new ValidationStateChange(
+			return new DynamicValidationStateChange(
 			  new RenameResourceChange(fResource, getNewElementName()));
 		} finally{
 			pm.done();

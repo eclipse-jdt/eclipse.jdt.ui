@@ -27,8 +27,8 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
 import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
+import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextViewer;
@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal;
@@ -183,7 +183,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ISu
 			if (proposals.length == 0) {
 				String errorMsg= collector.getErrorMessage();
 				if (errorMsg == null || errorMsg.trim().length() == 0)
-					errorMsg= JavaUIMessages.getString("JavaEditor.codeassist.noCompletions"); //$NON-NLS-1$
+					errorMsg= RefactoringMessages.getString("JavaTypeCompletionProcessor.no_completion");  //$NON-NLS-1$
 				fErrorMessage= errorMsg;
 			} else {
 				fErrorMessage= collector.getErrorMessage();
@@ -210,7 +210,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ISu
 		if (typeQualifier.length() > 0) {
 			buf.append(typeQualifier);
 		} else if (containerName != null) {
-			buf.append("(default package)");
+			buf.append(RefactoringMessages.getString("JavaTypeCompletionProcessor.default_package")); //$NON-NLS-1$
 		}
 		String name= buf.toString();
 		

@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -200,7 +200,7 @@ public class NLSRefactoring extends Refactoring {
 
             pm.beginTask("", 3); //$NON-NLS-1$
 
-            final ValidationStateChange result = new ValidationStateChange("NLS Refactoring");
+            final DynamicValidationStateChange result = new DynamicValidationStateChange("NLS Refactoring");
 
             if (willCreateAccessorClass()) {
                 result.add(

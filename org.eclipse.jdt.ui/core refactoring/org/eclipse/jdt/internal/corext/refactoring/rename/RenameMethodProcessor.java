@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -195,7 +195,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			pm.beginTask("", 12); //$NON-NLS-1$
 			// TODO workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=40367
 			if (!Checks.isAvailable(fMethod)) {
-				result.addFatalError("Method to be renamed is binary.", JavaStatusContext.create(fMethod));
+				result.addFatalError(RefactoringCoreMessages.getString("RenameMethodProcessor.is_binary"), JavaStatusContext.create(fMethod)); //$NON-NLS-1$
 				return result;
 			}
 			result.merge(Checks.checkIfCuBroken(fMethod));
@@ -439,7 +439,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	public final Change createChange(IProgressMonitor pm) throws CoreException {
 		try{
-			return new ValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			return new DynamicValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
 		}	
@@ -481,7 +481,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	final void addDeclarationUpdate(TextChange change) throws CoreException {
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), new ReplaceEdit(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), getNewElementName()));
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), new ReplaceEdit(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), getNewElementName())); //$NON-NLS-1$
 	}
 	
 	final TextEdit createTextChange(SearchResult searchResult) {

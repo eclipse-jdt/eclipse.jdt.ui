@@ -86,7 +86,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.InstanceMethodMover.Method.Delegation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.InstanceMethodMover.Method.MethodEditSession;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
@@ -114,7 +114,6 @@ class InstanceMethodMover {
 	
 	private static abstract class NewReceiver implements MoveInstanceMethodRefactoring.INewReceiver {
 		private final IJavaProject fDependentProject;
-		private final CodeGenerationSettings fCodeGenSettings;
 		
 		//cache:
 		private IType fModelClass;
@@ -124,7 +123,6 @@ class InstanceMethodMover {
 			Assert.isNotNull(codeGenSettings);
 			
 			fDependentProject= dependentProject;
-			fCodeGenSettings= codeGenSettings;
 		}
 		
 		public abstract String getName();
@@ -170,7 +168,7 @@ class InstanceMethodMover {
 			if (changes.length == 1) {
 				return changes[0];
 			} else {
-				return new ValidationStateChange(RefactoringCoreMessages.getString("InstanceMethodMover.move_method"), changes); //$NON-NLS-1$
+				return new DynamicValidationStateChange(RefactoringCoreMessages.getString("InstanceMethodMover.move_method"), changes); //$NON-NLS-1$
 			}
 		}
 
@@ -179,7 +177,7 @@ class InstanceMethodMover {
 			methodEditSession.replaceBodyWithDelegation(
 				specifyDelegationToNewMethod(originalMethod, newMethodName));
 			TextChange cuChange= manager.get(originalMethod.getDeclaringCU());
-			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.replace_with_delegation"), methodEditSession.getEdits());
+			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.replace_with_delegation"), methodEditSession.getEdits()); //$NON-NLS-1$
 		}
 		
 		abstract Method.Delegation specifyDelegationToNewMethod(Method originalMethod, String newMethodName);
@@ -203,9 +201,13 @@ class InstanceMethodMover {
 			rewrite.removeModifications();
 			
 			TextChange cuChange= manager.get(getReceiverClassCU());
-			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), edit);
+			TextChangeCompatibility.addTextEdit(
+				cuChange, 
+				RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), edit); //$NON-NLS-1$
 			ImportRewrite importRewrite= createImportRewrite(allTypesUsedWithoutQualification, getReceiverClassCU());
-			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.add_imports"), importRewrite.createEdit(buffer.getDocument()));
+			TextChangeCompatibility.addTextEdit(
+				cuChange, 
+				RefactoringCoreMessages.getString("InstanceMethodMover.add_imports"), importRewrite.createEdit(buffer.getDocument())); //$NON-NLS-1$
 		}
 
 		private ImportRewrite createImportRewrite(List types, ICompilationUnit cu) throws CoreException {

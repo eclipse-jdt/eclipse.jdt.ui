@@ -105,7 +105,7 @@ public class JavaContext extends CompilationUnitContext {
 	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 
 		if (!canEvaluate(template))
-			throw new TemplateException(JavaTemplateMessages.getString("Context.error.cannot.evaluate"));
+			throw new TemplateException(JavaTemplateMessages.getString("Context.error.cannot.evaluate")); //$NON-NLS-1$
 		
 		TemplateTranslator translator= new TemplateTranslator() {
 			/*

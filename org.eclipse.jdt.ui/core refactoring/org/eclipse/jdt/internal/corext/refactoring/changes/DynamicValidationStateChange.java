@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -38,7 +40,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.UndoManagerAdapter;
 
-public class ValidationStateChange extends CompositeChange {
+public class DynamicValidationStateChange extends CompositeChange {
 	
 	private class FlushListener implements IElementChangedListener {
 		public void elementChanged(ElementChangedEvent event) {
@@ -145,18 +147,18 @@ public class ValidationStateChange extends CompositeChange {
 	private SaveListener fSaveListener;
 	private UndoManagerListener fUndoManagerListener;
 	
-	public ValidationStateChange(Change change) {
+	public DynamicValidationStateChange(Change change) {
 		super(change.getName());
 		add(change);
 		markAsSynthetic();
 	}
 	
-	public ValidationStateChange(String name) {
+	public DynamicValidationStateChange(String name) {
 		super(name);
 		markAsSynthetic();
 	}
 	
-	public ValidationStateChange(String name, Change[] changes) {
+	public DynamicValidationStateChange(String name, Change[] changes) {
 		super(name, changes);
 		markAsSynthetic();
 	}
@@ -186,7 +188,7 @@ public class ValidationStateChange extends CompositeChange {
 		final Change[] result= new Change[1];
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				result[0]= ValidationStateChange.super.perform(monitor);
+				result[0]= DynamicValidationStateChange.super.perform(monitor);
 			}
 		};
 		JavaCore.run(runnable, pm);
@@ -197,7 +199,7 @@ public class ValidationStateChange extends CompositeChange {
 	 * {@inheritDoc}
 	 */
 	protected Change createUndoChange(Change[] childUndos) {
-		ValidationStateChange result= new ValidationStateChange(getName());
+		DynamicValidationStateChange result= new DynamicValidationStateChange(getName());
 		for (int i= 0; i < childUndos.length; i++) {
 			result.add(childUndos[i]);
 		}
@@ -242,7 +244,7 @@ public class ValidationStateChange extends CompositeChange {
 	private void workspaceChanged() {
 		if (fUndoManagerListener != null && fUndoManagerListener.isPerformingChange())
 			return;
-		fValidationState= RefactoringStatus.createFatalErrorStatus("Workspace has changed since change has been created");
+		fValidationState= RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("DynamicValidationStateChange.workspace_changed")); //$NON-NLS-1$
 		RefactoringCore.getUndoManager().flush();
 		removeListeners();
 	}

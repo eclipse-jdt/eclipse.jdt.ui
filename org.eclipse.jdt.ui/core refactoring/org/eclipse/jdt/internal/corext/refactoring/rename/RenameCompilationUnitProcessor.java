@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
@@ -324,10 +324,10 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		
 		IResource resource= ResourceUtil.getResource(fCu);
 		if (resource != null && resource.isLinked())
-			return new ValidationStateChange( 
+			return new DynamicValidationStateChange( 
 			   new RenameResourceChange(resource, getNewElementName()));
 		
-		return new ValidationStateChange( 
+		return new DynamicValidationStateChange( 
 			new RenameCompilationUnitChange(fCu, getNewElementName()));
 	}
 	
