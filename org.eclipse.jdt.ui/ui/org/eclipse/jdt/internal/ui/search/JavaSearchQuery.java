@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -22,31 +21,25 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jface.resource.ImageDescriptor;
-
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.text.Match;
-
-import org.eclipse.search.internal.ui.SearchPreferencePage;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.search.IQueryParticipant;
-import org.eclipse.jdt.ui.search.ISearchRequestor;
-import org.eclipse.jdt.ui.search.ISearchUIParticipant;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.SearchParticipantsPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.search.IMatchPresentation;
+import org.eclipse.jdt.ui.search.IQueryParticipant;
+import org.eclipse.jdt.ui.search.ISearchRequestor;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.search.internal.ui.SearchPreferencePage;
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.text.Match;
 
 /**
  * @author Thomas Mäder
@@ -66,7 +59,7 @@ public class JavaSearchQuery implements ISearchQuery {
 		private IQueryParticipant fParticipant;
 		private JavaSearchResult fSearchResult;
 		public void reportMatch(Match match) {
-			ISearchUIParticipant participant= fParticipant.getUIParticipant();
+			IMatchPresentation participant= fParticipant.getUIParticipant();
 			if (participant == null || match.getElement() instanceof IJavaElement || match.getElement() instanceof IResource) {
 				fSearchResult.addMatch(match);
 			} else {

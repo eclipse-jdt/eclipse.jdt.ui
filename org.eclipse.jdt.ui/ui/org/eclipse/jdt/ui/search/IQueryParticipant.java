@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.search.QuerySpecification;
  * <p> 
  * A <code>IQueryParticipant</code> is called during the execution of a 
  * Java search query. It can report matches via an <code>ISearchRequestor</code> and 
- * may contribute a <code>ISearchUIParticipant</code> to help render the elements it contributes.
+ * may contribute a <code>IMatchPresentation</code> to help render the elements it contributes.
  * </p>
  * <p>
  * Clients may implement this interface.
@@ -57,5 +57,5 @@ public interface IQueryParticipant {
 	 * A participant may return null if matches are only reported against <code>IResources</code> or <code>IJavaElements</code>.
 	 * @return The UI participant for this query participant or <code>null</code>.
 	 */
-	ISearchUIParticipant getUIParticipant();
+	IMatchPresentation getUIParticipant();
 }

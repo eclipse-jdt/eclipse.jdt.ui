@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.ui.search.ISearchUIParticipant;
+import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
@@ -151,11 +151,11 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 		return fQuery;
 	}
 	
-	synchronized ISearchUIParticipant getSearchParticpant(Object element) {
-		return (ISearchUIParticipant) fElementsToParticipants.get(element);
+	synchronized IMatchPresentation getSearchParticpant(Object element) {
+		return (IMatchPresentation) fElementsToParticipants.get(element);
 	}
 
-	boolean addMatch(Match match, ISearchUIParticipant participant) {
+	boolean addMatch(Match match, IMatchPresentation participant) {
 		Object element= match.getElement();
 		if (fElementsToParticipants.get(element) != null) {
 			// TODO must access the participant id / label to properly report the error.

@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
-import org.eclipse.jdt.ui.search.ISearchUIParticipant;
+import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
@@ -113,7 +113,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 			}
 		} else {
 			JavaSearchResult result= (JavaSearchResult) getInput();
-			ISearchUIParticipant participant= result.getSearchParticpant(element);
+			IMatchPresentation participant= result.getSearchParticpant(element);
 			if (participant != null)
 				participant.showMatch(match, offset, length);
 		}

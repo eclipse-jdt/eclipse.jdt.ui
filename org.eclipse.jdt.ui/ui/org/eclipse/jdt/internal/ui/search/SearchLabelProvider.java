@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
+import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.ui.search.ISearchUIParticipant;
+import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IColorProvider;
@@ -77,7 +77,7 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 			Match[] matches= result.getMatches(element);
 			for (int i = 0; i < matches.length; i++) {
 				if ((matches[i]) instanceof JavaElementMatch) {
-					if (((JavaElementMatch)matches[i]).getAccuracy() == IJavaSearchResultCollector.POTENTIAL_MATCH)
+					if (((JavaElementMatch)matches[i]).getAccuracy() == SearchMatch.A_INACCURATE)
 						return true;
 				}
 			}
@@ -144,7 +144,7 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 
 
 	private ILabelProvider getLabelProvider(Object element) {
-		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
+		IMatchPresentation participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
 		if (participant == null)
 			return null;
 		ILabelProvider lp= (ILabelProvider) fLabelProviderMap.get(participant);

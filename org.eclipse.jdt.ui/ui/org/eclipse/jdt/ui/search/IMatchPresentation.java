@@ -18,7 +18,7 @@ import org.eclipse.ui.PartInitException;
  * This interface serves to display elements that a search participant has contributed to a search
  * result.
  * <p>
- * Each <code>ISearchUIParticipant</code> is associated with a particular <code>IQueryParticipant</code>. The ISearchUIParticipant
+ * Each <code>IMatchPresentation</code> is associated with a particular <code>IQueryParticipant</code>. The IMatchPresentation
  * will only be asked to handle elements and matches which its <code>IQueryParticipant</code> contributed to the 
  * search result. If two search participants report matches against the same element, one of them will
  * be chosen to handle the element.
@@ -28,7 +28,7 @@ import org.eclipse.ui.PartInitException;
  * </p>
  * @since 3.0 
  */
-public interface ISearchUIParticipant {
+public interface IMatchPresentation {
 	/**
 	 * Creates a new instance of a label provider for elments that have been contributed
 	 * to a search result by the corresponding query participant. The search view
