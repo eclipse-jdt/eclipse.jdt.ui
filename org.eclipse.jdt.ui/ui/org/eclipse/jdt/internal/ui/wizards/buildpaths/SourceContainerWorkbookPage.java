@@ -436,33 +436,32 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 		
 	private void updateClasspathList() {
-		List cpelements= fClassPathList.getElements();
 		List srcelements= fFoldersList.getElements();
-
-		boolean changeDone= false;
-		CPListElement lastSourceFolder= null;
+		
+		List cpelements= fClassPathList.getElements();
+		int nEntries= cpelements.size();
 		// backwards, as entries will be deleted
-		for (int i= cpelements.size() - 1; i >= 0 ; i--) {
+		int lastRemovePos= nEntries;
+		int afterLastSourcePos= 0;
+		for (int i= nEntries - 1; i >= 0; i--) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
-			if (isEntryKind(cpe.getEntryKind())) {
-				// if it is a source folder, but not one of the accepted entries, remove it
-				// at the same time, for the entries seen, remove them from the accepted list
+			int kind= cpe.getEntryKind();
+			if (isEntryKind(kind)) {
 				if (!srcelements.remove(cpe)) {
 					cpelements.remove(i);
-					changeDone= true;
-				} else if (lastSourceFolder == null) {
-					lastSourceFolder= cpe;
+					lastRemovePos= i;
+				} else if (lastRemovePos == nEntries) {
+					afterLastSourcePos= i + 1;
 				}
 			}
 		}
 
 		if (!srcelements.isEmpty()) {
-			int insertIndex= (lastSourceFolder == null) ? 0 : cpelements.indexOf(lastSourceFolder) + 1;
-			cpelements.addAll(insertIndex, srcelements);
-			changeDone= true;
+			int insertPos= Math.min(afterLastSourcePos, lastRemovePos);
+			cpelements.addAll(insertPos, srcelements);
 		}
-
-		if (changeDone) {
+		
+		if (lastRemovePos != nEntries || !srcelements.isEmpty()) {
 			fClassPathList.setElements(cpelements);
 		}
 	}

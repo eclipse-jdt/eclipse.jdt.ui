@@ -388,7 +388,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			break;
 		}
 		if (res != null && res.length > 0) {
-			fLibrariesList.replaceElement(elem, res[0]);
+			CPListElement curr= res[0];
+			curr.setExported(elem.isExported());
+			fLibrariesList.replaceElement(elem, curr);
 		}		
 			
 	}
@@ -423,23 +425,24 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private void updateClasspathList() {
 		List projelements= fLibrariesList.getElements();
 		
-		boolean remove= false;
 		List cpelements= fClassPathList.getElements();
+		int nEntries= cpelements.size();
 		// backwards, as entries will be deleted
-		for (int i= cpelements.size() - 1; i >= 0; i--) {
+		int lastRemovePos= nEntries;
+		for (int i= nEntries - 1; i >= 0; i--) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
 			int kind= cpe.getEntryKind();
 			if (isEntryKind(kind)) {
 				if (!projelements.remove(cpe)) {
 					cpelements.remove(i);
-					remove= true;
+					lastRemovePos= i;
 				}	
 			}
 		}
-		for (int i= 0; i < projelements.size(); i++) {
-			cpelements.add(projelements.get(i));
-		}
-		if (remove || (projelements.size() > 0)) {
+		
+		cpelements.addAll(lastRemovePos, projelements);
+
+		if (lastRemovePos != nEntries || !projelements.isEmpty()) {
 			fClassPathList.setElements(cpelements);
 		}
 	}

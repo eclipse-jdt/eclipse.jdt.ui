@@ -216,6 +216,13 @@ public class CPListElement {
 	public int hashCode() {
 		return fPath.hashCode() + fEntryKind;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return getClasspathEntry().toString();
+	}
 
 	/**
 	 * Returns if a entry is missing.
