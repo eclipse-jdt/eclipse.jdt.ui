@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
 
 /**
  * A <tt>RangeMarker</tt> can be used to track positions when executing 
@@ -68,7 +68,7 @@ public final class RangeMarker extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public final void perform(TextBuffer buffer) throws CoreException {
+	public final void perform(IDocument document)  {
 	}
 	
 	/* non Java-doc

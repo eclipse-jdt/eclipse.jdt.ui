@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -76,8 +76,8 @@ public class SimpleTextEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#doPerform
 	 */
-	public void perform(TextBuffer buffer) throws CoreException {
-		buffer.replace(fRange, fText);
+	public void perform(IDocument document) throws PerformEditException {
+		performReplace(document, fRange, fText);
 	}
 	
 	/* non Java-doc

@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.IDocument;
 
 public final class MultiTextEdit extends TextEdit {
 
@@ -84,7 +83,7 @@ public final class MultiTextEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public final void perform(TextBuffer buffer) throws CoreException {
+	public final void perform(IDocument document) {
 		// do nothing.
 	}
 

@@ -15,13 +15,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -86,7 +87,7 @@ public abstract class TextEdit {
 	 * 
 	 * @return the edit's parent
 	 */
-	public TextEdit getParent() {
+	public final TextEdit getParent() {
 		return fParent;
 	}
 	
@@ -99,7 +100,7 @@ public abstract class TextEdit {
 	 *  overlaps with one of its siblings or if the child edit's region
 	 *  isn't fully covered by this edit.
 	 */
-	public void add(TextEdit child) throws TextEditException {
+	public final void add(TextEdit child) throws IllegalEditException {
 		internalAdd(child);
 	}
 	
@@ -112,7 +113,7 @@ public abstract class TextEdit {
 	 * 
 	 * @see #add(TextEdit)
 	 */
-	public void addAll(TextEdit[] edits) throws TextEditException {
+	public final void addAll(TextEdit[] edits) throws IllegalEditException {
 		for (int i= 0; i < edits.length; i++) {
 			internalAdd(edits[i]);
 		}
@@ -129,7 +130,7 @@ public abstract class TextEdit {
 	 * @exception <code>IndexOutOfBoundsException</code> if the index 
 	 *  is out of range
 	 */
-	public TextEdit remove(int index) {
+	public final TextEdit remove(int index) {
 		if (fChildren == null)
 			throw new IndexOutOfBoundsException("Index: " + index + " Size: 0");  //$NON-NLS-1$//$NON-NLS-2$
 		TextEdit result= (TextEdit)fChildren.remove(index);
@@ -146,7 +147,7 @@ public abstract class TextEdit {
 	 * 
 	 * @return an array of the removed edits
 	 */
-	public TextEdit[] removeAll() {
+	public final TextEdit[] removeAll() {
 		if (fChildren == null)
 			return new TextEdit[0];
 		int size= fChildren.size();
@@ -205,9 +206,9 @@ public abstract class TextEdit {
 	 * 
 	 * @see Object#equals(java.lang.Object)
 	 */
-	public final boolean equals(Object obj) {
-		return this == obj; // equivalent to Object.equals
-	}
+//	public final boolean equals(Object obj) {
+//		return this == obj; // equivalent to Object.equals
+//	}
 	
 	/**
 	 * The <code>Edit</code> implementation of this <code>Object</code>
@@ -218,9 +219,9 @@ public abstract class TextEdit {
 	 * 
 	 * @see Object#hashCode()
 	 */
-	public final int hashCode() {
-		return super.hashCode();
-	}
+//	public final int hashCode() {
+//		return super.hashCode();
+//	}
 	
 	//---- Region management -----------------------------------------------
 
@@ -234,6 +235,14 @@ public abstract class TextEdit {
 	 * @return the manipulated range
 	 */
 	public abstract TextRange getTextRange();
+	
+	public int getOffset() {
+		return getTextRange().getOffset();
+	}
+	
+	public int getLength() {
+		return getTextRange().getLength();
+	}
 	
 	//---- Execution -------------------------------------------------------
 	
@@ -251,17 +260,17 @@ public abstract class TextEdit {
 	 * @exception EditException if the edit isn't in a valid state
 	 *  and can therefore not be connected to the given document.
 	 */
-	protected void connect(TextBuffer document) throws TextEditException {
+	protected void connect(IDocument document) throws IllegalEditException {
 		// does nothing
 	}
 	
 	/**
 	 * Performs the text edit. Note that this method <b>should only be called</b> 
-	 * by a <code>TextBufferEditor</code>. 
+	 * by a <code>EditProcessor</code>. 
 	 * 
-	 * @param buffer the actual buffer to manipulate
+	 * @param document the actual document to manipulate
 	 */
-	public abstract void perform(TextBuffer buffer) throws CoreException;
+	public abstract void perform(IDocument document) throws PerformEditException;
 	
 	/**
 	 * This method gets called after all <code>TextEdit</code>s added to a text buffer
@@ -402,6 +411,14 @@ public abstract class TextEdit {
 	
 	//---- Helpers -------------------------------------------------------------------------------------------
 	
+	/* package */ void performReplace(IDocument document, TextRange range, String text) throws PerformEditException {
+		try {
+			document.replace(range.getOffset(), range.getLength(), text);
+		} catch (BadLocationException e) {
+			throw new PerformEditException(this, e.getMessage(), e);
+		}
+	}
+	
 	/* package */ void executePostProcessCopy(TextEditCopier copier) {
 		postProcessCopy(copier);
 		if (fChildren != null) {
@@ -444,14 +461,14 @@ public abstract class TextEdit {
 		fChildren= children;
 	}
 	
-	/* package */ void internalAdd(TextEdit edit) throws TextEditException {
+	/* package */ void internalAdd(TextEdit edit) throws IllegalEditException {
 		edit.aboutToBeAdded(this);
 		TextRange eRange= edit.getTextRange();
 		if (eRange.isUndefined() || eRange.isDeleted())
-			throw new TextEditException(this, edit, "Can't add undefined or deleted edit");
+			throw new IllegalEditException(this, edit, "Can't add undefined or deleted edit");
 		TextRange range= getTextRange();
 		if (!Regions.covers(range, eRange))
-			throw new TextEditException(this, edit, TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
+			throw new IllegalEditException(this, edit, TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
 		if (fChildren == null) {
 			fChildren= new ArrayList(2);
 		}
@@ -476,7 +493,7 @@ public abstract class TextEdit {
 				continue;
 			if (rEnd < oStart)
 				return i;
-			throw new TextEditException(this, edit, TextManipulationMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
+			throw new IllegalEditException(this, edit, TextManipulationMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
 		}
 		return size;
 	}
@@ -510,17 +527,17 @@ public abstract class TextEdit {
 		updateParents(delta);
 	}
 	
-	/* package */ void execute(TextBuffer buffer, Updater updater, IProgressMonitor pm) throws CoreException {
+	/* package */ void execute(IDocument document, Updater updater, IProgressMonitor pm) throws PerformEditException {
 		List children= internalGetChildren();
 		pm.beginTask("", children != null ? children.size() + 1 : 1); //$NON-NLS-1$
 		if (children != null) {
 			for (int i= children.size() - 1; i >= 0; i--) {
-				((TextEdit)children.get(i)).execute(buffer, updater, new SubProgressMonitor(pm, 1));
+				((TextEdit)children.get(i)).execute(document, updater, new SubProgressMonitor(pm, 1));
 			}
 		}
 		try {
 			updater.setActiveNode(this);
-			perform(buffer);
+			perform(document);
 		} finally {
 			updater.setActiveNode(null);
 		}

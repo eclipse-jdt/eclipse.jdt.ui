@@ -17,7 +17,11 @@ import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.PerformEditException;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
@@ -65,10 +69,17 @@ public final class ImportEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#doPerform
 	 */
-	public void perform(TextBuffer buffer) throws CoreException {
-		String text= fImportsStructure.getReplaceString(buffer, fRange);
-		if (text != null)
-			buffer.replace(fRange, text);
+	public void perform(IDocument document) throws PerformEditException {
+		try {
+			String text= fImportsStructure.getReplaceString(
+				new TextBuffer(document), fRange);
+			if (text != null)
+				document.replace(fRange.getOffset(), fRange.getLength(), text);
+		} catch (JavaModelException e) {
+			throw new PerformEditException(this, e.getMessage(), e);
+		} catch (BadLocationException e) {
+			throw new PerformEditException(this, e.getMessage(), e);
+		}
 	}
 	
 	/**

@@ -11,14 +11,10 @@
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jface.text.IDocument;
 
 /**
  * This class encapsulates the reverse change of a number of <code>TextEdit</code>s
@@ -36,24 +32,25 @@ public final class UndoMemento {
 		fEdits.add(edit);
 	}
 	
-	/* package */ void execute(TextBuffer buffer, IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", fEdits.size()); //$NON-NLS-1$
+	/* package */ void execute(IDocument document) throws PerformEditException {
 		for (int i= fEdits.size() - 1; i >= 0; i--) {
-			((TextEdit)fEdits.get(i)).perform(buffer);
-			pm.worked(1);
+			((TextEdit)fEdits.get(i)).perform(document);
 		}
 	}
 	
-	/* package */ void executed(IProgressMonitor pm) {
-		pm.beginTask("", fEdits.size()); //$NON-NLS-1$
+	/* package */ void executed() {
 		for (int i= fEdits.size() - 1; i >= 0; i--) {
 			((TextEdit)fEdits.get(i)).performed();
-			pm.worked(1);
 		}
 	}
 	
-	/* package */ IStatus checkEdits(int bufferLength) {
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, TextManipulationMessages.getString("UndoMemento.is_valid"), null); //$NON-NLS-1$
+	/* package */ boolean canPerform(int bufferLength) {
+		for (Iterator iter= fEdits.iterator(); iter.hasNext();) {
+			TextEdit edit= (TextEdit)iter.next();
+			if (edit.getOffset() + edit.getLength() >= bufferLength)
+				return false;
+		}
+		return true;
 	}
 }
 

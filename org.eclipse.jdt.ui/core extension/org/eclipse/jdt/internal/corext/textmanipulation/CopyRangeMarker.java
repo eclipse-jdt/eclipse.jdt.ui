@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 
 /**
  * A <tt>CopyRangeMarker</tt> can be used to track positions when executing 
@@ -77,8 +78,12 @@ public final class CopyRangeMarker extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public final void perform(TextBuffer buffer) throws CoreException {
-		fText= buffer.getContent(fRange.getOffset(), fRange.getLength());
+	public final void perform(IDocument document) throws PerformEditException {
+		try {
+			fText= document.get(fRange.getOffset(), fRange.getLength());
+		} catch (BadLocationException e) {
+			new PerformEditException(this, e.getMessage(), e);
+		}
 	}
 	
 	/* non Java-doc

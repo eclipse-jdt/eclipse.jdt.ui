@@ -61,9 +61,13 @@ public class TextBuffer {
 	
 	private static final TextBufferFactory fgFactory= new TextBufferFactory();
 	
-	TextBuffer(IDocument document) {
+	public TextBuffer(IDocument document) {
 		fDocument= document;
 		Assert.isNotNull(fDocument);
+	}
+	
+	public IDocument getDocument() {
+		return fDocument;
 	}
 	
 	/**

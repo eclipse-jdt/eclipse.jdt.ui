@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 	}
 	
 	public void release(TextBuffer buffer) {
+		Assert.isNotNull(buffer);
 		final Value value= (Value)fBufferValueMap.get(buffer);
 		if (value == null)
 			return;

@@ -15,12 +15,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
+import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
-
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jface.text.IDocument;
 
 public final class MoveSourceEdit extends AbstractTransferEdit {
 
@@ -73,28 +72,28 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		return fModifier;
 	}
 	
-	protected void connect(TextBuffer buffer) throws TextEditException {
+	protected void connect(IDocument buffer) throws IllegalEditException {
 		if (fTarget == null)
-			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
+			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
 		if (fTarget.getSourceEdit() != this)
-			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.different_source"));  //$NON-NLS-1$
+			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.different_source"));  //$NON-NLS-1$
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public void perform(TextBuffer buffer) throws CoreException {
+	public void perform(IDocument document) throws PerformEditException {
 		fCounter++;
 		switch(fCounter) {
 			// Position of move source > position of move target.
 			// Hence MoveTarget does the actual move. Move Source
 			// only deletes the content.
 			case 1:
-				fContent= getContent(buffer);
+				fContent= getContent(document);
 				fContentRange= getTextRange().copy();
 				fContentChildren= internalGetChildren();
 				fMode= DELETE;
-				buffer.replace(fContentRange, ""); //$NON-NLS-1$
+				performReplace(document, fContentRange, ""); //$NON-NLS-1$
 				// do this after executing the replace to be able to
 				// compute the number of children.
 				internalSetChildren(null);
@@ -103,14 +102,14 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 			// Hence move source handles the delete and the 
 			// insert at the target position.	
 			case 2:
-				fContent= getContent(buffer);
+				fContent= getContent(document);
 				fMode= DELETE;
-				buffer.replace(getTextRange(), ""); //$NON-NLS-1$
+				performReplace(document, getTextRange(), ""); //$NON-NLS-1$
 				TextRange targetRange= fTarget.getTextRange();
 				if (!targetRange.isDeleted()) {
 					// Insert target
 					fMode= INSERT;
-					buffer.replace(targetRange, fContent);
+					performReplace(document, targetRange, fContent);
 				}
 				clearContent();
 				break;
@@ -222,21 +221,27 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	
 	//---- content management ------------------------------------------
 	
-	private String getContent(TextBuffer buffer) throws CoreException {
-		TextRange range= getTextRange();
-		String result= buffer.getContent(range.getOffset(), range.getLength());
-		if (fModifier != null) {
-			TextBuffer newBuffer= TextBuffer.create(result);
-			Map editMap= new HashMap();
-			TextEdit newEdit= createEdit(editMap);
-			fModifier.addEdits(result, newEdit);
-			TextBufferEditor editor= new TextBufferEditor(newBuffer);
-			editor.add(newEdit);
-			editor.performEdits(new NullProgressMonitor());
-			restorePositions(editMap, range.getOffset());
-			result= newBuffer.getContent();
+	private String getContent(IDocument document) throws PerformEditException {
+		try {
+			TextRange range= getTextRange();
+			String result= document.get(range.getOffset(), range.getLength());
+			if (fModifier != null) {
+				IDocument newDocument= new Document(result);
+				Map editMap= new HashMap();
+				TextEdit newEdit= createEdit(editMap);
+				fModifier.addEdits(result, newEdit);
+				EditProcessor processor= new EditProcessor(newDocument);
+				processor.add(newEdit);
+				processor.performEdits();
+				restorePositions(editMap, range.getOffset());
+				result= newDocument.get();
+			}
+			return result;
+		} catch (IllegalEditException e) {
+			throw new PerformEditException(this, e.getMessage(), e);
+		} catch (BadLocationException e) {
+			throw new PerformEditException(this, e.getMessage(), e);
 		}
-		return result;
 	}
 	
 	private TextEdit createEdit(Map editMap) {

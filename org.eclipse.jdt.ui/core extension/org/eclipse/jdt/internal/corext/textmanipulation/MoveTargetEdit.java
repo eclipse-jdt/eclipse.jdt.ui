@@ -12,11 +12,9 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.DocumentEvent;
-
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jface.text.IDocument;
 
 public final class MoveTargetEdit extends AbstractTransferEdit {
 
@@ -49,22 +47,21 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	protected void connect(TextBuffer buffer) {
+	protected void connect(IDocument buffer) {
 		if (fSource == null)
-			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.no_source")); //$NON-NLS-1$
+			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.no_source")); //$NON-NLS-1$
 		if (fSource.getTargetEdit() != this)
-			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.different_target")); //$NON-NLS-1$
+			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.different_target")); //$NON-NLS-1$
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public void perform(TextBuffer buffer) throws CoreException {
+	public void perform(IDocument document) throws PerformEditException {
 		if (++fSource.fCounter == 2) {
 			String source= getSourceContent();
-
 			fMode= INSERT;
-			buffer.replace(getTextRange(), source);
+			performReplace(document, getTextRange(), source);
 		}
 	}
 	

@@ -1627,7 +1627,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		TextBufferEditor innerEditor= new TextBufferEditor(innerBuffer);
 		innerEditor.add(edit);
 		innerEditor.performEdits(null);
-		assertTrue("Can perform edits", innerEditor.canPerformEdits().isOK());
+		assertTrue("Can perform edits", innerEditor.canPerformEdits());
 		
 		buffer.replace(range, innerBuffer.getContent());
 				
@@ -1679,7 +1679,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		TextBufferEditor innerEditor= new TextBufferEditor(innerBuffer);
 		innerEditor.add(edit);
 		innerEditor.performEdits(null);
-		assertTrue("Can perform edits", innerEditor.canPerformEdits().isOK());
+		assertTrue("Can perform edits", innerEditor.canPerformEdits());
 		
 		buffer.replace(range, innerBuffer.getContent());
 		

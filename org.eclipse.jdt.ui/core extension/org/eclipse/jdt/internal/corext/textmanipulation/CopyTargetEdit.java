@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
 
 public final class CopyTargetEdit extends AbstractTransferEdit {
 
@@ -76,17 +76,17 @@ public final class CopyTargetEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	protected void connect(TextBuffer buffer) throws TextEditException {
+	protected void connect(IDocument buffer) throws IllegalEditException {
 		if (fSource == null)
-			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.no_source")); //$NON-NLS-1$
+			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.no_source")); //$NON-NLS-1$
 		if (fSource.getTargetEdit() != this)
-			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.different_target")); //$NON-NLS-1$
+			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.different_target")); //$NON-NLS-1$
 	}
 	
-	public void perform(TextBuffer buffer) throws CoreException {
+	public void perform(IDocument document) throws PerformEditException {
 		if (++fSource.fCounter == 2 && !getTextRange().isDeleted()) {
 			try {
-				buffer.replace(getTextRange(), getSourceContent());
+				performReplace(document, getTextRange(), getSourceContent());
 			} finally {
 				fSource.clearContent();
 			}

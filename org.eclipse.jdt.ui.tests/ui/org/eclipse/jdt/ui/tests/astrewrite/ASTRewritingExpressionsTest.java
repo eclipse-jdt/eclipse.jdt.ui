@@ -49,7 +49,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingExpressionsTest("testRemove3"));
+			suite.addTest(new ASTRewritingExpressionsTest("testSuperMethodInvocation"));
 			return new ProjectTestSetup(suite);
 		}
 	}

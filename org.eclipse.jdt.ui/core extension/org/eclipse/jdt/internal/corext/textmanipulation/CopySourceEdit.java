@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
 
 public final class CopySourceEdit extends AbstractTransferEdit {
 
@@ -95,38 +95,44 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	protected void connect(TextBuffer buffer) throws TextEditException {
+	protected void connect(IDocument buffer) throws IllegalEditException {
 		if (fTarget == null)
-			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.no_target")); //$NON-NLS-1$
+			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.no_target")); //$NON-NLS-1$
 		if (fTarget.getSourceEdit() != this)
-			throw new TextEditException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.different_source")); //$NON-NLS-1$
+			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.different_source")); //$NON-NLS-1$
 	}
 	
-	public void perform(TextBuffer buffer) throws CoreException {
-		fContent= getContent(buffer);
+	public void perform(IDocument document) throws PerformEditException {
+		fContent= getContent(document);
 		TextRange targetRange= fTarget.getTextRange();
 		if (++fCounter == 2 && !targetRange.isDeleted()) {
 			try {
-				buffer.replace(targetRange, fContent);
+				performReplace(document, targetRange, fContent);
 			} finally {
 				clearContent();
 			}
 		}
 	}
 
-	private String getContent(TextBuffer buffer) throws CoreException {
-		TextRange range= getTextRange();
-		String result= buffer.getContent(range.getOffset(), range.getLength());
-		if (fModifier != null) {
-			TextBuffer newBuffer= TextBuffer.create(result);
-			TextEdit newEdit= new MultiTextEdit(0, range.getLength());
-			fModifier.addEdits(result, newEdit);
-			TextBufferEditor editor= new TextBufferEditor(newBuffer);
-			editor.add(newEdit);
-			editor.performEdits(new NullProgressMonitor());
-			result= newBuffer.getContent();
+	private String getContent(IDocument document) throws PerformEditException {
+		try {
+			TextRange range= getTextRange();
+			String result= document.get(range.getOffset(), range.getLength());
+			if (fModifier != null) {
+				IDocument newDocument= new Document(result);
+				TextEdit newEdit= new MultiTextEdit(0, range.getLength());
+				fModifier.addEdits(result, newEdit);
+				EditProcessor processor= new EditProcessor(newDocument);
+				processor.add(newEdit);
+				processor.performEdits();
+				result= newDocument.get();
+			}
+			return result;
+		} catch (IllegalEditException e) {
+			throw new PerformEditException(this, e.getMessage(), e);
+		} catch (BadLocationException e) {
+			throw new PerformEditException(this, e.getMessage(), e);
 		}
-		return result;
 	}
 	
 	protected void updateTextRange(int delta, List executedEdits) {
