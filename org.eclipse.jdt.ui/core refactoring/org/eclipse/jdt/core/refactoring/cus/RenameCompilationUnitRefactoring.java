@@ -2,12 +2,13 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.core.refactoring.cus;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.core.refactoring.types.RenameTypeRefactoring;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.Checks;import org.eclipse.jdt.internal.core.refactoring.CompositeChange;import org.eclipse.jdt.internal.core.refactoring.NullChange;import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
+package org.eclipse.jdt.core.refactoring.cus;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.core.refactoring.types.RenameTypeRefactoring;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.Checks;import org.eclipse.jdt.internal.core.refactoring.CompositeChange;import org.eclipse.jdt.internal.core.refactoring.NullChange;import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
 
-public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring implements IRenameRefactoring{
+public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring implements IRenameRefactoring, IPreactivatedRefactoring{
 
 	private String fNewName;
 	private RenameTypeRefactoring fRenameTypeRefactoring;
+	private boolean fWillRenameType;
 	
 	public RenameCompilationUnitRefactoring(ITextBufferChangeCreator changeCreator, ICompilationUnit cu){
 		super(changeCreator, cu);
@@ -20,6 +21,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 			fRenameTypeRefactoring= new RenameTypeRefactoring(getTextBufferChangeCreator(), type);
 		else
 			fRenameTypeRefactoring= null;
+		fWillRenameType= (fRenameTypeRefactoring != null);	
 	}
 
 	/**
@@ -29,7 +31,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	public void setNewName(String newName) {
 		Assert.isNotNull(newName);
 		fNewName= newName;
-		if (willRenameType())
+		if (fWillRenameType)
 			fRenameTypeRefactoring.setNewName(removeFileNameExtension(newName));
 	}
 
@@ -39,7 +41,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	public RefactoringStatus checkNewName() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkCompilationUnitName(fNewName));
-		if (willRenameType())
+		if (fWillRenameType)
 			result.merge(fRenameTypeRefactoring.checkNewName());
 		if (Checks.isAlreadyNamed(getCu(), fNewName))
 			result.addFatalError("The same name chosen");	
@@ -60,22 +62,48 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 		return "Rename \"" + getCu().getElementName() + "\" to \"" + fNewName + "\"";
 	}
 
+	public RefactoringStatus checkPreactivation() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		ICompilationUnit cu= getCu();
+		if (! cu.exists())
+			result.addFatalError(cu.getElementName() + " does not exist in the model");
+		
+		if (cu.isReadOnly())
+			result.addFatalError(cu.getElementName() + " is read only");	
+		
+		if (mustCancelRenamingType())
+			fWillRenameType= false;
+		
+		if (fWillRenameType)
+			result.merge(fRenameTypeRefactoring.checkPreactivation());
+			
+		return result;
+	}
+	
 	/**
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkAvailability(getCu()));
-		if (willRenameType())
-			result.merge(fRenameTypeRefactoring.checkActivation(pm));
+		
+		if (mustCancelRenamingType()){
+			Assert.isTrue(! fWillRenameType);
+			result.addError(getCu().getElementName() + " cannot be parsed correctly. No references will be updated if you proceed");
+		}	
+		 
+		// we purposely do not check activation of the renameTypeRefactoring here. 
 		return result;
+	}
+	
+	private boolean mustCancelRenamingType() throws JavaModelException {
+		return (fRenameTypeRefactoring != null) && (! getCu().isStructureKnown());
 	}
 
 	/**
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		if (willRenameType())
+		if (fWillRenameType)
 			return fRenameTypeRefactoring.checkInput(pm);
 		else{
 			RefactoringStatus result= new RefactoringStatus();
@@ -90,16 +118,11 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		//renaming the file is taken care of in renameTypeRefactoring
-		if (willRenameType())
+		if (fWillRenameType)
 			return fRenameTypeRefactoring.createChange(pm);
 	
 		CompositeChange composite= new CompositeChange();
 		composite.addChange(new RenameResourceChange(getResource(getCu()), removeFileNameExtension(fNewName)));
 		return composite;	
 	}
-
-	private boolean willRenameType() {
-		return fRenameTypeRefactoring != null;
-	}
-
 }
