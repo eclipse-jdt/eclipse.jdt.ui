@@ -1147,7 +1147,7 @@ public class StubUtility {
 	public static String[] suggestArgumentNames(IJavaProject project, String[] paramNames) {
 		String prefixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, true);
 		String suffixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, true);
-		if (prefixes.length() + suffixes.length() == 0) {
+		if (prefixes == null || suffixes == null || prefixes.length() + suffixes.length() == 0) {
 			return paramNames;
 		}
 		
