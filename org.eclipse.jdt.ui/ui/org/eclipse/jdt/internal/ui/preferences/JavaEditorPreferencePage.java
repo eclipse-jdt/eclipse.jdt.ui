@@ -315,6 +315,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Text fBrowserLikeLinksKeyModifierText;
 	private Button fBrowserLikeLinksCheckBox;
 	private StatusInfo fBrowserLikeLinksKeyModifierStatus;
+	private Button fCompletionInsertsRadioButton;
+	private Button fCompletionOverwritesRadioButton;
 	
 	public JavaEditorPreferencePage() {
 		setDescription(PreferencesMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
@@ -898,10 +900,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Control createContentAssistPage(Composite parent) {
 
 		Composite contentAssistComposite= new Composite(parent, SWT.NULL);
-		GridLayout layout= new GridLayout(); layout.numColumns= 2;
+		GridLayout layout= new GridLayout(); 
+		layout.numColumns= 2;
 		contentAssistComposite.setLayout(layout);
 
-		String label= PreferencesMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
+		addCompletionRadioButtons(contentAssistComposite);
+
+		String label;		
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOINSERT, 0);		
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
@@ -913,9 +919,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ADDIMPORT, 0);
 
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.insertCompletion"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_INSERT_COMPLETION, 0);
-		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
 		Button button= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, 0);
 
@@ -1010,6 +1013,33 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 
 		return contentAssistComposite;
+	}
+	private void addCompletionRadioButtons(Composite contentAssistComposite) {
+		Composite completionComposite= new Composite(contentAssistComposite, SWT.NONE);
+		GridData ccgd= new GridData();
+		ccgd.horizontalSpan= 2;
+		completionComposite.setLayoutData(ccgd);
+		GridLayout ccgl= new GridLayout();
+		ccgl.marginWidth= 0;
+		ccgl.numColumns= 2;
+		completionComposite.setLayout(ccgl);
+		
+		SelectionListener completionSelectionListener= new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {				
+				boolean insert= fCompletionInsertsRadioButton.getSelection();
+				fOverlayStore.setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, insert);
+			}
+		};
+		
+		fCompletionInsertsRadioButton= new Button(completionComposite, SWT.RADIO | SWT.LEFT);
+		fCompletionInsertsRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.completionInserts")); //$NON-NLS-1$
+		fCompletionInsertsRadioButton.setLayoutData(new GridData());
+		fCompletionInsertsRadioButton.addSelectionListener(completionSelectionListener);
+		
+		fCompletionOverwritesRadioButton= new Button(completionComposite, SWT.RADIO | SWT.LEFT);
+		fCompletionOverwritesRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.completionOverwrites")); //$NON-NLS-1$
+		fCompletionOverwritesRadioButton.setLayoutData(new GridData());
+		fCompletionOverwritesRadioButton.addSelectionListener(completionSelectionListener);
 	}
 
 	private Control createNavigationPage(Composite parent) {
@@ -1259,6 +1289,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		boolean fillMethodArguments= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
 		fGuessMethodArgumentsButton.setEnabled(fillMethodArguments);
+
+		boolean completionInserts= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
+		fCompletionInsertsRadioButton.setSelection(completionInserts);
+		fCompletionOverwritesRadioButton.setSelection(! completionInserts);
 		
 		fBrowserLikeLinksKeyModifierText.setEnabled(fBrowserLikeLinksCheckBox.getSelection());
 		
