@@ -997,7 +997,7 @@ public class JavaIndenter {
 		// TODO adjust once this is a per-project setting
 		JavaCore core= JavaCore.getJavaCore();
 		JavaPlugin plugin= JavaPlugin.getDefault();
-		if (core != null)
+		if (core != null && plugin != null)
 			if (JavaCore.SPACE.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR)))
 				// if the formatter uses chars to mark indentation, then don't substitute any chars
 				tabLen= -1; // results in no tabs being substituted for space runs
