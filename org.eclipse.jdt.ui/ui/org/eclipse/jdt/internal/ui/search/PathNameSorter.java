@@ -13,22 +13,14 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
-
-import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.search.ui.SearchUI;
 
 /**
  * Sorts the search result viewer by the path name.
  */
-public class PathNameSorter extends ViewerSorter {
+public class PathNameSorter extends JavaSearchSorter {
 
-	private ILabelProvider fLabelProvider;
-	
 	/*
 	 * Overrides method from ViewerSorter
 	 */
@@ -40,11 +32,11 @@ public class PathNameSorter extends ViewerSorter {
 
 		if (e1 instanceof ISearchResultViewEntry) {
 			entry1= (ISearchResultViewEntry)e1;
-			name1= fLabelProvider.getText(e1);
+			name1= getLabel(e1);
 		}
 		if (e2 instanceof ISearchResultViewEntry) {
 			entry2= (ISearchResultViewEntry)e2;
-			name2= fLabelProvider.getText(e2);
+			name2= getLabel(e2);
 		}
 		if (name1 == null)
 			name1= ""; //$NON-NLS-1$
@@ -76,26 +68,8 @@ public class PathNameSorter extends ViewerSorter {
 		return getCollator().compare(name1, name2);
 	}
 
-	/*
-	 * Overrides method from ViewerSorter
-	 */
-	public boolean isSorterProperty(Object element, String property) {
-		return true;
-	}
-
-	/*
-	 * Overrides method from ViewerSorter
-	 */
-	public void sort(Viewer viewer, Object[] elements) {
-		// Set label provider to show "path - resource"
-		ISearchResultView view= SearchUI.getSearchResultView();
-		if (view == null)
-			return;
-		
-		fLabelProvider= view.getLabelProvider();
-		if (fLabelProvider instanceof JavaSearchResultLabelProvider)
-			((JavaSearchResultLabelProvider)fLabelProvider).setOrder(JavaSearchResultLabelProvider.SHOW_PATH);
-		super.sort(viewer, elements);
+	protected int getSortOrder() {
+		return JavaSearchResultLabelProvider.SHOW_PATH;
 	}
 }
 

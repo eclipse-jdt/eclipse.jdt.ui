@@ -10,21 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
-
-import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.search.ui.SearchUI;
 
 /**
  * Sorts the search result viewer by the Java Element name.
  */
-public class ElementNameSorter extends ViewerSorter {
+public class ElementNameSorter extends JavaSearchSorter {
 	
-	private ILabelProvider fLabelProvider;
-
 	/*
 	 * Overrides method from ViewerSorter
 	 */
@@ -33,9 +26,9 @@ public class ElementNameSorter extends ViewerSorter {
 		String name2= null;
 
 		if (e1 instanceof ISearchResultViewEntry)
-			name1= fLabelProvider.getText(e1);
+			name1= getLabel(e1);
 		if (e2 instanceof ISearchResultViewEntry)
-			name2= fLabelProvider.getText(e2);
+			name2= getLabel(e2);
 		if (name1 == null)
 			name1= ""; //$NON-NLS-1$
 		if (name2 == null)
@@ -43,25 +36,7 @@ public class ElementNameSorter extends ViewerSorter {
 		return getCollator().compare(name1, name2);
 	}
 
-	/*
-	 * Overrides method from ViewerSorter
-	 */
-	public boolean isSorterProperty(Object element, String property) {
-		return true;
-	}
-
-	/*
-	 * Overrides method from ViewerSorter
-	 */
-	public void sort(Viewer viewer, Object[] elements) {
-		// Set label provider to show "element - path"
-		ISearchResultView view= SearchUI.getSearchResultView();
-		if (view == null)
-			return;
-		fLabelProvider= view.getLabelProvider();
-		if (fLabelProvider instanceof JavaSearchResultLabelProvider) {
-			((JavaSearchResultLabelProvider)fLabelProvider).setOrder(JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER);
-			super.sort(viewer, elements);
-		}
+	protected int getSortOrder() {
+		return JavaSearchResultLabelProvider.SHOW_ELEMENT_CONTAINER;
 	}
 }
