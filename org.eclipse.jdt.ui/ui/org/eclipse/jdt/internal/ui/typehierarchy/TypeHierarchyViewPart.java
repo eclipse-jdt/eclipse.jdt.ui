@@ -22,8 +22,6 @@ import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -664,15 +662,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		Control control= fMethodsViewer.getTable();
 		control.addKeyListener(createKeyListener());
-		control.addFocusListener(new FocusListener() {
-			public void focusGained(FocusEvent e) {
-				fSelectAllAction.setEnabled(true);
-			}
-
-			public void focusLost(FocusEvent e) {
-				fSelectAllAction.setEnabled(false);
-			}
-		});
 		
 		return control;
 	}
@@ -1037,8 +1026,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	protected void doSelectionChanged(SelectionChangedEvent e) {
 		if (e.getSelectionProvider() == fMethodsViewer) {
 			methodSelectionChanged(e.getSelection());
+			fSelectAllAction.setEnabled(true);
 		} else {
 			typeSelectionChanged(e.getSelection());
+			fSelectAllAction.setEnabled(false);
 		}
 	}
 	

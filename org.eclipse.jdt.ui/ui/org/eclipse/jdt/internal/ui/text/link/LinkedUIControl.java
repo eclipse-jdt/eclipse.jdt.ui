@@ -328,7 +328,7 @@ public class LinkedUIControl {
 			Display display;
 
 			if (fAssistant == null || fCurrentTarget == null || (text= fCurrentTarget.fWidget) == null 
-					|| (display= text.getDisplay()) == null || display.isDisposed()) {
+					|| text.isDisposed() || (display= text.getDisplay()) == null || display.isDisposed()) {
 				leave(ILinkedListener.EXIT_ALL);
 			} else {
 				// Post in UI thread since the assistant popup will only get the focus after we lose it.
@@ -843,10 +843,10 @@ public class LinkedUIControl {
 		Shell shell= fCurrentTarget.fShell;
 		fCurrentTarget.fShell= null;
 		
-		if (shell != null)
+		if (shell != null && !shell.isDisposed())
 			shell.removeShellListener(fCloser);
 		
-		if (text != null) {
+		if (text != null && !text.isDisposed()) {
 			text.removeModifyListener(fCaretListener);
 			text.removeVerifyListener(fCaretListener);
 			text.removePaintListener(fPainter);
