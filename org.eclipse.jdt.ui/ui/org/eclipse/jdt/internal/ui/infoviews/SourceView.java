@@ -21,18 +21,29 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
+import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -50,6 +61,8 @@ import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
  */
 public class SourceView extends AbstractInfoView {
 
+	private IJavaElement fSelectedElement;
+	private int fCommentLines;
 	private static final String SYMBOLIC_FONT_NAME= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
 
 	/**
@@ -75,15 +88,28 @@ public class SourceView extends AbstractInfoView {
 	private SourceViewer fViewer;
 	/** The viewer's font properties change listener. */
 	private IPropertyChangeListener fFontPropertyChangeListener= new FontPropertyChangeListener();
+	/** The open action */
+	private OpenAction fOpen;
 
 
 	protected void internalCreatePartControl(Composite parent) {
-		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL);
+		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL) {
+			public ISelection getSelection() {
+				return convertToJavaElementSelection(super.getSelection());
+			}
+		};
 		fViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools(), null));
 		fViewer.setEditable(false);
 
 		setViewerFont();
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
+
+		// Setup OpenAction		
+		fOpen= new OpenAction(getViewSite());
+		fOpen.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
+		getViewSite().getActionBars().setGlobalActionHandler(JdtActionConstants.OPEN, fOpen);
+		
+		getViewSite().setSelectionProvider(fViewer);
 	}
 
 	protected void setForeground(Color color) {
@@ -93,6 +119,50 @@ public class SourceView extends AbstractInfoView {
 	protected void setBackground(Color color) {
 		fViewer.getTextWidget().setBackground(color);
 	}
+
+	public ISelection convertToJavaElementSelection(ISelection selection) {
+		
+		fSelectedElement= null;
+		
+		if (!(selection instanceof ITextSelection && fCurrentInput instanceof ISourceReference))
+			return selection;
+
+		ITextSelection textSelection= (ITextSelection)selection;
+	
+		Object codeAssist= fCurrentInput.getAncestor(IJavaElement.COMPILATION_UNIT); 
+		if (codeAssist == null)
+			codeAssist= fCurrentInput.getAncestor(IJavaElement.CLASS_FILE);
+
+		if (codeAssist instanceof ICodeAssist) {
+			IJavaElement[] elements= null;
+			try {
+				ISourceRange range= ((ISourceReference)fCurrentInput).getSourceRange();
+
+				IDocument originalDoc= new Document(((ISourceReference)fCurrentInput).getSource());
+				IDocument inputDoc= (IDocument)fViewer.getInput();
+				int origOffset= 0;
+				try {
+					IRegion origLineInfo= originalDoc.getLineInformation(fCommentLines + textSelection.getStartLine());
+					IRegion inputLineInfo= inputDoc.getLineInformation(textSelection.getStartLine());
+					origOffset= origLineInfo.getOffset() + origLineInfo.getLength() - inputLineInfo.getLength() - inputLineInfo.getOffset() + textSelection.getOffset();
+				} catch (BadLocationException e1) {
+					return StructuredSelection.EMPTY;
+				}
+
+				elements= ((ICodeAssist)codeAssist).codeSelect(range.getOffset() + origOffset, textSelection.getLength());
+			} catch (JavaModelException e) {
+				return StructuredSelection.EMPTY;
+			}
+			if (elements != null && elements.length > 0) {
+				fSelectedElement= elements[0];
+				return new StructuredSelection(elements[0]);
+			} else
+				return StructuredSelection.EMPTY;
+		}
+
+		return StructuredSelection.EMPTY;
+	}
+
 	
 	/*
 	 * @see IWorkbenchPart#dispose()
@@ -110,8 +180,14 @@ public class SourceView extends AbstractInfoView {
 	}
 	
 	protected boolean setInput(Object input) {
+
 		if (fViewer == null || !(input instanceof ISourceReference))
 			return false;
+
+		if (fSelectedElement != null && fSelectedElement.equals(input))
+			return false;
+
+		fSelectedElement= null;
 
 		String source;
 		try {
@@ -122,7 +198,7 @@ public class SourceView extends AbstractInfoView {
 		
 		if (source == null)
 			return false;
-			
+
 		source= removeLeadingComments(source);
 		String delim= null;
 
@@ -142,7 +218,7 @@ public class SourceView extends AbstractInfoView {
 		if (!Character.isWhitespace(firstLine.charAt(0)))
 			sourceLines[0]= firstLine;
 
-		source= source= Strings.concatenate(sourceLines, delim);
+		source= Strings.concatenate(sourceLines, delim);
 
 		IDocument doc= new Document(source);
 		IDocumentPartitioner dp= JavaPlugin.getDefault().getJavaTextTools().createDocumentPartitioner();
@@ -162,7 +238,7 @@ public class SourceView extends AbstractInfoView {
 		try {
 			reader.configureForwardReader(document, 0, document.getLength(), true, false);
 			int c= reader.read();
-			while (c != -1 && (c == '\r' || c == '\n')) {
+			while (c != -1 && (c == '\r' || c == '\n' || c == '\t')) {
 				c= reader.read();
 			}
 			i= reader.getOffset();
@@ -178,8 +254,15 @@ public class SourceView extends AbstractInfoView {
 			}
 		}
 
+		try {
+			fCommentLines= document.getLineOfOffset(i);
+		} catch (BadLocationException e) {
+			fCommentLines= 0;
+		}
+
 		if (i < 0)
 			return source;
+
 		return source.substring(i);
 	}
 
@@ -220,5 +303,29 @@ public class SourceView extends AbstractInfoView {
 			StyledText styledText= fViewer.getTextWidget();
 			styledText.setFont(font);
 		}	
+	}
+
+	/*
+	 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 */
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+		if (fViewer != null)
+			fViewer.addSelectionChangedListener(listener);
+	}
+
+	/*
+	 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 */
+	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+		if (fViewer != null)
+			fViewer.removeSelectionChangedListener(listener);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+	 */
+	public void setSelection(ISelection selection) {
+		// XXX Auto-generated method stub
+		
 	}
 }
