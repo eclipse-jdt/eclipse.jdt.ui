@@ -264,10 +264,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		inner.setLayoutData(gd);
 		
 		Composite entryComposite= createEntryPtCombo(composite); 
-		entryComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		entryComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Composite commentComposite= createCommentSelection(composite);
-		commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));		
+		commentComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));		
 
 		gd= new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(gd);
