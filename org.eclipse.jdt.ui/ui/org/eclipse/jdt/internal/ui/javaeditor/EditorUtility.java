@@ -5,7 +5,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IStorage;import org.eclipse.core.runtime.CoreException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.ui.IEditorDescriptor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IEditorRegistry;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.PartInitException;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IStorage;import org.eclipse.core.runtime.CoreException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.ui.IEditorDescriptor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IEditorRegistry;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.PartInitException;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
  * A number of routines for working with JavaElements in editors
@@ -104,19 +104,11 @@ public class EditorUtility {
 	 *@deprecated	Made it public again for java debugger UI.
 	 */
 	public static String getEditorID(IEditorInput input, Object inputObject) {
-		if (input instanceof ClassFileEditorInput) {
-			return JavaUI.ID_CF_EDITOR;
-		} 
-		if (input instanceof IFileEditorInput) {
-			return JavaUI.ID_CU_EDITOR;
-		} 
-		if (input instanceof JarEntryEditorInput) {
-			IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
-			IEditorDescriptor descriptor= registry.getDefaultEditor(((JarEntryEditorInput)input).getName());
-			if (descriptor != null)
-				return descriptor.getId();
-			return null;
-		}
+		
+		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
+		IEditorDescriptor descriptor= registry.getDefaultEditor(input.getName());
+		if (descriptor != null)
+			return descriptor.getId();
 		
 		return null;
 	}

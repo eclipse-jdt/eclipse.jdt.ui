@@ -9,7 +9,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.IDocumentPartitioner;import org.eclipse.jface.text.ITypedRegion;
 
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
@@ -180,10 +180,12 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			} else {
 				int start= d.getLineOffset(line);
 				// if line just ended a javadoc comment, take the indent from the comment's begin line
-				ITypedRegion region= d.getDocumentPartitioner().getPartition(start);
-				if (JavaPartitionScanner.JAVA_DOC.equals(region.getType())) {
-					start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
-				}
+				IDocumentPartitioner partitioner= d.getDocumentPartitioner();
+				if (partitioner != null) {
+					ITypedRegion region= partitioner.getPartition(start);
+					if (JavaPartitionScanner.JAVA_DOC.equals(region.getType()))
+						start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
+				}				
 				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
 				buf.append(d.get(start, whiteend - start));
 				if (getBracketCount(d, start, c.offset, true) > 0) {
