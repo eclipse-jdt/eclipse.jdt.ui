@@ -44,9 +44,9 @@ public abstract class BlockCommentAction extends TextEditorAction {
 
 	/**
 	 * An edit is a kind of <code>DocumentEvent</code>, in this case an edit instruction, that is 
-	 * affilitated with a <code>Position</code> on a document. The offset of the document event is 
+	 * affiliated with a <code>Position</code> on a document. The offset of the document event is 
 	 * not stored statically, but taken from the affiliated <code>Position</code>, which gets 
-	 * updated when other edits occurr.
+	 * updated when other edits occur.
 	 */
 	static class Edit extends DocumentEvent {
 		
