@@ -560,9 +560,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fTestRunnerClient= new RemoteTestRunnerClient();
 		
 		// add the TestRunnerViewPart to the list of registered listeners
-		Vector listeners= JUnitPlugin.getDefault().getTestRunListeners();	
+		List listeners= JUnitPlugin.getDefault().getTestRunListeners();	
 		ITestRunListener[] listenerArray= new ITestRunListener[listeners.size()+1];
-		listeners.copyInto(listenerArray);
+		listeners.toArray(listenerArray);
 		System.arraycopy(listenerArray, 0, listenerArray, 1, listenerArray.length-1);
 		listenerArray[0]= this;
 		fTestRunnerClient.startListening(listenerArray, port);

@@ -19,9 +19,9 @@ import java.net.URL;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -93,9 +93,9 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	private AbstractSet fTrackedLaunches= new HashSet(20);
 
 	/**
-	 * Vector storing the registered test run listeners
+	 * List storing the registered test run listeners
 	 */
-	private Vector testRunListeners;
+	private List fTestRunListeners;
 
 	public JUnitPlugin(IPluginDescriptor desc) {
 		super(desc);
@@ -356,7 +356,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * Initializes TestRun Listener extensions
 	 */
 	private void loadTestRunListeners() {
-		testRunListeners= new Vector();
+		fTestRunListeners= new ArrayList();
 		IExtensionPoint extensionPoint= Platform.getPluginRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
 		if (extensionPoint == null) {
 			return;
@@ -367,7 +367,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		for (int i= 0; i < configs.length; i++) {
 			try {
 				ITestRunListener testRunListener= (ITestRunListener) configs[i].createExecutableExtension("class"); //$NON-NLS-1$
-				testRunListeners.add(testRunListener);
+				fTestRunListeners.add(testRunListener);
 			} catch (CoreException e) {
 				status.add(e.getStatus());
 			}
@@ -380,20 +380,33 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	/**
 	 * Returns an array of all TestRun listeners
 	 */
-	public Vector getTestRunListeners() {
-		if (testRunListeners == null) {
+	public List getTestRunListeners() {
+		if (fTestRunListeners == null) {
 			loadTestRunListeners();
 		}
-		return testRunListeners;
+		return fTestRunListeners;
 	}
 
 	/**
 	 * Adds a TestRun listener to the collection of listeners
 	 */
 	public void addTestRunListener(ITestRunListener newListener) {
-		if (testRunListeners == null) {
+		if (fTestRunListeners == null) 
 			loadTestRunListeners();
+		for (Iterator iter= fTestRunListeners.iterator(); iter.hasNext();) {
+			Object o= iter.next();
+			if (o == newListener)
+				return;
 		}
-		testRunListeners.add(newListener);
+		fTestRunListeners.add(newListener);
 	}
+
+	/**
+	 * Removes a TestRun listener to the collection of listeners
+	 */
+	public void removeTestRunListener(ITestRunListener newListener) {
+		if (fTestRunListeners != null) 
+			fTestRunListeners.remove(newListener);
+	}
+
 }
