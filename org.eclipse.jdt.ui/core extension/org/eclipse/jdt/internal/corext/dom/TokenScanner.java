@@ -269,8 +269,7 @@ public class TokenScanner {
 	 * @param lastPos An offset to before the node start offset. Can be 0 but better is the end location of the previous node. 
 	 * @param nodeStart Start offset of the node to find the comments for.
 	 * @return Returns the start offset of comments directly ahead of a token.
-	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
-	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
+	 * @exception CoreException Thrown when a lexical error was detected while scanning (code LEXICAL_ERROR)
 	 */		
 	public int getTokenCommentStart(int lastPos, int nodeStart) throws CoreException {
 		setOffset(lastPos);
@@ -281,10 +280,10 @@ public class TokenScanner {
 		
 		int res= -1;
 
-		int curr= readNext(false);
+		int curr= readNextWithEOF(false);
 		int currStartPos= getCurrentStartOffset();
 		int currStartLine= getLineOfOffset(currStartPos);
-		while (nodeStart > currStartPos) {
+		while (curr != ITerminalSymbols.TokenNameEOF && nodeStart > currStartPos) {
 			if (TokenScanner.isComment(curr)) {
 				int linesDifference= currStartLine - prevEndLine;
 				if ((linesDifference > 1) || (res == -1 && (linesDifference != 0 || nodeLine == currStartLine))) {
@@ -299,11 +298,11 @@ public class TokenScanner {
 			} else {
 				prevEndLine= getLineOfOffset(getCurrentEndOffset() - 1);
 			}					
-			curr= readNext(false);
+			curr= readNextWithEOF(false);
 			currStartPos= getCurrentStartOffset();
 			currStartLine= getLineOfOffset(currStartPos);
 		}
-		if (res == -1) {
+		if (res == -1 || curr == ITerminalSymbols.TokenNameEOF) {
 			return nodeStart;
 		}
 		if (currStartLine - prevEndLine > 1) {

@@ -340,6 +340,7 @@ public final class ASTRewrite extends NewASTRewrite {
 		insert.description= description;
 		setChangeProperty(node, insert);
 		fHasASTModifications= true;
+		node.setSourceRange(-1, 0); // avoid troubles later when annotating extra node ranges.
 	}
 
 	/**

@@ -191,6 +191,8 @@ public class ASTNodes {
     
 	/**
 	 * Returns a list of the direct chidrens of a node. The siblings are ordered by start offset.
+	 * @param node
+	 * @return
 	 */    
 	public static List getChildren(ASTNode node) {
 		ChildrenCollector visitor= new ChildrenCollector();
@@ -201,8 +203,10 @@ public class ASTNodes {
 	/**
 	 * Returns the element type. This is a convenience method that returns its 
 	 * argument if it is a simple type and the element type if the parameter is an array type.
+	 * @param type The type to get the element type from.
+	 * @return The element type of the type or the type itself.
 	 */
-	public static Type getElementType(Type type){
+	public static Type getElementType(Type type) {
 		if (! type.isArrayType()) 
 			return type;
 		return ((ArrayType)type).getElementType();
@@ -230,6 +234,8 @@ public class ASTNodes {
 	 * Returns the type node for the given declaration. The returned node
 	 * is a copy and is owned by a different AST. The returned node contains
 	 * any extra dimensions.
+	 * @param declaration
+	 * @return
 	 */
 	public static Type getType(VariableDeclaration declaration) {
 		AST ast= new AST();
@@ -477,6 +483,11 @@ public class ASTNodes {
 	/**
 	 * Expands the range of the node passed in <code>nodes</code> to cover all comments
 	 * determined by <code>start</code> and <code>length</code> in the given text buffer. 
+	 * @param nodes
+	 * @param buffer
+	 * @param start
+	 * @param length
+	 * @throws CoreException
 	 */
 	public static void expandRange(ASTNode[] nodes, TextBuffer buffer, int start, int length) throws CoreException {
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
@@ -604,7 +615,10 @@ public class ASTNodes {
 	}
 	
 	/**
-	 * Annotates all node that have extended ranges.
+	 * Annotates all node that have extended ranges with a ISourceRange in
+	 * the NODE_RANGE_PROPERTY property 
+	 * @param node The root of the tree to annotate
+	 * @param scanner The scanner initialized to the source corresponding to the node.
 	 */
 	public static void annotateExtraRanges(ASTNode node, TokenScanner scanner) {
 		ASTNode astRoot= node.getRoot();
@@ -636,7 +650,7 @@ public class ASTNodes {
 		}
 	}
 	
-	/** workaround, deals with finding positions in modified ASTs. */
+	/* workaround, deals with finding positions in modified ASTs. */
 	private static int getNextExistingOffset(List children, int idx, int def) {
 		for (int i= idx + 1; i < children.size(); i++) {
 			ASTNode curr= (ASTNode) children.get(i);
@@ -660,7 +674,7 @@ public class ASTNodes {
 			return start + length;
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			// just log, no extra range annotated
+			// log, no extra range annotated
 		}
 		return tokenStart + tokenLength;
 	}		

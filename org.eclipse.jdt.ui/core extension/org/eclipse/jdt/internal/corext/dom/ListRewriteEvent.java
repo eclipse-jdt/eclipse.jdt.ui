@@ -141,23 +141,19 @@ public class ListRewriteEvent extends RewriteEvent {
 		return null;
 	}
 	
-	private NodeRewriteEvent createNew(List listEntries, int index, ASTNode insertedNode) {
-		NodeRewriteEvent change= new NodeRewriteEvent(null, insertedNode);
-		listEntries.add(index, change);
-		return change;
-	}
+
 	
 	
 	public RewriteEvent insertBeforeOriginalSibling(ASTNode insertedNode, ASTNode originalListSibling) {
 		List listEntries= getEntries();
 		if (originalListSibling == null) {
-			return createNew(listEntries, listEntries.size(), insertedNode);
+			return insertAtCombinedIndex(insertedNode, listEntries.size());
 		}
 		
 		for (int i= listEntries.size() - 1; i >= 0; i--) {
 			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
 			if (curr.getOriginalValue() == originalListSibling) {
-				return createNew(listEntries, i, insertedNode);
+				return insertAtCombinedIndex(insertedNode, i);
 			}
 		}
 		return null;
@@ -166,13 +162,13 @@ public class ListRewriteEvent extends RewriteEvent {
 	public RewriteEvent insertBeforeNewSibling(ASTNode insertedNode, ASTNode newListSibling) {
 		List listEntries= getEntries();
 		if (newListSibling == null) {
-			return createNew(listEntries, listEntries.size(), insertedNode);
+			return insertAtCombinedIndex(insertedNode, listEntries.size());
 		}
 		
 		for (int i= listEntries.size() - 1; i >= 0; i--) {
 			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
 			if (curr.getNewValue() == newListSibling) {
-				return createNew(listEntries, i, insertedNode);
+				return insertAtCombinedIndex(insertedNode, i);
 			}
 		}
 		return null;
@@ -187,13 +183,13 @@ public class ListRewriteEvent extends RewriteEvent {
 			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
 			if (curr.getOriginalValue() != null) {
 				if (insertIndex == currIndex) {
-					return createNew(listEntries, i, insertedNode);
+					return insertAtCombinedIndex(insertedNode, i);
 				}
 				currIndex++;
 			}
 		}
 		if (insertIndex == currIndex) {
-			return createNew(listEntries, nEntries, insertedNode);
+			return insertAtCombinedIndex(insertedNode, nEntries);
 		}
 		throw new IndexOutOfBoundsException();
 	}
@@ -207,15 +203,21 @@ public class ListRewriteEvent extends RewriteEvent {
 			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
 			if (curr.getNewValue() != null) {
 				if (insertIndex == currIndex) {
-					return createNew(listEntries, i, insertedNode);
+					return insertAtCombinedIndex(insertedNode, i);
 				}
 				currIndex++;
 			}
 		}
 		if (insertIndex == currIndex) {
-			return createNew(listEntries, nEntries, insertedNode);
+			return insertAtCombinedIndex(insertedNode, nEntries);
 		}
 		throw new IndexOutOfBoundsException();
+	}
+	
+	public RewriteEvent insertAtCombinedIndex(ASTNode insertedNode, int insertIndex) {
+		NodeRewriteEvent change= new NodeRewriteEvent(null, insertedNode);
+		getEntries().add(insertIndex, change);
+		return change;
 	}
 	
 	/* (non-Javadoc)
@@ -232,6 +234,7 @@ public class ListRewriteEvent extends RewriteEvent {
 			}
 			buf.append(events[i]);
 		}
+		buf.append("\n]"); //$NON-NLS-1$
 		return buf.toString();
 	}
 	
