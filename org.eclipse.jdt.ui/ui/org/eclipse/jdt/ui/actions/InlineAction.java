@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Inlines a method, local variable or a static final field.
@@ -44,7 +45,7 @@ public class InlineAction extends SelectionDispatchAction {
 	 */
 	public InlineAction(IWorkbenchSite site) {
 		super(site);
-		setText("&Inline...");
+		setText(RefactoringMessages.getString("InlineAction.Inline")); //$NON-NLS-1$
 		fInlineTemp		= new InlineTempAction(site);
 		fInlineMethod	= new InlineMethodAction(site);
 		fInlineConstant	= new InlineConstantAction(site);
@@ -57,7 +58,7 @@ public class InlineAction extends SelectionDispatchAction {
 	public InlineAction(CompilationUnitEditor editor) {
 		//don't want to call 'this' here - it'd create useless action objects
 		super(editor.getEditorSite());
-		setText("&Inline...");
+		setText(RefactoringMessages.getString("InlineAction.Inline")); //$NON-NLS-1$
 		fEditor= editor;
 		fInlineTemp		= new InlineTempAction(editor);
 		fInlineMethod	= new InlineMethodAction(editor);
@@ -96,7 +97,7 @@ public class InlineAction extends SelectionDispatchAction {
 		if (fInlineConstant.isEnabled() && tryInlineConstant(cu, selection))
 			return;
 	
-		MessageDialog.openInformation(getShell(), "Inline", "Select a method declaration, a method invocation, a static final field or a local variable that you want to inline.");
+		MessageDialog.openInformation(getShell(), RefactoringMessages.getString("InlineAction.dialog_title"), RefactoringMessages.getString("InlineAction.select")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private boolean tryInlineTemp(ICompilationUnit cu, ITextSelection selection){

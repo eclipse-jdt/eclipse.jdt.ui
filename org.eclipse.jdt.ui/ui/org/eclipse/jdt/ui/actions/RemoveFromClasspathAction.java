@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 
 /**
  * Action to remove package fragment roots from the classpath of its parent
@@ -55,8 +56,8 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	 */
 	public RemoveFromClasspathAction(IWorkbenchSite site) {
 		super(site);
-		setText("Remove from &Build Path");
-		setToolTipText("Remove package fragment root from the Java build path");
+		setText(ActionMessages.getString("RemoveFromClasspathAction.Remove")); //$NON-NLS-1$
+		setToolTipText(ActionMessages.getString("RemoveFromClasspathAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.REMOVE_FROM_CLASSPATH_ACTION);
 	}
 	
@@ -86,7 +87,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 				public void run(IProgressMonitor pm) throws CoreException {
 					try{
 						IPackageFragmentRoot[] roots= getRootsToRemove(selection);
-						pm.beginTask("Removing from build path...", roots.length);
+						pm.beginTask(ActionMessages.getString("RemoveFromClasspathAction.Removing"), roots.length); //$NON-NLS-1$
 						for (int i= 0; i < roots.length; i++) {
 							int jCoreFlags= IPackageFragmentRoot.NO_RESOURCE_MODIFICATION | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
 							roots[i].delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(pm, 1));
@@ -98,8 +99,8 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 		}));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
-					"Remove From Build Path",
-					"Problems occurred while removing from the build path.");
+					ActionMessages.getString("RemoveFromClasspathAction.exception_dialog_title"), //$NON-NLS-1$
+					ActionMessages.getString("RemoveFromClasspathAction.Problems_occurred")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// canceled
 		}

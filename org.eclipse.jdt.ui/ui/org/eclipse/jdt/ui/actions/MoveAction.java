@@ -138,7 +138,7 @@ public class MoveAction extends SelectionDispatchAction{
 		if (fMoveStaticMembersAction.isEnabled() && tryMoveStaticMembers(selection))
 			return;
 	
-		MessageDialog.openInformation(getShell(), "Move", "Select a static method, a static field or an instance method that can be moved to a component (parameter or field).");
+		MessageDialog.openInformation(getShell(), RefactoringMessages.getString("MoveAction.Move"), RefactoringMessages.getString("MoveAction.select")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private boolean tryMoveStaticMembers(ITextSelection selection) {

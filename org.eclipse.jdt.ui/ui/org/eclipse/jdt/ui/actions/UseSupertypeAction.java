@@ -54,7 +54,7 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	 */
 	public UseSupertypeAction(IWorkbenchSite site) {
 		super(site);
-		setText("Use Supertype &Where Possible...");
+		setText(RefactoringMessages.getString("UseSupertypeAction.use_Supertype")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.USE_SUPERTYPE_ACTION);
 	}
 	
@@ -92,8 +92,8 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 		if (canRun(selection)){
 			startRefactoring();
 		} else {
-			String unavailable= "To activate this refactoring, please select the name of a type";
-			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable);
+			String unavailable= RefactoringMessages.getString("UseSupertypeAction.to_activate"); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
 		}
 		fRefactoring= null;
 		selectionChanged(selection);
@@ -168,7 +168,7 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 			if (isEnabled())
 				run(mockSelection);
 			else
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Refactoring", "Operation not possible.");
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("UseSupertypeAction.Refactoring"), RefactoringMessages.getString("UseSupertypeAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}

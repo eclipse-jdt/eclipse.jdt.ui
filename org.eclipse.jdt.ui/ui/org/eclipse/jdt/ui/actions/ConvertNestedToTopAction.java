@@ -65,7 +65,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	 */
 	public ConvertNestedToTopAction(IWorkbenchSite site) {
 		super(site);
-		setText("Conv&ert Nested Type to Top Level...");
+		setText(RefactoringMessages.getString("ConvertNestedToTopAction.Convert")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_INNER_TO_TOP_ACTION);
 	}
 	
@@ -103,8 +103,8 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		if (canRun(selection)){
 			startRefactoring();	
 		} else {
-			String unavailable= "To activate this refactoring, please select the name of a nested type.";
-			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable);
+			String unavailable= RefactoringMessages.getString("ConvertNestedToTopAction.To_activate"); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
 		}
 		fRefactoring= null;
 		selectionChanged(selection);
@@ -179,7 +179,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 			if (isEnabled())
 				run(mockSelection);
 			else
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Refactoring", "Operation not possible.");
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("ConvertNestedToTopAction.Refactoring"), RefactoringMessages.getString("ConvertNestedToTopAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}

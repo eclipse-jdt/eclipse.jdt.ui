@@ -71,7 +71,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	 */
 	public PushDownAction(IWorkbenchSite site) {
 		super(site);
-		setText("Push Down...");
+		setText(RefactoringMessages.getString("PushDownAction.Push_Down")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PUSH_DOWN_ACTION);
 	}
 
@@ -118,7 +118,7 @@ public class PushDownAction extends SelectionDispatchAction{
 		if (canRun(selection)){
 			startRefactoring();	
 		} else {
-			String unavailable= "To activate this refactoring, please select the name of an instance method or field";
+			String unavailable= RefactoringMessages.getString("PushDownAction.To_activate"); //$NON-NLS-1$
 			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
 		}
 		fRefactoring= null;
@@ -171,7 +171,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	}
 
 	private RefactoringWizard createWizard(){
-		String title= "Push Down";
+		String title= RefactoringMessages.getString("PushDownAction.wizard_title"); //$NON-NLS-1$
 		String helpId= IJavaHelpContextIds.PUSH_DOWN_ERROR_WIZARD_PAGE;
 		return new PushDownWizard(fRefactoring, title, helpId);
 	}
@@ -191,7 +191,7 @@ public class PushDownAction extends SelectionDispatchAction{
 			if (isEnabled())
 				run(mockSelection);
 			else
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Refactoring", "Operation not possible.");
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("PushDownAction.Refactoring"), RefactoringMessages.getString("PushDownAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}

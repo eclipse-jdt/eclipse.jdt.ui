@@ -41,14 +41,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
-	private static final String DIALOG_MESSAGE_TITLE= "Convert Anonymous Class to Nested Class";
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ConvertAnonymousToNestedAction.dialog_title"); //$NON-NLS-1$
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public ConvertAnonymousToNestedAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText("Convert &Anonymous Class to Nested...");
+		setText(RefactoringMessages.getString("ConvertAnonymousToNestedAction.Convert_Anonymous")); //$NON-NLS-1$
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
@@ -60,7 +60,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 
 	private RefactoringWizard createWizard(Refactoring refactoring) {
 		String helpId= IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ERROR_WIZARD_PAGE;
-		String pageTitle= "Convert Anonymous Class to Nested Class";
+		String pageTitle= RefactoringMessages.getString("ConvertAnonymousToNestedAction.wizard_title"); //$NON-NLS-1$
 		return new ConvertAnonymousToNestedWizard((ConvertAnonymousToNestedRefactoring)refactoring, pageTitle, helpId);
 	}
 	
