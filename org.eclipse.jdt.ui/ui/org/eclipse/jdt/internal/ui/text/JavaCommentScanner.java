@@ -24,7 +24,6 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
-import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WordRule;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -49,8 +48,8 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 
 		private IToken fToken;
 
-		public TaskTagRule(IToken token) {
-			super(new TaskTagDetector(), Token.UNDEFINED);
+		public TaskTagRule(IToken token, IToken defaultToken) {
+			super(new TaskTagDetector(), defaultToken);
 			fToken= token;
 		}
 	
@@ -108,7 +107,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		
 		if (fCorePreferenceStore != null) {
 			// Add rule for Task Tags.
-			fTaskTagRule= new TaskTagRule(getToken(TASK_TAG));
+			fTaskTagRule= new TaskTagRule(getToken(TASK_TAG), getToken(fDefaultTokenProperty));
 			String tasks= fCorePreferenceStore.getString(COMPILER_TASK_TAGS);
 			fTaskTagRule.addTaskTags(tasks);
 			list.add(fTaskTagRule);
