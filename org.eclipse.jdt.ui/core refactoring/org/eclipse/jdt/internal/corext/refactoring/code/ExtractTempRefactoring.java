@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -117,7 +118,9 @@ public class ExtractTempRefactoring extends Refactoring {
 	private String fTempName;
 	private CompilationUnit fCompilationUnitNode;
 	
-	private IExpressionFragment fSelectedExpression; //cache
+	//caches:
+	private IExpressionFragment fSelectedExpression;
+	private String[] fExcludedVariableNames;
 
 	private ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		Assert.isTrue(selectionStart >= 0);
@@ -221,13 +224,19 @@ public class ExtractTempRefactoring extends Refactoring {
 		return Arrays.asList(proposals);
 	}
 	
-	private String[] getExcludedVariableNames() throws JavaModelException {
-		IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES);
-		String[] names= new String[bindings.length];
-		for (int i= 0; i < names.length; i++) {
-			names[i]= bindings[i].getName();
+	private String[] getExcludedVariableNames() {
+		if (fExcludedVariableNames == null) {
+			try {
+				IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES);
+				fExcludedVariableNames= new String[bindings.length];
+				for (int i= 0; i < bindings.length; i++) {
+					fExcludedVariableNames[i]= bindings[i].getName();
+				}
+			} catch (JavaModelException e) {
+				fExcludedVariableNames= new String[0];
+			}
 		}
-		return names;
+		return fExcludedVariableNames;
 	}
 
 	private static String getQualifiedName(ITypeBinding typeBinding) {
@@ -277,8 +286,8 @@ public class ExtractTempRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.explicit_constructor")); //$NON-NLS-1$
 			pm.worked(1);				
 			
-			if (getSelectedMethodNode() == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.expression_in_method"));			 //$NON-NLS-1$
+			if (getEnclosingBodyNode() == null)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.expr_in_method_or_initializer")); //$NON-NLS-1$
 			pm.worked(1);				
 			
 			if (selectedExpression.getAssociatedNode() instanceof Name && selectedExpression.getAssociatedNode().getParent() instanceof ClassInstanceCreation)
@@ -377,9 +386,16 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkTempName(String newName) {
-		return Checks.checkTempName(newName);
+		RefactoringStatus status= Checks.checkTempName(newName);
+		checkExcludedNames(newName, status);
+		return status;
 	}
 	
+	private void checkExcludedNames(String newName, RefactoringStatus status) {
+		if (Arrays.asList(getExcludedVariableNames()).contains(newName))
+			status.addWarning(RefactoringCoreMessages.getFormattedString("ExtractTempRefactoring.another_variable", newName)); //$NON-NLS-1$
+	}
+
 	public void setTempName(String newName) {
 		fTempName= newName;
 	}
@@ -392,6 +408,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			RefactoringStatus result= new RefactoringStatus();
 			
 			result.merge(checkMatchingFragments());
+			checkExcludedNames(fTempName, result);
 			
 			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
 			TextChangeCompatibility.addTextEdit(change, "", getAllEdits(buffer)); //$NON-NLS-1$
@@ -790,7 +807,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	private IASTFragment[] getMatchingFragments() throws JavaModelException {
 		if (fReplaceAllOccurrences){
-			IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(getSelectedMethodNode())
+			IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(getEnclosingBodyNode())
 														 .getSubFragmentsMatching(getSelectedExpression());
 			return allMatches;					 
 		} else 
@@ -861,8 +878,18 @@ public class ExtractTempRefactoring extends Refactoring {
 		return false;	
     }
 		
-	private MethodDeclaration getSelectedMethodNode() throws JavaModelException {
-		return (MethodDeclaration)ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), MethodDeclaration.class);
+	private Block getEnclosingBodyNode() throws JavaModelException {
+		ASTNode node= getSelectedExpression().getAssociatedNode();
+		do {
+			switch (node.getNodeType()) {
+				case ASTNode.METHOD_DECLARATION : 
+					return ((MethodDeclaration) node).getBody();
+				case ASTNode.INITIALIZER :
+					return ((Initializer) node).getBody();
+			}
+			node= node.getParent();
+		} while (node != null);
+		return null;
 	}
 	
 	private static ASTNode[] getParents(ASTNode node){
