@@ -86,7 +86,7 @@ public class AddExceptionDialog extends StatusDialog {
 
 		Label l= new Label(parent, SWT.NULL);
 		l.setLayoutData(new GridData());
-		l.setText("Choose an Exception (? = any character, * = any string");
+		l.setText("Choose an Exception (? = any character, * = any string)");
 		
 		fTypeList= new SelectionList(parent, SWT.BORDER | SWT.SINGLE, 
 				new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_POSTFIX), true);
