@@ -494,12 +494,12 @@ public abstract class TType {
 	}
 	
 	/**
-	 * Checks whether the this left hand side type interpreted as a type
-	 * argument of a parameterized type is compatible with the given 
-	 * type <code>rhs</code>. For example if List<this>= List<rhs> is 
-	 * a valid assignment.
+	 * Checks whether the <code>this</code> left hand side type interpreted as
+	 * a type argument of a parameterized type is compatible with the given type
+	 * <code>rhs</code>. For example if
+	 * <code>List&lt;this&gt;= List&lt;rhs&gt;</code> is a valid assignment.
 	 * 
-	 * @retrun whether this type is type argument compatible with rhs
+	 * @return whether this type is type argument compatible with rhs
 	 */
 	protected boolean checkTypeArgument(TType rhs) {
 		return this.equals(rhs);
