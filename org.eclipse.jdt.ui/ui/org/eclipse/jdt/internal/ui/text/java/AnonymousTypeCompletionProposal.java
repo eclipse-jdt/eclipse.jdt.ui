@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
@@ -67,9 +68,9 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	}
 	
 	/*
-	 * @see JavaCompletionProposal#applyImport(IDocument)
+	 * @see JavaCompletionProposal#applyImports(IDocument)
 	 */
-	protected void applyImport(IDocument document) {
+	protected void applyImports(IDocument document) {
 		if (fImportStructure != null) {
 			try {
 				fImportStructure.create(false, null);
@@ -84,7 +85,9 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	 */
 	public void apply(IDocument document, char trigger) {
 		try {
-			fImportStructure= new ImportsStructure(fCompilationUnit);
+			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
+			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();					
+			fImportStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
 			
 			// construct replacement text
 			StringBuffer buf= new StringBuffer();

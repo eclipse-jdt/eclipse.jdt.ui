@@ -62,7 +62,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	private String evalAccessorName(String fieldname) {
 		if (fieldname.length() > 0) {
 			char firstLetter= fieldname.charAt(0);			
-			if (Character.isLowerCase(firstLetter)) {
+			if (!Character.isUpperCase(firstLetter)) {
 				if (fieldname.length() > 1) {
 					char secondLetter= fieldname.charAt(1);
 					if (Character.isUpperCase(secondLetter)) {

@@ -317,7 +317,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			
 			monitor.worked(1);
 
-			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, fOrderPreference, fImportThreshold);
+			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, fOrderPreference, fImportThreshold, false);
 			
 			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, impStructure, new SubProgressMonitor(monitor, 1));
 			ArrayList openChoices= new ArrayList();

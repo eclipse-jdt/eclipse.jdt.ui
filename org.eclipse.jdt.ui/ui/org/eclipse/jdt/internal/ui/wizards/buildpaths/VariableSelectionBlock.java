@@ -59,8 +59,7 @@ public class VariableSelectionBlock {
 		return null;
 	}
 	
-	public IPath getResolvedPath() {
-		if (fVariable != null) {
+	public IPath getResolvedPath() {		if (fVariable != null) {
 			IPath entryPath= JavaCore.getClasspathVariable(fVariable);
 			if (entryPath != null) {
 				return entryPath.append(fExtensionField.getText());

@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
@@ -53,8 +54,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			
 			int nImports= fImports.length;
 			monitor.beginTask(CodeManipulationMessages.getString("AddImportsOperation.description"), 2); //$NON-NLS-1$
-			
-			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit);
+		
+			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
+			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
+			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
 			
 			for (int i= 0; i < nImports; i++) {
 				IJavaElement imp= fImports[i];

@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -116,7 +117,11 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 		fCursorPosition= cursorPosition;
 	}	
 	
-	private void applyImport(IDocument document) {
+	protected void applyImports(IDocument document) {
+		if (fImportDeclaration == null) {
+			return;
+		}
+		
 		ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(fImportDeclaration, IJavaElement.COMPILATION_UNIT);
 		if (cu != null) {
 			try {
@@ -125,8 +130,11 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 					// do not add import for code assist on import statements
 					return;
 				}
-			
-				ImportsStructure impStructure= new ImportsStructure(cu);
+
+				String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
+				int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();					
+				ImportsStructure impStructure= new ImportsStructure(cu, prefOrder, threshold, true);
+
 				impStructure.addImport(fImportDeclaration.getElementName());
 				// will modify the document as the CU works on the document
 				impStructure.create(false, null);
@@ -152,11 +160,9 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 				document.replace(fReplacementOffset, fReplacementLength, buffer.toString());
 			}
 			
-			if (fImportDeclaration != null) {
-				int oldLen= document.getLength();
-				applyImport(document);
-				fReplacementOffset += document.getLength() - oldLen;
-			}
+			int oldLen= document.getLength();
+			applyImports(document);
+			fReplacementOffset += document.getLength() - oldLen;
 			
 		} catch (BadLocationException x) {
 			// ignore

@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
@@ -95,7 +96,10 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 			IMethod[] existingMethods= fType.getMethods();
 			
 			ArrayList createdMethods= new ArrayList();
-			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit());
+			
+			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
+			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
+			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), prefOrder, threshold, true);
 			
 			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
 			int indent= StubUtility.getIndentUsed(fType) + 1;

@@ -1111,14 +1111,15 @@ public abstract class TypePage extends ContainerPage {
 		IType createdType;
 		ImportsStructure imports;
 		int indent= 0;
+
+		String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
+		int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
 		
 		String lineDelimiter= null;	
 		if (!isInnerClass) {
 			ICompilationUnit parentCU= pack.getCompilationUnit(clName + ".java"); //$NON-NLS-1$
 			
-			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
-			imports= new ImportsStructure(parentCU, prefOrder, threshold);
+			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(parentCU);
 			
@@ -1135,7 +1136,7 @@ public abstract class TypePage extends ContainerPage {
 			}
 
 			ICompilationUnit parentCU= enclosingType.getCompilationUnit();
-			imports= new ImportsStructure(parentCU);
+			imports= new ImportsStructure(parentCU, prefOrder, threshold, true);
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
 			String content= createTypeBody(imports, lineDelimiter);
