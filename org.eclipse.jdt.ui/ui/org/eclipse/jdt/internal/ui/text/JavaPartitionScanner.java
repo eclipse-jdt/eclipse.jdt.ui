@@ -67,7 +67,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner {
 		public EmptyCommentRule(IToken successToken) {
 			super(new EmptyCommentDetector());
 			fSuccessToken= successToken;
-			addWord("/**/", fSuccessToken);
+			addWord("/**/", fSuccessToken); //$NON-NLS-1$
 		}
 		
 		/*

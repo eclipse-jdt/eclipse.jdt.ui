@@ -30,7 +30,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.source.AnnotationRulerColumn;
+import org.eclipse.jface.text.source.AnnotationColumn;
+// import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -738,7 +739,8 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	 */
 	protected IVerticalRuler createVerticalRuler() {
 		CompositeRuler ruler= new CompositeRuler();
-		ruler.addDecorator(0, new AnnotationRulerColumn(VERTICAL_RULER_WIDTH));
+//		ruler.addDecorator(0, new AnnotationRulerColumn(VERTICAL_RULER_WIDTH));
+		ruler.addDecorator(0, new AnnotationColumn(VERTICAL_RULER_WIDTH));
 		if (isLineNumberRulerVisible())
 			ruler.addDecorator(1, createLineNumberRulerColumn());
 		return ruler;

@@ -132,7 +132,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PROBLEM_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PROBLEM_INDICATION),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.OVERVIEW_RULER),
 		
@@ -275,7 +275,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.PROBLEM_INDICATION, true);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
 		
-		store.setDefault(CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS, true);
+		store.setDefault(CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, true);
 		
 		store.setDefault(CompilationUnitEditor.OVERVIEW_RULER, true);
 		
@@ -297,31 +297,31 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.SPACES_FOR_TABS, false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(63, 127, 95));
-		store.setDefault(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + "_bold", false); //$NON-NLS-1$
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, new RGB(63, 127, 95));
-		store.setDefault(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + "_bold", false); //$NON-NLS-1$
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_KEYWORD, new RGB(127, 0, 85));
-		store.setDefault(IJavaColorConstants.JAVA_KEYWORD + "_bold", true);
+		store.setDefault(IJavaColorConstants.JAVA_KEYWORD + "_bold", true); //$NON-NLS-1$
 				
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_STRING, new RGB(42, 0, 255));
-		store.setDefault(IJavaColorConstants.JAVA_STRING + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVA_STRING + "_bold", false); //$NON-NLS-1$
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_DEFAULT, new RGB(0, 0, 0));
-		store.setDefault(IJavaColorConstants.JAVA_DEFAULT + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVA_DEFAULT + "_bold", false); //$NON-NLS-1$
 
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_KEYWORD + "_bold", true);
+		store.setDefault(IJavaColorConstants.JAVADOC_KEYWORD + "_bold", true); //$NON-NLS-1$
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_TAG, new RGB(127, 127, 159));
-		store.setDefault(IJavaColorConstants.JAVADOC_TAG + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVADOC_TAG + "_bold", false); //$NON-NLS-1$
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_LINK, new RGB(63, 63, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_LINK + "_bold", false);
+		store.setDefault(IJavaColorConstants.JAVADOC_LINK + "_bold", false); //$NON-NLS-1$
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_DEFAULT, new RGB(63, 95, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_DEFAULT + "_bold", false);		
+		store.setDefault(IJavaColorConstants.JAVADOC_DEFAULT + "_bold", false);		 //$NON-NLS-1$
 		
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION, true);
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_DELAY, 500);
@@ -331,8 +331,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PROPOSALS_FOREGROUND, new RGB(0, 0, 0));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_BACKGROUND, new RGB(254, 241, 233));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_FOREGROUND, new RGB(0, 0, 0));
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, ".");
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@");
+		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, "."); //$NON-NLS-1$
+		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@"); //$NON-NLS-1$
 		store.setDefault(ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, true);
 		store.setDefault(ContentAssistPreference.CASE_SENSITIVITY, false);
 		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
@@ -621,16 +621,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.SPACES_FOR_TABS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showProblemsBeforeCompiling"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS, 0);
+		addCheckBox(behaviorComposite, label, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
 		
 		
-		label= "Show line numbers";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.showLineNumbers"); //$NON-NLS-1$
 		fLineHighlightButton= addCheckBox(behaviorComposite, label, JavaEditor.LINE_NUMBER_RULER, 0);
 		
-		label= "Line number foreground color:";
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.lineNumberColor"); //$NON-NLS-1$
 		fLineNumberColor= addColorButton(behaviorComposite, label, JavaEditor.LINE_NUMBER_COLOR, 0);
 		
 		fLineHighlightButton.addSelectionListener(new SelectionListener() {
