@@ -11,9 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -34,6 +32,7 @@ import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
 import org.osgi.framework.Bundle;
 
 /**
@@ -41,7 +40,7 @@ import org.osgi.framework.Bundle;
  * 
  * @since 2.1
  */
-public class JavaEditorTextHoverDescriptor implements Comparable {
+public class JavaEditorTextHoverDescriptor {
 
 	private static final String JAVA_EDITOR_TEXT_HOVER_EXTENSION_POINT= "org.eclipse.jdt.ui.javaEditorTextHovers"; //$NON-NLS-1$
 	private static final String HOVER_TAG= "hover"; //$NON-NLS-1$
@@ -179,13 +178,6 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 		return getId().hashCode();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public int compareTo(Object o) {
-		return Collator.getInstance().compare(getLabel(), ((JavaEditorTextHoverDescriptor)o).getLabel());
-	}
-
 	private static JavaEditorTextHoverDescriptor[] createDescriptors(IConfigurationElement[] elements) {
 		List result= new ArrayList(elements.length);
 		for (int i= 0; i < elements.length; i++) {
@@ -195,7 +187,6 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 				result.add(desc);
 			}
 		}
-		Collections.sort(result);
 		return (JavaEditorTextHoverDescriptor[])result.toArray(new JavaEditorTextHoverDescriptor[result.size()]);
 	}
 

@@ -195,25 +195,27 @@
             id="org.eclipse.jdt.ui.text.correction.AdvancedQuickAssistProcessor">
       </quickAssistProcessor>
    </extension>
+   
+   <!-- Note: Do not change the sequence of those hover contributions -->
    <extension
          point="org.eclipse.jdt.ui.javaEditorTextHovers">
-      <hover
-            label="%javadocHover"
-            description="%javadocHoverDescription"
-            class="org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover"
-            id="org.eclipse.jdt.ui.JavadocHover">
-      </hover>
-      <hover
-            label="%nlsStringHover"
-            description="%nlsStringHoverDescription"
-            class="org.eclipse.jdt.internal.ui.text.java.hover.NLSStringHover"
-            id="org.eclipse.jdt.ui.NLStringHover">
-      </hover>
       <hover
             label="%sequentialHover"
             description="%sequentialHoverDescription"
             class="org.eclipse.jdt.internal.ui.text.java.hover.BestMatchHover"
             id="org.eclipse.jdt.ui.BestMatchHover">
+      </hover>
+      <hover
+            label="%problemHover"
+            description="%problemHoverDescription"
+            class="org.eclipse.jdt.internal.ui.text.java.hover.ProblemHover"
+            id="org.eclipse.jdt.ui.ProblemHover">
+      </hover>
+      <hover
+            label="%javadocHover"
+            description="%javadocHoverDescription"
+            class="org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover"
+            id="org.eclipse.jdt.ui.JavadocHover">
       </hover>
       <hover
             label="%sourceHover"
@@ -222,10 +224,10 @@
             id="org.eclipse.jdt.ui.JavaSourceHover">
       </hover>
       <hover
-            label="%problemHover"
-            description="%problemHoverDescription"
-            class="org.eclipse.jdt.internal.ui.text.java.hover.ProblemHover"
-            id="org.eclipse.jdt.ui.ProblemHover">
+            label="%nlsStringHover"
+            description="%nlsStringHoverDescription"
+            class="org.eclipse.jdt.internal.ui.text.java.hover.NLSStringHover"
+            id="org.eclipse.jdt.ui.NLStringHover">
       </hover>
       <hover
             label="%annotationHover"

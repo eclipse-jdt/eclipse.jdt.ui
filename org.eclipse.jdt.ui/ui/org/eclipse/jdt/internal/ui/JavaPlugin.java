@@ -17,10 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.osgi.framework.BundleContext;
-
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,6 +27,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
@@ -46,10 +44,6 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
-import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -63,17 +57,17 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ConfigurationElementSorter;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
+import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
@@ -82,6 +76,12 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
@@ -99,7 +99,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.osgi.framework.BundleContext;
 
 /**
  * Represents the java plug-in. It provides a series of convenience methods such as
@@ -595,56 +595,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 			};
 			sorter.sort(fJavaEditorTextHoverDescriptors);
 		
-			// The Problem hover has to be the first and the Annotation hover has to be the last one in the JDT UI's hover list
-			int length= fJavaEditorTextHoverDescriptors.length;
-			int first= -1;
-			int last= length - 1;
-			int problemHoverIndex= -1;
-			int annotationHoverIndex= -1;
-			for (int i= 0; i < length; i++) {
-				if (!fJavaEditorTextHoverDescriptors[i].getId().startsWith(JavaUI.ID_PLUGIN)) {
-					if (problemHoverIndex == -1 || annotationHoverIndex == -1)
-						continue;
-					last= i - 1;
-					break;
-				}
-				if (first == -1)
-					first= i;
-				
-				if (fJavaEditorTextHoverDescriptors[i].getId().equals("org.eclipse.jdt.ui.AnnotationHover")) { //$NON-NLS-1$
-					annotationHoverIndex= i;
-					continue;
-				}
-				if (fJavaEditorTextHoverDescriptors[i].getId().equals("org.eclipse.jdt.ui.ProblemHover")) { //$NON-NLS-1$
-					problemHoverIndex= i;
-					continue;
-				}
-			}
-	
-			JavaEditorTextHoverDescriptor hoverDescriptor= null;
-			
-			if (first > -1 && problemHoverIndex > -1 && problemHoverIndex != first) {
-				// move problem hover to beginning
-				hoverDescriptor= fJavaEditorTextHoverDescriptors[first];
-				fJavaEditorTextHoverDescriptors[first]= fJavaEditorTextHoverDescriptors[problemHoverIndex];
-				fJavaEditorTextHoverDescriptors[problemHoverIndex]= hoverDescriptor;
-
-				// update annotation hover index if needed
-				if (annotationHoverIndex == first)
-					annotationHoverIndex= problemHoverIndex;
-			}
-			
-			if (annotationHoverIndex > -1 && annotationHoverIndex != last) {
-				// move annotation hover to end
-				hoverDescriptor= fJavaEditorTextHoverDescriptors[last];
-				fJavaEditorTextHoverDescriptors[last]= fJavaEditorTextHoverDescriptors[annotationHoverIndex];
-				fJavaEditorTextHoverDescriptors[annotationHoverIndex]= hoverDescriptor;
-			}
-			
 			// Move Best Match hover to front
 			for (int i= 0; i < fJavaEditorTextHoverDescriptors.length - 1; i++) {
 				if (PreferenceConstants.ID_BESTMATCH_HOVER.equals(fJavaEditorTextHoverDescriptors[i].getId())) {
-					hoverDescriptor= fJavaEditorTextHoverDescriptors[i];
+					JavaEditorTextHoverDescriptor hoverDescriptor= fJavaEditorTextHoverDescriptors[i];
 					for (int j= i; j > 0; j--)
 						fJavaEditorTextHoverDescriptors[j]= fJavaEditorTextHoverDescriptors[j-1];
 					fJavaEditorTextHoverDescriptors[0]= hoverDescriptor;
