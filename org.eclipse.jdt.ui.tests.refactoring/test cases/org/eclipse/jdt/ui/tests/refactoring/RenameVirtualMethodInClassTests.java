@@ -173,6 +173,10 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		helper2_0("takeANumber", "doit", new String[]{"QNumber;"});
 	}
 	
+	public void testGenerics5() throws Exception {
+		helper2_0("covariant", "variant", new String[0]);
+	}
+	
 	public void testVarargs1() throws Exception {
 		helper2_0("runall", "runThese", new String[]{"[QRunnable;"});
 	}
