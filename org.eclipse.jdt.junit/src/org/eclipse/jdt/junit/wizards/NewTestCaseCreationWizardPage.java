@@ -202,7 +202,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				fTestClassStatus= testClassChanged();
 			}
 		}
-//		updateStatus(findMostSevereStatus());
 		doStatusUpdate();
 	}
 
@@ -364,7 +363,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 
 	/**
 	 * Sets the class to test name.
-	 * @param canBeModified Selects if the super class can be changed by the user
 	 */		
 	public void setClassToTest(String name) {
 		fClassToTestText.setText(name);
@@ -575,24 +573,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				type.createMethod(newMethod.toString(), null, false, null);	
 			}
 		}
-	}
-	protected static GridData gridDataForDefaultForTypeName(int span) {
-		GridData gd= new GridData();
-		gd.horizontalSpan= span;
-		return gd;
-	}
-
-	public static Control createEmptySpace(Composite parent, int span) {
-		Label label= new Label(parent, SWT.LEFT);
-		GridData gd= new GridData();
-		gd.horizontalAlignment= gd.BEGINNING;
-		gd.grabExcessHorizontalSpace= false;
-		gd.horizontalSpan= span;
-		gd.horizontalIndent= 0;
-		gd.widthHint= 0;
-		gd.heightHint= 0;
-		label.setLayoutData(gd);
-		return label;
 	}
 
 	public void setVisible(boolean visible) {
@@ -834,25 +814,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			type= JavaModelUtil.findType(jproject, classToTestName);
 		}
 		return type;
-	}
-
-	/**
-	 * Finds the most severe status from a array of statuses.
-	 * An error is more severe than a warning, and a warning is more severe
-	 * than ok.
-	 */
-	public static IStatus getMostSevere(IStatus[] status) {
-		IStatus max= null;
-		for (int i= 0; i < status.length; i++) {
-			IStatus curr= status[i];
-			if (curr.matches(IStatus.ERROR)) {
-				return curr;
-			}
-			if (max == null || curr.getSeverity() > max.getSeverity()) {
-				max= curr;
-			}
-		}
-		return max;
 	}
 
 	/**

@@ -120,23 +120,11 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		IJavaElement jelem= getInitialJavaElement(selection);
 		initContainerPage(jelem);
 		initTypePage(jelem);
-		updateStatus(findMostSevereStatus());
+		doStatusUpdate();
 	}
 	
 	/**
-	 * Finds the most severe error (if there is one)
-	 */
-	private IStatus findMostSevereStatus() {
-		return NewTestCaseCreationWizardPage.getMostSevere(new IStatus[] {
-			fContainerStatus,
-			fPackageStatus,
-			fSuiteNameStatus,
-			fClassesInSuiteStatus			
-		});
-	}
-
-	/*
-	 * @see ContainerPage#handleFieldChanged
+	 * @see NewContainerWizardPage#handleFieldChanged
 	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
@@ -151,7 +139,21 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			fSuiteNameStatus= testSuiteChanged();
 		}
 
-		updateStatus(findMostSevereStatus());
+		doStatusUpdate();
+	}
+
+	// ------ validation --------
+	private void doStatusUpdate() {
+		// status of all used components
+		IStatus[] status= new IStatus[] {
+			fContainerStatus,
+			fPackageStatus,
+			fSuiteNameStatus,
+			fClassesInSuiteStatus			
+		};
+		
+		// the mode severe status will be displayed and the ok button enabled/disabled.
+		updateStatus(status);
 	}
 
 	public void setVisible(boolean visible) {
