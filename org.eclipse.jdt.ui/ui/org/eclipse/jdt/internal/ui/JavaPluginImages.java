@@ -96,10 +96,10 @@ public class JavaPluginImages {
 
 	public static final String IMG_OBJS_STACK_FRAME_SYNCH= NAME_PREFIX + "jstackframe_synch_obj.gif";
 
-	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "rf_fatal.gif";
-	public static final String IMG_OBJS_REFACTORING_ERROR= NAME_PREFIX + "rf_error.gif";
-	public static final String IMG_OBJS_REFACTORING_WARNING= NAME_PREFIX + "rf_warn.gif";
-	public static final String IMG_OBJS_REFACTORING_INFO= NAME_PREFIX + "rf_info.gif";
+	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "fatalerror_obj.gif";
+	public static final String IMG_OBJS_REFACTORING_ERROR= NAME_PREFIX + "error_obj.gif";
+	public static final String IMG_OBJS_REFACTORING_WARNING= NAME_PREFIX + "warning_obj.gif";
+	public static final String IMG_OBJS_REFACTORING_INFO= NAME_PREFIX + "info_obj.gif";
 
 	// public static final String IMG_OVR_STATIC= NAME_PREFIX + "static_co.gif";
 	// public static final String IMG_OVR_FINAL= NAME_PREFIX + "final_co.gif";
