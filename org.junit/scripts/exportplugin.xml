@@ -19,7 +19,7 @@
 		<copy file="junit.jar" todir="${dest}"/>
 		<copy file="junitsrc.zip" todir="${dest}"/>
 		<copy file="plugin.xml" todir="${dest}"/>
-		<copy file="about.xml" todir="${dest}"/>
+		<copy file="about.html" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
 				
 	</target>
