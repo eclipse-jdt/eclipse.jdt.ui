@@ -475,6 +475,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 			} else {
 				fEnclosingMethodBinding= fEnclosingMethod.resolveBinding();
 			}
+			if (!isSingleExpressionOrStatementSet()) {
+				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.single_expression_or_set")); //$NON-NLS-1$
+				break superCall;
+			}
 			if (isExpressionSelected()) {
 				ASTNode expression= getFirstSelectedNode();
 				if (expression instanceof Name) {
@@ -591,6 +595,15 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node) {
 			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_variable_declaration"), JavaStatusContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 		}
+	}
+	
+	private boolean isSingleExpressionOrStatementSet() {
+		ASTNode first= getFirstSelectedNode();
+		if (first == null)
+			return true;
+		if (first instanceof Expression && getSelectedNodes().length != 1)
+			return false;
+		return true;
 	}
 }
 
