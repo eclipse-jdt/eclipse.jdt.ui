@@ -13,15 +13,14 @@ import java.io.StringReader;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jface.text.HoverTextControl;
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.TextPresentation;
-import org.eclipse.jface.text.HoverTextControl.IHoverInformationPresenter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 
-public class LineWrappingTextPresenter implements HoverTextControl.IHoverInformationPresenter {
+public class LineWrappingTextPresenter implements DefaultInformationControl.IInformationPresenter {
 	
 	private static final String LINE_DELIM= System.getProperty("line.separator", "\n");
 	

@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 /**
  * Caution: this implementation is a layer breaker and contains some "shortcuts"
  */
-public class JavaTextHover implements IInformationProvider {
+public class JavaTextHover implements ITextHover, IInformationProvider {
 		
 	class EditorWatcher implements IPartListener {
 		
@@ -116,7 +116,6 @@ public class JavaTextHover implements IInformationProvider {
 		
 	}
 	
-	
 	protected void update() {
 		
 		IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
@@ -140,10 +139,24 @@ public class JavaTextHover implements IInformationProvider {
 		}
 	}
 			
-	/**
+	/*
 	 * @see ITextHover#getHoverRegion(ITextViewer, int)
 	 */
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
+		return getSubject(textViewer, offset);
+	}
+		
+	/*
+	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
+	 */
+	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+		return getInformation(textViewer, hoverRegion);
+	}
+	
+	/*
+	 * @see IInformationProvider#getSubject(ITextViewer, int)
+	 */
+	public IRegion getSubject(ITextViewer textViewer, int offset) {
 		
 		if (!fEnabled)
 			return null;
@@ -151,16 +164,16 @@ public class JavaTextHover implements IInformationProvider {
 		if (textViewer != null)
 			return JavaWordFinder.findWord(textViewer.getDocument(), offset);
 		
-		return null;
+		return null;	
 	}
-		
-	/**
-	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
+
+	/*
+	 * @see IInformationProvider#getInformation(ITextViewer, IRegion)
 	 */
-	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+	public String getInformation(ITextViewer textViewer, IRegion subject) {
 		if (fImplementations != null && fEnabled) {
 			for (int i= 0; i < fImplementations.length; i++) {
-				String s= fImplementations[i].getHoverInfo(textViewer, hoverRegion);
+				String s= fImplementations[i].getHoverInfo(textViewer, subject);
 				if (s != null && s.trim().length() > 0)
 					return s;
 			}

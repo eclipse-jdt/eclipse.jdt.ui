@@ -11,11 +11,11 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
-import org.eclipse.jface.text.HoverTextControl;
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IHoverControl;
-import org.eclipse.jface.text.IHoverControlCreator;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.TextAttribute;
@@ -157,7 +157,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		assistant.setAutoActivationDelay(500);
 		assistant.setProposalPopupOrientation(assistant.PROPOSAL_OVERLAY);
 		assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
-		assistant.setHoverControlCreator(getHoverControlCreator(sourceViewer));
+		assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 		
 		Color background= getColorManager().getColor(new RGB(254, 241, 233));
 		assistant.setContextInformationPopupBackground(background);
@@ -213,7 +213,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getIndentPrefixes(ISourceViewer, String)
 	 */
 	public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType) {
-		return new String[] {"\t", "    ", ""}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return new String[] {"\t", "    ", ""};  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/*
@@ -262,13 +262,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	/*
 	 * @see SourceViewerConfiguration#getHoverControlCreator(ISourceViewer)
 	 */
-	public IHoverControlCreator getHoverControlCreator(ISourceViewer sourceViewer) {
-		return new IHoverControlCreator() {
-			public IHoverControl createHoverControl(Shell parent) {
-				if (true)
-					return new HoverTextControl(parent, new LineWrappingTextPresenter());
-				else
-					return new HoverBrowserControl(parent);
+	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				return new DefaultInformationControl(parent, new LineWrappingTextPresenter());
+				// return new HoverBrowserControl(parent);
 			}
 		};
 	}
@@ -277,7 +275,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getInformationPresenter(ISourceViewer)
 	 */
 	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
-		InformationPresenter presenter= new InformationPresenter(getHoverControlCreator(sourceViewer));
+		InformationPresenter presenter= new InformationPresenter(getInformationControlCreator(sourceViewer));
 		IInformationProvider provider= new JavaTextHover(getEditor());
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);

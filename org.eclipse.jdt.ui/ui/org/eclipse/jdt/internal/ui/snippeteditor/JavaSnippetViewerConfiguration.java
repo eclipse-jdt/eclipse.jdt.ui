@@ -4,20 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
 
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
-import org.eclipse.jdt.internal.ui.text.LineWrappingTextPresenter;
-import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
-import org.eclipse.jdt.ui.text.IColorManager;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
-import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
-import org.eclipse.jface.text.HoverTextControl;
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IHoverControl;
-import org.eclipse.jface.text.IHoverControlCreator;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
@@ -29,8 +24,16 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.LineWrappingTextPresenter;
+import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
 
 
 /**
@@ -113,7 +116,7 @@ public class JavaSnippetViewerConfiguration extends SourceViewerConfiguration {
 		assistant.setProposalPopupOrientation(assistant.PROPOSAL_OVERLAY);
 		assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
 		assistant.setContextInformationPopupBackground(getColorManager().getColor(new RGB(150, 150, 0)));
-		assistant.setHoverControlCreator(getHoverControlCreator(sourceViewer));
+		assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 		
 		return assistant;
 	}
@@ -147,12 +150,13 @@ public class JavaSnippetViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/*
-	 * @see SourceViewerConfiguration#getHoverControlCreator(ISourceViewer)
+	 * @see SourceViewerConfiguration#getInformationControlCreator(ISourceViewer)
 	 */
-	public IHoverControlCreator getHoverControlCreator(ISourceViewer sourceViewer) {
-		return new IHoverControlCreator() {
-			public IHoverControl createHoverControl(Shell parent) {
-				return new HoverTextControl(parent, new LineWrappingTextPresenter());
+	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				return new DefaultInformationControl(parent, new LineWrappingTextPresenter());
+				// return new HoverBrowserControl(parent);
 			}
 		};
 	}
