@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.*;
+import java.io.InputStream;
 
 import org.eclipse.jface.text.*;
 
@@ -168,6 +169,36 @@ public class JavaStructureCreator implements IStructureCreator {
 			return root;
 		} 
 		return null;
+	}
+	
+	/* package */ IStructureComparator getStructure(InputStream is) {
+		
+		String contents= JavaCompareUtilities.readString(is);
+		
+		if (contents != null) {
+			int n= contents.length();
+			char[] buffer= new char[n];
+			contents.getChars(0, n, buffer, 0);
+			
+			Document doc= new Document(contents);
+			IDocumentPartitioner dp= JavaCompareUtilities.createJavaPartitioner();
+			doc.setDocumentPartitioner(dp);
+			dp.connect(doc);
+						
+			// we hook into the root node to intercept all node changes
+			JavaNode root= new JavaNode(doc, false);
+			JavaParseTreeBuilder builder= new JavaParseTreeBuilder(root, buffer);
+			SourceElementParser parser= new SourceElementParser(builder, new ProblemFactory());
+			try {
+				parser.parseCompilationUnit(builder, false);
+			} catch (ParseError ex) {
+				// System.out.println("Parse error: " + ex);
+				// parse error: bail out
+				return null;
+			}
+			return root;
+		} 
+		return null;		
 	}
 	
 	/**
@@ -342,9 +373,17 @@ public class JavaStructureCreator implements IStructureCreator {
 		if (structure == null)	// we couldn't parse the structure 
 			return null;		// so we can't find anything
 			
+		// build a path
+		String[] path= createPath((IJavaElement) selector);
+			
+		// find the path in the JavaNode tree
+		return find(structure, path, 0);
+	}
+	
+	/* package */ static String[] createPath(IJavaElement je) {
+			
 		// build a path starting at the given Java element and walk
 		// up the parent chain until we reach a IWorkingCopy or ICompilationUnit
-		IJavaElement je= (IJavaElement) selector;
 		List args= new ArrayList();
 		while (je != null) {
 			// each path component has a name that uses the same
@@ -364,10 +403,9 @@ public class JavaStructureCreator implements IStructureCreator {
 		for (int i= 0; i < n; i++)
 			path[i]= (String) args.get(n-1-i);
 			
-		// find the path in the JavaNode tree
-		return find(structure, path, 0);
+		return path;
 	}
-			
+	
 	/**
 	 * Recursivly extracts the given path from the tree.
 	 */

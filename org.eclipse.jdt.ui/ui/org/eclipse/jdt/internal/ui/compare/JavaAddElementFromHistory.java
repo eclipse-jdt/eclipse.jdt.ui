@@ -38,7 +38,11 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	
 	private JavaEditor fEditor;
 
-		
+	/**
+	 * The optional argument editor is used iff the selection provider's
+	 * selection is empty. In this case the editor's CU is the container
+	 * to which to add an element from the local history.
+	 */
 	public JavaAddElementFromHistory(JavaEditor editor, ISelectionProvider sp) {
 		super(sp);
 		fEditor= editor;
