@@ -6,6 +6,10 @@ package org.eclipse.jdt.internal.ui.text.java;
  */
 
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Hashtable;
+
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
@@ -19,9 +23,6 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.ui.IEditorPart;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Hashtable;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -29,7 +30,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
@@ -165,7 +165,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 
 		ICompletionProposal[] results;
 
-		if (WorkInProgressPreferencePage.fillArgumentsOnMethodCompletion()) {
+		if (ExperimentalPreference.fillArgumentsOnMethodCompletion(JavaPlugin.getDefault().getPreferenceStore())) {
 				
 			try {
 				if (unit != null) {
