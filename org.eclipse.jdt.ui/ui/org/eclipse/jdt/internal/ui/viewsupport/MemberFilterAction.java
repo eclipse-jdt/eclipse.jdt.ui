@@ -39,7 +39,7 @@ public class MemberFilterAction extends Action {
 	 * @see Action#actionPerformed
 	 */
 	public void run() {	
-		fFilterActionGroup.setMemberFilter(fFilterProperty, isChecked());
+		fFilterActionGroup.setMemberFilter(fFilterProperty, isChecked(), true);
 	}
 		
 }
