@@ -143,7 +143,7 @@ public class ScopeAnalyzer {
 	
 	private void addTypeDeclarations(ITypeBinding binding, int flags) {
 		if (hasFlag(TYPES, flags)) {
-			if (!binding.isAnonymous()) {
+			if (!binding.isAnonymous() && fNamesAdded.add(getTypeSignature(binding))) {
 				fRequestor.add(binding);
 			}
 		}
