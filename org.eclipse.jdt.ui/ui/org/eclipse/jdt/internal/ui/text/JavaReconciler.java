@@ -131,7 +131,7 @@ public class JavaReconciler extends MonoReconciler {
 	}
 	
 	/**
-	 * Internal recource change listener.
+	 * Internal resource change listener.
 	 * 
 	 * @since 3.0
 	 */

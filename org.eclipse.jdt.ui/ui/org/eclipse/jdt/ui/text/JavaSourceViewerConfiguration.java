@@ -235,9 +235,9 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/**
-	 * Returns the Java multiline comment scanner for this configuration.
+	 * Returns the Java multi-line comment scanner for this configuration.
 	 *
-	 * @return the Java multiline comment scanner
+	 * @return the Java multi-line comment scanner
 	 * @since 2.0
 	 */
 	protected RuleBasedScanner getMultilineCommentScanner() {
@@ -245,9 +245,9 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/**
-	 * Returns the Java singleline comment scanner for this configuration.
+	 * Returns the Java single-line comment scanner for this configuration.
 	 *
-	 * @return the Java singleline comment scanner
+	 * @return the Java single-line comment scanner
 	 * @since 2.0
 	 */
 	protected RuleBasedScanner getSinglelineCommentScanner() {

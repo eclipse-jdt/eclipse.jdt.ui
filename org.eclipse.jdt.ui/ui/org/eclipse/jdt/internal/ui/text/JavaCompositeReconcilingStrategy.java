@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellReconcileStrategy;
 
 /**
- * Reconcling strategy for Java code. This is a composite strategy containing the
+ * Reconciling strategy for Java code. This is a composite strategy containing the
  * regular java model reconciler and the comment spell checking strategy. 
  * 
  * @since 3.0 
@@ -41,7 +41,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	 * Creates a new Java reconciling strategy.
 	 * 
 	 * @param editor the editor of the strategy's reconciler
-	 * @param documentPartitioning the document partitoning this strategy uses for configuration
+	 * @param documentPartitioning the document partitioning this strategy uses for configuration
 	 */
 	public JavaCompositeReconcilingStrategy(ITextEditor editor, String documentPartitioning) {
 		fEditor= editor;
@@ -55,7 +55,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	/**
 	 * Returns the problem requestor for the editor's input element.
 	 * 
-	 * @return the problem equestor for the editor's input element
+	 * @return the problem requestor for the editor's input element
 	 */
 	private IProblemRequestorExtension getProblemRequestorExtension() {
 		IDocumentProvider p= fEditor.getDocumentProvider();
