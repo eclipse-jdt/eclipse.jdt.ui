@@ -46,9 +46,9 @@ public abstract class RefactoringTest extends TestCase {
 
 	public static final String TEST_PATH_PREFIX= "";
 
-	private static final String TEST_INPUT_INFIX= "/in/";
-	private static final String TEST_OUTPUT_INFIX= "/out/";
-	private static final String CONTAINER= "src";
+	protected static final String TEST_INPUT_INFIX= "/in/";
+	protected static final String TEST_OUTPUT_INFIX= "/out/";
+	protected static final String CONTAINER= "src";
 	protected static final ITextBufferChangeCreator fgChangeCreator= new TextBufferChangeCreator();
 	
 	private static final IProgressMonitor fgNullProgressMonitor= new NullProgressMonitor();
@@ -194,7 +194,7 @@ public abstract class RefactoringTest extends TestCase {
 	 * @param infix
 	 * example "RenameTest/test0 + infix + cuName.java"
 	 */
-	private String createTestFileName(String cuName, String infix) {
+	protected String createTestFileName(String cuName, String infix) {
 		return getTestPath() + getName() + infix + cuName + ".java";
 	}
 	
