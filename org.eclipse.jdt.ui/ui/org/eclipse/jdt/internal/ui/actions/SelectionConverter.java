@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 import org.eclipse.swt.widgets.Shell;
@@ -31,12 +30,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 public class SelectionConverter {
 
