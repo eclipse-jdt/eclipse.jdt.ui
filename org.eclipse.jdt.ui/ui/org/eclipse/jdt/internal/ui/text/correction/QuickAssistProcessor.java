@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -25,27 +26,37 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
   */
-public class QuickAssistProcessor implements ICorrectionProcessor {
-
+public class QuickAssistProcessor implements IAssistProcessor {
+	
 	/**
 	 * Constructor for CodeManipulationProcessor.
 	 */
 	public QuickAssistProcessor() {
 		super();
 	}
-	
-	public void process(ICorrectionContext context, List resultingCollections) throws CoreException {
-		int id= context.getProblemId();
-		if (id != 0) { // no proposals for problem locations
-			return;
-		}
-		getAssignToVariableProposals(context, resultingCollections);
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
+	 */
+	public boolean hasAssists(IAssistContext context) throws CoreException {
+		ArrayList list= new ArrayList();
+		process(context, list);
+		return !list.isEmpty();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, java.util.List)
+	 */
+	public void process(IAssistContext context, List resultingCollections) throws CoreException {
+		// quick assists that show up also if there is an error/warning
 		getCatchClauseToThrowsProposals(context, resultingCollections);
 		getRenameLocalProposals(context, resultingCollections);
+
+		getAssignToVariableProposals(context, resultingCollections);
 		getUnWrapProposals(context, resultingCollections);
 	}
 	
-	private void getAssignToVariableProposals(ICorrectionContext context, List resultingCollections) throws CoreException {
+	private void getAssignToVariableProposals(IAssistContext context, List resultingCollections) throws CoreException {
 		ASTNode node= context.getCoveringNode();
 		
 		Statement statement= ASTResolving.findParentStatement(node);
@@ -77,7 +88,7 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		}				
 	}
 	
-	private void getCatchClauseToThrowsProposals(ICorrectionContext context, List resultingCollections) throws CoreException {
+	private void getCatchClauseToThrowsProposals(IAssistContext context, List resultingCollections) throws CoreException {
 		ASTNode node= context.getCoveringNode();
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(node, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
@@ -141,7 +152,7 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 	}
 	
 	
-	private void getRenameLocalProposals(ICorrectionContext context, List resultingCollections) throws CoreException {
+	private void getRenameLocalProposals(IAssistContext context, List resultingCollections) throws CoreException {
 		ASTNode node= context.getCoveringNode();
 		if (!(node instanceof SimpleName)) {
 			return;
@@ -173,7 +184,7 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 	}
 	
 	
-	private void getUnWrapProposals(ICorrectionContext context, List resultingCollections) throws CoreException {
+	private void getUnWrapProposals(IAssistContext context, List resultingCollections) throws CoreException {
 		ASTNode node= context.getCoveringNode();
 		if (node == null) {
 			return;
@@ -263,5 +274,6 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 			proposal.ensureNoModifications();
 			resultingCollections.add(proposal);
 		}				
-	}	
+	}
+
 }

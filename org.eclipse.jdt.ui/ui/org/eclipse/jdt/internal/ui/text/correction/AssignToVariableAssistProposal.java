@@ -252,7 +252,10 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
-		return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
+		if (fSelectedRegion != null) {
+			return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
+		}
+		return null;
 	}	
 
 	/* (non-Javadoc)

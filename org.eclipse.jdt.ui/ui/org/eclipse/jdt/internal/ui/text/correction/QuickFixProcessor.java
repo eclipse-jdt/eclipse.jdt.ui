@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
   */
 public class QuickFixProcessor implements ICorrectionProcessor {
 
-	public static boolean hasCorrections(int problemId) {
+	public boolean hasCorrections(int problemId) {
 		switch (problemId) {
 			case IProblem.UnterminatedString:
 			case IProblem.UnusedImport:
@@ -103,7 +103,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 		}
 	}
 	
-	public static int moveBack(int offset, int start, String ignoreCharacters, ICompilationUnit cu) {
+	private static int moveBack(int offset, int start, String ignoreCharacters, ICompilationUnit cu) {
 		try {
 			IBuffer buf= cu.getBuffer();
 			while (offset >= start) {

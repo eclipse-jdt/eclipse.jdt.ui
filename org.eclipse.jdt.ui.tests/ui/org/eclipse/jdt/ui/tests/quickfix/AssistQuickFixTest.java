@@ -105,7 +105,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
@@ -169,7 +169,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 
@@ -251,7 +251,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 
@@ -322,7 +322,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 
@@ -397,7 +397,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -467,7 +467,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -509,7 +509,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -546,7 +546,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -584,7 +584,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -623,7 +623,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -663,7 +663,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -707,7 +707,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -748,7 +748,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -786,7 +786,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -820,7 +820,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -851,7 +851,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectContext(context);
 		ArrayList proposals= new ArrayList();
 		
-		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		JavaCorrectionProcessor.collectAssists(context,  proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		

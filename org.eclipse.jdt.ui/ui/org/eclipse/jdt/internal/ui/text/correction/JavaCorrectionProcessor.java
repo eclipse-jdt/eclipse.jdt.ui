@@ -62,27 +62,42 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				if (del != 0) {
 					return del;
 				}
-				return fgCollator.compare(e1.getDisplayString(), e1.getDisplayString());
+				return fgCollator.compare(e1.getDisplayString(), e2.getDisplayString());
 
 			}				
-			return fgCollator.compare(((ICompletionProposal) o1).getDisplayString(), ((ICompletionProposal) o1).getDisplayString());
+			return fgCollator.compare(((ICompletionProposal) o1).getDisplayString(), ((ICompletionProposal) o2).getDisplayString());
 		}
 	}
 	
-	private static ICorrectionProcessor[] fCodeManipulationProcessors= null;
+	private static IAssistProcessor[] fAssistProcessors= null;
+	private static ICorrectionProcessor[] fCorrectionProcessors= null;
 	
-	public static ICorrectionProcessor[] getCodeManipulationProcessors() {
-		if (fCodeManipulationProcessors == null) {
-			fCodeManipulationProcessors= new ICorrectionProcessor[] {
-				new QuickFixProcessor(),
-				new QuickAssistProcessor()
+	private static ICorrectionProcessor[] getCorrectionProcessors() {
+		if (fCorrectionProcessors == null) {
+			fCorrectionProcessors= new ICorrectionProcessor[] {
+				new QuickFixProcessor()			};
+		}
+		return fCorrectionProcessors;
+	}
+	
+	private static IAssistProcessor[] getAssistProcessors() {
+		if (fAssistProcessors == null) {
+			fAssistProcessors= new IAssistProcessor[] {
+				new QuickAssistProcessor(),
+				new QuickTemplateProcessor()
 			};
 		}
-		return fCodeManipulationProcessors;
-	}
+		return fAssistProcessors;
+	}	
 	
 	public static boolean hasCorrections(int problemId) {
-		return QuickFixProcessor.hasCorrections(problemId);
+		ICorrectionProcessor[] processors= getCorrectionProcessors();
+		for (int i= 0; i < processors.length; i++) {
+			if (processors[i].hasCorrections(problemId)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static boolean hasCorrections(IJavaAnnotation annotation) {
@@ -150,16 +165,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	
 
 	private void processProblemAnnotations(ICompilationUnit cu, IAnnotationModel model, ITextViewer viewer, int offset, ArrayList proposals) {
-		if (viewer != null) {
-			QuickTemplateProcessor processor= new QuickTemplateProcessor();
-			processor.computeCompletionProposals(viewer, cu, proposals);
-			if (!proposals.isEmpty()) {
-				return;
-			}
-		}
 		CorrectionContext context= new CorrectionContext(cu);
 		
-		boolean noProbemFound= true;
 		HashSet idsProcessed= new HashSet();
 		Iterator iter= new JavaAnnotationIterator(model, true);
 		while (iter.hasNext()) {
@@ -174,14 +181,12 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 						if (proposals.isEmpty()) {
 							//proposals.add(new NoCorrectionProposal(pp, annot.getMessage()));
 						}
-					}
-					noProbemFound= false;				
+					}	
 				} else {
 					if (annot instanceof MarkerAnnotation) {
 						IMarker marker= ((MarkerAnnotation) annot).getMarker();
 						IMarkerResolution[] res= PlatformUI.getWorkbench().getMarkerHelpRegistry().getResolutions(marker);
 						if (res.length > 0) {
-							noProbemFound= false;
 							for (int i= 0; i < res.length; i++) {
 								proposals.add(new MarkerResolutionProposal(res[i], marker));
 							}
@@ -190,16 +195,14 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				}
 			}
 		}
-		if (noProbemFound) {
-			int length= viewer != null ? viewer.getSelectedRange().y : 0;
-			
-			context.initialize(offset, length, 0, null);
-			collectCorrections(context, proposals);
-		}
+
+		int length= viewer != null ? viewer.getSelectedRange().y : 0;
+		context.initialize(offset, length, 0, null);
+		collectAssists(context, proposals);
 	}
 	
 	public static void collectCorrections(CorrectionContext context, ArrayList proposals) {
-		ICorrectionProcessor[] processors= getCodeManipulationProcessors();
+		ICorrectionProcessor[] processors= getCorrectionProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
 				processors[i].process(context, proposals);
@@ -208,6 +211,17 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			}
 		}
 	}
+	
+	public static void collectAssists(CorrectionContext context, ArrayList proposals) {
+		IAssistProcessor[] processors= getAssistProcessors();
+		for (int i= 0; i < processors.length; i++) {
+			try {
+				processors[i].process(context, proposals);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+		}
+	}	
 	
 	/*
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)

@@ -16,19 +16,19 @@ import org.eclipse.core.runtime.CoreException;
 
 /**
   */
-public interface ICorrectionProcessor {
-
-	/**
-	 * Returns true if the processor has propsals for the given problem. This test should be an
-	 * optimistic guess and be extremly cheap. 
-	 */
-	boolean hasCorrections(int problemID);
+public interface IAssistProcessor {
 	
 	/**
-	 * Collects corrections or code manipulations for the given context
-	 * @param context Defines current compilation unit, position and the problem ID.
+	 * Returns true if the processor has propsals for the given location. This test can used the passed AST
+	 * and should be precice (to a guess). 
+	 */
+	boolean hasAssists(IAssistContext context) throws CoreException;
+
+	/**
+	 * Collects assists for the given context
+	 * @param context Defines current compilation unit, position and a shared AST
 	 * @param resultingCollections 
 	 */
-	void process(ICorrectionContext context, List resultingCollections) throws CoreException;
+	void process(IAssistContext context, List resultingCollections) throws CoreException;
 	
 }

@@ -10,90 +10,127 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
+
+import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
+import org.eclipse.jdt.internal.corext.template.Templates;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
-import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.text.template.TemplateProposal;
 
 
 /**
  * Quick template processor.
  */
-public class QuickTemplateProcessor {
+public class QuickTemplateProcessor implements IAssistProcessor {
+	
+	private static final String $_LINE_SELECTION= "${" + GlobalVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 		
-	private JavaCompletionProposalComparator fComparator;
-	private TemplateEngine fTemplateEngine;
-	
-	
 	public QuickTemplateProcessor() {
-		ContextType contextType= ContextTypeRegistry.getInstance().getContextType(JavaContextType.NAME);
-		if (contextType != null)
-			fTemplateEngine= new TemplateEngine(contextType);
-		
-		fComparator= new JavaCompletionProposalComparator();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
+	 */
+	public boolean hasAssists(IAssistContext context) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		IDocument document= getDocument(cu);
+			
+		int offset= context.getOffset();
+		int length= context.getLength();
+
+		try {
+			int startLine= document.getLineOfOffset(offset);
+			int endLine= document.getLineOfOffset(offset + length);
+			IRegion region= document.getLineInformation(endLine);
+			return ((startLine  < endLine) || (offset != region.getOffset() || length != region.getLength()));
+		} catch (BadLocationException e) {
+			return false;
+		}
+	}	
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ICorrectionProcessor#process(org.eclipse.jdt.internal.ui.text.correction.ICorrectionContext, java.util.List)
+	 */
+	public void process(IAssistContext context, List resultingCollections) throws CoreException {
+		try {
+			ICompilationUnit cu= context.getCompilationUnit();
+			IDocument document= getDocument(cu);
+			
+			int offset= context.getOffset();
+			int length= context.getLength();
+			// test if selection is either a full line or spans over multiple lines
+			int startLine= document.getLineOfOffset(offset);
+			int endLine= document.getLineOfOffset(offset + length);
+			IRegion endLineRegion= document.getLineInformation(endLine);
+			if (startLine  == endLine) {
+				if (offset != endLineRegion.getOffset() || length != endLineRegion.getLength()) {
+					return;
+				}
+			} else {
+				// expand selection
+				offset= document.getLineOffset(startLine);
+				length= endLineRegion.getOffset() + endLineRegion.getLength() - offset;
+			}
+
+			collectSurroundTemplates(document, cu, offset, length, resultingCollections);
+		} catch (BadLocationException e) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, "", e)); //$NON-NLS-1$
+		}
 	}
 
-	public void computeCompletionProposals(ITextViewer viewer, ICompilationUnit unit, List result) {
-		Point s= viewer.getSelectedRange();
-		int offset= s.x;
-		int length= s.y;
+	private IDocument getDocument(ICompilationUnit cu) throws JavaModelException {
+		IFile file= (IFile) JavaModelUtil.toOriginal(cu).getResource();
+		IDocument document= JavaUI.getDocumentProvider().getDocument(new FileEditorInput(file));
+		if (document == null) {
+			return new Document(cu.getSource()); // only used by test cases
+		}
+		return document;
+	}
+	
+	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, List result) throws BadLocationException {
+		CompilationUnitContextType contextType= (CompilationUnitContextType) ContextTypeRegistry.getInstance().getContextType(JavaContextType.NAME);
+		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
+		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$
+		context.setForceEvaluation(true);
 
-		if (fTemplateEngine != null && length > 0 && areMultipleLinesSelected(viewer, offset, length)) {
-			try {
-				fTemplateEngine.reset();
-				fTemplateEngine.complete(viewer, offset, unit);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}				
-			
-			TemplateProposal[] templateResults= fTemplateEngine.getResults();
-			Arrays.sort(templateResults, fComparator);
-			for (int i= 0; i < templateResults.length; i++) {
-				TemplateProposal proposal= templateResults[i];
-				Template template= proposal.getTemplate();
-				String[] arg= new String[] { template.getName(), template.getDescription() };
+		int start= context.getStart();
+		int end= context.getEnd();
+		IRegion region= new Region(start, end - start);
+
+		Template[] templates= Templates.getInstance().getTemplates();
+		for (int i= 0; i != templates.length; i++) {
+			Template curr= templates[i];				
+			if (context.canEvaluate(curr) && curr.getContextTypeName().equals(JavaContextType.NAME) && curr.getPattern().indexOf($_LINE_SELECTION) != -1) {
+				TemplateProposal proposal= new TemplateProposal(curr, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
+				String[] arg= new String[] { curr.getName(), curr.getDescription() };
 				proposal.setDisplayString(CorrectionMessages.getFormattedString("QuickTemplateProcessor.surround.label", arg)); //$NON-NLS-1$
 				result.add(proposal);
 			}
 		}
 	}
 	
-	/**
-	 * Returns <code>true</code> if one line is completely selected or if multiple lines are selected.
-	 * Being completely selected means that all characters except the new line characters are 
-	 * selected.
-	 * 
-	 * @return <code>true</code> if one or multiple lines are selected
-	 * @since 2.1
-	 */
-	private boolean areMultipleLinesSelected(ITextViewer viewer, int offset, int length) {
-		try {
-			IDocument document= viewer.getDocument();
-			int startLine= document.getLineOfOffset(offset);
-			int endLine= document.getLineOfOffset(offset + length);
-			IRegion line= document.getLineInformation(startLine);
-			return startLine != endLine || (offset == line.getOffset() && length == line.getLength());
-		
-		} catch (BadLocationException x) {
-			return false;
-		}
-	}
-
 }

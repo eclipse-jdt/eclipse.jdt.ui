@@ -10,32 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 /**
   */
-public interface ICorrectionContext {
-
-	/**
-	 * Returns the current compilation unit
-	 */
-	ICompilationUnit getCompilationUnit();
-
-	/**
-	 * Returns the length of the current selection
-	 * @return int
-	 */
-	int getLength();
+public interface ICorrectionContext extends IAssistContext {
 	
 	/**
-	 * Returns the offset of the current selection
-	 * @return int
-	 */
-	int getOffset();
-	
-	/**
-	 * Returns the problem that is associated with this context. Returns <code>0</code> if no problem exists. 
+	 * Returns the id of problem that is associated with this context. See {@link org.eclipse.jdt.core.compiler.IProblem} for
+	 * id definitions
 	 * @return int
 	 */
 	int getProblemId();
@@ -46,25 +27,5 @@ public interface ICorrectionContext {
 	 * @return String[]
 	 */
 	String[] getProblemArguments();	
-	
-	/**
-	 * Creates an AST on the compilation unit and returns the AST root element. The AST returned is shared and must
-	 * not be modified (or modifications must be reverted back again)
-	 * @return CompilationUnit
-	 */
-	CompilationUnit getASTRoot();
-	
-	/**
-	 * Returns the the AST node that covers the current selection or <code>null</code> if no node is found
-	 * that completly covers the selection range.
-	 * @return ASTNode
-	 */
-	ASTNode getCoveringNode();
 
-	/**
-	 * Returns the the AST node that is covered by the current selection or <code>null</code> if no node is found
-	 * that completely covered by the selection range.
-	 * @return ASTNode
-	 */
-	ASTNode getCoveredNode();
 }
