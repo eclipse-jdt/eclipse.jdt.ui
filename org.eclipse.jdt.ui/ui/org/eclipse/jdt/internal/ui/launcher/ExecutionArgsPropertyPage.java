@@ -44,6 +44,7 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 	private Text fProgramArgs;
 
 	protected Control createContents(Composite parent) {
+		noDefaultAndApplyButton();
 
 		ResourceBundle bundle= JavaLaunchUtils.getResourceBundle();
 
