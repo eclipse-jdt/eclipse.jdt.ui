@@ -83,6 +83,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -737,11 +738,10 @@ class ReorgPolicyFactory {
 				case IJavaElement.TYPE:
 					nodeDestination= null;
 					IType typeDestination= (IType) javaElementDestination;
-					if (typeDestination.isAnonymous()) {
+					if (typeDestination.isAnonymous())
 						destinationContainer= ASTNodeSearchUtil.getClassInstanceCreationNode(typeDestination, destinationCuNode).getAnonymousClassDeclaration();
-					} else {
+					else
 						destinationContainer= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(typeDestination, destinationCuNode);
-					}
 					break;
 				default:
 					nodeDestination= null;
@@ -749,9 +749,12 @@ class ReorgPolicyFactory {
 			}
 			if (destinationContainer != null) {
 				ListRewrite listRewrite;
-				if (destinationContainer instanceof AbstractTypeDeclaration)
-					listRewrite= targetRewrite.getListRewrite(destinationContainer, ((AbstractTypeDeclaration) destinationContainer).getBodyDeclarationsProperty());
-				else
+				if (destinationContainer instanceof AbstractTypeDeclaration) {
+					if (newMember instanceof EnumConstantDeclaration && destinationContainer instanceof EnumDeclaration)
+						listRewrite= targetRewrite.getListRewrite(destinationContainer, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
+					else
+						listRewrite= targetRewrite.getListRewrite(destinationContainer, ((AbstractTypeDeclaration) destinationContainer).getBodyDeclarationsProperty());
+				} else
 					listRewrite= targetRewrite.getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 
 				if (nodeDestination != null) {
