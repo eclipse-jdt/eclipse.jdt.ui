@@ -1,9 +1,16 @@
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
+
 package org.eclipse.jdt.internal.ui.text.java;
 
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
  
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -19,6 +26,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -44,6 +52,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	private char[] fTriggerCharacters;
 	
 	private int fRelevance;
+	private StyleRange fRememberedStyleRange;
 
 	/**
 	 * Creates a new completion proposal. All fields are initialized based on the provided information.
@@ -295,7 +304,8 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 
 	/**
 	 * Returns <code>true</code> if a words starts with the code completion prefix in the document,
-	 * <code>false</code> otherwise.	 */	
+	 * <code>false</code> otherwise.
+	 */	
 	protected boolean startsWith(IDocument document, int offset, String word) {
 		int wordLength= word == null ? 0 : word.length();
 		if (offset >  fReplacementOffset + wordLength)
@@ -343,17 +353,16 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
 		RGB rgb= PreferenceConverter.getColor(preference, ContentAssistPreference.COMPLETION_REPLACEMENT_BACKGROUND);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		return textTools.getColorManager().getColor(rgb);		
+		return textTools.getColorManager().getColor(rgb);
+	}
 	
-//		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
-//		if (preference.getBoolean(CompilationUnitEditor.CURRENT_LINE)) {
-//			RGB rgb= PreferenceConverter.getColor(preference, CompilationUnitEditor.CURRENT_LINE_COLOR);
-//			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-//			return textTools.getColorManager().getColor(rgb);
-//
-//		} else {
-//			return text.getBackground();
-//		}
+	private void repairPresentation(ITextViewer viewer) {
+		if (fRememberedStyleRange != null && viewer instanceof ITextViewerExtension2) {
+			// attempts to reduce the redraw area
+			ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
+			viewer2.invalidateTextPresentation(fRememberedStyleRange.start, fRememberedStyleRange.length);
+		} else
+			viewer.invalidateTextPresentation();
 	}
 
 	private void updateStyle(ITextViewer viewer) {
@@ -362,6 +371,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		if (text == null || text.isDisposed())
 			return;
 
+		fRememberedStyleRange= null;
 		IRegion visibleRegion= viewer.getVisibleRegion();			
 		int caretOffset= text.getCaretOffset() + visibleRegion.getOffset();
 
@@ -371,7 +381,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			fReplacementLength += delta;
 
 		if (caretOffset >= fReplacementOffset + fReplacementLength) {
-			viewer.invalidateTextPresentation(); // XXX flickers
+			repairPresentation(viewer); 
 			return;
 		}
 			
@@ -381,9 +391,9 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		Color foreground= getForegroundColor(text);
 		Color background= getBackgroundColor(text);
 
-		viewer.invalidateTextPresentation(); // XXX flickers
-		StyleRange styleRange= new StyleRange(offset, length, foreground, background);
-		text.setStyleRange(styleRange);		
+		repairPresentation(viewer);
+		fRememberedStyleRange= new StyleRange(offset, length, foreground, background);
+		text.setStyleRange(fRememberedStyleRange);
 	}
 
 	/*
@@ -399,7 +409,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	 */
 	public void unselected(ITextViewer viewer) {
 		if (!insertCompletion())
-			viewer.invalidateTextPresentation();			
+			repairPresentation(viewer);
+		fRememberedStyleRange= null;
 	}
-
 }
