@@ -64,4 +64,33 @@ public class SWTEventHelper {
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
 	}
+	
+	private static Event sfMouseMoveEvent= new Event();
+	public static void mouseMoveEvent(Display display, int x, int y, boolean runEventQueue) {
+		sfMouseMoveEvent.type= SWT.MouseMove;
+		sfMouseMoveEvent.x= x;
+		sfMouseMoveEvent.y= y;
+		
+		display.post(sfMouseMoveEvent);
+		if (runEventQueue)
+			EditorTestHelper.runEventQueue();
+	}
+	
+	public static void mouseDownEvent(Display display, int button, boolean runEventQueue) {
+		mouseButtonEvent(display, SWT.MouseDown, button, runEventQueue);
+	}
+
+	public static void mouseUpEvent(Display display, int button, boolean runEventQueue) {
+		mouseButtonEvent(display, SWT.MouseUp, button, runEventQueue);
+	}
+
+	private static Event sfMouseButtonEvent= new Event();
+	private static void mouseButtonEvent(Display display, int type, int button, boolean runEventQueue) {
+		sfMouseButtonEvent.type= type;
+		sfMouseButtonEvent.button= button;
+		
+		display.post(sfMouseButtonEvent);
+		if (runEventQueue)
+			EditorTestHelper.runEventQueue();
+	}
 }
