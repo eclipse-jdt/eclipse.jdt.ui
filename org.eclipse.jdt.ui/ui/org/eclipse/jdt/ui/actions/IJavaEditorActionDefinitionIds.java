@@ -183,6 +183,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String ADD_UNIMPLEMENTED_CONTRUCTORS= "org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"; //$NON-NLS-1$
 	
 	/**
+	 * Action definition ID of the source ->create new constructor action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.create.new.constructor"</code>).
+	 */
+	public static final String CREATE_NEW_CONSTRUCTOR= "org.eclipse.jdt.ui.edit.text.java.create.new.constructor"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the source -> generate setter/getter action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.create.getter.setter"</code>).
 	 */

@@ -30,6 +30,7 @@ public interface IJavaHelpContextIds {
 	public static final String ADD_METHODSTUB_ACTION= 										PREFIX + "add_methodstub_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_METHODS_ACTION= 					PREFIX + "add_unimplemented_methods_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION= 			PREFIX + "add_unimplemented_constructors_action_context"; //$NON-NLS-1$	
+	public static final String CREATE_NEW_CONSTRUCTOR_ACTION= 					PREFIX + "create_new_constructor_action_context"; //$NON-NLS-1$	
 	public static final String SHOW_IN_PACKAGEVIEW_ACTION= 								PREFIX + "show_in_packageview_action_context"; //$NON-NLS-1$
 	public static final String SHOW_IN_HIERARCHYVIEW_ACTION= 							PREFIX + "show_in_hierarchyview_action_context"; //$NON-NLS-1$
 	public static final String FOCUS_ON_SELECTION_ACTION= 								PREFIX + "focus_on_selection_action"; //$NON-NLS-1$

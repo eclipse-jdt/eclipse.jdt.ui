@@ -176,6 +176,12 @@ public class JdtActionConstants {
 	public static final String ADD_CONSTRUCTOR_FROM_SUPERCLASS= "org.eclipse.jdt.ui.actions.AddConstructorFromSuperclass"; //$NON-NLS-1$
 	
 	/**
+	 * Source menu: name of standard create New Constructor global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.CreateNewConstructor"</code>).
+	 */
+	public static final String CREATE_NEW_CONSTRUCTOR= "org.eclipse.jdt.ui.actions.CreateNewConstructor"; //$NON-NLS-1$
+
+	/**
 	 * Source menu: name of standard Add Javadoc Comment global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.AddJavaDocComment"</code>).
 	 */
