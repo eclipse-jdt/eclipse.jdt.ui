@@ -2,6 +2,7 @@ package p;
 
 class A {
 	int x;
+
 	public void m() { 
 		new B(){
 			void f(){

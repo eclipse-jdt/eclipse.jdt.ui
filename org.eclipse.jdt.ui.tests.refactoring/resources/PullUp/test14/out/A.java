@@ -8,10 +8,10 @@ void g(){
 	g();
 	}
 
-protected void m(){
+protected void m() {
 	List l= new ArrayList();
 	l.size();
-}	
 }
-class B extends A{
+}
+class B extends A{	
 }

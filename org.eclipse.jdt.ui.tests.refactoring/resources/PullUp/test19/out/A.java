@@ -7,6 +7,7 @@ class A {
 }
 
 class C extends A {
+
 	protected void m() {
 		super.m();
 		//further implementation

@@ -2,5 +2,5 @@ package p;
 class A{	
 	void x(){}
 
-	protected void m(){}
+	protected void m() {}
 }

@@ -4,7 +4,8 @@ class SuperA{
 	}
 }
 class A extends SuperA{
-	public void m(){
+
+	public void m() {
 	}
 }
 class B extends A{

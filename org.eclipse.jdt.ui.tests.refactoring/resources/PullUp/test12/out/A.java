@@ -5,6 +5,6 @@ import java.io.IOException;
 class A{	
 	void x(){}
 
-	protected void m() throws IOException{
+	protected void m() throws IOException {
 	}
 }
