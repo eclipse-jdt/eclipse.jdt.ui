@@ -198,6 +198,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private StatusInfo fBrowserLikeLinksKeyModifierStatus;
 	private Button fCompletionInsertsRadioButton;
 	private Button fCompletionOverwritesRadioButton;
+	private Button fStickyOccurrencesButton;
 	
 	public JavaEditorPreferencePage() {
 		setDescription(PreferencesMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
@@ -267,6 +268,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN));
+
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_STICKY_OCCURRENCES));
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
 
@@ -592,6 +596,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN, 0);
 
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.markOccurrences"); //$NON-NLS-1$
+		Button master= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MARK_OCCURRENCES, 0); //$NON-NLS-1$
+		
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.stickyOccurrences"); //$NON-NLS-1$
+		fStickyOccurrencesButton= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0); //$NON-NLS-1$
+		createDependency(master, fStickyOccurrencesButton);
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -1346,6 +1356,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fCompletionOverwritesRadioButton.setSelection(! completionInserts);
 		
 		fBrowserLikeLinksKeyModifierText.setEnabled(fBrowserLikeLinksCheckBox.getSelection());
+		
+		boolean markOccurrences= fOverlayStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
+		fStickyOccurrencesButton.setEnabled(markOccurrences);
 		
         updateAutoactivationControls();
 	}

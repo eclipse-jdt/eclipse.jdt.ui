@@ -1645,7 +1645,17 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */	
 	public static final String EDITOR_MARK_OCCURRENCES= "markOccurrences"; //$NON-NLS-1$
-	
+
+	/**
+	 * A named preference that controls whether occurrences are sticky in the editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public static final String EDITOR_STICKY_OCCURRENCES= "stickyOccurrences"; //$NON-NLS-1$
+
 	/**
 	 * A named preference that controls disabling of the overwrite mode.
 	 * <p>
@@ -2414,6 +2424,10 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 80);
 		
 		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.DEFAULT_PROFILE);
+		
+		// mark occurrencse
+		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
+		store.setDefault(PreferenceConstants.EDITOR_STICKY_OCCURRENCES, true);
 		
 		// spell checking
 		store.setDefault(PreferenceConstants.SPELLING_CHECK_SPELLING, false);

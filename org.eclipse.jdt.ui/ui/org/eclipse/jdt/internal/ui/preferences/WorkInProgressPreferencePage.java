@@ -143,7 +143,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
 	
-		addCheckBox(group, PreferencesMessages.getString(PREFIX + "markOccurrences"), PreferenceConstants.EDITOR_MARK_OCCURRENCES); //$NON-NLS-1$
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "rollover"), PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER); //$NON-NLS-1$
 		createSpacer(group, 1);
 	
@@ -366,8 +365,5 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		store.setDefault(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB, false);
 		store.setDefault(PREF_SEARCH_MENU, true);
 		store.setDefault(PREF_SEARCH_IGNORE_IMPORTS, false);
-		
-		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
-		
 	}
 }
