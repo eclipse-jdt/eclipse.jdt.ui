@@ -17,14 +17,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.text.Region;
 
@@ -34,11 +35,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -50,6 +49,8 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -58,6 +59,7 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
@@ -94,28 +96,30 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private IPackageFragment fCurrPackage;
 		
 		private ScopeAnalyzer fAnalyzer;
-		
+		private boolean fAllowDefaultPackageImports;
 		
 		
 		public TypeReferenceProcessor(Set oldSingleImports, Set oldDemandImports, CompilationUnit root, ImportsStructure impStructure, boolean ignoreLowerCaseNames) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
+			fImpStructure= impStructure;
+			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
+			
+			ICompilationUnit cu= impStructure.getCompilationUnit();
 			
 			fImplicitImports= new HashSet(3);
 			fImplicitImports.add(""); //$NON-NLS-1$
 			fImplicitImports.add("java.lang"); //$NON-NLS-1$
-			fImplicitImports.add(impStructure.getCompilationUnit().getParent().getElementName());	
+			fImplicitImports.add(cu.getParent().getElementName());	
 			
-			fImpStructure= impStructure;
-			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
 			fAnalyzer= new ScopeAnalyzer(root);
 
-			ICompilationUnit cu= fImpStructure.getCompilationUnit();
 			fSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { cu.getJavaProject() });
 			fCurrPackage= (IPackageFragment) cu.getParent();
 					
 			fTypeRefsFound= new ArrayList();  	// cached array list for reuse
 			fImportsAdded= new HashSet();		
+			fAllowDefaultPackageImports= cu.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_3);
 		}
 		
 		private boolean needsImport(ITypeBinding typeBinding, SimpleName ref) {
@@ -244,7 +248,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, fSearchScope, monitor);
 			for (int i= 0; i < infos.length; i++) {
 				TypeInfo curr= infos[i];
-				if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
+				if (curr.getPackageName().length() > 0 || fAllowDefaultPackageImports) { // do not suggest imports from the default package
 					IType type= curr.resolveType(fSearchScope);
 					if (type != null && JavaModelUtil.isVisible(type, fCurrPackage)) {
 						typeRefsFound.add(curr);

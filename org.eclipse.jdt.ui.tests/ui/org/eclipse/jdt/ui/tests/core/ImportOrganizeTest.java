@@ -58,11 +58,7 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			return setUpTest(new ImportOrganizeTest("testVisibility_bug56704"));
-		}	
+		return allTests();
 	}
 
 
@@ -999,9 +995,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
-		buf.append("import List1;\n");
-		buf.append("\n");	
-		buf.append("import java.util.*;\n");
+		buf.append("import java.util.*;\n");  // no imports from default in compatibility >= 1.4
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector v;\n");
@@ -1032,7 +1026,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
-		buf.append("import java.util.Set;\n");
+		buf.append("import java.util.Set;\n");  // no imports from default in compatibility >= 1.4
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("\n");
@@ -1056,9 +1050,6 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
-		buf.append("import List1;\n");
-		buf.append("import List2;\n");
-		buf.append("\n");	
 		buf.append("import java.util.*;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
