@@ -260,20 +260,21 @@ public class EditorUtility {
 	 * Maps the localized modifier name to a code in the same
 	 * manner as #findModifier.
 	 * 
+	 * @param modifierName the modifier name
 	 * @return the SWT modifier bit, or <code>0</code> if no match was found
 	 * @since 2.1.1
 	 */
-	public static int findLocalizedModifier(String token) {
-		if (token == null)
+	public static int findLocalizedModifier(String modifierName) {
+		if (modifierName == null)
 			return 0;
 		
-		if (token.equalsIgnoreCase(Action.findModifierString(SWT.CTRL)))
+		if (modifierName.equalsIgnoreCase(Action.findModifierString(SWT.CTRL)))
 			return SWT.CTRL;
-		if (token.equalsIgnoreCase(Action.findModifierString(SWT.SHIFT)))
+		if (modifierName.equalsIgnoreCase(Action.findModifierString(SWT.SHIFT)))
 			return SWT.SHIFT;
-		if (token.equalsIgnoreCase(Action.findModifierString(SWT.ALT)))
+		if (modifierName.equalsIgnoreCase(Action.findModifierString(SWT.ALT)))
 			return SWT.ALT;
-		if (token.equalsIgnoreCase(Action.findModifierString(SWT.COMMAND)))
+		if (modifierName.equalsIgnoreCase(Action.findModifierString(SWT.COMMAND)))
 			return SWT.COMMAND;
 
 		return 0;
