@@ -32,13 +32,18 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -47,7 +52,6 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
@@ -62,7 +66,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
@@ -70,71 +73,83 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 class PullUpInputPage1 extends UserInputWizardPage {
 	
-	private static final int ROW_COUNT = 10;
 	private class PullUpCellModifier implements ICellModifier {
 		/*
 		 * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object, java.lang.String)
 		 */
 		public Object getValue(Object element, String property) {
-			if (ACTION_PROPERTY.equals(property)) {
-				MemberActionInfo mac= (MemberActionInfo)element;
-				return new Integer(mac.getAction());
-			}
-			return null;
+			if (! ACTION_PROPERTY.equals(property))
+				return null;
+
+			MemberActionInfo mac= (MemberActionInfo)element;
+			return new Integer(mac.getAction());
 		}
 		/*
 		 * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object, java.lang.String)
 		 */
 		public boolean canModify(Object element, String property) {
-			return ACTION_PROPERTY.equals(property);
+			if (! ACTION_PROPERTY.equals(property))
+				return false;
+			
+			MemberActionInfo mac= (MemberActionInfo)element;
+			return mac.isEditable();
 		}
 		/*
 		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object, java.lang.String, java.lang.Object)
 		 */
 		public void modify(Object element, String property, Object value) {
-			if (ACTION_PROPERTY.equals(property)) {
-				int action= ((Integer)value).intValue();
-				MemberActionInfo mac= (MemberActionInfo)((Item)element).getData();
-				mac.setAction(action);
-				PullUpInputPage1.this.updateUIElements(null);
-			}
+			if (! ACTION_PROPERTY.equals(property))
+				return;
+
+			int action= ((Integer)value).intValue();
+			MemberActionInfo mac;
+			if (element instanceof Item) {
+				mac= (MemberActionInfo)((Item)element).getData();
+			} else
+				mac= (MemberActionInfo)element;
+			Assert.isTrue(mac.isMethodInfo());
+			mac.setAction(action);
+			PullUpInputPage1.this.updateUIElements(null);
 		}
 	}
 
 	private static class MemberActionInfo {
-		static final int NO_ACTION= 				0;
-		static final int PULL_UP_ACTION= 			1;
-		static final int DECLARE_ABSTRACT_ACTION= 2;
-		private static final String[] ALL_LABELS;     //indices in this array correspond to action numbers
-		private static final String[] LIMITED_LABELS; //indices in this array correspond to action numbers
-		private static final String NONE_LABEL= "none";
+		static final int PULL_UP_ACTION= 			0;//values are important here
+		static final int DECLARE_ABSTRACT_ACTION= 1;//values are important here
+		static final int NO_ACTION= 				2;
+
+		private static final String NO_LABEL= "";
 		private static final String PULL_UP_LABEL= "pull up";
 		private static final String DECLARE_ABSTRACT_LABEL= "declare abstract in destination";
+		private static final String[] FIELD_LABELS= {NO_LABEL};
+		private static final String[] METHOD_LABELS;//indices correspond to values
 		static{
-			ALL_LABELS= new String[3];
-			ALL_LABELS[NO_ACTION]= NONE_LABEL;
-			ALL_LABELS[PULL_UP_ACTION]= PULL_UP_LABEL;
-			ALL_LABELS[DECLARE_ABSTRACT_ACTION]= DECLARE_ABSTRACT_LABEL;
-
-			LIMITED_LABELS= new String[2];
-			LIMITED_LABELS[NO_ACTION]= NONE_LABEL;
-			LIMITED_LABELS[PULL_UP_ACTION]= PULL_UP_LABEL;
+			METHOD_LABELS= new String[2];
+			METHOD_LABELS[0]= PULL_UP_LABEL;
+			METHOD_LABELS[1]= DECLARE_ABSTRACT_LABEL;
 		}
 				
 		private final IMember fMember;
 		private int fAction;
 		
 		MemberActionInfo(IMember member, int action){
-			Assert.isTrue(member instanceof IMethod || member instanceof IField);
-			Assert.isTrue(action == NO_ACTION || action == DECLARE_ABSTRACT_ACTION || action == PULL_UP_ACTION);
+			Assert.isTrue((member instanceof IMethod) || (member instanceof IField));
+			assertAction(member, action);
 			fMember= member;
 			fAction= action;
 		}
 		
+		public boolean isMethodInfo() {
+			return getMember() instanceof IMethod;
+		}
+
+		public boolean isFieldInfo() {
+			return getMember() instanceof IField;
+		}
+
 		IMember getMember(){
 			return fMember;
 		}
@@ -143,35 +158,47 @@ class PullUpInputPage1 extends UserInputWizardPage {
 			return fAction;
 		}
 		
+		private static void assertAction(IMember member, int action){
+			if (member instanceof IMethod)
+				Assert.isTrue(
+			action == NO_ACTION ||
+				action == DECLARE_ABSTRACT_ACTION ||
+				action == PULL_UP_ACTION);
+			else
+				Assert.isTrue(
+				action == NO_ACTION ||
+				action == PULL_UP_ACTION);
+		}
+		
 		void setAction(int action){
-			Assert.isTrue(action == NO_ACTION || action == DECLARE_ABSTRACT_ACTION || action == PULL_UP_ACTION);
+			assertAction(fMember, action);
 			fAction= action;
 		}
 		
 		String getActionLabel(){
-			if (canDeclareAbstract())
-				return ALL_LABELS[getAction()];
-			else
-				return LIMITED_LABELS[getAction()];
-		}
-
-		boolean canDeclareAbstract() { //XXX kind of bogus to have it here
-			try {
-				if (fMember instanceof IField)
-					return false;
-				else 
-					return ! JdtFlags.isAbstract(fMember);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				return false;
+			switch(fAction){
+				case PULL_UP_ACTION: 			return PULL_UP_LABEL;
+				case DECLARE_ABSTRACT_ACTION: 	return DECLARE_ABSTRACT_LABEL;
+				case NO_ACTION: 				return NO_LABEL;
+				default:
+					Assert.isTrue(false);
+					return null; 
 			}
 		}
 
 		String[] getAllowedLabels() {
-			if (canDeclareAbstract())
-				return ALL_LABELS;		
+			if (isFieldInfo())
+				return FIELD_LABELS;
 			else
-				return LIMITED_LABELS;
+				return METHOD_LABELS;
+		}
+
+		public boolean isEditable() {
+			if (isFieldInfo())
+				return false;
+			if (fAction == NO_ACTION)
+				return false;
+			return true;	
 		}
 	}
 	
@@ -217,14 +244,66 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		}
 	}
 	
+	private static class PullUpCheckboxTableViewer extends CheckboxTableViewer{
+
+		public PullUpCheckboxTableViewer(Table table) {
+			super(table);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.StructuredViewer#doUpdateItem(org.eclipse.swt.widgets.Widget, java.lang.Object, boolean)
+		 */
+		protected void doUpdateItem(Widget widget, Object element, boolean fullMap) {
+			super.doUpdateItem(widget, element, fullMap);
+			if (! (widget instanceof TableItem))
+				return;
+			TableItem item= (TableItem)widget;
+			MemberActionInfo info= (MemberActionInfo)element;
+			item.setChecked(getCheckState(info));
+			Assert.isTrue(item.getChecked() == getCheckState(info));
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object, java.lang.Object)
+		 */
+		protected void inputChanged(Object input, Object oldInput) {
+			super.inputChanged(input, oldInput);
+			// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
+			setCheckState((MemberActionInfo[])input);
+		}
+
+		private void setCheckState(MemberActionInfo[] infos) {
+			if (infos == null)
+				return;
+			for (int i= 0; i < infos.length; i++) {
+				MemberActionInfo info= infos[i];
+				setChecked(info, getCheckState(info));
+			}	
+		}
+
+		private static boolean getCheckState(MemberActionInfo info) {
+			return info.getAction() != MemberActionInfo.NO_ACTION;
+		}		
+		
+		/*
+		 * @see org.eclipse.jface.viewers.Viewer#refresh()
+		 */
+		public void refresh() {
+			super.refresh();
+			// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
+			setCheckState((MemberActionInfo[])getInput());			
+		}
+	}
+	
 	private static final int MEMBER_COLUMN= 0;
 	private static final int ACTION_COLUMN= 1;
+	private static final int ROW_COUNT = 10;
 	
 	public static final String PAGE_NAME= "PullUpMethodsInputPage1"; //$NON-NLS-1$
 	private final static String ACTION_PROPERTY= "action"; //$NON-NLS-1$	
 	private final static String MEMBER_PROPERTY= "member"; //$NON-NLS-1$	
 
-	private TableViewer fTableViewer;
+	private CheckboxTableViewer fTableViewer;
 	private Combo fSuperclassCombo;
 	private IType[] fSuperclasses;
 	private Button fEditButton;
@@ -351,7 +430,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		});
 
 		Button addButton= new Button(composite, SWT.PUSH);
-		addButton.setText("&Pull Up Required Members");
+		addButton.setText("&Add Required");
 		addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(addButton);
 		addButton.addSelectionListener(new SelectionAdapter(){
@@ -389,14 +468,8 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	//String -> Integer
 	private Map createStringMappingForSelectedMembers() {
 		Map result= new HashMap();
-		if (canAllowAllChoices()){
-			putToStingMapping(result, MemberActionInfo.ALL_LABELS, MemberActionInfo.NO_ACTION);
-			putToStingMapping(result, MemberActionInfo.ALL_LABELS, MemberActionInfo.PULL_UP_ACTION);
-			putToStingMapping(result, MemberActionInfo.ALL_LABELS, MemberActionInfo.DECLARE_ABSTRACT_ACTION);
-		} else{
-			putToStingMapping(result, MemberActionInfo.LIMITED_LABELS, MemberActionInfo.NO_ACTION);
-			putToStingMapping(result, MemberActionInfo.LIMITED_LABELS, MemberActionInfo.PULL_UP_ACTION);
-		}
+		putToStingMapping(result, MemberActionInfo.METHOD_LABELS, MemberActionInfo.PULL_UP_ACTION);
+		putToStingMapping(result, MemberActionInfo.METHOD_LABELS, MemberActionInfo.DECLARE_ABSTRACT_ACTION);
 		return result;
 	}
 	private static void putToStingMapping(Map result, String[] actionLabels, int actionIndex){
@@ -413,15 +486,16 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		updateButtonEnablementState(fTableViewer.getSelection());
 	}
 
-	private boolean canAllowAllChoices() {
-		MemberActionInfo[] selected= getSelectedMemberActionInfos();
-		for (int i = 0; i < selected.length; i++) {
-			if (! selected[i].canDeclareAbstract())
-				return false;
+	private static int countEditableInfos(MemberActionInfo[] infos) {
+		int result= 0;
+		for (int i= 0; i < infos.length; i++) {
+			MemberActionInfo info= infos[i];
+			if (info.isEditable())
+				result++;
 		}
-		return true;
+		return result;
 	}
-
+	
 	private MemberActionInfo[] getSelectedMemberActionInfos() {
 		Assert.isTrue(fTableViewer.getSelection() instanceof IStructuredSelection);
 		IStructuredSelection ss= (IStructuredSelection)fTableViewer.getSelection();
@@ -454,7 +528,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		layouter.addColumnData(new ColumnWeightData(60, true));
 		layouter.addColumnData(new ColumnWeightData(40, true));
 
-		final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+		final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		
@@ -472,13 +546,24 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		TableColumn column1= new TableColumn(table, SWT.NONE);
 		column1.setText("Action");
 		
-		fTableViewer= new TableViewer(table);
+		fTableViewer= new PullUpCheckboxTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.setContentProvider(new StaticObjectArrayContentProvider());
 		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateButtonEnablementState(event.getSelection());
+			}
+		});
+		fTableViewer.addCheckStateListener(new ICheckStateListener(){
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				boolean checked= event.getChecked();
+				MemberActionInfo info= (MemberActionInfo)event.getElement();
+				if (checked)
+					info.setAction(MemberActionInfo.PULL_UP_ACTION);
+				else
+					info.setAction(MemberActionInfo.NO_ACTION);
+				updateUIElements(null);
 			}
 		});
 		
@@ -488,12 +573,15 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	}
 
 	private void updateButtonEnablementState(ISelection tableSelection) {
-		if (tableSelection instanceof IStructuredSelection){
-			IStructuredSelection ss= (IStructuredSelection)tableSelection;
-			if (fEditButton != null)
-				fEditButton.setEnabled(! ss.isEmpty() && ss.size() != 0);
-		}
+		if (fEditButton != null)
+			fEditButton.setEnabled(enableEditButton((IStructuredSelection)tableSelection));
 		fCreateStubsButton.setEnabled(getMethodsToDeclareAbstract().length != 0);
+	}
+
+	private boolean enableEditButton(IStructuredSelection ss) {
+		if (ss.isEmpty() || ss.size() == 0)
+			return false;
+		return ss.size() == countEditableInfos(getSelectedMemberActionInfos());
 	}
 
 	private void setTableInput() {
@@ -584,8 +672,6 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	 */
 	protected boolean performFinish() {
 		initializeRefactoring();
-		//on finish, we have to do more
-		getPullUpRefactoring().setMethodsToDelete(getMethodsToPullUp());
 		return super.performFinish();
 	}
 	
@@ -594,6 +680,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		getPullUpRefactoring().setMethodsToDeclareAbstract(getMethodsToDeclareAbstract());
 		getPullUpRefactoring().setTargetClass(getSelectedClass());
 		getPullUpRefactoring().setCreateMethodStubs(fCreateStubsButton.getSelection());
+		getPullUpRefactoring().setMethodsToDelete(getMethodsToPullUp());
 	}
 	
 	private IType getSelectedClass() {
@@ -631,10 +718,8 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		MemberActionInfo[] macs= getTableInputAsMemberActionInfoArray();
 		List list= new ArrayList(macs.length);
 		for (int i= 0; i < macs.length; i++) {
-			if (macs[i].getAction() == action){
-				IMember member= macs[i].getMember();
-				if (member instanceof IMethod)
-					list.add(member);
+			if (macs[i].isMethodInfo() && macs[i].getAction() == action){
+				list.add(macs[i].getMember());
 			}		
 		}
 		return (IMethod[]) list.toArray(new IMethod[list.size()]);

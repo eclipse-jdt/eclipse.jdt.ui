@@ -89,18 +89,18 @@ public class PushDownRefactoring extends Refactoring {
 
 		private final IMember fMember;
 		private int fAction;
-		public static final int NO_ACTION= 0;
-		public static final int PUSH_DOWN_ACTION= 1;
-		public static final int PUSH_ABSTRACT_ACTION= 2;
+		public static final int PUSH_DOWN_ACTION= 		0;
+		public static final int PUSH_ABSTRACT_ACTION= 	1;
+		public static final int NO_ACTION= 				2;
 		private MemberActionInfo(IMember member, int action){
-			assertValidAction(action);
+			assertValidAction(member, action);
 			Assert.isTrue(member instanceof IField || member instanceof IMethod);
 			fMember= member;
 			fAction= action;
 		}
 		
 		public void setAction(int action){
-			assertValidAction(action);
+			assertValidAction(fMember, action);
 			if (isFieldInfo())
 				Assert.isTrue(action != PUSH_ABSTRACT_ACTION);
 			fAction= action;	
@@ -108,15 +108,19 @@ public class PushDownRefactoring extends Refactoring {
 	
 		public int[] getAvailableActions(){
 			if (isFieldInfo())
-				return new int[]{NO_ACTION, PUSH_DOWN_ACTION};
+				return new int[]{PUSH_DOWN_ACTION, NO_ACTION};
 			else
-				return new int[]{NO_ACTION, PUSH_DOWN_ACTION, PUSH_ABSTRACT_ACTION};
+				return new int[]{PUSH_DOWN_ACTION, PUSH_ABSTRACT_ACTION, NO_ACTION};
 		}
 		
-		public void assertValidAction(int action) {
-			Assert.isTrue(	action == PUSH_ABSTRACT_ACTION || 
-							action == NO_ACTION ||
-							action == PUSH_DOWN_ACTION);
+		private static void assertValidAction(IMember member, int action) {
+			if (member instanceof IMethod)
+				Assert.isTrue(	action == PUSH_ABSTRACT_ACTION || 
+								action == NO_ACTION ||
+								action == PUSH_DOWN_ACTION);
+			else if (member instanceof IField)
+				Assert.isTrue(	action == NO_ACTION ||
+								action == PUSH_DOWN_ACTION);
 		}
 		
 		public static MemberActionInfo create(IMember member) {
@@ -127,18 +131,18 @@ public class PushDownRefactoring extends Refactoring {
 			return fAction == PUSH_DOWN_ACTION;
 		}
 
-		public boolean isToBeDeletedFromDeclaringClass() {
+		boolean isToBeDeletedFromDeclaringClass() {
 			return isToBePushedDown();
 		}
 
-		public boolean isNewMethodToBeDeclaredAbstract() throws JavaModelException {
+		boolean isNewMethodToBeDeclaredAbstract() throws JavaModelException {
 			return 
 				! isFieldInfo() &&
 				! JdtFlags.isAbstract(fMember) &&
 				fAction == PUSH_ABSTRACT_ACTION;
 		}		
 
-		public boolean isToBeCreatedInSubclassesOfDeclaringClass() {
+		boolean isToBeCreatedInSubclassesOfDeclaringClass() {
 			return fAction != NO_ACTION;
 		}
 
@@ -150,11 +154,11 @@ public class PushDownRefactoring extends Refactoring {
 			return fAction;
 		}
 
-		public boolean isFieldInfo() {
+		boolean isFieldInfo() {
 			return fMember instanceof IField;
 		}
 
-		public int getNewModifiersForCopyInSubclass(int oldModifiers) throws JavaModelException {
+		int getNewModifiersForCopyInSubclass(int oldModifiers) throws JavaModelException {
 			if (isFieldInfo())
 				return oldModifiers;
 			if (isToBeDeletedFromDeclaringClass())
@@ -167,7 +171,7 @@ public class PushDownRefactoring extends Refactoring {
 			return modifiers;
 		}
 		
-		public int getNewModifiersForOriginal(int oldModifiers) throws JavaModelException{
+		int getNewModifiersForOriginal(int oldModifiers) throws JavaModelException{
 			if (isFieldInfo())
 				return oldModifiers;
 			if (isToBeDeletedFromDeclaringClass())
@@ -183,11 +187,20 @@ public class PushDownRefactoring extends Refactoring {
 			return modifiers;
 		}
 
-		public boolean copyJavadocToCopiesInSubclasses() {
+		//XXX incorrect to have a method like this in the model
+		public boolean isEditable(){
+			if (isFieldInfo())
+				return false;
+			if (getAction() == MemberActionInfo.NO_ACTION)
+				return false;
+			return true;
+		}
+
+		boolean copyJavadocToCopiesInSubclasses() {
 			return isToBeDeletedFromDeclaringClass();
 		}
 		
-		public static IMember[] getMembers(MemberActionInfo[] infos){
+		static IMember[] getMembers(MemberActionInfo[] infos){
 			IMember[] result= new IMember[infos.length];
 			for (int i= 0; i < result.length; i++) {
 				result[i]= infos[i].getMember();
@@ -350,7 +363,7 @@ public class PushDownRefactoring extends Refactoring {
 	private RefactoringStatus checkPossibleSubclasses(IProgressMonitor pm) throws JavaModelException {
 		IType[] modifiableSubclasses= getDestinationClassesForNonAbstractMembers(pm);
 		if (modifiableSubclasses.length == 0){
-			String pattern= "Class ''{0}'' does not have any modifiable non-anonymous subclasses";
+			String pattern= "Class ''{0}'' does not have any modifiable non-anonymous subclasses to which members could be pushed down";
 			String msg= MessageFormat.format(pattern, new String[]{createTypeLabel(getDeclaringClass())});
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}

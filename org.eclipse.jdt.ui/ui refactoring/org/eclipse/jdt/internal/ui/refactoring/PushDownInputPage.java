@@ -14,7 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,13 +32,18 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -48,7 +52,6 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -73,28 +76,31 @@ public class PushDownInputPage extends UserInputWizardPage {
 		 * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object, java.lang.String)
 		 */
 		public Object getValue(Object element, String property) {
-			if (ACTION_PROPERTY.equals(property)) {
-				MemberActionInfo mac= (MemberActionInfo)element;
-				return new Integer(mac.getAction());
-			}
-			return null;
+			if (! ACTION_PROPERTY.equals(property))
+				return null;
+
+			MemberActionInfo mac= (MemberActionInfo)element;
+			return new Integer(mac.getAction());
 		}
 		/*
 		 * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object, java.lang.String)
 		 */
 		public boolean canModify(Object element, String property) {
-			return ACTION_PROPERTY.equals(property);
+			if (! ACTION_PROPERTY.equals(property))
+				return false;
+			return ((MemberActionInfo)element).isEditable();
 		}
 		/*
 		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object, java.lang.String, java.lang.Object)
 		 */
 		public void modify(Object element, String property, Object value) {
-			if (ACTION_PROPERTY.equals(property)) {
-				int action= ((Integer)value).intValue();
-				MemberActionInfo mac= (MemberActionInfo)((Item)element).getData();
-				mac.setAction(action);
-				PushDownInputPage.this.updateUIElements(null);
-			}
+			if (! ACTION_PROPERTY.equals(property))
+				return;
+
+			int action= ((Integer)value).intValue();
+			MemberActionInfo mac= (MemberActionInfo)((Item)element).getData();
+			mac.setAction(action);
+			PushDownInputPage.this.updateUIElements(null);
 		}
 	}
 
@@ -107,10 +113,8 @@ public class PushDownInputPage extends UserInputWizardPage {
 		public String getColumnText(Object element, int columnIndex) {
 			MemberActionInfo mac= (MemberActionInfo)element;
 			switch (columnIndex) {
-				case MEMBER_COLUMN :
-					return fJavaElementLabelProvider.getText(mac.getMember());
-				case ACTION_COLUMN :
-					return getActionLabel(mac);
+				case MEMBER_COLUMN :	return fJavaElementLabelProvider.getText(mac.getMember());
+				case ACTION_COLUMN :	return getActionLabel(mac);
 				default :
 					Assert.isTrue(false);
 					return null;
@@ -132,12 +136,9 @@ public class PushDownInputPage extends UserInputWizardPage {
 
 		static String getActionLabel(int action) {
 			switch(action){
-				case MemberActionInfo.NO_ACTION:
-					return "none";
-				case MemberActionInfo.PUSH_ABSTRACT_ACTION:
-					return "leave abstract declaration";
-				case MemberActionInfo.PUSH_DOWN_ACTION:
-					return "push down";
+				case MemberActionInfo.NO_ACTION: 				return "";
+				case MemberActionInfo.PUSH_ABSTRACT_ACTION:	return "leave abstract declaration";
+				case MemberActionInfo.PUSH_DOWN_ACTION:		return "push down";
 				default:
 					Assert.isTrue(false);
 					return null;
@@ -150,10 +151,8 @@ public class PushDownInputPage extends UserInputWizardPage {
 		public Image getColumnImage(Object element, int columnIndex) {
 			MemberActionInfo mac= (MemberActionInfo)element;
 			switch (columnIndex) {
-				case MEMBER_COLUMN :
-					return fJavaElementLabelProvider.getImage(mac.getMember());
-				case ACTION_COLUMN :
-					return null;
+				case MEMBER_COLUMN:	return fJavaElementLabelProvider.getImage(mac.getMember());
+				case ACTION_COLUMN:	return null;
 				default :
 					Assert.isTrue(false);
 					return null;
@@ -167,6 +166,56 @@ public class PushDownInputPage extends UserInputWizardPage {
 			fJavaElementLabelProvider.dispose();
 		}
 	}
+	
+	private static class PushDownTableViewer extends CheckboxTableViewer{
+		public PushDownTableViewer(Table table) {
+			super(table);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.StructuredViewer#doUpdateItem(org.eclipse.swt.widgets.Widget, java.lang.Object, boolean)
+		 */
+		protected void doUpdateItem(Widget widget, Object element, boolean fullMap) {
+			super.doUpdateItem(widget, element, fullMap);
+			if (! (widget instanceof TableItem))
+				return;
+			TableItem item= (TableItem)widget;
+			MemberActionInfo info= (MemberActionInfo)element;
+			item.setChecked(getCheckState(info));
+			Assert.isTrue(item.getChecked() == getCheckState(info));
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object, java.lang.Object)
+		 */
+		protected void inputChanged(Object input, Object oldInput) {
+			super.inputChanged(input, oldInput);
+			// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
+			setCheckState((MemberActionInfo[])input);
+		}
+
+		private void setCheckState(MemberActionInfo[] infos) {
+			if (infos == null)
+				return;
+			for (int i= 0; i < infos.length; i++) {
+				MemberActionInfo info= infos[i];
+				setChecked(info, getCheckState(info));
+			}	
+		}
+
+		private static boolean getCheckState(MemberActionInfo info) {
+			return info.getAction() != MemberActionInfo.NO_ACTION;
+		}		
+		
+		/*
+		 * @see org.eclipse.jface.viewers.Viewer#refresh()
+		 */
+		public void refresh() {
+			super.refresh();
+			// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
+			setCheckState((MemberActionInfo[])getInput());			
+		}
+	}
 
 	private static final int MEMBER_COLUMN= 0;
 	private static final int ACTION_COLUMN= 1;
@@ -177,7 +226,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 	private static final int ROW_COUNT= 10;
 
 	private Button fEditButton;
-	private TableViewer fTableViewer;
+	private PushDownTableViewer fTableViewer;
 
 	public PushDownInputPage() {
 		super(PAGE_NAME, true);
@@ -224,7 +273,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 		layouter.addColumnData(new ColumnWeightData(60, true));
 		layouter.addColumnData(new ColumnWeightData(40, true));
 
-		final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+		final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		
@@ -242,13 +291,24 @@ public class PushDownInputPage extends UserInputWizardPage {
 		TableColumn column1= new TableColumn(table, SWT.NONE);
 		column1.setText("Action");
 		
-		fTableViewer= new TableViewer(table);
+		fTableViewer= new PushDownTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.setContentProvider(new StaticObjectArrayContentProvider());
 		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 			public void selectionChanged(SelectionChangedEvent event) {
 				PushDownInputPage.this.updateButtonEnablementState((IStructuredSelection)event.getSelection());
+			}
+		});
+		fTableViewer.addCheckStateListener(new ICheckStateListener(){
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				boolean checked= event.getChecked();
+				MemberActionInfo info= (MemberActionInfo)event.getElement();
+				if (checked)
+					info.setAction(MemberActionInfo.PUSH_DOWN_ACTION);
+				else
+					info.setAction(MemberActionInfo.NO_ACTION);
+				updateUIElements(null);
 			}
 		});
 		
@@ -300,7 +360,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 		});
 
 		Button addButton= new Button(composite, SWT.PUSH);
-		addButton.setText("&Push Down Required Members");
+		addButton.setText("&Add Required");
 		addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(addButton);
 		addButton.addSelectionListener(new SelectionAdapter(){
@@ -352,20 +412,13 @@ public class PushDownInputPage extends UserInputWizardPage {
 
 	//String -> Integer
 	private Map createStringMappingForSelectedElements() {
-		MemberActionInfo[] infos= getSelectedMemberActionInfos();
-		Set intersection= createSet(new int[]{MemberActionInfo.NO_ACTION, 
-										MemberActionInfo.PUSH_ABSTRACT_ACTION,
-										MemberActionInfo.PUSH_DOWN_ACTION});
-		for (int i= 0; i < infos.length; i++) {
-			intersection.retainAll(createSet(infos[i].getAvailableActions()));
-		}
-		Map result= new HashMap(intersection.size());
-		for (Iterator iter= intersection.iterator(); iter.hasNext();) {
-			Integer action= (Integer) iter.next();
-			String key= MemberActionInfoLabelProvider.getActionLabel(action.intValue());
-			result.put(key, action);
-		}
+		Map result= new HashMap();
+		addToStringMapping(result, MemberActionInfo.PUSH_DOWN_ACTION);
+		addToStringMapping(result, MemberActionInfo.PUSH_ABSTRACT_ACTION);
 		return result;
+	}
+	private void addToStringMapping(Map result, int action) {
+		result.put(MemberActionInfoLabelProvider.getActionLabel(action), new Integer(action));
 	}
 
 	private static void setInfoAction(MemberActionInfo[] infos, int action) {
@@ -435,7 +488,21 @@ public class PushDownInputPage extends UserInputWizardPage {
 		if (tableSelection == null || fEditButton == null)
 			return;
 			
-		fEditButton.setEnabled(! tableSelection.isEmpty() && tableSelection.size() != 0);
+		fEditButton.setEnabled(enableEditButton(tableSelection));
+	}
+	private boolean enableEditButton(IStructuredSelection tableSelection) {
+		if (tableSelection.isEmpty() || tableSelection.size() == 0)
+			return false;
+		return tableSelection.size() == countEditableInfos(getSelectedMemberActionInfos());
+	}
+
+	private static int countEditableInfos(MemberActionInfo[] memberActionInfos) {
+		int result= 0;
+		for (int i= 0; i < memberActionInfos.length; i++) {
+			if (memberActionInfos[i].isEditable())
+				result++;
+		}
+		return result;
 	}
 
 	private PushDownRefactoring getPushDownRefactoring(){
