@@ -102,7 +102,7 @@ class AccessAnalyzer extends ASTVisitor {
 			return true;
 		
 		PrefixExpression.Operator operator= node.getOperator();	
-		if (operator != operator.INCREMENT && operator != operator.DECREMENT)
+		if (operator != PrefixExpression.Operator.INCREMENT && operator != PrefixExpression.Operator.DECREMENT)
 			return true;
 			
 		checkParent(node);
