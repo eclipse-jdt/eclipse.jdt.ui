@@ -5,7 +5,9 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
@@ -57,9 +59,9 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	}		
 
 	public void createFieldEditors() {
-		addField(createSeverityLevelField(getFieldEditorParent()));
-		addField(createSaveAllField(getFieldEditorParent()));
-	}
+    	addField(createSeverityLevelField(getFieldEditorParent()));
+    	addField(createSaveAllField(getFieldEditorParent()));
+    }
 	
 	private FieldEditor createSeverityLevelField(Composite parent){
 			RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
@@ -72,7 +74,7 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 				{ RefactoringMessages.getString("RefactoringPreferencePage.warning"), WARNING_SEVERITY }, //$NON-NLS-1$
 				{ RefactoringMessages.getString("RefactoringPreferencePage.info"), INFO_SEVERITY } //$NON-NLS-1$
 			},
-			parent
+			parent, true
 			);
 		return editor;	
 	}
