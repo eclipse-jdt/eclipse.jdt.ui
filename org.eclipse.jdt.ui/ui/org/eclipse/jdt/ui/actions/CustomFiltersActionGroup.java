@@ -221,9 +221,12 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 * @param state
 	 */
 	private void setFilter(String filterId, boolean state) {
-		fEnabledFilterIds.put(filterId, new Boolean(state));
-		fLRUFilterIdsStack.pop();
+		// Renew filter id in LRU stack
+		fLRUFilterIdsStack.remove(filterId);
 		fLRUFilterIdsStack.add(0, filterId);
+		storeViewDefaults();
+		
+		fEnabledFilterIds.put(filterId, new Boolean(state));
 		updateViewerFilters(true);
 	}
 	
