@@ -4,10 +4,13 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -122,7 +125,6 @@ public class Checks {
 	 *  name is not a valid java package name.
 	 */
 	public static RefactoringStatus checkCompilationUnitName(String name) {
-		//XXX fix for1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
 		if (hasTwoDots(name)) //$NON-NLS-2$ //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.no_two_dots"));//$NON-NLS-1$
 		else	
@@ -138,10 +140,20 @@ public class Checks {
 	 * @param newName just a simple name - no extension.
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{
-		if (resourceExists(RenameResourceChange.renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName)))
+		if (resourceExists(renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName)))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName));//$NON-NLS-1$
 		else
 			return null;
+	}
+	
+	/**
+	 * changes resource names - changes the name, leaves the extension untouched
+	 * /s/p/A.java renamed to B becomes /s/p/B.java
+	 */
+	public static IPath renamedResourcePath(IPath path, String newName){
+		String oldExtension= path.getFileExtension();
+		String newEnding= oldExtension == null ? "": "." + oldExtension; //$NON-NLS-2$ //$NON-NLS-1$
+		return path.removeFileExtension().removeLastSegments(1).append(newName + newEnding);
 	}
 	
 	public static boolean startsWithLowerCase(String s){
@@ -172,12 +184,10 @@ public class Checks {
 	 * @param List groupedResults list of lists of <code>SearchResults</code> (grouped by resource 
 	 * - as returned by <code>RefactoringSearchEngine#search</code>)
 	 */
-	public static RefactoringStatus checkAffectedResourcesAvailability(List groupedResults) throws JavaModelException{
+	public static RefactoringStatus checkAffectedResourcesAvailability(SearchResultGroup[] groupedResults) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		Iterator iter= groupedResults.iterator();
-		while (iter.hasNext()){
-			List searchResults= (List)iter.next();
-			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
+		for (int i= 0; i < groupedResults.length; i++){
+			IResource resource= groupedResults[i].getResource();
 			if (!resource.isAccessible())
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_not_accessible", resource.getFullPath())); //$NON-NLS-1$
 			if (resource.isReadOnly())
@@ -329,26 +339,22 @@ public class Checks {
 	
 	private static RefactoringStatus checkName(String name, IStatus status) {
 		RefactoringStatus result= new RefactoringStatus();
-		if ("".equals(name)){ //$NON-NLS-1$
-			result.addFatalError(RefactoringCoreMessages.getString("Checks.Choose_name")); //$NON-NLS-1$
+		if ("".equals(name)) //$NON-NLS-1$
+			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("Checks.Choose_name")); //$NON-NLS-1$
+
+		if (status.isOK())
 			return result;
-		}	
-		if (! status.isOK()) {
-			switch (status.getSeverity()){
-				case IStatus.ERROR: 
-					result.addFatalError(status.getMessage());
-					break;
-				case IStatus.WARNING: 
-					result.addWarning(status.getMessage());
-					break;
-				case IStatus.INFO:
-					result.addInfo(status.getMessage());
-					break;	
-				default: //no nothing
-					break;
-			}
+		
+		switch (status.getSeverity()){
+			case IStatus.ERROR: 
+				return RefactoringStatus.createFatalErrorStatus(status.getMessage());
+			case IStatus.WARNING: 
+				return RefactoringStatus.createWarningStatus(status.getMessage());
+			case IStatus.INFO:
+				return RefactoringStatus.createInfoStatus(status.getMessage());
+			default: //no nothing
+				return new RefactoringStatus();
 		}
-		return result;		
 	}
 	
 	public static IMethod findMethod(String name, int parameters, boolean isConstructor, IMethod[] methods) throws JavaModelException {	
@@ -387,50 +393,45 @@ public class Checks {
 	//---------------------
 	
 	public static RefactoringStatus checkIfCuBroken(IMember member) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
 		//1GF25DZ: ITPJUI:WINNT - SEVERE: Assertion failed in rename paramter refactoring
 		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(Refactoring.getResource(member));
-		if (cu == null){
-			result.addFatalError(RefactoringCoreMessages.getString("Checks.cu_not_created"));	 //$NON-NLS-1$
-		}	else {
-			if (! cu.isStructureKnown())
-				result.addFatalError(RefactoringCoreMessages.getString("Checks.cu_not_parsed"));	 //$NON-NLS-1$
-		}	
-		return result;
+		if (cu == null)
+			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("Checks.cu_not_created"));	 //$NON-NLS-1$
+		else if (! cu.isStructureKnown())
+			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("Checks.cu_not_parsed"));	 //$NON-NLS-1$
+		return new RefactoringStatus();
 	}
 	
 	/**
-	 * From the List of Lists of SearchResults passed as the parameter
+	 * From SearchResultGroup[] passed as the parameter
 	 * this method removes all those that correspond to a non-parsable ICompilationUnit
+	 * adn returns it as a result.
 	 * Also it removes all those that are not saved - passed as a parameter.
-	 * Returns the status describing the result of this check.
-	 * Note: it modifies the first parameter.
-	 * 
-	 * @see ICompilationUnit::isStructureKnown
-	 */
-	public static RefactoringStatus excludeCompilationUnits(List grouped, List unsavedFiles) throws JavaModelException{
-		Assert.isNotNull(unsavedFiles);
-		RefactoringStatus result= new RefactoringStatus();	
-		boolean wasEmpty= grouped.isEmpty();
-		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){	
-			List searchResults= (List)iter.next();
-			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
-			if (unsavedFiles.contains(resource)){
-				result.addError(RefactoringCoreMessages.getFormattedString("Checks.not_saved", resource.getFullPath().toString())); //$NON-NLS-1$
-				iter.remove();
+	 * Status object collect the result of checking.
+	 */	
+	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, IFile[] unsavedFiles, RefactoringStatus status) throws JavaModelException{
+		List result= new ArrayList();
+		List unsavedFileList= Arrays.asList(unsavedFiles);
+		boolean wasEmpty= grouped.length == 0;
+		for (int i= 0; i < grouped.length; i++){	
+			IResource resource= grouped[i].getResource();
+			if (unsavedFileList.contains(resource)){
+				status.addError(RefactoringCoreMessages.getFormattedString("Checks.not_saved", resource.getFullPath().toString())); //$NON-NLS-1$
 				continue; //removed, go to the next one
 			}
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
 			if (! cu.isStructureKnown()){
 				String path= AbstractRefactoringASTAnalyzer.getFullPath(cu);
-				result.addError(RefactoringCoreMessages.getFormattedString("Checks.cannot_be_parsed", path)); //$NON-NLS-1$
-				iter.remove();
-			}	
+				status.addError(RefactoringCoreMessages.getFormattedString("Checks.cannot_be_parsed", path)); //$NON-NLS-1$
+				continue; //removed, go to the next one
+			}
+			result.add(grouped[i]);	
 		}
 		
-		if ((!wasEmpty) && grouped.isEmpty())
-			result.addFatalError(RefactoringCoreMessages.getString("Checks.all_excluded")); //$NON-NLS-1$
-		return result;	
+		if ((!wasEmpty) && result.isEmpty())
+			status.addFatalError(RefactoringCoreMessages.getString("Checks.all_excluded")); //$NON-NLS-1$
+		
+		return (SearchResultGroup[])result.toArray(new SearchResultGroup[result.size()]);
 	}
 	
 	//------
