@@ -246,6 +246,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ReorderRenameParame
 		helper1(new String[]{"test2"}, new String[]{"Z"});
 	}
 	
+	public void test35() throws Exception{
+		printTestDisabledMessage("regression test for bug#6224");
+//		helper1(new String[]{"j"}, new String[]{"I"});
+	}	
+	
 	// -----
 	
 	public void testFail0() throws Exception{
