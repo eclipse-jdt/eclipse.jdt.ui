@@ -220,7 +220,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		} else if (character == SEMICHAR) {
 
 			if (isForStatement(text, offset)) {
-				insertPos= offset;
+				insertPos= -1; // don't do anything in for statements, as semis are vital part of these
 			} else {
 				int nextPartitionPos= nextPartitionOrLineEnd(document, line, offset, partitioning);
 				insertPos= startOfWhitespaceBeforeOffset(text, nextPartitionPos);
