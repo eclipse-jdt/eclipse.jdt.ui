@@ -86,7 +86,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 	
 	static OpenRefactoringWizardAction createPullUpAction(StructuredSelectionProvider selectionProvider) {
-		String label= "Pull &Up...";
+		String label= "Pu&ll Up...";
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMember.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				Set memberSet= new HashSet();
