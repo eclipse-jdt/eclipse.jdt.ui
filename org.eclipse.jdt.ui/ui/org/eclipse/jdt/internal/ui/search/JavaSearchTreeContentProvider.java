@@ -58,6 +58,7 @@ public class JavaSearchTreeContentProvider extends JavaSearchContentProvider imp
 				if (refreshViewer)
 					fTreeViewer.add(parent, child);
 			} else {
+				fTreeViewer.refresh(parent);
 				return;
 			}
 			child= parent;
@@ -86,7 +87,7 @@ public class JavaSearchTreeContentProvider extends JavaSearchContentProvider imp
 	protected void remove(Object child, boolean refreshViewer) {
 		Object parent= getParent(child);
 		if (fResult.getMatchCount(child) == 0) {
-			fChildrenMap.remove(child);
+			fChildrenMap.remove(parent);
 			Set container= (Set) fChildrenMap.get(parent);
 			if (container != null) {
 				container.remove(child);

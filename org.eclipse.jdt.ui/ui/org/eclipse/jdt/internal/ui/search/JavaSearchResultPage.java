@@ -88,7 +88,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 	
 	private void addSortActions(IMenuManager mgr) {
-		if (!isFlatMode())
+		if (!isFlatLayout())
 			return;
 		MenuManager sortMenu= new MenuManager(SearchMessages.getString("JavaSearchResultPage.sortBylabel")); //$NON-NLS-1$
 		sortMenu.add(fSortByNameAction);

@@ -30,7 +30,10 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider im
 		int removeCount= 0;
 		for (int i= 0; i < updatedElements.length; i++) {
 			if (fResult.getMatchCount(updatedElements[i]) > 0) {
-				fTableViewer.add(updatedElements[i]);
+				if (fTableViewer.testFindItem(updatedElements[i]) != null)
+					fTableViewer.refresh(updatedElements[i]);
+				else
+					fTableViewer.add(updatedElements[i]);
 				addCount++;
 			} else {
 				fTableViewer.remove(updatedElements[i]);
