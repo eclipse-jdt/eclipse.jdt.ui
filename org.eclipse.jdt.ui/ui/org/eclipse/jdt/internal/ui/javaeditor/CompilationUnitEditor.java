@@ -697,18 +697,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsSelectionDependentAction("RemoveBlockComment", true); //$NON-NLS-1$		
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.REMOVE_BLOCK_COMMENT_ACTION);
 		
-		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Indent.", this); //$NON-NLS-1$
+		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Indent.", this, false); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.INDENT);		
 		setAction("Indent", action); //$NON-NLS-1$
 		markAsStateDependentAction("Indent", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("Indent", true); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.INDENT_ACTION);
 		
-		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Indent.", this) { //$NON-NLS-1$
-			public void update() {
-				updateForTab();
-			}
-		};
+		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Indent.", this, true); //$NON-NLS-1$
 		setAction("IndentOnTab", action); //$NON-NLS-1$
 		markAsStateDependentAction("IndentOnTab", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("IndentOnTab", true); //$NON-NLS-1$

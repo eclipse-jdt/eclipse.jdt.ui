@@ -39,6 +39,10 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
@@ -61,6 +65,12 @@ public class IndentAction extends TextEditorAction {
 	/** The caret offset after an indent operation. */
 	private int fCaretOffset;
 	
+	/** 
+	 * Whether this is the action invoked by TAB. When <code>true</code>, indentation behaves 
+	 * differently to accomodate normal TAB operation.
+	 */
+	private final boolean fIsTabAction;
+	
 	/**
 	 * Creates a new instance.
 	 * 
@@ -68,8 +78,9 @@ public class IndentAction extends TextEditorAction {
 	 * @param prefix the prefix to use for keys in <code>bundle</code>
 	 * @param editor the text editor
 	 */
-	public IndentAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
+	public IndentAction(ResourceBundle bundle, String prefix, ITextEditor editor, boolean isTabAction) {
 		super(bundle, prefix, editor);
+		fIsTabAction= isTabAction;
 	}
 	
 	/*
@@ -115,7 +126,7 @@ public class IndentAction extends TextEditorAction {
 						JavaIndenter indenter= new JavaIndenter(document, scanner);
 						boolean hasChanged= false;
 						for (int i= 0; i < nLines; i++) {
-							hasChanged |= indentLine(document, firstLine + i, indenter, scanner);
+							hasChanged |= indentLine(document, firstLine + i, offset, indenter, scanner);
 						}
 						
 						// update caret position: move to new position when indenting just one line
@@ -132,7 +143,6 @@ public class IndentAction extends TextEditorAction {
 						
 						// always reset the selection if anything was replaced
 						if (hasChanged || newOffset != offset || newLength != length)
-							// TODO: be less intrusive than selectAndReveal
 							getTextEditor().selectAndReveal(newOffset, newLength);
 						
 						document.removePosition(end);
@@ -165,12 +175,13 @@ public class IndentAction extends TextEditorAction {
 	 * 
 	 * @param document the document
 	 * @param line the line to be indented
+	 * @param caret the caret position
 	 * @param indenter the java indenter
 	 * @param scanner the heuristic scanner
 	 * @return <code>true</code> if <code>document</code> was modified, <code>false</code> otherwise
 	 * @throws BadLocationException if the document got changed concurrently 
 	 */
-	private boolean indentLine(IDocument document, int line, JavaIndenter indenter, JavaHeuristicScanner scanner) throws BadLocationException {
+	private boolean indentLine(IDocument document, int line, int caret, JavaIndenter indenter, JavaHeuristicScanner scanner) throws BadLocationException {
 		IRegion currentLine= document.getLineInformation(line);
 		int offset= currentLine.getOffset();
 		
@@ -214,22 +225,72 @@ public class IndentAction extends TextEditorAction {
 		// get current white space
 		int lineLength= currentLine.getLength();
 		int end= scanner.findNonWhitespaceForwardInAnyPartition(offset, offset + lineLength);
-		int length;
 		if (end == JavaHeuristicScanner.NOT_FOUND)
-			length= lineLength;
-		else
-			length= end - offset;
+			end= offset + lineLength;
+		int length= end - offset;
+		String currentIndent= document.get(offset, length);
 		
+		// if we are right before the text start / line end, and already after the insertion point
+		// then just insert a tab.
+		if (fIsTabAction && caret == end && whiteSpaceLength(currentIndent) >= whiteSpaceLength(indent)) {
+			String tab= getTabEquivalent();
+			document.replace(caret, 0, tab);
+			fCaretOffset= caret + tab.length();
+			return true;
+		}		
+		
+		// set the caret offset so it can be used when setting the selection
 		fCaretOffset= offset + indent.length();
 		
 		// only change the document if it is a real change
-		if (!indent.equals(document.get(offset, length))) {
+		if (!indent.equals(currentIndent)) {
 			document.replace(offset, length, indent);
 			return true;
 		} else
 			return false;
 	}
 	
+	/**
+	 * Returns the size in characters of a string. All characters count one, tabs count the editor's
+	 * preference for the tab display 
+	 * 
+	 * @param indent the string to be measured.
+	 * @return
+	 */
+	private int whiteSpaceLength(String indent) {
+		if (indent == null)
+			return 0;
+		else {
+			int size= 0;
+			int l= indent.length();
+			int tabSize= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+			
+			for (int i= 0; i < l; i++)
+				size += indent.charAt(i) == '\t' ? tabSize : 1;
+			return size;
+		}
+	}
+
+	/**
+	 * Returns a tab equivalent, either as a tab character or as spaces, depending on the editor and
+	 * formatter preferences.
+	 * 
+	 * @return a string representing one tab in the editor, never <code>null</code>
+	 */
+	private String getTabEquivalent() {
+		String tab;
+		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS)) {
+			int size= JavaCore.getPlugin().getPluginPreferences().getInt(JavaCore.FORMATTER_TAB_SIZE);
+			StringBuffer buf= new StringBuffer();
+			for (int i= 0; i< size; i++)
+				buf.append(' ');
+			tab= buf.toString();
+		} else
+			tab= "\t"; //$NON-NLS-1$
+	
+		return tab;
+	}
+
 	/**
 	 * Returns the editor's selection provider.
 	 * 
@@ -250,18 +311,10 @@ public class IndentAction extends TextEditorAction {
 		super.update();
 		
 		if (isEnabled())
-			setEnabled(canModifyEditor() && !getSelection().isEmpty());
-	}
-	
-	/**
-	 * Enablement when tab key is pressed - the current selection has to be empty and in the
-	 * whitespace in the beginning of a line.
-	 */
-	protected void updateForTab() {
-		super.update();
-		
-		if (isEnabled())
-			setEnabled(isSmartMode() && isValidSelection());
+			if (fIsTabAction)
+				setEnabled(canModifyEditor() && isSmartMode() && isValidSelection());
+			else
+				setEnabled(canModifyEditor() && !getSelection().isEmpty());
 	}
 	
 	/**
