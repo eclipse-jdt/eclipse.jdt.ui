@@ -53,7 +53,16 @@ public class ActionUtil {
 	public static boolean isProcessable(Shell shell, JavaEditor editor) {
 		if (editor == null)
 			return true;
-		return isProcessable(shell, SelectionConverter.getInput(editor));
+		IJavaElement input= SelectionConverter.getInput(editor);
+		// if a Java editor doesn't have an input of type Java element
+		// then it is for sure not on the build path
+		if (input == null) {
+			MessageDialog.openInformation(shell, 
+				ActionMessages.getString("ActionUtil.notOnBuildPath.title"),  //$NON-NLS-1$
+				ActionMessages.getString("ActionUtil.notOnBuildPath.message")); //$NON-NLS-1$
+			return false;
+		}
+		return isProcessable(shell, input);
 	}
 	
 	public static boolean isProcessable(Shell shell, Object element) {

@@ -99,10 +99,13 @@ public class InlineAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
 	public void run(ITextSelection selection) {
-		ICompilationUnit cu= getCompilationUnit();
-		if (cu == null || !ActionUtil.isProcessable(getShell(), cu))
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null) 
+			return;
+		
 		if (fInlineTemp.isEnabled() && tryInlineTemp(cu, selection))
 			return;
 
