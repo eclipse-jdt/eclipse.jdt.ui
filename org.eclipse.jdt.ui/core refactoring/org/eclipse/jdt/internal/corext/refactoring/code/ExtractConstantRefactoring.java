@@ -688,20 +688,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		ClassInstanceCreation cic= (ClassInstanceCreation) expression;
 		Assert.isNotNull(cic.getAnonymousClassDeclaration());
 		
-		return getNameIdentifier(cic.getName());
-	}
-
-	// !!! identical to method in ExtractTempRefactoring
-	//recursive
-	private static String getNameIdentifier(Name name) throws JavaModelException {
-		if (name.isSimpleName())
-			return ((SimpleName) name).getIdentifier();
-		if (name.isQualifiedName()) {
-			QualifiedName qn= (QualifiedName) name;
-			return getNameIdentifier(qn.getQualifier()) + "." + qn.getName().getIdentifier(); //$NON-NLS-1$
-		}
-		Assert.isTrue(false);
-		return ""; //$NON-NLS-1$
+		return ASTNodes.getNameIdentifier(cic.getName());
 	}
 
 	private String getInitializerSource() throws JavaModelException {
