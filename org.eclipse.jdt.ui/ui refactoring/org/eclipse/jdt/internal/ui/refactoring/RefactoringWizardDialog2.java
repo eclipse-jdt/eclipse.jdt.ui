@@ -44,7 +44,6 @@ import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
