@@ -232,6 +232,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					}
 					OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
 					op.run(new SubProgressMonitor(monitor, 1));
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					
 					ISourceRange errorRange= op.getErrorSourceRange();
 					if (errorRange != null) {
 						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cu.getElementName()); //$NON-NLS-1$
