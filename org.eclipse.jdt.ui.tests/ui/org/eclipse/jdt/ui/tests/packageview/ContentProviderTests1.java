@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.ui.tests.packageview;
-
 
 import java.util.ArrayList;
 
