@@ -13,6 +13,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 
+import java.text.CollationElementIterator;
+import java.text.Collator;
+import java.text.RuleBasedCollator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,32 +26,45 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BidiSegmentEvent;
-import org.eclipse.swt.custom.BidiSegmentListener;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICodeAssist;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -57,16 +73,6 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
@@ -98,7 +104,41 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BidiSegmentEvent;
+import org.eclipse.swt.custom.BidiSegmentListener;
+import org.eclipse.swt.custom.ST;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPageLayout;
@@ -126,52 +166,11 @@ import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
+import org.eclipse.ui.texteditor.TextNavigationAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.tasklist.TaskList;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICodeAssist;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
-import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
 /**
  * Java specific text editor.
@@ -1100,7 +1099,432 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 	}
 	
+	/**
+	 * This action implements smart home.
+	 * 
+	 * Instead of going to the start of a line it does the following:
+	 * 
+	 * - if smart home/end is enabled and the caret is after the line's first non-whitespace then the caret is moved directly before it, taking JavaDoc and multi-line comments into account.
+	 * - if the caret is before the line's first non-whitespace the caret is moved to the beginning of the line
+	 * - if the caret is at the beginning of the line see first case.
+	 * 
+	 * @since 3.0
+	 */
+	protected class SmartLineStartAction extends LineStartAction {
+
+		/**
+		 * Creates a new smart line start action
+		 * 
+		 * @param textWidget the styled text widget
+		 * @param doSelect a boolean flag which tells if the text up to the beginning of the line should be selected
+		 */
+		public SmartLineStartAction(final StyledText textWidget, final boolean doSelect) {
+			super(textWidget, doSelect);
+		}
+
+		/*
+		 * @see org.eclipse.ui.texteditor.AbstractTextEditor.LineStartAction#getLineStartPosition(java.lang.String, int, java.lang.String)
+		 */
+		protected int getLineStartPosition(final IDocument document, final String line, final int length, final int offset) {
+
+			String type= IDocument.DEFAULT_CONTENT_TYPE;
+			try {
+				type= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset).getType();
+			} catch (BadLocationException exception) {
+				// Should not happen
+			}
+			
+			int index= super.getLineStartPosition(document, line, length, offset);
+			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
+				if (index < length - 1 && line.charAt(index) == '*' && line.charAt(index + 1) != '/') {
+					do {
+						++index;
+					} while (index < length && Character.isWhitespace(line.charAt(index)));
+				}
+			} else {
+				if (index < length - 1 && line.charAt(index) == '/' && line.charAt(++index) == '/') {
+					do {
+						++index;
+					} while (index < length && Character.isWhitespace(line.charAt(index)));
+				}
+			}
+			return index;
+		}
+	}
+
+	/**
+	 * Text navigation action to navigate to the next sub-word.
+	 * 
+	 * @since 3.0
+	 */
+	protected abstract class NextSubWordAction extends TextNavigationAction {
+
+		/** Collator to determine the sub-word boundaries */
+		private final RuleBasedCollator fCollator= (RuleBasedCollator)Collator.getInstance();
+
+		/**
+		 * Creates a new next sub-word action.
+		 * 
+		 * @param code Action code for the default operation. Must be an action code from @see org.eclipse.swt.custom.ST.
+		 */
+		protected NextSubWordAction(int code) {
+			super(getSourceViewer().getTextWidget(), code);
+			
+			// Only compare upper-/lower case
+			fCollator.setStrength(Collator.TERTIARY);
+		}
+
+		/*
+		 * @see org.eclipse.jface.action.IAction#run()
+		 */
+		public void run() {
+			try {
+
+				final ISourceViewer viewer= getSourceViewer();
+				final IDocument document= viewer.getDocument();
 	
+				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+			
+				// Check whether we are in a java code partititon and the preference is enabled
+				final IPreferenceStore store= getPreferenceStore();
+				final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
+				if (!region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE) || !store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
+					super.run();
+					return;				
+				}
+
+				// Check whether right hand character of caret is valid identifier start
+				if (Character.isJavaIdentifierStart(document.getChar(position))) {
+
+					int offset= 0;
+					int order= CollationElementIterator.NULLORDER;
+					short previous= Short.MAX_VALUE;
+					short next= Short.MAX_VALUE;
+
+					// Acquire collator for partition around caret
+					final String buffer= document.get(position, region.getOffset() + region.getLength() - position);
+					final CollationElementIterator iterator= fCollator.getCollationElementIterator(buffer);
+
+					// Iterate to first upper-case character
+					do {
+						// Check whether we reached end of word
+						offset= iterator.getOffset();
+						if (!Character.isJavaIdentifierPart(document.getChar(position + offset)))
+							throw new BadLocationException();
+
+						// Test next characters
+						order= iterator.next();
+						next= CollationElementIterator.tertiaryOrder(order);
+						if (next <= previous)
+							previous= next;
+						else
+							break;
+
+					} while (order != CollationElementIterator.NULLORDER);
+
+					// Check for leading underscores				
+					position += offset;
+					if (Character.getType(document.getChar(position - 1)) != Character.CONNECTOR_PUNCTUATION) {
+						setCaretPosition(position);
+						return;
+					}
+				}
+			} catch (BadLocationException exception) {
+				// Use default behavior
+			}
+			super.run();
+		}
+
+		/**
+		 * Sets the caret position to the sub-word boundary given with <code>position</code>.
+		 * 
+		 * @param position Position where the action should move the caret
+		 */
+		protected abstract void setCaretPosition(int position);
+	}
+
+	/**
+	 * Text navigation action to navigate to the next sub-word.
+	 * 
+	 * @since 3.0
+	 */
+	protected class NavigateNextSubWordAction extends NextSubWordAction {
+
+		/**
+		 * Creates a new navigate next sub-word action.
+		 */
+		public NavigateNextSubWordAction() {
+			super(ST.WORD_NEXT);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.NextSubWordAction#setCaretPosition(int)
+		 */
+		protected void setCaretPosition(final int position) {
+			final ISourceViewer viewer= getSourceViewer();
+			
+			viewer.getTextWidget().setCaretOffset(modelOffset2WidgetOffset(viewer, position));
+		}
+	}
+
+	/**
+	 * Text operation action to delete the next sub-word.
+	 * 
+	 * @since 3.0
+	 */
+	protected class DeleteNextSubWordAction extends NextSubWordAction {
+
+		/**
+		 * Creates a new delete next sub-word action.
+		 */
+		public DeleteNextSubWordAction() {
+			super(ST.DELETE_WORD_NEXT);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.NextSubWordAction#setCaretPosition(int)
+		 */
+		protected void setCaretPosition(final int position) {
+			final ISourceViewer viewer= getSourceViewer();
+			final int caret= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+
+			try {
+				viewer.getDocument().replace(caret, position - caret, ""); //$NON-NLS-1$
+			} catch (BadLocationException exception) {
+				// Should not happen
+			}
+		}
+	}
+
+	/**
+	 * Text operation action to select the next sub-word.
+	 * 
+	 * @since 3.0
+	 */
+	protected class SelectNextSubWordAction extends NextSubWordAction {
+
+		/**
+		 * Creates a new select next sub-word action.
+		 */
+		public SelectNextSubWordAction() {
+			super(ST.SELECT_WORD_NEXT);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.NextSubWordAction#setCaretPosition(int)
+		 */
+		protected void setCaretPosition(final int position) {
+			final ISourceViewer viewer= getSourceViewer();
+			
+			final StyledText text= viewer.getTextWidget();
+			if (text != null && !text.isDisposed()) {
+				
+				final Point selection= text.getSelection();
+				text.setSelectionRange(selection.x, modelOffset2WidgetOffset(viewer, position) - selection.x);
+
+				final Event event= new Event();
+				event.x= text.getSelection().x;
+				event.y= text.getSelection().y;
+				text.notifyListeners(SWT.Selection, event);
+			}
+		}
+	}
+
+	/**
+	 * Text navigation action to navigate to the previous sub-word.
+	 * 
+	 * @since 3.0
+	 */
+	protected abstract class PreviousSubWordAction extends TextNavigationAction {
+
+		/** Collator to determine the sub-word boundaries */
+		private final RuleBasedCollator fCollator= (RuleBasedCollator)Collator.getInstance();
+
+		/**
+		 * Creates a new previous sub-word action.
+		 * 
+		 * @param code Action code for the default operation. Must be an action code from @see org.eclipse.swt.custom.ST.
+		 */
+		protected PreviousSubWordAction(final int code) {
+			super(getSourceViewer().getTextWidget(), code);
+			
+			// Only compare upper-/lower case
+			fCollator.setStrength(Collator.TERTIARY);
+		}
+
+		/*
+		 * @see org.eclipse.jface.action.IAction#run()
+		 */
+		public void run() {
+			try {
+
+				final ISourceViewer viewer= getSourceViewer();
+				final IDocument document= viewer.getDocument();
+
+				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset()) - 1;
+			
+				// Check whether we are in a java code partititon and the preference is enabled
+				final IPreferenceStore store= getPreferenceStore();
+				ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
+				if (!region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE) || !store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
+					super.run();
+					return;				
+				}
+
+				// Ignore trailing white spaces
+				char character= document.getChar(position);
+				while (position > 0 && Character.isWhitespace(character)) {
+					--position;
+					character= document.getChar(position);
+				}
+
+				// Check whether left hand character of caret is valid identifier part
+				if (Character.isJavaIdentifierPart(character)) {
+
+					int offset= 0;
+					int order= CollationElementIterator.NULLORDER;
+					short previous= Short.MAX_VALUE;
+					short next= Short.MAX_VALUE;
+
+					// Acquire collator for partition around caret
+					region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
+					final String buffer= document.get(region.getOffset(), position - region.getOffset() + 1);
+					final CollationElementIterator iterator= fCollator.getCollationElementIterator(buffer);
+
+					// Iterate to first upper-case character
+					iterator.setOffset(buffer.length() - 1);
+					do {
+
+						// Check whether we reached begin of word or single upper-case start
+						offset= iterator.getOffset();
+						character= document.getChar(region.getOffset() + offset);
+						if (!Character.isJavaIdentifierPart(character))
+							throw new BadLocationException();
+						else if (Character.isUpperCase(character)) {
+							++offset;
+							break;
+						}
+
+						// Test next characters
+						order= iterator.previous();
+						next= CollationElementIterator.tertiaryOrder(order);
+						if (next <= previous)
+							previous= next;
+						else
+							break;
+
+					} while (order != CollationElementIterator.NULLORDER);
+
+					// Check left character for multiple upper-case characters
+					position= position - buffer.length() + offset - 1;
+					character= document.getChar(position);
+
+					if (!Character.isUpperCase(character)) {
+						setCaretPosition(position + 1);
+						return;
+					}
+				}
+			} catch (BadLocationException exception) {
+				// Use default behavior
+			}
+			super.run();
+		}
+
+		/**
+		 * Sets the caret position to the sub-word boundary given with <code>position</code>.
+		 * 
+		 * @param position Position where the action should move the caret
+		 */
+		protected abstract void setCaretPosition(int position);
+	}
+
+	/**
+	 * Text navigation action to navigate to the previous sub-word.
+	 * 
+	 * @since 3.0
+	 */
+	protected class NavigatePreviousSubWordAction extends PreviousSubWordAction {
+
+		/**
+		 * Creates a new navigate previous sub-word action.
+		 */
+		public NavigatePreviousSubWordAction() {
+			super(ST.WORD_PREVIOUS);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.PreviousSubWordAction#setCaretPosition(int)
+		 */
+		protected void setCaretPosition(final int position) {
+			final ISourceViewer viewer= getSourceViewer();
+			
+			viewer.getTextWidget().setCaretOffset(modelOffset2WidgetOffset(viewer, position));
+		}
+	}
+
+	/**
+	 * Text operation action to delete the previous sub-word.
+	 * 
+	 * @since 3.0
+	 */
+	protected class DeletePreviousSubWordAction extends PreviousSubWordAction {
+
+		/**
+		 * Creates a new delete previous sub-word action.
+		 */
+		public DeletePreviousSubWordAction() {
+			super(ST.DELETE_WORD_PREVIOUS);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.PreviousSubWordAction#setCaretPosition(int)
+		 */
+		protected void setCaretPosition(final int position) {
+			final ISourceViewer viewer= getSourceViewer();
+			final int caret= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+
+			try {
+				viewer.getDocument().replace(position, caret - position, ""); //$NON-NLS-1$
+			} catch (BadLocationException exception) {
+				// Should not happen
+			}
+		}
+	}
+
+	/**
+	 * Text operation action to select the previous sub-word.
+	 * 
+	 * @since 3.0
+	 */
+	protected class SelectPreviousSubWordAction extends PreviousSubWordAction {
+
+		/**
+		 * Creates a new select previous sub-word action.
+		 */
+		public SelectPreviousSubWordAction() {
+			super(ST.SELECT_WORD_PREVIOUS);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.PreviousSubWordAction#setCaretPosition(int)
+		 */
+		protected void setCaretPosition(final int position) {
+			final ISourceViewer viewer= getSourceViewer();
+			
+			final StyledText text= viewer.getTextWidget();
+			if (text != null && !text.isDisposed()) {
+				
+				final Point selection= text.getSelection();
+				text.setSelectionRange(selection.y, modelOffset2WidgetOffset(viewer, position) - selection.y);
+
+				final Event event= new Event();
+				event.x= text.getSelection().x;
+				event.y= text.getSelection().y;
+				text.notifyListeners(SWT.Selection, event);
+			}
+		}
+	}
+
 	/** Preference key for the link color */
 	protected final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
 	/** Preference key for matching brackets */
@@ -2241,4 +2665,50 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		return false; // never show change ruler for the non-editable java editor. Overridden in subclasses like CompilationUnitEditor
 	}
 
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#createNavigationActions()
+	 */
+	protected void createNavigationActions() {
+		super.createNavigationActions();
+
+		final StyledText textWidget= getSourceViewer().getTextWidget();
+
+		IAction action= new SmartLineStartAction(textWidget, false);
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.LINE_START);
+		setAction(ITextEditorActionDefinitionIds.LINE_START, action);
+
+		action= new SmartLineStartAction(textWidget, true);
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_LINE_START);
+		setAction(ITextEditorActionDefinitionIds.SELECT_LINE_START, action);
+
+		action= new NavigatePreviousSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.WORD_PREVIOUS);
+		setAction(ITextEditorActionDefinitionIds.WORD_PREVIOUS, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.ARROW_LEFT, SWT.NULL);
+
+		action= new NavigateNextSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.WORD_NEXT);
+		setAction(ITextEditorActionDefinitionIds.WORD_NEXT, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.ARROW_RIGHT, SWT.NULL);
+							
+		action= new DeletePreviousSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD);
+		setAction(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.BS, SWT.NULL);
+
+		action= new DeleteNextSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD);
+		setAction(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.DEL, SWT.NULL);
+		
+		action= new SelectPreviousSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS);
+		setAction(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.SHIFT | SWT.ARROW_LEFT, SWT.NULL);
+		
+		action= new SelectNextSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT);
+		setAction(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.SHIFT | SWT.ARROW_RIGHT, SWT.NULL);
+	}
 }

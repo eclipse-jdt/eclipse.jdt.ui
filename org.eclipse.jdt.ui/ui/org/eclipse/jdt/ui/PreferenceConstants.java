@@ -955,6 +955,16 @@ public class PreferenceConstants {
 	public final static String EDITOR_SMART_HOME_END= AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END;
 
 	/**
+	 * A named preference that controls whether the 'sub-word navigation' feature is
+	 * enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_SUB_WORD_NAVIGATION= "subWordNavigation"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if temporary problems are evaluated and shown in the UI.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -1992,6 +2002,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
 
 		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
+		store.setDefault(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, true);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_PASTE, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
