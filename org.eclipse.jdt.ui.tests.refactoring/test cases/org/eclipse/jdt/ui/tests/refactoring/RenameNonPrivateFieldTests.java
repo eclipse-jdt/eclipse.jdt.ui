@@ -36,6 +36,14 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private static final String REFACTORING_PATH= "RenameNonPrivateField/";
 
 	private Object fPrefixPref;
+	
+	//Test methods can configure these fields:
+	private boolean fUpdateReferences= true;
+	private boolean fUpdateTextualMatches= false;
+	private boolean fRenameGetter= false;
+	private boolean fRenameSetter= false;
+	
+	
 	public RenameNonPrivateFieldTests(String name) {
 		super(name);
 	}
@@ -84,7 +92,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		helper1_0("f", "g");
 	}
 	
-	private void helper2(String fieldName, String newFieldName, boolean updateReferences, boolean updateTextualMatches) throws Exception{
+	private void helper2(String fieldName, String newFieldName) throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
@@ -93,8 +101,12 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		RenameFieldProcessor processor= field.getDeclaringType().isEnum() ? new RenameEnumConstProcessor(field) : new RenameFieldProcessor(field);
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setNewElementName(newFieldName);
-		processor.setUpdateReferences(updateReferences);
-		processor.setUpdateTextualMatches(updateTextualMatches);
+		
+		processor.setUpdateReferences(fUpdateReferences);
+		processor.setUpdateTextualMatches(fUpdateTextualMatches);
+		processor.setRenameGetter(fRenameGetter);
+		processor.setRenameSetter(fRenameSetter);
+		
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
@@ -102,7 +114,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		ParticipantTesting.testRename(
 			handles,
 			new RenameArguments[] {
-				new RenameArguments(newFieldName, updateReferences)});
+				new RenameArguments(newFieldName, fUpdateReferences)});
 		
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
@@ -117,16 +129,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
-	private void helper2(String fieldName, String newFieldName) throws Exception{
-		helper2(fieldName, newFieldName, true, false);
-	}
-	
 	private void helper2() throws Exception{
-		helper2(true);
-	}
-	
-	private void helper2(boolean updateReferences) throws Exception{
-		helper2("f", "g", updateReferences, false);
+		helper2("f", "g");
 	}
 
 	//--------- tests ----------	
@@ -255,11 +259,15 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	public void test14() throws Exception{
-		helper2(false);
+		fUpdateReferences= false;
+		fUpdateTextualMatches= false;
+		helper2();
 	}
 	
 	public void test15() throws Exception{
-		helper2(false);
+		fUpdateReferences= false;
+		fUpdateTextualMatches= false;
+		helper2();
 	}
 
 	public void test16() throws Exception{
@@ -269,13 +277,29 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
 	public void test17() throws Exception{
 //		printTestDisabledMessage("test for bug 66250, 79131 (corner case: reference "A.f" to p.A#f)");
-		helper2("f", "g", false, true);
+		fUpdateReferences= false;
+		fUpdateTextualMatches= true;
+		helper2("f", "g");
 	}
 	
 	public void test18() throws Exception{
 //		printTestDisabledMessage("test for 79131 (corner case: reference "A.f" to p.A#f)");
-		helper2("field", "member", false, true);
+		fUpdateReferences= false;
+		fUpdateTextualMatches= true;
+		helper2("field", "member");
 	}
+	
+//--- test 1.5 features: ---
+	public void test19() throws Exception{
+		printTestDisabledMessage("generics not supported yet");
+		if (true)
+			return;
+		fRenameGetter= true;
+		fRenameSetter= true;
+		helper2("fList", "fItems");
+	}
+	
+//--- end test 1.5 features. ---
 	
 	public void testBug5821() throws Exception{
 		helper2("test", "test1");

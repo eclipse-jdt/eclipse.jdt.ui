@@ -108,38 +108,41 @@ public class RefactoringScanner {
 		int index= value.indexOf(fName);
 		while (index != -1) {
 			if (isWholeWord(value, index, index + fName.length())
-					&& ! hasWrongQualifier(value, index))
+					&& isQualifierOK(value, index))
 				addMatch(start + index);
 			index= value.indexOf(fName, index + 1);
 		}
 	}
 
-	private boolean hasWrongQualifier(String value, int nameStart) {
+	private boolean isQualifierOK(String value, int nameStart) {
 		// only works for references without whitespace
 		int qualifierAfter= nameStart - 1;
 		if (qualifierAfter < 0)
-			return false;
+			return true;
 		
 		char charBeforeName= value.charAt(qualifierAfter);
 		if (! isQualifierSeparator(charBeforeName))
-			return false;
-			
+			return true;
+		
+		boolean canFinish= charBeforeName == '#';
 		for (int i= 0; i < fQualifier.length() ; i++) {
 			int qualifierCharPos= qualifierAfter - 1 - i;
 			if (qualifierCharPos < 0)
-				return false;
+				return canFinish;
 			
 			char qualifierChar= value.charAt(qualifierCharPos);
 			char goalQualifierChar= fQualifier.charAt(fQualifier.length() - 1 - i);
 			if (qualifierChar != goalQualifierChar)
-				return isQualifierPart(qualifierChar);
+				return canFinish && ! isQualifierPart(qualifierChar);
+			
+			canFinish= ! isQualifierSeparator(qualifierChar);
 		}
 		int beforeQualifierPos= qualifierAfter - fQualifier.length() - 1;
 		if (beforeQualifierPos >= 0) {
 			char beforeQualifierChar= value.charAt(beforeQualifierPos);
-			return isQualifierPart(beforeQualifierChar);
+			return ! isQualifierPart(beforeQualifierChar);
 		}
-		return false;
+		return true;
 	}
 
 	private boolean isQualifierPart(char ch) {
