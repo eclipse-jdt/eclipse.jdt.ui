@@ -47,6 +47,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	private static class ProblemPosition {
 		Position fPosition;
 		Color fColor;
+		boolean fMultiLine;
 	};
 	
 	private boolean fIsActive= false;
@@ -136,6 +137,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 						ProblemPosition pp= new ProblemPosition();
 						pp.fPosition= fModel.getPosition(a);
 						pp.fColor= color;
+						pp.fMultiLine= pa.isTask();
 						fProblemPositions.add(pp);
 					}
 				}
@@ -251,7 +253,30 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 			if (p.overlapsWith(vOffset, vLength) && p.overlapsWith(offset , length)) {
 				int p1= Math.max(offset, p.getOffset());
 				int p2= Math.min(offset + length, p.getOffset() + p.getLength());
-				draw(gc, p1 - offset, p2 - p1, pp.fColor);
+				
+				if (!pp.fMultiLine) {
+					
+					draw(gc, p1 - offset, p2 - p1, pp.fColor);
+				
+				} else {
+					
+					IDocument document= fSourceViewer.getDocument();
+					try {
+						
+						int startLine= document.getLineOfOffset(p1); 
+						int lastInclusive= Math.max(p1, p2 - 1);
+						int endLine= document.getLineOfOffset(lastInclusive);
+						
+						for (int i= startLine; i <= endLine; i++) {
+							IRegion line= document.getLineInformation(i);
+							int paintStart= Math.max(line.getOffset(), p1);
+							int paintEnd= Math.min(line.getOffset() + line.getLength(), p2);
+							draw(gc, paintStart - offset, paintEnd - paintStart, pp.fColor);
+						}
+					
+					} catch (BadLocationException x) {
+					}
+				}
 			}
 		}
 	}
@@ -260,9 +285,16 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		
 		final int WIDTH= 4; // must be even
 		final int HEIGHT= 2; // can be any number
+//		final int MINPEEKS= 2; // minimal number of peeks
+		
+		int peeks= (right.x - left.x) / WIDTH;
+//		if (peeks < MINPEEKS) {
+//			int missing= (MINPEEKS - peeks) * WIDTH;
+//			left.x= Math.max(0, left.x - missing/2);
+//			peeks= MINPEEKS;
+//		}
 		
 		int leftX= left.x;
-		int peeks= (right.x - left.x) / WIDTH;
 				
 		// compute (number of point) * 2
 		int length= ((2 * peeks) + 1) * 2;
