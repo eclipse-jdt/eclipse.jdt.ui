@@ -2,14 +2,17 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.NameReference;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.corext.refactoring.util.AST;
-import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.util.NewSelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 
 public class TempDeclarationFinder {
 	
@@ -21,8 +24,8 @@ public class TempDeclarationFinder {
 	 * declaration or reference.
 	 */
 	public static LocalDeclaration findTempDeclaration(AST ast, ICompilationUnit cu, int selectionOffset, int selectionLength) throws JavaModelException{
-		SelectionAnalyzer analyzer= new TempSelectionAnalyzer(cu, selectionOffset, selectionLength);
-		ast.accept(analyzer.getParentTracker());
+		TempSelectionAnalyzer analyzer= new TempSelectionAnalyzer(cu, selectionOffset, selectionLength);
+		ast.accept(analyzer);
 		
 		AstNode[] selected= analyzer.getSelectedNodes();
 		if (selected == null || selected.length != 1){
@@ -46,12 +49,12 @@ public class TempDeclarationFinder {
 	 * Subclassing <code>SelectionAnalyzer</code> is needed to support activation 
 	 * when only a part of the LocalDeclaration node is selected
 	 */
-	private static class TempSelectionAnalyzer extends SelectionAnalyzer {
+	private static class TempSelectionAnalyzer extends NewSelectionAnalyzer {
 
 		private AstNode fNode;
 
 		TempSelectionAnalyzer(ICompilationUnit cu, int selectionOffset, int selectionLength) throws JavaModelException {
-			super(cu.getBuffer(), selectionOffset, selectionLength);
+			super(new ExtendedBuffer(cu.getBuffer()), Selection.createFromStartLength(selectionOffset, selectionLength));
 		}
 
 		//overridden

@@ -66,7 +66,7 @@ public class StructureSelectionAction extends TextSelectionAction {
 		try{
 			AST ast= new AST(cu);
 			StructureSelectionAnalyzer selAnalyzer= new StructureSelectionAnalyzer(cu.getBuffer(), oldSourceRange.getOffset(), oldSourceRange.getLength());
-			ast.accept(selAnalyzer.getParentTracker());
+			ast.accept(selAnalyzer);
 			return internalGetNewSelectionRange(oldSourceRange, cu, selAnalyzer);
 	 	}	catch (JavaModelException e){
 	 		JavaPlugin.log(e); //dialog would be too heavy here
