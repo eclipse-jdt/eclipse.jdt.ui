@@ -43,8 +43,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
@@ -197,16 +195,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.registerAdapters(new EditorInputAdapterFactory(), IEditorInput.class);
 		manager.registerAdapters(new ResourceAdapterFactory(), IResource.class);
 		
-		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-			public void run(IProgressMonitor monitor) throws CoreException {
-				JavaRuntime.initializeJREVariables(monitor);
-			}
-		};
-		try {
-			getWorkspace().run(runnable, null);
-		} catch (CoreException e) {
-			log(e);
-		}
 		try {
 			JavaDocLocations.loadJavadocLocations();
 		} catch (CoreException e) {
