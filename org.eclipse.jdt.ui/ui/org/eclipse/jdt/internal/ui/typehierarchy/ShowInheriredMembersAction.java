@@ -19,7 +19,7 @@ public class ShowInheriredMembersAction extends JavaUIAction {
 	
 	private static final String RESOURCE_PREFIX= "ShowInheriredMembersAction.";
 	
-	/**
+	/** 
 	 * Creates the action.
 	 */
 	public ShowInheriredMembersAction(MethodsViewer viewer, boolean initValue) {
