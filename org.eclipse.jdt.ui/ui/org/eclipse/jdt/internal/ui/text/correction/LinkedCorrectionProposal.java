@@ -25,11 +25,13 @@ import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -43,7 +45,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
@@ -235,7 +236,12 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 					for (int i= 0; i < positions.size(); i++) {
 						ITrackedNodePosition pos= (ITrackedNodePosition) positions.get(i);
 						if (pos.getStartPosition() != -1) {
-							group.addPosition(new ProposalPosition(document, pos.getStartPosition(), pos.getLength(), fPositionOrder.indexOf(pos), linkedModeProposals));
+							ProposalPosition proposalPosition= new ProposalPosition(document, pos.getStartPosition(), pos.getLength(), fPositionOrder.indexOf(pos), linkedModeProposals);
+							for (int j= 0; j < linkedModeProposals.length; j++) {
+								if (linkedModeProposals[j] instanceof LinkedModeProposal)
+									((LinkedModeProposal)linkedModeProposals[j]).setPosition(proposalPosition);
+							}
+							group.addPosition(proposalPosition);
 						}
 					}
 				}
@@ -287,15 +293,20 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		private String fProposal;
 		private ITypeBinding fTypeProposal;
 		private ICompilationUnit fCompilationUnit;
+		private Position fPosition;
 
 		public LinkedModeProposal(String proposal) {
 			fProposal= proposal;
 		}
-	
+		
 		public LinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal) {
 			this(typeProposal.getName());
 			fTypeProposal= typeProposal;
 			fCompilationUnit= unit;
+		}
+	
+		public void setPosition(Position position) {
+			fPosition= position;
 		}
 	
 		private ImportsStructure getImportStructure() throws CoreException {
@@ -311,7 +322,6 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		 */
 		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 			IDocument document= viewer.getDocument();
-			Point point= viewer.getSelectedRange();
 			try {
 				String replaceString= fProposal;
 				ImportsStructure impStructure= null;
@@ -319,7 +329,16 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 					impStructure= getImportStructure();
 					replaceString= impStructure.addImport(fTypeProposal);
 				}
-				document.replace(point.x, point.y, replaceString);
+				int off, length;
+				if (fPosition != null) {
+					off= fPosition.getOffset();
+					length= fPosition.getLength();
+				} else {
+					Point point= viewer.getSelectedRange();
+					off= point.x;
+					length= point.y;
+				}
+				document.replace(off, length, replaceString);
 			
 				if (impStructure != null) {
 					impStructure.create(false, null);
@@ -397,16 +416,19 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			if (insert == null)
 				return false;
 			
-			int start= offset - insert.length();
-			if (start >= 0 && offset <= document.getLength()) {
+			int off;
+			if (fPosition != null) {
+				off= fPosition.getOffset();
+			} else {
+				off= Math.max(0, offset - insert.length());
+			}
+			int length= offset - off;
+			
+			if (offset <= document.getLength()) {
 				try {
-					String content= document.get(start, offset - start);
-//					while (content.length() > 0) {
-						if (insert.startsWith(content))
-							return true;
-//						else
-//							content= content.substring(1);
-//					}
+					String content= document.get(off, length);
+					if (insert.startsWith(content))
+						return true;
 				} catch (BadLocationException e) {
 					JavaPlugin.log(e);
 					// and ignore and return false
