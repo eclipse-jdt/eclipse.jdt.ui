@@ -6,7 +6,9 @@ package org.eclipse.jdt.internal.ui;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -108,6 +110,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @return an array of all dirty editor parts.
 	 */
 	public static IEditorPart[] getDirtyEditors() {
+		Set inputs= new HashSet();
 		List result= new ArrayList(0);
 		IWorkbench workbench= getDefault().getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
@@ -117,8 +120,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 				IEditorPart[] editors= pages[x].getDirtyEditors();
 				for (int z= 0; z < editors.length; z++) {
 					IEditorPart ep= editors[z];
-					if (!result.contains(ep))
+					IEditorInput input= ep.getEditorInput();
+					if (!inputs.contains(input)) {
+						inputs.add(input);
 						result.add(ep);
+					}
 				}
 			}
 		}
