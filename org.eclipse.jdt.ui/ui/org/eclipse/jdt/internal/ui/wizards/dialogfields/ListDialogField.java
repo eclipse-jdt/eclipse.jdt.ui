@@ -6,7 +6,8 @@ package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
 
 import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 /**
@@ -155,8 +156,8 @@ public class ListDialogField extends DialogField {
 		gd.grabExcessVerticalSpace= true;
 		gd.grabColumn= 0;
 		gd.horizontalSpan= nColumns - 2;
-		gd.widthHint= 200;
-		gd.heightHint= 200;
+		gd.widthHint= SWTUtil.convertWidthInCharsToPixels(40, list);
+		gd.heightHint= SWTUtil.convertHeightInCharsToPixels(15, list);
 		list.setLayoutData(gd);
 		
 		Composite buttons= getButtonBox(parent);
@@ -450,7 +451,12 @@ public class ListDialogField extends DialogField {
 			}
 			fElements.set(idx, newElement);
 			if (fTable != null) {
+				List selected= getSelectedElements();
+				if (selected.remove(oldElement)) {
+					selected.add(newElement);
+				}
 				fTable.refresh();
+				fTable.setSelection(new StructuredSelection(selected));
 			}
 			dialogFieldChanged();
 		} else {
@@ -674,12 +680,14 @@ public class ListDialogField extends DialogField {
 	 * Returns the selected elements.
 	 */
 	public List getSelectedElements() {
-		ISelection selection= fTable.getSelection();		
 		List result= new ArrayList();
-		if (selection instanceof IStructuredSelection) {
-			Iterator iter= ((IStructuredSelection)selection).iterator();
-			while (iter.hasNext()) {
-				result.add(iter.next());
+		if (fTable != null) {
+			ISelection selection= fTable.getSelection();
+			if (selection instanceof IStructuredSelection) {
+				Iterator iter= ((IStructuredSelection)selection).iterator();
+				while (iter.hasNext()) {
+					result.add(iter.next());
+				}
 			}
 		}
 		return result;
