@@ -96,7 +96,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	 */
 	public static int getTabSize() {
 		String string= (String) JavaCore.getOptions().get(PREF_TAB_SIZE);
-		return getIntValue(string, 4);
+		return getPositiveIntValue(string, 4);
 	}
 	
 	/**
@@ -114,9 +114,12 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}	
 	
 	
-	private static int getIntValue(String string, int dflt) {
+	private static int getPositiveIntValue(String string, int dflt) {
 		try {
-			return Integer.parseInt(string);
+			int i= Integer.parseInt(string);
+			if (i >= 0) {
+				return i;
+			}
 		} catch (NumberFormatException e) {
 		}
 		return dflt;
@@ -329,7 +332,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		previewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		previewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
-		previewViewer.getTextWidget().setTabs(getIntValue((String) fWorkingValues.get(PREF_TAB_SIZE), 0));
+		previewViewer.getTextWidget().setTabs(getPositiveIntValue((String) fWorkingValues.get(PREF_TAB_SIZE), 0));
 		previewViewer.setEditable(false);
 		previewViewer.setDocument(fPreviewDocument);
 		Control control= previewViewer.getControl();
@@ -370,7 +373,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		textBox.setLayoutData(new GridData());
 		
 		String currValue= (String)fWorkingValues.get(key);	
-		textBox.setText(String.valueOf(getIntValue(currValue, 1)));
+		textBox.setText(String.valueOf(getPositiveIntValue(currValue, 1)));
 		textBox.setTextLimit(3);
 		textBox.addModifyListener(fTextModifyListener);
 
@@ -405,8 +408,8 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			fWorkingValues.put(key, number);
 		}
 		if (PREF_TAB_SIZE.equals(key)) {
-			fSourceViewer.getTextWidget().setTabs(getIntValue(number, 0));
-		}		
+			fSourceViewer.getTextWidget().setTabs(getPositiveIntValue(number, 0));
+		}			
 		updateStatus(status);
 		updatePreview();
 	}
