@@ -24,8 +24,6 @@ import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests3;
 import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests4;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
-import org.eclipse.jdt.ui.tests.text.HTML2TextReaderTester;
-import org.eclipse.jdt.ui.tests.text.JavaDoc2HTMLTextReaderTester;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 
 
@@ -52,8 +50,6 @@ public class AutomatedSuite extends TestSuite {
 		
 		addTest(NewJavaProjectWizardTest.suite());
 		
-		addTest(JavaDoc2HTMLTextReaderTester.suite());
-		addTest(HTML2TextReaderTester.suite());
 		addTest(ContentProviderTests1.suite());
 		addTest(ContentProviderTests2.suite());
 		addTest(ContentProviderTests3.suite());
