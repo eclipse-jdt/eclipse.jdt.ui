@@ -55,7 +55,6 @@ public final class TypeVariableMaplet {
 	}
 
 	public final boolean equals(final Object object) {
-		Assert.isNotNull(object);
 		if (object instanceof TypeVariableMaplet) {
 			final TypeVariableMaplet mapping= (TypeVariableMaplet) object;
 			return mapping.getSourceName().equals(fSourceName) && mapping.getTargetName().equals(fTargetName) && mapping.getSourceIndex() == fSourceIndex && mapping.getTargetIndex() == fTargetIndex;
