@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Control;
