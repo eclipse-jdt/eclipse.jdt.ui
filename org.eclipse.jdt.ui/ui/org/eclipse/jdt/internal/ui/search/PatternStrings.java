@@ -59,7 +59,7 @@ public class PatternStrings {
 		for (int i= 0; i < types.length; i++) {
 			if (i > 0)
 				buffer.append(", "); //$NON-NLS-1$
-			String typeSig= Signature.toString(types[0]);
+			String typeSig= Signature.toString(types[i]);
 			buffer.append(typeSig);
 		}
 		buffer.append(')');
