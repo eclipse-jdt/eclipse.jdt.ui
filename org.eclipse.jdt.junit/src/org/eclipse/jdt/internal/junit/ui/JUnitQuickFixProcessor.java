@@ -1,9 +1,14 @@
-/*
- * Created on Jul 2, 2003
- *
- * To change this generated comment go to 
- * Window>Preferences>Java>Code Generation>Code Template
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids <sdavids@gmx.de> - bug 48696
+ *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.core.runtime.CoreException;
@@ -39,8 +44,11 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			IProblemLocation location= locations[i];
 			try {
 				String s= unit.getBuffer().getText(location.getOffset(), location.getLength());
-				if (s.equals("TestCase") || s.equals("junit.framework.TestCase")) //$NON-NLS-1$ //$NON-NLS-2$
-					return true;
+				if (s.equals("TestCase") //$NON-NLS-1$
+						|| s.equals("junit") //$NON-NLS-1$
+						|| s.equals("TestSuite") //$NON-NLS-1$
+						|| s.equals("Test"))
+					return true; //$NON-NLS-1$
 			} catch (JavaModelException e) {
 				e.printStackTrace();
 			}
