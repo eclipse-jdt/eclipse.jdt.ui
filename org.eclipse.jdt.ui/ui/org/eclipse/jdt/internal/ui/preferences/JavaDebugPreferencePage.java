@@ -1,6 +1,5 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.awt.GridBagConstraints;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.HashSet;
