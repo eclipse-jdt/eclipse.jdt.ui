@@ -805,7 +805,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		for (int i= 0; i < fAllViewers.length; i++) {
 			fAllViewers[i].setMemberFilter(memberFilter);
 		}
-		fIsEnableMemberFilter= (memberFilter != null);
 	}	
 	
 	private IType getSelectableType(IJavaElement elem) {
