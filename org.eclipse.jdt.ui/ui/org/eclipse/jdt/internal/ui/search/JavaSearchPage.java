@@ -566,7 +566,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		ILabelProvider labelProvider= new JavaElementLabelProvider(
 			  JavaElementLabelProvider.SHOW_DEFAULT 
 			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider, true, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
 		dialog.setElements(openChoices);

@@ -989,7 +989,8 @@ public abstract class TypePage extends ContainerPage {
 			packages= new IJavaElement[0];
 		}
 		
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), false, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
+		dialog.setIgnoreCase(false);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChoosePackageDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
 		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$

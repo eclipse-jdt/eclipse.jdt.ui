@@ -176,7 +176,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		}		
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(),
-			new JavaElementLabelProvider(flags), true, false);
+			new JavaElementLabelProvider(flags));
 		dialog.setTitle(			JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
 		dialog.setElements(results);

@@ -195,7 +195,8 @@ public final class JavaUI {
 			IPackageFragmentRoot root= (IPackageFragmentRoot)iter.next();
 			packages.addAll(Arrays.asList(root.getChildren()));
 		}			
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags), false, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags));
+		dialog.setIgnoreCase(false);
 		dialog.setElements(packages);
 		return dialog;
 	}
@@ -215,7 +216,8 @@ public final class JavaUI {
 	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root) throws JavaModelException {
 		List packages= new ArrayList();
 		packages.addAll(Arrays.asList(root.getChildren()));
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), false, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
+		dialog.setIgnoreCase(false);
 		dialog.setElements(packages);
 		return dialog;		
 	}
@@ -242,7 +244,7 @@ public final class JavaUI {
 		Assert.isTrue((style | IJavaElementSearchConstants.CONSIDER_TYPES) == IJavaElementSearchConstants.CONSIDER_TYPES);
 		SelectionDialog dialog= null;
 		if (multipleSelection) {
-			dialog= new MultiTypeSelectionDialog(parent, context, scope, style, true);
+			dialog= new MultiTypeSelectionDialog(parent, context, scope, style);
 		} else {
 			dialog= new TypeSelectionDialog(parent, context, scope, style, true, true);
 		}
@@ -275,7 +277,7 @@ public final class JavaUI {
 	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) {
 		SelectionDialog dialog= null;
 		if (multipleSelection) {
-			dialog= new MultiMainTypeSelectionDialog(parent, context, scope, style, true);
+			dialog= new MultiMainTypeSelectionDialog(parent, context, scope, style);
 		} else {
 			dialog= new MainTypeSelectionDialog(parent, context, scope, style, true);
 		}

@@ -233,7 +233,7 @@ public class CUSavePolicy implements ISavePolicy {
 					| JavaElementLabelProvider.SHOW_ROOT;
 		ILabelProvider renderer= new JavaElementLabelProvider(flags);
 		
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, renderer, true, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, renderer);
 		dialog.setTitle(ReorgMessages.getString("cuSavePolicy.save.title")); //$NON-NLS-1$
 		dialog.setMessage(ReorgMessages.getString("cuSavePolicy.pickPkg.message")); //$NON-NLS-1$		 
 		dialog.setElements(packages);

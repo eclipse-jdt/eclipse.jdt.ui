@@ -27,8 +27,8 @@ import org.eclipse.jface.viewers.ILabelProvider;
 public abstract class AbstractElementListSelectionDialog extends SelectionStatusDialog {
 	
 	private ILabelProvider fRenderer;
-	private boolean fIgnoreCase;
-	private boolean fIsMultipleSelection;
+	private boolean fIgnoreCase= true;
+	private boolean fIsMultipleSelection= false;
 	
 	private SelectionList fSelectionList;
 	private Label fMessage;
@@ -48,13 +48,11 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * @param multipleSelection Allow multiple selection	 
 	 */
 	protected AbstractElementListSelectionDialog(Shell parent,
-		ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection)
+		ILabelProvider renderer)
 	{
 		super(parent);
 		
 		fRenderer= renderer;
-		fIgnoreCase= ignoreCase;
-		fIsMultipleSelection= multipleSelection;		
 	}
 
 	/**
@@ -62,6 +60,14 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * Emulate a OK button pressed to close the dialog.
 	 */	
 	protected abstract void handleDoubleClick();
+	
+	public void setIgnoreCase(boolean ignoreCase) {
+		fIgnoreCase= ignoreCase;
+	}
+	
+	public void setMultipleSelection(boolean multipleSelection) {
+		fIsMultipleSelection= multipleSelection;
+	}
 	
 	/**
 	 * If a empty-list message is set, a error message is shown

@@ -208,7 +208,7 @@ public class OpenTypeHierarchyHelper {
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell,			
-			new JavaElementLabelProvider(flags), true, false);
+			new JavaElementLabelProvider(flags));
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.title"));  //$NON-NLS-1$
 		dialog.setMessage(JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.message")); //$NON-NLS-1$
 		dialog.setElements(types);

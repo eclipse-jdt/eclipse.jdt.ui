@@ -67,7 +67,7 @@ public class ShowTypeHierarchyAction extends Action implements IUpdate {
 			return types[0];
 
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();			
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), true, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		dialog.setMessage(JavaUIMessages.getString("ShowTypeHierarchyAction.selectiondialog.message")); //$NON-NLS-1$
 		dialog.setTitle(JavaUIMessages.getString("ShowTypeHierarchyAction.selectiondialog.title")); //$NON-NLS-1$
 		dialog.setElements(types);

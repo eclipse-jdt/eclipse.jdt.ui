@@ -34,10 +34,11 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 	private int fStyle;
 	
 	public MultiTypeSelectionDialog(Shell parent, IRunnableContext context,
-		IJavaSearchScope scope, int style, boolean ignoreCase)
+		IJavaSearchScope scope, int style)
 	{
-		super(parent, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_POSTFIX),
-			ignoreCase, true); 
+		super(parent, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_POSTFIX)); 
+			
+		setMultipleSelection(true);
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(scope);

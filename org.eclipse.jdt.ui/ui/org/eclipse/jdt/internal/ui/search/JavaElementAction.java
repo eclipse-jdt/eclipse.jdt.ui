@@ -165,7 +165,7 @@ public abstract class JavaElementAction extends Action {
 			  JavaElementLabelProvider.SHOW_DEFAULT 
 			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
 
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider, true, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider);
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
 		if (dialog.open() == dialog.OK)
@@ -224,7 +224,7 @@ public abstract class JavaElementAction extends Action {
 			Shell parent= JavaPlugin.getActiveWorkbenchShell();
 			int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
 
-			ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags), true, false);
+			ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags));
 			dialog.setTitle(title);
 			dialog.setMessage(message);
 			dialog.setElements(types);

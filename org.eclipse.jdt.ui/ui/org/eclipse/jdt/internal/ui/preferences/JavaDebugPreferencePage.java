@@ -502,7 +502,8 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 			}
 		}
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT;
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags), false, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
+		dialog.setIgnoreCase(false);
 		dialog.setElements(packageList);
 		return dialog;
 	}

@@ -144,7 +144,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 	private boolean openChoicesSelections(TypeInfo[][] openChoices, ImportsStructure impStructure) {
 		ILabelProvider labelProvider= new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED);
 		
-		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider, true, false);
+		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider);
 		dialog.setTitle(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.message")); //$NON-NLS-1$
 		dialog.setPageInfoMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.pageinfo")); //$NON-NLS-1$

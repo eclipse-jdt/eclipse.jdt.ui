@@ -29,17 +29,18 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 	 * Constructor.
 	 */
 	public MultiMainTypeSelectionDialog(Shell shell, IRunnableContext context,
-		IJavaSearchScope scope, int style, boolean ignoreCase)
+		IJavaSearchScope scope, int style)
 	{
 		super(shell, new JavaElementLabelProvider(
 			JavaElementLabelProvider.SHOW_CONTAINER | 
 			JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION |
-			JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION), 
-			ignoreCase, true);
+			JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION));
+
+		setMultipleSelection(true);
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(scope);
-
+		
 		fRunnableContext= context;
 		fScope= scope;
 		fStyle= style;

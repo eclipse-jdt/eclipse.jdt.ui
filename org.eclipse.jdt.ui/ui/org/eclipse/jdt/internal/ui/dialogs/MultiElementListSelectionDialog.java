@@ -32,8 +32,8 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @param ignoreCase Decides if the match string ignores lower/upppr case
 	 * @param multipleSelection Allow multiple selection	 
 	 */
-	public MultiElementListSelectionDialog(Shell parent, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
-		super(parent, renderer, ignoreCase, multipleSelection);
+	public MultiElementListSelectionDialog(Shell parent, ILabelProvider renderer) {
+		super(parent, renderer);
 		fPageInfoMessage= JavaUIMessages.getString("MultiElementListSelectionDialog.pageInfoMessage"); //$NON-NLS-1$
 	}
 	

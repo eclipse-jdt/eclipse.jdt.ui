@@ -28,10 +28,9 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 	 * @param ignoreCase Decides if the match string ignores lower/upppr case
 	 * @param multipleSelection Allow multiple selection	 
 	 */	
-	public ElementListSelectionDialog(Shell parent,
-		ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection)
+	public ElementListSelectionDialog(Shell parent,	ILabelProvider renderer)
 	{
-		super(parent, renderer, ignoreCase, multipleSelection);
+		super(parent, renderer);
 	}
 
 	/**
