@@ -29,8 +29,10 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
@@ -91,25 +93,18 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 		try {
 			String labelName= JavaElementLabels.getElementLabel(jelem, JavaElementLabels.M_PARAMETER_TYPES);
 			
-			IPath annotatedPath= JavaDocLocations.getAnnotatedPath(jelem);
-			if (annotatedPath == null) {
-				String message= "No Javadoc available for element ''{0}''";
-				showError(shell, MessageFormat.format(message, new String[] { labelName }));
-				return;
-			}
-			URL baseURL= JavaDocLocations.getJavadocLocation(annotatedPath);
+			URL baseURL= JavaDocLocations.getJavadocBaseLocation(jelem);
 			if (baseURL == null) {
-				IJavaElement annotatedElement= jelem.getJavaProject().findElement(annotatedPath);
-				
-				if (annotatedElement.getElementType() == IJavaElement.JAVA_PROJECT) {
+				IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(jelem);
+				if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
+					String message= "The documentation location for ''{0}'' has not been configured. For elements from libraries specify the Javadoc location URL on the property page of the parent JAR (''{1}'').";	
+					showError(shell, MessageFormat.format(message, new String[] { labelName, root.getElementName() }));
+				} else {
+					IJavaElement annotatedElement= jelem.getJavaProject();
 					String message= "The documentation location for ''{0}'' has not been configured. For elements from source specify the Javadoc location URL on the property page of the parent project (''{1}'').";	
 					showError(shell, MessageFormat.format(message, new String[] { labelName, annotatedElement.getElementName() }));
-					return;
-				} else {
-					String message= "The documentation location for ''{0}'' has not been configured. For elements from libraries specify the Javadoc location URL on the property page of the parent JAR (''{1}'').";	
-					showError(shell, MessageFormat.format(message, new String[] { labelName, annotatedElement.getElementName() }));
-					return;
 				}
+				return;
 			}
 			if ("file".equals(baseURL.getProtocol())) {
 				URL noRefURL= JavaDocLocations.getJavaDocLocation(jelem, false);

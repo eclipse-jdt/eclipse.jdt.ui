@@ -41,6 +41,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -186,7 +187,7 @@ public class SourceAttachmentBlock {
 				path= getResolvedPath(path);
 			}
 			if (path != null) {
-				URL jdocLocation= JavaDocLocations.getJavadocLocation(path);
+				URL jdocLocation= JavaDocLocations.getLibraryJavadocLocation(path);
 				if (jdocLocation != null) {
 					jdocText= jdocLocation.toExternalForm();
 				}
@@ -756,7 +757,7 @@ public class SourceAttachmentBlock {
 						path= getResolvedPath(path);
 					}
 					if (path != null) {
-						JavaDocLocations.setJavadocLocation(path, getJavadocLocation());
+						JavaDocLocations.setLibraryJavadocLocation(path, getJavadocLocation());
 					}
 				} catch (JavaModelException e) {
 					throw new InvocationTargetException(e);

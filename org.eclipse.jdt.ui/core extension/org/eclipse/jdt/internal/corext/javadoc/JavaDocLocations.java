@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -63,31 +64,87 @@ public class JavaDocLocations {
 	private static final String NODE_PATH= "path";
 	private static final String NODE_URL= "url";
 	
+	private static final boolean IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
+
+	
 	private static Map fgJavadocLocations= new HashMap(5);
 	
 
+	private static IPath canonicalizedPath(IPath externalPath) {
+		if (externalPath == null || IS_CASE_SENSITIVE)
+			return externalPath;
+
+		if (ResourcesPlugin.getWorkspace().getRoot().findMember(externalPath) != null) {
+			return externalPath;
+		}
+
+		IPath canonicalPath = null;
+		try {
+			return new Path(externalPath.toFile().getCanonicalPath());
+		} catch (IOException e) {
+		}
+		return externalPath;
+	}
+
+
+
+	/**
+	 * Gets the Javadoc location for an archive with the given path.
+	 * @deprecated Use getJavaDocBaseLocation
+	 */
+	public static URL getJavadocLocation(IPath path) {
+		return getJavadocBaseLocation(path);
+	}
+
 	/**
 	 * Sets the Javadoc location for an archive with the given path.
+	 * @deprecated Use setJavaDocBaseLocation
 	 */
 	public static void setJavadocLocation(IPath path, URL url) {
+		setJavadocBaseLocation(path, url);
+	}
+
+
+	private static void setJavadocBaseLocation(IPath path, URL url) {
 		if (url == null) {
-			fgJavadocLocations.remove(url);
+			fgJavadocLocations.remove(path);
 		} else {
 			fgJavadocLocations.put(path, url);
 		}
 	}
-
+	
 	/**
 	 * Gets the Javadoc location for an archive with the given path.
 	 */
-	public static URL getJavadocLocation(IPath path) {
+	private static URL getJavadocBaseLocation(IPath path) {
 		return (URL) fgJavadocLocations.get(path);
+	}		
+	
+	/**
+	 * Sets the Javadoc location for an archive with the given path.
+	 */
+	public static void setLibraryJavadocLocation(IPath archivePath, URL url) {
+		setJavadocBaseLocation(canonicalizedPath(archivePath), url);
+	}
+	
+	/**
+	 * Sets the Javadoc location for an archive with the given path.
+	 */
+	public static void setProjectJavadocLocation(IJavaProject project, URL url) {
+		setJavadocBaseLocation(project.getProject().getFullPath(), url);
+	}
+	
+	public static URL getProjectJavadocLocation(IJavaProject project) {
+		return getJavadocBaseLocation(project.getProject().getFullPath());
 	}
 
-		
-	public static IPath getAnnotatedPath(IJavaElement element) throws JavaModelException {	
+	public static URL getLibraryJavadocLocation(IPath archivePath) {
+		return getJavadocBaseLocation(canonicalizedPath(archivePath));
+	}
+
+	public static URL getJavadocBaseLocation(IJavaElement element) throws JavaModelException {	
 		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
-			return element.getCorrespondingResource().getFullPath();
+			return getProjectJavadocLocation((IJavaProject) element);
 		}
 		
 		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
@@ -96,9 +153,9 @@ public class JavaDocLocations {
 		}
 
 		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
-			return root.getPath();
+			return getLibraryJavadocLocation(root.getPath());
 		} else {
-			return root.getJavaProject().getProject().getFullPath();
+			return getProjectJavadocLocation(root.getJavaProject());
 		}	
 	}
 		
@@ -111,7 +168,7 @@ public class JavaDocLocations {
 		
 		while (iter.hasNext()) {
 			IPath path= (IPath) iter.next();
-			URL url= getJavadocLocation(path);
+			URL url= getJavadocBaseLocation(path);
 		
 			Element varElement= document.createElement(NODE_ENTRY);
 			varElement.setAttribute(NODE_PATH, path.toString());
@@ -160,7 +217,7 @@ public class JavaDocLocations {
 				if (element.getNodeName().equalsIgnoreCase(NODE_ENTRY)) {
 					String varPath = element.getAttribute(NODE_PATH);
 					String varURL = element.getAttribute(NODE_URL);
-					setJavadocLocation(new Path(varPath), new URL(varURL));
+					setJavadocBaseLocation(new Path(varPath), new URL(varURL));
 				}
 			}
 		}
@@ -187,12 +244,7 @@ public class JavaDocLocations {
 	}
 	
 	public static URL getJavaDocLocation(IJavaElement element, boolean includeMemberReference) throws CoreException {
-		IPath annotated= getAnnotatedPath(element);
-		if (annotated == null) {
-			return null;
-		}
-
-		URL baseLocation= getJavadocLocation(annotated);
+		URL baseLocation= getJavadocBaseLocation(element);
 		if (baseLocation == null) {
 			return null;
 		}
