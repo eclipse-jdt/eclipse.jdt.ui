@@ -113,7 +113,7 @@ public class RefreshAction extends SelectionDispatchAction {
 						checkLocationDeleted(((IProject)resource));
 					}
 					IJavaElement jElement= JavaCore.create(resource);
-					if (jElement != null)
+					if (jElement != null && jElement.exists())
 						javaElements.add(jElement);
 				}
 				IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
