@@ -203,8 +203,12 @@ public class TestSearchEngine {
 		    throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE, JUnitMessages.getString("JUnitBaseLaunchConfiguration.error.notests"), null))); //$NON-NLS-1$
 
 		for (int i = 0; i < subtypes.length; i++) {
-			if (subtypes[i].getAncestor(element.getElementType()).equals(element))
-			    found.add(subtypes[i]);
+		    try {
+		        if (element.equals(subtypes[i].getAncestor(element.getElementType())) && hasValidModifiers(subtypes[i]))
+		            found.add(subtypes[i]);
+		    } catch (JavaModelException e) {
+		        JUnitPlugin.log(e.getStatus());
+		    }
 		}
 		return found;
 	}
@@ -257,16 +261,22 @@ public class TestSearchEngine {
 	}
 	
 	private static boolean isTestType(IType type) throws JavaModelException {
-		if (Flags.isAbstract(type.getFlags())) 
-			return false;
-		if (!Flags.isPublic(type.getFlags())) 
-			return false;
+	    if (!hasValidModifiers(type))
+		    return false;
 		
 		IType[] interfaces= type.newSupertypeHierarchy(null).getAllSuperInterfaces(type);
 		for (int i= 0; i < interfaces.length; i++)
 			if(interfaces[i].getFullyQualifiedName().equals(JUnitPlugin.TEST_INTERFACE_NAME))
 				return true;
 		return false;
+	}
+	
+	private static boolean hasValidModifiers(IType type) throws JavaModelException {
+		if (Flags.isAbstract(type.getFlags())) 
+			return false;
+		if (!Flags.isPublic(type.getFlags())) 
+			return false;
+		return true;
 	}
 
 	public static boolean isTestImplementor(IType type) throws JavaModelException {
