@@ -921,8 +921,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected IStatus containerChanged() {
 		IStatus status= super.containerChanged();
 		fCurrPackageCompletionProcessor.setPackageFragmentRoot(getPackageFragmentRoot());
-		if (getPackageFragmentRoot() != null)
+		if (getPackageFragmentRoot() != null) {
+			//TODO: use JavaSourceTypeCompletionProcessor
 			fEnclosingTypeCompletionProcessor.setPackageFragment(getPackageFragmentRoot().getPackageFragment("")); //$NON-NLS-1$
+		}
 		return status;
 	}
 	
@@ -976,7 +978,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			
 			fCurrPackage= root.getPackageFragment(packName);
-			fSuperClassCompletionProcessor.setPackageFragment(fCurrPackage);
+			fSuperClassCompletionProcessor.setExtendsCompletionContext(fCurrPackage);
 		} else {
 			status.setError(""); //$NON-NLS-1$
 		}
