@@ -362,9 +362,6 @@ public final class ASTRewrite {
 		setCopySourceEdit(node, null);
 		setChangeProperty(node, null);
 	}
-
-	private static final String CHANGEKEY= "ASTChangeData"; //$NON-NLS-1$
-	private static final String COPYSOURCEKEY= "ASTCopySource"; //$NON-NLS-1$
 	
 	private final void setChangeProperty(ASTNode node, ASTChange change) {
 		fChangedProperties.put(node, change);

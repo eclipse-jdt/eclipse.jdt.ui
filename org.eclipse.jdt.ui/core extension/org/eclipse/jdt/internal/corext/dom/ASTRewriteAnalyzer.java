@@ -213,14 +213,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			Assert.isTrue(false, "Can not insert or remove node " + node + " in " + node.getParent().getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}	
-	
-	private void checkNoInsert(ASTNode node) {
-		if (isInserted(node)) {	
-			Assert.isTrue(false, "Can not insert node in " + node.getParent().getClass().getName()); //$NON-NLS-1$
-		}
-	}		
-	
-	
+		
 	private int rewriteRequiredNode(ASTNode node) {
 		checkNoInsertOrRemove(node);
 		if (isReplaced(node)) {
@@ -432,10 +425,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			}
 		}
 		return defaultOffset;
-	}
-	
-	private boolean isInsertFirst(List list) {
-		return !list.isEmpty() && isInserted((ASTNode) list.get(0));
 	}
 	
 	private boolean hasChanges(List list) {
@@ -1121,8 +1110,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(AssertStatement)
 	 */
 	public boolean visit(AssertStatement node) {
-		checkNoChange(node.getExpression());
-		checkNoChange(node.getMessage());
+		rewriteRequiredNode(node.getExpression());
+		
+		checkNoInsertOrRemove(node.getMessage());
+		Expression message= node.getMessage();
+		if (message != null) {
+			rewriteRequiredNode(message);
+		}
 		return true;
 	}
 
