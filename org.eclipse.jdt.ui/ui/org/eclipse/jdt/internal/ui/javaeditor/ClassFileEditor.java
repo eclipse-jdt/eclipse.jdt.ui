@@ -54,6 +54,224 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ClassFileEditor extends JavaEditor {
 	
+		/**
+		 * A form to attach source to a class file.
+		 */
+		private class SourceAttachmentForm implements IPropertyChangeListener {
+		
+			private final IClassFile fFile;
+			private ScrolledComposite fScrolledComposite;
+			private Color fBackgroundColor;
+			private Color fForegroundColor;
+			private Color fSeparatorColor;
+			private List fBannerLabels= new ArrayList();
+			private List fHeaderLabels= new ArrayList();
+			
+			/**
+			 * Creates a source attachment form for a class file. 
+			 */
+			public SourceAttachmentForm(IClassFile file) {
+				fFile= file;
+			}
+		
+			/**
+			 * Returns the package fragment root of this file.
+			 */
+			private IPackageFragmentRoot getPackageFragmentRoot(IClassFile file) {
+		
+				IJavaElement element= file.getParent();
+				while (element != null && element.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
+					element= element.getParent();
+		
+				return (IPackageFragmentRoot) element;		
+			}
+			
+			/**
+			 * Creates the control of the source attachment form.
+			 */
+			public Control createControl(Composite parent) {
+		
+				Display display= parent.getDisplay();
+				fBackgroundColor= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+				fForegroundColor= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
+				fSeparatorColor= new Color(display, 152, 170, 203);
+		
+				JFaceResources.getFontRegistry().addListener(this);
+		
+				fScrolledComposite= new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+				fScrolledComposite.setAlwaysShowScrollBars(false);
+				fScrolledComposite.setExpandHorizontal(true);
+				fScrolledComposite.setExpandVertical(true);
+				fScrolledComposite.addDisposeListener(new DisposeListener() {
+					public void widgetDisposed(DisposeEvent e) {
+						JFaceResources.getFontRegistry().removeListener(SourceAttachmentForm.this);
+						fScrolledComposite= null;
+						fSeparatorColor.dispose();
+						fSeparatorColor= null;				
+						fBannerLabels.clear();
+						fHeaderLabels.clear();
+					}
+				});
+		
+				Composite composite= createComposite(fScrolledComposite);
+				composite.setLayout(new GridLayout());
+		
+				Label titleLabel= createTitleLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.title")); //$NON-NLS-1$
+				createLabel(composite, null);
+				createLabel(composite, null);
+		
+				createHeadingLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.heading")); //$NON-NLS-1$
+		
+				Composite separator= createCompositeSeparator(composite);
+				GridData data= new GridData(GridData.FILL_HORIZONTAL);
+				data.heightHint= 2;
+				separator.setLayoutData(data);
+		
+				final IPackageFragmentRoot root= getPackageFragmentRoot(fFile);
+		
+				if (root != null) {
+					
+					if (!root.isArchive()) {
+						createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
+		
+					} else {
+						try {
+							Button button;
+		
+							IPath path= root.getSourceAttachmentPath();			
+							if (path == null) {			
+								createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceAttachment", root.getElementName())); //$NON-NLS-1$
+								createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToAttach")); //$NON-NLS-1$
+								createLabel(composite, null);
+		
+								button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.attachSource"));		 //$NON-NLS-1$
+		
+							} else {
+								createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceInAttachment", fFile.getElementName())); //$NON-NLS-1$
+								createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToChange")); //$NON-NLS-1$
+								createLabel(composite, null);
+		
+								button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.changeAttachedSource")); //$NON-NLS-1$
+							}
+		
+							button.setEnabled(false); // XXX depending on 15423
+							button.addSelectionListener(new SelectionListener() {
+								public void widgetSelected(SelectionEvent event) {				
+									try {
+										SourceAttachmentDialog dialog= new SourceAttachmentDialog(fScrolledComposite.getShell(), root);
+										if (dialog.open() == SourceAttachmentDialog.OK)
+											verifyInput(getEditorInput());
+		
+									} catch (CoreException e) {
+										String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
+										String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
+										ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
+									}
+								}
+		
+								public void widgetDefaultSelected(SelectionEvent e) {}
+							});
+		
+						} catch (JavaModelException e) {
+							String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
+							String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
+							ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
+						}
+					}
+				}
+		
+				fScrolledComposite.setContent(composite);
+				fScrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+				
+				return fScrolledComposite;
+			}
+		
+			/*
+			 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+			 */
+			public void propertyChange(PropertyChangeEvent event) {		
+		
+				for (Iterator iterator = fBannerLabels.iterator(); iterator.hasNext();) {
+					Label label = (Label) iterator.next();
+					label.setFont(JFaceResources.getBannerFont());
+				}
+		
+				for (Iterator iterator = fHeaderLabels.iterator(); iterator.hasNext();) {
+					Label label = (Label) iterator.next();
+					label.setFont(JFaceResources.getHeaderFont());
+				}
+		
+				Control control= fScrolledComposite.getContent();
+				fScrolledComposite.setMinSize(control.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+				fScrolledComposite.setContent(control);
+				
+				fScrolledComposite.layout(true);
+				fScrolledComposite.redraw();
+			}
+		
+			// --- copied from org.eclipse.update.ui.forms.internal.FormWidgetFactory
+		
+			private Composite createComposite(Composite parent) {
+				Composite composite = new Composite(parent, SWT.NONE);
+				composite.setBackground(fBackgroundColor);
+		//		composite.addMouseListener(new MouseAdapter() {
+		//			public void mousePressed(MouseEvent e) {
+		//				((Control) e.widget).setFocus();
+		//			}
+		//		});
+				return composite;
+			}
+		
+			private Composite createCompositeSeparator(Composite parent) {
+				Composite composite = new Composite(parent, SWT.NONE);
+				composite.setBackground(fSeparatorColor);
+				return composite;
+			}
+				
+			private Label createLabel(Composite parent, String text) {
+				Label label = new Label(parent, SWT.NONE);
+				if (text != null)
+					label.setText(text);
+				label.setBackground(fBackgroundColor);
+				label.setForeground(fForegroundColor);
+				return label;
+			}
+		
+			private Label createTitleLabel(Composite parent, String text) {
+				Label label = new Label(parent, SWT.NONE);
+				if (text != null)
+					label.setText(text);
+				label.setBackground(fBackgroundColor);
+				label.setForeground(fForegroundColor);
+				label.setFont(JFaceResources.getHeaderFont());
+				fHeaderLabels.add(label);
+				return label;
+			}
+		
+			private Label createHeadingLabel(Composite parent, String text) {
+				Label label = new Label(parent, SWT.NONE);
+				if (text != null)
+					label.setText(text);
+				label.setBackground(fBackgroundColor);
+				label.setForeground(fForegroundColor);
+				label.setFont(JFaceResources.getBannerFont());
+				fBannerLabels.add(label);
+				return label;
+			}
+			
+			private Button createButton(Composite parent, String text) {
+				Button button = new Button(parent, SWT.FLAT);
+				button.setBackground(fBackgroundColor);
+				button.setForeground(fForegroundColor);
+				if (text != null)
+					button.setText(text);
+		//		button.addFocusListener(visibilityHandler);
+				return button;
+			}	
+		};
+	
+	
+	
 	private StackLayout fStackLayout;
 	private Composite fParent;
 
@@ -256,223 +474,5 @@ public class ClassFileEditor extends JavaEditor {
 				fParent.layout();
 			}
 		}		
-	}
-
-/**
- * A form to attach source to a class file.
- */
-private class SourceAttachmentForm implements IPropertyChangeListener {
-
-	private final IClassFile fFile;
-	private ScrolledComposite fScrolledComposite;
-	private Color fBackgroundColor;
-	private Color fForegroundColor;
-	private Color fSeparatorColor;
-	private List fBannerLabels= new ArrayList();
-	private List fHeaderLabels= new ArrayList();
-	
-	/**
-	 * Creates a source attachment form for a class file. 
-	 */
-	public SourceAttachmentForm(IClassFile file) {
-		fFile= file;
-	}
-
-	/**
-	 * Returns the package fragment root of this file.
-	 */
-	private IPackageFragmentRoot getPackageFragmentRoot(IClassFile file) {
-
-		IJavaElement element= file.getParent();
-		while (element != null && element.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
-			element= element.getParent();
-
-		return (IPackageFragmentRoot) element;		
-	}
-	
-	/**
-	 * Creates the control of the source attachment form.
-	 */
-	public Control createControl(Composite parent) {
-
-		Display display= parent.getDisplay();
-		fBackgroundColor= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-		fForegroundColor= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
-		fSeparatorColor= new Color(display, 152, 170, 203);
-
-		JFaceResources.getFontRegistry().addListener(this);
-
-		fScrolledComposite= new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-		fScrolledComposite.setAlwaysShowScrollBars(false);
-		fScrolledComposite.setExpandHorizontal(true);
-		fScrolledComposite.setExpandVertical(true);
-		fScrolledComposite.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				JFaceResources.getFontRegistry().removeListener(SourceAttachmentForm.this);
-				fScrolledComposite= null;
-				fSeparatorColor.dispose();
-				fSeparatorColor= null;				
-				fBannerLabels.clear();
-				fHeaderLabels.clear();
-			}
-		});
-
-		Composite composite= createComposite(fScrolledComposite);
-		composite.setLayout(new GridLayout());
-
-		Label titleLabel= createTitleLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.title")); //$NON-NLS-1$
-		createLabel(composite, null);
-		createLabel(composite, null);
-
-		createHeadingLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.heading")); //$NON-NLS-1$
-
-		Composite separator= createCompositeSeparator(composite);
-		GridData data= new GridData(GridData.FILL_HORIZONTAL);
-		data.heightHint= 2;
-		separator.setLayoutData(data);
-
-		final IPackageFragmentRoot root= getPackageFragmentRoot(fFile);
-
-		if (root != null) {
-			
-			if (!root.isArchive()) {
-				createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
-
-			} else {
-				try {
-					Button button;
-
-					IPath path= root.getSourceAttachmentPath();			
-					if (path == null) {			
-						createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceAttachment", root.getElementName())); //$NON-NLS-1$
-						createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToAttach")); //$NON-NLS-1$
-						createLabel(composite, null);
-
-						button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.attachSource"));		
-
-					} else {
-						createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceInAttachment", fFile.getElementName())); //$NON-NLS-1$
-						createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToChange")); //$NON-NLS-1$
-						createLabel(composite, null);
-
-						button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.changeAttachedSource")); //$NON-NLS-1$
-					}
-
-					button.setEnabled(false); // XXX depending on 15423
-					button.addSelectionListener(new SelectionListener() {
-						public void widgetSelected(SelectionEvent event) {				
-							try {
-								SourceAttachmentDialog dialog= new SourceAttachmentDialog(fScrolledComposite.getShell(), root);
-								if (dialog.open() == SourceAttachmentDialog.OK)
-									verifyInput(getEditorInput());
-
-							} catch (CoreException e) {
-								String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
-								String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
-								ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
-							}
-						}
-
-						public void widgetDefaultSelected(SelectionEvent e) {}
-					});
-
-				} catch (JavaModelException e) {
-					String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
-					String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
-					ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
-				}
-			}
-		}
-
-		fScrolledComposite.setContent(composite);
-		fScrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
-		return fScrolledComposite;
-	}
-
-	/*
-	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
-	 */
-	public void propertyChange(PropertyChangeEvent event) {		
-
-		for (Iterator iterator = fBannerLabels.iterator(); iterator.hasNext();) {
-			Label label = (Label) iterator.next();
-			label.setFont(JFaceResources.getBannerFont());
-		}
-
-		for (Iterator iterator = fHeaderLabels.iterator(); iterator.hasNext();) {
-			Label label = (Label) iterator.next();
-			label.setFont(JFaceResources.getHeaderFont());
-		}
-
-		Control control= fScrolledComposite.getContent();
-		fScrolledComposite.setMinSize(control.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		fScrolledComposite.setContent(control);
-		
-		fScrolledComposite.layout(true);
-		fScrolledComposite.redraw();
-	}
-
-	// --- copied from org.eclipse.update.ui.forms.internal.FormWidgetFactory
-
-	private Composite createComposite(Composite parent) {
-		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setBackground(fBackgroundColor);
-//		composite.addMouseListener(new MouseAdapter() {
-//			public void mousePressed(MouseEvent e) {
-//				((Control) e.widget).setFocus();
-//			}
-//		});
-		return composite;
-	}
-
-	private Composite createCompositeSeparator(Composite parent) {
-		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setBackground(fSeparatorColor);
-		return composite;
-	}
-		
-	private Label createLabel(Composite parent, String text) {
-		Label label = new Label(parent, SWT.NONE);
-		if (text != null)
-			label.setText(text);
-		label.setBackground(fBackgroundColor);
-		label.setForeground(fForegroundColor);
-		return label;
-	}
-
-	private Label createTitleLabel(Composite parent, String text) {
-		Label label = new Label(parent, SWT.NONE);
-		if (text != null)
-			label.setText(text);
-		label.setBackground(fBackgroundColor);
-		label.setForeground(fForegroundColor);
-		label.setFont(JFaceResources.getHeaderFont());
-		fHeaderLabels.add(label);
-		return label;
-	}
-
-	private Label createHeadingLabel(Composite parent, String text) {
-		Label label = new Label(parent, SWT.NONE);
-		if (text != null)
-			label.setText(text);
-		label.setBackground(fBackgroundColor);
-		label.setForeground(fForegroundColor);
-		label.setFont(JFaceResources.getBannerFont());
-		fBannerLabels.add(label);
-		return label;
-	}
-	
-	private Button createButton(Composite parent, String text) {
-		Button button = new Button(parent, SWT.FLAT);
-		button.setBackground(fBackgroundColor);
-		button.setForeground(fForegroundColor);
-		if (text != null)
-			button.setText(text);
-//		button.addFocusListener(visibilityHandler);
-		return button;
 	}	
-}
-
-	
 }

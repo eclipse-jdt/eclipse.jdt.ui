@@ -103,6 +103,11 @@ public class EditorUtility {
 			return openInEditor((IFile) inputElement);
 		
 		IEditorInput input= getEditorInput(inputElement);
+		if (input instanceof IFileEditorInput) {
+			IFileEditorInput fileInput= (IFileEditorInput) input;
+			return openInEditor(fileInput.getFile());
+		}
+		
 		if (input != null)
 			return openInEditor(input, getEditorID(input, inputElement), activate);
 			
@@ -143,21 +148,10 @@ public class EditorUtility {
 	 *@deprecated	Made it public again for java debugger UI.
 	 */
 	public static String getEditorID(IEditorInput input, Object inputObject) {
-		
 		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
-		
-//		// check whether favorit editor as been remembered
-//		if (input instanceof IFileEditorInput) {
-//			String id= ((IFileEditorInput) input).getFile().getPersistentPropert(EDITOR_KEY);
-//			if (id != null)
-//				return id;
-//		}
-		
-		// get the default editor		
 		IEditorDescriptor descriptor= registry.getDefaultEditor(input.getName());
 		if (descriptor != null)
 			return descriptor.getId();
-
 		return null;
 	}
 	

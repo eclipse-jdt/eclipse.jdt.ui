@@ -359,7 +359,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		};
 		
 	/* Preference key for temporary problems */
-	public final static String HANDLE_TEMPRARY_PROBELMS= "handleTemporaryProblems"; //$NON-NLS-1$
+	public final static String HANDLE_TEMPORARY_PROBLEMS= "handleTemporaryProblems"; //$NON-NLS-1$
 	
 	
 	/** The buffer factory */
@@ -379,7 +379,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	public CompilationUnitDocumentProvider() {
 		fPropertyListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				if (HANDLE_TEMPRARY_PROBELMS.equals(event.getProperty()))
+				if (HANDLE_TEMPORARY_PROBLEMS.equals(event.getProperty()))
 					enableHandlingTemporaryProblems();
 			}
 		};
@@ -712,7 +712,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	protected boolean isHandlingTemporaryProblems() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(HANDLE_TEMPRARY_PROBELMS);
+		return store.getBoolean(HANDLE_TEMPORARY_PROBLEMS);
 	} 
 	
 	/**
