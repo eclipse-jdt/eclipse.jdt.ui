@@ -12,6 +12,8 @@ package org.eclipse.jdt.ui.examples;
 
 import java.util.HashMap;
 
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
@@ -29,10 +31,40 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
+/** In plugin.xml:
+    <extension
+         id="testmarker"
+         name="jdt-test-problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+   </extension>
+   <extension
+         point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+            markerType="org.eclipse.jdt.ui.tests.testmarker"
+            class="org.eclipse.jdt.ui.tests.quickfix.MarkerResolutionGenerator">
+      </markerResolutionGenerator>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.ICompilationUnit"
+            id="org.eclipse.jdt.ui.examples.AddTestMarkersAction">
+         <action
+               label="%AddTestMarkersAction.label"
+               tooltip="%AddTestMarkersAction.tooltip"
+               class="org.eclipse.jdt.ui.examples.AddTestMarkersAction"
+               menubarPath="AddTestMarkers"
+               enablesFor="1"
+               id="addTestmarkers">
+         </action>
+      </objectContribution>
+   </extension>
+ */
 
 public class AddTestMarkersAction extends Action implements IActionDelegate {
 
@@ -45,9 +77,8 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 		try {
 			EditorUtility.openInEditor(fCompilationUnit);
 			
-			ICompilationUnit cu= JavaModelUtil.toWorkingCopy(fCompilationUnit);
 			IScanner scanner= ToolFactory.createScanner(true, false, false, true);
-			scanner.setSource(cu.getSource().toCharArray());
+			scanner.setSource(fCompilationUnit.getSource().toCharArray());
 			
 			int count= 0;
 			int tok;
@@ -57,7 +88,7 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 					int start= scanner.getCurrentTokenStartPosition();
 					int end= scanner.getCurrentTokenEndPosition() + 1;
 					int line= scanner.getLineNumber(start);
-					createMarker(cu, line, start, end - start);
+					createMarker(fCompilationUnit, line, start, end - start);
 					count++;
 				}
 			} while (tok != ITerminalSymbols.TokenNameEOF);
@@ -90,8 +121,6 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 	
 	
 	private void createMarker(ICompilationUnit cu, int line, int offset, int len) throws CoreException {
-		ICompilationUnit original= JavaModelUtil.toOriginal(cu);
-
 		HashMap map= new HashMap();
 		map.put(IMarker.LOCATION, cu.getElementName());
 		map.put(IMarker.MESSAGE, "Test marker");
@@ -100,7 +129,7 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 		map.put(IMarker.CHAR_START, new Integer(offset));
 		map.put(IMarker.CHAR_END, new Integer(offset + len));
 	
-		MarkerUtilities.createMarker(original.getResource(), map, "org.eclipse.jdt.ui.tests.testmarker");
+		MarkerUtilities.createMarker(cu.getResource(), map, "org.eclipse.jdt.ui.tests.testmarker");
 	}	
 
 }
