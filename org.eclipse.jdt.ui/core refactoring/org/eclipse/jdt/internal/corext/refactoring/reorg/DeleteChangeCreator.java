@@ -109,7 +109,7 @@ class DeleteChangeCreator{
 	private static TextChange addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdits= new MultiTextEdit();
-		rewrite.rewriteNode(textBuffer, resultingEdits, null);
+		rewrite.rewriteNode(textBuffer, resultingEdits);
 
 		TextChange textChange= manager.get(cu);
 		if (textChange instanceof TextFileChange){
