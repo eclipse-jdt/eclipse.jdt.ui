@@ -52,6 +52,8 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS | 
 			JavaElementLabels.F_APP_TYPE_SIGNATURE;
 
+	protected IJavaElement fCurrentInput;
+
 	private IPartListener2 fPartListener= new IPartListener2() {
 		public void partVisible(IWorkbenchPartReference ref) {
 			if (ref.getId().equals(getSite().getId()))
@@ -77,7 +79,6 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 		}
 	};
 
-	Object fCurrentInput;
 
 	abstract protected boolean setInput(Object input);
 	abstract protected void internalCreatePartControl(Composite parent);
@@ -111,6 +112,9 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 	}
 
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+		if (part.equals(this))
+			return;
+		
 		setInputFrom(part);
 	}
 
