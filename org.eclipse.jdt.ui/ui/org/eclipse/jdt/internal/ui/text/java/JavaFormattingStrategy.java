@@ -12,9 +12,7 @@ import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.tex
 public class JavaFormattingStrategy implements IFormattingStrategy {
 	
 	private String fInitialIndentation;
-	private ISourceViewer fViewer;
-	private final static int CLEAR_ALL_NEWLINES_OPTION = 3;
-	
+	private ISourceViewer fViewer;	
 
 	public JavaFormattingStrategy(ISourceViewer viewer) {
 		fViewer = viewer;
@@ -31,15 +29,6 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 	 * @see IFormattingStrategy#formatterStops()
 	 */
 	public void formatterStops() {
-	}
-	
-	private boolean isClearAllNewLines(ConfigurableOption[] options) {
-		for (int i= 0; i < options.length; i++) {
-			if (options[i].getID() == CLEAR_ALL_NEWLINES_OPTION) {
-				return options[i].getCurrentValueIndex() == 0 ? true : false;
-			}
-		}
-		return false;
 	}
 	
 	private String getLineDelimiter() {

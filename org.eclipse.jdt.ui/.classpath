@@ -22,6 +22,6 @@
         path="/org.eclipse.core.runtime/runtime.jar" sourcepath="/org.eclipse.core.runtime/runtimesrc.zip"/>
     <classpathentry kind="lib" path="/org.eclipse.swt/swt.jar"/>
     <classpathentry kind="lib" path="/org.apache.xerces/xerces.jar"/>
-    <classpathentry kind="var" path="JRE_LIB"/>
+    <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

@@ -7,20 +7,7 @@ package org.eclipse.jdt.internal.ui.text;
  */
 
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.source.IAnnotationHover;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.ISourceViewer;
-
-import org.eclipse.core.resources.IMarker;
-
-import org.eclipse.ui.texteditor.MarkerAnnotation;
+import java.io.IOException;import java.io.Reader;import java.io.StringReader;import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.graphics.GC;import org.eclipse.swt.graphics.Rectangle;import org.eclipse.swt.widgets.Display;import org.eclipse.core.resources.IMarker;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.Position;import org.eclipse.jface.text.source.IAnnotationHover;import org.eclipse.jface.text.source.IAnnotationModel;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.ui.texteditor.MarkerAnnotation;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 
@@ -96,8 +83,50 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
 		IMarker marker= getMarker(sourceViewer, lineNumber);
 		if (marker != null) {
-			return marker.getAttribute(IMarker.MESSAGE, (String) null);
+			String text= marker.getAttribute(IMarker.MESSAGE, (String) null);
+			return formatHoverText(text, sourceViewer.getTextWidget().getDisplay());
 		}
 		return null;
 	}
+	
+	/*
+	 * Formats the message of this hover to fit onto the screen.
+	 */
+	private String formatHoverText(String text, Display display) {
+		String lineDelim= System.getProperty("line.separator", "\n");
+		
+		Reader textReader= new StringReader(text);
+		GC gc= new GC(display);
+		try {
+			StringBuffer buf= new StringBuffer();
+			
+			LineBreakingReader reader= new LineBreakingReader(textReader, gc, getHoverWidth(display));
+			String line= reader.readLine();
+			while (line != null) {
+				if (buf.length() != 0) {
+					buf.append(lineDelim);
+				}
+				buf.append(line);
+				line= reader.readLine();
+			}
+			return buf.toString();
+		} catch (IOException e) {
+			JavaPlugin.log(e);
+		} finally {
+			gc.dispose();
+		}
+		return null;
+	}
+	
+	private int getHoverWidth(Display display) {
+		Rectangle displayBounds= display.getBounds();
+		int hoverWidth= displayBounds.width - (display.getCursorLocation().x - displayBounds.x);
+		hoverWidth-= 12; // add some space to the border, hack!
+		if (hoverWidth < 200) {
+			hoverWidth= 200;
+		}
+		return hoverWidth;
+	}	
+	
+	
 }

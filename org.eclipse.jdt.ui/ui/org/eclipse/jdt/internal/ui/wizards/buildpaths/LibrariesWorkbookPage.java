@@ -287,17 +287,19 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private List getFilteredExistingContainerEntries() {
 		List res= new ArrayList();
-		try {
-			IPath outputLocation= fCurrJProject.getOutputLocation();
-			if (outputLocation != null) {
-				IResource resource= fWorkspaceRoot.findMember(outputLocation);
-				if (resource != null) {
-					res.add(resource);
+		if (fCurrJProject.exists()) {
+			try {
+				IPath outputLocation= fCurrJProject.getOutputLocation();
+				if (outputLocation != null) {
+					IResource resource= fWorkspaceRoot.findMember(outputLocation);
+					if (resource != null) {
+						res.add(resource);
+					}
 				}
+			} catch (JavaModelException e) {
+				// ignore it here, just log
+				JavaPlugin.log(e.getStatus());
 			}
-		} catch (JavaModelException e) {
-			// ignore it here, just log
-			JavaPlugin.log(e.getStatus());
 		}	
 			
 		List cplist= fLibrariesList.getElements();

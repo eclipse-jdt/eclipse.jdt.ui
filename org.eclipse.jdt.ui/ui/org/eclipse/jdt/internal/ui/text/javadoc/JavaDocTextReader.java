@@ -12,7 +12,6 @@ import java.io.Reader;
 public class JavaDocTextReader extends SingleCharReader {
 	
 	private static final String LINE_DELIM= System.getProperty("line.separator", "\n");
-	private static final String JDOC_TAG_BEGIN= LINE_DELIM + '@';
 	
 	private static HashMap fgHTMLTagLookup;
 	private static HashMap fgEntityLookup;
@@ -100,7 +99,7 @@ public class JavaDocTextReader extends SingleCharReader {
 				} else if (ch == '@') {
 					processJDocTag();
 				} else if (ch == '&') {
-					processEscapeCharacter();
+					processEntity();
 				} else {
 					break;
 				}
@@ -112,18 +111,18 @@ public class JavaDocTextReader extends SingleCharReader {
 		return ch;
 	}
 	
+	/*
+	 * A '<' has been read. Process a html tag
+	 */ 
 	private void processHTML() throws IOException {
 		StringBuffer buf= new StringBuffer();
 		int ch;
 		do {		
 			ch= nextChar();
 			while (ch != -1 && ch != '>') {
-				//if (ch == '"' || ch == '\'') {
-				//	readString(buf, ch);
-				//} else {
-					buf.append(Character.toLowerCase((char)ch));
-					ch= nextChar();
-				//}
+				// to be done: skip strings
+				buf.append(Character.toLowerCase((char)ch));
+				ch= nextChar();
 			}
 			if (ch == -1) {
 				return;
@@ -149,12 +148,28 @@ public class JavaDocTextReader extends SingleCharReader {
 	protected String htmlToText(String htmlTag) {
 		return (String) fgHTMLTagLookup.get(htmlTag);
 	}	
-			
-	private void processJDocTag() {
-		addToBuffer(JDOC_TAG_BEGIN);
+
+	/*
+	 * A '@' has been read. Process a jdoc tag
+	 */ 			
+	private void processJDocTag() throws IOException {
+		StringBuffer buf= new StringBuffer("@");
+		int ch= nextChar();
+		while (ch != -1 && Character.isLetter((char)ch)) {
+			buf.append((char)ch);
+			ch= nextChar();
+		}
+		if (!"@link".equals(buf.toString())) {
+			buf.insert(0, LINE_DELIM);
+		}
+		buf.append((char)ch);
+		addToBuffer(buf.toString());		
 	}
-	
-	private void processEscapeCharacter() throws IOException {
+
+	/*
+	 * A '&' has been read. Process a entity
+	 */ 	
+	private void processEntity() throws IOException {
 		StringBuffer buf= new StringBuffer();
 		int ch= nextChar();
 		while (Character.isLetterOrDigit((char)ch) || ch == '#') {

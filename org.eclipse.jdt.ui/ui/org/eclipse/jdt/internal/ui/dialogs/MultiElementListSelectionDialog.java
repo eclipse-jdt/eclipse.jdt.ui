@@ -235,6 +235,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	
 	/**
 	 * @private
+	 * @see AbstractElementListSelectionDialog#updateButtonsEnableState
 	 */
 	protected void updateButtonsEnableState(IStatus status) {
 		boolean isOK= !status.matches(IStatus.ERROR);

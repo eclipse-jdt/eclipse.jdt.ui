@@ -388,8 +388,8 @@ public class BuildPathsBlock {
 							fClassPathStatus.setError(getFormattedString(CP_DUPLICATE_ERROR, cpelementPath.toString()));
 							return;
 						} else {
-							// nested entry (applies only if they are of the same kind)
-							if (cpelementKind == currKind && JavaConventions.isOverlappingRoots(currPath, cpelementPath)) {
+							// overlapping entry
+							if (JavaConventions.isOverlappingRoots(currPath, cpelementPath)) {
 								fClassPathStatus.setError(getFormattedString(CP_RECURSIVE_ERROR, new String[] { currPath.toString(), cpelementPath.toString()}));
 								return;
 							}
