@@ -294,6 +294,11 @@
 		class="org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
+	<page name="%compilerOptionsPrefName"
+		id="org.eclipse.jdt.ui.preferences.CompilerPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
+		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>	
 </extension>
 
 <extension
