@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,16 +20,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -80,8 +87,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -111,14 +116,9 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
+import org.eclipse.jdt.ui.CodeGeneration;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 public class MoveInnerToTopRefactoring extends Refactoring {
 
@@ -527,7 +527,11 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 	private CompilationUnitRewrite fSourceRewrite;
 
+	private Collection fStaticImports;
+
 	private IType fType;
+
+	private Collection fTypeImports;
 
 	private MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {
 		Assert.isNotNull(type);
@@ -582,21 +586,22 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 	private void addImportsToTargetUnit(final ICompilationUnit targetUnit, final IProgressMonitor monitor) throws CoreException, JavaModelException {
 		final ImportsStructure structure= new ImportsStructure(targetUnit, fCodeGenerationSettings.importOrder, fCodeGenerationSettings.importThreshold, true);
-		final IType[] references= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[] { fType}, monitor);
-		IType type= null;
-		for (int index= 0; index < references.length; index++) {
-			type= references[index];
-			if (isParent(fType, type))
-				continue;
-			else if (type.isBinary() || !type.getCompilationUnit().equals(fSourceRewrite.getCu())) {
-				IType declaring= type.getDeclaringType();
-				while (declaring != null) {
-					type= declaring;
-					declaring= declaring.getDeclaringType();
-				}
+		if (fTypeImports != null) {
+			ITypeBinding type= null;
+			for (final Iterator iterator= fTypeImports.iterator(); iterator.hasNext();) {
+				type= (ITypeBinding) iterator.next();
+				structure.addImport(type);
 			}
-			structure.addImport(JavaModelUtil.getFullyQualifiedName(type));
 		}
+		if (fStaticImports != null) {
+			IBinding binding= null;
+			for (final Iterator iterator= fStaticImports.iterator(); iterator.hasNext();) {
+				binding= (IBinding) iterator.next();
+				structure.addStaticImport(binding);
+			}
+		}
+		fTypeImports= null;
+		fStaticImports= null;
 		structure.create(false, monitor);
 	}
 
@@ -854,13 +859,18 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		if (targetUnit.equals(sourceUnit)) {
 			final AbstractTypeDeclaration declaration= findTypeDeclaration(fType, root);
 			final TextEditGroup qualifierGroup= fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_qualifier")); //$NON-NLS-1$
-			if (!remove && !JdtFlags.isStatic(fType) && fCreateInstanceField) {
-				if (JavaElementUtil.getAllConstructors(fType).length == 0)
-					createConstructor(declaration, rewrite);
-				else
-					modifyConstructors(declaration, rewrite);
-				addInheritedTypeQualifications(declaration, targetRewrite, qualifierGroup);
-				addEnclosingInstanceDeclaration(declaration, rewrite);
+			if (!remove) {
+				if (!JdtFlags.isStatic(fType) && fCreateInstanceField) {
+					if (JavaElementUtil.getAllConstructors(fType).length == 0)
+						createConstructor(declaration, rewrite);
+					else
+						modifyConstructors(declaration, rewrite);
+					addInheritedTypeQualifications(declaration, targetRewrite, qualifierGroup);
+					addEnclosingInstanceDeclaration(declaration, rewrite);
+				}
+				fTypeImports= new ArrayList();
+				fStaticImports= new ArrayList();
+				ImportRewriteUtil.collectImports(fType.getJavaProject(), declaration, fTypeImports, fStaticImports, false);
 			}
 			addEnclosingInstanceTypeParameters(parameters, declaration, rewrite);
 			modifyAccessToEnclosingInstance(targetRewrite, declaration, status, monitor);
@@ -1223,17 +1233,6 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 	public boolean isInstanceFieldMarkedFinal() {
 		return fMarkInstanceFieldAsFinal;
-	}
-
-	private boolean isParent(IType parent, IType child) {
-		Assert.isNotNull(parent);
-		Assert.isNotNull(child);
-		if (parent.equals(child))
-			return true;
-		final IType declaring= child.getDeclaringType();
-		if (declaring != null)
-			return isParent(parent, declaring);
-		return false;
 	}
 
 	private boolean isSubclassBindingOfEnclosingType(ITypeBinding binding) {
