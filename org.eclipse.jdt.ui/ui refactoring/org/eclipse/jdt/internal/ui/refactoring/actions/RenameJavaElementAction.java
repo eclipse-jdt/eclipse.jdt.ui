@@ -93,6 +93,12 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	}
     //----------
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
+		setEnabled(canOperateOn(selection));
+	}
+	
+	private boolean canOperateOn(ITextSelection selection){
+		if (fEditor == null)
+			return false;
+		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 }

@@ -21,8 +21,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class RenameTempAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
-	private String fDialogMessageTitle;
+	private final CompilationUnitEditor fEditor;
+	private final String fDialogMessageTitle;
 	
 	public RenameTempAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
