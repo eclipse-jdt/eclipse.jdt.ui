@@ -1,11 +1,11 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
-
 import org.eclipse.jface.util.Assert;
+
 import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -61,29 +61,21 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
 	 */
 	public void modelChanged(IAnnotationModel model) {
-		if (fJavaEditor.getTitleImage() == null) {
+		Image titleImage= fJavaEditor.getTitleImage();
+		if (titleImage == null) {
 			return;
 		}
-		Shell shell= fJavaEditor.getEditorSite().getShell();
-		if (shell != null && !shell.isDisposed()) {
-			shell.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					doUpdateErrorTicks();
-				}
-			});
-		}
-	}
-	
-	private void doUpdateErrorTicks() {
 		IEditorInput input= fJavaEditor.getEditorInput();
-		if (fLabelProvider != null && input != null) { // running async, tests needed
+		if (fLabelProvider != null && input != null) { // might run async, tests needed
 			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
 			if (jelement != null) {
-				fJavaEditor.updatedTitleImage(fLabelProvider.getImage(jelement));
+				Image newImage= fLabelProvider.getImage(jelement);
+				if (titleImage != newImage) {
+					fJavaEditor.updatedTitleImage(newImage);
+				}
 			}
 		}
-	}	
-
+	}
 }
 
 
