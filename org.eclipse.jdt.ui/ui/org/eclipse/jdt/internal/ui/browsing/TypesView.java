@@ -40,16 +40,6 @@ public class TypesView extends JavaBrowsingPart {
 	}
 
 	/**
-	 * Adds filters the viewer of this part.
-	 */
-	protected void addFilters() {
-		getViewer().addFilter(new EmptyInnerPackageFilter());
-		getViewer().addFilter(new EmptyPackageFilter());
-		getViewer().addFilter(new NonJavaElementFilter());
-		getViewer().addFilter(new LibraryFilter());
-	}
-
-	/**
 	 * Answers if the given <code>element</code> is a valid
 	 * input for this part.
 	 * 
