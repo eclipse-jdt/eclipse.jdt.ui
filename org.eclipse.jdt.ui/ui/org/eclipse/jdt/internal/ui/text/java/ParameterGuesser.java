@@ -23,10 +23,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.Flags;
@@ -41,10 +42,11 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.PositionBasedCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -57,6 +59,38 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * @author Andrew McCullough
  */
 public class ParameterGuesser {
+	
+	private static final class PositionBasedJavaContext extends JavaContext {
+
+		private Position fPosition;
+
+		/**
+		 * @param type
+		 * @param document
+		 * @param position
+		 * @param compilationUnit
+		 */
+		public PositionBasedJavaContext(TemplateContextType type, IDocument document, Position position, ICompilationUnit compilationUnit) {
+			super(type, document, position.getOffset(), position.getLength(), compilationUnit);
+			fPosition= position;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.corext.template.java.JavaContext#getStart()
+		 */
+		public int getStart() {
+			return fPosition.getOffset();
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.corext.template.java.JavaContext#getEnd()
+		 */
+		public int getEnd() {
+			return fPosition.getOffset() + fPosition.getLength();
+		}
+		
+	}
+	
 
 	private static final class Variable {
 
@@ -170,14 +204,6 @@ public class ParameterGuesser {
 			return element.getElementName();		
 		}
 
-		private static int getCompletionOffset(String source, int start) {
-			int index= start;
-			char c;
-			while (index > 0 && (c= source.charAt(index - 1)) != '{' && c != ';')
-				index--;
-			return Math.min(index + 1, source.length());
-		}
-
 		/**
 		 * Determine if the declaring type matches the type of the code completion invokation
 		 */
@@ -266,9 +292,7 @@ public class ParameterGuesser {
 	/** Local and member variables of the compilation unit */
 	private List fVariables;
 	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
-	private Template fTemplateMatch;
-	private String fTemplateType;
-	private String fTemplateCollection;
+	private boolean fIsTemplateMatch;
 
 	/**
 	 * Creates a parameter guesser for compilation unit and offset.
@@ -350,23 +374,26 @@ public class ParameterGuesser {
 	 * @param paramPackage - the package of the parameter we are trying to match
 	 * @param paramType - the qualified name of the parameter we are trying to match
 	 * @param paramName - the name of the paramater (used to find similarly named matches)
+	 * @param pos
+	 * @param document
 	 * @return returns the name of the best match, or <code>null</code> if no match found
+	 * @throws JavaModelException
 	 */
-	public ICompletionProposal[] parameterProposals(String paramPackage, String paramType, String paramName, int offset, IDocument document) throws JavaModelException {
+	public ICompletionProposal[] parameterProposals(String paramPackage, String paramType, String paramName, Position pos, IDocument document) throws JavaModelException {
 		
 		if (fVariables == null) {
 			VariableCollector variableCollector= new VariableCollector();
 			fVariables= variableCollector.collect(fCodeAssistOffset, fCompilationUnit);
 		}
 		
-		fTemplateMatch= null;
+		fIsTemplateMatch= false;
 		
 		List typeMatches= findFieldsMatchingType(fVariables, paramPackage, paramType);
 		orderMatches(typeMatches, paramName);
 		if (typeMatches == null)
 			return new ICompletionProposal[0];
 			
-		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size() + (fTemplateMatch != null ? 1 : 0)];
+		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size() + (fIsTemplateMatch ? 1 : 0)];
 		int i= 0; int replacementLength= 0;
 		for (Iterator it= typeMatches.iterator(); it.hasNext();) {
 			Variable v= (Variable)it.next();
@@ -375,21 +402,25 @@ public class ParameterGuesser {
 				replacementLength= v.name.length();
 			}
 			
-			if (fTemplateMatch != null && !isArrayType(v.typeName)) {
-				ret[i++]= createTemplateProposal(offset, document, replacementLength);
-				fTemplateMatch= null;
+			// bump priority for collection-toArrays if there are no assignable arrays
+			if (fIsTemplateMatch && !isArrayType(v.typeName)) {
+				ret[i++]= createTemplateProposal(document, pos, paramType);
+				fIsTemplateMatch= false;
 			}
 			
-			JavaCompletionProposal proposal= new JavaCompletionProposal(v.name, offset, replacementLength, getImage(v.descriptor), v.name, ret.length + 1 - i);
-			char[] triggers= new char[v.triggerChars.length + 1];
+			final char[] triggers= new char[v.triggerChars.length + 1];
 			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
 			triggers[triggers.length - 1]= ';';
-			proposal.setTriggerCharacters(triggers);
+			ICompletionProposal proposal= new PositionBasedCompletionProposal(v.name, pos, replacementLength, getImage(v.descriptor), v.name, null, null) {
+				public char[] getTriggerCharacters() {
+					return triggers;
+				}
+			};
 			ret[i++]= proposal;
 		}
 
-		if (fTemplateMatch != null) {
-			ret[i++]= createTemplateProposal(offset, document, replacementLength);
+		if (fIsTemplateMatch) {
+			ret[i++]= createTemplateProposal(document, pos, paramType);
 		}
 		
 		return ret;
@@ -401,18 +432,21 @@ public class ParameterGuesser {
 	 * @param replacementLength
 	 * @return
 	 */
-	private TemplateProposal createTemplateProposal(int offset, IDocument document, int replacementLength) {
+	private TemplateProposal createTemplateProposal(IDocument document, Position position, String templateType) {
+		String dimensionLess= templateType.substring(0, templateType.length() - 2);
 		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
-		CompilationUnitContext context= ((CompilationUnitContextType) contextType).createContext(document, offset, replacementLength, fCompilationUnit);
+		
+		position.offset= getCompletionOffset(document.get(), fCodeAssistOffset);
+		JavaContext context= new PositionBasedJavaContext(contextType, document, position, fCompilationUnit);
+		context.guessCollections(); // force code completion at the completion offset...
+		
 		context.setForceEvaluation(true);
-		context.setVariable("type", fTemplateType); //$NON-NLS-1$
-		context.setVariable("collection", fTemplateCollection); //$NON-NLS-1$
+		context.setVariable("type", dimensionLess); //$NON-NLS-1$
 		
-		int start= context.getStart();
-		int end= context.getEnd();
-		IRegion region= new Region(start, end - start);
+		IRegion region= new Region(fCodeAssistOffset, 0);
 		
-		TemplateProposal proposal= new TemplateProposal(fTemplateMatch, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
+		Template toArray= JavaPlugin.getDefault().getTemplateStore().findTemplate("toarray"); //$NON-NLS-1$
+		TemplateProposal proposal= new TemplateProposal(toArray, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
 		return proposal;
 	}
 
@@ -556,10 +590,8 @@ public class ParameterGuesser {
 			if (isTypeMatch(variable, typePackage, typeName))
 				matches.add(variable);
 			if (isArrayType && isAssignable(variable, "java.util", "Collection")) { //$NON-NLS-1$//$NON-NLS-2$
-				fTemplateMatch= JavaPlugin.getDefault().getTemplateStore().findTemplate("toarray"); //$NON-NLS-1$
+				fIsTemplateMatch= true;
 				isArrayType= false;
-				fTemplateType= typeName.substring(0, typeName.length() - 2);
-				fTemplateCollection= variable.name;
 			}
 		}
 
@@ -683,6 +715,14 @@ public class ParameterGuesser {
 	private static boolean isPrimitive(char[] typeName) {
 		String s= new String(typeName);
 		return "boolean".equals(s) || "byte".equals(s) || "short".equals(s) || "int".equals(s) || "long".equals(s) || "float".equals(s) || "double".equals(s) || "char".equals(s); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+	}
+
+	private static int getCompletionOffset(String source, int start) {
+		int index= start;
+		char c;
+		while (index > 0 && (c= source.charAt(index - 1)) != '{' && c != ';')
+			index--;
+		return Math.min(index + 1, source.length());
 	}
 
 }

@@ -136,7 +136,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#getCompletionText()
 	 */
-	public CharSequence getCompletionText() {
+	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		return fUnqualifiedTypeName;
 	}
 

@@ -403,45 +403,14 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementString()
 	 */
-	public CharSequence getCompletionText() {
+	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		return fTemplate.getName();
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementOffset()
 	 */
-	public int getCompletionOffset() {
-		return fRegion.getOffset();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void updateReplacementOffset(int newOffset) {
-		Assert.isTrue(newOffset > 0);
-		fRegion= new Region(newOffset, Math.max(0, fRegion.getLength() - (newOffset - fRegion.getOffset())));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getReplacementString() {
-		fContext.setReadOnly(false);
-		try {
-			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
-			return templateBuffer.getString();
-		} catch (BadLocationException e) {
-			return new String();
-		} catch (TemplateException e) {
-			return new String();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void updateReplacementLength(int length) {
-		Assert.isTrue(length >= 0);
-		fRegion= new Region(fRegion.getOffset(), length);
+	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
+		return getReplaceOffset();
 	}
 }

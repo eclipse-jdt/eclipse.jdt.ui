@@ -380,7 +380,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getCompletionOffset()
 	 */
-	public int getCompletionOffset() {
+	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 		return getReplacementOffset();
 	}
 
@@ -421,7 +421,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementText()
 	 */
-	public CharSequence getCompletionText() {
+	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		String string= getReplacementString();
 		int pos= string.indexOf('(');
 		if (pos > 0)

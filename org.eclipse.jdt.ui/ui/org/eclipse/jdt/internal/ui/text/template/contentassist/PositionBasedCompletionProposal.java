@@ -22,14 +22,16 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 
 /**
  * An enhanced implementation of the <code>ICompletionProposal</code> interface implementing all the extension interfaces.
+ * It uses a position to track its replacement offset and length. The position must be set up externally.
  */
-final class PositionBasedCompletionProposal implements ICompletionProposal, ICompletionProposalExtension2 {
+public class PositionBasedCompletionProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2 {
 	
 	/** The string to be displayed in the completion proposal popup */
 	private String fDisplayString;
@@ -161,6 +163,35 @@ final class PositionBasedCompletionProposal implements ICompletionProposal, ICom
 			// ignore concurrently modified document
 		}
 		return false;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#apply(org.eclipse.jface.text.IDocument, char, int)
+	 */
+	public void apply(IDocument document, char trigger, int offset) {
+		// not called any more
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#isValidFor(org.eclipse.jface.text.IDocument, int)
+	 */
+	public boolean isValidFor(IDocument document, int offset) {
+		// not called any more
+		return false;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#getTriggerCharacters()
+	 */
+	public char[] getTriggerCharacters() {
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#getContextInformationPosition()
+	 */
+	public int getContextInformationPosition() {
+		return fReplacementPosition.getOffset();
 	}
 	
 }
