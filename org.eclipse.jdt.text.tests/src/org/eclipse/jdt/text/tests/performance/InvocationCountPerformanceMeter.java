@@ -255,7 +255,16 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/** Default debugging port when the system property cannot be interpreted as an integer */
 	public static final int DEBUG_PORT_DEFAULT= 7777;
 	
-	/** Debugging port */
+	/**
+	 * Debugging port
+	 * <p>
+	 * TODO: Fetch the debug port with
+	 * <code>Platform.getCommandLineArgs()</code> or
+	 * <code>org.eclipse.core.runtime.adaptor.EnvironmentInfo.getDefault().getCommandLineArgs()</code>
+	 * (the latter may be necessary because it also includes low-level
+	 * arguments).
+	 * </p>
+	 */
 	private static final int PORT= intValueOf(System.getProperty(DEBUG_PORT_PROPERTY), DEBUG_PORT_DEFAULT);
 	
 	/** Empty array of methods */
