@@ -624,8 +624,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		editorComposite.setLayoutData(gd);		
 
 		fAppearanceColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		gd= new GridData(GridData.FILL_BOTH);
-		gd.heightHint= convertHeightInCharsToPixels(5);
+		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
+		gd.heightHint= convertHeightInCharsToPixels(8);
 		fAppearanceColorList.setLayoutData(gd);
 						
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
@@ -671,7 +671,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	}
 	
 	
-	private Control createProblemIndicationPage(Composite parent) {
+	private Control createAnnotationsPage(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		composite.setLayout(layout);
@@ -682,15 +682,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		text= PreferencesMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
 		addCheckBox(composite, text, PreferenceConstants.EDITOR_CORRECTION_INDICATION, 0);
 		
-		Label label= new Label(composite, SWT.LEFT );
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
-		label.setLayoutData(gd);
-		
-		label= new Label(composite, SWT.LEFT);
+		addFiller(composite);
+				
+		Label label= new Label(composite, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotationPresentationOptions")); //$NON-NLS-1$
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
 
@@ -705,8 +701,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		editorComposite.setLayoutData(gd);		
 
 		fProblemIndicationList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		gd= new GridData(GridData.FILL_BOTH);
-		gd.heightHint= convertHeightInCharsToPixels(5);
+		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
+		gd.heightHint= convertHeightInCharsToPixels(8);
 		fProblemIndicationList.setLayoutData(gd);
 						
 		Composite optionsComposite= new Composite(editorComposite, SWT.NONE);
@@ -792,43 +788,60 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return composite;
 	}
 
-	private Control createBehaviourPage(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NULL);
-		GridLayout layout= new GridLayout(); layout.numColumns= 2;
+	private Control createTypingPage(Composite parent) {
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 1;
 		composite.setLayout(layout);
 
-		String label= PreferencesMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 1);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
+		String label= PreferencesMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 1);
 
+		addFiller(composite);
+
+		Group group= new Group(composite, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		group.setLayout(layout);
+
+		group.setText(PreferencesMessages.getString("JavaEditorPreferencePage.typing.description")); //$NON-NLS-1$
+
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
+		addCheckBox(group, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 1);
+		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.smartPaste"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_PASTE, 1);
+		addCheckBox(group, label, PreferenceConstants.EDITOR_SMART_PASTE, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SPACES_FOR_TABS, 1);
+		addCheckBox(group, label, PreferenceConstants.EDITOR_SPACES_FOR_TABS, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeStrings"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_STRINGS, 1);
+		addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_STRINGS, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACKETS, 1);
+		addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_BRACKETS, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeBraces"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACES, 1);
+		addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_BRACES, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
-		Button button= addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 1);
+		Button button= addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
-		fAddJavaDocTagsButton= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 1);
+		fAddJavaDocTagsButton= addCheckBox(group, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 1);
 		createDependency(button, fAddJavaDocTagsButton);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.formatJavaDocs"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_FORMAT_JAVADOCS, 1);
-	
+		addCheckBox(group, label, PreferenceConstants.EDITOR_FORMAT_JAVADOCS, 1);
+
 		return composite;
+	}
+	private void addFiller(Composite composite) {
+		Label filler= new Label(composite, SWT.LEFT );
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
+		filler.setLayoutData(gd);
 	}
 	
 	private static void indent(Control control) {
@@ -939,12 +952,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item.setControl(createContentAssistPage(folder));
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.problemIndicationTab.title")); //$NON-NLS-1$
-		item.setControl(createProblemIndicationPage(folder));
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotationsTab.title")); //$NON-NLS-1$
+		item.setControl(createAnnotationsPage(folder));
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.behaviourTab.title")); //$NON-NLS-1$
-		item.setControl(createBehaviourPage(folder));
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.typing.tabTitle")); //$NON-NLS-1$
+		item.setControl(createTypingPage(folder));
 
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.hoverTab.title")); //$NON-NLS-1$
