@@ -151,7 +151,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 				return;
 			}
 			if ("file".equals(baseURL.getProtocol())) { //$NON-NLS-1$
-				URL noRefURL= JavaDocLocations.getJavaDocLocation(element, false);
+				URL noRefURL= JavaDocLocations.getJavadocLocation(element, false);
 				if (!(new File(noRefURL.getFile())).isFile()) {
 					String message= ActionMessages.getString("OpenExternalJavadocAction.no_entry"); //$NON-NLS-1$
 					showMessage(shell, MessageFormat.format(message, new String[] { labelName, noRefURL.toExternalForm() }), false);
@@ -159,7 +159,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 				}
 			}
 		
-			URL url= JavaDocLocations.getJavaDocLocation(element, true);
+			URL url= JavaDocLocations.getJavadocLocation(element, true);
 			if (url != null) {
 				OpenBrowserUtil.open(url, shell, getTitle());
 			} 		
