@@ -350,7 +350,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			// update the action to use the right selection since the refresh
 			// action doesn't listen to selection changes.
 			fRefreshAction.selectionChanged(selection);
-			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, fRefreshAction);
+			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);
 		}	
 	}
@@ -432,13 +432,19 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		IAdaptable element= (IAdaptable) selection.getFirstElement();
 		IResource resource= (IResource)element.getAdapter(IResource.class);
 
-		if (!(resource instanceof IContainer))
-			return;
-			
-		// Create a menu flyout.
-		MenuManager submenu = new MenuManager("Open Perspective");
-		submenu.add(new OpenPerspectiveMenu(getSite().getWorkbenchWindow(), resource));
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
+		if ((resource instanceof IContainer)) {			
+			// Create a menu flyout.
+			MenuManager submenu = new MenuManager("Open Perspective");
+			submenu.add(new OpenPerspectiveMenu(getSite().getWorkbenchWindow(), resource));
+			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
+		}
+		IType type= convertToType(element);
+		if (type != null) {
+			// Create a menu flyout.
+			MenuManager submenu = new MenuManager("Open Perspective");
+			submenu.add(new OpenPerspectiveMenu(getSite().getWorkbenchWindow(), type));
+			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
+		}		
 	}
 	
 	private void addOpenWithMenu(IMenuManager menu, IStructuredSelection selection) {
@@ -894,4 +900,37 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			setTitleToolTip("");
 		}
 	}
+	
+	/**
+	 * Converts the input to an IType if possible 
+	 */	
+	private IType convertToType(Object input) {
+		if (input instanceof IType) { 
+			return (IType)input;
+		} 
+		if (input instanceof IClassFile) {
+			try {
+				IType type= ((IClassFile)input).getType();
+				return type;
+			} catch (JavaModelException e) {
+				// not handled here
+			}
+		}
+		if (input instanceof ICompilationUnit) {
+			try {
+				IType[] types= ((ICompilationUnit)input).getTypes();
+				if (types == null || types.length == 0)
+					return null;
+									
+				if (types.length == 1) {
+					return types[0];
+				} 
+				// show selection dialog
+			} catch (JavaModelException e) {
+				return null;
+			}
+		}
+		return null;	
+	}
+
 }
