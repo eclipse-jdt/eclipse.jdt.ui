@@ -1,5 +1,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.util.Iterator;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -16,6 +18,7 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -146,6 +149,14 @@ public class InlineTempRefactoring extends Refactoring {
 		
 		if (fTempDeclaration.getParent() instanceof CatchClause)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.exceptions_declared")); //$NON-NLS-1$
+		
+		if (ASTNodes.getParent(fTempDeclaration, ASTNode.FOR_STATEMENT) != null){
+			ForStatement forStmt= (ForStatement)ASTNodes.getParent(fTempDeclaration, ASTNode.FOR_STATEMENT);
+			for (Iterator iter= forStmt.initializers().iterator(); iter.hasNext();) {
+				if (ASTNodes.isParent(fTempDeclaration, (Expression) iter.next()))
+					return RefactoringStatus.createFatalErrorStatus("Cannot inline variables declared in the initializer list of a 'for' statement.");
+			}
+		}
 		
 		if (fTempDeclaration.getInitializer() == null){
 			String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.not_initialized", getTempName());//$NON-NLS-1$
