@@ -70,7 +70,7 @@ public class JarWriter {
 			throw new OperationCanceledException();
 
 		try {
-			if (fJarPackage.usesManifest() && fJarPackage.areClassFilesExported()) {
+			if (fJarPackage.usesManifest() && fJarPackage.areGeneratedFilesExported()) {
 				Manifest manifest=  fJarPackage.getManifestProvider().create(fJarPackage);
 				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toOSString()), manifest);
 			} else

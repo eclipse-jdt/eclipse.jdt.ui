@@ -94,7 +94,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		document.appendChild(xmlJarDesc);
 		xmlWriteJarLocation(jarPackage, document, xmlJarDesc);
 		xmlWriteOptions(jarPackage, document, xmlJarDesc);
-		if (jarPackage.areClassFilesExported())
+		if (jarPackage.areGeneratedFilesExported())
 			xmlWriteManifest(jarPackage, document, xmlJarDesc);
 		xmlWriteSelectedElements(jarPackage, document, xmlJarDesc);
 
@@ -162,6 +162,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		Element selectedElements= document.createElement("selectedElements"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(selectedElements);
 		selectedElements.setAttribute("exportClassFiles", "" + jarPackage.areClassFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
+		selectedElements.setAttribute("exportOutputFolder", "" + jarPackage.areOutputFoldersExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		selectedElements.setAttribute("exportJavaFiles", "" + jarPackage.areJavaFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		Object[] elements= jarPackage.getElements();
 		for (int i= 0; i < elements.length; i++) {
@@ -186,6 +187,8 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		writer.write(JarPackagerMessages.getString("JarWriter.output.title")); //$NON-NLS-1$
 		writer.newLine();
 		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.exportBin", jarPackage.areClassFilesExported())); //$NON-NLS-1$
+		writer.newLine();
+		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.exportOutputFolders", jarPackage.areOutputFoldersExported())); //$NON-NLS-1$
 		writer.newLine();
 		writer.write(JarPackagerMessages.getFormattedString("JarWriter.output.exportJava", jarPackage.areJavaFilesExported())); //$NON-NLS-1$
 		writer.newLine();

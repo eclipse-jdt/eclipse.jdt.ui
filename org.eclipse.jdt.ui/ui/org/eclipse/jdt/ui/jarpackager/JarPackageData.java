@@ -52,6 +52,7 @@ public class JarPackageData {
 	 * The list fExported* is null if fExport* is false)
 	 */	
 	private boolean fExportClassFiles;	// export generated class files and resources
+	private boolean fExportOutputFolders;	// export all output folder of enclosing projects
 	private boolean fExportJavaFiles;		// export java files and resources
 
 	/*
@@ -120,6 +121,7 @@ public class JarPackageData {
 	
 	public JarPackageData() {
 		setExportClassFiles(true);
+		setExportOutputFolders(false);
 		setUseSourceFolderHierarchy(false);
 		setCompress(true);
 		setSaveDescription(false);
@@ -189,6 +191,38 @@ public class JarPackageData {
 	 */
 	public void setExportClassFiles(boolean state) {
 		fExportClassFiles= state;
+	}
+	
+	/**
+	 * Tells whether all output folders for the
+	 * enclosing projects of the exported elements.
+	 * 
+	 * @return	<code>true</code> if output folder are exported
+	 * @since 2.1.2.1
+	 */
+	public boolean areOutputFoldersExported() {
+		return fExportOutputFolders;
+	}
+
+	/**
+	 * Set option to export all output folders for the
+	 * enclosing projects of the exported elements.
+	 * 
+	 * @param state a boolean indicating the new state
+	 * @since 2.1.2.1
+	 */
+	public void setExportOutputFolders(boolean state) {
+		fExportOutputFolders= state;
+	}
+
+	/**
+	 * Tells whether files created by the Java builder are exported.
+	 * 
+	 * @return	<code>true</code> if output folder are exported
+	 * @since 2.1.2.1
+	 */
+	public boolean areGeneratedFilesExported() {
+		return fExportOutputFolders || fExportClassFiles;
 	}
 
 	/**
@@ -854,7 +888,7 @@ public class JarPackageData {
 	 * @return <code>true</code> if the JAR Package info is valid
 	 */
 	public boolean isValid() {
-		return (areClassFilesExported() || areJavaFilesExported())
+		return (areGeneratedFilesExported() || areJavaFilesExported())
 			&& getElements() != null && getElements().length > 0
 			&& getAbsoluteJarLocation() != null
 			&& isManifestAccessible()

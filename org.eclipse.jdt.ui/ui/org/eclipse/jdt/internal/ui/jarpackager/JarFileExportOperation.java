@@ -182,10 +182,17 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @return int
 	 */
 	protected int countSelectedElements() {
+		Set enclosingJavaProjects= new HashSet(10);
 		int count= 0;
+		
 		int n= fJarPackage.getElements().length;
 		for (int i= 0; i < n; i++) {
 			Object element= fJarPackage.getElements()[i];
+			
+			IJavaProject javaProject= getEnclosingJavaProject(element);
+			if (javaProject != null)
+				enclosingJavaProjects.add(javaProject);
+			
 			IResource resource= null;
 			if (element instanceof IJavaElement) {
 				IJavaElement je= (IJavaElement)element;
@@ -201,11 +208,32 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			}
 			else
 				resource= (IResource)element;
+
 			if (resource.getType() == IResource.FILE)
 				count++;
 			else
 				count += getTotalChildCount((IContainer)resource);
 		}
+		
+		if (fJarPackage.areOutputFoldersExported()) {
+			if (!fJarPackage.areJavaFilesExported())
+				count= 0;
+			Iterator iter= enclosingJavaProjects.iterator();
+			while (iter.hasNext()) {
+				IJavaProject javaProject= (IJavaProject)iter.next();
+				IContainer[] outputContainers;
+				try {
+					outputContainers= getOutputContainers(javaProject);
+				} catch (CoreException ex) {
+					addToStatus(ex);
+					continue;
+				}
+				for (int i= 0; i < outputContainers.length; i++)
+					count += getTotalChildCount(outputContainers[i]);
+
+			}
+		}
+		
 		return count;
 	}
 	
@@ -322,7 +350,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			exportContainer(progressMonitor, (IContainer)resource);
 	}
 
-	private void exportJavaElement(IProgressMonitor progressMonitor, IJavaElement je) throws java.lang.InterruptedException {
+	private void exportJavaElement(IProgressMonitor progressMonitor, IJavaElement je) throws InterruptedException {
 		if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && ((IPackageFragmentRoot)je).isArchive())
 			return;
 
@@ -331,7 +359,38 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			exportElement(children[i], progressMonitor);
 	}
 
-	private void exportContainer(IProgressMonitor progressMonitor, IContainer container) throws java.lang.InterruptedException {
+	private void exportResource(IProgressMonitor progressMonitor, IResource resource, int leadingSegmentsToRemove) throws InterruptedException {
+		if (resource instanceof IContainer) {
+			IContainer container= (IContainer)resource;
+			IResource[] children;
+			try {
+				children= container.members();
+			} catch (CoreException e) {
+				// this should never happen because an #isAccessible check is done before #members is invoked
+				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorDuringExport", container.getFullPath()), e); //$NON-NLS-1$
+				return;
+			}
+			for (int i= 0; i < children.length; i++)
+				exportResource(progressMonitor, children[i], leadingSegmentsToRemove);
+		} else if (resource instanceof IFile) {
+			try {
+				IPath destinationPath= resource.getFullPath().removeFirstSegments(leadingSegmentsToRemove);
+				progressMonitor.subTask(JarPackagerMessages.getFormattedString("JarFileExportOperation.exporting", destinationPath.toString())); //$NON-NLS-1$
+				fJarWriter.write((IFile)resource, destinationPath);
+			} catch (CoreException ex) {
+				Throwable realEx= ex.getStatus().getException();
+				if (realEx instanceof ZipException && realEx.getMessage() != null && realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$
+					addWarning(ex.getMessage(), realEx);
+				else
+					addToStatus(ex);
+			} finally {
+				progressMonitor.worked(1);
+				ModalContext.checkCanceled(progressMonitor);
+			}
+		}
+	}
+
+	private void exportContainer(IProgressMonitor progressMonitor, IContainer container) throws InterruptedException {
 		if (container.getType() == IResource.FOLDER && isOutputFolder((IFolder)container))
 			return;
 		
@@ -375,7 +434,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if ((fJarPackage.areClassFilesExported() &&
 					((isNonJavaResource || (pkgRoot != null && !isJavaFile(resource) && !isClassFile(resource)))
 					|| isInClassFolder && isClassFile(resource)))
-			|| (fJarPackage.areJavaFilesExported() && (isNonJavaResource || (pkgRoot != null && !isClassFile(resource))))) {
+			|| (fJarPackage.areJavaFilesExported() && (isNonJavaResource || (pkgRoot != null && !isClassFile(resource)) || (isInClassFolder && isClassFile(resource) && !fJarPackage.areClassFilesExported())))) {
 			try {
 				progressMonitor.subTask(JarPackagerMessages.getFormattedString("JarFileExportOperation.exporting", destinationPath.toString())); //$NON-NLS-1$
 				fJarWriter.write((IFile) resource, destinationPath);
@@ -427,9 +486,95 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 */
 	protected void exportSelectedElements(IProgressMonitor progressMonitor) throws InterruptedException {
 		fExportedClassContainers= new HashSet(10);
+		Set enclosingJavaProjects= new HashSet(10);
 		int n= fJarPackage.getElements().length;
-		for (int i= 0; i < n; i++)
-			exportElement(fJarPackage.getElements()[i], progressMonitor);
+		for (int i= 0; i < n; i++) {
+			Object element= fJarPackage.getElements()[i];
+			exportElement(element, progressMonitor);
+			if (fJarPackage.areOutputFoldersExported()) {
+				IJavaProject javaProject= getEnclosingJavaProject(element);
+				if (javaProject != null)
+					enclosingJavaProjects.add(javaProject);
+			}
+		}
+		if (fJarPackage.areOutputFoldersExported())
+			exportOutputFolders(progressMonitor, enclosingJavaProjects);
+	}
+	
+	private IJavaProject getEnclosingJavaProject(Object element) {
+		if (element instanceof IJavaElement) {
+			return ((IJavaElement)element).getJavaProject();
+		} else if (element instanceof IResource) {
+			IProject project= ((IResource)element).getProject();
+			try {
+				if (project.hasNature(JavaCore.NATURE_ID))
+					return JavaCore.create(project);
+			} catch (CoreException ex) {
+				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.projectNatureNotDeterminable", project.getFullPath()), ex); //$NON-NLS-1$
+			}
+		}
+		return null;
+	}
+	
+	private void exportOutputFolders(IProgressMonitor progressMonitor, Set javaProjects) throws InterruptedException {
+		if (javaProjects == null)
+			return;
+		
+		Iterator iter= javaProjects.iterator();
+		while (iter.hasNext()) {
+			IJavaProject javaProject= (IJavaProject)iter.next();
+			IContainer[] outputContainers;
+			try {
+				outputContainers= getOutputContainers(javaProject);
+			} catch (CoreException ex) {
+				addToStatus(ex);
+				continue;
+			}
+			for (int i= 0; i < outputContainers.length; i++)
+				exportResource(progressMonitor, outputContainers[i], outputContainers[i].getFullPath().segmentCount());
+
+		}
+	}
+	
+	private IContainer[] getOutputContainers(IJavaProject javaProject) throws CoreException {
+		Set outputPaths= new HashSet();
+		boolean includeDefaultOutputPath= false;
+		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			if (roots[i] != null) {
+				IClasspathEntry cpEntry= roots[i].getRawClasspathEntry();
+				if (cpEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					IPath location= cpEntry.getOutputLocation();
+					if (location != null)
+						outputPaths.add(location);
+					else
+						includeDefaultOutputPath= true;
+				}
+			}
+		}
+		
+		if (includeDefaultOutputPath) {
+			// Use default output location
+			outputPaths.add(javaProject.getOutputLocation());
+		}
+		
+		// Convert paths to containers
+		Set outputContainers= new HashSet(outputPaths.size());
+		Iterator iter= outputPaths.iterator();
+		while (iter.hasNext()) {
+			IPath path= (IPath)iter.next();
+			if (javaProject.getProject().getFullPath().equals(path))
+				outputContainers.add(javaProject.getProject());
+			else {
+				IFolder outputFolder= createFolderHandle(path);
+				if (outputFolder == null || !outputFolder.isAccessible()) {
+					String msg= JarPackagerMessages.getString("JarFileExportOperation.outputContainerNotAccessible"); //$NON-NLS-1$
+					addToStatus(new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null)));
+				} else
+					outputContainers.add(outputFolder);
+			}
+		}
+		return (IContainer[])outputContainers.toArray(new IContainer[outputContainers.size()]);
 	}
 
 	/**
@@ -731,7 +876,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			if (!preconditionsOK())
 				throw new InvocationTargetException(null, JarPackagerMessages.getString("JarFileExportOperation.jarCreationFailedSeeDetails")); //$NON-NLS-1$
 			int totalWork= countSelectedElements();
-			if (!isAutoBuilding() && fJarPackage.isBuildingIfNeeded() && fJarPackage.areClassFilesExported()) {
+			if (!isAutoBuilding() && fJarPackage.isBuildingIfNeeded() && fJarPackage.areGeneratedFilesExported()) {
 				int subMonitorTicks= totalWork/10;
 				totalWork += subMonitorTicks;
 				progressMonitor.beginTask("", totalWork); //$NON-NLS-1$
@@ -760,7 +905,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	}
 	
 	protected boolean preconditionsOK() {
-		if (!fJarPackage.areClassFilesExported() && !fJarPackage.areJavaFilesExported()) {
+		if (!fJarPackage.areGeneratedFilesExported() && !fJarPackage.areJavaFilesExported()) {
 			addError(JarPackagerMessages.getString("JarFileExportOperation.noExportTypeChosen"), null); //$NON-NLS-1$
 			return false;
 		}
@@ -918,7 +1063,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 	protected void saveFiles() {
 		// Save the manifest
-		if (fJarPackage.areClassFilesExported() && fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
+		if (fJarPackage.areGeneratedFilesExported() && fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
 			try {
 				saveManifest();
 			} catch (CoreException ex) {
@@ -1061,6 +1206,6 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	}
 
 	private boolean mustUseSourceFolderHierarchy() {
-		return fJarPackage.useSourceFolderHierarchy() && fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported();
+		return fJarPackage.useSourceFolderHierarchy() && fJarPackage.areJavaFilesExported() && !fJarPackage.areGeneratedFilesExported();
 	}
 }

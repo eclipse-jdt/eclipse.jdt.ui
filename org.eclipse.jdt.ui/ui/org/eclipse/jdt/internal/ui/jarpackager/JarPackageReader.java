@@ -123,7 +123,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			Element element= (Element)node;
 			xmlReadJarLocation(jarPackage, element);
 			xmlReadOptions(jarPackage, element);
-			if (jarPackage.areClassFilesExported())
+			if (jarPackage.areGeneratedFilesExported())
 				xmlReadManifest(jarPackage, element);
 			xmlReadSelectedElements(jarPackage, element);
 		}
@@ -184,6 +184,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	private void xmlReadSelectedElements(JarPackageData jarPackage, Element element) throws java.io.IOException {
 		if (element.getNodeName().equals("selectedElements")) { //$NON-NLS-1$
 			jarPackage.setExportClassFiles(getBooleanAttribute(element, "exportClassFiles")); //$NON-NLS-1$
+			jarPackage.setExportOutputFolders(getBooleanAttribute(element, "exportOutputFolder", false)); //$NON-NLS-1$
 			jarPackage.setExportJavaFiles(getBooleanAttribute(element, "exportJavaFiles")); //$NON-NLS-1$
 			NodeList selectedElements= element.getChildNodes();
 			Set elementsToExport= new HashSet(selectedElements.getLength());
