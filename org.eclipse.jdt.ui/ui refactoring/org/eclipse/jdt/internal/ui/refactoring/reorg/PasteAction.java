@@ -559,47 +559,35 @@ public class PasteAction extends SelectionDispatchAction{
 				p.setSource(getDestinationCu());
 				CompilationUnit cuNode= (CompilationUnit) p.createAST(pm);
 				ASTRewrite rewrite= ASTRewrite.create(cuNode.getAST());
-				for (int i= 0; i < fSources.length; i++) {
-					pasteSource(fSources[i], rewrite, cuNode);
+				TypedSource source= null;
+				for (int i= fSources.length - 1; i >= 0; i--) {
+					source= fSources[i];
+					final ASTNode destination= getDestinationNodeForSourceElement(fDestination, source.getType(), cuNode);
+					if (destination != null) {
+						if (destination.getNodeType() == ASTNode.COMPILATION_UNIT)
+							insertToCu(rewrite, createNewNodeToInsertToCu(source, rewrite), (CompilationUnit) destination);
+						else if (destination.getNodeType() == ASTNode.TYPE_DECLARATION)
+							insertToType(rewrite, createNewNodeToInsertToType(source, rewrite), (TypeDeclaration) destination);
+					}
 				}
 				TextBuffer textBuffer= TextBuffer.create(getDestinationCu().getBuffer().getContents());
 				TextEdit rootEdit= rewrite.rewriteAST(textBuffer.getDocument(), fDestination.getJavaProject().getOptions(true));
 				final CompilationUnitChange result= new CompilationUnitChange(ReorgMessages.getString("PasteAction.change.name"), getDestinationCu()); //$NON-NLS-1$
-				if (getDestinationCu().isWorkingCopy()) 
+				if (getDestinationCu().isWorkingCopy())
 					result.setSaveMode(TextFileChange.LEAVE_DIRTY);
 				TextChangeCompatibility.addTextEdit(result, ReorgMessages.getString("PasteAction.edit.name"), rootEdit); //$NON-NLS-1$
 				return result;
 			}
-			
-			private void pasteSource(TypedSource source, ASTRewrite rewrite, CompilationUnit cuNode) throws CoreException {
-				createAndInsertNewNode(source, cuNode, rewrite);
-			}
-
-			private ASTNode createAndInsertNewNode(TypedSource source, CompilationUnit cuNode, ASTRewrite rewrite) throws CoreException {
-				ASTNode destinationNode= getDestinationNodeForSourceElement(fDestination, source.getType(), cuNode);
-				if (destinationNode == null) {
-					return null;
-				} else if (destinationNode.getNodeType() == ASTNode.COMPILATION_UNIT) {
-					ASTNode nodeToInsert= createNewNodeToInsertToCu(source, rewrite);
-					insertToCu(rewrite, nodeToInsert, (CompilationUnit)destinationNode);
-					return nodeToInsert;
-				} else if (destinationNode.getNodeType() == ASTNode.TYPE_DECLARATION){
-					ASTNode nodeToInsert= createNewNodeToInsertToType(source, rewrite);
-					insertToType(rewrite, nodeToInsert, (TypeDeclaration)destinationNode);
-					return nodeToInsert;
-				} else
-					return null;
-			}
 
 			private static void insertToType(ASTRewrite rewrite, ASTNode node, AbstractTypeDeclaration typeDeclaration) {
-				switch(node.getNodeType()){
+				switch (node.getNodeType()) {
 					case ASTNode.ANNOTATION_TYPE_DECLARATION:
 					case ASTNode.ENUM_DECLARATION:
-					case ASTNode.TYPE_DECLARATION: 
-					case ASTNode.METHOD_DECLARATION: 
-					case ASTNode.FIELD_DECLARATION: 
-					case ASTNode.INITIALIZER: 
-						rewrite.getListRewrite(typeDeclaration, typeDeclaration.getBodyDeclarationsProperty()).insertAt(node, ASTNodes.getInsertionIndex((BodyDeclaration)node, typeDeclaration.bodyDeclarations()), null);
+					case ASTNode.TYPE_DECLARATION:
+					case ASTNode.METHOD_DECLARATION:
+					case ASTNode.FIELD_DECLARATION:
+					case ASTNode.INITIALIZER:
+						rewrite.getListRewrite(typeDeclaration, typeDeclaration.getBodyDeclarationsProperty()).insertAt(node, ASTNodes.getInsertionIndex((BodyDeclaration) node, typeDeclaration.bodyDeclarations()), null);
 						break;
 					default:
 						Assert.isTrue(false, String.valueOf(node.getNodeType()));
@@ -607,11 +595,11 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 
 			private static void insertToCu(ASTRewrite rewrite, ASTNode node, CompilationUnit cuNode) {
-				switch(node.getNodeType()){
-					case ASTNode.TYPE_DECLARATION: 
+				switch (node.getNodeType()) {
+					case ASTNode.TYPE_DECLARATION:
 					case ASTNode.ENUM_DECLARATION:
 					case ASTNode.ANNOTATION_TYPE_DECLARATION:
-						rewrite.getListRewrite(cuNode, CompilationUnit.TYPES_PROPERTY).insertAt(node, ASTNodes.getInsertionIndex((AbstractTypeDeclaration)node, cuNode.types()), null);
+						rewrite.getListRewrite(cuNode, CompilationUnit.TYPES_PROPERTY).insertAt(node, ASTNodes.getInsertionIndex((AbstractTypeDeclaration) node, cuNode.types()), null);
 						break;
 					case ASTNode.IMPORT_DECLARATION:
 						rewrite.getListRewrite(cuNode, CompilationUnit.IMPORTS_PROPERTY).insertLast(node, null);
