@@ -77,7 +77,6 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void selectionChanged(ITextSelection selection) {
-		System.out.println(selection.getLength());
 		setEnabled(checkEnabled(selection));
 	}
 	
