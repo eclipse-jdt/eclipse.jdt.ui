@@ -173,7 +173,7 @@ public class CompilationUnitRewrite {
 				}
 			}
 			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
-				TextEdit importsEdit= fImportRewrite.createEdit(document);
+				TextEdit importsEdit= fImportRewrite.createEdit(document, null);
 				if (!isEmptyEdit(importsEdit)) {
 					multiEdit.addChild(importsEdit);
 					String importUpdateName= RefactoringCoreMessages.getString("ASTData.update_imports"); //$NON-NLS-1$
