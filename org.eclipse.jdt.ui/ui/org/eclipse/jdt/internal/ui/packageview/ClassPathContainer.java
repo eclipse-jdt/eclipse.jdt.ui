@@ -10,17 +10,26 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -28,6 +37,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -39,6 +49,45 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	private IClasspathEntry fClassPathEntry;
 	private IClasspathContainer fContainer;
 
+	public static class RequiredProjectWrapper implements IAdaptable, IWorkbenchAdapter {
+
+		private final IJavaElement fProject;
+		private static ImageDescriptor DESC_OBJ_PROJECT;	
+		{
+			ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages(); 
+			DESC_OBJ_PROJECT= images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
+		}
+
+		public RequiredProjectWrapper(IJavaElement project) {
+			this.fProject= project;
+		}
+		
+		public IJavaElement getProject() {
+			return fProject; 
+		}
+		
+		public Object getAdapter(Class adapter) {
+			if (adapter == IWorkbenchAdapter.class) 
+				return this;
+			return null;
+		}
+
+		public Object[] getChildren(Object o) {
+			return null;
+		}
+
+		public ImageDescriptor getImageDescriptor(Object object) {
+			return DESC_OBJ_PROJECT;
+		}
+
+		public String getLabel(Object o) {
+			return fProject.getElementName();
+		}
+
+		public Object getParent(Object o) {
+			return null;
+		}
+	}
 
 	public ClassPathContainer(IJavaProject parent, IClasspathEntry entry) {
 		fProject= parent;
@@ -79,7 +128,31 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	}
 
 	public Object[] getChildren(Object o) {
-		return getPackageFragmentRoots();
+		return concatenate(getPackageFragmentRoots(), getRequiredProjects());
+	}
+
+	private Object[] getRequiredProjects() {
+		IClasspathEntry[] classpathEntries= fContainer.getClasspathEntries();
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		List list= new ArrayList();
+		for (int i= 0; i < classpathEntries.length; i++) {
+			IClasspathEntry entry= classpathEntries[i];
+			if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
+				IResource resource= root.findMember(entry.getPath());
+				if (resource instanceof IProject)
+					list.add(new RequiredProjectWrapper(JavaCore.create(resource)));
+			}
+		}
+		return list.toArray();
+	}
+
+	protected static Object[] concatenate(Object[] a1, Object[] a2) {
+		int a1Len= a1.length;
+		int a2Len= a2.length;
+		Object[] res= new Object[a1Len + a2Len];
+		System.arraycopy(a1, 0, res, 0, a1Len);
+		System.arraycopy(a2, 0, res, a1Len, a2Len); 
+		return res;
 	}
 
 	public ImageDescriptor getImageDescriptor(Object object) {

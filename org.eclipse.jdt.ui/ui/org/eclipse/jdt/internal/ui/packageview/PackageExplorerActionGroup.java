@@ -81,13 +81,16 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	private GotoResourceAction fGotoResourceAction;
 	private CollapseAllAction fCollapseAllAction;
 	
+	
 	private ToggleLinkingAction fToggleLinkingAction;
 
 	private RefactorActionGroup fRefactorActionGroup;
 	private NavigateActionGroup fNavigateActionGroup;
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	
-	private CustomFiltersActionGroup fCustomFiltersActionGroup;	
+	private CustomFiltersActionGroup fCustomFiltersActionGroup;
+
+	private IAction fGotoRequiredProjectAction;	
  	
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
@@ -134,6 +137,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fGotoResourceAction= new GotoResourceAction(fPart);
 		fCollapseAllAction= new CollapseAllAction(fPart);	
 		fToggleLinkingAction = new ToggleLinkingAction(fPart); 
+		fGotoRequiredProjectAction= new GotoRequiredProjectAction(fPart);
 	}
 
 	public void dispose() {
@@ -210,6 +214,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		IStructuredSelection selection= (IStructuredSelection)getContext().getSelection();
 		int size= selection.size();
 		Object element= selection.getFirstElement();
+		
+		if (element instanceof ClassPathContainer.RequiredProjectWrapper) 
+			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fGotoRequiredProjectAction);
 		
 		addGotoMenu(menu, element, size);
 		

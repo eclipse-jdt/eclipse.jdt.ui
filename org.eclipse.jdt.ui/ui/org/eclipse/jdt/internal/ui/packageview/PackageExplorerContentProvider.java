@@ -158,7 +158,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	}
 
 	private Object[] getContainerPackageFragmentRoots(ClassPathContainer container) {
-		return container.getPackageFragmentRoots();
+		return container.getChildren(container);
 	}
 
 	private Object[] getNonJavaProjects(IJavaModel model) throws JavaModelException {
