@@ -7,17 +7,23 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ResourceBundle;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
+import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectionAction;
 
 
 public class ClassFileEditorActionContributor extends BasicTextEditorActionContributor {
@@ -26,6 +32,10 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	protected OpenOnSelectionAction fOpenHierarchyOnSelection;
 	protected TogglePresentationAction fTogglePresentationAction;
 	protected RetargetTextEditorAction fShowJavaDoc;
+	
+	private StructureSelectionAction fStructureSelectionAction;
+	private StructureSelectNextAction fStructureSelectNextAction;
+	private StructureSelectPreviousAction fStructureSelectPreviousAction;
 	
 	//protected RetargetTextEditorAction fDisplay;
 	//protected RetargetTextEditorAction fInspect;
@@ -38,6 +48,11 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		super();
 		
 		ResourceBundle bundle= JavaEditorMessages.getResourceBundle();
+		
+		fStructureSelectionAction= new StructureSelectionAction();
+		fStructureSelectNextAction= new StructureSelectNextAction();
+		fStructureSelectPreviousAction= new StructureSelectPreviousAction();
+		
 		fOpenOnSelection= new OpenOnSelectionAction();
 		fOpenHierarchyOnSelection= new OpenHierarchyOnSelectionAction();
 		fTogglePresentationAction= new TogglePresentationAction();
@@ -59,6 +74,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
 			
+			addStructureSelection(editMenu);
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
 			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnSelection);
@@ -69,6 +85,14 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 			//editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspect);		
 			//editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplay);
 		}
+	}
+	
+	private void addStructureSelection(IMenuManager editMenu) {
+		MenuManager structureSelection= new MenuManager("Expand Selection With");
+		structureSelection.add(fStructureSelectionAction);
+		structureSelection.add(fStructureSelectNextAction);
+		structureSelection.add(fStructureSelectPreviousAction);
+		editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 	}
 	
 	/**
@@ -92,6 +116,12 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		ITextEditor textEditor= null;
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
+			
+		if (part instanceof AbstractTextEditor){
+			fStructureSelectionAction.setEditor((AbstractTextEditor)textEditor);
+			fStructureSelectNextAction.setEditor((AbstractTextEditor)textEditor);
+			fStructureSelectPreviousAction.setEditor((AbstractTextEditor)textEditor);
+		}		
 		
 		fOpenOnSelection.setContentEditor(textEditor);
 		fOpenHierarchyOnSelection.setContentEditor(textEditor);
