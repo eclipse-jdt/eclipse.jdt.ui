@@ -30,8 +30,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * XXX: not yet reviewed - part of experimental logical packages view
- * 
  * Table content provider for the hierarchical layout in the packages view.
  * <p> 
  * XXX: The standard Java browsing part content provider needs and calls
