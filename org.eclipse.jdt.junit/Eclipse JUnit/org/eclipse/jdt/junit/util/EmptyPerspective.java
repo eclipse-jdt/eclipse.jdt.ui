@@ -19,7 +19,7 @@ public class EmptyPerspective implements IPerspectiveFactory {
 	/**
 	 * The perspective id.
 	 */
-	public static final String PERSP_ID = "org.eclipse.ui.junit.EmptyPerspective";
+	public static final String PERSP_ID = "org.eclipse.jdt.junit.EmptyPerspective";
 	
 	/**
 	 * Constructs a new Default layout engine.
