@@ -527,6 +527,10 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		int index= offset[0];
 		int indexBuffer= -1;
 
+         // line delimiter could be null
+        if (lineDelimiter == null)
+            lineDelimiter= ""; //$NON-NLS-1$
+
 		for (int start= iterator.first(), end= iterator.next(); end != BreakIterator.DONE; start= end, end= iterator.next()) {
 
 			String word= paragraph.substring(start, end);
@@ -630,7 +634,10 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	private String getLineContents(IDocument d, int line) throws BadLocationException {
 		int offset = d.getLineOffset(line);
-		int length = d.getLineLength(line) - d.getLineDelimiter(line).length();
+		int length = d.getLineLength(line);
+        String lineDelimiter= d.getLineDelimiter(line);
+        if (lineDelimiter != null)
+            length= length - lineDelimiter.length();
 		String lineContents = d.get(offset, length);
 		int trim = jdocExtractLinePrefix(d, line).length();
 		return lineContents.substring(trim);
