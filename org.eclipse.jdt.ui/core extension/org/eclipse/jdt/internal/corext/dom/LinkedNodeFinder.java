@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -215,7 +216,7 @@ public class LinkedNodeFinder  {
 		
 		public BindingFinder(IBinding binding, ArrayList result) {
 			super(true);
-			fBinding= getErasure(binding);
+			fBinding= getDeclaration(binding);
 			fResult= result;
 		}
 		
@@ -261,7 +262,7 @@ public class LinkedNodeFinder  {
 			if (binding == null || binding.getKind() != fBinding.getKind()) {
 				return false;
 			}
-			binding= getErasure(binding);
+			binding= getDeclaration(binding);
 			
 			if (fBinding == binding) {
 				fResult.add(node);
@@ -273,14 +274,16 @@ public class LinkedNodeFinder  {
 			return false;
 		}
 		
-		private static IBinding getErasure(IBinding binding) {
+		private static IBinding getDeclaration(IBinding binding) {
 			if (binding instanceof ITypeBinding) {
-				ITypeBinding typeBinding= (ITypeBinding) binding;
-				if (typeBinding.isParameterizedType()) { // not for type variables
-					return typeBinding.getErasure();
-				}
+				return ((ITypeBinding) binding).getTypeDeclaration();
 			} else if (binding instanceof IMethodBinding) {
-				return ((IMethodBinding) binding).getErasure();
+				return ((IMethodBinding) binding).getMethodDeclaration();
+			} else if (binding instanceof IVariableBinding) {
+				IVariableBinding varBinding= (IVariableBinding) binding;
+				if (varBinding.isField()) {
+					return Bindings.getFieldDeclaration(varBinding);
+				}
 			}
 			return binding;
 		}
