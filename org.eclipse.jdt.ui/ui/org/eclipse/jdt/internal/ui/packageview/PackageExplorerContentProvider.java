@@ -96,7 +96,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	
 	// ------ Code which delegates to PackageFragmentProvider ------
 
-	private boolean needsToDelegate(Object element) {
+	private boolean needsToDelegateGetChildren(Object element) {
 		int type= -1;
 		if (element instanceof IJavaElement)
 			type= ((IJavaElement)element).getElementType();
@@ -115,7 +115,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			if (parentElement instanceof IProject) 
 				return ((IProject)parentElement).members();
 					
-			if (needsToDelegate(parentElement)) {
+			if (needsToDelegateGetChildren(parentElement)) {
 				Object[] packageFragments= fPackageFragmentProvider.getChildren(parentElement);
 				children= getWithParentsResources(packageFragments, parentElement);
 			} else {
@@ -170,11 +170,18 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	}
 
 	public Object getParent(Object child) {
-		if (needsToDelegate(child)) {
+		if (needsToDelegateGetParent(child)) {
 			return fPackageFragmentProvider.getParent(child);
 		} else
 			return super.getParent(child);
 	}
+
+	private boolean needsToDelegateGetParent(Object element) {
+		int type= -1;
+		if (element instanceof IJavaElement)
+			type= ((IJavaElement)element).getElementType();
+		return (!fIsFlatLayout && type == IJavaElement.PACKAGE_FRAGMENT);
+	}		
 
 	/**
 	 * Returns the given objects with the resources of the parent.
