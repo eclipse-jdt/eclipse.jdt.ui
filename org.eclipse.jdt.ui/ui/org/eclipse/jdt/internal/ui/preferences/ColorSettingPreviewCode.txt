@@ -11,7 +11,7 @@ public class ClassName extends SuperClass {
 	// This comment may span only this line
 	private String field= "zero";
 	// TASK: refactor
-	public int foo(int parameter) {
+	@Override public int foo(int parameter) {
 		abstractMethod();
 		int local= 42*hashCode();
 		staticMethod();

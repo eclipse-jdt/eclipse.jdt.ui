@@ -22,6 +22,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.IWhitespaceDetector;
+import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
@@ -96,7 +98,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			}
 		}
 	}
-	
 
 	/**
 	 * Word matcher to detect java method names.
@@ -126,7 +127,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			IToken token= Token.UNDEFINED;
 			int character= scanner.read();
 
-			// Ignore trailing whitespaces
+			// Ignore trailing whitespace
 			while (Character.isWhitespace((char) character)) {
 				character= scanner.read();
 				++count;
@@ -190,6 +191,133 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		}
 	}
 	
+	private static class AnnotationRule implements IRule, IVersionDependent {
+		private static class ResettableScanner implements ICharacterScanner {
+			private final ICharacterScanner fDelegate;
+			private int fReadCount;
+
+			public ResettableScanner(final ICharacterScanner scanner) {
+				fDelegate= scanner;
+				fReadCount= 0;
+			}
+			
+			/*
+			 * @see org.eclipse.jface.text.rules.ICharacterScanner#getColumn()
+			 */
+			public int getColumn() {
+				return fDelegate.getColumn();
+			}
+			
+			/*
+			 * @see org.eclipse.jface.text.rules.ICharacterScanner#getLegalLineDelimiters()
+			 */
+			public char[][] getLegalLineDelimiters() {
+				return fDelegate.getLegalLineDelimiters();
+			}
+			
+			/*
+			 * @see org.eclipse.jface.text.rules.ICharacterScanner#read()
+			 */
+			public int read() {
+				int ch= fDelegate.read();
+				if (ch != ICharacterScanner.EOF)
+					fReadCount++;
+				return ch;
+			}
+			
+			/*
+			 * @see org.eclipse.jface.text.rules.ICharacterScanner#unread()
+			 */
+			public void unread() {
+				if (fReadCount > 0)
+					fReadCount--;
+				fDelegate.unread();
+			}
+			
+			/**
+			 * Marks an offset in the scanned content.
+			 */
+			public void mark() {
+				fReadCount= 0;
+			}
+			
+			/**
+			 * Resets the scanner to the marked position.
+			 */
+			public void reset() {
+				while (fReadCount > 0)
+					unread();
+				
+				while (fReadCount < 0)
+					read();
+			}
+		}
+
+		private final IWhitespaceDetector fWhitespaceDetector= new JavaWhitespaceDetector();
+		private final IWordDetector fWordDetector= new JavaWordDetector();
+		private final IToken fInterfaceToken;
+		private final IToken fAnnotationToken;
+		private final String fVersion;
+		private boolean fIsVersionMatch;
+		
+		public AnnotationRule(IToken interfaceToken, Token annotationToken, String version, String currentVersion) {
+			fInterfaceToken= interfaceToken;
+			fAnnotationToken= annotationToken;
+			fVersion= version;
+			setCurrentVersion(currentVersion);
+		}
+
+		public IToken evaluate(ICharacterScanner scanner) {
+			if (!fIsVersionMatch)
+				return Token.UNDEFINED;
+			
+			ResettableScanner resettable= new ResettableScanner(scanner);
+			if (resettable.read() == '@')
+				if (skipWhitespace(resettable))
+					return readAnnotation(resettable);
+			
+			resettable.reset();
+			return Token.UNDEFINED;
+		}
+
+		private IToken readAnnotation(ResettableScanner scanner) {
+			StringBuffer buffer= new StringBuffer();
+			
+			int ch= scanner.read();
+			while (ch != ICharacterScanner.EOF && fWordDetector.isWordPart((char) ch)) {
+				buffer.append((char) ch);
+				ch= scanner.read();
+			}
+			
+			if (ch != ICharacterScanner.EOF)
+				scanner.unread();
+			
+			if ("interface".equals(buffer.toString())) //$NON-NLS-1$
+				return fInterfaceToken;
+			
+			if (buffer.length() > 0)
+				return fAnnotationToken;
+			
+			scanner.reset();
+
+			return Token.UNDEFINED;
+		}
+
+		private boolean skipWhitespace(ICharacterScanner scanner) {
+			while (fWhitespaceDetector.isWhitespace((char) scanner.read())) {
+				// do nothing
+			} 
+			
+			scanner.unread();
+			return true;
+		}
+
+		public void setCurrentVersion(String version) {
+			fIsVersionMatch= fVersion.compareTo(version) <= 0; //$NON-NLS-1$
+		}
+		
+	}
+	
 	private static final String SOURCE_VERSION= JavaCore.COMPILER_SOURCE;
 	
 	static String[] fgKeywords= { 
@@ -211,7 +339,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	
 	private static final String RETURN= "return"; //$NON-NLS-1$
 	private static String[] fgJava14Keywords= { "assert" }; //$NON-NLS-1$
-	private static String[] fgJava15Keywords= { "enum", "@interface" }; //$NON-NLS-1$ //$NON-NLS-2$
+	private static String[] fgJava15Keywords= { "enum" }; //$NON-NLS-1$
 	
 	private static String[] fgTypes= { "void", "boolean", "char", "byte", "short", "strictfp", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-5$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-8$ //$NON-NLS-9$  //$NON-NLS-10$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$
 	
@@ -224,7 +352,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVA_DEFAULT,
 		IJavaColorConstants.JAVA_METHOD_NAME,
 		IJavaColorConstants.JAVA_KEYWORD_RETURN,
-		IJavaColorConstants.JAVA_OPERATOR
+		IJavaColorConstants.JAVA_OPERATOR,
+		IJavaColorConstants.JAVA_ANNOTATION,
 	};
 	
 	private List fVersionDependentRules= new ArrayList(3);
@@ -262,12 +391,15 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add generic whitespace rule.
 		rules.add(new WhitespaceRule(new JavaWhitespaceDetector()));
 		
+		String version= getPreferenceStore().getString(SOURCE_VERSION);
+
+		// Add JLS3 rule for /@\s*interface/
+		AnnotationRule atInterfaceRule= new AnnotationRule(getToken(IJavaColorConstants.JAVA_KEYWORD), getToken(IJavaColorConstants.JAVA_ANNOTATION), "1.5", version); //$NON-NLS-1$
+		rules.add(atInterfaceRule);
+		fVersionDependentRules.add(atInterfaceRule);
 		
 		// Add word rule for new keywords, 4077
-		String version= getPreferenceStore().getString(SOURCE_VERSION);
 		JavaWordDetector wordDetector= new JavaWordDetector();
-		wordDetector.setCurrentVersion(version);
-		fVersionDependentRules.add(wordDetector);
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
 		CombinedWordRule combinedWordRule= new CombinedWordRule(wordDetector, token);
 		

@@ -88,6 +88,14 @@ public interface IJavaColorConstants {
 	String JAVA_TYPE= "java_type"; //$NON-NLS-1$
 	
 	/**
+	 * The color key for annotations
+	 * (value <code>"java_annotation"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	String JAVA_ANNOTATION= "java_annotation"; //$NON-NLS-1$
+	
+	/**
 	 * The color key for task tags in java comments
 	 * (value <code>"java_comment_task_tag"</code>).
 	 * 

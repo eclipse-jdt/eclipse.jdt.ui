@@ -16,15 +16,13 @@ import org.eclipse.jface.text.rules.IWordDetector;
 /**
  * A Java aware word detector.
  */
-public class JavaWordDetector implements IWordDetector, IVersionDependent {
+public class JavaWordDetector implements IWordDetector {
 
-	private boolean fIsJLS3= false;
-	
 	/*
 	 * @see IWordDetector#isWordStart
 	 */
 	public boolean isWordStart(char c) {
-		return Character.isJavaIdentifierStart(c) || fIsJLS3 && c == '@';
+		return Character.isJavaIdentifierStart(c);
 	}
 	
 	/*
@@ -32,12 +30,5 @@ public class JavaWordDetector implements IWordDetector, IVersionDependent {
 	 */
 	public boolean isWordPart(char c) {
 		return Character.isJavaIdentifierPart(c);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.IVersionDependent#setCurrentVersion(java.lang.String)
-	 */
-	public void setCurrentVersion(String version) {
-		fIsJLS3= "1.5".compareTo(version) <= 0; //$NON-NLS-1$
 	}
 }
