@@ -22,12 +22,12 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -37,17 +37,20 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.ProposalPosition;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
@@ -84,6 +87,17 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		public IJavaCompletionProposal[] getProposals() {
 			return (IJavaCompletionProposal[])fProposals.toArray(new IJavaCompletionProposal[fProposals.size()]);
 		}
+	}
+	
+	private static class LinkedModeExitPolicy implements LinkedModeUI.IExitPolicy {
+	
+		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
+			if (event.character  == '=') {
+				return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
+			}
+			return null;
+		}
+		
 	}
 	
 	private ITrackedNodePosition fSelectionDescription;
@@ -269,6 +283,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 					ui.setExitPosition(viewer, cursorPosition, 0, Integer.MAX_VALUE);
 				}
 			}	
+			ui.setExitPolicy(new LinkedModeExitPolicy());
 			ui.enter();
 			
 			IRegion region= ui.getSelectedRegion();
