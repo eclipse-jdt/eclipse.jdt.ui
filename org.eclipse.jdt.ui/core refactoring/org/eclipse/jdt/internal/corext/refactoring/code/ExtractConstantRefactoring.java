@@ -250,11 +250,11 @@ public class ExtractConstantRefactoring extends Refactoring {
 		for (; i < string.length(); i++) {
 			ch= string.charAt(i);
 			if (Character.isJavaIdentifierStart(ch)) {
-				result.append(ch);
+				result.append(Character.toUpperCase(ch));
 				i++;
 				break;
 			} else if (Character.isJavaIdentifierPart(ch)) {
-				result.append('_').append(ch);
+				result.append('_').append(Character.toUpperCase(ch));
 				i++;
 				break;
 			}

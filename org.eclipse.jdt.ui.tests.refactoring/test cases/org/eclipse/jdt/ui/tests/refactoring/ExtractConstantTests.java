@@ -369,6 +369,10 @@ public class ExtractConstantTests extends RefactoringTest {
 		guessHelper(4, 19, 4, 56, "HANS_IM_GLUECK123_34_BLA_BLA");
 	}
 
+	public void testGuessStringLiteral3() throws Exception {
+		guessHelper(5, 16, 5, 16, "ASSUME_CAMEL_CASE");
+	}
+
 	public void testGuessFromGetterName0() throws Exception {
 		guessHelper(4, 19, 4, 30, "FOO_BAR");
 	}
