@@ -4,8 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-
-import org.eclipse.swt.graphics.Font;import org.eclipse.swt.graphics.FontData;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.FontFieldEditor;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferenceConverter;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.graphics.Font;import org.eclipse.swt.graphics.FontData;import org.eclipse.swt.widgets.Composite;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.FontFieldEditor;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferenceConverter;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * A preference page to set the font used in the Java editor.
@@ -24,6 +23,16 @@ public class JavaEditorPreferencePage extends FieldEditorPreferencePage implemen
 		setDescription(JavaPlugin.getResourceString("JavaEditorPreferencePage.description"));		
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
+	
+	/**
+	 * @see PreferencePage#createControl(Composite)
+	 */
+	public void createControl(Composite parent) {
+		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE));
+	}	
+	
 	
 	/*
 	 * @see FieldEditorPreferencePage#createFieldEditors

@@ -42,7 +42,14 @@ public interface IJavaHelpContextIds {
 	public static final String VARIABLE_SELECTION_DIALOG= PREFIX + "variable_selection_dialog_context";
 	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context";
 
-	// Editors
+	public static final String JAVA_SEARCH_PAGE= PREFIX + "java_search_page_context";
+
+
+	// view parts
+	public static final String PACKAGE_VIEW= PREFIX + "package_view_context";
+	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context";
+	public static final String DISPLAY_VIEW= PREFIX + "display_view_context";
+
 
 	// Preference/Property pages
 	public static final String BUILD_PATH_PROPERTY_PAGE= PREFIX + "build_path_property_page_context";
@@ -51,7 +58,13 @@ public interface IJavaHelpContextIds {
 	public static final String SOURCE_ATTACHMENT_PROPERTY_PAGE= PREFIX + "source_attachment_property_page_context";
 	public static final String JRE_PREFERENCE_PAGE= PREFIX + "jre_preference_page_context";
 	public static final String SOURCE_LOOKUP_PROPERTY_PAGE= PREFIX + "source_lookup_property_page_context";
-	public static final String LAUNCH_JRE_PROPERYY_PAGE= PREFIX + "launch_jre_preference_page_context";
+	public static final String LAUNCH_JRE_PROPERYY_PAGE= PREFIX + "launch_jre_property_page_context";
+
+	public static final String ORGANIZE_IMPORTS_PREFERENCE_PAGE= PREFIX + "organizeimports_preference_page_context";
+	public static final String JAVA_BASE_PREFERENCE_PAGE= PREFIX + "java_base_preference_page_context";
+	public static final String REFACTORING_PREFERENCE_PAGE= PREFIX + "refactoring_preference_page_context";
+	public static final String JAVA_EDITOR_PREFERENCE_PAGE= PREFIX + "java_editor_preference_page_context";
+
 
 	// Wizard pages
 	public static final String NEW_JAVAPROJECT_WIZARD_PAGE= PREFIX + "new_javaproject_wizard_page_context";
@@ -78,13 +91,13 @@ public interface IJavaHelpContextIds {
 	public static final String RENAME_PACKAGE_WIZARD_PAGE= PREFIX + "rename_package_wizard_page_context";
 	public static final String RENAME_PACKAGE_ERROR_WIZARD_PAGE= PREFIX + "rename_package_error_wizard_page_context";
 	public static final String RENAME_CU_WIZARD_PAGE= PREFIX + "rename_cu_wizard_page_context";
-	public static final String RENAME_CU_ERROR_WIZARD_PAGE= PREFIX + "rename_cu_wizard_page_context";
+	public static final String RENAME_CU_ERROR_WIZARD_PAGE= PREFIX + "rename_cu_wizard_error_page_context";
 	public static final String RENAME_METHOD_WIZARD_PAGE= PREFIX + "rename_method_wizard_page_context";
-	public static final String RENAME_METHOD_ERROR_WIZARD_PAGE= PREFIX + "rename_method_wizard_page_context";
+	public static final String RENAME_METHOD_ERROR_WIZARD_PAGE= PREFIX + "rename_method_error_wizard_page_context";
 	public static final String RENAME_TYPE_WIZARD_PAGE= PREFIX + "rename_type_wizard_page_context";
-	public static final String RENAME_TYPE_ERROR_WIZARD_PAGE= PREFIX + "rename_type_wizard_page_context";
+	public static final String RENAME_TYPE_ERROR_WIZARD_PAGE= PREFIX + "rename_type_error_wizard_page_context";
 	public static final String RENAME_FIELD_WIZARD_PAGE= PREFIX + "rename_field_wizard_page_context";
-	public static final String RENAME_FIELD_ERROR_WIZARD_PAGE= PREFIX + "rename_field_wizard_page_context";
+	public static final String RENAME_FIELD_ERROR_WIZARD_PAGE= PREFIX + "rename_field_error_wizard_page_context";
 
 	// reused ui-blocks
 	public static final String BUILD_PATH_BLOCK= PREFIX + "build_paths_context";

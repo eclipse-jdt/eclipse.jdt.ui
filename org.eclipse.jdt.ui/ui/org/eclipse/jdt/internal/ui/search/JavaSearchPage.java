@@ -43,7 +43,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
@@ -66,7 +66,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -265,6 +265,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			}
 		});
 		setControl(result);
+		
+		WorkbenchHelp.setHelp(result, new Object[] { IJavaHelpContextIds.JAVA_SEARCH_PAGE });	
 	}
 
 	private Control createExpression(Composite parent) {

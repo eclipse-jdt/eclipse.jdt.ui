@@ -5,17 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.FieldEditor;import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.widgets.Composite;import org.eclipse.jface.preference.BooleanFieldEditor;import org.eclipse.jface.preference.FieldEditor;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.RadioGroupFieldEditor;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RefactoringPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
@@ -28,10 +18,19 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 		store.setDefault(RefactoringPreferences.PREF_JAVA_STYLE_GUIDE_CONFORM, true);
 		store.setDefault(RefactoringPreferences.PREF_SAVE_ALL_EDITORS, false);
 	}
-
+	
 	protected IPreferenceStore doGetPreferenceStore() {
 		return JavaPlugin.getDefault().getPreferenceStore();
 	}
+	
+	/**
+	 * @see PreferencePage#createControl(Composite)
+	 */
+	public void createControl(Composite parent) {
+		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.REFACTORING_PREFERENCE_PAGE));
+	}		
 
 	public void createFieldEditors() {
 		Composite parent= getFieldEditorParent();

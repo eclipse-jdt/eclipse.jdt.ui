@@ -4,29 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.IPreferencesConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.widgets.Composite;import org.eclipse.jface.preference.BooleanFieldEditor;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.RadioGroupFieldEditor;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /*
  * The page for setting java plugin preferences.
@@ -53,6 +31,16 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		store.setDefault(IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ, false);		
 		store.setDefault(IPreferencesConstants.DOUBLE_CLICK_GOES_INTO, false);		
 	}
+	
+	/**
+	 * @see PreferencePage#createControl(Composite)
+	 */
+	public void createControl(Composite parent) {
+		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.JAVA_BASE_PREFERENCE_PAGE));
+	}	
+	
 
 	protected void createFieldEditors() {
 		Composite parent= getFieldEditorParent();
