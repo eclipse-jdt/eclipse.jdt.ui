@@ -251,37 +251,43 @@ public class MoveMembersRefactoring extends Refactoring {
 	private static String createNonAccessibleMemberMessage(IMember member, IType type, boolean moved) throws JavaModelException{
 		switch (member.getElementType()){
 			case IJavaElement.FIELD: {
-				String key;
+				String message;
 				if (moved)
-					key= "MoveMembersRefactoring.moved_field"; //$NON-NLS-1$
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.moved_field", //$NON-NLS-1$ 
+								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
+									 createAccessModifierString(member),
+								 	JavaModelUtil.getFullyQualifiedName(type)});
 				else
-					key= "MoveMembersRefactoring.accessed_field"; //$NON-NLS-1$
-				String message= RefactoringCoreMessages.getFormattedString(key, 
-					new String[]{JavaElementUtil.createFieldSignature((IField)member), 
-								 createAccessModifierString(member),
-								 JavaModelUtil.getFullyQualifiedName(type)});
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.accessed_field", //$NON-NLS-1$
+								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
+									 createAccessModifierString(member),
+								 	JavaModelUtil.getFullyQualifiedName(type)});
 				return message;
 			}			
 			case IJavaElement.METHOD: {
-				String key;
+				String message;
 				if (moved)
-					key= "MoveMembersRefactoring.moved_method"; //$NON-NLS-1$
-				else
-					key= "MoveMembersRefactoring.accessed_method"; //$NON-NLS-1$
-				
-				String message= RefactoringCoreMessages.getFormattedString(key,
-					new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
-								 createAccessModifierString(member),
-								 JavaModelUtil.getFullyQualifiedName(type)});
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.moved_method", //$NON-NLS-1$
+									new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
+								 	createAccessModifierString(member),
+								 	JavaModelUtil.getFullyQualifiedName(type)});
+				else				 
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.accessed_method", //$NON-NLS-1$
+									new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
+								 	createAccessModifierString(member),
+								 	JavaModelUtil.getFullyQualifiedName(type)});
+								 
 				return message;		
 			}			
 			case IJavaElement.TYPE:{
-				String key;
+				String message;
 				if (moved)
-					key= "MoveMembersRefactoring.moved_type"; //$NON-NLS-1$
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.moved_type", //$NON-NLS-1$
+						new String[]{JavaModelUtil.getFullyQualifiedName(((IType)member)), 
+									createAccessModifierString(member),
+									JavaModelUtil.getFullyQualifiedName(type)});
 				else
-					key= "MoveMembersRefactoring.accessed_type"; //$NON-NLS-1$
-				String message= RefactoringCoreMessages.getFormattedString(key,
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.accessed_type", //$NON-NLS-1$
 						new String[]{JavaModelUtil.getFullyQualifiedName(((IType)member)), 
 									createAccessModifierString(member),
 									JavaModelUtil.getFullyQualifiedName(type)});
