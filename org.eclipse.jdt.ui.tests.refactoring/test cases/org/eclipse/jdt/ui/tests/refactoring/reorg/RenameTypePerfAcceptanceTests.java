@@ -23,27 +23,12 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.infra.SWTProjectTestSetup;
 
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCase {
 	
-	private static final class MySuite extends RefactoringPerformanceTestSetup {
-		private SWTTestProject fTestProject;
-		private MySuite(Test test) {
-			super(test);
-		}
-		protected void setUp() throws Exception {
-			super.setUp();
-			fTestProject= new SWTTestProject();
-		}
-		protected void tearDown() throws Exception {
-			fTestProject.delete();
-			super.tearDown();
-		}
-	}
-
 	private IJavaProject fProject;
 	
 	public static Test suite() {
@@ -51,11 +36,11 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 		TestSuite suite= new TestSuite("RenameTypePerfAcceptanceTests");
 		suite.addTest(new RenameTypePerfAcceptanceTests("testCold"));
 		suite.addTest(new RenameTypePerfAcceptanceTests("testWarm"));
-        return new MySuite(suite);
+        return new SWTProjectTestSetup(suite);
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new MySuite(someTest);
+		return new SWTProjectTestSetup(someTest);
 	}
 
 	public RenameTypePerfAcceptanceTests(String test) {
