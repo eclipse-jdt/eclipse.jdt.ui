@@ -31,7 +31,6 @@ import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -885,7 +884,7 @@ public class JavadocOptionsManager {
 					}
 					break;
 				default :
-					ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(je, IJavaElement.COMPILATION_UNIT);
+					ICompilationUnit cu= (ICompilationUnit) je.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (cu != null) {
 						if (cu.isWorkingCopy()) {
 							cu= (ICompilationUnit) cu.getOriginalElement();
