@@ -186,7 +186,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 		int count = 0;
 		for (int i = 0; i < fields.length; i++) {
-			if (!hasPrimitiveType(fields[i])) {
+			if (!hasPrimitiveType(fields[i]) || isArray(fields[i])) {
 				count++;
 			}
 		}
@@ -242,7 +242,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
 			return;
 		if (!ActionUtil.isProcessable(getShell(), type))
-			return;			
+			return;
+		if(!canEnableOn(type)){
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
+			return;
+		}			
 		showUI(type, preselected);
 	}
 
@@ -850,7 +854,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	 **/
 	private static IType resolveTypeOfField(IField field) throws JavaModelException {
 		boolean isPrimitive = hasPrimitiveType(field);
-		boolean isArray = Signature.getArrayCount(field.getTypeSignature()) > 0;
+		boolean isArray = isArray(field);
 		if (!isPrimitive && !isArray) {
 			String typeName = JavaModelUtil.getResolvedTypeName(field.getTypeSignature(), field.getDeclaringType());
 			//if the cu has errors its possible no type name is resolved
@@ -861,5 +865,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 		return null;
 
+	}
+
+	private static boolean isArray(IField field) throws JavaModelException {
+		return Signature.getArrayCount(field.getTypeSignature()) > 0;
 	}
 }
