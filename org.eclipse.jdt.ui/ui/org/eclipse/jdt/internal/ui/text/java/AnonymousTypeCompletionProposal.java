@@ -17,7 +17,6 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -101,9 +100,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			int start= buffer.length();
 			buffer.append("{\n\n}"); //$NON-NLS-1$
 			workingCopy.getBuffer().setContents(buffer.toString());
-			synchronized (workingCopy) {
-				workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, new NullProgressMonitor());
-			}
+			JavaModelUtil.reconcile(workingCopy);
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 			CompilationUnit unit= parser.parse(workingCopy, true);
 			IType dummyType= workingCopy.getType(dummyName);
