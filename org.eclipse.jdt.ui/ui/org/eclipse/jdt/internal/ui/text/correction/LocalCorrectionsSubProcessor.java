@@ -775,5 +775,46 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 		}
 	}
+
+	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		while (selectedNode instanceof QualifiedName) {
+			selectedNode= ((QualifiedName) selectedNode).getQualifier();
+		}
+		if (!(selectedNode instanceof SimpleName)) {
+			return;
+		}
+		SimpleName name = (SimpleName) selectedNode;
+		IBinding binding= name.resolveBinding();
+		if (binding.getKind() != IBinding.VARIABLE) {
+			return;
+		}
+		
+		ASTRewrite rewrite= new ASTRewrite(name.getParent());
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$
+
+		
+		ITypeBinding declaringClass= ((IVariableBinding) binding).getDeclaringClass();
+		String qualifier;
+		if (Modifier.isStatic(binding.getModifiers())) {
+			qualifier= proposal.addImport(declaringClass);
+		} else {
+			ITypeBinding currType= Bindings.getBindingOfParentType(name);
+			if (Bindings.isSuperType(currType, declaringClass)) {
+				qualifier= "this"; //$NON-NLS-1$
+			} else {
+				String outer= proposal.addImport(declaringClass);
+				qualifier= outer + ".this"; //$NON-NLS-1$
+			}
+		}
+		
+		String replacement= qualifier + '.' + name.getIdentifier();
+		rewrite.markAsReplaced(name, rewrite.createPlaceholder(replacement, ASTRewrite.NAME));
+
+		String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.unqualifiedfieldaccess.description", qualifier); //$NON-NLS-1$
+		proposal.setDisplayName(label);
+		proposals.add(proposal);
+	}
 		
 }

@@ -2428,6 +2428,170 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testUnqualifiedFieldAccess1() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int count;\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        count= i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int count;\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        this.count= i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testUnqualifiedFieldAccess2() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public int count;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private F f= new F();\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        f.count= i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private F f= new F();\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        this.f.count= i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testUnqualifiedFieldAccess3() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public void setCount(int i) {}\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private F f= new F();\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        f.setCount(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private F f= new F();\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        this.f.setCount(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testUnqualifiedFieldAccess4() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int count;\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        class Inner {\n");
+		buf.append("            public void foo() {\n");
+		buf.append("               count= 1;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int count;\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        class Inner {\n");
+		buf.append("            public void foo() {\n");
+		buf.append("               E.this.count= 1;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
 	}	
 	
 }

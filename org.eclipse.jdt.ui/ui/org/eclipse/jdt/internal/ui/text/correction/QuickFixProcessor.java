@@ -111,6 +111,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.Task:
 			case IProblem.UnusedMethodDeclaredThrownException:
 			case IProblem.UnusedConstructorDeclaredThrownException:
+			case IProblem.UnqualifiedFieldAccess:
 				return true;
 			default:
 				return false;
@@ -308,7 +309,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnusedMethodDeclaredThrownException:
 			case IProblem.UnusedConstructorDeclaredThrownException:
 				LocalCorrectionsSubProcessor.addUnnecessaryThrownExceptionProposal(context, problem, proposals);
-				break;				
+				break;
+			case IProblem.UnqualifiedFieldAccess:
+				LocalCorrectionsSubProcessor.addUnqualifiedFieldAccessProposal(context, problem, proposals);
+				break;
 			case IProblem.Task:
 				proposals.add(new TaskMarkerProposal(context.getCompilationUnit(), problem, 10));
 				break;
