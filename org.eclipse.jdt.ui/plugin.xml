@@ -299,6 +299,11 @@
 		class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
+   <page name="%javaDebugPrefName"
+         id="org.eclipse.jdt.ui.JavaDebugPreferencePage"   
+	     class="org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage"
+         category="org.eclipse.debug.ui.DebugPreferencePage">
+   </page>	
 </extension>
 
 <extension
@@ -618,14 +623,6 @@
 			state="true"
 			class="org.eclipse.jdt.internal.debug.ui.ShowStaticFieldsAction">
 		</action>
-		<action id="org.eclipse.jdt.ui.actions.HexValues"
-			label="%hexValueAction.label"
-			toolbarPath="javaVariableFilters"
-			icon="icons/full/elcl16/hexad_co.gif"
-			tooltip="%hexValueAction.tooltip"
-			state="false"
-			class="org.eclipse.jdt.internal.debug.ui.HexValuesAction">
-		</action>
 	</viewContribution>
 </extension>
 	
@@ -753,6 +750,32 @@
 		</action>
 	</viewerContribution>
 	<viewerContribution
+		id="org.eclipse.jdt.debug.AccessWatchpointToggleActions"
+		targetID="org.eclipse.debug.ui.BreakpointView">
+		<action
+			id="org.eclipse.jdt.ui.actions.AccessToggle"
+			label="%accessAction.label"
+			tooltip="%accessAction.tooltip"
+			menubarPath="emptyBreakpointGroup"
+			state="false"
+			class="org.eclipse.jdt.internal.debug.ui.AccessWatchpointToggleAction"
+			enablesFor="+">
+		</action>
+	</viewerContribution>
+	<viewerContribution
+		id="org.eclipse.jdt.debug.ModificationWatchpointToggleActions"
+		targetID="org.eclipse.debug.ui.BreakpointView">
+		<action
+			id="org.eclipse.jdt.ui.actions.ModificationToggle"
+			label="%modificationAction.label"
+			tooltip="%modificationAction.tooltip"
+			menubarPath="emptyBreakpointGroup"
+			state="true"
+			class="org.eclipse.jdt.internal.debug.ui.ModificationWatchpointToggleAction"
+			enablesFor="+">
+		</action>
+	</viewerContribution>	
+	<viewerContribution
 		id="org.eclipse.jdt.debug.DropToFrameActions"
 		targetID="org.eclipse.debug.ui.DebugView">
 		<action
@@ -763,8 +786,7 @@
 			class="org.eclipse.jdt.internal.debug.ui.DropToFrameAction"
 			enablesFor="1">
 		</action>
-	</viewerContribution>	
-
+	</viewerContribution>
 </extension>
 
 <!--example model presentation -->
