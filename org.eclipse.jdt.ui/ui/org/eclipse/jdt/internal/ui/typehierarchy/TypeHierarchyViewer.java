@@ -28,18 +28,20 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	
 	private OpenAction fOpen;
+	private HierarchyLabelProvider fLabelProvider;
 			
 	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
 		super(new Tree(parent, SWT.SINGLE));
 
-		HierarchyLabelProvider labelProvider= new HierarchyLabelProvider(lifeCycle);
+		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
 	
-		setLabelProvider(new DecoratingJavaLabelProvider(labelProvider, true, false));
+		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true, false));
 			
 		setContentProvider(contentProvider);
 		setSorter(new HierarchyViewerSorter(lifeCycle));
@@ -52,6 +54,15 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		});
 		
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
+	}
+	
+	public void setQualifiedTypeName(boolean on) {
+		if (on) {
+			fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() | JavaElementLabels.T_POST_QUALIFIED);
+		} else {
+			fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() & ~JavaElementLabels.T_POST_QUALIFIED);
+		}
+		refresh();
 	}
 	
 	/**

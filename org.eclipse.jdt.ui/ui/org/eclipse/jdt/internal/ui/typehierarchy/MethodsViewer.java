@@ -101,7 +101,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		if (on) {
 			fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() | JavaElementLabels.ALL_POST_QUALIFIED);
 		} else {
-			fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() & (-1 ^ JavaElementLabels.ALL_POST_QUALIFIED));
+			fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() & ~JavaElementLabels.ALL_POST_QUALIFIED);
 		}
 		if (on) {
 			sortByDefiningTypeNoRedraw(false);

@@ -179,6 +179,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private int fCurrentOrientation;
 	
 	private EnableMemberFilterAction fEnableMemberFilterAction;
+	private ShowQualifiedTypeNamesAction fShowQualifiedTypeNamesAction;
 	private AddMethodStubAction fAddStubAction;
 	private FocusOnTypeAction fFocusOnTypeAction;
 	private FocusOnSelectionAction fFocusOnSelectionAction;
@@ -235,6 +236,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		};
 			
 		fEnableMemberFilterAction= new EnableMemberFilterAction(this, false);
+		fShowQualifiedTypeNamesAction= new ShowQualifiedTypeNamesAction(this, false);
 		
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
 		
@@ -569,6 +571,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		}, cotextHelpId,	getSite());
 		typesViewer.addSelectionChangedListener(fSelectionChangedListener);
+		typesViewer.setQualifiedTypeName(isShowQualifiedTypeNames());
 	}
 	
 	private Control createMethodViewerControl(Composite parent) {
@@ -693,6 +696,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			viewMenu.add(fToggleOrientationActions[i]);
 		}
 		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		viewMenu.add(fShowQualifiedTypeNamesAction);
 		
 	
 		// fill the method viewer toolbar
@@ -1176,6 +1180,25 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		fEnableMemberFilterAction.setChecked(on);
 	}
+	
+	/**
+	 * called from ShowQualifiedTypeNamesAction. Must be called after creation
+	 * of the viewpart.
+	 */	
+	public void showQualifiedTypeNames(boolean on) {
+		if (fAllViewers == null) {
+			return;
+		}
+		for (int i= 0; i < fAllViewers.length; i++) {
+			fAllViewers[i].setQualifiedTypeName(on);
+		}
+	}
+	
+	private boolean isShowQualifiedTypeNames() {
+		return fShowQualifiedTypeNamesAction.isChecked();
+	}
+	
+	
 	
 	/**
 	 * Called from ITypeHierarchyLifeCycleListener.
