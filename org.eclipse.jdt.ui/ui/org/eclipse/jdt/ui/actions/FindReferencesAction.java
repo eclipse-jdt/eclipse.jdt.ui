@@ -119,7 +119,7 @@ public class FindReferencesAction extends FindAction {
 		} catch (JavaModelException ex) {
 			return false;
 		}
-		char first= Signature.getElementType(fieldType).charAt(0);
-		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
+		char first= fieldType.charAt(0);
+		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_ARRAY);
 	}
 }
