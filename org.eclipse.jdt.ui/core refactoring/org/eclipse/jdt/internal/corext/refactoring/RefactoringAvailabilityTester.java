@@ -184,9 +184,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isCopyAvailable(final IResource[] resources, final IJavaElement[] elements) throws JavaModelException {
-		if (resources.length != 0 && elements.length != 0)
-			return ReorgPolicyFactory.createCopyPolicy(resources, elements).canEnable();
-		return false;
+		return ReorgPolicyFactory.createCopyPolicy(resources, elements).canEnable();
 	}
 
 	public static boolean isDeleteAvailable(final IJavaElement element) throws JavaModelException {
