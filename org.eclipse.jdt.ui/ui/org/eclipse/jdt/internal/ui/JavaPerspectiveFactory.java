@@ -10,16 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.console.IConsoleConstants;
-
-import org.eclipse.search.ui.SearchUI;
-
-import org.eclipse.debug.ui.IDebugUIConstants;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaPerspectiveFactory implements IPerspectiveFactory {
 	
@@ -42,7 +39,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		outputfolder.addView(IPageLayout.ID_PROBLEM_VIEW);
 		outputfolder.addView(JavaUI.ID_JAVADOC_VIEW);
 		outputfolder.addView(JavaUI.ID_SOURCE_VIEW);
-		outputfolder.addPlaceholder(SearchUI.SEARCH_VIEW_ID);
+		outputfolder.addPlaceholder(NewSearchUI.SEARCH_VIEW_ID);
 		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		
@@ -60,7 +57,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_JAVADOC_VIEW);
 
 		// views - search
-		layout.addShowViewShortcut(SearchUI.SEARCH_VIEW_ID);
+		layout.addShowViewShortcut(NewSearchUI.SEARCH_VIEW_ID);
 		
 		// views - debugging
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);

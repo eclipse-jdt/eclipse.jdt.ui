@@ -45,7 +45,6 @@ import org.eclipse.search.ui.IContextMenuConstants;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.ISearchResultViewPart;
 import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.SearchUI;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
@@ -163,7 +162,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	private void showWithMarker(IEditorPart editor, IFile file, int offset, int length) throws PartInitException {
 		try {
-			IMarker marker= file.createMarker(SearchUI.SEARCH_MARKER);
+			IMarker marker= file.createMarker(NewSearchUI.SEARCH_MARKER);
 			HashMap attributes= new HashMap(4);
 			attributes.put(IMarker.CHAR_START, new Integer(offset));
 			attributes.put(IMarker.CHAR_END, new Integer(offset + length));

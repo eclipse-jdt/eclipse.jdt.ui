@@ -11,20 +11,15 @@
 package org.eclipse.jdt.internal.ui.browsing;
 
 import org.eclipse.core.runtime.IAdaptable;
-
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaElement;
-
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
 import org.eclipse.ui.console.IConsoleConstants;
-
-import org.eclipse.search.ui.SearchUI;
-
-import org.eclipse.debug.ui.IDebugUIConstants;
-
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
@@ -64,7 +59,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_JAVADOC_VIEW);
 
 		// views - search		
-		layout.addShowViewShortcut(SearchUI.SEARCH_VIEW_ID);
+		layout.addShowViewShortcut(NewSearchUI.SEARCH_VIEW_ID);
 		
 		// views - debugging
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
@@ -106,7 +101,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
-		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_VIEW_ID);
+		placeHolderBottom.addPlaceholder(NewSearchUI.SEARCH_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
@@ -139,7 +134,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
-		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_VIEW_ID);
+		placeHolderBottom.addPlaceholder(NewSearchUI.SEARCH_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);

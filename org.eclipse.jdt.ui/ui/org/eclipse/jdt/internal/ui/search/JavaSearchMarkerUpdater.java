@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.texteditor.IMarkerUpdater;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -79,6 +79,6 @@ public class JavaSearchMarkerUpdater implements IMarkerUpdater {
 	 * @see IMarkerUpdater#getMarkerType()
 	 */
 	public String getMarkerType() {
-		return SearchUI.SEARCH_MARKER;
+		return NewSearchUI.SEARCH_MARKER;
 	}
 }

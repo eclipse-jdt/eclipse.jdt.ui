@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -52,7 +53,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -145,7 +146,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
  	
 	private IMarker createMarker(IResource file, IDocument document, ASTNode node) throws CoreException {
 		Map attributes= new HashMap(10);
-		IMarker marker= file.createMarker(SearchUI.SEARCH_MARKER);
+		IMarker marker= file.createMarker(NewSearchUI.SEARCH_MARKER);
 	
 		int startPosition= node.getStartPosition();
 		MarkerUtilities.setCharStart(attributes, startPosition);

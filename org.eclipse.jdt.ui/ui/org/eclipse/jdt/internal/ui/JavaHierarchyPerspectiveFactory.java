@@ -11,17 +11,14 @@
 
 package org.eclipse.jdt.internal.ui;
 
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
 import org.eclipse.ui.console.IConsoleConstants;
-
-import org.eclipse.search.ui.SearchUI;
-
-import org.eclipse.debug.ui.IDebugUIConstants;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
@@ -43,7 +40,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
 		IPlaceholderFolderLayout outputfolder= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
 		outputfolder.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
-		outputfolder.addPlaceholder(SearchUI.SEARCH_VIEW_ID);
+		outputfolder.addPlaceholder(NewSearchUI.SEARCH_VIEW_ID);
 		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		outputfolder.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
@@ -57,7 +54,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
 		layout.addShowViewShortcut(JavaUI.ID_TYPE_HIERARCHY);
 
-		layout.addShowViewShortcut(SearchUI.SEARCH_VIEW_ID);
+		layout.addShowViewShortcut(NewSearchUI.SEARCH_VIEW_ID);
 		
 		// views - debugging
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);

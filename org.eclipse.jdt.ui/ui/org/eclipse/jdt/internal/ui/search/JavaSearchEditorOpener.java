@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.search.internal.ui.SearchPlugin;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -39,7 +39,7 @@ public class JavaSearchEditorOpener {
 	public IEditorPart open(Match match) throws PartInitException, JavaModelException {
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
 		Object element= getElementToOpen(match);
-		if (SearchUI.reuseEditor())
+		if (NewSearchUI.reuseEditor())
 			return showWithReuse(element, wbPage);
 		else
 			return showWithoutReuse(element, wbPage);

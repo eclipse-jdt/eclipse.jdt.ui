@@ -28,6 +28,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.SearchUI;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -67,7 +68,7 @@ public class GotoMarkerAction extends Action {
 		if (javaElement != null && javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
 			gotoPackagesView(javaElement, wbPage);
 		else {
-			if (SearchUI.reuseEditor())
+			if (NewSearchUI.reuseEditor())
 				showWithReuse(marker, resource, javaElement, wbPage);
 			else
 				showWithoutReuse(marker, javaElement, wbPage);

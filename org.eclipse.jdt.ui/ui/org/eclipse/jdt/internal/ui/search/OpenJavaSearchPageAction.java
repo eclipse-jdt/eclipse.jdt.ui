@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -40,7 +40,7 @@ public class OpenJavaSearchPageAction implements IWorkbenchWindowActionDelegate 
 			JavaPlugin.logErrorMessage("Could not open the search dialog - for some reason the window handle was null"); //$NON-NLS-1$
 			return;
 		}
-		SearchUI.openSearchDialog(fWindow, JAVA_SEARCH_PAGE_ID);
+		NewSearchUI.openSearchDialog(fWindow, JAVA_SEARCH_PAGE_ID);
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {
