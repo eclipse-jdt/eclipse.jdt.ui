@@ -44,7 +44,7 @@ public class DeleteWizard extends RefactoringWizard{
 	private static final String HELP_CONTEXT_ID= "";
 	
 	public DeleteWizard(DeleteRefactoring2 ref) {
-		super(ref, "Delete", HELP_CONTEXT_ID);
+		super(ref, "Confirm Delete", HELP_CONTEXT_ID);
 	}
 
 	/* (non-Javadoc)
