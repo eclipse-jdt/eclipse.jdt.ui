@@ -65,7 +65,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 				element= fCompilationUnit;
 			}
 			
-			return fCompilationUnit.getAncestor(elementType);
+			return element.getAncestor(elementType);
 
 		} catch (JavaModelException e) {
 			return null;
