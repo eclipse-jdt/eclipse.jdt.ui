@@ -14,43 +14,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.swt.graphics.Image;
 
 
 public class ConvertForLoopProposal extends LinkedCorrectionProposal {
@@ -184,15 +160,15 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 		
 		fOldForStatement.getBody().accept(new ASTVisitor() {
 			public boolean visit(Assignment assignment) {
-				classifyWriteAccess(writeAccesses, assignment.getLeftHandSide());
+				classifyWriteAccess(assignment.getLeftHandSide());
 				return true;
 			}
 			public boolean visit(PostfixExpression node) {
-				classifyWriteAccess(writeAccesses, node.getOperand());
+				classifyWriteAccess(node.getOperand());
 				return true;
 			}
 			public boolean visit(PrefixExpression node) {
-				classifyWriteAccess(writeAccesses, node.getOperand());
+				classifyWriteAccess(node.getOperand());
 				return true;
 			}
 			public boolean visit(SimpleName name) {
@@ -213,7 +189,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 				}
 				return false;
 			}	
-			private void classifyWriteAccess(List writeAccesses, Expression expression) {
+			private void classifyWriteAccess(Expression expression) {
 				//check that
 				if (expression instanceof ArrayAccess) {
 					checkThatArrayIsNotAssigned(writeAccesses, expression);
@@ -630,7 +606,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 	}
 
 	/**
-	 * @param VariableDeclarationFragment to visit. This helper method is useful
+	 * @param fragment VariableDeclarationFragment to visit. This helper method is useful
 	 *        for the IDIOM when the stop condition is expressed with another
 	 *        variable within loop: for (int i=0, max= array.length; i < max;
 	 *        i++){}
