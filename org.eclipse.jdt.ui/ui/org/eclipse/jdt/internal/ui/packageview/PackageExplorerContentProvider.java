@@ -157,7 +157,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		return result.toArray();
 	}
 
-	private Object[] getContainerPackageFragmentRoots(ClassPathContainer container) throws JavaModelException {
+	private Object[] getContainerPackageFragmentRoots(ClassPathContainer container) {
 		return container.getPackageFragmentRoots();
 	}
 
@@ -417,7 +417,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		}
 	}
 
-	private boolean isOnClassPath(ICompilationUnit element) throws JavaModelException {
+	private boolean isOnClassPath(ICompilationUnit element) {
 		IJavaProject project= element.getJavaProject();
 		if (project == null || !project.exists())
 			return false;

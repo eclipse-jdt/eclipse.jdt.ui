@@ -367,7 +367,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	protected boolean isPackageFragmentEmpty(IJavaElement element) throws JavaModelException {
 		if (element instanceof IPackageFragment) {
 			IPackageFragment fragment= (IPackageFragment)element;
-			if (!(fragment.hasChildren() || fragment.getNonJavaResources().length > 0) && fragment.hasSubpackages()) 
+			if (fragment.exists() || !(fragment.hasChildren() || fragment.getNonJavaResources().length > 0) && fragment.hasSubpackages()) 
 				return true;
 		}
 		return false;
