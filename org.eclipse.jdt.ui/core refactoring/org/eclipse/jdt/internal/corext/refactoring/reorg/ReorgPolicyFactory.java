@@ -673,8 +673,13 @@ class ReorgPolicyFactory {
 		private void copyTypeToDestination(IType type, OldASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
 			TypeDeclaration newType= (TypeDeclaration) targetRewrite.createStringPlaceholder(getUnindentedSource(type), ASTNode.TYPE_DECLARATION);
 			targetRewrite.markAsInserted(newType);
-			//always put on top level - we could create member types but that is wrong most of the time
-			destinationCuNode.types().add(newType);
+			IType enclosingType= getEnclosingType(getJavaElementDestination());
+			if (enclosingType != null) {
+				TypeDeclaration targetClass= ASTNodeSearchUtil.getTypeDeclarationNode(enclosingType, destinationCuNode);
+				targetClass.bodyDeclarations().add(newType);
+			} else {
+				destinationCuNode.types().add(newType);
+			}
 		}
 
 		private void copyMethodToDestination(IMethod method, OldASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
