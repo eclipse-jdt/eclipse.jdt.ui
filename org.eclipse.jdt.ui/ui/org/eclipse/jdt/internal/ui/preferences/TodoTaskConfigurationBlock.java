@@ -231,7 +231,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		}
 
 		public void dialogFieldChanged(DialogField field) {
-			validateSettings(PREF_COMPILER_TASK_TAGS, null);
+			validateSettings(PREF_COMPILER_TASK_TAGS, null, null);
 		}			
 		
 	}
@@ -241,7 +241,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		
 		Composite markersComposite= createMarkersTabContent(parent);
 		
-		validateSettings(null, null);
+		validateSettings(null, null, null);
 	
 		return markersComposite;
 	}
@@ -266,7 +266,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		return markersComposite;
 	}
 
-	protected void validateSettings(String changedKey, String newValue) {
+	protected void validateSettings(String changedKey, String oldValue, String newValue) {
 		if (changedKey != null) {
 			if (PREF_COMPILER_TASK_TAGS.equals(changedKey)) {
 				fTaskTagsStatus= validateTaskTags();

@@ -387,7 +387,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
 	 */
-	protected void validateSettings(String changedKey, String newValue) {
+	protected void validateSettings(String changedKey, String oldValue, String newValue) {
 		// no validation
 	}	
 

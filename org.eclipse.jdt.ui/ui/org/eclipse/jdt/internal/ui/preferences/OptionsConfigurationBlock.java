@@ -354,16 +354,16 @@ public abstract class OptionsConfigurationBlock {
 		} else {
 			return;
 		}
-		fWorkingValues.put(data.getKey(), newValue);
+		String oldValue= (String) fWorkingValues.put(data.getKey(), newValue);
 		
-		validateSettings(data.getKey(), newValue);
+		validateSettings(data.getKey(), oldValue, newValue);
 	}
 	
 	protected void textChanged(Text textControl) {
 		String key= (String) textControl.getData();
 		String number= textControl.getText();
-		fWorkingValues.put(key, number);
-		validateSettings(key, number);
+		String oldValue= (String) fWorkingValues.put(key, number);
+		validateSettings(key, oldValue, number);
 	}	
 
 	protected boolean checkValue(String key, String value) {
@@ -374,7 +374,7 @@ public abstract class OptionsConfigurationBlock {
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
-	protected abstract void validateSettings(String changedKey, String newValue);
+	protected abstract void validateSettings(String changedKey, String oldValue, String newValue);
 	
 	
 	protected String[] getTokens(String text, String separator) {
@@ -478,7 +478,7 @@ public abstract class OptionsConfigurationBlock {
 	public void performDefaults() {
 		fWorkingValues= getDefaultOptions();
 		updateControls();
-		validateSettings(null, null);
+		validateSettings(null, null, null);
 	}
 	
 	protected void updateControls() {

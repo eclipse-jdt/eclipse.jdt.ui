@@ -427,7 +427,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String,java.lang.String)
 	 */
-	protected void validateSettings(final String key, final String value) {
+	protected void validateSettings(final String key, final String oldValue, final String newValue) {
 
 		if (key == null || PREF_SPELLING_PROPOSAL_THRESHOLD.equals(key))
 			fThresholdStatus= validatePositiveNumber((String)fWorkingValues.get(PREF_SPELLING_PROPOSAL_THRESHOLD));
