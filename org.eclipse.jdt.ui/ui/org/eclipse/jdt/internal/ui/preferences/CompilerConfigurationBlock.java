@@ -300,7 +300,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.15.tabtitle")); //$NON-NLS-1$
 		item.setControl(extraComposite);		
 		
-		validateSettings(null, null);
+		validateSettings(null, null, null);
 	
 		return folder;
 	}
@@ -812,17 +812,18 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
-	protected void validateSettings(String changedKey, String newValue) {
+	protected void validateSettings(String changedKey, String oldValue, String newValue) {
 		
 		if (changedKey != null) {
 			if (INTR_DEFAULT_COMPLIANCE.equals(changedKey)) {
 				updateComplianceEnableState();
-				updateComplianceDefaultSettings(true);
+				updateComplianceDefaultSettings(true, null);
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_COMPLIANCE.equals(changedKey)) {
-				if (checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF)) {
-					updateComplianceDefaultSettings(false);
-				}
+			    // set compliance settings to default
+			    Object oldDefault= fWorkingValues.put(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF);
+			    updateComplianceEnableState();
+				updateComplianceDefaultSettings(USER_CONF.equals(oldDefault), oldValue);
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_SOURCE_COMPATIBILITY.equals(changedKey)) {
 				updateAssertEnumAsIdentifierEnableState();
@@ -1045,18 +1046,22 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	/*
 	 * Set the default compliance values derived from the chosen level
 	 */	
-	private void updateComplianceDefaultSettings(boolean rememberOld) {
+	private void updateComplianceDefaultSettings(boolean rememberOld, String oldComplianceLevel) {
 		String assertAsId, enumAsId, source, target;
-		String complianceLevel= (String) fWorkingValues.get(PREF_COMPLIANCE);
 		boolean isDefault= checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF);
+		String complianceLevel= (String) fWorkingValues.get(PREF_COMPLIANCE);
 		
 		if (isDefault) {
 			if (rememberOld) {
+				if (oldComplianceLevel == null) {
+					oldComplianceLevel= complianceLevel;
+				}
+				
 				fRememberedUserCompliance[IDX_ASSERT_AS_IDENTIFIER]= (String) fWorkingValues.get(PREF_PB_ASSERT_AS_IDENTIFIER);
 				fRememberedUserCompliance[IDX_ENUM_AS_IDENTIFIER]= (String) fWorkingValues.get(PREF_PB_ENUM_AS_IDENTIFIER);
 				fRememberedUserCompliance[IDX_SOURCE_COMPATIBILITY]= (String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY);
 				fRememberedUserCompliance[IDX_CODEGEN_TARGET_PLATFORM]= (String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM);
-				fRememberedUserCompliance[IDX_COMPLIANCE]= complianceLevel;
+				fRememberedUserCompliance[IDX_COMPLIANCE]= oldComplianceLevel;
 			}
 
 			if (VERSION_1_4.equals(complianceLevel)) {
