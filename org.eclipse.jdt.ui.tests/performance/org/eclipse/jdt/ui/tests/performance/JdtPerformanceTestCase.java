@@ -33,6 +33,14 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 		}
 	}
 
+	public JdtPerformanceTestCase() {
+		super();
+	}
+	
+	public JdtPerformanceTestCase(String name) {
+		super(name);
+	}
+	
 	protected void joinBackgroudJobs() throws CoreException {
 		// Join Building
 		boolean interrupted= true;
@@ -54,5 +62,11 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 			new Requestor(),
 			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 			null);
+	}
+
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformance();
 	}
 }

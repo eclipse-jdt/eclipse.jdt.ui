@@ -17,9 +17,6 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.test.performance.Performance;
-import org.eclipse.test.performance.PerformanceMeter;
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -61,41 +58,48 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	public static Test suite() {
-		return new MyTestSetup(new TestSuite(PackageExplorerPerfTest.class));
+		TestSuite suite= new TestSuite("PackageExplorerPerfTest");
+		suite.addTest(new PackageExplorerPerfTest("testOpen"));
+		suite.addTest(new PackageExplorerPerfTest("testSelect"));
+		suite.addTest(new PackageExplorerPerfTest("testExpand"));
+		return new MyTestSetup(suite);
 	}
 
 	public static Test setUpTest(Test someTest) {
 		return new MyTestSetup(someTest);
 	}
 	
-	public void testPackageExplorer() throws Exception {
+	public PackageExplorerPerfTest(String name) {
+		super(name);
+	}
+	
+	public void testOpen() throws Exception {
 		joinBackgroudJobs();
-		Performance performance= Performance.getDefault();
-		PerformanceMeter openMeter= performance.createPerformanceMeter(
-			performance.getDefaultScenarioId(this, "open")); 
 		IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		openMeter.start();
-		PackageExplorerPart part= (PackageExplorerPart)page.showView(JavaUI.ID_PACKAGES);
-		openMeter.stop();
-		openMeter.commit();
-		openMeter.dispose();
-		
-		TreeViewer viewer= part.getTreeViewer();
-		PerformanceMeter selectMeter= performance.createPerformanceMeter(
-			performance.getDefaultScenarioId(this, "select")); 
+		startMeasuring();
+		page.showView(JavaUI.ID_PACKAGES);
+		finishMeasurements();
+	}
+	
+	public void testSelect() throws Exception {
+		joinBackgroudJobs();
+		TreeViewer viewer= getViewer();
 		StructuredSelection selection= new StructuredSelection(MyTestSetup.fJProject1);
-		selectMeter.start();
+		startMeasuring();
 		viewer.setSelection(selection);
-		selectMeter.stop();
-		selectMeter.commit();
-		selectMeter.dispose();
-		
-		PerformanceMeter expandMeter= performance.createPerformanceMeter(
-			performance.getDefaultScenarioId(this, "expand"));
-		expandMeter.start();
+		finishMeasurements();
+	}
+	
+	public void testExpand() throws Exception {
+		joinBackgroudJobs();
+		TreeViewer viewer= getViewer();
+		startMeasuring();
 		viewer.expandToLevel(MyTestSetup.fJProject1, 1);
-		expandMeter.stop();
-		expandMeter.commit();
-		expandMeter.dispose();
-	}	
+		finishMeasurements();
+	}
+	
+	private TreeViewer getViewer() {
+		IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		return ((PackageExplorerPart)page.findView(JavaUI.ID_PACKAGES)).getTreeViewer();
+	}
 }

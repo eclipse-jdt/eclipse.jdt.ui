@@ -34,7 +34,7 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 public class SWTTestProject {
 	
-	private static final String PROJECT= "org.eclipse.swt";
+	public static final String PROJECT= "org.eclipse.swt";
 	private static final String PROJECT_ZIP= "/testResources/org.eclipse.swt-R3_0.zip";
 
 	private IJavaProject fProject;

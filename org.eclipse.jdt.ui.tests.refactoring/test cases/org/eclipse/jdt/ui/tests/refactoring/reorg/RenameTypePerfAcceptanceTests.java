@@ -13,7 +13,11 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 
@@ -25,35 +29,56 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCase {
 	
-	private SWTTestProject fTestProject;
+	private static final class MySuite extends RefactoringPerformanceTestSetup {
+		private SWTTestProject fTestProject;
+		private MySuite(Test test) {
+			super(test);
+		}
+		protected void setUp() throws Exception {
+			super.setUp();
+			fTestProject= new SWTTestProject();
+		}
+		protected void tearDown() throws Exception {
+			fTestProject.delete();
+			super.tearDown();
+		}
+	}
+
+	private IJavaProject fProject;
 	
 	public static Test suite() {
-		return new RefactoringPerformanceTestSetup(new TestSuite(RenameTypePerfAcceptanceTests.class));
+		// we must make sure that cold is executed before warm
+		TestSuite suite= new TestSuite("RenameTypePerfAcceptanceTests");
+		suite.addTest(new RenameTypePerfAcceptanceTests("testCold"));
+		suite.addTest(new RenameTypePerfAcceptanceTests("testWarm"));
+        return new MySuite(suite);
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new RefactoringPerformanceTestSetup(someTest);
+		return new MySuite(someTest);
 	}
 
+	public RenameTypePerfAcceptanceTests(String test) {
+		super(test);
+	}
+	
 	protected void setUp() throws Exception {
 		super.setUp();
-		fTestProject= new SWTTestProject();
+		fProject= (IJavaProject)JavaCore.create(
+			ResourcesPlugin.getWorkspace().getRoot().findMember(SWTTestProject.PROJECT));
 	}
 	
-	protected void tearDown() throws Exception {
-		fTestProject.delete();
-		super.tearDown();
-	}
-	
-	public void testRenameType() throws Exception {
-		IType control= fTestProject.getProject().findType("org.eclipse.swt.widgets.Control");
+	public void testCold() throws Exception {
+		IType control= fProject.findType("org.eclipse.swt.widgets.Control");
 		RenameTypeProcessor processor= new RenameTypeProcessor(control);
 		processor.setNewElementName("Control2");
-		executeRefactoring(new RenameRefactoring(processor), "cold");
-		
-		control= fTestProject.getProject().findType("org.eclipse.swt.widgets.Control2");
-		processor= new RenameTypeProcessor(control);
+		executeRefactoring(new RenameRefactoring(processor));
+	}
+	
+	public void testWarm() throws Exception {
+		IType control= fProject.findType("org.eclipse.swt.widgets.Control2");
+		RenameTypeProcessor processor= new RenameTypeProcessor(control);
 		processor.setNewElementName("Control");
-		executeRefactoring(new RenameRefactoring(processor), "warm");
+		executeRefactoring(new RenameRefactoring(processor));
 	}
 }
