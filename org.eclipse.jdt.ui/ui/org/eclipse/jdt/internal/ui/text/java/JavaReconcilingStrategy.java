@@ -28,10 +28,12 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -81,9 +83,10 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					try {
 						// reconcile
 						synchronized (unit) {
-							if (fIsJavaReconcilingListener)
+							if (fIsJavaReconcilingListener) {
 								ast= unit.reconcile(true, true, null, fProgressMonitor);
-							else
+								markAsUnmodifiable(ast);
+							} else
 								unit.reconcile(false, true, null, fProgressMonitor);
 						}
 					} catch (OperationCanceledException ex) {
@@ -109,6 +112,21 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 				fNotify= true;
 			}
 		}
+	}
+	
+	/**
+	 * Marks the given compilation unit AST as unmodifiable.
+	 * 
+	 * @param ast the compilation unit AST to mark
+	 */
+	private void markAsUnmodifiable(CompilationUnit ast) {
+		ast.accept(new GenericVisitor() {
+			protected boolean visitNode(ASTNode node) {
+				int flags= node.getFlags();
+				node.setFlags(flags | ASTNode.PROTECT);
+				return true;
+			}
+		});
 	}
 	
 	/*
