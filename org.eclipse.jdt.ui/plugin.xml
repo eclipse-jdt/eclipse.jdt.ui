@@ -939,6 +939,7 @@
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
 		<action id="exportJavadoc"
 			definitionId="org.eclipse.jdt.ui.generate.javadoc"
+			helpContextId="org.eclipse.jdt.ui.generate_javadoc_action"
 			menubarPath="project/additions"
 			label="%GenerateJavadocAction.label"
 			class="org.eclipse.jdt.internal.ui.actions.GenerateJavadocAction"/>
