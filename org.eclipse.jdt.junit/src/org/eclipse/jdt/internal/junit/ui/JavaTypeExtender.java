@@ -12,8 +12,10 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.core.expressions.PropertyTester;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
@@ -26,12 +28,20 @@ public class JavaTypeExtender extends PropertyTester  {
 	 * @inheritDoc
 	 */
 	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
-		IType type= (IType)receiver;
-		try {
-			if (IS_TEST.equals(method)) 
-				return TestSearchEngine.isTestOrTestSuite(type);
-		} catch (JavaModelException e) {
-			return false;
+		if (receiver instanceof IType) {
+			IType type= (IType)receiver;
+			try {
+				if (IS_TEST.equals(method)) 
+					return TestSearchEngine.isTestOrTestSuite(type);
+			} catch (JavaModelException e) {
+			}
+		} else if(receiver instanceof ICompilationUnit) {
+			ICompilationUnit cu = (ICompilationUnit) receiver;
+			IType mainType= cu.getType(Signature.getQualifier(cu.getElementName()));
+			try {
+				return TestSearchEngine.isTestOrTestSuite(mainType);
+			} catch (JavaModelException e) {
+			}
 		}
 		return false;
 	}

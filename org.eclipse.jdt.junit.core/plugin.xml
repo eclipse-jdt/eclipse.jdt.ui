@@ -253,14 +253,6 @@
                   </iterate>
                </with>
             </enablement>
-            <contextLabel
-                  label="%JUnitShortcutRun.label"
-                  mode="run">
-            </contextLabel>
-            <contextLabel
-                  label="%JUnitShortcutDebug.label"
-                  mode="debug">
-            </contextLabel>
          </contextualLaunch>
          <perspective
                id="org.eclipse.jdt.ui.JavaPerspective">
@@ -296,16 +288,9 @@
       <propertyTester
             properties="isTest"
             namespace="org.eclipse.jdt.junit"
-            type="org.eclipse.jdt.core.IType"
+            type="org.eclipse.jdt.core.IJavaElement"
             class="org.eclipse.jdt.internal.junit.ui.JavaTypeExtender"
             id="org.eclipse.jdt.junit.ITypeExtender">
-      </propertyTester>
-      <propertyTester
-            properties="isTest"
-            namespace="org.eclipse.jdt.junit"
-            type="org.eclipse.core.resources.IResource"
-            class="org.eclipse.jdt.internal.junit.launcher.ResourceExtender"
-            id="org.eclipse.jdt.junit.IResourceExtender">
       </propertyTester>
    </extension>
    <extension
