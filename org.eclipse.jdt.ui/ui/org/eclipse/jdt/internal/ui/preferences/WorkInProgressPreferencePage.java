@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.StringFieldEditor;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -18,6 +19,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
 import org.eclipse.jdt.internal.ui.text.java.ExperimentalPreference;
 	
 /*
@@ -25,7 +27,7 @@ import org.eclipse.jdt.internal.ui.text.java.ExperimentalPreference;
  */
 public class WorkInProgressPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW= "PackagesView.isCompressingPkgNameInPackagesView"; //$NON-NLS-1$
+	public static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView"; //$NON-NLS-1$
 
 	public WorkInProgressPreferencePage() {
 		super(GRID);
@@ -36,7 +38,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
-		store.setDefault(PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW, false);
+		store.setDefault(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, "");
 	}
 	
 	/*
@@ -57,18 +59,22 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 			parent
         );
 		addField(boolEditor);
-
-		boolEditor= new BooleanFieldEditor(
-			PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW,
-			JavaUIMessages.getString("WorkInProgressPreferencePage.packagesView.isCompressingPkgNameInPackagesView"), //$NON-NLS-1$
+        StringFieldEditor stringEditor= new StringFieldEditor(
+        	PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW,
+			JavaUIMessages.getString("WorkInProgressPreferencePage.packagesView.pkgNamePatternForPackagesView.text"), //$NON-NLS-1$
 			parent
         );
-		addField(boolEditor);
+        stringEditor.getLabelControl(parent).setToolTipText(JavaUIMessages.getString("WorkInProgressPreferencePage.packagesView.pkgNamePatternForPackagesView.tooltip")); //$NON-NLS-1$
+		addField(stringEditor);
 	}
 
 	static public boolean isCompressingPkgNameInPackagesView() {
+		return getPkgNamePatternForPackagesView().length() > 0;
+	}
+
+	static public String getPkgNamePatternForPackagesView() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW);
+		return store.getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW);
 	}
 	
 	/*

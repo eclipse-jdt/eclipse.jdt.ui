@@ -17,6 +17,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+
 public class JavaElementLabels {
 	
 	/**
@@ -230,6 +232,14 @@ public class JavaElementLabels {
 	private final static String CONCAT_STRING= JavaUIMessages.getString("JavaElementLabels.concat_string"); // " - ";
 	private final static String COMMA_STRING= JavaUIMessages.getString("JavaElementLabels.comma_string"); // ", ";
 	private final static String DECL_STRING= JavaUIMessages.getString("JavaElementLabels.declseparator_string"); // "  "; // use for return type
+
+	/*
+	 * Package name compression
+	 */
+	private static String fgPkgNamePattern= ""; //$NON-NLS-1$
+	private static String fgPkgNamePrefix;
+	private static String fgPkgNamePostfix;
+	private static int fgPkgNameChars;
 
 	private JavaElementLabels() {
 	}
@@ -531,11 +541,14 @@ public class JavaElementLabels {
 			buf.append(JavaUIMessages.getString("JavaElementLabels.default_package")); //$NON-NLS-1$
 		} else if (getFlag(flags, P_COMPRESSED)) {
 				String name= pack.getElementName();
+				refreshPackageNamePattern();
 				int start= 0;
 				int dot= name.indexOf('.', start);
 				while (dot > 0) {
-					buf.append(name.charAt(start));
-					buf.append("*.");
+					buf.append(fgPkgNamePrefix);
+					if (fgPkgNameChars > 0)
+						buf.append(name.substring(start, Math.min(start+ fgPkgNameChars, dot)));
+					buf.append(fgPkgNamePostfix);
 					start= dot + 1;
 					dot= name.indexOf('.', start);
 				}
@@ -582,4 +595,28 @@ public class JavaElementLabels {
 			}
 		}		
 	}	
+
+	private static void refreshPackageNamePattern() {
+		String pattern= WorkInProgressPreferencePage.getPkgNamePatternForPackagesView();
+		if (pattern.equals(fgPkgNamePattern))
+			return;
+		fgPkgNamePattern= pattern;
+		int i= 0;
+		fgPkgNameChars= 0;
+		fgPkgNamePrefix= "";
+		fgPkgNamePostfix= "";
+		while (i < pattern.length()) {
+			char ch= pattern.charAt(i);
+			if (Character.isDigit(ch)) {
+				fgPkgNameChars= ch-48;
+				if (i > 0 && i < pattern.length() - 1)
+					fgPkgNamePrefix= pattern.substring(0, i);
+				if (i >= 0 && i < pattern.length())
+					fgPkgNamePostfix= pattern.substring(i+1);
+				return;
+			}
+			i++;
+		}
+		fgPkgNamePrefix= pattern;
+	}
 }

@@ -1272,6 +1272,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * @param decorator a label decorator or <code>null</code> for no decorations.
 	 */
 	public void setLabelDecorator(ILabelDecorator decorator) {
+		fJavaElementLabelProvider= new PackageExplorerLabelProvider();
 		if (decorator == null)
 			fViewer.setLabelProvider(fJavaElementLabelProvider);
 		else
@@ -1288,7 +1289,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		boolean refreshViewer= false;
 	
 		if (event.getProperty() == JavaBasePreferencePage.SHOW_CU_CHILDREN) {
-			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			IActionBars actionBars= getViewSite().getActionBars();
 			IToolBarManager toolBar= actionBars.getToolBarManager();
 			boolean b= JavaBasePreferencePage.showCompilationUnitChildren();
@@ -1304,7 +1304,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			refreshViewer= true;
 		}			
 
-		if (event.getProperty() == WorkInProgressPreferencePage.PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW) {
+		if (event.getProperty() == WorkInProgressPreferencePage.PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW) {
 			fJavaElementLabelProvider.setCompressingPkgNameInPackagesView(WorkInProgressPreferencePage.isCompressingPkgNameInPackagesView());
 			refreshViewer= true;
 		}
