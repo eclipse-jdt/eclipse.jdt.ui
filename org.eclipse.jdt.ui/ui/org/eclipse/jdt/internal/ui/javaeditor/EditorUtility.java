@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.swt.SWT;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -32,6 +33,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -41,6 +44,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -152,11 +156,20 @@ public class EditorUtility {
 
 	private static void initializeHighlightRange(IEditorPart editorPart) {
 		if (editorPart instanceof ITextEditor) {
-			TogglePresentationAction toggleAction= new TogglePresentationAction();
-			// Initialize editor
-			toggleAction.setEditor((ITextEditor)editorPart);
-			// Reset action
-			toggleAction.setEditor(null);
+			IAction toggleAction= editorPart.getEditorSite().getActionBars().getGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY);
+			if (toggleAction != null && toggleAction.isEnabled() && toggleAction.isChecked()) {
+				if (toggleAction instanceof TextEditorAction) {
+					// Reset the action 
+					((TextEditorAction)toggleAction).setEditor(null);
+					// Restore the action 
+					((TextEditorAction)toggleAction).setEditor((ITextEditor)editorPart);
+				} else {
+					// Uncheck 
+					toggleAction.run();
+					// Check
+					toggleAction.run();
+				}
+			}
 		}
 	}
 	
