@@ -107,7 +107,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		
 		addLinkedPosition(rewrite.track(newDeclFrag.getName()), true, KEY_NAME);
 		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
-		setEndPosition(rewrite.track(newDecl));
+		setEndPosition(rewrite.track(fNodeToAssign)); // set cursor after expression statement
 
 		return rewrite;
 	}
