@@ -26,7 +26,6 @@ public class GoToNextPreviousMemberActionTests extends RefactoringTest{
 
 	private static final Class clazz= GoToNextPreviousMemberActionTests.class;
 	private static final String REFACTORING_PATH= "GoToNextPreviousMemberAction/";
-	int u;
 	public GoToNextPreviousMemberActionTests(String name){
 		super(name);
 	}
