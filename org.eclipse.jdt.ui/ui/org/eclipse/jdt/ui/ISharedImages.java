@@ -77,6 +77,19 @@ public interface ISharedImages {
 	public static final String IMG_OBJS_DEFAULT= JavaPluginImages.IMG_MISC_DEFAULT;
 	
 	/**
+	 * Key to access the shared image or image decriptor for external archives. 
+	 * @since 2.1
+	 */
+	public static final String IMG_OBJS_EXTERNAL_ARCHIVE= JavaPluginImages.IMG_OBJS_EXTJAR;
+	
+	/** 
+	 * Key to access the shared image or image descriptor for external archives
+	 * with source.
+	 * @since 2.1
+	 */
+	public static final String IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE= JavaPluginImages.IMG_OBJS_EXTJAR_WSRC;
+	
+	/**
 	 * Returns the shared image managed under the given key.
 	 * <p>
 	 * Note that clients <b>must not</b> dispose the image returned by this method.

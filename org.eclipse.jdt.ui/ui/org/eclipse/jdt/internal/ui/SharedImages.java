@@ -53,6 +53,8 @@ public class SharedImages implements ISharedImages {
 		fgMap.put(IMG_OBJS_PUBLIC, JavaPluginImages.DESC_MISC_PUBLIC);
 		fgMap.put(IMG_OBJS_PROTECTED, JavaPluginImages.DESC_MISC_PROTECTED);
 		fgMap.put(IMG_OBJS_PRIVATE, JavaPluginImages.DESC_MISC_PRIVATE);
-		fgMap.put(IMG_OBJS_DEFAULT, JavaPluginImages.DESC_MISC_DEFAULT);		
+		fgMap.put(IMG_OBJS_DEFAULT, JavaPluginImages.DESC_MISC_DEFAULT);
+		fgMap.put(IMG_OBJS_EXTERNAL_ARCHIVE, JavaPluginImages.DESC_OBJS_EXTJAR);		
+		fgMap.put(IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE, JavaPluginImages.DESC_OBJS_EXTJAR_WSRC);		
 	}
 }
