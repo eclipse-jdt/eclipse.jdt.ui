@@ -56,8 +56,8 @@ public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 	private MemberEdit fMemberEdit;
 
 	public NewConstructorCompletionProposal(String label, ICompilationUnit currCU, IType destType, List arguments, int relevance) throws CoreException {
-		super(label, destType.getCompilationUnit(), relevance);
-		
+		super(label, destType.getCompilationUnit(), relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
+
 		fDestType= destType;
 		fCurrCU= currCU;
 		fArguments= arguments;
@@ -178,13 +178,6 @@ public class NewConstructorCompletionProposal extends CUCorrectionProposal {
 	}
 	
 		
-	/*
-	 * @see ICompletionProposal#getImage()
-	 */
-	public Image getImage() {
-		return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
-	}
-
 	/* (non-Javadoc)
 	 * @see ICompletionProposal#apply(IDocument)
 	 */

@@ -11,9 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -21,20 +18,14 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 
 public class ChangeCorrectionProposal implements ICompletionProposal {
@@ -42,11 +33,17 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 	private Change fChange;
 	private String fName;
 	private int fRelevance;
+	private Image fImage;
 
 	public ChangeCorrectionProposal(String name, Change change, int relevance) {
+		this(name, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ENV_VAR));
+	}
+	
+	protected ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
 		fName= name;
 		fChange= change;
 		fRelevance= relevance;
+		fImage= image;
 	}
 	
 	/*
@@ -110,7 +107,7 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
-		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ENV_VAR);
+		return fImage;
 	}
 
 	/*
@@ -118,6 +115,15 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 	 */
 	public Point getSelection(IDocument document) {
 		return null;
+	}
+
+	/**
+	 * Sets the proposal's image.
+	 * 
+	 * @param image the desired image. Can be <code>null</code>
+	 */
+	public void setImage(Image image) {
+		fImage= image;
 	}
 
 	/**

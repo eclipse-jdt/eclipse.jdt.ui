@@ -32,7 +32,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	private boolean fIsInitialized;
 
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) throws CoreException {
-		super(name, createCompilationUnitChange(name, cu, false), relevance);
+		this(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPCONT));
+	}
+	
+	protected CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) throws CoreException {
+		super(name, createCompilationUnitChange(name, cu, false), relevance, image);
 		fIsInitialized= false;
 	}
 	
@@ -117,13 +121,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 		}
 	}		
 		
-	/*
-	 * @see ICompletionProposal#getImage()
-	 */
-	public Image getImage() {
-		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPCONT);
-	}
-
 	/**
 	 * Gets the compilationUnitChange.
 	 * @return Returns a CompilationUnitChange

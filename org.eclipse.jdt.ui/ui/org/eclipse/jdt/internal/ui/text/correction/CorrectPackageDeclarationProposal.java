@@ -32,7 +32,8 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	private ProblemPosition fProblemPosition;
 
 	public CorrectPackageDeclarationProposal(ProblemPosition problemPos, int relevance) throws CoreException {
-		super(CorrectionMessages.getString("CorrectPackageDeclarationProposal.name"), problemPos.getCompilationUnit(), relevance); //$NON-NLS-1$
+		super(CorrectionMessages.getString("CorrectPackageDeclarationProposal.name"), problemPos.getCompilationUnit(), relevance, //$NON-NLS-1$
+			JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL)); 
 		fProblemPosition= problemPos;
 	}
 
@@ -81,10 +82,5 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 			JavaPlugin.log(e);
 		}
 		return (CorrectionMessages.getFormattedString("CorrectPackageDeclarationProposal.change.description", parentPack.getElementName())); //$NON-NLS-1$
-	}	
-
-	public Image getImage() {
-		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL);
 	}
-
 }

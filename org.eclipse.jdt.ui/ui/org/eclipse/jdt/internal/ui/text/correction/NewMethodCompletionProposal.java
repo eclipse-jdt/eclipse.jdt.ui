@@ -59,7 +59,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	private MemberEdit fMemberEdit;
 
 	public NewMethodCompletionProposal(String label, MethodInvocation node, ICompilationUnit currCU, IType destType, int relevance) throws CoreException {
-		super(label, destType.getCompilationUnit(), relevance);
+		super(label, destType.getCompilationUnit(), relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
 		
 		fDestType= destType;
 		fCurrCU= currCU;
@@ -237,13 +237,6 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	}
 	
 		
-	/*
-	 * @see ICompletionProposal#getImage()
-	 */
-	public Image getImage() {
-		return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
-	}
-
 	/* (non-Javadoc)
 	 * @see ICompletionProposal#apply(IDocument)
 	 */

@@ -165,8 +165,8 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 	private IMember fParentMember;
 
 	public NewVariableCompletionProposal(String label, int variableKind, SimpleName node, IMember parentMember, int relevance) throws CoreException {
-		super(label, parentMember.getCompilationUnit(), relevance);
-		
+		super(label, parentMember.getCompilationUnit(), relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
+	
 		fVariableKind= variableKind;
 		fNode= node;
 		fParentMember= parentMember;
@@ -250,13 +250,6 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		return buf.toString();
 	}
 		
-	/*
-	 * @see ICompletionProposal#getImage()
-	 */
-	public Image getImage() {
-		return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
-	}
-	
 	private ITypeBinding evaluateVariableType(ImportEdit importEdit, ASTNode selectedNode) {
 		if (selectedNode != null) {
 			ITypeBinding binding= ASTResolving.getTypeBinding(selectedNode);

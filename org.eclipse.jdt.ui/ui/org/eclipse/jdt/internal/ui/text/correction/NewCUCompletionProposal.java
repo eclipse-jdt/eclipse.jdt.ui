@@ -28,10 +28,15 @@ public class NewCUCompletionProposal extends ChangeCorrectionProposal {
 	 * Constructor for NewCUCompletionProposal.
 	 */
 	public NewCUCompletionProposal(String name, ICompilationUnit addedCU, boolean isClass, String[] superTypes, int severity) {
-		super(name, new CreateCompilationUnitChange(addedCU, isClass, superTypes, JavaPreferencesSettings.getCodeGenerationSettings()), severity);
+		super(name, new CreateCompilationUnitChange(addedCU, isClass, superTypes, JavaPreferencesSettings.getCodeGenerationSettings()), severity, null);
 	
 		fCompilationUnit= addedCU;
 		fIsClass= isClass;
+		if (fIsClass) {
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS));
+		} else {
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE));
+		}
 	}
 
 	/* (non-Javadoc)
@@ -48,17 +53,4 @@ public class NewCUCompletionProposal extends ChangeCorrectionProposal {
 			JavaPlugin.log(e);
 		}
 	}
-
-
-	/* (non-Javadoc)
-	 * @see ICompletionProposal#getImage()
-	 */
-	public Image getImage() {
-		if (fIsClass) {
-			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS);
-		} else {
-			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE);
-		}
-	}
-
 }
