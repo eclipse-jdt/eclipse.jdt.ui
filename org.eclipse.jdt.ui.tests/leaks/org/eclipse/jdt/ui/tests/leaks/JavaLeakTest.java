@@ -70,17 +70,18 @@ public class JavaLeakTest extends LeakTestCase {
 		JavaProjectHelper.delete(fJProject1);
 	}
 
-	private ICompilationUnit createTestCU() throws Exception {
+	private ICompilationUnit createTestCU(String typeName) throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack0;\n");
-		buf.append("public class List1 {\n}\n");
-		return pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
+		buf.append("public class "+typeName+" {\n}\n");
+		return pack2.createCompilationUnit(typeName+".java", buf.toString(), false, null);
 	}
 	
-	public void testJavaEditor() throws Exception {
+
+	public void testJavaEditorClose() throws Exception {
 		final Class cl= CompilationUnitEditor.class;
 		
 		// known reference via a ThreadLocal ref to JavaReconciler.BackgroundThread
@@ -90,7 +91,44 @@ public class JavaLeakTest extends LeakTestCase {
 		final int count1= getInstanceCount(cl, excludedClasses);
 		
 		// open an editor on a CU
-		ICompilationUnit unit= createTestCU();
+		ICompilationUnit unit= createTestCU("List1");
+		IEditorPart part= EditorUtility.openInEditor(unit);
+		// make sure the received instance has the type we're expecting
+		assertEquals(part.getClass(), cl);
+
+		int count2= getInstanceCount(cl, excludedClasses);
+		assertDifferentCount("JavaEditor", count1, count2);
+		
+		// close the editor
+		boolean res= JavaPlugin.getActivePage().closeEditor(part, false);
+		part= null;
+		assertTrue("Could not close editor", res);
+		
+		final boolean[] runnableFinished= new boolean[] { false };
+		
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				runnableFinished[0]= true;
+			}
+		});
+		// closing editors is posted via the event queue.
+		while (!runnableFinished[0])
+			Display.getDefault().readAndDispatch();
+		int count3 = getInstanceCount(cl, excludedClasses);
+		assertEqualCount("JavaEditor", count1, count3);
+	}
+
+	public void testJavaEditorCloseAll() throws Exception {
+		final Class cl= CompilationUnitEditor.class;
+		
+		// known reference via a ThreadLocal ref to JavaReconciler.BackgroundThread
+		final Class[] excludedClasses= new Class[] { JavaReconciler.class };
+
+		// count before opening the editor
+		final int count1= getInstanceCount(cl, excludedClasses);
+		
+		// open an editor on a CU
+		ICompilationUnit unit= createTestCU("List2");
 		IEditorPart part= EditorUtility.openInEditor(unit);
 		// make sure the received instance has the type we're expecting
 		assertEquals(part.getClass(), cl);
