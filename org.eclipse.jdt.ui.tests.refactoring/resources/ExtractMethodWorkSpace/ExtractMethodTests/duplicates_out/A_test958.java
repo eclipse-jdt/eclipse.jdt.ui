@@ -1,7 +1,5 @@
 package duplicates_out;
 
-// don't extract second occurence of
-// 2 since it is in a inner class
 public class A_test958 {
 	private Object fO;
 

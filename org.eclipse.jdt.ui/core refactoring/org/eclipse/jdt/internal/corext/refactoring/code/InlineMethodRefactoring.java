@@ -24,6 +24,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -254,6 +255,8 @@ public class InlineMethodRefactoring extends Refactoring {
 					inliner.dispose();
 			}
 			sub.worked(1);
+			if (sub.isCanceled())
+				throw new OperationCanceledException();
 		}
 		sub.done();
 		pm.done();
