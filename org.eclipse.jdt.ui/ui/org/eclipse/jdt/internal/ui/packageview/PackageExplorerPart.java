@@ -118,7 +118,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	} 
 		
 	 public void dispose() {
-		JavaPlugin.getErrorTickManager().removeListener(fViewer);
+	 	if (fViewer != null)
+			JavaPlugin.getErrorTickManager().removeListener(fViewer);
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
 		getSite().getPage().removePartListener(fPartListener);

@@ -32,7 +32,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		setEditorContextMenuId("#CompilationUnitEditorContext"); //$NON-NLS-1$
 		setRulerContextMenuId("#CompilationUnitRulerContext"); //$NON-NLS-1$
 		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
-		fSavePolicy= new CUSavePolicy();
+		fSavePolicy= null;
 	}
 	
 	/**

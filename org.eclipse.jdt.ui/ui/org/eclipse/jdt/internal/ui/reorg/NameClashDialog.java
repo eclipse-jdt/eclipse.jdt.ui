@@ -113,7 +113,7 @@ public class NameClashDialog extends StatusDialog {
 	}
 	
 	public boolean isReplace() {
-		return fReplaceRadioButton.isSelected();;
+		return fReplaceRadioButton.isSelected();
 	}
 	
 	public String getNewName() {
