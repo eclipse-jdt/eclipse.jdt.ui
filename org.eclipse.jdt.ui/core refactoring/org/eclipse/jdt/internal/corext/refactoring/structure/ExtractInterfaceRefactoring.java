@@ -383,12 +383,22 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				return false; 
 			VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(vds);	
 			for (int i= 0; i < vdfs.length; i++) {
-				if (hasIndirectProblems(vdfs[i], nodesToRemove))
+				if (hasIndirectProblems(vdfs[i], nodesToRemove, new SubProgressMonitor(pm, 1)))
 					return true;	
 			}
+		} else if (parentNode instanceof FieldDeclaration){
+			FieldDeclaration fd= (FieldDeclaration)parentNode;
+			if (fd.getType() != node)
+				return false; 
+			VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(fd);	
+			for (int i= 0; i < vdfs.length; i++) {
+				if (hasIndirectProblems(vdfs[i], nodesToRemove, new SubProgressMonitor(pm, 1)))
+					return true;	
+			}
+				
 		} else if (parentNode instanceof VariableDeclaration){
-			if (hasIndirectProblems((VariableDeclaration)parentNode, nodesToRemove))
-				return true;	
+			if (hasIndirectProblems((VariableDeclaration)parentNode, nodesToRemove, new SubProgressMonitor(pm, 1)))
+				return true;
 		} else if (parentNode instanceof CastExpression){
 			if (! isReferenceUpdatable(parentNode, nodesToRemove))
 				return true;	
@@ -441,17 +451,44 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return oldTop;
 	}
 	
-	private boolean hasIndirectProblems(VariableDeclaration tempDeclaration, Collection nodesToRemove) throws JavaModelException{
-		ASTNode[] references= TempOccurrenceFinder.findTempOccurrenceNodes(tempDeclaration, true, false);
+	private boolean hasIndirectProblems(VariableDeclaration varDeclaration, Collection nodesToRemove, IProgressMonitor pm) throws JavaModelException{
+		ASTNode[] references= getVariableReferences(varDeclaration, pm);
 		for (int i= 0; i < references.length; i++) {
 			if (! isReferenceUpdatable(references[i], nodesToRemove)){
-				fBadVarSet.add(tempDeclaration);
+				addToBadVarSet(varDeclaration);
 				return true;
 			}	
 		}
 		return false;
 	}
 	
+	private ASTNode[] getVariableReferences(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
+		IVariableBinding vb= varDeclaration.resolveBinding();
+		if (vb == null)
+			return new ASTNode[0];
+		if (vb.isField())
+			return getFieldReferences(varDeclaration, pm);
+		return TempOccurrenceFinder.findTempOccurrenceNodes(varDeclaration, true, false);
+	}
+
+	private ASTNode[] getFieldReferences(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
+		Assert.isTrue(varDeclaration.resolveBinding().isField());
+		IField field= Binding2JavaModel.lookupIField(varDeclaration.resolveBinding(), getCompilationUnit(varDeclaration).getJavaProject());
+		if (field == null)
+			return new ASTNode[0];
+		ISearchPattern pattern= SearchEngine.createSearchPattern(field, IJavaSearchConstants.REFERENCES);
+		IJavaSearchScope scope= RefactoringScopeFactory.create(field);
+		SearchResultGroup[] referenceGroups= RefactoringSearchEngine.search(pm, scope, pattern);
+		List result= new ArrayList();
+		for (int i= 0; i < referenceGroups.length; i++) {
+			ICompilationUnit referencedCu= referenceGroups[i].getCompilationUnit();
+			if (referencedCu == null)
+				continue;
+			result.addAll(Arrays.asList(getAstNodes(referenceGroups[i].getSearchResults(), getAST(referencedCu))));
+		}
+		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);		
+	}
+		
 	private boolean isReferenceUpdatable(ASTNode varReference, Collection nodesToRemove) throws JavaModelException{
 		ASTNode parent= varReference.getParent();
 		if (parent instanceof VariableDeclarationFragment){
@@ -921,6 +958,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private static VariableDeclarationFragment[] getVariableDeclarationFragments(VariableDeclarationStatement vds){
 		return (VariableDeclarationFragment[]) vds.fragments().toArray(new VariableDeclarationFragment[vds.fragments().size()]);
+	}
+
+	private static VariableDeclarationFragment[] getVariableDeclarationFragments(FieldDeclaration fd){
+		return (VariableDeclarationFragment[]) fd.fragments().toArray(new VariableDeclarationFragment[fd.fragments().size()]);
 	}
 	
 	//--- 'can replace*' related methods 
