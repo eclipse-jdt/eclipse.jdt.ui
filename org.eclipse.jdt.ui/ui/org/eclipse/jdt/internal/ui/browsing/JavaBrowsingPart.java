@@ -725,7 +725,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * @return	the closest Java element used as input for this part
 	 */
 	protected IJavaElement findInputForJavaElement(IJavaElement je) {
-		if (je == null)
+		if (je == null || !je.exists())
 			return null;
 		if (isValidInput(je))
 			return je;
