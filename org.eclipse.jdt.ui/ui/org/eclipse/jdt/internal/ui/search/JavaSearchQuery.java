@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.SearchParticipantsPreferencePage;
@@ -118,7 +120,7 @@ public class JavaSearchQuery implements ISearchQuery {
 			boolean ignoreImports= (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES);
 			ignoreImports &= PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_SEARCH_IGNORE_IMPORTS);
 			boolean ignorePotentials= SearchPreferencePage.arePotentialMatchesIgnored();
-			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, mainSearchPM, ignoreImports, ignorePotentials);
+			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, ignoreImports, ignorePotentials);
 			
 			ISearchPattern pattern;
 			String stringPattern= null;
@@ -135,21 +137,20 @@ public class JavaSearchQuery implements ISearchQuery {
 			if (pattern == null) {
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, SearchMessages.getFormattedString("JavaSearchQuery.error.unsupported_pattern", stringPattern), null);  //$NON-NLS-1$
 			}
-			engine.search(JavaPlugin.getWorkspace(), pattern, fPatternData.getScope(), collector);
+			// TODO we shouldn't have to cast this.
+			engine.search((SearchPattern)pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, fPatternData.getScope(), collector, mainSearchPM);
 			for (int i= 0; i < participants.length; i++) {
 				ISearchRequestor requestor= new SearchRequestor(participants[i], textResult);
 				IProgressMonitor participantPM= new SubProgressMonitor(monitor, ticks[i]);
 				participants[i].search(requestor, fPatternData, participantPM);
 			}
-			matchCount= collector.getMatchCount();
 			
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
 		// TODO fix status message
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "Found "+matchCount+" matches.", null);
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "Found "+textResult.getMatchCount()+" matches.", null);
 	}
-
 
 	public String getLabel() {
 		if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES)

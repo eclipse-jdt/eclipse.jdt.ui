@@ -28,16 +28,14 @@ import org.eclipse.jdt.ui.search.ISearchUIParticipant;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.IEditorMatchAdapter;
+import org.eclipse.search.ui.text.IFileMatchAdapter;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 
-/**
- * @author Thomas Mäder
- *
- */
-public class JavaSearchResult extends AbstractTextSearchResult {
+public class JavaSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
 	private JavaSearchQuery fQuery;
 	private Map fElementsToParticipants;
 	
@@ -67,11 +65,11 @@ public class JavaSearchResult extends AbstractTextSearchResult {
 		return getLabel();
 	}
 
-	public Match[] findContainedMatches(IEditorPart editor) {
+	public Match[] findContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput instanceof IFileEditorInput)  {
 			IFileEditorInput fileEditorInput= (IFileEditorInput) editorInput;
-			return findContainedMatches(fileEditorInput.getFile());
+			return findContainedMatches(result, fileEditorInput.getFile());
 		} else if (editorInput instanceof IClassFileEditorInput) {
 			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) editorInput;
 			Set matches= new HashSet();
@@ -81,7 +79,7 @@ public class JavaSearchResult extends AbstractTextSearchResult {
 		return null;
 	}
 
-	public Match[] findContainedMatches(IFile file) {
+	public Match[] findContainedMatches(AbstractTextSearchResult result, IFile file) {
 		IJavaElement javaElement= JavaCore.create(file);
 		Set matches= new HashSet();
 		collectMatches(matches, javaElement);
@@ -182,6 +180,13 @@ public class JavaSearchResult extends AbstractTextSearchResult {
 				fElementsToParticipants.remove(match.getElement());
 		}
 		super.removeMatch(match);
+	}
+	public IFileMatchAdapter getFileMatchAdapter() {
+		return this;
+	}
+	
+	public IEditorMatchAdapter getEditorMatchAdapter() {
+		return this;
 	}
 
 }

@@ -16,30 +16,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jface.resource.ImageDescriptor;
-
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.IEditorMatchAdapter;
+import org.eclipse.search.ui.text.IFileMatchAdapter;
+import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
-import org.eclipse.search.ui.text.Match;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-
-public class NLSSearchResult extends AbstractTextSearchResult {
+public class NLSSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
 	/*
 	 * Element (group key) is always IJavaElement or FileEntry.
 	 */
@@ -63,12 +59,12 @@ public class NLSSearchResult extends AbstractTextSearchResult {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.ui.IEditorPart)
 	 */
-	public Match[] findContainedMatches(IEditorPart editor) {
+	public Match[] findContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		//TODO: copied from JavaSearchResult:
 		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput instanceof IFileEditorInput)  {
 			IFileEditorInput fileEditorInput= (IFileEditorInput) editorInput;
-			return findContainedMatches(fileEditorInput.getFile());
+			return findContainedMatches(result, fileEditorInput.getFile());
 		} else if (editorInput instanceof IClassFileEditorInput) {
 			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) editorInput;
 			Set matches= new HashSet();
@@ -81,7 +77,7 @@ public class NLSSearchResult extends AbstractTextSearchResult {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.core.resources.IFile)
 	 */
-	public Match[] findContainedMatches(IFile file) {
+	public Match[] findContainedMatches(AbstractTextSearchResult result, IFile file) {
 		if (fQuery.getPropertiesFile().equals(file)) {
 			ArrayList matches= new ArrayList();
 			if (fDuplicatesGroup != null)
@@ -201,6 +197,14 @@ public class NLSSearchResult extends AbstractTextSearchResult {
 	 */
 	public ISearchQuery getQuery() {
 		return fQuery;
+	}
+
+	public IFileMatchAdapter getFileMatchAdapter() {
+		return this;
+	}
+	
+	public IEditorMatchAdapter getEditorMatchAdapter() {
+		return this;
 	}
 
 }

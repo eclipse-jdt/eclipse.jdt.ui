@@ -10,58 +10,46 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
-/**
- * @author Thomas Mäder
- *
- */
-public class NewSearchResultCollector implements IJavaSearchResultCollector {
+public class NewSearchResultCollector extends SearchRequestor {
 	private JavaSearchResult fSearch;
-	private IProgressMonitor fProgressMonitor;
-	private int fMatchCount;
 	private boolean fIgnoreImports;
 	private boolean fIgnorePotentials;
 
-	public NewSearchResultCollector(JavaSearchResult search, IProgressMonitor monitor, boolean ignoreImports, boolean ignorePotentials) {
+	public NewSearchResultCollector(JavaSearchResult search, boolean ignoreImports, boolean ignorePotentials) {
 		super();
 		fSearch= search;
-		fProgressMonitor= monitor;
 		fIgnoreImports= ignoreImports;
 		fIgnorePotentials= ignorePotentials;
 	}
-
-	public void aboutToStart() {
-		// do nothing
-	}
-
-	public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
-		fMatchCount++;
+	
+	public boolean acceptSearchMatch(SearchMatch match) throws CoreException {
+		IJavaElement enclosingElement= (IJavaElement) match.getElement();
 		if (enclosingElement != null) {
 			if (fIgnoreImports && enclosingElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
-				return;
-			if (fIgnorePotentials && (accuracy == IJavaSearchResultCollector.POTENTIAL_MATCH))
-				return;
-			fSearch.addMatch(new JavaElementMatch(enclosingElement, start, end-start, accuracy));
+				return true;
+			if (fIgnorePotentials && (match.getAccuracy() == SearchMatch.A_INACCURATE))
+				return true;
+			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getOffset(), match.getLength(), match.getAccuracy()));
 		}
+		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.search.IJavaSearchResultCollector#done()
-	 */
-	public void done() {
-		//System.out.println("done search, "+fMatchCount+" matches");
+	public void beginReporting() {
 	}
 
-	public IProgressMonitor getProgressMonitor() {
-		return fProgressMonitor;
+	public void endReporting() {
 	}
-	
-	public int getMatchCount() {
-		return fMatchCount;
+
+	public void enterParticipant(SearchParticipant participant) {
+	}
+
+	public void exitParticipant(SearchParticipant participant) {
 	}
 
 

@@ -12,29 +12,25 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
-
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jface.resource.ImageDescriptor;
-
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.IEditorMatchAdapter;
+import org.eclipse.search.ui.text.IFileMatchAdapter;
+import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
-import org.eclipse.search.ui.text.Match;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-
-
-public class OccurrencesSearchResult extends AbstractTextSearchResult {
+public class OccurrencesSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
 
 	protected static final Match[] NO_MATCHES= new Match[0];
 	private OccurrencesSearchQuery fQuery;
@@ -46,7 +42,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.core.resources.IFile)
 	 */
-	public Match[] findContainedMatches(IFile file) {
+	public Match[] findContainedMatches(AbstractTextSearchResult result, IFile file) {
 		Object[] elements= getElements();
 		if (elements.length == 0)
 			return NO_MATCHES;
@@ -64,12 +60,12 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.ui.IEditorPart)
 	 */
-	public Match[] findContainedMatches(IEditorPart editor) {
+	public Match[] findContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		//TODO same code in JavaSearchResult
 		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput instanceof IFileEditorInput)  {
 			IFileEditorInput fileEditorInput= (IFileEditorInput) editorInput;
-			return findContainedMatches(fileEditorInput.getFile());
+			return findContainedMatches(result, fileEditorInput.getFile());
 			
 		} else if (editorInput instanceof IClassFileEditorInput) {
 			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) editorInput;
@@ -155,6 +151,14 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult {
 	 */
 	public ISearchQuery getQuery() {
 		return fQuery;
+	}
+
+	public IFileMatchAdapter getFileMatchAdapter() {
+		return this;
+	}
+	
+	public IEditorMatchAdapter getEditorMatchAdapter() {
+		return this;
 	}
 
 }
