@@ -172,17 +172,16 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 	
 	private static String guessContantName(StringLiteral literal) {
-		return convertNonLetters(literal.getLiteralValue()).toUpperCase();
+		return convertNonLettersToUnderscores(literal.getLiteralValue()).toUpperCase();
 	}
 
-	private static String convertNonLetters(String string) {
+	private static String convertNonLettersToUnderscores(String string) {
 		StringBuffer result= new StringBuffer(string.length());
 		for (int i= 0; i < string.length(); i++) {
-			char ch= string.charAt(i);
-			if (! Character.isLetter(ch))
-				result.append(UNDERSCORE);
+			if (Character.isLetter(string.charAt(i)))
+				result.append(string.charAt(i));
 			else
-				result.append(ch);
+				result.append(UNDERSCORE);
 		}
 		return result.toString();
 	}
