@@ -48,8 +48,8 @@ public interface IChange {
 	 *		change.performed();
 	 *	}
 	 * </pre>
+	 * @see #performed()
 	 */
-	// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm);
 	 
 	/**
@@ -63,7 +63,7 @@ public interface IChange {
 	 * The change has been performed. Clients must ensure that this method is called after all
 	 * resource deltas emitted by calling <code>perform</code> are processed. This method must
 	 * be called even if the perform has thrown a runtime exception.
-	 * @see aboutToPerform()
+	 * @see #aboutToPerform(ChangeContext, IProgressMonitor)
 	 */
 	public void performed(); 
 	 
@@ -91,8 +91,7 @@ public interface IChange {
 	 * consider the activation status of possible children.
 	 *
 	 * @return the change's activation status.
-	 * @see setActive
-	 * @see getActivationStatus
+	 * @see #setActive(boolean)
 	 */
 	public boolean isActive();
 	

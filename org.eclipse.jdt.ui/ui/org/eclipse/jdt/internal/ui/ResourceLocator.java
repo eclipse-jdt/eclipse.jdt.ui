@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui;
 
-
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -15,37 +14,29 @@ import org.eclipse.jdt.core.JavaModelException;
  * which are related to an object
  */
 public class ResourceLocator implements IResourceLocator {
-	/* 
-       * Implements a method from IResourceLocator
-       */
-       public IResource getUnderlyingResource(Object element) throws JavaModelException {
+	
+	public IResource getUnderlyingResource(Object element) throws JavaModelException {
 		if (element instanceof IJavaElement)
-			return ((IJavaElement)element).getUnderlyingResource();
+			return ((IJavaElement) element).getUnderlyingResource();
 		else
 			return null;
 	}
 
-	/* 
-       * Implements a method from IResourceLocator
-       */
 	public IResource getCorrespondingResource(Object element) throws JavaModelException {
 		if (element instanceof IJavaElement)
-			return ((IJavaElement)element).getUnderlyingResource();
+			return ((IJavaElement) element).getUnderlyingResource();
 		else
 			return null;
 	}
 
-	/*
-       * Implements a method from IResourceLocator
-       */
 	public IResource getContainingResource(Object element) throws JavaModelException {
 		IResource resource= null;
 		if (element instanceof IResource)
-			resource= (IResource)element;
+			resource= (IResource) element;
 		if (element instanceof IJavaElement) {
-			resource= ((IJavaElement)element).getUnderlyingResource();
+			resource= ((IJavaElement) element).getUnderlyingResource();
 			if (resource == null)
-				resource= ((IJavaElement)element).getJavaProject().getProject();
+				resource= ((IJavaElement) element).getJavaProject().getProject();
 		}
 		return resource;
 	}

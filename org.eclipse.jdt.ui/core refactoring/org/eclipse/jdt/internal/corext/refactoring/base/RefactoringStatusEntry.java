@@ -159,9 +159,10 @@ public class RefactoringStatusEntry{
 
 	/**
 	 * @return severity level.
-	 * @see RefactoringStatus.INFO
-	 * @see RefactoringStatus.WARNING
-	 * @see RefactoringStatus.ERROR
+	 * @see RefactoringStatus#INFO
+	 * @see RefactoringStatus#WARNING
+	 * @see RefactoringStatus#ERROR
+	 * @see RefactoringStatus#FATAL
 	 */	
 	public int getSeverity() {
 		return fSeverity;

@@ -62,7 +62,7 @@ public class JavaModelUtil {
 	 * <code>null</code> is returned if the type container could not be found.
 	 * @param jproject The Java project defining the context to search
 	 * @param typeContainerName A dot separarted name of the type container
-	 * @see #getTypeContainerName()
+	 * @see #getTypeContainerName(IType)
 	 */
 	public static IJavaElement findTypeContainer(IJavaProject jproject, String typeContainerName) throws JavaModelException {
 		// try to find it as type

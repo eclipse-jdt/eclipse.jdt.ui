@@ -169,7 +169,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 * Enters the linked mode. The linked mode can be left by calling
 	 * <code>exit</code>.
 	 * 
-	 * @see exit(boolean)
+	 * @see #exit(boolean)
 	 */
 	public void enter() {
 		// track final caret

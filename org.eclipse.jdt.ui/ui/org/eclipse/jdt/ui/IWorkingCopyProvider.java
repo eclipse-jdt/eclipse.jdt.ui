@@ -4,7 +4,7 @@ package org.eclipse.jdt.ui;
  * Interface to add to a Java content provider that
  * can return <code>IWorkingCopy</code> elements. 
  * 
- * @see JavaUI#StandardElementContentProvider
+ * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider
  * @see org.eclipse.jdt.core.IWorkingCopy
  * 
  * @since 2.0 

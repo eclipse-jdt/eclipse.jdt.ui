@@ -88,7 +88,7 @@ public class NLSRefactoring extends Refactoring {
 	 * sets the import to be added
 	 * @param decl must be a valid import declaration
 	 * otherwise no import declaration will be added
-	 * @see JavaConventions#validateImportDeclaration
+	 * @see JavaConventions#validateImportDeclaration(java.lang.String)
 	 */
 	public void setAddedImportDeclaration(String decl){
 		if (JavaConventions.validateImportDeclaration(decl).isOK())
@@ -479,7 +479,7 @@ public class NLSRefactoring extends Refactoring {
 	// --- changes
 	
 	/**
-	 * @see IRefactoring#createChange(IProgressMonitor)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{

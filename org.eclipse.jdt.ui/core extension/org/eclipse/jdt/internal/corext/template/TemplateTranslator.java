@@ -65,7 +65,7 @@ public class TemplateTranslator {
 	 * @param string the string to translate.
 	 * @return returns the template buffer corresponding to the string, <code>null</code>
 	 *         if there was an error.
-	 * @see getErrorMessage()
+	 * @see #getErrorMessage()
 	 */
 	public TemplateBuffer translate(String string) throws CoreException {
 

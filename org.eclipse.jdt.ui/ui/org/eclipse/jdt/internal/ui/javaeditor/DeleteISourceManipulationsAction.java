@@ -50,7 +50,7 @@ public class DeleteISourceManipulationsAction extends Action implements ISelecti
 	}
 		
 	/**
-	 * @see Action#actionPerformed
+	 * @see Action#run()
 	 */
 	public void run() {
 		try {

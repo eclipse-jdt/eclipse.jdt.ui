@@ -101,7 +101,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	/**
 	 * The actual drop has occurred. Calls <code>drop(Object target, DropTargetEvent event)
 	 * </code>.
-	 * @see DropTargetListener.drop(DropTargetEvent)
+	 * @see DropTargetListener#drop(org.eclipse.swt.dnd.DropTargetEvent)
 	 */	 
 	public void drop(DropTargetEvent event) {
 		drop(fTarget, event);

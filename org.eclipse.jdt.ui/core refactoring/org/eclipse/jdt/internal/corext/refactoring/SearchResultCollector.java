@@ -33,20 +33,20 @@ public class SearchResultCollector implements IJavaSearchResultCollector {
 	}
 	
 	/**
-	 * @see IJavaSearchResultCollector#accept
+	 * @see IJavaSearchResultCollector#accept(org.eclipse.core.resources.IResource, int, int, org.eclipse.jdt.core.IJavaElement, int)
 	 */
 	public void accept(IResource res, int start, int end, IJavaElement element, int accuracy) {
 		fFound.add(new SearchResult(res, start, end, element, accuracy));
 	}
 	
 	/**
-	 * @see IJavaSearchResultCollector#done
+	 * @see IJavaSearchResultCollector#done()
 	 */
 	public void done() {
 	}
 
 	/**
-	 * @see IJavaSearchResultCollector#getProgressMonitor
+	 * @see IJavaSearchResultCollector#getProgressMonitor()
 	 */
 	public IProgressMonitor getProgressMonitor() {
 		return fPM;

@@ -76,7 +76,7 @@ public abstract class SubstitutionTextReader extends SingleCharReader {
 	}
 	
 	/**
-	 * @see Reader#read(char)
+	 * @see Reader#read()
 	 */
 	public int read() throws IOException {
 		int c;

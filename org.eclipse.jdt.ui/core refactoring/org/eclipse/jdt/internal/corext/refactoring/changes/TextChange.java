@@ -143,7 +143,6 @@ public abstract class TextChange extends AbstractTextChange {
 	 * Returns the text edit changes managed by this text change.
 	 * 
 	 * @return the text edit changes
-	 * @see isReverseChange
 	 */
 	public EditChange[] getTextEditChanges() {
 		return (EditChange[])fTextEditChanges.toArray(new EditChange[fTextEditChanges.size()]);

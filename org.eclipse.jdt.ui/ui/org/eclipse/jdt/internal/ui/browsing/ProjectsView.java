@@ -139,7 +139,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	
 	
 	/**
-	 * @see IWorkbenchPart#getTitle()
+	 * @see org.eclipse.ui.IWorkbenchPart#getTitle()
 	 */
 	public String getTitle() {
 		return JavaBrowsingMessages.getString("JavaBrowsing.projectView.title"); //$NON-NLS-1$

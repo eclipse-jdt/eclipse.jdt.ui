@@ -285,7 +285,7 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see createPackageDialog(Shell,IJavaProject,int,String)
+	 * @see #createPackageDialog(Shell,IJavaProject,int,String)
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IJavaProject project, int style) throws JavaModelException {
 		return createPackageDialog(parent, project, style, ""); //$NON-NLS-1$
@@ -313,7 +313,7 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see createPackageDialog(Shell,IPackageFragmentRoot)
+	 * @see #createPackageDialog(Shell,IPackageFragmentRoot)
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root) throws JavaModelException {
 		return createPackageDialog(parent, root, ""); //$NON-NLS-1$
@@ -361,7 +361,7 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see createTypeDialog(Shell,IRunnableContext,IJavaSearchScope,int,boolean,String)
+	 * @see #createTypeDialog(Shell,IRunnableContext,IJavaSearchScope,int,boolean,String)
 	 */
 	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) throws JavaModelException {
 		return createTypeDialog(parent, context, scope, style, multipleSelection, "");//$NON-NLS-1$
@@ -401,7 +401,7 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see createMainTypeDialog(Shell,IRunnableContext,IJavaSearchScope,int,boolean,String)
+	 * @see #createMainTypeDialog(Shell, IRunnableContext, IJavaSearchScope, int, boolean, String)
 	 */
 	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) {
 		return createMainTypeDialog(parent, context, scope, style, multipleSelection, "");//$NON-NLS-1$

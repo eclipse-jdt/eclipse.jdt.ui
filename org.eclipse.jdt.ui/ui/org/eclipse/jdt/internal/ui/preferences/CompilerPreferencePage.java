@@ -189,7 +189,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	}
 	
 	/**
-	 * @see IWorkbenchPreferencePage#init()
+	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */	
 	public void init(IWorkbench workbench) {
 	}

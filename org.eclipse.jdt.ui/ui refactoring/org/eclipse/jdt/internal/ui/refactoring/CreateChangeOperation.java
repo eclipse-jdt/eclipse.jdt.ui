@@ -57,7 +57,7 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 	 * @param style style to define which conditions to check
 	 * @param checkPassedSeverity the severity below which the check is considered
 	 *  to be passed
-	 * @see #setCheckPassedSeverity()
+	 * @see #setCheckPassedSeverity(int)
 	 */
 	public CreateChangeOperation(Refactoring refactoring, int style, int checkPassedSeverity) {
 		Assert.isNotNull(refactoring);

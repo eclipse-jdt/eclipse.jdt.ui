@@ -64,7 +64,7 @@ public class WorkingCopyUtil {
 
 	/**
 	 * Creates a <em>new</em> working copy and the caller is responsible for destroying it.
-	 * @see IWorkingCopy::destroy()
+	 * @see IWorkingCopy#destroy()
 	 */
 	public static ICompilationUnit getNewWorkingCopy(ICompilationUnit cu) throws JavaModelException{
 		/*

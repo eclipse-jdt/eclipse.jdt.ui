@@ -22,7 +22,7 @@ public interface IResourceLocator {
 	 * @param	element	the element for which the resource is located
 	 * @exception JavaModelException if the element does not exist or if an
 	 *		exception occurrs while accessing its underlying resource
-	 * @see IJavaElement#getUnderlyingResource
+	 * @see org.eclipse.jdt.core.IJavaElement#getUnderlyingResource()
 	 */
 	IResource getUnderlyingResource(Object element) throws JavaModelException;
 	/**
@@ -41,7 +41,7 @@ public interface IResourceLocator {
 	 * @param	element	the element for which the resource is located
 	 * @exception JavaModelException if the element does not exist or if an
 	 *		exception occurrs while accessing its corresponding resource
-	 * @see IJavaElement#getCorrespondingResource
+	 * @see org.eclipse.jdt.core.IJavaElement#getCorrespondingResource()
 	 */
 	IResource getCorrespondingResource(Object element) throws JavaModelException;
 	/**

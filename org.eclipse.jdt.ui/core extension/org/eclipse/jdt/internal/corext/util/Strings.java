@@ -63,7 +63,7 @@ public class Strings {
 	 * @return <code>true</code> if the string only consists of white
 	 * 	spaces; otherwise <code>false</code> is returned
 	 * 
-	 * @see Character#isWhitespace(char)
+	 * @see java.lang.Character#isWhitespace(char)
 	 */
 	public static boolean containsOnlyWhitespaces(String s) {
 		int size= s.length();

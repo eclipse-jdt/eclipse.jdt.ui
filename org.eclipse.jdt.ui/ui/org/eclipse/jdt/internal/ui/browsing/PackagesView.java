@@ -108,7 +108,7 @@ public class PackagesView extends JavaBrowsingPart {
 	
 		
 	/**
-	 * @see IWorkbenchPart#getTitle()
+	 * @see org.eclipse.ui.IWorkbenchPart#getTitle()
 	 */
 	public String getTitle() {
 		return JavaBrowsingMessages.getString("JavaBrowsing.packageView.title"); //$NON-NLS-1$

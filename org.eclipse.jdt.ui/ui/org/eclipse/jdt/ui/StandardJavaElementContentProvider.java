@@ -35,7 +35,7 @@ Java model (<code>IJavaModel</code>)
  * Java project and the package fragments is automatically filtered out.
  * </p>
  * This content provider can optionally return working copy elements.
- * @see JavaUI#IWorkingCopyProvider
+ * @see org.eclipse.jdt.ui.IWorkingCopyProvider
  * 
  * @since 2.0
  */

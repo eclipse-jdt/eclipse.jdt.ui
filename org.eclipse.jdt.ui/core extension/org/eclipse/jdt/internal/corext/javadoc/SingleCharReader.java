@@ -11,7 +11,7 @@ import java.io.Reader;
 public abstract class SingleCharReader extends Reader {
 	
 	/**
-	 * @see Reader#read(char)
+	 * @see Reader#read()
 	 */
 	public abstract int read() throws IOException;
 

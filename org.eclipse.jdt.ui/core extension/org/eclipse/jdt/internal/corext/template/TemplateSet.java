@@ -73,7 +73,7 @@ public class TemplateSet {
 	/**
 	 * Convenience method for reading templates from a file.
 	 * 
-	 * @see addFromStream(InputStream)
+	 * @see #addFromStream(InputStream)
 	 */
 	public void addFromFile(File file) throws CoreException {
 		InputStream stream= null;
@@ -157,7 +157,7 @@ public class TemplateSet {
 	/**
 	 * Convenience method for saving to a file.
 	 * 
-	 * @see saveToStream(OutputStream)
+	 * @see #saveToStream(OutputStream)
 	 */
 	public void saveToFile(File file) throws CoreException {
 		OutputStream stream= null;

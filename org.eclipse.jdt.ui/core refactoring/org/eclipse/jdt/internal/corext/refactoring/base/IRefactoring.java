@@ -28,7 +28,7 @@ public interface IRefactoring {
 	 * Must not return <code>null</code>.
 	 * Implementors can assume the progress monitor to be not initialized.
 	 * @see RefactoringStatus
-	 * @see RefactoringStatus#isOk
+	 * @see RefactoringStatus#OK
 	 * @see RefactoringStatus#ERROR
 	 */
 	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException;

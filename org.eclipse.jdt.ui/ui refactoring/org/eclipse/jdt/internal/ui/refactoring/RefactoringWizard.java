@@ -155,7 +155,6 @@ public class RefactoringWizard extends Wizard {
 	 * to the error page.
 	 * 
 	 * @param status the input status to set.
-	 * @see #checkActivationOnOpen()
 	 * @see #getActivationStatus()
 	 */
 	public void setInputStatus(RefactoringStatus status) {
@@ -182,7 +181,6 @@ public class RefactoringWizard extends Wizard {
 	 * checking has been performed during startup.
 	 * 
 	 * @return the activation status computed during startup.
-	 * @see #checkActivationOnOpen()
 	 */
 	public RefactoringStatus getActivationStatus() {
 		return fActivationStatus;

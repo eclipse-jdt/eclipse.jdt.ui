@@ -294,7 +294,7 @@ public class DeleteRefactoring extends Refactoring {
 	}
 	
 	/**
-	 * @see IRefactoring#getName()
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
 		return RefactoringCoreMessages.getString("DeleteRefactoring.delete"); //$NON-NLS-1$

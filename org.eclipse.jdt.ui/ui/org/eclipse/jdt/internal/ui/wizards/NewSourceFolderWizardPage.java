@@ -162,11 +162,12 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		fRootDialogField.setText("");		 //$NON-NLS-1$
 	}
 	
+
 	// -------- UI Creation ---------
 
-	/**
-	 * @see WizardPage#createControl
-	 */	
+	/*
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		
@@ -191,7 +192,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	}
 	
 	/*
-	 * @see IDialogPage#setVisible(boolean)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
 		if (visible) {
@@ -343,9 +344,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	}
 	
 	// ---- creation ----------------
-	/** 
-	 * @see NewElementWizardPage#getRunnable
-	 */	
+	
 	public IRunnableWithProgress getRunnable() {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
