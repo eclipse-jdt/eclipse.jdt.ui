@@ -15,8 +15,11 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
@@ -27,7 +30,8 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -55,6 +59,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class PullUpInputPage extends UserInputWizardPage {
 	
@@ -174,8 +179,11 @@ public class PullUpInputPage extends UserInputWizardPage {
 		}
 	}
 	
+	private Label fTypeHierarchyLabel;
+	private Button fSelectAllButton;
+	private Button fDeselectAllButton;
 	private SourceViewer fSourceViewer;
-	private CheckboxTreeViewer fTreeViewerViewer;
+	private PullUpTreeViewer fTreeViewer;
 	private Label fContextLabel;
 	private Set fMarkedMethods; //Set of IMethods
 	public static final String PAGE_NAME= "PullUpMethodsInputPage"; //$NON-NLS-1$
@@ -191,7 +199,52 @@ public class PullUpInputPage extends UserInputWizardPage {
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
-		SashForm composite= new SashForm(parent, SWT.HORIZONTAL);
+		Composite superComposite= new Composite(parent, SWT.NONE);
+		superComposite.setLayout(new GridLayout());
+		
+		createTreeAndSourceViewer(superComposite);
+		createButtonComposite(superComposite);
+		setControl(superComposite);
+		
+		///FIX ME: wrong
+		WorkbenchHelp.setHelp(getControl(), fgHelpContextID);			
+	}
+
+	private void createButtonComposite(Composite superComposite) {
+		Composite buttonComposite= new Composite(superComposite, SWT.NONE);
+		buttonComposite.setLayoutData(new GridData());
+		GridLayout bcl= new GridLayout();
+		bcl.numColumns= 2;
+		bcl.marginWidth= 1;
+		buttonComposite.setLayout(bcl);
+
+		fSelectAllButton= createSelectButton(buttonComposite, "&Select All", true);
+		fDeselectAllButton= createSelectButton(buttonComposite, "&Deselect All", false);
+	}
+	
+	private Button createSelectButton(Composite composite, String buttonLabel, final boolean select){
+		Button button= new Button(composite, SWT.PUSH);
+		button.setLayoutData(new GridData());
+		SWTUtil.setButtonDimensionHint(button);
+		button.setText(buttonLabel);		
+		button.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				IType root= ((ITypeHierarchy)fTreeViewer.getInput()).getType();
+				fTreeViewer.setSubtreeChecked(root, select);
+				fTreeViewer.setSubtreeGrayed(root, false);
+				updateTypeHierarchyLabel();
+			}
+		});
+		return button;
+	}
+
+	private void updateTypeHierarchyLabel(){
+		fTypeHierarchyLabel.setText("Type Hierarchy. Selected: " + getCheckedMethods().length + " method(s) to delete");
+	}	
+	
+	private void createTreeAndSourceViewer(Composite superComposite) {
+		SashForm composite= new SashForm(superComposite, SWT.HORIZONTAL);
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2; 
 		layout.marginWidth= 0; 
@@ -201,14 +254,8 @@ public class PullUpInputPage extends UserInputWizardPage {
 		composite.setLayout(layout);
 		
 		createHierarchyTreeComposite(composite);
-		
 		createSourceViewer(composite);
-		
 		composite.setWeights(new int[]{50, 50});
-		setControl(composite);
-		
-		///FIX ME: wrong
-		WorkbenchHelp.setHelp(getControl(), fgHelpContextID);			
 	}
 
 	/*
@@ -228,7 +275,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 	} 
 	
 	private IMethod[] getCheckedMethods(){
-		Object[] checked= fTreeViewerViewer.getCheckedElements();
+		Object[] checked= fTreeViewer.getCheckedElements();
 		List members= new ArrayList(checked.length);
 		for (int i= 0; i < checked.length; i++) {
 			if (checked[i] instanceof IMethod)
@@ -281,17 +328,17 @@ public class PullUpInputPage extends UserInputWizardPage {
 		layout.verticalSpacing= 1;
 		composite.setLayout(layout);
 
-		Label label= new Label(composite, SWT.NONE);
-		label.setText("Type hierarchy");
-		label.setLayoutData(new GridData());
+		fTypeHierarchyLabel= new Label(composite, SWT.NONE);
+		fTypeHierarchyLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		fTreeViewerViewer= createTreeViewer(composite, pm);
+		fTreeViewer= createTreeViewer(composite, pm);
+		updateTypeHierarchyLabel();
 	}
 
-	private CheckboxTreeViewer createTreeViewer(Composite composite, IProgressMonitor pm) {
+	private PullUpTreeViewer createTreeViewer(Composite composite, IProgressMonitor pm) {
 		Tree tree= new Tree(composite, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
-		final CheckboxTreeViewer treeViever= new PullUpTreeViewer(tree);
+		final PullUpTreeViewer treeViever= new PullUpTreeViewer(tree);
 		treeViever.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		treeViever.setUseHashlookup(true);
 		treeViever.setSorter(new JavaElementSorter());
@@ -313,6 +360,11 @@ public class PullUpInputPage extends UserInputWizardPage {
 		treeViever.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				PullUpInputPage.this.selectionChanged(event);
+			}
+		});
+		treeViever.addCheckStateListener(new ICheckStateListener(){
+			public void checkStateChanged(CheckStateChangedEvent event){
+				updateTypeHierarchyLabel();
 			}
 		});
 		return treeViever;
