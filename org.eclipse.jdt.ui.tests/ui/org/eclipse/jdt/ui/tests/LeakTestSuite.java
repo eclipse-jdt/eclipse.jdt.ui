@@ -20,7 +20,7 @@ import junit.framework.TestSuite;
 public class LeakTestSuite extends TestSuite {
 
 	/**
-	 * Returns the suite.  This is required to
+	 * @return Returns the suite.  This is required to
 	 * use the JUnit Launcher.
 	 */
 	public static Test suite() {

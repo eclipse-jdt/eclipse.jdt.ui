@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.tests.dialogs.WizardsTest;
 public class UIInteractiveSuite extends TestSuite {
 
 	/**
-	 * Returns the suite.  This is required to
+	 * @return Returns the suite.  This is required to
 	 * use the JUnit Launcher.
 	 */
 	public static Test suite() {
