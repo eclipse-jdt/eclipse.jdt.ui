@@ -48,14 +48,13 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	public UnresolvedTypesQuickFixTest(String name) {
 		super(name);
 	}
-
-
+	
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -64,7 +63,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		}
 	}
 
-
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
+	
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getFormatterOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
