@@ -363,8 +363,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test59() throws Exception{
-		printTestDisabledMessage("bug 22946 ");
-//		standardPassingTest();
+//		printTestDisabledMessage("bug 22946 ");
+		standardPassingTest();
 	}
 
 	public void test60() throws Exception{
@@ -405,6 +405,23 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "Outer", "Inter"}, "I", names, signatures, true);
 	}
+	
+	public void test68() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", new String[]{"A", "As"}, "I", names, signatures, true);
+	}
+
+	public void test69() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", new String[]{"A", "As"}, "I", names, signatures, true);
+	}
+
+	public void test70() throws Exception{
+		standardPassingTest();
+	}
+	
 
 	public void testFail0() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
