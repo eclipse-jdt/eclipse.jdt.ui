@@ -197,6 +197,9 @@ public class ProfileStore {
 			final FileReader reader= new FileReader(file);
 			try {
 				List res= readProfilesFromStream(new InputSource(reader));
+				for (int i= 0; i < res.size(); i++) {
+					ProfileVersioner.updateAndComplete((CustomProfile) res.get(i));
+				}
 				writeProfiles(res);
 				file.delete(); // remove after successful write
 				return res;
@@ -316,10 +319,14 @@ public class ProfileStore {
 		while (keyIter.hasNext()) {
 			final String key= (String)keyIter.next();
 			final String value= (String)profile.getSettings().get(key);
-			final Element setting= document.createElement(XML_NODE_SETTING);
-			setting.setAttribute(XML_ATTRIBUTE_ID, key);
-			setting.setAttribute(XML_ATTRIBUTE_VALUE, value);
-			element.appendChild(setting);
+			if (value != null) {
+				final Element setting= document.createElement(XML_NODE_SETTING);
+				setting.setAttribute(XML_ATTRIBUTE_ID, key);
+				setting.setAttribute(XML_ATTRIBUTE_VALUE, value);
+				element.appendChild(setting);
+			} else {
+				JavaPlugin.logErrorMessage("ProfileStore: Profile does not contain value for key " + key); //$NON-NLS-1$
+			}
 		}
 		return element;
 	}
