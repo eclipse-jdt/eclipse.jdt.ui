@@ -36,7 +36,6 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -50,7 +49,6 @@ import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -60,7 +58,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateSet;
 import org.eclipse.jdt.internal.corext.template.Templates;
@@ -270,7 +267,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
         gd1.horizontalSpan= 2;
         fFormatButton.setLayoutData(gd1);
 
-		fTableViewer.setInput(fTemplates);		
+		fTableViewer.setInput(fTemplates);
 		fTableViewer.setAllChecked(false);
 		fTableViewer.setCheckedElements(getEnabledTemplates());		
 
