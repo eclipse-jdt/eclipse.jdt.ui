@@ -128,7 +128,7 @@ public class ProfileNatives {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			};
+			}
 			System.out.println("thread stopping");
 		}
 		
