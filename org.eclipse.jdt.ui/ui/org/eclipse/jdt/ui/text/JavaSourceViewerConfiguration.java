@@ -12,6 +12,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -42,6 +43,8 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
@@ -69,10 +72,6 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	/** Key used to look up display tab width */
 	public final static String PREFERENCE_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
-	/** Key used to look up code formatter tab size */
-	private final static String CODE_FORMATTER_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
-	/** Key used to look up code formatter tab character */
-	private final static String CODE_FORMATTER_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char"; //$NON-NLS-1$
 	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
@@ -265,8 +264,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		Vector vector= new Vector();
 
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
-		int tabWidth= getPreferenceStore().getInt(CODE_FORMATTER_TAB_SIZE);
-		boolean useSpaces= getPreferenceStore().getString(CODE_FORMATTER_TAB_CHAR).equals("space"); //$NON-NLS-1$
+				
+		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+		int tabWidth= preferences.getInt(JavaCore.FORMATTER_TAB_SIZE);
+		boolean useSpaces= preferences.getString(JavaCore.FORMATTER_TAB_CHAR).equals("space"); //$NON-NLS-1$
 
 		for (int i= 0; i <= tabWidth; i++) {
 		    StringBuffer prefix= new StringBuffer();
