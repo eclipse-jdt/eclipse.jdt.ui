@@ -21,14 +21,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
  * Standard label provider for Java elements used by the PackageExplorerPart
  * Use this class when you want to present the Java elements in a viewer.
  * <p>
- * The implementation also handles non-Java elements by forwarding the requests to an 
- * internal <code>WorkbenchLabelProvider</code>.
+ * The implementation also handles non-Java elements by forwarding the requests to the
+ * <code>IWorkbenchAdapter</code> of the element.
  * </p>
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *
- * @see org.eclipse.ui.model.WorkbenchLabelProvider
  */
 class PackageExplorerLabelProvider extends LabelProvider {
 
@@ -69,7 +67,7 @@ class PackageExplorerLabelProvider extends LabelProvider {
 		if (element instanceof IStorage) 
 			return fStorageLabelProvider.getImage(element);
 
-		return super.getImage(element);
+		return result;
 	}
 
 	/* (non-Javadoc)
@@ -84,7 +82,7 @@ class PackageExplorerLabelProvider extends LabelProvider {
 		if (element instanceof IStorage)
 			return fStorageLabelProvider.getText(element);
 
-		return super.getText(element);
+		return text;
 	}
 
 	/* (non-Javadoc)

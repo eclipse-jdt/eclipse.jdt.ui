@@ -18,14 +18,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
  * Standard label provider for Java elements.
  * Use this class when you want to present the Java elements in a viewer.
  * <p>
- * The implementation also handles non-Java elements by forwarding the requests to an 
- * internal <code>WorkbenchLabelProvider</code>.
+ * The implementation also handles non-Java elements by forwarding the requests to the
+ * <code>IWorkbenchAdapter</code> of the element.
  * </p>
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *
- * @see org.eclipse.ui.model.WorkbenchLabelProvider
  */
 public class JavaElementLabelProvider extends LabelProvider {
 	
@@ -93,6 +91,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
 	 * should be rendered qualified.
 	 * Examples: java.lang.String, java.util.Vector.size()
+	 * @since 2.0
 	 */
 	public final static int SHOW_QUALIFIED=				0x400;
 
@@ -100,6 +99,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
 	 * should be rendered qualified. The qualifcation is appended
 	 * Examples: String - java.lang, size() - java.util.Vector
+	 * @since 2.0
 	 */
 	public final static int SHOW_POST_QUALIFIED=	0x800;	
 	
@@ -231,7 +231,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 		if (element instanceof IStorage) 
 			return fStorageLabelProvider.getImage(element);
 
-		return super.getImage(element);
+		return result;
 	}
 
 	/* (non-Javadoc)
@@ -246,7 +246,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 		if (element instanceof IStorage)
 			return fStorageLabelProvider.getText(element);
 
-		return super.getText(element);
+		return text;
 	}
 
 	/* (non-Javadoc)

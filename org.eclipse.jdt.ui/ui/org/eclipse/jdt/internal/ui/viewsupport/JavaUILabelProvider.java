@@ -25,13 +25,21 @@ public class JavaUILabelProvider extends LabelProvider {
 		this(JavaElementLabels.M_PARAMETER_TYPES, JavaElementImageProvider.OVERLAY_ICONS);
 	}
 
+	/**
+	 * @param textFlags Flags defined in <code>JavaElementLabels</code>.
+	 * @param imageFlags Flags defined in <code>JavaElementImageProvider</code>.
+	 */
 	public JavaUILabelProvider(int textFlags, int imageFlags, JavaElementImageProvider imageLabelProvider) {
 		fImageLabelProvider= imageLabelProvider;
 		fStorageLabelProvider= new StorageLabelProvider();
 		fImageFlags= imageFlags;
 		fTextFlags= textFlags;
 	}
-	
+
+	/**
+	 * @param textFlags Flags defined in <code>JavaElementLabels</code>.
+	 * @param imageFlags Flags defined in <code>JavaElementImageProvider</code>.
+	 */	
 	public JavaUILabelProvider(int textFlags, int imageFlags) {
 		this(textFlags, imageFlags, new JavaElementImageProvider());
 	}
@@ -42,14 +50,14 @@ public class JavaUILabelProvider extends LabelProvider {
 	}		
 	
 	/**
-	 * Sets the text flags to use
+	 * Sets the text flags to use. Valid flags are defined in <code>JavaElementLabels</code>.
 	 */
 	public void setTextFlags(int flags) {
 		fTextFlags= flags;
 	}
 	
 	/**
-	 * Sets the text flags to use
+	 * Sets the image flags to use. Valid flags are defined in <code>JavaElementImageProvider</code>.
 	 */
 	public void setImageFlags(int flags) {
 		fImageFlags= flags;
@@ -67,7 +75,7 @@ public class JavaUILabelProvider extends LabelProvider {
 		if (element instanceof IStorage) 
 			return fStorageLabelProvider.getImage(element);
 
-		return super.getImage(element);
+		return result;
 	}
 
 	/* (non-Javadoc)
@@ -82,7 +90,7 @@ public class JavaUILabelProvider extends LabelProvider {
 		if (element instanceof IStorage)
 			return fStorageLabelProvider.getText(element);
 
-		return super.getText(element);
+		return text;
 	}
 
 	/* (non-Javadoc)
