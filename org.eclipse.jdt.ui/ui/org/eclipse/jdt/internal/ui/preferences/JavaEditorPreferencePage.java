@@ -133,8 +133,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.LINKED_POSITION_COLOR),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PROBLEM_INDICATION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PROBLEM_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.ERROR_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ERROR_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.WARNING_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WARNING_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.TASK_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.TASK_INDICATION),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE),
@@ -166,11 +170,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.INSERT_COMPLETION),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.FILL_METHOD_ARGUMENTS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.GUESS_METHOD_ARGUMENTS),
+		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_STRINGS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_BRACKETS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_JAVADOCS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WRAP_STRINGS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ADD_JAVADOC_TAGS),
+		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END)
 	};
 	
@@ -190,10 +196,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{JavaUIMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), JavaEditor.LINE_NUMBER_COLOR}, //$NON-NLS-1$
 		{JavaUIMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), CompilationUnitEditor.MATCHING_BRACKETS_COLOR}, //$NON-NLS-1$
 		{JavaUIMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), CompilationUnitEditor.CURRENT_LINE_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.problemsHighlightColor"), CompilationUnitEditor.PROBLEM_INDICATION_COLOR}, //$NON-NLS-1$
 		{JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColor2"), CompilationUnitEditor.PRINT_MARGIN_COLOR}, //$NON-NLS-1$
 		{JavaUIMessages.getString("JavaEditorPreferencePage.findScopeColor2"), AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE}, //$NON-NLS-1$
 		{JavaUIMessages.getString("JavaEditorPreferencePage.linkedPositionColor2"), CompilationUnitEditor.LINKED_POSITION_COLOR}, //$NON-NLS-1$
+	};
+	
+	private final String[][] fProblemIndicationColorListModel= new String[][] {
+		{"Errors", CompilationUnitEditor.ERROR_INDICATION_COLOR},
+		{"Warnings", CompilationUnitEditor.WARNING_INDICATION_COLOR},
+		{"Tasks", CompilationUnitEditor.TASK_INDICATION_COLOR}
 	};
 	
 	private OverlayPreferenceStore fOverlayStore;
@@ -237,8 +248,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private WorkbenchChainedTextFontFieldEditor fFontEditor;
 	private List fSyntaxColorList;
 	private List fAppearanceColorList;
+	private List fProblemIndicationColorList;
 	private ColorEditor fSyntaxForegroundColorEditor;
 	private ColorEditor fAppearanceForegroundColorEditor;
+	private ColorEditor fProblemIndicationForegroundColorEditor;
 	private ColorEditor fBackgroundColorEditor;
 	private Button fBackgroundDefaultRadioButton;
 	private Button fBackgroundCustomRadioButton;
@@ -293,8 +306,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		PreferenceConverter.setDefault(store, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, new RGB(185, 176 , 180));
 		
-		store.setDefault(CompilationUnitEditor.PROBLEM_INDICATION, true);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
+		store.setDefault(CompilationUnitEditor.ERROR_INDICATION, true);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.ERROR_INDICATION_COLOR, new RGB(255, 0 , 128));
+		
+		store.setDefault(CompilationUnitEditor.WARNING_INDICATION, true);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.WARNING_INDICATION_COLOR, new RGB(244, 200 , 45));
+		
+		store.setDefault(CompilationUnitEditor.TASK_INDICATION, true);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.TASK_INDICATION_COLOR, new RGB(0, 128, 255));
 		
 		store.setDefault(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, true);
 		store.setDefault(JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
@@ -403,6 +422,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		String key= fAppearanceColorListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
 		fAppearanceForegroundColorEditor.setColorValue(rgb);		
+	}
+	
+	private void handleProblemIndicationColorListSelection() {
+		int i= fProblemIndicationColorList.getSelectionIndex();
+		String key= fProblemIndicationColorListModel[i][1];
+		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
+		fProblemIndicationForegroundColorEditor.setColorValue(rgb);		
 	}
 	
 	private Control createSyntaxPage(Composite parent) {
@@ -629,51 +655,51 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 	private Control createAppearancePage(Composite parent) {
 
-		Composite behaviorComposite= new Composite(parent, SWT.NONE);
+		Composite appearanceComposite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
-		behaviorComposite.setLayout(layout);
+		appearanceComposite.setLayout(layout);
 
 		String label= JavaUIMessages.getString("JavaEditorPreferencePage.textFont"); //$NON-NLS-1$
-		addTextFontEditor(behaviorComposite, label, AbstractTextEditor.PREFERENCE_FONT);
+		addTextFontEditor(appearanceComposite, label, AbstractTextEditor.PREFERENCE_FONT);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
-		addTextField(behaviorComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 3, 0, true);
+		addTextField(appearanceComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 3, 0, true);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
-		addTextField(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 3, 0, true);
+		addTextField(appearanceComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 3, 0, true);
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.synchronizeOnCursor"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, 0);
+		addCheckBox(appearanceComposite, label, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
+		addCheckBox(appearanceComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showLineNumbers"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, JavaEditor.LINE_NUMBER_RULER, 0);
+		addCheckBox(appearanceComposite, label, JavaEditor.LINE_NUMBER_RULER, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
+		addCheckBox(appearanceComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, CompilationUnitEditor.CURRENT_LINE, 0);
+		addCheckBox(appearanceComposite, label, CompilationUnitEditor.CURRENT_LINE, 0);
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
+		addCheckBox(appearanceComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
 
 
-		Label l= new Label(behaviorComposite, SWT.LEFT );
+		Label l= new Label(appearanceComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		l.setLayoutData(gd);
 		
-		l= new Label(behaviorComposite, SWT.LEFT);
+		l= new Label(appearanceComposite, SWT.LEFT);
 		l.setText(JavaUIMessages.getString("JavaEditorPreferencePage.appearanceOptions")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
 
-		Composite editorComposite= new Composite(behaviorComposite, SWT.NONE);
+		Composite editorComposite= new Composite(appearanceComposite, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginHeight= 0;
@@ -727,7 +753,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				PreferenceConverter.setValue(fOverlayStore, key, fAppearanceForegroundColorEditor.getColorValue());
 			}
 		});
-		return behaviorComposite;
+		return appearanceComposite;
 	}
 	
 	private Control createProblemIndicationPage(Composite parent) {
@@ -735,18 +761,91 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		composite.setLayout(layout);
 				
-		String label= JavaUIMessages.getString("JavaEditorPreferencePage.showProblemsBeforeCompiling"); //$NON-NLS-1$
+		String label= "Analyse problems while typing";
 		addCheckBox(composite, label, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
 
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightProblems"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
+		label= "Highlight errors in text";
+		addCheckBox(composite, label, CompilationUnitEditor.ERROR_INDICATION, 0);
+		
+		label= "Highlight warnings in text";
+		addCheckBox(composite, label, CompilationUnitEditor.WARNING_INDICATION, 0);
+		
+		label= "Highlight tasks in text";
+		addCheckBox(composite, label, CompilationUnitEditor.TASK_INDICATION, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
 		addCheckBox(composite, label, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
 		
+		Label l= new Label(composite, SWT.LEFT );
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
+		l.setLayoutData(gd);
+		
+		l= new Label(composite, SWT.LEFT);
+		l.setText("Problem indication color options:");
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		l.setLayoutData(gd);
+
+		Composite editorComposite= new Composite(composite, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		editorComposite.setLayout(layout);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
+		gd.horizontalSpan= 2;
+		editorComposite.setLayoutData(gd);		
+
+		fProblemIndicationColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		gd= new GridData(GridData.FILL_BOTH);
+		gd.heightHint= convertHeightInCharsToPixels(5);
+		fProblemIndicationColorList.setLayoutData(gd);
+						
+		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.numColumns= 2;
+		stylesComposite.setLayout(layout);
+		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		l= new Label(stylesComposite, SWT.LEFT);
+		l.setText("Color:");
+		gd= new GridData();
+		gd.horizontalAlignment= GridData.BEGINNING;
+		l.setLayoutData(gd);
+
+		fProblemIndicationForegroundColorEditor= new ColorEditor(stylesComposite);
+		Button foregroundColorButton= fProblemIndicationForegroundColorEditor.getButton();
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		foregroundColorButton.setLayoutData(gd);
+
+		fProblemIndicationColorList.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				handleProblemIndicationColorListSelection();
+			}
+		});
+		foregroundColorButton.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				int i= fProblemIndicationColorList.getSelectionIndex();
+				String key= fProblemIndicationColorListModel[i][1];
+				
+				PreferenceConverter.setValue(fOverlayStore, key, fProblemIndicationForegroundColorEditor.getColorValue());
+			}
+		});
+		
 		Label note= new Label(composite, SWT.NONE);
 		note.setText(JavaUIMessages.getString("JavaEditorPreferencePage.updatesOnNextChangeIinEditor.label")); //$NON-NLS-1$
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan= 2;
 		note.setLayoutData(gd);
 			
@@ -931,6 +1030,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		
+		for (int i= 0; i < fProblemIndicationColorListModel.length; i++)
+			fProblemIndicationColorList.add(fProblemIndicationColorListModel[i][0]);
+			
+		fProblemIndicationColorList.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				fProblemIndicationColorList.select(0);
+				handleProblemIndicationColorListSelection();
+			}
+		});
 	}
 	
 	private void initializeFields() {
@@ -1002,6 +1110,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		initializeFields();
 		handleSyntaxColorListSelection();
 		handleAppearanceColorListSelection();
+		handleProblemIndicationColorListSelection();
 		super.performDefaults();
 		
 		fPreviewViewer.invalidateTextPresentation();
@@ -1159,7 +1268,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		StatusUtil.applyToStatusLine(this, status);
 	}
 
-	public static boolean showTempProblems() {
+	public static boolean indicateQuixFixableProblems() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS);
 	}
 	

@@ -18,6 +18,8 @@ public interface IProblemAnnotation {
 	
 	boolean isProblem();
 	
+	boolean isTask();
+	
 	String getMessage();
 	
 	String[] getArguments();
@@ -25,7 +27,7 @@ public interface IProblemAnnotation {
 	int getId();
 	
 	
-	boolean isTemporaryProblem();
+	boolean isTemporary();
 	
 	boolean isWarning();
 	

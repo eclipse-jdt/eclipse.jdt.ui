@@ -453,10 +453,18 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String PRINT_MARGIN_COLUMN= "printMarginColumn"; //$NON-NLS-1$
 	/** Preference key for inserting spaces rather than tabs */
 	public final static String SPACES_FOR_TABS= JavaSourceViewerConfiguration.SPACES_FOR_TABS;
-	/** Preference key for problem indication */
-	public final static String PROBLEM_INDICATION= "problemIndication"; //$NON-NLS-1$
-	/** Preference key for problem highlight color */
-	public final static String PROBLEM_INDICATION_COLOR= "problemIndicationColor"; //$NON-NLS-1$
+	/** Preference key for error indication */
+	public final static String ERROR_INDICATION= "problemIndication"; //$NON-NLS-1$
+	/** Preference key for error highlight color */
+	public final static String ERROR_INDICATION_COLOR= "problemIndicationColor"; //$NON-NLS-1$
+	/** Preference key for warning indication */
+	public final static String WARNING_INDICATION= "warningIndication"; //$NON-NLS-1$
+	/** Preference key for warning highlight color */
+	public final static String WARNING_INDICATION_COLOR= "warningIndicationColor"; //$NON-NLS-1$
+	/** Preference key for task indication */
+	public final static String TASK_INDICATION= "taskIndication"; //$NON-NLS-1$
+	/** Preference key for task highlight color */
+	public final static String TASK_INDICATION_COLOR= "taskIndicationColor"; //$NON-NLS-1$
 	/** Preference key for linked position color */
 	public final static String LINKED_POSITION_COLOR= "linkedPositionColor"; //$NON-NLS-1$
 	/** Preference key for shwoing the overview ruler */
@@ -1015,26 +1023,76 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(PRINT_MARGIN);
 	}
 	
-	private void startProblemIndication() {
+	private void startErrorIndication() {
 		if (fProblemPainter == null) {
 			fProblemPainter= new ProblemPainter(this, getSourceViewer());
-			fProblemPainter.setHighlightColor(getColor(PROBLEM_INDICATION_COLOR));
 			fPaintManager.addPainter(fProblemPainter);
 		}
+		fProblemPainter.setErrorHighlightColor(getColor(ERROR_INDICATION_COLOR));
+		fProblemPainter.paintErrors(true);
 	}
 	
-	private void stopProblemIndication() {
-		if (fProblemPainter != null) {
+	private void startWarningIndication() {
+		if (fProblemPainter == null) {
+			fProblemPainter= new ProblemPainter(this, getSourceViewer());
+			fPaintManager.addPainter(fProblemPainter);
+		}
+		fProblemPainter.setWarningHighlightColor(getColor(WARNING_INDICATION_COLOR));
+		fProblemPainter.paintWarnings(true);
+	}
+
+	private void startTaskIndication() {
+		if (fProblemPainter == null) {
+			fProblemPainter= new ProblemPainter(this, getSourceViewer());
+			fPaintManager.addPainter(fProblemPainter);
+		}
+		fProblemPainter.setTaskHighlightColor(getColor(TASK_INDICATION_COLOR));
+		fProblemPainter.paintTasks(true);
+	}
+	
+	private void shutdownProblemIndication() {
+		if ( !(isWarningIndicationEnabled() || isTaskIndicationEnabled() || isErrorIndicationEnabled())) {
 			fPaintManager.removePainter(fProblemPainter);
 			fProblemPainter.deactivate(true);
 			fProblemPainter.dispose();
 			fProblemPainter= null;
+		}	
+	}
+	
+	private void stopErrorIndication() {
+		if (fProblemPainter != null) {
+			fProblemPainter.paintErrors(false);
+			shutdownProblemIndication();
 		}
 	}
 	
-	private boolean isProblemIndicationEnabled() {
+	private void stopWarningIndication() {
+		if (fProblemPainter != null) {
+			fProblemPainter.paintWarnings(false);
+			shutdownProblemIndication();
+		}
+	}
+
+	private void stopTaskIndication() {
+		if (fProblemPainter != null) {
+			fProblemPainter.paintTasks(false);
+			shutdownProblemIndication();
+		}
+	}
+
+	private boolean isErrorIndicationEnabled() {
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(PROBLEM_INDICATION);
+		return store.getBoolean(ERROR_INDICATION);
+	}
+	
+	private boolean isWarningIndicationEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(WARNING_INDICATION);
+	}
+	
+	private boolean isTaskIndicationEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(TASK_INDICATION);
 	}
 	
 	private void configureTabConverter() {
@@ -1144,24 +1202,31 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	/*
 	 * @see AbstractTextEditor#createPartControl(Composite)
 	 */
-	public void createPartControl(Composite parent) {			
+	public void createPartControl(Composite parent) {
+		
 		super.createPartControl(parent);
+		
 		fPaintManager= new PaintManager(getSourceViewer());
+		
 		if (isBracketHighlightingEnabled())
 			startBracketHighlighting();
 		if (isLineHighlightingEnabled())
 			startLineHighlighting();
 		if (isPrintMarginVisible())
 			showPrintMargin();
-		if (isProblemIndicationEnabled())
-			startProblemIndication();
+		if (isErrorIndicationEnabled())
+			startErrorIndication();
+		if (isWarningIndicationEnabled())
+			startWarningIndication();
+		if (isTaskIndicationEnabled())
+			startTaskIndication();
 		if (isTabConversionEnabled())
 			startTabConversion();
 		if (isOverviewRulerVisible())
 			showOverviewRuler();
 
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		preferences.addPropertyChangeListener(fPropertyChangeListener);
+		preferences.addPropertyChangeListener(fPropertyChangeListener);			
 		
 		IPreferenceStore preferenceStore= getPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
@@ -1332,7 +1397,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
-	 */
+		 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 		
 		try {
@@ -1341,7 +1406,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			if (asv != null) {
 					
 				String p= event.getProperty();		
-
+				
 				if (CLOSE_BRACKETS.equals(p)) {
 					fBracketInserter.setCloseBracketsEnabled(getPreferenceStore().getBoolean(p));
 					return;	
@@ -1410,17 +1475,45 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if (PROBLEM_INDICATION.equals(p)) {
-					if (isProblemIndicationEnabled())
-						startProblemIndication();
+				if (ERROR_INDICATION.equals(p)) {
+					if (isErrorIndicationEnabled())
+						startErrorIndication();
 					else
-						stopProblemIndication();
+						stopErrorIndication();
 					return;
 				}
 				
-				if (PROBLEM_INDICATION_COLOR.equals(p)) {
+				if (ERROR_INDICATION_COLOR.equals(p)) {
 					if (fProblemPainter != null)
-						fProblemPainter.setHighlightColor(getColor(PROBLEM_INDICATION_COLOR));
+						fProblemPainter.setErrorHighlightColor(getColor(ERROR_INDICATION_COLOR));
+					return;
+				}
+				
+				if (WARNING_INDICATION.equals(p)) {
+					if (isWarningIndicationEnabled())
+						startWarningIndication();
+					else
+						stopWarningIndication();
+					return;
+				}
+				
+				if (WARNING_INDICATION_COLOR.equals(p)) {
+					if (fProblemPainter != null)
+						fProblemPainter.setWarningHighlightColor(getColor(WARNING_INDICATION_COLOR));
+					return;
+				}
+				
+				if (TASK_INDICATION.equals(p)) {
+					if (isTaskIndicationEnabled())
+						startTaskIndication();
+					else
+						stopTaskIndication();
+					return;
+				}
+				
+				if (ERROR_INDICATION_COLOR.equals(p)) {
+					if (fProblemPainter != null)
+						fProblemPainter.setErrorHighlightColor(getColor(ERROR_INDICATION_COLOR));
 					return;
 				}
 				
@@ -1466,7 +1559,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		String p= event.getProperty();
-		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || CURRENT_LINE_COLOR.equals(p) || PROBLEM_INDICATION_COLOR.equals(p);
+		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || CURRENT_LINE_COLOR.equals(p) || 
+									ERROR_INDICATION_COLOR.equals(p) || WARNING_INDICATION_COLOR.equals(p) || TASK_INDICATION_COLOR.equals(p);
 		return affects ? affects : super.affectsTextPresentation(event);
 	}
 	

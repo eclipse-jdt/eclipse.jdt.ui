@@ -36,10 +36,14 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAnnotation {		
 	
+	private static final int UNKNOWN= 0;
+	private static final int PROBLEM= 1;
+	private static final int TASK= 2;
+	
 	private IDebugModelPresentation fPresentation;
-	private boolean fIsProblemMarker;
 	private IProblemAnnotation fOverlay;
 	private boolean fNotRelevant= false;
+	private int fType;
 	
 	
 	public JavaMarkerAnnotation(IMarker marker) {
@@ -69,12 +73,16 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 			setLayer(4);
 			setImage(fPresentation.getImage(marker));					
 			
-			fIsProblemMarker= false;
+			fType= UNKNOWN;
 			
 		} else {
 			
+			fType= UNKNOWN;
 			try {
-				fIsProblemMarker= marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
+				if (marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER))
+					fType= PROBLEM;
+				else if (marker.isSubtypeOf(IMarker.TASK))
+					fType= TASK;
 			} catch(CoreException e) {
 				JavaPlugin.log(e);
 			}
@@ -87,7 +95,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 * @see IProblemAnnotation#getMessage()
 	 */
 	public String getMessage() {
-		if (fIsProblemMarker)
+		if (isProblem() || isTask())
 			return getMarker().getAttribute(IMarker.MESSAGE, ""); //$NON-NLS-1$
 		return ""; //$NON-NLS-1$
 	}
@@ -96,7 +104,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 * @see IProblemAnnotation#isError()
 	 */
 	public boolean isError() {
-		if (fIsProblemMarker) {
+		if (isProblem()) {
 			int markerSeverity= getMarker().getAttribute(IMarker.SEVERITY, -1);
 			return (markerSeverity == IMarker.SEVERITY_ERROR);
 		}
@@ -107,7 +115,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 * @see IProblemAnnotation#isWarning()
 	 */
 	public boolean isWarning() {
-		if (fIsProblemMarker) {
+		if (isProblem()) {
 			int markerSeverity= getMarker().getAttribute(IMarker.SEVERITY, -1);
 			return (markerSeverity == IMarker.SEVERITY_WARNING);
 		}
@@ -115,9 +123,9 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	}
 	
 	/*
-	 * @see IProblemAnnotation#isTemporaryProblem()
+	 * @see IProblemAnnotation#isTemporary()
 	 */
-	public boolean isTemporaryProblem() {
+	public boolean isTemporary() {
 		return false;
 	}
 	
@@ -125,7 +133,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 * @see IProblemAnnotation#getArguments()
 	 */
 	public String[] getArguments() {
-		if (fIsProblemMarker)
+		if (isProblem())
 			return Util.getProblemArgumentsFromMarker(getMarker().getAttribute(IJavaModelMarker.ARGUMENTS, "")); //$NON-NLS-1$
 		return null;
 	}
@@ -134,17 +142,24 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 * @see IProblemAnnotation#getId()
 	 */
 	public int getId() {
-		if (fIsProblemMarker)
+		if (isProblem())
 			return getMarker().getAttribute(IJavaModelMarker.ID, -1);
-		return 0;
+		return -1;
 	}
 	
 	/*
 	 * @see IProblemAnnotation#isProblem()
 	 */
 	public boolean isProblem() {
-		return fIsProblemMarker;
+		return fType == PROBLEM;
 	}
+	
+	/*
+	 * @see IProblemAnnotation#isTask()
+	 */
+	public boolean isTask() {
+		return fType ==TASK;
+	}	
 	
 	/*
 	 * @see IProblemAnnotation#isRelevant()

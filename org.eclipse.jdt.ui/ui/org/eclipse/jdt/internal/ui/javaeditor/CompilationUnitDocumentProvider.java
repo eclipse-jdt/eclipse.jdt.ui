@@ -135,7 +135,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private void initializeImage() {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
 				if (!fImageInitialized) {
-					if (JavaEditorPreferencePage.showTempProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID())) {
+					if (JavaEditorPreferencePage.indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID())) {
 						if (!fgImageInitialized) {
 							fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 							fgImageInitialized= true;
@@ -171,9 +171,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 
 			/*
-			 * @see IProblemAnnotation#isTemporaryProblem()
+			 * @see IProblemAnnotation#isTemporary()
 			 */
-			public boolean isTemporaryProblem() {
+			public boolean isTemporary() {
 				return true;
 			}
 
@@ -181,35 +181,42 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemAnnotation#isWarning()
 			 */
 			public boolean isWarning() {
-				return fProblem.isWarning();
+				return isProblem() && fProblem.isWarning();
 			}
 
 			/*
 			 * @see IProblemAnnotation#isError()
 			 */
 			public boolean isError() {
-				return fProblem.isError();
+				return isProblem() && fProblem.isError();
 			}
 			
 			/*
 			 * @see IProblemAnnotation#getArguments()
 			 */
 			public String[] getArguments() {
-				return fProblem.getArguments();
+				return isProblem() ? fProblem.getArguments() : null;
 			}
 
 			/*
 			 * @see IProblemAnnotation#getId()
 			 */
 			public int getId() {
-				return fProblem.getID();
+				return isProblem() ? fProblem.getID() : -1;
 			}
 
 			/*
 			 * @see IProblemAnnotation#isProblem()
 			 */
 			public boolean isProblem() {
-				return true;
+				return !isTask();
+			}
+			
+			/*
+			 * @see IProblemAnnotation#isTask()
+			 */
+			public boolean isTask() {
+				return IProblem.Task == fProblem.getID();
 			}
 			
 			/*

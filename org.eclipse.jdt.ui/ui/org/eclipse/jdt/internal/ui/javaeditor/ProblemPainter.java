@@ -42,14 +42,25 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Highlights the temporary problems.
  */
-public class ProblemPainter implements IPainter, PaintListener, IAnnotationModelListener {
+public class ProblemPainter implements IPainter, PaintListener, IAnnotationModelListener {	
 	
+	private static class ProblemPosition {
+		Position fPosition;
+		Color fColor;
+	};
 	
 	private boolean fIsActive= false;
 	private boolean fIsPainting= false;
 	private boolean fIsSettingModel= false;
 	
-	private Color fColor;
+	private Color fErrorColor;
+	private Color fWarningColor;
+	private Color fTaskColor;
+	
+	private boolean fPaintErrors= false;
+	private boolean fPaintWarnings= false;
+	private boolean fPaintTasks= false;
+	
 	private ITextEditor fTextEditor;
 	private ISourceViewer fSourceViewer;
 	private StyledText fTextWidget;
@@ -105,13 +116,27 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		if (fProblemPositions != null) {
 			fProblemPositions.clear();
 			if (fModel != null) {
+				
 				Iterator e= new ProblemAnnotationIterator(fModel, true);
 				while (e.hasNext()) {
 					IProblemAnnotation pa= (IProblemAnnotation) e.next();
+					Annotation a= (Annotation) pa;
+					
+					Color color= null;
 					if (pa.isProblem()) {
-						Annotation a= (Annotation) pa;
-						Position p= fModel.getPosition(a);
-						fProblemPositions.add(p);
+						if (pa.isWarning() && fPaintWarnings)
+							color= fWarningColor;
+						else if (pa.isError() && fPaintErrors)
+							color= fErrorColor;
+					} else if (pa.isTask() && fPaintTasks) {
+						color= fTaskColor;
+					}
+					
+					if (color != null) {
+						ProblemPosition pp= new ProblemPosition();
+						pp.fPosition= fModel.getPosition(a);
+						pp.fColor= color;
+						fProblemPositions.add(pp);
 					}
 				}
 			}
@@ -146,15 +171,37 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		}
 	}
 	
-	public void setHighlightColor(Color color) {
-		fColor= color;
+	public void setErrorHighlightColor(Color color) {
+		fErrorColor= color;
+	}
+	
+	public void setWarningHighlightColor(Color color) {
+		fWarningColor= color;
+	}
+	
+	public void setTaskHighlightColor(Color color) {
+		fTaskColor= color;
+	}
+	
+	public void paintErrors(boolean paintErrors) {
+		fPaintErrors= paintErrors;
+	}
+	
+	public void paintWarnings(boolean paintWarnings) {
+		fPaintWarnings= paintWarnings;
+	}
+	
+	public void paintTasks(boolean paintTasks) {
+		fPaintTasks= paintTasks;
 	}
 	
 	/*
 	 * @see IPainter#dispose()
 	 */
 	public void dispose() {
-		fColor= null;
+		fErrorColor= null;
+		fWarningColor= null;
+		fTaskColor= null;
 		fTextWidget= null;
 		fModel= null;
 		fProblemPositions= null;
@@ -199,11 +246,12 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		int vLength= fSourceViewer.getBottomIndexEndOffset() + 1;		
 		
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
-			Position p = (Position) e.next();
+			ProblemPosition pp = (ProblemPosition) e.next();
+			Position p= pp.fPosition;
 			if (p.overlapsWith(vOffset, vLength) && p.overlapsWith(offset , length)) {
 				int p1= Math.max(offset, p.getOffset());
 				int p2= Math.min(offset + length, p.getOffset() + p.getLength());
-				draw(gc, p1 - offset, p2 - p1);
+				draw(gc, p1 - offset, p2 - p1, pp.fColor);
 			}
 		}
 	}
@@ -243,13 +291,13 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		return coordinates;
 	}
 	
-	private void draw(GC gc, int offset, int length) {
+	private void draw(GC gc, int offset, int length, Color color) {
 		if (gc != null) {
 			
 			Point left= fTextWidget.getLocationAtOffset(offset);
 			Point right= fTextWidget.getLocationAtOffset(offset + length);
 			
-			gc.setForeground(fColor);
+			gc.setForeground(color);
 			int[] polyline= computePolyline(left, right, gc.getFontMetrics().getHeight());
 			gc.drawPolyline(polyline);
 								

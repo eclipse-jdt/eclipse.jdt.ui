@@ -134,19 +134,25 @@ public class OverviewRuler {
 	private static final int ALL= -1;
 	private static final int COMPILE_WARNING= 0;
 	private static final int COMPILE_ERROR= 1;
-	private static final int TEMPORARY= 2;
-	private static final int UNKNOWN= 4;
+	private static final int COMPILE_TASK= 2;
+	private static final int TEMPORARY_WARNING= 3;
+	private static final int TEMPORARY_ERROR= 4;
+	private static final int TEMPORARY_TASK= 5;
+	private static final int UNKNOWN= 6;
 	
 	/** Color table */
 	private static final RGB[][] COLORS= new RGB[][] {
-								/* fill */							/* stroke */
-		/* warning */ { new RGB(248, 218, 114),	new RGB(139, 109, 7) },
-		/* error */     { new RGB(255, 140, 140),	new RGB(255, 0 ,0) },
-		/* temp */	{ new RGB(240, 230, 230),	new RGB(200, 100, 100) }
+															/* fill */						/* stroke */
+		/* compile warning */	{ new RGB(248, 218, 114),	new RGB(139, 109, 7) },
+		/* compile error */		{ new RGB(255, 140, 140),	new RGB(255, 0, 0) },
+		/* compile task */			{ new RGB(0, 128, 255),		new RGB(176, 216 , 255) },
+		/* temporary warning */ { new RGB(255, 255, 206),	new RGB(244, 200, 45) },
+		/* temporary error */	{ new RGB(240, 230, 230),	new RGB(200, 100, 100) },
+		/* temporary task */		{ new RGB(159, 207, 255),	new RGB(255, 255, 255) }
 	};
 	
 	/** drawing layers */
-	private static final int[] LAYERS= new int[] { COMPILE_WARNING, TEMPORARY, COMPILE_ERROR };
+	private static final int[] LAYERS= new int[] { COMPILE_TASK, TEMPORARY_TASK, COMPILE_WARNING, TEMPORARY_WARNING, COMPILE_ERROR, TEMPORARY_ERROR };
 	
 	private static final int INSET= 2;
 	private static final int PROBLEM_HEIGHT_MIN= 4;
@@ -192,14 +198,21 @@ public class OverviewRuler {
 	private int getType(Annotation annotation) {
 		if (annotation instanceof IProblemAnnotation) {
 			IProblemAnnotation pa= (IProblemAnnotation) annotation;
+			
 			if (!pa.isRelevant())
 				return UNKNOWN;
-			if (pa.isTemporaryProblem())
-				return TEMPORARY;
-			if (pa.isError())
-				return COMPILE_ERROR;
-			if (pa.isWarning())
-				return COMPILE_WARNING;
+			
+			if (pa.isProblem()) {
+				
+				if (pa.isError())
+					return pa.isTemporary() ? TEMPORARY_ERROR : COMPILE_ERROR;
+				
+				if (pa.isWarning())
+					return pa.isTemporary() ? TEMPORARY_WARNING : COMPILE_WARNING;
+			
+			} else {
+				return pa.isTemporary() ? TEMPORARY_TASK : COMPILE_TASK;
+			}
 		}
 		
 		return UNKNOWN;

@@ -449,7 +449,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public final static String EDITOR_PROBLEM_INDICATION= CompilationUnitEditor.PROBLEM_INDICATION;
+	public final static String EDITOR_PROBLEM_INDICATION= CompilationUnitEditor.ERROR_INDICATION;
 
 	/**
 	 * A named preference that holds the color used to render problem indicators.
@@ -462,7 +462,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 */
-	public final static String EDITOR_PROBLEM_INDICATION_COLOR= CompilationUnitEditor.PROBLEM_INDICATION_COLOR;
+	public final static String EDITOR_PROBLEM_INDICATION_COLOR= CompilationUnitEditor.ERROR_INDICATION_COLOR;
 
 	/**
 	 * A named preference that controls if correction indicators are shown in the UI.
