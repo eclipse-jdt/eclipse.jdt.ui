@@ -279,7 +279,7 @@ public final class WhiteSpaceOptions {
     
     private final static PreviewSnippet TYPE_ARGUMENTS_PREVIEW= new PreviewSnippet(
             CodeFormatter.K_CLASS_BODY_DECLARATIONS,
-            "Map<String, Element> map=\n new <String, Element> HashMap();" //$NON-NLS-1$
+            "Map<String, Element> map=\n new HashMap<String, Element>();" //$NON-NLS-1$
         );
         
     private final static PreviewSnippet TYPE_PARAMETER_PREVIEW= new PreviewSnippet(
@@ -585,8 +585,8 @@ public final class WhiteSpaceOptions {
 		createArrayInitializerTree(workingValues, arrays);
 		createArrayElementAccessTree(workingValues, arrays);
 		
-		final InnerNode paramtypes= new InnerNode(null, workingValues, "WhiteSpaceTabPage.paramentrized_types"); //$NON-NLS-1$
-		createParametrizedTypeTree(workingValues, paramtypes);
+		final InnerNode paramtypes= new InnerNode(null, workingValues, "WhiteSpaceTabPage.parameterized_types"); //$NON-NLS-1$
+		createParameterizedTypeTree(workingValues, paramtypes);
 		createTypeArgumentTree(workingValues, paramtypes);
 		createTypeParameterTree(workingValues, paramtypes);
 		createWildcardTypeTree(workingValues, paramtypes);
@@ -681,7 +681,7 @@ public final class WhiteSpaceOptions {
 
     private static void createBeforeClosingAngleBracketTree(Map workingValues, final InnerNode parent) {
         createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.parametrized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
     }
     
@@ -694,7 +694,7 @@ public final class WhiteSpaceOptions {
     
     private static void createBeforeOpenAngleBracketTree(Map workingValues, final InnerNode parent) {
         createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.parametrized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$        
     }
 
@@ -823,7 +823,7 @@ public final class WhiteSpaceOptions {
         createOption(parent, workingValues, "WhiteSpaceOptions.annotation_modifier_args", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ANNOTATION, ANNOTATION_MODIFIER_PREVIEW); //$NON-NLS-1$
         
         createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.parametrized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
 	    createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
     }
 
@@ -844,7 +844,7 @@ public final class WhiteSpaceOptions {
     
     private static void createAfterOpenAngleBracketTree(Map workingValues, final InnerNode parent) {
         createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(parent, workingValues, "WhiteSpaceOptions.parametrized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
     }
     
@@ -866,7 +866,7 @@ public final class WhiteSpaceOptions {
     
     private static void createAfterClosingAngleBracketTree(Map workingValues, final InnerNode parent) {
         createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        //createOption(parent, workingValues, "WhiteSpaceOptions.parametrized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
+        //createOption(parent, workingValues, "WhiteSpaceOptions.parameterized_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
         createOption(parent, workingValues, "WhiteSpaceOptions.type_arguments", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$        
     }
     
@@ -1178,7 +1178,7 @@ public final class WhiteSpaceOptions {
         return root;
     }
     
-    private static InnerNode createParametrizedTypeTree(Map workingValues, InnerNode parent) {
+    private static InnerNode createParameterizedTypeTree(Map workingValues, InnerNode parent) {
         final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.param_type_ref"); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
