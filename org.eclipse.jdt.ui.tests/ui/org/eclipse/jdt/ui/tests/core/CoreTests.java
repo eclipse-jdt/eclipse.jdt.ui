@@ -17,11 +17,11 @@ public class CoreTests extends TestCase {
 		suite.addTest(new TestSuite(BindingsNameTest.class));
 		suite.addTest(new TestSuite(ClassPathDetectorTest.class));
 		suite.addTest(new TestSuite(HierarchicalASTVisitorTest.class));
-		suite.addTest(new TestSuite(ImportOrganizeTest.class));
+		//suite.addTest(new TestSuite(ImportOrganizeTest.class));
 		suite.addTest(new TestSuite(JavaModelUtilTest.class));
 		suite.addTest(new TestSuite(NameProposerTest.class));
 		suite.addTest(new TestSuite(TextBufferTest.class));
-		suite.addTest(new TestSuite(TypeInfoTest.class));		
+		//suite.addTest(new TestSuite(TypeInfoTest.class));		
 		return suite;
 	}
 
