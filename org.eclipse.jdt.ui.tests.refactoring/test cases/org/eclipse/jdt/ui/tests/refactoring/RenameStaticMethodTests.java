@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -175,5 +176,21 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	
 	public void test9() throws Exception{
 		helper2_0("m", "k", new String[]{Signature.SIG_INT}, false);
+	}
+	
+	public void test10() throws Exception{
+		printTestDisabledMessage("bug 40628");
+		if (true)	return;
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+
+		IType classB= getType(cuB, "B");
+		RenameRefactoring refactoring= new RenameRefactoring(classB.getMethod("method", new String[0]));
+		RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+		processor.setUpdateReferences(true);
+		processor.setNewElementName("newmethod");
+		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
+		SourceCompareUtil.compare("invalid renaming in A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+		SourceCompareUtil.compare("invalid renaming in B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 }
