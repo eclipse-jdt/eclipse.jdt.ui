@@ -77,7 +77,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 	
 	private void addLabel(Composite result, RowLayouter layouter) {
 		fLabel= new Label(result, SWT.WRAP);
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(50);
 		fLabel.setLayoutData(gd);
 		updatePreviewLabel();
