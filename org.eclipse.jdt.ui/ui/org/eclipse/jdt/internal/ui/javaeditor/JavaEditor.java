@@ -76,6 +76,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.information.IInformationProvider;
+import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
@@ -892,6 +893,43 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		 */
 		public void run() {
 
+			/**
+			 * Information provider used to present the information.
+			 * 
+			 * @since 3.0
+			 */
+			class InformationProvider implements IInformationProvider, IInformationProviderExtension2 {
+
+				private IRegion fHoverRegion;
+				private String fHoverInfo;
+				private IInformationControlCreator fControlCreator;
+				
+				InformationProvider(IRegion hoverRegion, String hoverInfo, IInformationControlCreator controlCreator) {
+					fHoverRegion= hoverRegion;
+					fHoverInfo= hoverInfo;
+					fControlCreator= controlCreator;
+				}
+				/*
+				 * @see org.eclipse.jface.text.information.IInformationProvider#getSubject(org.eclipse.jface.text.ITextViewer, int)
+				 */
+				public IRegion getSubject(ITextViewer textViewer, int invocationOffset) {					
+					return fHoverRegion;
+				}
+				/*
+				 * @see org.eclipse.jface.text.information.IInformationProvider#getInformation(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
+				 */
+				public String getInformation(ITextViewer textViewer, IRegion subject) {
+					return fHoverInfo;
+				}
+				/*
+				 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
+				 * @since 3.0
+				 */
+				public IInformationControlCreator getInformationPresenterControlCreator() {
+					return fControlCreator;
+				}
+			}
+
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer == null) {	
 				fTextOperationAction.run();
@@ -924,27 +962,17 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				IDocument document= sourceViewer.getDocument();
 				String contentType= document.getContentType(offset);
 
-				final IRegion hoverRegion= textHover.getHoverRegion(sourceViewer, offset);						
+				IRegion hoverRegion= textHover.getHoverRegion(sourceViewer, offset);						
 				if (hoverRegion == null)
 					return;
 				
-				final String hoverInfo= textHover.getHoverInfo(sourceViewer, hoverRegion);
+				String hoverInfo= textHover.getHoverInfo(sourceViewer, hoverRegion);
+
+				IInformationControlCreator controlCreator= null;				
+				if (textHover instanceof IInformationProviderExtension2)
+					controlCreator= ((IInformationProviderExtension2)textHover).getInformationPresenterControlCreator();
 	
-				// with information provider
-				IInformationProvider informationProvider= new IInformationProvider() {
-					/*
-					 * @see org.eclipse.jface.text.information.IInformationProvider#getSubject(org.eclipse.jface.text.ITextViewer, int)
-					 */
-					public IRegion getSubject(ITextViewer textViewer, int invocationOffset) {					
-						return hoverRegion;
-					}
-					/*
-					 * @see org.eclipse.jface.text.information.IInformationProvider#getInformation(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
-					 */
-					public String getInformation(ITextViewer textViewer, IRegion subject) {
-						return hoverInfo;
-					}
-				};
+				IInformationProvider informationProvider= new InformationProvider(hoverRegion, hoverInfo, controlCreator);
 
 				fInformationPresenter.setOffset(offset);	
 				fInformationPresenter.setInformationProvider(informationProvider, contentType);
@@ -1668,7 +1696,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		action= GoToNextPreviousMemberAction.newGoToPreviousMemberAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);				
-		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);		
+		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
 	}
 	
 	public void updatedTitleImage(Image image) {
@@ -1751,7 +1779,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					configureInsertMode(OVERWRITE, !disable.booleanValue());
 				}
 			}
-			
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
