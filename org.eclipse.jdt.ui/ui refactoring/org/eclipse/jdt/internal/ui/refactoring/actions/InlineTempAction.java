@@ -1,22 +1,22 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
-public class InlineTempAction extends TextSelectionBasedRefactoringAction {
+public class InlineTempAction extends TextSelectionRefactoringAction {
 
-	public InlineTempAction() {
-		super(RefactoringMessages.getString("InlineTempAction.inline_temp")); //$NON-NLS-1$
+	public InlineTempAction(CompilationUnitEditor editor) {
+		super(editor);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declated in TextSelectionBasedRefactoringAction
 	 */	
@@ -43,14 +43,10 @@ public class InlineTempAction extends TextSelectionBasedRefactoringAction {
 		return RefactoringMessages.getString("InlineTempAction.inline_temp"); //$NON-NLS-1$
 	}
 	
-	/* (non-Javadoc)
-	 * @see TextSelectionAction#canOperateOnCurrentSelection(ISelection)
-	 */
-	protected boolean canOperateOnCurrentSelection(ISelection selection) {
-		if (!(selection instanceof ITextSelection))
-			return false;
-		return true;
+	protected boolean canEnableOn(ITextSelection selection) {
+		return getCompilationUnit() != null;
 	}
 	
-}
 
+
+}

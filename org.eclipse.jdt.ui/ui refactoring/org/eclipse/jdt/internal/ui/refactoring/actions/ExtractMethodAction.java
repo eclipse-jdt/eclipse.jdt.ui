@@ -1,8 +1,3 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
-
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -11,26 +6,18 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
 
-/**
- * Extracts a new method from the text editor's text selection by using the
- * extract method refactoing.
- */
-public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
+public class ExtractMethodAction extends TextSelectionRefactoringAction {
 
-	/**
-	 * Creates a new extract method action when used as an action delegate.
-	 */
-	public ExtractMethodAction() {
-		super(RefactoringMessages.getString("ExtractMethodAction.label"));  //$NON-NLS-1$
+	public ExtractMethodAction(CompilationUnitEditor editor) {
+		super(editor);
 	}
-	
 	/* (non-Javadoc)
 	 * Method declated in TextSelectionBasedRefactoringAction
 	 */	
