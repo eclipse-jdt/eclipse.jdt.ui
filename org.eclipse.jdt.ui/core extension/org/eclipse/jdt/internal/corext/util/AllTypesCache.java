@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0f
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -54,6 +53,60 @@ public class AllTypesCache {
 	private static final int INITIAL_DELAY= 4000;
 	private static final int TIMEOUT= 3000;
 	private static final int INITIAL_SIZE= 2000;
+	private static final int CANCEL_POLL_INTERVAL= 300;
+	
+	static class DelegatedProgressMonitor implements IProgressMonitor {
+		private IProgressMonitor fDelegate;
+		private String fTaskName;
+		private String fSubTask;
+		private int fTotalWork= IProgressMonitor.UNKNOWN;
+		private double fWorked;
+		
+		public synchronized void beginTask(String name, int totalWork) {
+			fTaskName= name;
+			fTotalWork= totalWork;
+			if (fDelegate != null)
+				fDelegate.beginTask(name, totalWork);
+		}
+		public void done() {
+		}
+		public synchronized void internalWorked(double work) {
+			fWorked+= work;
+			if (fDelegate != null)
+				fDelegate.internalWorked(work);
+		}
+		public boolean isCanceled() {
+			return false;
+		}
+		public void setCanceled(boolean value) {
+		}
+		public synchronized void setTaskName(String name) {
+			fTaskName= name;
+			if (fDelegate != null)
+				fDelegate.setTaskName(name);
+		}
+		public synchronized void subTask(String name) {
+			fSubTask= name;
+			if (fDelegate != null)
+				fDelegate.subTask(name);
+		}
+		public void worked(int work) {
+			internalWorked(work);
+		}
+		synchronized void setDelegate(IProgressMonitor delegate) {
+			fDelegate= delegate;
+			if (fDelegate != null) {
+				if (fTaskName != null) {
+					fDelegate.beginTask(fTaskName, fTotalWork);
+					fDelegate.internalWorked(fWorked);
+				}				
+			} else {
+				fTaskName= null;
+				fTotalWork= IProgressMonitor.UNKNOWN;
+				fWorked= 0.0;
+			}
+		}
+	}
 
 	static class TypeCacher extends Thread {
 		
@@ -61,13 +114,11 @@ public class AllTypesCache {
 		private int fSizeHint;
 		private volatile boolean fRestart;
 		private volatile boolean fAbort;
-		private IProgressMonitor fMonitor;
 		
-		TypeCacher(int sizeHint, int delay, IProgressMonitor monitor) {
+		TypeCacher(int sizeHint, int delay) {
 			super("All Types Caching"); //$NON-NLS-1$
 			fSizeHint= sizeHint;
 			fDelay= delay;
-			fMonitor= monitor;
 			setPriority(Thread.NORM_PRIORITY-1);
 		}
 		
@@ -126,7 +177,7 @@ public class AllTypesCache {
 			};
 
 			try {
-				if (! search(requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, fMonitor))
+				if (! search(requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null))
 					return null;
 			} catch (RequestorAbort e) {
 				// query cancelled
@@ -149,7 +200,7 @@ public class AllTypesCache {
 	
 	
 	private static int fgNumberOfCacheFlushes;
-	
+	private static DelegatedProgressMonitor fDelegatedProgressMonitor= new DelegatedProgressMonitor();	
 	private static TypeCacheDeltaListener fgDeltaListener;
 
 	/**
@@ -205,37 +256,45 @@ public class AllTypesCache {
 		
 		synchronized(fgLock) {
 			
-			if (fgTypeCache == null) {
-				// cache is empty
-				
-				if (fgTypeCacherThread == null) {
-					// cache synchroneously
-					ArrayList searchResult= new ArrayList(fgSizeHint);
-					try {
-						fgIsLocked= true;
-						if (search(new TypeInfoRequestor(searchResult), IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor)) {
-							TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
-							Arrays.sort(result, fgTypeNameComparator);
-							fgTypeCache= result;
-							fgSizeHint= result.length;
+			try {
+				if (fgTypeCache == null) {
+					// cache is empty
+					
+					if (fgTypeCacherThread == null) {
+						// cache synchroneously
+						ArrayList searchResult= new ArrayList(fgSizeHint);
+						try {
+							fgIsLocked= true;
+							if (search(new TypeInfoRequestor(searchResult), IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor)) {
+								TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
+								Arrays.sort(result, fgTypeNameComparator);
+								fgTypeCache= result;
+								fgSizeHint= result.length;
+							}
+						} finally {
+							fgIsLocked= false;
+						}	
+					} else {
+						fDelegatedProgressMonitor.setDelegate(monitor);
+						// wait for the thread to finished
+						try {
+							while (fgTypeCache == null) {
+								fgLock.wait(CANCEL_POLL_INTERVAL);	// poll for cancel
+								if (monitor.isCanceled())
+									throw new OperationCanceledException();
+							}
+						} catch (InterruptedException e) {
+							JavaPlugin.log(e);
+						} finally {
+							fDelegatedProgressMonitor.setDelegate(null);						
 						}
-					} finally {
-						fgIsLocked= false;
-					}	
-				} else {
-					// wait for the thread to finished
-					try {
-						while (fgTypeCache == null)
-							fgLock.wait();
-					} catch (InterruptedException e) {
-						JavaPlugin.log(e);
 					}
 				}
+				
+			} finally {
+				if (monitor != null)
+					monitor.done();
 			}
-			
-			if (monitor != null)
-				monitor.done();
-			
 			return fgTypeCache;
 		}
 	}
@@ -282,7 +341,7 @@ public class AllTypesCache {
 				fgTypeCacherThread.restart();
 			} else {
 				if (fgAsyncMode) {	// start thread only if we are in background mode
-					fgTypeCacherThread= new TypeCacher(fgSizeHint, TIMEOUT, null);
+					fgTypeCacherThread= new TypeCacher(fgSizeHint, TIMEOUT);
 					fgTypeCacherThread.start();
 				}
 			}
@@ -433,7 +492,7 @@ public class AllTypesCache {
 	static boolean search(ITypeNameRequestor requestor, int waitingPolicy, IProgressMonitor monitor) {
 		try {
 			if (monitor == null)
-				monitor= new NullProgressMonitor();
+				monitor= fDelegatedProgressMonitor;
 		
 			new SearchEngine().searchAllTypeNames(ResourcesPlugin.getWorkspace(),
 				null,
@@ -498,7 +557,7 @@ public class AllTypesCache {
 					if (fgTypeCache != null) {
 						// the cache is already uptodate
 					} else {
-						fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY, null);
+						fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY);
 						fgTypeCacherThread.start();
 					}							
 				}
