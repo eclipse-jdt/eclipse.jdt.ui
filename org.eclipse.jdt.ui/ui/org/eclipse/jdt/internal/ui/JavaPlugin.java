@@ -26,14 +26,18 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferFactory;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -62,7 +66,6 @@ import org.eclipse.ui.texteditor.ConfigurationElementSorter;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
-import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
@@ -76,6 +79,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory;
+import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -307,8 +311,17 @@ public class JavaPlugin extends AbstractUIPlugin {
 		super.startup();
 		registerAdapters();
 		
-		if (USE_WORKING_COPY_OWNERS)
-			DefaultWorkingCopyOwner.PRIMARY.factory= getBufferFactory();
+		if (USE_WORKING_COPY_OWNERS) {
+			WorkingCopyOwner.setPrimaryBufferProvider(new WorkingCopyOwner() {
+				public IBuffer createBuffer(ICompilationUnit workingCopy) {
+					ICompilationUnit original= workingCopy.getPrimary();
+					IResource resource= original.getResource();
+					if (resource instanceof IFile)
+						return new DocumentAdapter(workingCopy, (IFile) resource);
+					return DocumentAdapter.NULL;
+				}
+			});
+		}
 	
 		installPreferenceStoreBackwardsCompatibility();
 		

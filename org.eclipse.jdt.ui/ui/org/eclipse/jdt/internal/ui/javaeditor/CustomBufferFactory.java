@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IOpenable;
 
 /**
  * Creates <code>IBuffer</code>s based on documents.
+ * @deprecated since 3.0 no longer used
  */
 public class CustomBufferFactory implements IBufferFactory {
 	
@@ -31,7 +32,7 @@ public class CustomBufferFactory implements IBufferFactory {
 	public IBuffer createBuffer(IOpenable owner) {
 		if (owner instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit) owner;
-			ICompilationUnit original= (ICompilationUnit) unit.getOriginalElement();
+			ICompilationUnit original= unit.getPrimary();
 			IResource resource= original.getResource();
 			if (resource instanceof IFile) {
 				return new DocumentAdapter(unit, (IFile) resource);
