@@ -18,6 +18,8 @@ import org.eclipse.test.performance.PerformanceTestCase;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -26,6 +28,11 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
@@ -44,6 +51,12 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 	
 	public JdtPerformanceTestCase(String name) {
 		super(name);
+	}
+	
+	protected void finishMeasurements() {
+		stopMeasuring();
+		commitMeasurements();
+		assertPerformance();
 	}
 	
 	protected void joinBackgroudActivities() throws CoreException {
@@ -70,11 +83,62 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 		// Join all types cache
 		AllTypesCache.getTypes(SearchEngine.createJavaSearchScope(new IJavaElement[0]), 
 			IJavaSearchConstants.CLASS, new NullProgressMonitor(), new ArrayList());
+		// Join jobs
+		joinJobs(0, 0, 500);
 	}
 
-	protected void finishMeasurements() {
-		stopMeasuring();
-		commitMeasurements();
-		assertPerformance();
+	private static boolean joinJobs(long minTime, long maxTime, long intervalTime) {
+		long startTime= System.currentTimeMillis() + minTime;
+		runEventQueue();
+		while (System.currentTimeMillis() < startTime)
+			runEventQueue(intervalTime);
+		
+		long endTime= maxTime > 0  && maxTime < Long.MAX_VALUE ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
+		boolean calm= allJobsQuiet();
+		while (!calm && System.currentTimeMillis() < endTime) {
+			runEventQueue(intervalTime);
+			calm= allJobsQuiet();
+		}
+		return calm;
+	}
+	
+	private static void sleep(int intervalTime) {
+		try {
+			Thread.sleep(intervalTime);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static boolean allJobsQuiet() {
+		IJobManager jobManager= Platform.getJobManager();
+		Job[] jobs= jobManager.find(null);
+		for (int i= 0; i < jobs.length; i++) {
+			Job job= jobs[i];
+			int state= job.getState();
+			if (state == Job.RUNNING || state == Job.WAITING)
+				return false;
+		}
+		return true;
+	}
+	
+	private static void runEventQueue() {
+		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (window != null)
+			runEventQueue(window.getShell());
+	}
+	
+	private static void runEventQueue(Shell shell) {
+		while (shell.getDisplay().readAndDispatch()) {
+			// do nothing
+		}
+	}
+	
+	private static void runEventQueue(long minTime) {
+		long nextCheck= System.currentTimeMillis() + minTime;
+		while (System.currentTimeMillis() < nextCheck) {
+			runEventQueue();
+			sleep(1);
+		}
 	}
 }
