@@ -48,8 +48,6 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
-import org.eclipse.jdt.internal.ui.actions.AddWatchpointAction;
 import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
 import org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
@@ -154,8 +152,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		// page.setAction("ShowTypeHierarchy", new ShowTypeHierarchyAction(page));	//$NON-NLS-1$
 		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page)); //$NON-NLS-1$
 		page.setAction("ShowInPackageView", new ShowInPackageViewAction()); //$NON-NLS-1$
-		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page)); //$NON-NLS-1$
-		page.setAction("AddWatchpoint", new AddWatchpointAction(page)); // $NON-NLS-1$
 		StructuredSelectionProvider selectionProvider= StructuredSelectionProvider.createFrom(page);
 		return page;
 	}
@@ -172,7 +168,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	}
 	
 	/*
-	 * Get the dektop's StatusLineManager
+	 * Get the desktop's StatusLineManager
 	 */
 	protected IStatusLineManager getStatusLineManager() {
 		IEditorActionBarContributor contributor= getEditorSite().getActionBarContributor();
