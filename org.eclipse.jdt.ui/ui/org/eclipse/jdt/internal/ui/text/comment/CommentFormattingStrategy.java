@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.text.comment.CommentFormatter;
 import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceConstants;
 import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
 import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
@@ -103,24 +102,24 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				int partitionOffset= position.getOffset() - sourceOffset;
 				int sourceLength= partitionOffset + position.getLength();
 				String source= document.get(sourceOffset, sourceLength);
-				CodeFormatter commentFormatter= new CommentFormatter(fTextMeasurement, preferences);
+				CodeFormatter commentFormatter= org.eclipse.jdt.internal.corext.text.comment.ToolFactory.createCommentFormatter(fTextMeasurement, preferences);
 				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences));
 				edit= commentFormatter.format(getKindForPartitionType(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
 				
 				// move edit offset to match document
 				if (edit != null)
 					edit.moveTree(sourceOffset);
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
+			} catch (BadLocationException x) {
+				JavaPlugin.log(x);
 			}
 			
 			try {
 				if (edit != null)
 					edit.apply(document);
-			} catch (MalformedTreeException e) {
-				JavaPlugin.log(e);
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
+			} catch (MalformedTreeException x) {
+				JavaPlugin.log(x);
+			} catch (BadLocationException x) {
+				JavaPlugin.log(x);
 			}
 		}
 	}
@@ -198,7 +197,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 * @return the expanded string
 	 * @since 3.1
 	 */
-	private StringBuffer expandTabs(String string, int tabSize) {
+	private static StringBuffer expandTabs(String string, int tabSize) {
 		StringBuffer expanded= new StringBuffer();
 		for (int i= 0, n= string.length(), chars= 0; i < n; i++) {
 			char ch= string.charAt(i);
