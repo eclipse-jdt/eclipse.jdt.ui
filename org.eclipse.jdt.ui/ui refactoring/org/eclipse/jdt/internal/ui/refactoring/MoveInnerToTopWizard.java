@@ -66,9 +66,8 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		public MoveInnerToToplnputPage(String initialValue) {
 			super(RefactoringMessages.getString("MoveInnerToToplnputPage.description"), true, initialValue); //$NON-NLS-1$
 			final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
-			final boolean nonEmpty= initialValue.equals(""); //$NON-NLS-1$
 			final boolean mandatory= refactoring.isCreatingInstanceFieldMandatory();
-			fInitialInputValid= nonEmpty || !mandatory;
+			fInitialInputValid= (!initialValue.equals("")) || !mandatory; //$NON-NLS-1$
 			if (!mandatory)
 				refactoring.setCreateInstanceField(false);
 		}
