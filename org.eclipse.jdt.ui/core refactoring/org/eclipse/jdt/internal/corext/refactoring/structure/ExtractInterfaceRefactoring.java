@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -423,6 +424,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 							}
 						}
 					}
+				} else  if (parent instanceof ReturnStatement){
+					MethodDeclaration md= (MethodDeclaration)ASTNodes.getParent(parent, MethodDeclaration.class);
+					if (nodesToRemove.contains(md.getReturnType())){
+						fBadVarSet.add(tempDeclaration);
+						return true;
+					}	
 				}
 			}
 		}
