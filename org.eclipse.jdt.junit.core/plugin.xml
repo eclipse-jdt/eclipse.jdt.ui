@@ -354,9 +354,6 @@
       <launchConfigType
             configTypeID="org.eclipse.jdt.junit.launchconfig">
       </launchConfigType>
-      <launchConfigType
-            configTypeID="org.eclipse.pde.ui.JunitLaunchConfig">
-      </launchConfigType>
    </extension>
 
 </plugin>
