@@ -248,9 +248,6 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		
 	// -------------- Preconditions -----------------------
 	
-	/* non java-doc
-	 * IPreactivatedRefactoring#checkPreactivation
-	 */
 	public RefactoringStatus checkPreactivation() throws JavaModelException {
 		return Checks.checkAvailability(fField);	
 	}
