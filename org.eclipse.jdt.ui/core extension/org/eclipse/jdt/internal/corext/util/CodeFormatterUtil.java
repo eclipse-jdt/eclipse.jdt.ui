@@ -97,6 +97,10 @@ public class CodeFormatterUtil {
 	 */	
 	public static String format(int kind, String string, int offset, int length, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		TextEdit edit= format2(kind, string, offset, length, indentationLevel, lineSeparator, options);
+		if (edit == null) {
+			JavaPlugin.logErrorMessage("formatter failed to format (null returned). Will use unformatted instead. kind: " + kind + ", string: " + string); //$NON-NLS-1$ //$NON-NLS-2$
+			return string;
+		}
 		String formatted= getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
 		return formatted.substring(offset, formatted.length() - (string.length() - (offset + length)));
 	}
@@ -110,39 +114,39 @@ public class CodeFormatterUtil {
 		}
 		
 		TextEdit edit= format2(node, string, indentationLevel, lineSeparator, options);
+		if (edit == null) {
+			JavaPlugin.logErrorMessage("formatter failed to format (null returned). Will use unformatted instead. node: " + node.getNodeType() + ", string: " + string); //$NON-NLS-1$ //$NON-NLS-2$
+			return string;
+		}
 		return getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
 	}
 	
 	private static String getOldAPICompatibleResult(String string, TextEdit edit, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		if (edit != null) {
-			Position[] p= null;
-			
-			if (positions != null) {
-				p= new Position[positions.length];
-				for (int i= 0; i < positions.length; i++) {
-					p[i]= new Position(positions[i], 0);
-				}
+		Position[] p= null;
+		
+		if (positions != null) {
+			p= new Position[positions.length];
+			for (int i= 0; i < positions.length; i++) {
+				p[i]= new Position(positions[i], 0);
 			}
-			String res= evaluateFormatterEdit(string, edit, p);
-			
-			int[] positionCopy= null;
-			if (positions != null) {
-				if (DEBUG) {
-					positionCopy= (int[]) positions.clone();
-				}
-				for (int i= 0; i < positions.length; i++) {
-					Position curr= p[i];
-					positions[i]= curr.getOffset();
-				}
-			}			
-			if (DEBUG) {
-				String oldFormat= old_formatter(string, indentationLevel, positionCopy, lineSeparator, options);
-				testSame(res, oldFormat, positions, positionCopy);
-			}
-			return res;
 		}
-		JavaPlugin.logErrorMessage("formatter returned null-edit. string: " + string); //$NON-NLS-1$
-		return string;
+		String res= evaluateFormatterEdit(string, edit, p);
+		
+		int[] positionCopy= null;
+		if (positions != null) {
+			if (DEBUG) {
+				positionCopy= (int[]) positions.clone();
+			}
+			for (int i= 0; i < positions.length; i++) {
+				Position curr= p[i];
+				positions[i]= curr.getOffset();
+			}
+		}			
+		if (DEBUG) {
+			String oldFormat= old_formatter(string, indentationLevel, positionCopy, lineSeparator, options);
+			testSame(res, oldFormat, positions, positionCopy);
+		}
+		return res;
 	}
 	
 	/**
