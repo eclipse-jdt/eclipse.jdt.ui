@@ -48,12 +48,13 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.core.dom.Modifier;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * An advanced version of CheckedTreeSelectionDialog with right-side button layout and

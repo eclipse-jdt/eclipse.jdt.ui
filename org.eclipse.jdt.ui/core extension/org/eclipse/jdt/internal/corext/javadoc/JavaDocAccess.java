@@ -33,10 +33,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 public class JavaDocAccess {
-	
-	
-
-	
 	/**
 	 * Gets a reader for an IMember's JavaDoc comment
 	 * Returns null if the member does not contain a JavaDoc comment or

@@ -22,6 +22,8 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProvider;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 public class JavaUILabelProvider extends LabelProvider implements IColorProvider {
 	
 	protected JavaElementImageProvider fImageLabelProvider;

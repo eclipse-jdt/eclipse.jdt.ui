@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -20,7 +22,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * Refocuses the type hierarchy on the currently selection type.

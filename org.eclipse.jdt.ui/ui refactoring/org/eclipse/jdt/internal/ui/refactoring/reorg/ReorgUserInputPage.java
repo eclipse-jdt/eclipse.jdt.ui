@@ -35,9 +35,9 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;

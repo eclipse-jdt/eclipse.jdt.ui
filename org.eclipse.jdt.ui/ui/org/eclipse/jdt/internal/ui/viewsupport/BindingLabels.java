@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.dom.IBinding;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class BindingLabels {

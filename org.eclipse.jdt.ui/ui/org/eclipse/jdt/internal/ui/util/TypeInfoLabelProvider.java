@@ -15,9 +15,11 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class TypeInfoLabelProvider extends LabelProvider {
 	

@@ -20,9 +20,10 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
     private static final long TEXTFLAGS= DEFAULT_TEXTFLAGS | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED;
