@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -219,7 +219,7 @@ public class EditorUtility {
 		if (cu != null) {
 			ICompilationUnit workingCopy= getWorkingCopy(cu);
 			if (workingCopy != null) {
-				return JavaModelUtility.findMemberInCompilationUnit(workingCopy, member);
+				return JavaModelUtil.findMemberInCompilationUnit(workingCopy, member);
 			}
 		}
 		return null;

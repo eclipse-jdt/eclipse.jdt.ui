@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  {
 	
@@ -85,7 +85,7 @@ public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  
 				flags |= JavaOverlayDescriptor.STATIC;
 				
 			if (sourceReference instanceof IType) {
-				if (JavaModelUtility.hasMainMethod((IType)sourceReference))
+				if (JavaModelUtil.hasMainMethod((IType)sourceReference))
 					flags |= JavaOverlayDescriptor.RUNNABLE;
 			}
 		}

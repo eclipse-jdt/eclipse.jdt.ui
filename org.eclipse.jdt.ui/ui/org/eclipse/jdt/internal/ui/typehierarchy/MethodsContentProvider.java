@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Content provider used for the method view.
@@ -164,7 +164,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement elem= (IJavaElement)obj;
-				return !(elem.exists() && JavaModelUtility.isOnBuildPath(elem));
+				return !(elem.exists() && JavaModelUtil.isOnBuildPath(elem));
 			}
 		} catch (JavaModelException e) {
 			// dont handle here

@@ -18,8 +18,8 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
@@ -129,7 +129,7 @@ public class JavaTextLabelProvider {
 			buf.append(name);
 		}
 		if (showContainer()) {
-			IPackageFragmentRoot parent= JavaModelUtility.getPackageFragmentRoot(element);
+			IPackageFragmentRoot parent= JavaModelUtil.getPackageFragmentRoot(element);
 			buf.append(" - "); //$NON-NLS-1$
 			String container= parent.getElementName();
 			// The default package fragment root of a project doesn't have a name.
@@ -144,7 +144,7 @@ public class JavaTextLabelProvider {
 		String name= root.getElementName();
 		if (showVariable() && root.isArchive()) {
 			try {
-				IClasspathEntry rawEntry= JavaModelUtility.getRawClasspathEntry(root);
+				IClasspathEntry rawEntry= JavaModelUtil.getRawClasspathEntry(root);
 				if (rawEntry != null) {
 					if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 						buf.append(rawEntry.getPath().makeRelative());
@@ -178,7 +178,7 @@ public class JavaTextLabelProvider {
 			buf.append(" - "); //$NON-NLS-1$
 			renderName(type.getDeclaringType(), buf);
 		} else {
-			buf.append(JavaModelUtility.getFullyQualifiedName(type));
+			buf.append(JavaModelUtil.getFullyQualifiedName(type));
 		}
 	}	
 	
@@ -238,7 +238,7 @@ public class JavaTextLabelProvider {
 		StringBuffer buf= new StringBuffer();
 		renderName(element, buf);
 		if (showRoot()) {
-			IPackageFragmentRoot root= JavaModelUtility.getPackageFragmentRoot(element);
+			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 			if (root != null) {
 				buf.append(" - "); //$NON-NLS-1$
 				buf.append(root.getPath().toString());

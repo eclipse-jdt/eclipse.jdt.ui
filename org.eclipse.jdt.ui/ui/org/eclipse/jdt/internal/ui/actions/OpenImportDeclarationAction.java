@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 
 /**
@@ -65,7 +65,7 @@ public class OpenImportDeclarationAction extends Action implements IUpdate {
 			IStructuredSelection ss= (IStructuredSelection) s;
 			IImportDeclaration declaration= (IImportDeclaration) ss.getFirstElement();
 			try {
-				IJavaElement element= JavaModelUtility.convertFromImportDeclaration(declaration);
+				IJavaElement element= JavaModelUtil.convertFromImportDeclaration(declaration);
 				EditorUtility.openInEditor(element);
 			} catch (JavaModelException x) {
 				Shell shell= JavaPlugin.getActiveWorkbenchShell();

@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Base class for content providers for type hierarchy viewers.
@@ -234,7 +234,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement elem= (IJavaElement)obj;
-				return !(elem.exists() && JavaModelUtility.isOnBuildPath(elem));
+				return !(elem.exists() && JavaModelUtil.isOnBuildPath(elem));
 			}
 		} catch (JavaModelException e) {
 			// dont handle here

@@ -37,10 +37,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
 
 /**
- * Utility methods for the Java Model. These methods should be part of
- * <code>IJavaModel</code> but unfortunately they aren't.
+ * Utility methods for the Java Model.
  */
-public class JavaModelUtility {
+public class JavaModelUtil {
 
 	/** 
 	 * Finds a type by its qualified type name. (dot separated)

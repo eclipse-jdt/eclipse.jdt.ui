@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.Utilities;
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.IVMInstall;
@@ -195,7 +195,7 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 				vmArgs= args.getVMArguments();
 				programArgs= args.getProgramArguments();
 			}
-			final VMRunnerConfiguration config= new VMRunnerConfiguration(JavaModelUtility.getFullyQualifiedName(mainType), classPath);
+			final VMRunnerConfiguration config= new VMRunnerConfiguration(JavaModelUtil.getFullyQualifiedName(mainType), classPath);
 			config.setVMArguments(JavaLaunchUtils.parseArguments(vmArgs));
 			config.setProgramArguments(JavaLaunchUtils.parseArguments(programArgs));
 			

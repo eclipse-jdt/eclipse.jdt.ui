@@ -38,7 +38,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.TypeRef;
 import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
 
@@ -368,7 +368,7 @@ public class StubUtility {
 		IMethod[] methods= supertype.getMethods();
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
-			if (curr.isConstructor() && JavaModelUtility.isVisible(type.getPackageFragment(), curr.getFlags(), supertype.getPackageFragment())) {
+			if (curr.isConstructor() && JavaModelUtil.isVisible(type.getPackageFragment(), curr.getFlags(), supertype.getPackageFragment())) {
 				String newStub= genStub(type, methods[i], imports);
 				newMethods.add(newStub);
 			}
@@ -455,7 +455,7 @@ public class StubUtility {
 			
 			String[][] resolvedNames= declaringType.resolveType(name);
 			if (resolvedNames != null && resolvedNames.length > 0) {
-				return JavaModelUtility.concatenateName(resolvedNames[0][0], resolvedNames[0][1]);
+				return JavaModelUtil.concatenateName(resolvedNames[0][0], resolvedNames[0][1]);
 			}
 			return null;
 		} else {
@@ -499,7 +499,7 @@ public class StubUtility {
 	 * Examines a string and returns the first line delimiter found.
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
-		ICompilationUnit cu= (ICompilationUnit)JavaModelUtility.getParent(elem, IJavaElement.COMPILATION_UNIT);
+		ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent(elem, IJavaElement.COMPILATION_UNIT);
 		if (cu != null) {
 			IBuffer buf= cu.getBuffer();
 			int length= buf.getLength();
@@ -554,7 +554,7 @@ public class StubUtility {
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {
 			int tabWidth= CodeFormatterPreferencePage.getTabSize();
-			ICompilationUnit cu= (ICompilationUnit)JavaModelUtility.getParent(elem, IJavaElement.COMPILATION_UNIT);
+			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent(elem, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				IBuffer buf= cu.getBuffer();
 				int i= ((ISourceReference)elem).getSourceRange().getOffset();

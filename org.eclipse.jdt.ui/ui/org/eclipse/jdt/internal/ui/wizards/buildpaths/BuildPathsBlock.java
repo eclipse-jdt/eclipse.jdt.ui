@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -549,7 +549,7 @@ public class BuildPathsBlock {
 			
 		fCurrJProject.setRawClasspath(classpath, new SubProgressMonitor(monitor, 5));
 		
-		JavaModelUtility.updateRequiredProjects(fCurrJProject, prevRequiredProjects, new SubProgressMonitor(monitor, 1));
+		JavaModelUtil.updateRequiredProjects(fCurrJProject, prevRequiredProjects, new SubProgressMonitor(monitor, 1));
 		
 	}
 	

@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 public class NewGroup extends ContextMenuGroup {
 		
@@ -113,7 +113,7 @@ public class NewGroup extends ContextMenuGroup {
 	static boolean isOnBuildPath(Object obj) {
 		try {
 			if (obj instanceof IJavaElement) {
-				return JavaModelUtility.isOnBuildPath((IJavaElement)obj);
+				return JavaModelUtil.isOnBuildPath((IJavaElement)obj);
 			}
 		} catch (JavaModelException e) {
 			// ignore
@@ -123,7 +123,7 @@ public class NewGroup extends ContextMenuGroup {
 	
 	static boolean isInArchive(Object obj) {
 		if (obj instanceof IJavaElement) {
-			IPackageFragmentRoot root= JavaModelUtility.getPackageFragmentRoot((IJavaElement)obj);
+			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot((IJavaElement)obj);
 			return (root != null) && root.isArchive();
 		}
 		return false;

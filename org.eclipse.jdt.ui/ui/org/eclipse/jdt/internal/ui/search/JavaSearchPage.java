@@ -70,7 +70,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.i
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
@@ -471,16 +471,16 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			case IJavaElement.TYPE:
 				searchFor= TYPE;
 				limitTo= REFERENCES;
-				pattern= JavaModelUtility.getFullyQualifiedName((IType)element);
+				pattern= JavaModelUtil.getFullyQualifiedName((IType)element);
 				break;
 			case IJavaElement.COMPILATION_UNIT:
 				ICompilationUnit cu= (ICompilationUnit)element;
 				//fix 1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
 				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf(".")); //$NON-NLS-1$
 				IType mainType= cu.getType(mainTypeName);
-				mainTypeName= JavaModelUtility.getTypeQualifiedName(mainType);
+				mainTypeName= JavaModelUtil.getTypeQualifiedName(mainType);
 				try {					
-					mainType= JavaModelUtility.findTypeInCompilationUnit(cu, mainTypeName);
+					mainType= JavaModelUtil.findTypeInCompilationUnit(cu, mainTypeName);
 					if (mainType == null) {
 						// fetch type which is declared first in the file
 						IType[] types= cu.getTypes();
@@ -495,7 +495,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				}
 				searchFor= TYPE;
 				limitTo= REFERENCES;
-				pattern= JavaModelUtility.getFullyQualifiedName((IType)mainType);
+				pattern= JavaModelUtil.getFullyQualifiedName((IType)mainType);
 				break;
 			case IJavaElement.CLASS_FILE:
 				IClassFile cf= (IClassFile)element;
@@ -509,14 +509,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 					break;
 				searchFor= TYPE;
 				limitTo= REFERENCES;
-				pattern= JavaModelUtility.getFullyQualifiedName(mainType);
+				pattern= JavaModelUtil.getFullyQualifiedName(mainType);
 				break;
 			case IJavaElement.FIELD:
 				searchFor= FIELD;
 				limitTo= REFERENCES;
 				IType type= ((IField)element).getDeclaringType();
 				StringBuffer buffer= new StringBuffer();
-				buffer.append(JavaModelUtility.getFullyQualifiedName(type));
+				buffer.append(JavaModelUtil.getFullyQualifiedName(type));
 				buffer.append('.');
 				buffer.append(element.getElementName());
 				pattern= buffer.toString();

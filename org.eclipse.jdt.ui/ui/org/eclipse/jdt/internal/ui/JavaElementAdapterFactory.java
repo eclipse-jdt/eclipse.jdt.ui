@@ -17,7 +17,7 @@ import org.eclipse.search.ui.ISearchPageScoreComputer;
 import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Implements basic UI support for Java elements.
@@ -72,7 +72,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 			//1GE8SR2: ITPUI:WIN98 - Task List does not show problems for selection in Hierarchy View
 			// check whether the resource is inside a CU. If yes
 			// return the CU as the resource
-			ICompilationUnit cu= (ICompilationUnit)JavaModelUtility.getParent(element, IJavaElement.COMPILATION_UNIT);
+			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent(element, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				if (cu.isWorkingCopy())
 					return cu.getOriginalElement().getUnderlyingResource();

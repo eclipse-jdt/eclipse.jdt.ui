@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -224,7 +224,7 @@ public abstract class TypePage extends ContainerPage {
 		IPackageFragment pack= null;
 				
 		if (elem != null) {
-			pack= (IPackageFragment) JavaModelUtility.findElementOfKind(elem, IJavaElement.PACKAGE_FRAGMENT);
+			pack= (IPackageFragment) JavaModelUtil.findElementOfKind(elem, IJavaElement.PACKAGE_FRAGMENT);
 			try {
 				IType type= null;
 				switch (elem.getElementType()) {
@@ -233,7 +233,7 @@ public abstract class TypePage extends ContainerPage {
 					break;
 				}
 				if (type != null && type.exists()) {
-					String superName= JavaModelUtility.getFullyQualifiedName(type);
+					String superName= JavaModelUtil.getFullyQualifiedName(type);
 					if (type.isInterface()) {
 						initSuperinterfaces.add(superName);
 					} else {
@@ -386,12 +386,12 @@ public abstract class TypePage extends ContainerPage {
 		} else if (field == fEnclosingTypeDialogField) {
 			IType type= chooseEnclosingType();
 			if (type != null) {
-				fEnclosingTypeDialogField.setText(JavaModelUtility.getFullyQualifiedName(type));
+				fEnclosingTypeDialogField.setText(JavaModelUtil.getFullyQualifiedName(type));
 			}
 		} else if (field == fSuperClassDialogField) {
 			IType type= chooseSuperType();
 			if (type != null) {
-				fSuperClassDialogField.setText(JavaModelUtility.getFullyQualifiedName(type));
+				fSuperClassDialogField.setText(JavaModelUtil.getFullyQualifiedName(type));
 			}
 		}
 	}
@@ -540,7 +540,7 @@ public abstract class TypePage extends ContainerPage {
 	public void setEnclosingType(IType type, boolean canBeModified) {
 		fCurrEnclosingType= type;
 		fCanModifyEnclosingType= canBeModified;
-		String str= (type == null) ? "" : JavaModelUtility.getFullyQualifiedName(type); //$NON-NLS-1$
+		String str= (type == null) ? "" : JavaModelUtil.getFullyQualifiedName(type); //$NON-NLS-1$
 		fEnclosingTypeDialogField.setText(str);
 		updateEnableState();
 	}
@@ -762,7 +762,7 @@ public abstract class TypePage extends ContainerPage {
 			return status;
 		}
 		try {
-			IType type= JavaModelUtility.findType(root.getJavaProject(), enclName);
+			IType type= JavaModelUtil.findType(root.getJavaProject(), enclName);
 			if (type == null) {
 				status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
 				return status;
@@ -868,7 +868,7 @@ public abstract class TypePage extends ContainerPage {
 					if (Flags.isFinal(flags)) {
 						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsFinal", sclassName)); //$NON-NLS-1$
 						return status;
-					} else if (!JavaModelUtility.isVisible(getPackageFragment(), flags, type.getPackageFragment())) {
+					} else if (!JavaModelUtil.isVisible(getPackageFragment(), flags, type.getPackageFragment())) {
 						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsNotVisible", sclassName)); //$NON-NLS-1$
 						return status;
 					}
@@ -894,7 +894,7 @@ public abstract class TypePage extends ContainerPage {
 			if (enclosingType != null) {
 				String[][] res= enclosingType.resolveType(sclassName);
 				if (res != null && res.length > 0) {
-					type= JavaModelUtility.findType(jproject, res[0][0], res[0][1]);
+					type= JavaModelUtil.findType(jproject, res[0][0], res[0][1]);
 				}
 			}
 		} else {
@@ -903,16 +903,16 @@ public abstract class TypePage extends ContainerPage {
 				String packName= currPack.getElementName();
 				// search in own package
 				if (!currPack.isDefaultPackage()) {
-					type= JavaModelUtility.findType(jproject, packName, sclassName);
+					type= JavaModelUtil.findType(jproject, packName, sclassName);
 				}
 				// search in java.lang
 				if (type == null && !"java.lang".equals(packName)) { //$NON-NLS-1$
-					type= JavaModelUtility.findType(jproject, "java.lang", sclassName); //$NON-NLS-1$
+					type= JavaModelUtil.findType(jproject, "java.lang", sclassName); //$NON-NLS-1$
 				}
 			}
 			// search fully qualified
 			if (type == null) {
-				type= JavaModelUtility.findType(jproject, sclassName);
+				type= JavaModelUtil.findType(jproject, sclassName);
 			}
 		}
 		return type;
@@ -936,7 +936,7 @@ public abstract class TypePage extends ContainerPage {
 			for (int i= 0; i < nElements; i++) {
 				String intfname= (String)elements.get(i);
 				try {
-					IType type= JavaModelUtility.findType(root.getJavaProject(), intfname);
+					IType type= JavaModelUtil.findType(root.getJavaProject(), intfname);
 					if (type == null) {
 						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceNotExists", intfname)); //$NON-NLS-1$
 						return status;
@@ -945,7 +945,7 @@ public abstract class TypePage extends ContainerPage {
 							status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceIsNotInterface", intfname)); //$NON-NLS-1$
 							return status;
 						}
-						if (!JavaModelUtility.isVisible(getPackageFragment(), type.getFlags(), type.getPackageFragment())) {
+						if (!JavaModelUtil.isVisible(getPackageFragment(), type.getFlags(), type.getPackageFragment())) {
 							status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceIsNotVisible", intfname)); //$NON-NLS-1$
 							return status;
 						}
@@ -1164,7 +1164,7 @@ public abstract class TypePage extends ContainerPage {
 			buf.append(" extends "); //$NON-NLS-1$
 			buf.append(Signature.getSimpleName(typename));
 			if (fSuperClass != null) {
-				imports.addImport(JavaModelUtility.getFullyQualifiedName(fSuperClass));
+				imports.addImport(JavaModelUtil.getFullyQualifiedName(fSuperClass));
 			} else {
 				imports.addImport(typename);
 			}

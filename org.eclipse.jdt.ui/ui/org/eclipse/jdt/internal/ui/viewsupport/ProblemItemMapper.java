@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Helper class for updating error markers.
@@ -188,7 +188,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 				}
 				return packPath;
 			default:
-				IOpenable openable= JavaModelUtility.getOpenable(elem);
+				IOpenable openable= JavaModelUtil.getOpenable(elem);
 				if (openable instanceof IJavaElement) {
 					return getCorrespondingPath((IJavaElement)openable);
 				}

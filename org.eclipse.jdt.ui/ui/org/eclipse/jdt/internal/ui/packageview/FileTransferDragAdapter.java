@@ -45,7 +45,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Drag support class to allow dragging of files and folder from
@@ -75,7 +75,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 				if (element instanceof IPackageFragment) {
 					return false;
 				} else if (element instanceof IJavaElement) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot)JavaModelUtility.findElementOfKind((IJavaElement)element, 
+					IPackageFragmentRoot root= (IPackageFragmentRoot)JavaModelUtil.findElementOfKind((IJavaElement)element, 
 						IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (root != null && root.isArchive())
 						return false;

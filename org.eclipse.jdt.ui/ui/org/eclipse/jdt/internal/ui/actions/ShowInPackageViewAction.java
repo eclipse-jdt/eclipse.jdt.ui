@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 /**
  * Tries to reveal the selected element in the package navigator 
@@ -64,24 +64,24 @@ public class ShowInPackageViewAction extends Action implements IUpdate {
 		Object o= ((IStructuredSelection)fSelectionProvider.getSelection()).getFirstElement();
 		IJavaElement element= null;
 		if (o instanceof IPackageDeclaration)
-			element= JavaModelUtility.getParent((IJavaElement)o, IJavaElement.PACKAGE_FRAGMENT);
+			element= JavaModelUtil.getParent((IJavaElement)o, IJavaElement.PACKAGE_FRAGMENT);
 		
 		else if (o instanceof IImportDeclaration) {
 			try {
-				element= JavaModelUtility.convertFromImportDeclaration((IImportDeclaration)o);
+				element= JavaModelUtil.convertFromImportDeclaration((IImportDeclaration)o);
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, JavaUIMessages.getString("ShowInPackageViewAction.errorTitle"), JavaUIMessages.getString("ShowInPackageViewAction.errorMessage")); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 			if (element instanceof IType) {
-				IJavaElement temp= JavaModelUtility.getParent(element, IJavaElement.COMPILATION_UNIT);
+				IJavaElement temp= JavaModelUtil.getParent(element, IJavaElement.COMPILATION_UNIT);
 				if (temp == null)
-					temp= JavaModelUtility.getParent(element, IJavaElement.CLASS_FILE);
+					temp= JavaModelUtil.getParent(element, IJavaElement.CLASS_FILE);
 					
 				element= temp;
 			}
 		}
 		else if (o instanceof IType) {
-			ICompilationUnit cu= (ICompilationUnit)JavaModelUtility.getParent((IJavaElement)o, IJavaElement.COMPILATION_UNIT);
+			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent((IJavaElement)o, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				if (cu.isWorkingCopy())
 					element= cu.getOriginalElement();
@@ -89,7 +89,7 @@ public class ShowInPackageViewAction extends Action implements IUpdate {
 					element= cu;
 			}
 			else {
-				element= JavaModelUtility.getParent((IJavaElement)o, IJavaElement.CLASS_FILE);
+				element= JavaModelUtil.getParent((IJavaElement)o, IJavaElement.CLASS_FILE);
 			}
 		}
 		

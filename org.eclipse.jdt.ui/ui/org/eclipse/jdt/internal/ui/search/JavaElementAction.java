@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 /**
@@ -190,9 +190,9 @@ public abstract class JavaElementAction extends Action {
 				return null;
 			String mainTypeName= cu.getElementName().substring(0, cu.getElementName().length() - 5);
 			IType mainType= cu.getType(mainTypeName);
-			mainTypeName= JavaModelUtility.getTypeQualifiedName((IType)mainType);
+			mainTypeName= JavaModelUtil.getTypeQualifiedName((IType)mainType);
 			try {					
-				mainType= JavaModelUtility.findTypeInCompilationUnit(cu, mainTypeName);
+				mainType= JavaModelUtil.findTypeInCompilationUnit(cu, mainTypeName);
 				if (mainType == null) {
 					// fetch type which is declared first in the file
 					IType[] types= cu.getTypes();

@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.dnd.BasicSelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 public class SelectionTransferDragAdapter extends BasicSelectionTransferDragAdapter {
 		
@@ -27,7 +27,7 @@ public class SelectionTransferDragAdapter extends BasicSelectionTransferDragAdap
 			for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof IJavaElement) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot)JavaModelUtility.findElementOfKind((IJavaElement)element, 
+					IPackageFragmentRoot root= (IPackageFragmentRoot)JavaModelUtil.findElementOfKind((IJavaElement)element, 
 						IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (root != null && root.isArchive())
 						return false;

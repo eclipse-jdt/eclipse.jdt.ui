@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaImageLabelProvider;
 
 public class CompletionEvaluator {
@@ -326,7 +326,7 @@ public class CompletionEvaluator {
 				// '@see #foo'
 				IJavaElement elem= fCompilationUnit.getElementAt(wordStart);
 				if (elem != null) {
-					parent= (IType)JavaModelUtility.getParent(elem, IJavaElement.TYPE);
+					parent= (IType)JavaModelUtil.getParent(elem, IJavaElement.TYPE);
 				}
 			}
 				

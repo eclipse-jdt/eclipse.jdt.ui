@@ -58,7 +58,7 @@ public class MainMethodSearchEngine extends SearchEngine {
 			public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
 				if (enclosingElement instanceof IMethod) {
 					IMethod method= (IMethod)enclosingElement;
-					if (JavaModelUtility.isMainMethod((IMethod)enclosingElement)) {
+					if (JavaModelUtil.isMainMethod((IMethod)enclosingElement)) {
 						// partial: fix for 
 						// 1GBADLN: ITPJUI:WINNT - SH: Launch/Debug list with runnables not complete and bad to use
 						// only add managed resources

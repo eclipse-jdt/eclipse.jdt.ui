@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 
 /**
@@ -60,7 +60,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		fJarRoot= getJARPackageFragmentRoot();
 		if (fJarRoot != null) {
 			try {
-				IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry(fJarRoot);
+				IClasspathEntry entry= JavaModelUtil.getRawClasspathEntry(fJarRoot);
 				if (entry == null) {
 					// use a dummy entry to use for initialization
 					entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);

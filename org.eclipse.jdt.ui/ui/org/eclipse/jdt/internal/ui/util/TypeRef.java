@@ -174,7 +174,7 @@ public class TypeRef {
 			elem= findInFile(root);
 		}
 		if (elem instanceof ICompilationUnit) {
-			return JavaModelUtility.findTypeInCompilationUnit((ICompilationUnit)elem, getTypeQualifiedName());
+			return JavaModelUtil.findTypeInCompilationUnit((ICompilationUnit)elem, getTypeQualifiedName());
 		} else if (elem instanceof IClassFile) {
 			return ((IClassFile)elem).getType();
 		}

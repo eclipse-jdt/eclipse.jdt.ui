@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
@@ -92,7 +92,7 @@ public class JavaElementInfoPage extends PropertyPage {
 			rootContents.setText(JavaUIMessages.getString("JavaElementInfoPage.classpath_entry_kind")); //$NON-NLS-1$
 			Label rootContentsType= new Label(composite, SWT.NONE);
 			try {
-				IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry((IPackageFragmentRoot)element);
+				IClasspathEntry entry= JavaModelUtil.getRawClasspathEntry((IPackageFragmentRoot)element);
 				if (entry != null) {
 					switch (entry.getEntryKind()) {
 						case IClasspathEntry.CPE_SOURCE:

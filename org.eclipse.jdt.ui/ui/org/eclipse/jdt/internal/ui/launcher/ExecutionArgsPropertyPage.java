@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.launching.ExecutionArguments;
 
 public class ExecutionArgsPropertyPage extends PropertyPage {
@@ -80,7 +80,7 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 		if (type == null)
 			return null;
 		ExecutionArguments args= null;
-		if (!JavaModelUtility.hasMainMethod(type))
+		if (!JavaModelUtil.hasMainMethod(type))
 			return null;
 		try {
 			args= ExecutionArguments.getArguments(type);

@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
@@ -864,7 +864,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		setTitle(getCurrentViewer().getTitle());
 		String tooltip;
 		if (fInput != null) {
-			String[] args= new String[] { title, JavaModelUtility.getFullyQualifiedName(fInput) };
+			String[] args= new String[] { title, JavaModelUtil.getFullyQualifiedName(fInput) };
 			tooltip= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.tooltip", args); //$NON-NLS-1$
 		} else {
 			tooltip= title;

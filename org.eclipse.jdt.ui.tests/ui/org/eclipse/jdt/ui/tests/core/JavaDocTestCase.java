@@ -30,7 +30,7 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;
 import org.eclipse.jdt.internal.ui.text.javadoc.StandardDocletPageBuffer;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 public class JavaDocTestCase extends TestCase {
 	
@@ -137,7 +137,7 @@ public class JavaDocTestCase extends TestCase {
 		IType type= cf.getType();
 		assertTrue("Type must exist", type != null);
 		
-		IPackageFragmentRoot root= JavaModelUtility.getPackageFragmentRoot(type);
+		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(type);
 		assertTrue("PackageFragmentRoot must exist", root != null);
 		
 		URL jdocLocation= JavaDocAccess.getJavaDocLocation(root);

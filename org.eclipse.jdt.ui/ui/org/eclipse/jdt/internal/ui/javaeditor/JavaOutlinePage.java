@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -340,7 +340,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				protected boolean mustUpdateParent(IJavaElementDelta delta, IJavaElement element) {
 					if (element instanceof IMethod) {
 						if ((delta.getKind() & IJavaElementDelta.ADDED) != 0) {
-							return JavaModelUtility.isMainMethod((IMethod)element);
+							return JavaModelUtil.isMainMethod((IMethod)element);
 						}
 						return "main".equals(element.getElementName()); //$NON-NLS-1$
 					}

@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.packageview.PackageViewerSorter;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
@@ -85,7 +85,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	protected void initContainerPage(IJavaElement elem) {
 		IPackageFragmentRoot initRoot= null;
 		if (elem != null) {
-			initRoot= JavaModelUtility.getPackageFragmentRoot(elem);
+			initRoot= JavaModelUtil.getPackageFragmentRoot(elem);
 			if (initRoot == null || initRoot.isArchive()) {
 				IJavaProject jproject= elem.getJavaProject();
 				try {
@@ -196,7 +196,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 						status.setWarning(NewWizardMessages.getString("ContainerPage.warning.NotAJavaProject")); //$NON-NLS-1$
 					}
 					try {
-						if (!JavaModelUtility.isOnBuildPath(fCurrRoot, jproject)) {
+						if (!JavaModelUtil.isOnBuildPath(fCurrRoot, jproject)) {
 							status.setWarning(NewWizardMessages.getFormattedString("ContainerPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
 						}		
 					} catch (JavaModelException e) {

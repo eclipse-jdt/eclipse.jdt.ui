@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddGetterSetterOperation;
 import org.eclipse.jdt.internal.ui.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
 /**
@@ -84,7 +84,7 @@ public class AddGetterSetterAction extends Action {
 				workingCopyFields= new IField[fields.length];
 				for (int i= 0; i < fields.length; i++) {
 					IField field= fields[i];
-					IField workingCopyField= (IField) JavaModelUtility.findMemberInCompilationUnit(workingCopyCU, field);
+					IField workingCopyField= (IField) JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, field);
 					if (workingCopyField == null) {
 						showError(JavaUIMessages.getFormattedString("AddGetterSetterAction.error.fieldNotExisting", field.getElementName())); //$NON-NLS-1$
 						return;

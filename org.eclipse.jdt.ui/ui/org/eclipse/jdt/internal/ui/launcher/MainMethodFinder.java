@@ -38,7 +38,7 @@ import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 
 public class MainMethodFinder implements IJavaSearchConstants {
@@ -81,7 +81,7 @@ public class MainMethodFinder implements IJavaSearchConstants {
 		}
 		while ((scope instanceof IJavaElement) && !(scope instanceof ICompilationUnit) && (scope instanceof ISourceReference)) {
 			if (scope instanceof IType) {
-				if (JavaModelUtility.hasMainMethod((IType)scope)) {
+				if (JavaModelUtil.hasMainMethod((IType)scope)) {
 					v.add(scope);
 					return;
 				}
@@ -93,7 +93,7 @@ public class MainMethodFinder implements IJavaSearchConstants {
 			ICompilationUnit cu= (ICompilationUnit)scope;
 			IType[] types= cu.getAllTypes();
 			for (int i= 0; i < types.length; i++) {
-				if (JavaModelUtility.hasMainMethod(types[i]))
+				if (JavaModelUtil.hasMainMethod(types[i]))
 					v.add(types[i]);
 			}
 		} else if (scope instanceof IJavaElement) {

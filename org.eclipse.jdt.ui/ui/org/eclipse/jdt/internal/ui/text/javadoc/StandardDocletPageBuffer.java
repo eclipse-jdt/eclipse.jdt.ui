@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 
 public class StandardDocletPageBuffer {
@@ -54,7 +54,7 @@ public class StandardDocletPageBuffer {
 	}
 	
 	private void parse() throws CoreException {
-		IPackageFragmentRoot root= JavaModelUtility.getPackageFragmentRoot(fInput);
+		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(fInput);
 		URL javaDocRoot= JavaDocAccess.getJavaDocLocation(root);
 		if (javaDocRoot == null) {
 			return;
@@ -177,7 +177,7 @@ public class StandardDocletPageBuffer {
 			buf.append(packageName.replace('.', '/'));
 			buf.append('/');
 		}
-		buf.append(JavaModelUtility.getTypeQualifiedName(type));
+		buf.append(JavaModelUtil.getTypeQualifiedName(type));
 		buf.append(".html"); //$NON-NLS-1$
 		return buf.toString();
 	}

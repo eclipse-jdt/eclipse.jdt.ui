@@ -10,7 +10,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 public class HistoryAction extends Action {
 
@@ -72,7 +72,7 @@ public class HistoryAction extends Action {
 	private void updateToolTip(IType type) {
 		Object arg= null;
 		if (type != null) {
-			arg= JavaModelUtility.getFullyQualifiedName(type);
+			arg= JavaModelUtil.getFullyQualifiedName(type);
 		}
 		setToolTipText(getToolTip(fIsForward, arg));
 	}

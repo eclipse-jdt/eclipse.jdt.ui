@@ -24,7 +24,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 public class GotoTypeAction extends Action {
 	
@@ -64,7 +64,7 @@ public class GotoTypeAction extends Action {
 	}
 	
 	private void gotoType(IType type) {
-		ICompilationUnit cu= (ICompilationUnit)JavaModelUtility.getParent(type, IJavaElement.COMPILATION_UNIT);
+		ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.getParent(type, IJavaElement.COMPILATION_UNIT);
 		IJavaElement element= null;
 		
 		if (cu != null) {
@@ -74,7 +74,7 @@ public class GotoTypeAction extends Action {
 				element= cu;
 		}
 		else {
-			element= JavaModelUtility.getParent(type, IJavaElement.CLASS_FILE);
+			element= JavaModelUtil.getParent(type, IJavaElement.CLASS_FILE);
 		}
 		if (element != null) {
 			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();

@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.DocumentManager;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 public class ImportsStructure implements IImportsStructure {
 	
@@ -161,7 +161,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
 	 */			
 	public void addImport(String packageName, String typeName) {
-		String fullTypeName= JavaModelUtility.concatenateName(packageName, typeName);
+		String fullTypeName= JavaModelUtil.concatenateName(packageName, typeName);
 		IImportDeclaration decl= fCompilationUnit.getImport(fullTypeName);
 			
 		PackageEntry bestMatch= findBestMatch(packageName);
@@ -196,7 +196,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
 	 */			
 	public void addImport(String packageName, String enclosingTypeName, String typeName) {
-		addImport(JavaModelUtility.concatenateName(packageName, enclosingTypeName), typeName);
+		addImport(JavaModelUtil.concatenateName(packageName, enclosingTypeName), typeName);
 	}	
 		
 	private static int getMatchLen(String s, String t) {
@@ -355,7 +355,7 @@ public class ImportsStructure implements IImportsStructure {
 				return false;
 			}
 			for (int i= 0; i < cuTypes.length; i++) {
-				if (packName.equals(JavaModelUtility.getFullyQualifiedName(cuTypes[i]))) {
+				if (packName.equals(JavaModelUtil.getFullyQualifiedName(cuTypes[i]))) {
 					return false;
 				}
 			}

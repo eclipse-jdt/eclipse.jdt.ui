@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Standard workbench wizard for exporting resources from the workspace
@@ -248,7 +248,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 						}
 					}
 					else {
-						IJavaElement jcu= JavaModelUtility.getParent(je, IJavaElement.COMPILATION_UNIT);
+						IJavaElement jcu= JavaModelUtil.getParent(je, IJavaElement.COMPILATION_UNIT);
 						if (jcu != null) {
 							ICompilationUnit cu= (ICompilationUnit)jcu;
 							if (!cu.isWorkingCopy() || (cu= (ICompilationUnit)cu.getOriginalElement()) != null)
