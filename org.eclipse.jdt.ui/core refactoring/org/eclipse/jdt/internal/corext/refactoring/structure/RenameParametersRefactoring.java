@@ -226,10 +226,9 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 	}
 	
 	private boolean mustAnalyzeAst() throws JavaModelException{
-		int flags= fMethod.getFlags();
-		if (Flags.isAbstract(flags))
+		if (Flags.isAbstract(fMethod.getFlags()))
 			return false;
-		else if (Flags.isNative(flags))
+		else if (Flags.isNative(fMethod.getFlags()))
 			return false;
 		else if (fMethod.getDeclaringType().isInterface())
 			return false;
