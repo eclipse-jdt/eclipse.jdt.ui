@@ -249,7 +249,11 @@ public class CodeTemplateBlock {
 		
 		fCodeTemplateTree.selectFirstElement();	
 	}
-	
+
+	public void postSetSelection(Object element) {
+		fCodeTemplateTree.postSetSelection(new StructuredSelection(element));
+	}
+
 	public boolean hasProjectSpecificOptions() {
 		TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
 		for (int i= 0; i < templateData.length; i++) {

@@ -59,6 +59,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -526,6 +527,10 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			Composite overrideSuperComposite= createOmitSuper(composite);
 			overrideSuperComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+			Control linkControl= createLinkControl(composite);
+			if (linkControl != null)
+				linkControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
 			gd= new GridData(GridData.FILL_BOTH);
 			composite.setLayoutData(gd);
 			
@@ -534,5 +539,15 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			return composite;
 		}
 
+		/*
+		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
+		 */
+		protected Control createLinkControl(Composite composite) {
+			final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("GenerateConstructorDialog.link.text.before"), new String[] { JavaUIMessages.getString("GenerateConstructorDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "constructorcomment", JavaUIMessages.getString("GenerateConstructorDialog.link.tooltip")}, JavaUIMessages.getString("GenerateConstructorDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+			data.widthHint= 150; // only expand further if anyone else requires it
+			control.setLayoutData(data);
+			return control;
+		}
 	}
 }

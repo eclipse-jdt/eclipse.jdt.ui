@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -39,10 +40,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -336,5 +338,16 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.OVERRIDE_TREE_SELECTION_DIALOG);
-	}	
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
+	 */
+	protected Control createLinkControl(Composite composite) {
+		final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("OverrideMethodDialog.link.text.before"), new String[] { JavaUIMessages.getString("OverrideMethodDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "overridecomment", JavaUIMessages.getString("OverrideMethodDialog.link.tooltip")}, JavaUIMessages.getString("OverrideMethodDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		data.widthHint= 150; // only expand further if anyone else requires it
+		control.setLayoutData(data);
+		return control;
+	}
 }

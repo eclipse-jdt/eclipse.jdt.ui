@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -109,7 +111,20 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
 	}
 
+	/*
+	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
+	 */
+	public void applyData(Object data) {
+		if (data instanceof String) {
+			final String name= (String) data;
+			final TemplatePersistenceData[] templates= fCodeTemplateConfigurationBlock.fTemplateStore.getTemplateData();
+			TemplatePersistenceData template= null;
+			for (int index= 0; index < templates.length; index++) {
+				template= templates[index];
+				if (template.getTemplate().getName().equals(name)) {
+					fCodeTemplateConfigurationBlock.postSetSelection(template);
+				}
+			}
+		}
+	}
 }
-
-
-

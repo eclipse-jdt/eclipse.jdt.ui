@@ -22,7 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -69,6 +74,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -344,7 +350,25 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return state;
 		}			
 	}
-	
+
+	private static class AddDelegateMethodsDialog extends SourceActionDialog {
+
+		public AddDelegateMethodsDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type, boolean isConstructor) throws JavaModelException {
+			super(parent, labelProvider, contentProvider, editor, type, isConstructor);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
+		 */
+		protected Control createLinkControl(Composite composite) {
+			final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("DelegateMethodDialog.link.text.before"), new String[] { JavaUIMessages.getString("DelegateMethodDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "methodcomment", JavaUIMessages.getString("DelegateMethodDialog.link.tooltip")}, JavaUIMessages.getString("DelegateMethodDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+			data.widthHint= 150; // only expand further if anyone else requires it
+			control.setLayoutData(data);
+			return control;
+		}
+	}
+
 	private static ISelectionStatusValidator createValidator(int entries) {
 		AddDelegateMethodsActionStatusValidator validator= new AddDelegateMethodsActionStatusValidator(entries);
 		return validator;
@@ -355,7 +379,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			AddDelegateMethodsContentProvider provider = new AddDelegateMethodsContentProvider(type);
 			Methods2FieldLabelProvider methodLabel = new Methods2FieldLabelProvider();
 
-			SourceActionDialog dialog = new SourceActionDialog(getShell(), methodLabel, provider, fEditor, type, false);			
+			SourceActionDialog dialog = new AddDelegateMethodsDialog(getShell(), methodLabel, provider, fEditor, type, false);			
 			dialog.setValidator(createValidator(provider.getNumEntries()));
 			Methods2FieldSorter sorter= new Methods2FieldSorter();
 			dialog.setSorter(sorter);

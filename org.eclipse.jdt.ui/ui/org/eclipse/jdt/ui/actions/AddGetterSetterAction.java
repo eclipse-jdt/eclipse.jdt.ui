@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
@@ -38,13 +39,14 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.IRewriteTarget;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -62,18 +64,20 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaElementSorter;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -922,7 +926,18 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			layout.numColumns= 1;
 			
 			return buttonComposite;
-		}		
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
+		 */
+		protected Control createLinkControl(Composite composite) {
+			final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("GetterSetterMethodDialog.link.text.before"), new String[] { JavaUIMessages.getString("GetterSetterMethodDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "gettercomment", JavaUIMessages.getString("GetterSetterMethodDialog.link.tooltip")}, JavaUIMessages.getString("GetterSetterMethodDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+			data.widthHint= 150; // only expand further if anyone else requires it
+			control.setLayoutData(data);
+			return control;
+		}
 	}
 
 	private static class GetterSetterEntry {

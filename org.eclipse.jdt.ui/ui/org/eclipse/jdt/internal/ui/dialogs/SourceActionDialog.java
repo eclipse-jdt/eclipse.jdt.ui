@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -19,6 +20,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -31,13 +33,15 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.StringConverter;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -45,7 +49,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -53,6 +56,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.CHyperLink;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 
@@ -345,6 +349,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		Composite commentComposite= createCommentSelection(composite);
 		commentComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));		
 
+		Control linkControl= createLinkControl(composite);
+		if (linkControl != null)
+			linkControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
 		gd= new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(gd);
 		
@@ -352,7 +360,11 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 					
 		return composite;
 	}				
-	
+
+	protected Control createLinkControl(Composite composite) {
+		return null; // No link as default
+	}
+
 	protected Composite createCommentSelection(Composite composite) {
 		Composite commentComposite = new Composite(composite, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -535,7 +547,57 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 										
 		return selectionComposite;
 	}
-	
+
+	protected Control createLinkText(Composite composite, Object[] tokens) {
+		Composite description= new Composite(composite, SWT.NONE);
+		RowLayout rowLayout= new RowLayout(SWT.HORIZONTAL);
+		rowLayout.justify= false;
+		rowLayout.fill= true;
+		rowLayout.marginBottom= 0;
+		rowLayout.marginHeight= 0;
+		rowLayout.marginLeft= 0;
+		rowLayout.marginRight= 0;
+		rowLayout.marginTop= 0;
+		rowLayout.marginWidth= 0;
+		rowLayout.spacing= 0;
+		description.setLayout(rowLayout);
+		String text= null;
+		String[] strings= null;
+		for (int index= 0; index < tokens.length; index++) {
+			if (tokens[index] instanceof String[]) {
+				strings= (String[]) tokens[index];
+				text= strings[0];
+				final String target= strings[1];
+				final String subTarget= strings[2];
+				final CHyperLink control= new CHyperLink(description, SWT.NONE);
+				control.setText(text);
+				control.addSelectionListener(new SelectionAdapter() {
+
+					public final void widgetSelected(final SelectionEvent event) {
+						PreferencesUtil.createPreferenceDialogOn(target, new String[] { target}, subTarget).open();
+					}
+				});
+				if (strings.length > 2)
+					control.setToolTipText(strings[3]);
+				continue;
+			}
+			text= (String) tokens[index];
+			StringTokenizer tokenizer= new StringTokenizer(text, " ", true); //$NON-NLS-1$
+			boolean space= false;
+			String token= null;
+			while (tokenizer.hasMoreTokens()) {
+				token= tokenizer.nextToken();
+				if (token.trim().length() == 0 && tokenizer.hasMoreTokens()) {
+					space= true;
+					continue;
+				}
+				new Label(description, SWT.NONE).setText((space ? " " : "") + token); //$NON-NLS-1$ //$NON-NLS-2$
+				space= false;
+			}
+		}
+		return description;
+	}
+
 	private Composite addOrderEntryChoices(Composite buttonComposite) {
 		Label enterLabel= new Label(buttonComposite, SWT.NONE);
 		enterLabel.setText(ActionMessages.getString("SourceActionDialog.enterAt_label")); //$NON-NLS-1$
