@@ -80,6 +80,7 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	//$NON-NLS-1$
 	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_MISSING_ENV_VAR= NAME_PREFIX + "envvar_nonexist_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_JAVA_MODEL= NAME_PREFIX + "java_model_obj.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_OBJS_LIBRARY= NAME_PREFIX + "library_obj.gif"; 		//$NON-NLS-1$
 	
@@ -135,6 +136,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_PACKAGE= createManaged(T_OBJ, IMG_OBJS_PACKAGE);
 	public static final ImageDescriptor DESC_OBJS_PACKFRAG_ROOT= createManaged(T_OBJ, IMG_OBJS_PACKFRAG_ROOT);
 	public static final ImageDescriptor DESC_OBJS_MISSING_PACKFRAG_ROOT= createManaged(T_OBJ, IMG_OBJS_MISSING_PACKFRAG_ROOT);
+	public static final ImageDescriptor DESC_OBJS_JAVA_MODEL= createManaged(T_OBJ, IMG_OBJS_JAVA_MODEL);
 
 	public static final ImageDescriptor DESC_OBJS_JAR= createManaged(T_OBJ, IMG_OBJS_JAR);
 	public static final ImageDescriptor DESC_OBJS_MISSING_JAR= createManaged(T_OBJ, IMG_OBJS_MISSING_JAR);

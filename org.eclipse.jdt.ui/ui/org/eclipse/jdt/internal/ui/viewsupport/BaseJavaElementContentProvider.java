@@ -296,7 +296,7 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 		return null;
 	}
 	
-	private static Object[] concatenate(Object[] a1, Object[] a2) {
+	protected static Object[] concatenate(Object[] a1, Object[] a2) {
 		int a1Len= a1.length;
 		int a2Len= a2.length;
 		Object[] res= new Object[a1Len + a2Len];

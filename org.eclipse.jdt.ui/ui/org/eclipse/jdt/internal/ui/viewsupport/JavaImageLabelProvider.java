@@ -204,6 +204,9 @@ public class JavaImageLabelProvider {
 						return DESC_OBJ_PROJECT;
 					}
 					return DESC_OBJ_PROJECT_CLOSED;
+					
+				case IJavaElement.JAVA_MODEL:
+					return JavaPluginImages.DESC_OBJS_JAVA_MODEL;
 			}
 			
 			Assert.isTrue(false, JavaUIMessages.getString("JavaImageLabelprovider.assert.wrongImage")); //$NON-NLS-1$
