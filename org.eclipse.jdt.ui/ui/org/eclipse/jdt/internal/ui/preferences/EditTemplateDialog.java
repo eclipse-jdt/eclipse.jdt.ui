@@ -54,6 +54,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
@@ -130,7 +131,7 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 	}	
 
-	private final Template fTemplate;
+	private Template fTemplate;
 	
 	private Text fNameText;
 	private Text fDescriptionText;
@@ -312,6 +313,10 @@ public class EditTemplateDialog extends StatusDialog {
 			String name= fContextCombo.getText();
 			String contextId= getContextId(name);
 			fTemplateProcessor.setContextType(fContextTypeRegistry.getContextType(contextId));
+			IDocument document= fPatternEditor.getDocument();
+			String prefix= getPrefix();
+			document.set(prefix + getPattern());
+			fPatternEditor.setVisibleRegion(prefix.length(), document.getLength() - prefix.length());
 		} else if (w == fDescriptionText) {
 			// nothing
 		}	
@@ -543,6 +548,7 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 	
 	protected void okPressed() {
+		fTemplate= new Template(fNameText.getText(), fDescriptionText.getText(), getContextId(fContextCombo.getText()), getPattern());
 		super.okPressed();
 	}
 	
@@ -577,14 +583,18 @@ public class EditTemplateDialog extends StatusDialog {
 	 * @since 3.1
 	 */
 	public Template getTemplate() {
-		String prefix= getPrefix();
+		return fTemplate;
+	}
+	
+	private String getPattern() {
 		IDocument doc= fPatternEditor.getDocument();
+		IRegion visible= fPatternEditor.getVisibleRegion();
 		try {
-			String pattern= doc.get(prefix.length(), doc.getLength() - prefix.length());
-			return new Template(fNameText.getText(), fDescriptionText.getText(), getContextId(fContextCombo.getText()), pattern);
+			return doc.get(visible.getOffset(), doc.getLength() - visible.getOffset());
 		} catch (BadLocationException e) {
-			return null;
+			return ""; //$NON-NLS-1$
 		}
 	}
+	
 
 }

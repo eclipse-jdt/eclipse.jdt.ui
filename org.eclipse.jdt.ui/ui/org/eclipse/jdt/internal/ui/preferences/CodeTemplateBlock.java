@@ -372,7 +372,7 @@ public class CodeTemplateBlock {
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true, false, JavaPlugin.getDefault().getCodeTemplateContextRegistry());
 		if (dialog.open() == Window.OK) {
 			// changed
-			data.setTemplate(newTemplate);
+			data.setTemplate(dialog.getTemplate());
 			fCodeTemplateTree.refresh(data);
 			fCodeTemplateTree.selectElements(new StructuredSelection(data));
 		}
