@@ -288,7 +288,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	
     private RefactoringStatus analyzeCompileErrors(String newCuSource, CompilationUnit newCUNode) {
     	RefactoringStatus result= new RefactoringStatus();
-    	IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCuSource, newCUNode, fCompilationUnitNode);
+    	IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
     	for (int i= 0; i < newProblems.length; i++) {
             IProblem problem= newProblems[i];
             if (problem.isError())

@@ -708,7 +708,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		TextChange change= fChangeManager.get(cu);
 		String newCuSource= change.getPreviewContent();
 		CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), cu.getElementName(), cu.getJavaProject());
-		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCuSource, newCUNode, compliationUnitNode);
+		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, compliationUnitNode);
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];

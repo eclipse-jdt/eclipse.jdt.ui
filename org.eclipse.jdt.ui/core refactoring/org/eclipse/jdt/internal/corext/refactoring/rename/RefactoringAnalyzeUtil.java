@@ -127,7 +127,7 @@ public class RefactoringAnalyzeUtil {
 		return ((Block)ASTNodes.getParent(decl, Block.class));
 	}
 	
-	public static IProblem[] getIntroducedCompileProblems(String wcSource, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
+	public static IProblem[] getIntroducedCompileProblems(CompilationUnit newCUNode, CompilationUnit oldCuNode) {
 		Set subResult= new HashSet();				
 		Set oldProblems= getOldProblems(oldCuNode);
 		IProblem[] newProblems= ASTNodes.getProblems(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.PROBLEMS);
