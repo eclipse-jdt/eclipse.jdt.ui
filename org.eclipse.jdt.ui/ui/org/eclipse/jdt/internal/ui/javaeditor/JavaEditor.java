@@ -1224,6 +1224,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		return viewer;
 	}
 	
+	public final ISourceViewer getViewer() {
+		return getSourceViewer();
+	}
+	
 	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
