@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -101,6 +100,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private boolean fReplaceOccurrences= true; //XXX 
 	private TextChangeManager fChangeManager;
 	private Set fBadVarSet;
+	private Map fASTs; //ICompilationUnit -> CompilationUnit
 	
 	public ExtractInterfaceRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(clazz);
@@ -109,6 +109,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		fCodeGenerationSettings= codeGenerationSettings;
 		fExtractedMembers= new IMember[0];
 		fBadVarSet= new HashSet(0);
+		fASTs= new HashMap(0);
 	}
 	
 	/*
@@ -318,7 +319,6 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			if (! getInputClassPackage().equals(cu.getParent()))
 				addInterfaceImport(manager, cu);			
 		}
-		//----
 		pm.done();
 	}
 
@@ -331,7 +331,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			if (!(element instanceof ICompilationUnit))
 				continue;
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
-			CompilationUnit cuNode= AST.parseCompilationUnit(cu, true);
+			CompilationUnit cuNode= getAST(cu);
 			ASTNode[] nodes= getAstNodes(searchResultGroup.getSearchResults(), cuNode);
 			for (int j= 0; j < nodes.length; j++) {
 				mapping.put(nodes[j], cu);
@@ -372,7 +372,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	//XXX
-	private boolean hasIndirectProblems(ASTNode node, Collection nodesToRemove) {
+	private boolean hasIndirectProblems(ASTNode node, Collection nodesToRemove) throws JavaModelException {
 		if (! (node.getParent() instanceof VariableDeclarationStatement))
 			return false;
 
@@ -405,6 +405,23 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 								fBadVarSet.add(tempDeclaration);
 								return true;
 							}	
+						}
+					}
+				} else if (parent instanceof MethodInvocation){
+					MethodInvocation mi= (MethodInvocation)parent;
+					int argumentIndex= mi.arguments().indexOf(varReference);
+					if (argumentIndex != -1 ){
+						IBinding bin= mi.getName().resolveBinding();
+						if (bin instanceof IMethodBinding){
+							IMethod method= Binding2JavaModel.find((IMethodBinding)bin, getInputClass().getJavaProject());
+							ICompilationUnit cu= method.getCompilationUnit();
+							if (cu == null)
+								return true;
+							SingleVariableDeclaration parDecl= (SingleVariableDeclaration)getMethodDeclarationNode(method).parameters().get(argumentIndex);
+							if (fBadVarSet.contains(parDecl)){
+								fBadVarSet.add(tempDeclaration);
+								return true;
+							}
 						}
 					}
 				}
@@ -464,8 +481,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			//XXX code dup
 			if (pp instanceof FieldAccess)
 				return true;
-			if (pp instanceof MethodInvocation && ! isMethodInvocationOk((MethodInvocation)pp))
-				return true;
+			if (pp instanceof MethodInvocation){
+				MethodInvocation mi= (MethodInvocation)pp;
+				if (parentNode == mi.getExpression() && ! isMethodInvocationOk(mi))
+					return true;
+			}	
 		}
 		return false;	
 	}
@@ -480,9 +500,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private static ASTNode getAstNode(SearchResult searchResult, CompilationUnit cuNode) {
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartEnd(searchResult.getStart(), searchResult.getEnd()), true);
-		cuNode.accept(analyzer);
-		ASTNode selectedNode= analyzer.getFirstSelectedNode();
+		ASTNode selectedNode= getAstNode(cuNode, searchResult.getStart(), searchResult.getEnd() - searchResult.getStart());
 		if (selectedNode == null)
 			return null;
 		if (selectedNode.getParent() == null)
@@ -490,6 +508,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return selectedNode;
 	}
 
+	private static ASTNode getAstNode(CompilationUnit cuNode, int start, int length){
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(start, length), true);
+		cuNode.accept(analyzer);
+		return analyzer.getFirstSelectedNode();
+	}
+	
 	private void addInterfaceImport(TextChangeManager manager, ICompilationUnit cu) throws CoreException {
 		ImportEdit importEdit= new ImportEdit(cu, fCodeGenerationSettings);
 		importEdit.addImport(getFullyQualifiedInterfaceName());
@@ -531,19 +555,19 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private static boolean isExtractableField(IField iField) throws JavaModelException {
-		if (! Flags.isPublic(iField.getFlags()))
+		if (! JdtFlags.isPublic(iField))
 			return false;
-		if (! Flags.isStatic(iField.getFlags()))
+		if (! JdtFlags.isStatic(iField))
 			return false;
-		if (! Flags.isFinal(iField.getFlags()))
+		if (! JdtFlags.isFinal(iField))
 			return false;
 		return true;		
 	}
 
 	private static boolean isExtractableMethod(IMethod iMethod) throws JavaModelException {
-		if (! Flags.isPublic(iMethod.getFlags()))
+		if (! JdtFlags.isPublic(iMethod))
 			return false;
-		if (Flags.isStatic(iMethod.getFlags()))
+		if (JdtFlags.isStatic(iMethod))
 			return false;
 		return true;		
 	}
@@ -610,8 +634,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private TypeDeclaration getTypeDeclarationNode() throws JavaModelException {
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(fInputClass.getNameRange().getOffset(), fInputClass.getNameRange().getLength() +1), true);
-		CompilationUnit cuNode= AST.parseCompilationUnit(fInputClass.getCompilationUnit(), false);
-		cuNode.accept(analyzer);
+		getAST(fInputClass.getCompilationUnit()).accept(analyzer);
 		if (analyzer.getFirstSelectedNode() != null){
 			if (analyzer.getFirstSelectedNode().getParent() instanceof TypeDeclaration)
 				return (TypeDeclaration)analyzer.getFirstSelectedNode().getParent();
@@ -687,7 +710,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String createInterfaceMethodDeclarationsSource(IMethod iMethod) throws JavaModelException {
-		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod, false);
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod);
 		if (methodDeclaration == null)
 			return ""; 
 	
@@ -708,11 +731,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			return iMethod.getSourceRange().getLength() - methodDeclaration.getBody().getLength() - preDeclarationSourceLength;
 	}
 
-	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod, boolean resolveBindings) throws JavaModelException{
+	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod) throws JavaModelException{
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(iMethod.getSourceRange().getOffset(), iMethod.getSourceRange().getLength()), true);
-		AST.parseCompilationUnit(fInputClass.getCompilationUnit(), resolveBindings).accept(analyzer);
+		getAST(iMethod.getCompilationUnit()).accept(analyzer);
 		if (! (analyzer.getFirstSelectedNode() instanceof MethodDeclaration))
-			return null; //???
+			return null;
 		return (MethodDeclaration) analyzer.getFirstSelectedNode();
 	}
 	
@@ -751,7 +774,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	//set of ITypeBindings
 	private Set getTypesUsedInDeclaration(IMethod iMethod) throws JavaModelException {
-		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod, true);
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod);
 		if (methodDeclaration == null)
 			return new HashSet(0);
 		Set result= new HashSet();	
@@ -815,8 +838,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			ASTNode parentNode= tempReferences[i].getParent();
 			if (parentNode instanceof FieldAccess)
 				return false;
-			if (parentNode instanceof MethodInvocation && ! isMethodInvocationOk((MethodInvocation)parentNode))
-				return false;
+			if (parentNode instanceof MethodInvocation){
+				MethodInvocation mi= (MethodInvocation)parentNode;
+				if (tempReferences[i] == mi.getExpression() &&  ! isMethodInvocationOk(mi))
+					return false;
+			}	
 		}	
 		return true;
 	}
@@ -829,5 +855,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (method == null || ! Arrays.asList(fExtractedMembers).contains(method))
 			return false;	
 		return true;	
+	}
+	
+	private CompilationUnit getAST(ICompilationUnit cu){
+		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+		if (fASTs.containsKey(wc))
+			return (CompilationUnit)fASTs.get(wc);
+		CompilationUnit cuNode= AST.parseCompilationUnit(wc, true);
+		fASTs.put(wc, cuNode);
+		return cuNode;	
 	}
 }
