@@ -110,7 +110,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * The content outline page of the Java editor. The viewer implements a proprietary
  * update mechanism based on Java model deltas. It does not react on domain changes.
  * It is specified to show the content of ICompilationUnits and IClassFiles.
- * Pulishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outliner"</code>.
+ * Pulishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outline"</code>.
  */
 class JavaOutlinePage extends Page implements IContentOutlinePage {
 
