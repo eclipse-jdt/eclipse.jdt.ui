@@ -60,31 +60,29 @@ public abstract class TextEdit {
 	
 	private TextEdit fParent;
 	private List fChildren;
-	private int fActiveState;
-	
-	/* package */ static final int INACTIVE= 0;
-	/* package */ static final int ACTIVE= 1;
-	/* package */ static final int SAME_AS_PARENT= 2;
 
 	/**
 	 * Create a new text edit. Parent is initialized to <code>
 	 * null<code> and the edit doesn't have any children.
 	 */
 	protected TextEdit() {
-		fActiveState= SAME_AS_PARENT;
 	}
 	
 	/**
 	 * Copy constrcutor
+	 * 
+	 * @param source the source to copy form
 	 */
 	protected TextEdit(TextEdit source) {
-		fActiveState= source.fActiveState;
+		// do nothing. Parent and childs are
+		// populated by the EditCopier class
 	}
 
+	//---- parent and children management -----------------------------
+	
 	/**
-	 * Returns the edit's parent. The method returns
-	 * <code>null</code> if this edit hasn't been
-	 * add to another edit.
+	 * Returns the edit's parent. The method returns <code>null</code> 
+	 * if this edit hasn't been add to another edit.
 	 * 
 	 * @return the edit's parent
 	 */
@@ -92,34 +90,27 @@ public abstract class TextEdit {
 		return fParent;
 	}
 	
-	/* package */ void setParent(TextEdit parent) {
-		if (parent != null)
-			Assert.isTrue(fParent == null);
-		fParent= parent;
-	}
-	
 	/**
-	 * Adds the given text edit <code>edit</code> to this
-	 * edit.
+	 * Adds the given edit <code>child</code> to this edit.
 	 * 
-	 * @param edit the text edit to be added
-	 * @exception TextEditException is thrown if the given
-	 *  edit can't be added to this edit. This happens if the
-	 *  edit overlaps with one of its siblings or if the given
-	 *  edit isn't fully covered by this edit.
+	 * @param child the child edit to add
+	 * @exception <code>EditException<code> is thrown if the child
+	 *  edit can't be added to this edit. This is the case if the child 
+	 *  overlaps with one of its siblings or if the child edit's region
+	 *  isn't fully covered by this edit.
 	 */
-	public void add(TextEdit edit) throws TextEditException {
-		internalAdd(edit);
+	public void add(TextEdit child) throws TextEditException {
+		internalAdd(child);
 	}
 	
 	/**
 	 * Adds all edits in <code>edits</code> to this edit.
 	 * 
-	 * @param edits the text edits to be added
-	 * @exception TextEditException is thrown if one of the given
-	 *  edits can't be added to this edit. This happens if one
-	 *  edit overlaps with one of its siblings or if one edit
-	 *  isn't fully covered by this edit.
+	 * @param edits the text edits to add
+	 * @exception <code>EditException</code> is thrown if one of 
+	 *  the given edits can't be added to this edit.
+	 * 
+	 * @see #add(TextEdit)
 	 */
 	public void addAll(TextEdit[] edits) throws TextEditException {
 		for (int i= 0; i < edits.length; i++) {
@@ -127,16 +118,34 @@ public abstract class TextEdit {
 		}
 	}
 	
+	/**
+	 * Removes the edit specified by the given index from the list
+	 * of children. Returns the child edit that was removed from
+	 * the list of children. The parent of the returned edit is
+	 * set to <code>null</code>.
+	 * 
+	 * @param index the index of the edit to remove
+	 * @return the removed edit
+	 * @exception <code>IndexOutOfBoundsException</code> if the index 
+	 *  is out of range
+	 */
 	public TextEdit remove(int index) {
 		if (fChildren == null)
-			return null;
-		TextEdit result= (TextEdit) fChildren.remove(index);
+			throw new IndexOutOfBoundsException("Index: " + index + " Size: 0");  //$NON-NLS-1$//$NON-NLS-2$
+		TextEdit result= (TextEdit)fChildren.remove(index);
 		result.setParent(null);
 		if (fChildren.isEmpty())
 			fChildren= null;
 		return result;
 	}
 	
+	/**
+	 * Removes all edits from the list of child edits. Returns the 
+	 * removed child edits. The parent of the removed edits is set
+	 * to <code>null</code>.
+	 * 
+	 * @return an array of the removed edits
+	 */
 	public TextEdit[] removeAll() {
 		if (fChildren == null)
 			return new TextEdit[0];
@@ -150,54 +159,23 @@ public abstract class TextEdit {
 		return result;
 	}
 	
-	public boolean isActive() {
-		switch (fActiveState) {
-			case INACTIVE:
-				return false;
-			case ACTIVE:
-				return true;
-			case SAME_AS_PARENT:
-				TextEdit parent= getParent();
-				if (parent == null)
-					return false;
-				return parent.isActive();
-			default:
-				return false;
-		}
-	}
-	
-	public void setActive(boolean active) {
-		if (active)
-			fActiveState= ACTIVE;
-		else
-			fActiveState= INACTIVE;
-	}
-	
-	public void clearActive() {
-		fActiveState= SAME_AS_PARENT;
-	}
-	
-	/**
-	 * Returns the children managed by this text edit collection.
-	 * 
-	 * @return the children of this composite text edit
-	 */
-	public Iterator iterator() {
-		if (fChildren == null)
-			return EMPTY_ITERATOR;
-		return fChildren.iterator();
-	}
-	
 	/**
 	 * Returns <code>true</code> if this edit has children. Otherwise
 	 * <code>false</code> is returned.
 	 * 
-	 * @return <code>true</code> if this edit has children
+	 * @return <code>true</code> if this edit has children; otherwise
+	 *  <code>false</code> is returned
 	 */
 	public boolean hasChildren() {
 		return fChildren != null && ! fChildren.isEmpty();
 	}
 
+	/**
+	 * Returns the edit's children. If the edit doesn't have any 
+	 * children an empty array is returned.
+	 * 
+	 * @return the edit's children
+	 */
 	public TextEdit[] getChildren() {
 		if (fChildren == null)
 			return EMPTY_ARRAY;
@@ -205,32 +183,75 @@ public abstract class TextEdit {
 	}
 	
 	/**
-	 * Returns the <code>TextRange</code> that this text edit is going to
-	 * manipulate. If this method is called before the <code>TextEdit</code>
-	 * has been added to a <code>TextBufferEditor</code> it may return <code>
-	 * null</code> or <code>TextRange.UNDEFINED</code> to indicate this situation.
+	 * Returns an iterator over the child edits.
 	 * 
-	 * @return the <code>TextRange</code>s this <code>TextEdit is going
-	 * 	to manipulate
+	 * @return an iterator over the child edits
+	 */
+	public Iterator iterator() {
+		if (fChildren == null)
+			return EMPTY_ITERATOR;
+		return fChildren.iterator();
+	}
+	
+	//---- equals and hashcode ---------------------------------------------
+
+	/**
+	 * The <code>Edit</code> implementation of this <code>Object</code>
+	 * method uses object identity (==).
+	 * 
+	 * @param obj the other object
+	 * @return <code>true</code> iff <code>this == obj</code>; otherwise
+	 *  <code>false</code> is returned
+	 * 
+	 * @see Object#equals(java.lang.Object)
+	 */
+	public final boolean equals(Object obj) {
+		return this == obj; // equivalent to Object.equals
+	}
+	
+	/**
+	 * The <code>Edit</code> implementation of this <code>Object</code>
+	 * method calls uses <code>Object#hashCode()</code> to compute its
+	 * hash code.
+	 * 
+	 * @return the object's hash code value
+	 * 
+	 * @see Object#hashCode()
+	 */
+	public final int hashCode() {
+		return super.hashCode();
+	}
+	
+	//---- Region management -----------------------------------------------
+
+	/**
+	 * Returns the range that this edit is manipulating. The returned
+	 * <code>IRegion</code> contains the edit's offset and length at
+	 * the point in time when this call is made. Any subsequent changes
+	 * to the edit's offset and length aren't reflected in the returned
+	 * region object.
+	 * 
+	 * @return the manipulated range
 	 */
 	public abstract TextRange getTextRange();
 	
+	//---- Execution -------------------------------------------------------
+	
 	/**
-	 * Connects this text edit to the given <code>TextBuffer</code>. 
-	 * The passed buffer is the same instance passed to the perform 
-	 * method. But the content of the buffer may differ.
+	 * Connects this edit to the given <code>IDocument</code>. The passed 
+	 * document is the same instance passed to the perform method.
 	 * <p>
-	 * Note that this method <b>should only be called</b> by the text
-	 * edit framework and not by normal clients.
+	 * Note that this method <b>should only be called</b> by the edit
+	 * framework and not by normal clients.
 	 *<p>
 	 * This default implementation does nothing. Subclasses may override
 	 * if needed.
 	 *  
-	 * @param buffer the text buffer this text edit will be applied to
-	 * @exception TextEditException if the edit isn't in a valid state
-	 *  and can therefore not be connected to the given buffer.
+	 * @param document the document this edit will be applied to
+	 * @exception EditException if the edit isn't in a valid state
+	 *  and can therefore not be connected to the given document.
 	 */
-	protected void connect(TextBuffer buffer) {
+	protected void connect(TextBuffer document) throws TextEditException {
 		// does nothing
 	}
 	
@@ -253,36 +274,56 @@ public abstract class TextEdit {
 	public void performed() {
 		// does nothing
 	}
+	
+	//---- Copying -------------------------------------------------------------
 		
 	/**
-	 * Creates and returns a copy of this object. The copy method should
-	 * be implemented in a way so that the copy can be added to a different 
-	 * <code>TextBufferEditor</code> without causing any harm to the object 
-	 * from which the copy has been created.
+	 * Creates and returns a copy of this edit. The copy method should be 
+	 * implemented in a way so that the copy can be added to a different 
+	 * <code>EditProcessor</code> without causing any harm to original 
+	 * edit.
+	 * <p>
+	 * Implementers of this method should use the copy constructor <code>
+	 * Edit#Edit(Edit source) to initialize the edit part of the copy.
+	 * <p>
+	 * This method <b>should not be called</b> from outside the framework.
+	 * Please use <code>EditCopier</code> to create a copy of a edit tree.
 	 * 
-	 * @return a copy of this object.
+	 * @return a copy of this edit.
+	 * @see EditCopier
 	 */
 	protected abstract TextEdit copy0();
 	
+	public abstract boolean matches(Object other);
+	
+	public boolean matchesSubtree(Object obj) {
+		if (!matches(obj))
+			return false;
+		TextEdit other= (TextEdit)obj;
+		int size= fChildren != null ? fChildren.size() : 0;
+		int otherSize= other.fChildren != null ? other.fChildren.size() : 0;
+		if (size != otherSize)
+			return false;
+		if (size == 0 && otherSize == 0)
+			return true;
+		for (Iterator iter1= fChildren.iterator(), iter2= other.fChildren.iterator(); iter1.hasNext();) {
+			TextEdit thisChild= (TextEdit)iter1.next();
+			TextEdit otherChild= (TextEdit)iter2.next();
+			if (other != otherChild.getParent())
+				return false;
+			if (! thisChild.matchesSubtree(otherChild))
+				return false;
+		}
+		return true;
+	}
+	
+	protected TextEdit createPlaceholder() {
+		TextRange range= getTextRange();
+		return new MultiTextEdit(range.getOffset(), range.getLength());
+	}
+	
 	protected void postProcessCopy(TextEditCopier copier) {
 	}
-	
-	/* package */ TextEdit copy(TextEditCopier copier) {
-		TextEdit result= copy0();
-		copier.addCopy(this, result);
-		if (fChildren != null) {
-			List newChildren= new ArrayList(fChildren.size());
-			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
-				TextEdit element= (TextEdit)iter.next();
-				TextEdit copy= element.copy(copier);
-				copy.setParent(result);
-				newChildren.add(copy);
-			}
-			result.internalSetChildren(newChildren);
-		}
-		return result;
-	}
-	
 	
 	/**
 	 * Returns the element modified by this text edit. The method
@@ -388,6 +429,13 @@ public abstract class TextEdit {
 	/* package */ void aboutToBeAdded(TextEdit parent) {
 	}
 	
+	
+	/* package */ void setParent(TextEdit parent) {
+		if (parent != null)
+			Assert.isTrue(fParent == null);
+		fParent= parent;
+	}
+			
 	/* package */ List internalGetChildren() {
 		return fChildren;
 	}
@@ -470,13 +518,11 @@ public abstract class TextEdit {
 				((TextEdit)children.get(i)).execute(buffer, updater, new SubProgressMonitor(pm, 1));
 			}
 		}
-		if (isActive()) {
-			try {
-				updater.setActiveNode(this);
-				perform(buffer);
-			} finally {
-				updater.setActiveNode(null);
-			}
+		try {
+			updater.setActiveNode(this);
+			perform(buffer);
+		} finally {
+			updater.setActiveNode(null);
 		}
 		pm.worked(1);
 	}
@@ -505,6 +551,6 @@ public abstract class TextEdit {
 			edit.childExecuted(delta);
 			edit= edit.getParent();
 		}
-	}	
+	}
 }
 

@@ -128,6 +128,22 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		super.adjustOffset(delta);
 	}
 	
+	/* (non-Javadoc)
+	 * @see TextEdit#matches(java.lang.Object)
+	 */
+	public boolean matches(Object obj) {
+		if (!(obj instanceof MoveSourceEdit))
+			return false;
+		MoveSourceEdit other= (MoveSourceEdit)obj;
+		if (!fRange.equals(other.fRange))
+			return false;
+		if (fTarget != null)
+			return fTarget.matches(other.fTarget);
+		if (other.fTarget != null)
+			return false;
+		return true;
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
@@ -206,7 +222,7 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	
 	//---- content management ------------------------------------------
 	
-	private String getContent(TextBuffer buffer) {
+	private String getContent(TextBuffer buffer) throws CoreException {
 		TextRange range= getTextRange();
 		String result= buffer.getContent(range.getOffset(), range.getLength());
 		if (fModifier != null) {
@@ -215,13 +231,8 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 			TextEdit newEdit= createEdit(editMap);
 			fModifier.addEdits(result, newEdit);
 			TextBufferEditor editor= new TextBufferEditor(newBuffer);
-			try {
-				editor.add(newEdit);
-				editor.performEdits(new NullProgressMonitor());
-			} catch (CoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			editor.add(newEdit);
+			editor.performEdits(new NullProgressMonitor());
 			restorePositions(editMap, range.getOffset());
 			result= newBuffer.getContent();
 		}

@@ -207,7 +207,7 @@ public class TextBufferTest extends TestCase {
 		root.add(e2);
 		List org= flatten(root);
 		TextEditCopier copier= new TextEditCopier(root);
-		List copy= flatten(copier.copy());
+		List copy= flatten(copier.perform());
 		compare(copier, org, copy);
 	}
 	
@@ -223,7 +223,7 @@ public class TextBufferTest extends TestCase {
 		root.add(t2);
 		List org= flatten(root);
 		TextEditCopier copier= new TextEditCopier(root);
-		List copy= flatten(copier.copy());
+		List copy= flatten(copier.perform());
 		compare(copier, org, copy);
 	}
 		

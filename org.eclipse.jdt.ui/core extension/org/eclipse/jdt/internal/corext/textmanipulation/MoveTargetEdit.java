@@ -75,6 +75,22 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		return fSource.getContent();
 	}	
 
+	/* (non-Javadoc)
+	 * @see TextEdit#matches(java.lang.Object)
+	 */
+	public boolean matches(Object obj) {
+		if (!(obj instanceof MoveTargetEdit))
+			return false;
+		MoveTargetEdit other= (MoveTargetEdit)obj;
+		if (!fRange.equals(other.fRange))
+			return false;
+		if (fSource != null)
+			return fSource.matches(other.fSource);
+		if (other.fSource != null)
+			return false;
+		return true;
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#copy0
 	 */	

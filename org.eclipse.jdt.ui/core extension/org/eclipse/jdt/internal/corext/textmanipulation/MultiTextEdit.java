@@ -66,6 +66,21 @@ public final class MultiTextEdit extends TextEdit {
 		return getChildrenTextRange();
 	}
 
+	/* (non-Javadoc)
+	 * @see TextEdit#matches(java.lang.Object)
+	 */
+	public boolean matches(Object obj) {
+		if (!(obj instanceof MultiTextEdit))
+			return false;
+		Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement matches"); //$NON-NLS-1$
+		MultiTextEdit other= (MultiTextEdit)obj;
+		if (fRange != null)
+			return fRange.equals(other.fRange);
+		if (other.fRange != null)
+			return false;
+		return true;
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
@@ -81,6 +96,15 @@ public final class MultiTextEdit extends TextEdit {
 		return new MultiTextEdit(this);
 	}
 
+	/* non Java-doc
+	 * @see TextEdit#createPlaceholder
+	 */	
+	protected TextEdit createPlaceholder() {
+		if (fRange == null)
+			return new MultiTextEdit();
+		return new MultiTextEdit(fRange.getOffset(), fRange.getLength());
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#adjustOffset
 	 */	

@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 /* package */ abstract class AbstractTransferEdit extends TextEdit {
 
-	private TextRange fRange;
+	/* package */ TextRange fRange;
 	
 	/* package */ int fMode;
 	/* package */ final static int UNDEFINED= 0;

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,7 +24,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
@@ -87,7 +87,7 @@ public abstract class TextChange extends AbstractTextChange {
 			return true;
 		}
 	}
-
+	
 	private List fTextEditChanges;
 	private TextEditCopier fCopier;
 	private TextEdit fEdit;
@@ -281,7 +281,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 */
 	public TextBuffer getPreviewTextBuffer() throws JavaModelException {
 		try {
-			TextBufferEditor editor= new TextBufferEditor(createTextBuffer());
+			LocalTextEditProcessor editor= new LocalTextEditProcessor(createTextBuffer());
 			addTextEdits(editor);
 			editor.performEdits(new NullProgressMonitor());
 			return editor.getTextBuffer();
@@ -350,7 +350,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 */	
 	public String getPreviewContent(EditChange[] changes, TextRange range) throws CoreException {
 		TextBuffer buffer= createTextBuffer();
-		TextBufferEditor editor= new TextBufferEditor(buffer);
+		LocalTextEditProcessor editor= new LocalTextEditProcessor(buffer);
 		addTextEdits(editor, changes);
 		int oldLength= buffer.getLength();
 		editor.performEdits(new NullProgressMonitor());
@@ -446,52 +446,65 @@ public abstract class TextChange extends AbstractTextChange {
 	/* non Java-doc
 	 * @see AbstractTextChange#addTextEdits
 	 */
-	protected void addTextEdits(TextBufferEditor editor) throws CoreException {
+	protected void addTextEdits(LocalTextEditProcessor editor) throws CoreException {
 		if (fEdit == null)
 			return;
-		fCopier= new TextEditCopier(fEdit);
-		TextEdit copiedEdit= fCopier.copy();
+		List excludes= new ArrayList(0);
 		for (Iterator iter= fTextEditChanges.iterator(); iter.hasNext(); ) {
 			EditChange edit= (EditChange)iter.next();
 			if (!edit.isActive()) {
-				TextEdit[] edits= edit.getGroupDescription().getTextEdits();
-				for (int i= 0; i < edits.length; i++) {
-					TextEdit textEdit= fCopier.getCopy(edits[i]);
-					if (textEdit != null)
-						textEdit.setActive(false);
-				}
+				excludes.addAll(Arrays.asList(edit.getGroupDescription().getTextEdits()));
 			}
 		}
-		editor.add(copiedEdit);		
+		fCopier= new TextEditCopier(fEdit);
+		TextEdit copiedEdit= fCopier.perform();
+		if (copiedEdit != null) {
+			editor.add(copiedEdit);
+			editor.setExcludes(mapEdits(
+				(TextEdit[])excludes.toArray(new TextEdit[excludes.size()]),
+				fCopier));	
+		}
 		if (!fKeepExecutedTextEdits)
 			fCopier= null;
 	}
 	
-	protected void addTextEdits(TextBufferEditor editor, EditChange[] changes) throws CoreException {
+	protected void addTextEdits(LocalTextEditProcessor editor, EditChange[] changes) throws CoreException {
 		if (fEdit == null)
 			return;
-		fCopier= new TextEditCopier(fEdit);
-		TextEdit copiedEdit= fCopier.copy();
-		copiedEdit.setActive(false);
+		List includes= new ArrayList(0);
 		for (int c= 0; c < changes.length; c++) {
 			EditChange change= changes[c];
 			Assert.isTrue(change.getTextChange() == this);
-			boolean active= change.isActive();
-			TextEdit[] edits= change.getGroupDescription().getTextEdits();
-			for (int e= 0; e < edits.length; e++) {
-				fCopier.getCopy(edits[e]).setActive(active);
+			if (change.isActive()) {
+				includes.addAll(Arrays.asList(change.getGroupDescription().getTextEdits()));
 			}
 		}
-		editor.add(copiedEdit);		
+		fCopier= new TextEditCopier(fEdit);
+		TextEdit copiedEdit= fCopier.perform();
+		if (copiedEdit != null) {
+			editor.add(copiedEdit);
+			editor.setIncludes(mapEdits(
+				(TextEdit[])includes.toArray(new TextEdit[includes.size()]),
+				fCopier));
+		}		
 		if (!fKeepExecutedTextEdits)
 			fCopier= null;
+	}
+	
+	private TextEdit[] mapEdits(TextEdit[] edits, TextEditCopier copier) {
+		if (edits == null)
+			return null;
+		for (int i= 0; i < edits.length; i++) {
+			edits[i]= copier.getCopy(edits[i]);
+		}
+		return edits;
 	}
 	
 	private String getContent(EditChange change, int surroundingLines, boolean preview) throws CoreException {
 		Assert.isTrue(change.getTextChange() == this);
 		TextBuffer buffer= createTextBuffer();
 		if (preview) {
-			TextBufferEditor editor= new TextBufferEditor(buffer);
+			LocalTextEditProcessor editor= new LocalTextEditProcessor(buffer);
 			addTextEdits(editor, new EditChange[] { change });
 			editor.performEdits(new NullProgressMonitor());
 		}

@@ -55,31 +55,17 @@ public class SimpleTextEdit extends TextEdit {
 	public String getText() {
 		return fText;
 	}
+	
+	/* (non-Javadoc)
+	 * @see TextEdit#matches(java.lang.Object)
+	 */
+	public boolean matches(Object obj) {
+		if (!(obj instanceof SimpleTextEdit))
+			return false;
+		SimpleTextEdit other= (SimpleTextEdit)obj;
+		return fText.equals(other.getText()) && fRange.equals(other.getTextRange());
+	}
 		
-	/**
-	 * Sets the text edit's text.<p>
-	 * This method should only be called from within the <code>connect</code> method.
-	 * 
-	 * @param text the text edit's text
-	 */	
-	protected final void setText(String text) {
-		Assert.isTrue(text != null);
-		fText= text;
-	}
-	
-	/**
-	 * Sets the text edit's range.
-	 * <p>
-	 * This method should only be called from within the <code>
-	 * connect</code> method.
-	 * 
-	 * @param range the text edit's range.
-	 */	
-	protected final void setTextRange(TextRange range) {
-		Assert.isTrue(range != null);
-		fRange= range;
-	}
-	
 	/* non Java-doc
 	 * @see TextEdit#getTextRange
 	 */

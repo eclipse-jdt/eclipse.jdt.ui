@@ -58,6 +58,22 @@ public final class CopyRangeMarker extends TextEdit {
 		return fRange;
 	}
 
+	/* (non-Javadoc)
+	 * @see TextEdit#matches(java.lang.Object)
+	 */
+	public boolean matches(Object obj) {
+		if (!(obj instanceof CopyRangeMarker))
+			return false;
+		CopyRangeMarker other= (CopyRangeMarker)obj;
+		if (!fRange.equals(other.getTextRange()))
+			return false;
+		if (fText != null)
+			return fText.equals(other.fText);
+		if (other.fText != null)
+			return false;
+		return true;
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	

@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 
 public abstract class AbstractTextChange extends Change {
@@ -32,8 +33,47 @@ public abstract class AbstractTextChange extends Change {
 	private IChange fUndoChange;
 
 	protected final static int ORIGINAL_CHANGE=		0;
-	protected final static int UNDO_CHANGE=				1;
-	protected final static int REDO_CHANGE=				2;
+	protected final static int UNDO_CHANGE=			1;
+	protected final static int REDO_CHANGE=			2;
+
+	protected static class LocalTextEditProcessor extends TextBufferEditor {
+		public static final int EXCLUDE= 1;
+		public static final int INCLUDE= 2;
+
+		private TextEdit[] fExcludes;
+		private TextEdit[] fIncludes;
+		
+		public LocalTextEditProcessor(TextBuffer buffer) {
+			super(buffer);
+		}
+		public void setIncludes(TextEdit[] includes) {
+			Assert.isNotNull(includes);
+			Assert.isTrue(fExcludes == null);
+			fIncludes= includes;
+		}
+		public void setExcludes(TextEdit[] excludes) {
+			Assert.isNotNull(excludes);
+			Assert.isTrue(fIncludes == null);
+			fExcludes= excludes;
+		}
+		protected boolean considerEdit(TextEdit edit) {
+			if (fExcludes != null) {
+				for (int i= 0; i < fExcludes.length; i++) {
+					if (edit.equals(fExcludes[i]))
+						return false;
+				}
+				return true;
+			}
+			if (fIncludes != null) {
+				for (int i= 0; i < fIncludes.length; i++) {
+					if (edit.equals(fIncludes[i]))
+						return true;
+				}
+				return false;
+			}
+			return true;
+		}
+	}
 
 	/**
 	 * Creates a new <code>TextChange</code> with the given name.
@@ -82,7 +122,7 @@ public abstract class AbstractTextChange extends Change {
 	 * @param copy if <code>true</code> the edits are copied before adding.
 	 * 	Otherwise the original edits are added.
 	 */
-	protected abstract void addTextEdits(TextBufferEditor editor) throws CoreException;
+	protected abstract void addTextEdits(LocalTextEditProcessor editor) throws CoreException;
 	
 	/**
 	 * Creates a <code>IChange</code> that can undo this change.
@@ -134,10 +174,10 @@ public abstract class AbstractTextChange extends Change {
 			fUndoChange= new NullChange();
 			return;
 		}
-		TextBufferEditor editor= null;
+		LocalTextEditProcessor editor= null;
 		try {
 			fUndoChange= null;
-			editor= new TextBufferEditor(acquireTextBuffer());
+			editor= new LocalTextEditProcessor(acquireTextBuffer());
 			addTextEdits(editor);
 			fUndoChange= createReverseChange(editor.performEdits(pm), getReverseKind());
 		} catch (Exception e) {

@@ -40,6 +40,26 @@ public final class CopyTargetEdit extends AbstractTransferEdit {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see TextEdit#matches(java.lang.Object)
+	 */
+	public boolean matches(Object obj) {
+		if (!(obj instanceof CopyTargetEdit))
+			return false;
+		CopyTargetEdit other= (CopyTargetEdit)obj;
+		if (!internalMatches(other))
+			return false;
+		if (fSource != null)
+			return fSource.internalMatches(other.fSource);
+		if (other.fSource != null)
+			return false;
+		return true;
+	}
+	
+	/* package */ boolean internalMatches(CopyTargetEdit other) {
+		return fRange.equals(other.fRange);
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	

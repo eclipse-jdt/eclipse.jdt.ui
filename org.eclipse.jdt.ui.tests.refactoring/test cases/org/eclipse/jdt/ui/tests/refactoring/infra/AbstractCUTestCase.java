@@ -20,7 +20,7 @@ import junit.framework.TestCase;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 public abstract class AbstractCUTestCase extends TestCase {
 
@@ -89,14 +89,11 @@ public abstract class AbstractCUTestCase extends TestCase {
 	}
 	
 	public static void compareSource(String refactored, String proofed, boolean skipPackageDeclaration) {
-		int index= skipPackageDeclaration ? index = refactored.indexOf(';'): 0;
-		String[] refactoredCode= Strings.convertIntoLines(refactored.substring(index));
-		index= proofed.indexOf(';');
-		String[] proofedCode= Strings.convertIntoLines(proofed.substring(index));
-		for (int i= 0; i < proofedCode.length; i++) {
-			assertEquals("Line " + (i + 1) + " different: ", proofedCode[i], refactoredCode[i]);
-		}
-		assertEquals("Length difference", proofedCode.length, refactoredCode.length);
+		int index= skipPackageDeclaration ? refactored.indexOf(';'): 0;
+		refactored= refactored.substring(index);
+		index= skipPackageDeclaration ? proofed.indexOf(';') : 0;
+		proofed= proofed.substring(index);
+		RefactoringTest.assertEqualLines(proofed, refactored);
 	}
 			
 }

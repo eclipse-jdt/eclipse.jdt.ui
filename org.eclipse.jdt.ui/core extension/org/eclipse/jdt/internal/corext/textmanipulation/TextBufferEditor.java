@@ -78,7 +78,6 @@ public class TextBufferEditor {
 		executeConnect(edit, fBuffer);
 		if (fRoot == null) {
 			fRoot= new MultiTextEdit(0, fBuffer.getLength());
-			fRoot.setActive(true);
 		}
 		fRoot.add(edit);
 		fCheckStatus= null;
@@ -190,7 +189,7 @@ public class TextBufferEditor {
 			pm.beginTask("", 5); //$NON-NLS-1$
 			updater= Updater.createDoUpdater();
 			fBuffer.registerUpdater(updater);
-			fRoot.execute(fBuffer, updater, new SubProgressMonitor(pm, 4));
+			execute(fRoot, updater, new SubProgressMonitor(pm, 4));
 			List executed= updater.getProcessedEdits();
 			SubProgressMonitor sm= new SubProgressMonitor(pm, 1);
 			sm.beginTask("", executed.size()); //$NON-NLS-1$
@@ -203,6 +202,27 @@ public class TextBufferEditor {
 			if (updater != null)
 				fBuffer.unregisterUpdater(updater);
 		}
+	}
+	
+	private void execute(TextEdit edit, Updater updater, IProgressMonitor pm) throws CoreException {
+		TextEdit[] children= edit.getChildren();
+		pm.beginTask("", children.length + 1); //$NON-NLS-1$
+		for (int i= children.length - 1; i >= 0; i--) {
+			execute(children[i], updater, new SubProgressMonitor(pm, 1));
+		}
+		if (considerEdit(edit)) {
+			try {
+				updater.setActiveNode(edit);
+				edit.perform(fBuffer);
+			} finally {
+				updater.setActiveNode(null);
+			}
+		}
+		pm.worked(1);
+	}
+	
+	protected boolean considerEdit(TextEdit edit) {
+		return true;
 	}
 	
 	private UndoMemento executeUndo(IProgressMonitor pm) throws CoreException {

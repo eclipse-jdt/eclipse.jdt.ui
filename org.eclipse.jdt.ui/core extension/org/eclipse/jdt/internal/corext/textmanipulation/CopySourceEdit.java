@@ -59,6 +59,26 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 		return fModifier;
 	}
 	
+	/* (non-Javadoc)
+	 * @see TextEdit#matches(java.lang.Object)
+	 */
+	public boolean matches(Object obj) {
+		if (!(obj instanceof CopySourceEdit))
+			return false;
+		CopySourceEdit other= (CopySourceEdit)obj;
+		if (!internalMatches(other))
+			return false;
+		if (fTarget != null)
+			return fTarget.internalMatches(other.fTarget);
+		if (other.fTarget != null)
+			return false;
+		return true;
+	}
+	
+	/* package */ boolean internalMatches(CopySourceEdit other) {
+		return fRange.equals(other.fRange);
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
@@ -94,7 +114,7 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 		}
 	}
 
-	private String getContent(TextBuffer buffer) {
+	private String getContent(TextBuffer buffer) throws CoreException {
 		TextRange range= getTextRange();
 		String result= buffer.getContent(range.getOffset(), range.getLength());
 		if (fModifier != null) {
@@ -102,13 +122,8 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 			TextEdit newEdit= new MultiTextEdit(0, range.getLength());
 			fModifier.addEdits(result, newEdit);
 			TextBufferEditor editor= new TextBufferEditor(newBuffer);
-			try {
-				editor.add(newEdit);
-				editor.performEdits(new NullProgressMonitor());
-			} catch (CoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			editor.add(newEdit);
+			editor.performEdits(new NullProgressMonitor());
 			result= newBuffer.getContent();
 		}
 		return result;

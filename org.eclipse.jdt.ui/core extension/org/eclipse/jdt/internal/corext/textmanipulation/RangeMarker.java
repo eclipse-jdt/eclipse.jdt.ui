@@ -55,6 +55,16 @@ public final class RangeMarker extends TextEdit {
 		return fRange;
 	}
 
+	/* (non-Javadoc)
+	 * @see TextEdit#matches(java.lang.Object)
+	 */
+	public boolean matches(Object obj) {
+		if (!(obj instanceof RangeMarker))
+			return false;
+		RangeMarker other= (RangeMarker)obj;
+		return fRange.equals(other.getTextRange());
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	

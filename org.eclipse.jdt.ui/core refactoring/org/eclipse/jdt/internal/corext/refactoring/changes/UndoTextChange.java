@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 
 abstract class UndoTextChange extends AbstractTextChange {
@@ -24,7 +23,7 @@ abstract class UndoTextChange extends AbstractTextChange {
 		fUndos= undos;
 	}
 	
-	protected void addTextEdits(TextBufferEditor editor) throws CoreException {
+	protected void addTextEdits(LocalTextEditProcessor editor) throws CoreException {
 		editor.add(fUndos);
 	}	
 }
