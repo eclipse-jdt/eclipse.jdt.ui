@@ -103,7 +103,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 	 */
 	public void check(IDocument document, IRegion[] regions, SpellingContext context, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		IPreferenceStore preferences= PreferenceConstants.getPreferenceStore();
-		if (preferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_CHECK_SPELLING) && collector != null) {
+		if (collector != null) {
 			Locale locale= getLocale(preferences);
 			ISpellChecker checker= org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine.getInstance().createSpellChecker(locale, preferences);
 			if (checker != null)

@@ -38,8 +38,6 @@ import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
-
 /**
  * Reconcile strategy for spell checking comments.
  * 
@@ -262,7 +260,7 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
 	public void reconcile(IRegion region) {
-		if (fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_CHECK_SPELLING) && fRequester != null) {
+		if (fRequester != null) {
 			SpellingContext context= new SpellingContext();
 			context.setContentType(getContentType());
 			EditorsUI.getSpellingService().check(fDocument, context, fCollector, fProgressMonitor);
