@@ -93,13 +93,15 @@
 
 return ${name};</template>
 <template name="toarray" description="%Templates.toarray" id="org.eclipse.jdt.ui.templates.toarray" context="java" enabled="true">(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()])</template>
-<template name="sysout" description="%Templates.sysout" id="org.eclipse.jdt.ui.templates.sysout" context="java" enabled="true">System.out.println(${word_selection}${cursor});</template>
-<template name="syserr" description="%Templates.syserr" id="org.eclipse.jdt.ui.templates.syserr" context="java" enabled="true">System.err.println(${word_selection}${cursor});</template>
-<template name="&lt;code&gt;" description="%Templates.code_tag" id="org.eclipse.jdt.ui.templates.code_tag" context="javadoc" enabled="true">&lt;code&gt;${word_selection}${cursor}&lt;/code&gt;</template>
+<template name="sysout" description="%Templates.sysout" id="org.eclipse.jdt.ui.templates.sysout" context="java" enabled="true">System.out.println(${word_selection}${});${cursor}</template>
+<template name="syserr" description="%Templates.syserr" id="org.eclipse.jdt.ui.templates.syserr" context="java" enabled="true">System.err.println(${word_selection}${});${cursor}</template>
+<template name="&lt;code&gt;" description="%Templates.code_tag" id="org.eclipse.jdt.ui.templates.code_tag" context="javadoc" enabled="true">&lt;code&gt;${word_selection}${}&lt;/code&gt;${cursor}</template>
 <template name="&lt;code&gt;" description="%Templates.code_tag_null" id="org.eclipse.jdt.ui.templates.code_tag_null" context="javadoc" enabled="true">&lt;code&gt;null&lt;/code&gt;</template>
-<template name="&lt;pre&gt;" description="%Templates.pre_tag" id="org.eclipse.jdt.ui.templates.pre_tag" context="javadoc" enabled="true">&lt;pre&gt;${word_selection}${cursor}&lt;/pre&gt;</template>
-<template name="&lt;b&gt;" description="%Templates.b_tag" id="org.eclipse.jdt.ui.templates.b_tag" context="javadoc" enabled="true">&lt;b&gt;${word_selection}${cursor}&lt;/b&gt;</template>
-<template name="&lt;i&gt;" description="%Templates.i_tag" id="org.eclipse.jdt.ui.templates.i_tag" context="javadoc" enabled="true">&lt;i&gt;${word_selection}${cursor}&lt;/i&gt;</template>
+<template name="&lt;code&gt;" description="%Templates.code_tag_true" id="org.eclipse.jdt.ui.templates.code_tag_true" context="javadoc" enabled="true">&lt;code&gt;true&lt;/code&gt;</template>
+<template name="&lt;code&gt;" description="%Templates.code_tag_false" id="org.eclipse.jdt.ui.templates.code_tag_false" context="javadoc" enabled="true">&lt;code&gt;false&lt;/code&gt;</template>
+<template name="&lt;pre&gt;" description="%Templates.pre_tag" id="org.eclipse.jdt.ui.templates.pre_tag" context="javadoc" enabled="true">&lt;pre&gt;${word_selection}${}&lt;/pre&gt;${cursor}</template>
+<template name="&lt;b&gt;" description="%Templates.b_tag" id="org.eclipse.jdt.ui.templates.b_tag" context="javadoc" enabled="true">&lt;b&gt;${word_selection}${}&lt;/b&gt;${cursor}</template>
+<template name="&lt;i&gt;" description="%Templates.i_tag" id="org.eclipse.jdt.ui.templates.i_tag" context="javadoc" enabled="true">&lt;i&gt;${word_selection}${}&lt;/i&gt;${cursor}</template>
 <template name="@author" description="%Templates.author" id="org.eclipse.jdt.ui.templates.author" context="javadoc" enabled="true">@author ${user}</template>
 <template name="while" description="%Templates.while_condition" id="org.eclipse.jdt.ui.templates.while_condition" context="java" enabled="true">while (${condition}) {
 	${line_selection}${cursor}
