@@ -18,7 +18,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 				updateStatus(status);
 			}
 		};
-		fVariableBlock= new VariableBlock(listener, false, null);		setDescription("A classpath variable allows to express indirect references on a classpath to other projects or libraries.");	}
+		fVariableBlock= new VariableBlock(listener, false, null);		setDescription("A classpath variable can be added to a project's class path. It can be used to define the location of a JAR file that isn't part of the workspace. The reserved class path variables JRE_LIB, JRE_SRC, JRE_SRCROOT are set internally depending on the JRE setting.");	}
 
 	/**
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
