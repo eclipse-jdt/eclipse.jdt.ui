@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -98,9 +99,11 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		SearchResult[] results= refs.getSearchResults();
 		for (int j= 0; j < results.length; j++){
 			SearchResult searchResult= results[j];
-			String oldName= wc.findPrimaryType().getElementName();
-			int offset= searchResult.getEnd() - oldName.length();
-			manager.get(wc).addTextEdit(name, new ReplaceEdit(offset, oldName.length(), newName));
+			if (searchResult.getAccuracy() == IJavaSearchResultCollector.POTENTIAL_MATCH)
+				continue;
+			int offset= searchResult.getStart();
+			int length= searchResult.getEnd() - searchResult.getStart();
+			manager.get(wc).addTextEdit(name, new ReplaceEdit(offset, length, newName));
 		}
 		return manager;
 	}
