@@ -1,6 +1,6 @@
 package p;
 class A{
 	void m(){
-		int i= /*[*/1 + 1/*]*/;
+		int i= 1 + 1;
 	}
 }

@@ -1,30 +1,27 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions.structureselection;
 
+import java.util.Collection;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.Block;
-import org.eclipse.jdt.internal.compiler.ast.Statement;
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
-import org.eclipse.jdt.internal.corext.refactoring.util.AST;
-import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.actions.TextSelectionAction;
 
-/**
- * Action used to structurally select a fragment of source code.
- * Run, this action will select the parent of the currently selected syntax tree node, or the node itself if it has been only
- * partially covered by the selection. 
- */
 public class StructureSelectionAction extends TextSelectionAction {
-	
+
 	protected StructureSelectionAction(String text) {
 		super(text);
 		setText("&Enclosing Element@Alt+ARROW_UP");
@@ -33,7 +30,7 @@ public class StructureSelectionAction extends TextSelectionAction {
 	public StructureSelectionAction() {
 		this("Structure Select");
 	}
-	
+
 	/* (non-JavaDoc)
 	 * Method declared in IAction.
 	 */
@@ -46,11 +43,10 @@ public class StructureSelectionAction extends TextSelectionAction {
 		try{
 			if (! cu.isStructureKnown())
 				return oldSourceRange;
-			AST ast= new AST(cu);
-			if (ast.hasProblems())
-				return oldSourceRange;	
-			StructureSelectionAnalyzer selAnalyzer= new StructureSelectionAnalyzer(cu.getBuffer(), oldSourceRange.getOffset(), oldSourceRange.getLength());
-			ast.accept(selAnalyzer);
+			CompilationUnit root= AST.parseCompilationUnit(cu, true);
+			Selection selection= Selection.createFromStartLength(oldSourceRange.getOffset(), oldSourceRange.getLength());
+			StructureSelectionAnalyzer selAnalyzer= new StructureSelectionAnalyzer(selection, true);
+			root.accept(selAnalyzer);
 			return internalGetNewSelectionRange(oldSourceRange, cu, selAnalyzer);
 	 	}	catch (JavaModelException e){
 	 		JavaPlugin.log(e); //dialog would be too heavy here
@@ -70,21 +66,28 @@ public class StructureSelectionAction extends TextSelectionAction {
 	 * Subclasses may implement different behavior and/or use this implementation as a fallback for cases they do not handle..
 	 */
 	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, StructureSelectionAnalyzer selAnalyzer) throws JavaModelException{
-		AstNode[] parents= selAnalyzer.getParents();
-		if (parents == null || parents.length == 0){
+		ASTNode first= selAnalyzer.getFirstSelectedNode();
+		if (first == null) {
 			if (selAnalyzer.getLastCoveringNode() != null)
 				return getSelectedNodeSourceRange(cu, selAnalyzer.getLastCoveringNode());
 			else
-				return oldSourceRange;
-		} 	else
-				return getSelectedNodeSourceRange(cu, parents[parents.length - 1]);
+				return oldSourceRange;		
+		}	
+		ASTNode parent= first.getParent();
+		if (parent == null){
+			if (selAnalyzer.getLastCoveringNode() != null)
+				return getSelectedNodeSourceRange(cu, selAnalyzer.getLastCoveringNode());
+			else
+				return oldSourceRange;		
+		}	
+		return getSelectedNodeSourceRange(cu, parent);
 	}
 	
 	//-- private helper methods
 	
-	private static ISourceRange getSelectedNodeSourceRange(ICompilationUnit cu, AstNode nodeToSelect) throws JavaModelException {
-		int offset= ASTUtil.getSourceStart(nodeToSelect);
-		int end= Math.min(cu.getSourceRange().getLength(), ASTUtil.getSourceEnd(nodeToSelect));
+	private static ISourceRange getSelectedNodeSourceRange(ICompilationUnit cu, ASTNode nodeToSelect) throws JavaModelException {
+		int offset= nodeToSelect.getStartPosition();
+		int end= Math.min(cu.getSourceRange().getLength(), nodeToSelect.getStartPosition() + nodeToSelect.getLength() - 1);
 		return createSourceRange(offset, end);
 	}
 	
@@ -104,12 +107,22 @@ public class StructureSelectionAction extends TextSelectionAction {
 		return new SourceRange(Math.max(0, offset), length);
 	}
 	
-	static Statement[] getStatements(AstNode node){
+	static Statement[] getStatements(ASTNode node){
 		if (node instanceof Block)
-			return ((Block)node).statements;
-		if (node instanceof AbstractMethodDeclaration)
-			return ((AbstractMethodDeclaration)node).statements;		
+			return convertToStatementArray(((Block)node).statements());	
+			
+		if (node instanceof MethodDeclaration){
+			Block body= ((MethodDeclaration)node).getBody();
+			if (body != null)
+				return convertToStatementArray(body.statements());
+			else
+				return null;			
+		}	
 		return null;	
+	}
+	
+	private static Statement[] convertToStatementArray(Collection statements){
+		return (Statement[]) statements.toArray(new Statement[statements.size()]);
 	}
 
 	static int findIndex(Object[] array, Object o){
@@ -120,5 +133,5 @@ public class StructureSelectionAction extends TextSelectionAction {
 		}
 		return -1;
 	}	
-}
 
+}

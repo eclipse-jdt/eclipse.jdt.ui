@@ -1,38 +1,31 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions.structureselection;
 
-import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.dom.ASTNode;
 
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
-import org.eclipse.jdt.internal.corext.refactoring.util.NewSelectionAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
-public class StructureSelectionAnalyzer extends NewSelectionAnalyzer {
+class StructureSelectionAnalyzer extends SelectionAnalyzer{
 
-	private AstNode fLastCoveringNode;
+	private ASTNode fLastCoveringNode;
+	
+	public StructureSelectionAnalyzer(Selection selection, boolean traverseSelectedNode) {
+		super(selection, traverseSelectedNode);
+	}
 
-	public StructureSelectionAnalyzer(IBuffer buffer, int start, int length) {
-		super(new ExtendedBuffer(buffer), Selection.createFromStartLength(start, length));
+	protected boolean visitNode(ASTNode node) {
+		if (getSelection().liesOutside(node))
+			return super.visitNode(node);		
+		if (getSelection().covers(node))
+			return super.visitNode(node);
+		if (! getSelection().coveredBy(node))
+			return super.visitNode(node);
+		
+		fLastCoveringNode= node;
+		return true;
 	}
 	
-	protected boolean visitRange(int start, int end, AstNode node, Scope scope) {
-		if (	!(end < fSelection.start || fSelection.end < start) 
-		  && !(fSelection.covers(start, end))
-		  && fSelection.coveredBy(start, end)) {
-		  	
-			handleSelectionCoveredByNode(node);
-			return true;
-		} else {
-			return super.visitRange(start, end, node, scope);
-		}	
-	}
-
-	public AstNode getLastCoveringNode() {
+	public ASTNode getLastCoveringNode() {
 		return fLastCoveringNode;
-	}
-
-	private void handleSelectionCoveredByNode(AstNode node){
-		fLastCoveringNode= node;
 	}
 }
