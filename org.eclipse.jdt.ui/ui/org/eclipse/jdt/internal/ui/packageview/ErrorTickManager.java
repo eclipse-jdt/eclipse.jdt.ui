@@ -29,8 +29,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 
-import org.eclipse.core.resources.IMarkerDelta;
-
 public class ErrorTickManager implements IResourceChangeListener {
 
 	protected static final int SEVERITY_WARNING= 0;
@@ -64,18 +62,7 @@ public class ErrorTickManager implements IResourceChangeListener {
 			if (delta.getKind() == IResourceDelta.REMOVED) {
 				invalidate(r);
 			} else if (delta.getKind() == IResourceDelta.CHANGED && (delta.getFlags() & IResourceDelta.MARKERS) != 0) {
-				boolean shouldInvalidate = false;
-				IMarkerDelta[] markerDeltas = delta.getMarkerDeltas();
-				for (int i = 0, length = markerDeltas.length; i < length; i++){
- 					IMarkerDelta markerDelta = markerDeltas[i];
- 					int oldSeverity = markerDelta.getAttribute(IMarker.SEVERITY, -1);
- 					int newSeverity = markerDelta.getMarker().getAttribute(IMarker.SEVERITY, -1);
- 					shouldInvalidate = newSeverity != oldSeverity;
- 					if (shouldInvalidate) 
- 						break;
- 				}
-				if (shouldInvalidate)
-					invalidate(r);
+				invalidate(r);
 			}
 			return true;
 		}
