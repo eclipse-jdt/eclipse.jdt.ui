@@ -132,12 +132,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{PreferencesMessages.getString("JavaEditorPreferencePage.foregroundForCompletionReplacement"), PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND } //$NON-NLS-1$
 	};
 	
-	private final String[] fAnnotationDecorationListModel= new String[] {
-		"None",
-		"Squigglies",
-		"Box",
-		"Underline",
-		"IBeam"
+	private final String[][] fAnnotationDecorationListModel= new String[][] {
+		{"None", AnnotationPreference.STYLE_NONE},
+		{"Squigglies", AnnotationPreference.STYLE_SQUIGGLIES},
+		{"Underline", AnnotationPreference.STYLE_UNDERLINE},
+		{"Box", AnnotationPreference.STYLE_BOX},
+		{"IBeam", AnnotationPreference.STYLE_IBEAM}
 	};
 
 	private OverlayPreferenceStore fOverlayStore;
@@ -345,7 +345,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			if (info.getVerticalRulerPreferenceKey() != null)
 				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getVerticalRulerPreferenceKey()));
 			if (info.getTextStylePreferenceKey() != null)
-				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, info.getTextStylePreferenceKey()));
+				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, info.getTextStylePreferenceKey()));
 		}
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
@@ -400,10 +400,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		key= fAnnotationColorListModel[i][6];
 		if (key != null) {
 			fDecorationStyleCombo.setEnabled(showInText);
-			fDecorationStyleCombo.setText(fAnnotationDecorationListModel[fOverlayStore.getInt(key)]);
+			fDecorationStyleCombo.setText(fOverlayStore.getString(key));
 		} else {
 			fDecorationStyleCombo.setEnabled(false);
-			fDecorationStyleCombo.setText(fAnnotationDecorationListModel[AnnotationPreference.STYLE_SQUIGGLIES]); // set selection to squigglies if the key is not there (legacy support)
+			fDecorationStyleCombo.setText(AnnotationPreference.STYLE_SQUIGGLIES); // set selection to squigglies if the key is not there (legacy support)
 		}
 		
 		key= fAnnotationColorListModel[i][3];
@@ -739,7 +739,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		fDecorationStyleCombo= new Combo(optionsComposite, SWT.READ_ONLY);
 		for(int i= 0; i < fAnnotationDecorationListModel.length; i++)
-			fDecorationStyleCombo.add(fAnnotationDecorationListModel[i]);
+			fDecorationStyleCombo.add(fAnnotationDecorationListModel[i][0]);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
         gd.horizontalSpan= 2;
@@ -865,8 +865,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				int i= fAnnotationList.getSelectionIndex();
 				String key= fAnnotationColorListModel[i][6];
 				if (key != null) {
-					int value= Arrays.asList(fAnnotationDecorationListModel).indexOf(fDecorationStyleCombo.getText());
-					fOverlayStore.setValue(key, value);
+					for (int j= 0; j < fAnnotationDecorationListModel.length; j++) {
+						if (fAnnotationDecorationListModel[j][0].equals(fDecorationStyleCombo.getText())) {
+							fOverlayStore.setValue(key, fAnnotationDecorationListModel[j][1]);
+							break;
+						}
+					}
 				}
 			}
 		});
