@@ -7,9 +7,9 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.ResourceBundle;
 
-import org.eclipse.jdt.core.IField;
+import org.eclipse.core.runtime.IPath;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -215,6 +215,14 @@ public class JavaTextLabelProvider {
 	public String getTextLabel(IJavaElement element) {
 		StringBuffer buf= new StringBuffer();
 		renderName(element, buf);
+		if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot) element;
+			if (root.isArchive()) {
+				String label= checkVariableReference(root);
+				if (label != null)
+					return label;
+			}
+		}
 		if (showRoot()) {
 			IPackageFragmentRoot root= JavaModelUtility.getPackageFragmentRoot(element);
 			if (root != null) {
@@ -224,4 +232,18 @@ public class JavaTextLabelProvider {
 		}
 		return buf.toString();
 	}
+	
+	String checkVariableReference(IPackageFragmentRoot root) {
+		IClasspathEntry rawEntry= JavaModelUtility.getRawClasspathEntry(root);
+		if (rawEntry != null) {
+			IPath varpath= rawEntry.getPath();
+			String label= varpath.segment(0);
+			if (varpath.segmentCount() > 1)
+				label+= "/"+varpath.segment(1); 
+			label+= " - "+ root.getPath();
+			return label;
+		}
+		return null;
+	}	
+
 }
