@@ -19,6 +19,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 
@@ -155,7 +156,9 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 			
 			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 			dialog.create();
-			dialog.open();
+			int res= dialog.open();
+			
+			notifyResult(res == Window.OK);
 		} catch (CoreException e) {
 			String title= NewWizardMessages.getString("AbstractOpenWizardAction.createerror.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getString("AbstractOpenWizardAction.createerror.message"); //$NON-NLS-1$
