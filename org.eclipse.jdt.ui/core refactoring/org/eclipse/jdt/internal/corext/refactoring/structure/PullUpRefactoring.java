@@ -414,12 +414,25 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private void addAllRequiredPullableMembers(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.beginTask("", 3); //$NON-NLS-1$
 		addAllRequiredPullableMethods(queue, member, new SubProgressMonitor(pm, 1));
 		addAllRequiredPullableFields(queue, member, new SubProgressMonitor(pm, 1));
+		addAllRequiredPullableTypes(queue, member, new SubProgressMonitor(pm, 1));
 		pm.done();
 	}
 	
+	private void addAllRequiredPullableTypes(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
+		IType[] requiredTypes= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[]{member}, pm);
+		boolean isStatic= JdtFlags.isStatic(member);
+		for (int i= 0; i < requiredTypes.length; i++) {
+			IType requiredType= requiredTypes[i];
+			if (isStatic && ! JdtFlags.isStatic(requiredType))
+				continue;			
+			if (isRequiredPullableMember(queue, requiredType))
+				queue.add(requiredType);
+		}
+	}
+
 	private void addAllRequiredPullableFields(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
 		IField[] requiredFields= ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[]{member}, pm);
 		boolean isStatic= JdtFlags.isStatic(member);
@@ -474,6 +487,8 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private boolean isRequiredPullableMember(List queue, IMember member) throws JavaModelException {
+		if (member.getDeclaringType() == null) //not a member
+			return false; 
 		return member.getDeclaringType().equals(getDeclaringType()) && ! queue.contains(member) && isPullable(member);
 	}
 		
