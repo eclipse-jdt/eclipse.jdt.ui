@@ -65,13 +65,13 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 	 * @see IInformationProvider#getInformation(ITextViewer, IRegion)
 	 */
 	public String getInformation(ITextViewer textViewer, IRegion subject) {
-		return getElement(textViewer, subject).toString();
+		return getInformation2(textViewer, subject).toString();
 	}
 
 	/*
 	 * @see IInformationProviderExtension#getElement(ITextViewer, IRegion)
 	 */
-	public Object getElement(ITextViewer textViewer, IRegion subject) {
+	public Object getInformation2(ITextViewer textViewer, IRegion subject) {
 		if (fEditor == null)
 			return null;
 		
