@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,16 +20,22 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import junit.framework.Assert;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Preferences;
 
 public class ResourceTestHelper {
@@ -197,5 +204,22 @@ public class ResourceTestHelper {
 		if (value != oldValue)
 			preferences.setValue(ResourcesPlugin.PREF_AUTO_BUILDING, value);
 		return oldValue;
+	}
+
+	public static IProject createExistingProject(String projectName) throws CoreException {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IProject project= workspace.getRoot().getProject(projectName);
+		IProjectDescription description= workspace.newProjectDescription(projectName);
+		description.setLocation(null);
+	
+		project.create(description, null);
+		project.open(null);
+		return project;
+	}
+
+	public static IProject createProjectFromZip(Plugin installationPlugin, String projectZip, String projectName) throws IOException, ZipException, CoreException {
+		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
+		FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(installationPlugin, new Path(projectZip))), new File(workspacePath));
+		return createExistingProject(projectName);
 	}
 }

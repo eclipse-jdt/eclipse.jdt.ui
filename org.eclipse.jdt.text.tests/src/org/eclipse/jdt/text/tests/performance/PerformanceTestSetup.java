@@ -11,20 +11,14 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
@@ -92,26 +86,9 @@ public class PerformanceTestSetup extends TestSetup {
 		// do nothing, the set up workspace will be used by other tests (see test.xml)
 	}
 	
-	private void setUpProject() throws IOException, ZipException, CoreException {
-		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
-		FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(JdtTextTestPlugin.getDefault(), new Path(PROJECT_ZIP))), new File(workspacePath));
-		File oldFile= new File(workspacePath + PROJECT + "/.classpath_win32");
-		File newFile= new File(workspacePath + PROJECT + "/.classpath");
-		assertTrue(oldFile.renameTo(newFile));
-
-		IProject project= createExistingProject(PROJECT);
+	private static void setUpProject() throws IOException, ZipException, CoreException {
+		IProject project= ResourceTestHelper.createProjectFromZip(JdtTextTestPlugin.getDefault(), PROJECT_ZIP, PROJECT);
+		ResourceTestHelper.copy("/" + PROJECT + "/.classpath_win32", "/" + PROJECT + "/.classpath");
 		assertTrue(JavaCore.create(project).exists());
-	}
-
-	private IProject createExistingProject(String projectName) throws CoreException {
-
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IProject project= workspace.getRoot().getProject(projectName);
-		IProjectDescription description= workspace.newProjectDescription(projectName);
-		description.setLocation(null);
-
-		project.create(description, null);
-		project.open(null);
-		return project;
 	}
 }
