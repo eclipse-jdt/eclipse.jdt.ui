@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.core.resources.IFile;
@@ -46,6 +47,17 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 
 	public NLSSearchResult(NLSSearchQuery query) {
 		fQuery= query;
+	}
+	
+	//TODO: workaround for bug 58417
+	public Match[] getMatches(Object element) {
+		Match[] matches= super.getMatches(element);
+		Arrays.sort(matches, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((Match) o1).getOffset() - ((Match) o2).getOffset();
+			}
+		});
+		return matches;
 	}
 	
 	public void setDuplicatesGroup(FileEntry duplicatesGroup) {
