@@ -53,7 +53,7 @@ class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	 * @see CreateFileChange#getOldFile()
 	 */
 	protected IFile getOldFile(IProgressMonitor pm) {
-		pm.beginTask("", 10);
+		pm.beginTask("", 10); //$NON-NLS-1$
 		String oldSource= super.getSource();
 		IPath oldPath= super.getPath();
 		String newTypeName= fNameQuery.getNewName();
@@ -70,7 +70,7 @@ class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	}
 
 	private IPath constructNewPath(String newTypeName) throws JavaModelException{
-		return ResourceUtil.getResource(fOldCu).getParent().getFullPath().append(newTypeName + ".java");
+		return ResourceUtil.getResource(fOldCu).getParent().getFullPath().append(newTypeName + ".java"); //$NON-NLS-1$
 	}
 
 	private static String getCopiedFileSource(IProgressMonitor pm, ICompilationUnit cu, String newTypeName) throws CoreException {

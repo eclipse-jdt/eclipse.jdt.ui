@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 class CodeRefactoringUtil {
@@ -27,7 +28,7 @@ class CodeRefactoringUtil {
 				return RefactoringStatus.createFatalErrorStatus(invalidSelectionMessage); 
 
 			MethodDeclaration methodDecl= (MethodDeclaration)coveringNode.getParent();
-			String key= "Compilation errors in method ''{0}'' prevent analyzing the body of the method. Please fix the errors first.";
+			String key= RefactoringCoreMessages.getString("CodeRefactoringUtil.error.message"); //$NON-NLS-1$
 			String message= MessageFormat.format(key, new String[]{methodDecl.getName().getIdentifier()});
 			return RefactoringStatus.createFatalErrorStatus(message);	
 	}

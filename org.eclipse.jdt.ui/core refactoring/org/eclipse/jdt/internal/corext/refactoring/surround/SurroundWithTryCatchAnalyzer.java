@@ -54,7 +54,7 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 					Block block= (Block)coveringNode;
 					Message[] messages= ASTNodes.getMessages(block, ASTNodes.NODE_ONLY);
 					if (messages.length > 0) {
-						invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.compile_errors"),
+						invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.compile_errors"), //$NON-NLS-1$
 							JavaSourceContext.create(getCompilationUnit(), block)); //$NON-NLS-1$
 						break superCall;
 					}

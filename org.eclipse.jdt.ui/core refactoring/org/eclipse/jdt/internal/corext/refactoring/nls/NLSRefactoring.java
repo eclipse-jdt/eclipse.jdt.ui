@@ -424,9 +424,9 @@ public class NLSRefactoring extends Refactoring {
 		if (key == null)
 			result.addFatalError(NLSMessages.getString("NLSrefactoring.null")); //$NON-NLS-1$
 
-		if (key.startsWith("!") || key.startsWith("#")){
+		if (key.startsWith("!") || key.startsWith("#")){ //$NON-NLS-1$ //$NON-NLS-2$
 			Context context= new StringContext(key, new SourceRange(0, 0));
-			result.addWarning("Keys should not start with chartacters '!' or '#'", context);
+			result.addWarning(NLSMessages.getString("NLSRefactoring.warning"), context); //$NON-NLS-1$
 		}	
 			
 		if ("".equals(key.trim())) //$NON-NLS-1$

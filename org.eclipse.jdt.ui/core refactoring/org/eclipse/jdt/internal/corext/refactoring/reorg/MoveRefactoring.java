@@ -107,7 +107,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 				continue;
 			if (getDestination().equals(type.getCompilationUnit().getParent()))
 				continue;
-			String key= "Type ''{0}'' will not be accessible after moving.";
+			String key= RefactoringCoreMessages.getString("MoveRefactoring.warning.typeWillNotBeAccessible"); //$NON-NLS-1$
 			String message= MessageFormat.format(key, new String[]{JavaElementUtil.createSignature(type)});
 			result.addWarning(message);				
 		}
@@ -138,7 +138,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 				continue;
 			if (movedCuList.contains(cu))	
 				continue;
-			String key= "''{0}'' contains references to a type that will not be visible after moving.";
+			String key= RefactoringCoreMessages.getString("MoveRefactoring.warning.containsReferencesToTypeThatWillNotBeVisible"); //$NON-NLS-1$
 			String message= MessageFormat.format(key, new String[]{cu.getElementName()});
 			result.addWarning(message);
 		}

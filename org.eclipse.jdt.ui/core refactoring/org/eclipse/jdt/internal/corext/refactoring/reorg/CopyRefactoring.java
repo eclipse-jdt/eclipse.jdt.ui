@@ -228,8 +228,8 @@ public class CopyRefactoring extends ReorgRefactoring {
 	}
 	
 	private static String removeTrailingJava(String name) {
-		Assert.isTrue(name.endsWith(".java"));
-		return name.substring(0, name.length() - ".java".length());
+		Assert.isTrue(name.endsWith(".java")); //$NON-NLS-1$
+		return name.substring(0, name.length() - ".java".length()); //$NON-NLS-1$
 	}
 	
 }

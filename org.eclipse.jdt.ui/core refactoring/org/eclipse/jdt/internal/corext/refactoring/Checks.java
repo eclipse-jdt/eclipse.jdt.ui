@@ -137,7 +137,7 @@ public class Checks {
 	 * @param newName 
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{
-		if (resourceExists(RenameResourceChange.renamedResourcePath(ResourceUtil.getResource(cu).getFullPath(), newName + ".java")))
+		if (resourceExists(RenameResourceChange.renamedResourcePath(ResourceUtil.getResource(cu).getFullPath(), newName + ".java"))) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName));//$NON-NLS-1$
 		else
 			return new RefactoringStatus();

@@ -74,7 +74,7 @@ public class ChangeContext {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		for (int i= 0; i < fUnsavedFiles.length; i++) {
 			if (fUnsavedFiles[i].equals(file)) {
-				status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_unsaved", file.getFullPath().toString()));
+				status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_unsaved", file.getFullPath().toString())); //$NON-NLS-1$
 				fHandledUnsavedFiles.add(file);
 				return;
 			}

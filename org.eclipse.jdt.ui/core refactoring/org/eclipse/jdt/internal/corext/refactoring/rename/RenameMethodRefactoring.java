@@ -206,13 +206,13 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			result.merge(Checks.checkIfCuBroken(fMethod));
 			if (result.hasFatalError())
 				return result;
-			pm.setTaskName("Checking preconditions...");
+			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.checkingPreconditions")); //$NON-NLS-1$
 			result.merge(checkNewName(fNewName));
 			pm.worked(1);
 			
-			pm.setTaskName("Searching for references...");
+			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.searchingForReferences")); //$NON-NLS-1$
 			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 4));	
-			pm.setTaskName("Checking preconditions...");
+			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.checkingPreconditions")); //$NON-NLS-1$
 			
 			if (fUpdateReferences)
 				result.merge(checkRelatedMethods(new SubProgressMonitor(pm, 1)));

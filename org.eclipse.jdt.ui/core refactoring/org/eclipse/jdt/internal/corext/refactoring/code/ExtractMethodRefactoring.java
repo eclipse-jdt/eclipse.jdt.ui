@@ -533,7 +533,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (declaration.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT)
 			extraDim= ((VariableDeclarationFragment)declaration).getExtraDimensions();
 		for (int i= 0; i < extraDim; i++) {
-			result.append("[]");
+			result.append("[]"); //$NON-NLS-1$
 		}
 		return result.toString();
 	}

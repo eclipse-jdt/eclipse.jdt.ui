@@ -110,7 +110,7 @@ public class InlineTempRefactoring extends Refactoring {
     private RefactoringStatus checkInitializer() {
     	Expression initializer= fTempDeclaration.getInitializer();
     	if (initializer instanceof NullLiteral)
-    		return RefactoringStatus.createFatalErrorStatus("Null literals cannot be inlined");
+    		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.nulLiteralsCannotBeInlined")); //$NON-NLS-1$
         return null;
     }
 
@@ -139,7 +139,7 @@ public class InlineTempRefactoring extends Refactoring {
 		}	
 
 		if (fTempDeclaration.getParent() instanceof FieldDeclaration)
-			return RefactoringStatus.createFatalErrorStatus("Cannot inline fields");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.fieldsCannotBeInlined")); //$NON-NLS-1$
 
 		if (fTempDeclaration.getParent() instanceof MethodDeclaration)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.method_parameter")); //$NON-NLS-1$
