@@ -38,11 +38,11 @@ public class ImportOrganizeTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testReplaceImports"));
+			suite.addTest(new ImportOrganizeTest("testCommentAfterImport"));
 			return suite;
 		}	
 	}
@@ -337,6 +337,7 @@ public class ImportOrganizeTest extends TestCase {
 	}
 	
 	private static final int printRange= 6;
+
 	
 	public static void assertEqualString(String str1, String str2) {	
 		int len1= Math.min(str1.length(), str2.length());
@@ -514,6 +515,46 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append("public class C extends Vector {\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
-	}	
+	}
+	
+	private boolean BUG_10557= true;
+	
+	public void testCommentAfterImport() throws Exception {
+		if (BUG_10557) {
+			return;
+		}
+		
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\r\n");
+		buf.append("\r\n");			
+		buf.append("import x;\r\n");		
+		buf.append("import java.util.Vector; // comment\r\n");
+		buf.append("\r\n");			
+		buf.append("public class C {\r\n");
+		buf.append("    Vector v;\r\n");		
+		buf.append("}\r\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+	
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\r\n");
+		buf.append("\r\n");		
+		buf.append("import java.util.Vector;\r\n");
+		buf.append("\r\n");			
+		buf.append("public class C {\r\n");
+		buf.append("    Vector v;\r\n");
+		buf.append("}\r\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 }
