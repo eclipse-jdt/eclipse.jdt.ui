@@ -92,9 +92,9 @@ public class ScopeAnalyzer {
 			IMethodBinding[] methodBindings= binding.getDeclaredMethods();
 			for (int i= 0; i < methodBindings.length; i++) {
 				IMethodBinding curr= methodBindings[i];
-				if (!curr.isSynthetic() && !(curr.isConstructor() && binding.isAnonymous())) {
+				if (!curr.isSynthetic() && !curr.isConstructor()) {
 					String signature= getMethodSignature(curr);
-					if (fMethodAdded.add(signature)) {
+					if (fMethodAdded.add(signature)) { // avoid duplicated results from inheritance
 						fRequestor.add(curr);
 					}					
 				}
@@ -125,10 +125,6 @@ public class ScopeAnalyzer {
 	
 	
 	private void addTypeDeclarations(ITypeBinding binding, int flags) {
-		if (!fTypesVisited.add(binding)) {
-			return;
-		}		
-		
 		if (hasFlag(TYPES, flags)) {
 			if (!binding.isAnonymous()) {
 				fRequestor.add(binding);
@@ -175,20 +171,26 @@ public class ScopeAnalyzer {
 		}
 	}
 	
+	private static ITypeBinding getBinding(Expression node) {
+		if (node != null) {
+			return node.resolveTypeBinding();
+		}
+		return null;
+	}
 		
-	private static Expression getQualifier(SimpleName selector) {
+	private static ITypeBinding getQualifier(SimpleName selector) {
 		ASTNode parent= selector.getParent();
 		switch (parent.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
-				return ((MethodInvocation) parent).getExpression();
+				return getBinding(((MethodInvocation) parent).getExpression());
 			case ASTNode.QUALIFIED_NAME:
-				return ((QualifiedName) parent).getName();
+				return getBinding(((QualifiedName) parent).getQualifier());
 			case ASTNode.FIELD_ACCESS:
-				return ((FieldAccess) parent).getName();
+				return getBinding(((FieldAccess) parent).getExpression());
 			case ASTNode.SUPER_FIELD_ACCESS:
-				return ((SuperFieldAccess) parent).getName();
 			case ASTNode.SUPER_METHOD_INVOCATION:
-				return ((SuperMethodInvocation) parent).getName();				
+				ITypeBinding curr= ASTResolving.getBindingOfParentType(parent);
+				return curr.getSuperclass();
 			default:
 				return null;
 		}
@@ -207,10 +209,8 @@ public class ScopeAnalyzer {
 			if (node instanceof SimpleName) {
 				SimpleName selector= (SimpleName) node;
 				
-				Expression qualifier= getQualifier(selector);
-				if (qualifier != null) {
-					binding= qualifier.resolveTypeBinding();
-				} else {
+				binding= getQualifier(selector);
+				if (binding == null) {
 					addLocalDeclarations(selector, flags);
 					binding= ASTResolving.getBindingOfParentType(selector);
 				}	
