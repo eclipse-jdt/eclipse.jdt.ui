@@ -549,6 +549,46 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
+	 * Adjusts the visibility of all members declared in the specified type.
+	 * 
+	 * @param types the types to adjust its visibility
+	 * @param methods the methods to adjust its visibility
+	 * @param fields the fields to adjust its visibility
+	 * @param monitor the progress monitor to use
+	 * @throws JavaModelException if an error occurs
+	 */
+	private void adjustIncomingVisibility(final IType[] types, final IMethod[] methods, final IField[] fields, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(types);
+		Assert.isNotNull(methods);
+		Assert.isNotNull(fields);
+		Assert.isNotNull(monitor);
+		try {
+			monitor.beginTask("", fields.length + methods.length + types.length); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("MemberVisibilityAdjustor.checking")); //$NON-NLS-1$
+			IField field= null;
+			for (int index= 0; index < fields.length; index++) {
+				field= fields[index];
+				if (!field.isBinary() && !field.isReadOnly())
+					adjustIncomingVisibility(field, new SubProgressMonitor(monitor, 1));
+			}
+			IMethod method= null;
+			for (int index= 0; index < methods.length; index++) {
+				method= methods[index];
+				if (!method.isBinary() && !method.isReadOnly() && !method.isMainMethod())
+					adjustIncomingVisibility(method, new SubProgressMonitor(monitor, 1));
+			}
+			IType type= null;
+			for (int index= 0; index < types.length; index++) {
+				type= types[index];
+				if (!type.isBinary() && !type.isReadOnly())
+					adjustIncomingVisibility(type, new SubProgressMonitor(monitor, 1));
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+
+	/**
 	 * Adjusts the visibility of the specified search match found in a compilation unit.
 	 * 
 	 * @param match the search match that has been found
@@ -760,7 +800,7 @@ public final class MemberVisibilityAdjustor {
 				engine.clearResults();
 				if (fReferenced instanceof IType) {
 					final IType type= (IType) fReferenced;
-					adjustVisibility(type, new SubProgressMonitor(monitor, 1));
+					adjustIncomingVisibility(type.getTypes(), type.getMethods(), type.getFields(), new SubProgressMonitor(monitor, 1));
 				}
 			}
 			if (fOutgoing) {
@@ -768,45 +808,6 @@ public final class MemberVisibilityAdjustor {
 				engine.searchReferencedFields(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				engine.searchReferencedMethods(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				adjustOutgoingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
-			}
-		} finally {
-			monitor.done();
-		}
-	}
-
-	/**
-	 * Adjusts the visibility of all members declared in the specified type.
-	 * 
-	 * @param referenced the type whose members should be adjusted
-	 * @param monitor the progress monitor to use
-	 * @throws JavaModelException if an error occurs
-	 */
-	private void adjustVisibility(final IType referenced, final IProgressMonitor monitor) throws JavaModelException {
-		Assert.isNotNull(referenced);
-		Assert.isNotNull(monitor);
-		try {
-			final IField[] fields= referenced.getFields();
-			final IMethod[] methods= referenced.getMethods();
-			final IType[] types= referenced.getTypes();
-			monitor.beginTask("", fields.length + methods.length + types.length); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("MemberVisibilityAdjustor.checking")); //$NON-NLS-1$
-			IField field= null;
-			for (int index= 0; index < fields.length; index++) {
-				field= fields[index];
-				if (!field.isBinary() && !field.isReadOnly())
-					adjustIncomingVisibility(field, new SubProgressMonitor(monitor, 1));
-			}
-			IMethod method= null;
-			for (int index= 0; index < methods.length; index++) {
-				method= methods[index];
-				if (!method.isBinary() && !method.isReadOnly() && !method.isMainMethod())
-					adjustIncomingVisibility(method, new SubProgressMonitor(monitor, 1));
-			}
-			IType type= null;
-			for (int index= 0; index < types.length; index++) {
-				type= types[index];
-				if (!type.isBinary() && !type.isReadOnly())
-					adjustIncomingVisibility(type, new SubProgressMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();
