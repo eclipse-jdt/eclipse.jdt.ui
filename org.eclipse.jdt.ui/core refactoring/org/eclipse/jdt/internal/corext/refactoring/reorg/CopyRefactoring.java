@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 public class CopyRefactoring extends ReorgRefactoring {
 
@@ -148,7 +149,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 			return new CopyCompilationUnitChange(cu, (IPackageFragment)dest, createNewName(cu, (IPackageFragment)dest));
 
 		Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
-		return new CopyResourceChange(Refactoring.getResource(cu), (IContainer)dest, createNewName(Refactoring.getResource(cu), (IContainer)dest));
+		return new CopyResourceChange(ResourceUtil.getResource(cu), (IContainer)dest, createNewName(ResourceUtil.getResource(cu), (IContainer)dest));
 	}
 	
 	IChange createChange(IPackageFragmentRoot root) throws JavaModelException{

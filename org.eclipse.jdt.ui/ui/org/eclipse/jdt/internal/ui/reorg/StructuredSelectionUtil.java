@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 class StructuredSelectionUtil {
 	
@@ -55,7 +56,7 @@ class StructuredSelectionUtil {
 			if (element.getCorrespondingResource() != null)
 				return element.getCorrespondingResource();
 			if (element.getElementType() == IJavaElement.COMPILATION_UNIT)	
-				return Refactoring.getResource((ICompilationUnit)element);
+				return ResourceUtil.getResource((ICompilationUnit)element);
 			return null;
 		} catch(JavaModelException e) {
 			//no action - simply do not put to clipboard

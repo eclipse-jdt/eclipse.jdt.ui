@@ -158,7 +158,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	 */
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkAvailability(fMethod));
+		result.merge(Checks.checkAvailability(fMethod));
 		if (isSpecialCase(fMethod))
 			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.special_case")); //$NON-NLS-1$
 		if (fMethod.isConstructor())

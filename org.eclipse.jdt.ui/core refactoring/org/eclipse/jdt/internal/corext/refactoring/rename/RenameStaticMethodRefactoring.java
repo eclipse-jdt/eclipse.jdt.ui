@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
@@ -29,7 +30,7 @@ class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
-		result.merge(checkAvailability(getMethod()));
+		result.merge(Checks.checkAvailability(getMethod()));
 					
 		if (JdtFlags.isPrivate(getMethod()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.no_private")); //$NON-NLS-1$

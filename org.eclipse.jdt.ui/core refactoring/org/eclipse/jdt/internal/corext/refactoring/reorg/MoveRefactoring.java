@@ -180,7 +180,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 			if (! (each instanceof ICompilationUnit))
 				continue;
 			
-			if (hasSyntaxErrors((ICompilationUnit)JavaCore.create(getResource((ICompilationUnit)each))))
+			if (hasSyntaxErrors((ICompilationUnit)JavaCore.create(ResourceUtil.getResource((ICompilationUnit)each))))
 					return true;
 		}
 		return false;
@@ -286,7 +286,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 		if (dest instanceof IPackageFragment)
 			return new MoveCompilationUnitChange(cu, (IPackageFragment)dest);
 		Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
-		return new MoveResourceChange(getResource(cu), (IContainer)dest);
+		return new MoveResourceChange(ResourceUtil.getResource(cu), (IContainer)dest);
 	}
 
 	/*

@@ -218,7 +218,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	 */
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkAvailability(fType));
+		result.merge(Checks.checkAvailability(fType));
 		if (isSpecialCase(fType))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.special_case"));	 //$NON-NLS-1$
 		return result;
@@ -341,7 +341,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 		
 	private RefactoringStatus checkNewPathValidity() throws JavaModelException{
-		IContainer c= getResource(fType).getParent();
+		IContainer c= ResourceUtil.getResource(fType).getParent();
 		
 		String notRename= RefactoringCoreMessages.getString("RenameTypeRefactoring.will_not_rename"); //$NON-NLS-1$
 		IStatus status= c.getWorkspace().validateName(fNewName, IResource.FILE);
@@ -356,7 +356,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private String createNewPath(String newName) throws JavaModelException{
-		return getResource(fType).getFullPath().removeLastSegments(1).append(newName).toString();
+		return ResourceUtil.getResource(fType).getFullPath().removeLastSegments(1).append(newName).toString();
 	}
 	
 	private RefactoringStatus checkTypesImportedInCu() throws JavaModelException{
@@ -366,7 +366,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			return null;	
 			
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.imported", //$NON-NLS-1$
-											new Object[]{fNewName, getResource(fType).getFullPath()});
+											new Object[]{fNewName, ResourceUtil.getResource(fType).getFullPath()});
 		IJavaElement grandParent= imp.getParent().getParent();
 		if (grandParent instanceof ICompilationUnit)
 			return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(imp));
@@ -664,7 +664,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	
 	private static String getFullPath(ICompilationUnit cu) throws JavaModelException{
 		Assert.isTrue(cu.exists());
-		return getResource(cu).getFullPath().toString();
+		return ResourceUtil.getResource(cu).getFullPath().toString();
 	}
 
 	/* 
@@ -679,7 +679,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			return null;
 			
 		return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict2", //$NON-NLS-1$
-																		new Object[]{fNewName, getResource(cu).getFullPath()}));
+																		new Object[]{fNewName, ResourceUtil.getResource(cu).getFullPath()}));
 	}
 	
 	//------------- Changes ---------------
@@ -694,7 +694,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			CompositeChange builder= new CompositeChange();
 			builder.addAll(fChangeManager.getAllChanges());
 			if (willRenameCU())
-				builder.add(new RenameResourceChange(getResource(fType), fNewName + ".java")); //$NON-NLS-1$
+				builder.add(new RenameResourceChange(ResourceUtil.getResource(fType), fNewName + ".java")); //$NON-NLS-1$
 			pm.worked(1);	
 			return builder;	
 		} catch (CoreException e){

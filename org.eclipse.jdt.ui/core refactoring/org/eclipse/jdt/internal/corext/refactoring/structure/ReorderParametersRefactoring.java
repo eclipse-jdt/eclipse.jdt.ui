@@ -122,7 +122,7 @@ class ReorderParametersRefactoring extends Refactoring {
 	
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkAvailability(fMethod));
+		result.merge(Checks.checkAvailability(fMethod));
 
 		if (fOldParameterNames == null || fOldParameterNames.length < 2)
 			result.addFatalError(RefactoringCoreMessages.getString("ReorderParametersRefactoring.too_few_parameters"));  //$NON-NLS-1$

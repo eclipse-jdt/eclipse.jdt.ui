@@ -30,7 +30,7 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
-		result.merge(checkAvailability(getMethod()));
+		result.merge(Checks.checkAvailability(getMethod()));
 					
 		if (JdtFlags.isPrivate(getMethod()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.no_private")); //$NON-NLS-1$

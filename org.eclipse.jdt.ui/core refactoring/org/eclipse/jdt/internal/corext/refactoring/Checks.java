@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
@@ -136,7 +137,7 @@ public class Checks {
 	 * @param newName just a simple name - no extension.
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{
-		if (resourceExists(RenameResourceChange.renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName)))
+		if (resourceExists(RenameResourceChange.renamedResourcePath(ResourceUtil.getResource(cu).getFullPath(), newName)))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName));//$NON-NLS-1$
 		else
 			return new RefactoringStatus();
@@ -359,7 +360,7 @@ public class Checks {
 	//---------------------
 	
 	public static RefactoringStatus checkIfCuBroken(IMember member) throws JavaModelException{
-		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(Refactoring.getResource(member));
+		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(ResourceUtil.getResource(member));
 		if (cu == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.cu_not_created"));	 //$NON-NLS-1$
 		else if (! cu.isStructureKnown())
@@ -501,6 +502,33 @@ public class Checks {
 		}
 		return result;
 	}
+
+	/**
+	 * Checks whether it is possible to modify the given <code>IJavaElement</code>.
+	 * The <code>IJavaElement</code> must exist and be non read-only to be modifiable.
+	 * Moreover, if it is a <code>IMember</code> it must not be binary.
+	 * The returned <code>RefactoringStatus</code> has <code>ERROR</code> severity if
+	 * it is not possible to modify the element.
+	 *
+	 * @see IJavaElement#exists
+	 * @see IJavaElement#isReadOnly
+	 * @see IMember#isBinary
+	 * @see RefactoringStatus
+	 *
+	 */ 
+	public static RefactoringStatus checkAvailability(IJavaElement javaElement) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+		if (! javaElement.exists())
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.not_in_model", javaElement.getElementName())); //$NON-NLS-1$
+		if (javaElement.isReadOnly())
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.read_only", javaElement.getElementName()));	 //$NON-NLS-1$
+		if (javaElement.exists() && !javaElement.isStructureKnown())
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.unknown_structure", javaElement.getElementName()));	 //$NON-NLS-1$
+		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.binary", javaElement.getElementName())); //$NON-NLS-1$
+		return result;
+	}
+
 	
 	
 }

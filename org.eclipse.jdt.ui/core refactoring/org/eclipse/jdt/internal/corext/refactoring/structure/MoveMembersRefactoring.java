@@ -634,7 +634,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)referencingElement);
 			SearchResultGroup modifiedGroup= searchResultGroup;
 	
-			if (Refactoring.getResource(getDeclaringType()).equals(Refactoring.getResource(cu)))
+			if (ResourceUtil.getResource(getDeclaringType()).equals(ResourceUtil.getResource(cu)))
 				modifiedGroup= removeReferencesEnclosedIn(fMembers, searchResultGroup);
 	
 			modifyReferencesToMovedMember(member, manager, modifiedGroup, cu);

@@ -56,6 +56,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
@@ -406,7 +408,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 					NonNLSElement nlsel= (NonNLSElement)element;
 					String elementName= nlsel.cu.getElementName();
 					try{
-						elementName= Refactoring.getResource(nlsel.cu).getProjectRelativePath().toString();
+						elementName= ResourceUtil.getResource(nlsel.cu).getProjectRelativePath().toString();
 					}catch (JavaModelException e){
 					}	
 					return ActionMessages.getFormattedString(

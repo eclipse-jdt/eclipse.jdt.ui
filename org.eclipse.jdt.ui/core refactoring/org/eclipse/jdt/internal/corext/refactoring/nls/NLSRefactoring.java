@@ -160,7 +160,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	private IPath getDefaultPropertyFilePath() throws JavaModelException{
 		IPath cuName= new Path(fCu.getElementName());
-		return Refactoring.getResource(fCu).getFullPath()
+		return ResourceUtil.getResource(fCu).getFullPath()
 						  .removeLastSegments(cuName.segmentCount())
 						  .append(fProperyFileName + PROPERTY_FILE_EXT);
 	}
@@ -761,7 +761,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	private IPath getAccessorCUPath() throws JavaModelException{
 		IPath cuName= new Path(fCu.getElementName());
-		return Refactoring.getResource(fCu).getFullPath()
+		return ResourceUtil.getResource(fCu).getFullPath()
 						  .removeLastSegments(cuName.segmentCount())
 						  .append(getAccessorCUName());
 	}

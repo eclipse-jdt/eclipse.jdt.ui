@@ -104,7 +104,7 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 	
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkAvailability(fMethod));
+		result.merge(Checks.checkAvailability(fMethod));
 		if (fRenamings == null || fRenamings.isEmpty())
 			result.addFatalError(RefactoringCoreMessages.getString("RenameParametersRefactoring.no_parameters"));  //$NON-NLS-1$
 		return result;

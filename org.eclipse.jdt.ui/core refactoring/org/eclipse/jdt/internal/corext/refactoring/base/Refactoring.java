@@ -18,8 +18,10 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.UndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 /**
  * Superclass for all refactorings.
@@ -84,54 +86,6 @@ public abstract class Refactoring implements IRefactoring {
 		return result;
 	}
 		
-	/**
-	 * Checks whether it is possible to modify the given <code>IJavaElement</code>.
-	 * The <code>IJavaElement</code> must exist and be non read-only to be modifiable.
-	 * Moreover, if it is a <code>IMember</code> it must not be binary.
-	 * The returned <code>RefactoringStatus</code> has <code>ERROR</code> severity if
-	 * it is not possible to modify the element.
-	 *
-	 * @see IJavaElement#exists
-	 * @see IJavaElement#isReadOnly
-	 * @see IMember#isBinary
-	 * @see RefactoringStatus
-	 *
-	 */ 
-	protected static RefactoringStatus checkAvailability(IJavaElement javaElement) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		if (! javaElement.exists())
-			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.not_in_model", javaElement.getElementName())); //$NON-NLS-1$
-		if (javaElement.isReadOnly())
-			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.read_only", javaElement.getElementName()));	 //$NON-NLS-1$
-		if (javaElement.exists() && !javaElement.isStructureKnown())
-			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.unknown_structure", javaElement.getElementName()));	 //$NON-NLS-1$
-		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
-			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.binary", javaElement.getElementName())); //$NON-NLS-1$
-		return result;
+		
+		
 	}
-	
-	//----- other ------------------------------
-			
-	/**
-	 * Finds an <code>IResource</code> for a given <code>ICompilationUnit</code>.
-	 * If the parameter is a working copy then the <code>IResource</code> for
-	 * the original element is returned.
-	 * @see ICompilationUnit#isWorkingCopy
-	 * @see ICompilationUnit#getUnderlyingResource
-	 */
-	public static IResource getResource(ICompilationUnit cu) throws JavaModelException{
-		if (cu.isWorkingCopy()) 
-			return cu.getOriginalElement().getUnderlyingResource();
-		else 
-			return cu.getUnderlyingResource();
-	}
-	
-	/**
-	 * Returns the <code>IResource</code> that the given <code>IMember</code> is defined in.
-	 * @see #getResource
-	 */
-	public static IResource getResource(IMember member) throws JavaModelException{
-		Assert.isTrue(!member.isBinary());
-		return getResource(member.getCompilationUnit());
-	}
-}

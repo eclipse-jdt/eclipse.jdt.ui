@@ -179,7 +179,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 1); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkAvailability(fPackage));
+		result.merge(Checks.checkAvailability(fPackage));
 		
 		if (fPackage.isDefaultPackage())
 			result.addFatalError(""); //$NON-NLS-1$

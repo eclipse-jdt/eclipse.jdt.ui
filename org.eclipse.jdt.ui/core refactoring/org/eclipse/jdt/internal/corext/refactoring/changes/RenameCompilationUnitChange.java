@@ -15,12 +15,13 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 
 public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
 
 	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) throws JavaModelException{
-		this(Refactoring.getResource(cu).getFullPath(), cu.getElementName(), newName);
+		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName);
 		Assert.isTrue(!cu.isReadOnly(), RefactoringCoreMessages.getString("RenameCompilationUnitChange.assert.read_only")); //$NON-NLS-1$
 	}
 	

@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
@@ -43,7 +44,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
-		result.merge(checkAvailability(getMethod()));
+		result.merge(Checks.checkAvailability(getMethod()));
 		if (! JdtFlags.isPrivate(getMethod()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.only_private")); //$NON-NLS-1$
 		return result;
