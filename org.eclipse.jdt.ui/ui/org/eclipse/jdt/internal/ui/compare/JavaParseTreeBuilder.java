@@ -53,6 +53,13 @@ class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICom
 		return new char[0];
 	}
 	
+	/* (non Java doc)
+	 * @see ICompilationUnit#getMainTypeName
+	 */
+	public char[][] getPackageName() {
+		return null;
+	}
+	
 	//---- ISourceElementRequestor
 	
 	public void enterCompilationUnit() {
