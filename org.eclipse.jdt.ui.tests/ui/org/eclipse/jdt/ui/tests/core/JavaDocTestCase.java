@@ -8,13 +8,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
+
 import org.eclipse.core.runtime.Path;
-
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -23,11 +23,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.testplugin.JavaTestProject;
-import org.eclipse.jdt.testplugin.JavaTestSetup;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
+
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;
 import org.eclipse.jdt.internal.ui.text.javadoc.StandardDocletPageBuffer;
@@ -35,38 +34,36 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 public class JavaDocTestCase extends TestCase {
 	
-	private JavaTestProject fTestProject;
-
+	private IJavaProject fJavaProject;
+
 	public JavaDocTestCase(String name) {
 		super(name);
 	}
-
-	public static void main(String[] args) {
+	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), JavaDocTestCase.class, args);
 	}		
 			
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
-		//suite.addTest(new JavaDocTestCase("doTest1"));
-		suite.addTest(new JavaDocTestCase("doTest3"));
-		return new JavaTestSetup(suite);
+		suite.addTest(new JavaDocTestCase("doTest1"));
+		return suite;
 	}
 	
-	/*
-	 * create a new source container "src"
-	 */	
+	/**
+	 * Creates a new test Java project.
+	 */
 	protected void setUp() throws Exception {
-		fTestProject= JavaTestSetup.getTestProject();
-
-		IPackageFragmentRoot jdk= fTestProject.addRTJar();
-		assert("jdk not found", jdk != null);
+		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
+
+		IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(fJavaProject);
+		assertTrue("jdk not found", jdk != null);
 		
 		
-		File jdocDir= new File("M:\\JAVA\\jdk1.2\\docs\\api");
-		assert("Must be existing directory", jdocDir.isDirectory());
-		JavaDocAccess.setJavaDocLocation(jdk, jdocDir.toURL());
+/*		File jdocDir= new File("M:\\JAVA\\jdk1.2\\docs\\api");
+		assertTrue("Must be existing directory", jdocDir.isDirectory());
+		JavaDocAccess.setJavaDocLocation(jdk, jdocDir.toURL());*/
 
-		IPackageFragmentRoot root= fTestProject.addSourceContainer("src");
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		IPackageFragment pack= root.createPackageFragment("ibm.util", true, null);
 		
 		ICompilationUnit cu= pack.getCompilationUnit("A.java");
@@ -94,58 +91,57 @@ public class JavaDocTestCase extends TestCase {
 		return buf.toString();
 	}
 			
-	/*
-	 * remove the source container
-	 */	
+	/**
+	 * Removes the test java project.
+	 */
 	protected void tearDown () throws Exception {
-		fTestProject.removeSourceContainer("src");
+		JavaProjectHelper.delete(fJavaProject);
+		fJavaProject= null;
 	}
 				
-	/*
-	 * basic test: check for created methods
-	 */
 	public void doTest1() throws Exception {
-		IJavaProject jproject= fTestProject.getJavaProject();
 		
 		String name= "ibm/util/A.java";
-		ICompilationUnit cu= (ICompilationUnit)jproject.findElement(new Path(name));
-		assert("A.java must exist", cu != null);
+		ICompilationUnit cu= (ICompilationUnit) fJavaProject.findElement(new Path(name));
+		assertTrue("A.java must exist", cu != null);
 		System.out.println(cu.getSource());
 		IType type= cu.getType("A");
-		assert("Type A must exist", type != null);
+		assertTrue("Type A must exist", type != null);
 			
 		System.out.println("methods of A");
 		IMethod[] methods= type.getMethods();
-		assert("Should contain 2 methods", methods.length == 2);
+		assertTrue("Should contain 2 methods", methods.length == 2);
 		Reader reader;
 		for (int i= 0; i < methods.length; i++) {
 			System.out.println(methods[i].getElementName());
 			System.out.println("JavaDoc:");
 			reader= JavaDocAccess.getJavaDoc(methods[i]);
-			assert("Java doc must be found", reader != null);
+			assertTrue("Java doc must be found", reader != null);
 			JavaDocTextReader txtreader= new JavaDocTextReader(reader);
 			String str= txtreader.getString();
 			System.out.println(str);
 			String expectedComment="My Java comment <©>";
-			assert("Java doc text not as expected", expectedComment.equals(str));
+			assertTrue("Java doc text not as expected", expectedComment.equals(str));
 		}
 		
 	}
 	
+	/**
+	 * Currently not working (JavaDocAccess.getJavaDocLocation disabled)
+	 */
 	public void doTest2() throws Exception {		
-		IJavaProject jproject= fTestProject.getJavaProject();
 		
 		String name= "java/io/Reader.java";
-		IClassFile cf= (IClassFile)jproject.findElement(new Path(name));
-		assert(name + " must exist", cf != null);
+		IClassFile cf= (IClassFile) fJavaProject.findElement(new Path(name));
+		assertTrue(name + " must exist", cf != null);
 		IType type= cf.getType();
-		assert("Type must exist", type != null);
+		assertTrue("Type must exist", type != null);
 		
 		IPackageFragmentRoot root= JavaModelUtility.getPackageFragmentRoot(type);
-		assert("PackageFragmentRoot must exist", root != null);
+		assertTrue("PackageFragmentRoot must exist", root != null);
 		
 		URL jdocLocation= JavaDocAccess.getJavaDocLocation(root);
-		assert("JavaDoc location must exist", jdocLocation != null);
+		assertTrue("JavaDoc location must exist", jdocLocation != null);
 		
 		StandardDocletPageBuffer page= new StandardDocletPageBuffer(type);
 
@@ -157,9 +153,7 @@ public class JavaDocTestCase extends TestCase {
 			System.out.println("JavaDoc of type " + type.getElementName());
 			System.out.println(txtreader.getString());
 		}		
-
-
-		IMethod[] methods= type.getMethods();
+		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
 			reader= page.getJavaDoc(curr);
@@ -184,19 +178,18 @@ public class JavaDocTestCase extends TestCase {
 				System.out.println(txtreader.getString());
 			}
 		}		
-			
-		
-		
 	}	
-	
+
+	/**
+	 * Interactive test
+	 */	
 	public void doTest3() throws Exception {		
-		IJavaProject jproject= fTestProject.getJavaProject();
-		
+	
 		String name= "java/lang/Math.java";
-		IClassFile cf= (IClassFile)jproject.findElement(new Path(name));
-		assert(name + " must exist", cf != null);
+		IClassFile cf= (IClassFile) fJavaProject.findElement(new Path(name));
+		assertTrue(name + " must exist", cf != null);
 		IType type= cf.getType();
-		assert("Type must exist", type != null);
+		assertTrue("Type must exist", type != null);
 		
 		System.out.println("methods of " + name);
 		IMethod[] methods= type.getMethods();

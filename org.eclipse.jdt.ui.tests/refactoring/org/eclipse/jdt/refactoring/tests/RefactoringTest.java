@@ -9,35 +9,38 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 
-import java.util.ArrayList;import junit.framework.TestCase;
+import junit.framework.TestCase;
 
-import org.eclipse.core.runtime.IPluginDescriptor;import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 
-import org.eclipse.core.runtime.Platform;import org.eclipse.core.runtime.Plugin;import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
+import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.internal.core.JavaModelManager;
-
-import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
-import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.JavaTestProject;
-import org.eclipse.jdt.testplugin.JavaTestSetup;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 public abstract class RefactoringTest extends TestCase {
+
+	private IJavaProject fJavaTestProject;
 
 	private IPackageFragmentRoot fRoot;
 	private IPackageFragment fPackageP;
@@ -58,9 +61,9 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected void setUp() throws Exception {
-		JavaTestProject testProject= JavaTestSetup.getTestProject();
+		fJavaTestProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 
-		fRoot= testProject.addSourceContainer(CONTAINER);
+		fRoot= JavaProjectHelper.addSourceContainer(fJavaTestProject, CONTAINER);
 		fPackageP= fRoot.createPackageFragment("p", true, null);
 
 		if (fIsVerbose){
@@ -71,8 +74,7 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected void tearDown() throws Exception {
-		JavaTestProject testProject= JavaTestSetup.getTestProject();
-		testProject.removeSourceContainer(CONTAINER);
+		JavaProjectHelper.delete(fJavaTestProject);
 	}
 
 	protected IPackageFragmentRoot getRoot() {

@@ -3,18 +3,22 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.tests.core;
-
+
+import java.io.File;
 import java.util.ArrayList;
-
+import java.util.List;
+import java.util.zip.ZipFile;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
-
+import junit.framework.TestSuite;
+
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -22,69 +26,78 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
-
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.JavaTestProject;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
+
 import org.eclipse.jdt.internal.ui.util.TypeRef;
 import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
-import org.eclipse.jdt.testplugin.*;
 
 public class TypeRefTest extends TestCase {
-	private static final IPath SOURCES= new Path("t:\\jabiru\\smoke\\junit32src");
-	private static final IPath JARFILE= new Path("d:\\temp\\VectorFooLibrary.jar");
-	private JavaTestProject fTestProject;
+	
+	private IJavaProject fJProject1;
+	private IJavaProject fJProject2;
+	private static final IPath SOURCES= new Path("test-resources/junit32src.jar");
 	public TypeRefTest(String name) {
 		super(name);
 	}
 	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeRefTest.class, args);
 	}
-	public static Test suite() {
-		return new TypeRefTest("doTest1");
+
+	public static Test suite() {
+		TestSuite suite= new TestSuite(TestSuite.class.getName());
+		suite.addTest(new TypeRefTest("doTest1"));
+		suite.addTest(new TypeRefTest("doTest2"));
+		return suite;
 	}
 
 	protected void setUp() throws Exception {
+			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+			fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 	}
 
 	protected void tearDown() throws Exception {
+		JavaProjectHelper.delete(fJProject1);
+		JavaProjectHelper.delete(fJProject2);		
+		
 	}
 
 	public void doTest1() throws Exception {
-		IWorkspaceRoot workspaceRoot= JavaTestPlugin.getWorkspace().getRoot();
-
+		
 		// a junit project
-		JavaTestProject proj2= new JavaTestProject(workspaceRoot, "TestProject2", "bin");
-		IPackageFragmentRoot jdk= proj2.addRTJar();
-		assert("jdk not found", jdk != null);
-		proj2.addSourceContainerWithImport("junit", SOURCES);
-
-		// our project
-		JavaTestProject proj1= new JavaTestProject(workspaceRoot, "TestProject1", "bin");
+		IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(fJProject2);
+		assertTrue("jdk not found", jdk != null);
+		
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(SOURCES);
+		assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
+		ZipFile zipfile= new ZipFile(junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", zipfile);
+		
+
 		// external jar
-		proj1.addRTJar();
+		JavaProjectHelper.addRTJar(fJProject1);
 		// required project
-		proj1.addRequiredProject(proj2.getJavaProject());
+		JavaProjectHelper.addRequiredProject(fJProject1, fJProject2);
 		
 		// source folder
-		IPackageFragmentRoot root1= proj1.addSourceContainer("src");
+		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= root1.createPackageFragment("com.oti", true, null);
 		ICompilationUnit cu1= pack1.getCompilationUnit("V.java");
 		IType type1= cu1.createType("public class V {\n static class VInner {\n}\n}\n", null, true, null);
 
 		// internal jar
-		IPackageFragmentRoot root2= proj1.addLibraryWithImport(JARFILE, null, null);
+		//IPackageFragmentRoot root2= JavaProjectHelper.addLibraryWithImport(fJProject1, JARFILE, null, null);
 		ArrayList result= new ArrayList();
 
-		IResource[] resources= new IResource[] {proj1.getJavaProject().getProject()};
+		IResource[] resources= new IResource[] {fJProject1.getJavaProject().getProject()};
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(resources);
 		ITypeNameRequestor requestor= new TypeRefRequestor(result);
 		SearchEngine engine= new SearchEngine();
-
+
 		engine.searchAllTypeNames(
-			workspaceRoot.getWorkspace(), 
+			fJProject1.getJavaModel().getWorkspace(),
 			null, 
 			new char[] {'V'}, 
 			IJavaSearchConstants.PREFIX_MATCH, 
@@ -94,40 +107,54 @@ public class TypeRefTest extends TestCase {
 			requestor, 
 			IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, 
 			null); 
-		assert("Should find 45 elements", result.size() == 45);
-
+		findTypeRef(result, "com.oti.V");
+		findTypeRef(result, "com.oti.V.VInner");
+		findTypeRef(result, "java.lang.VerifyError");
+		findTypeRef(result, "java.lang.Void");
+		findTypeRef(result, "java.util.Vector");
+		findTypeRef(result, "junit.samples.VectorTest");
+		findTypeRef(result, "junit.util.Version");
 		System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
 			TypeRef ref= (TypeRef) result.get(i);
 			IType resolvedType= ref.resolveType(scope);
 			if (resolvedType == null) {
-				assert("Could not be resolved: " + ref.toString(), false);
+				assertTrue("Could not be resolved: " + ref.toString(), false);
 			} else {
 				System.out.println(resolvedType.getFullyQualifiedName());
 			}
 		}
-
-		proj1.remove();
+
+
 	}
 	
+	private void findTypeRef(List refs, String fullname) {
+		for (int i= 0; i <refs.size(); i++) {
+			TypeRef curr= (TypeRef) refs.get(i);
+			if (fullname.equals(curr.getFullyQualifiedName())) {
+				return;
+			}
+		}
+		assertTrue("Type not found: " + fullname, false);
+	}
+		
+	
+	
 	public void doTest2() throws Exception {
-		IWorkspaceRoot workspaceRoot= JavaTestPlugin.getWorkspace().getRoot();
-
-
 		// our project
-		JavaTestProject proj1= new JavaTestProject(workspaceRoot, "TestProject1", "bin");
+		IJavaProject fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		// external jar
-		proj1.addRTJar();
+		JavaProjectHelper.addRTJar(fJProject1);
 		
 		ArrayList result= new ArrayList();
 		
-		IResource[] resources= new IResource[] {proj1.getJavaProject().getProject()};
+		IResource[] resources= new IResource[] {fJProject1.getProject()};
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(resources);
 		ITypeNameRequestor requestor= new TypeRefRequestor(result);
 		SearchEngine engine= new SearchEngine();
-
+
 		engine.searchAllTypeNames(
-			workspaceRoot.getWorkspace(), 
+			fJProject1.getJavaModel().getWorkspace(),
 			null, 
 			new char[] {'A', 'c', 't', 'i', 'v', 'a'}, 
 			IJavaSearchConstants.PREFIX_MATCH, 
@@ -144,15 +171,10 @@ public class TypeRefTest extends TestCase {
 			System.out.println(ref.getTypeName());
 			IType resolvedType= ref.resolveType(scope);
 			if (resolvedType == null) {
-				assert("Could not be resolved: " + ref.toString(), false);
+				assertTrue("Could not be resolved: " + ref.toString(), false);
 			} else {
 				System.out.println(resolvedType.getFullyQualifiedName());
 			}
 		}
-
-		proj1.remove();
 	}
-
-	
-
 }

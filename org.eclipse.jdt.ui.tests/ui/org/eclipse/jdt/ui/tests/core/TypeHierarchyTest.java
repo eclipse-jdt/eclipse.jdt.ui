@@ -3,36 +3,30 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.tests.core;
-
-import junit.framework.Test;
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.JavaTestProject;
-import org.eclipse.jdt.testplugin.JavaTestSetup;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
+
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.testplugin.*;
 
 public class TypeHierarchyTest extends TestCase {
 	
-	private JavaTestProject fTestProject;
-
-	public TypeHierarchyTest(String name) {
+	private IJavaProject fJavaProject1;
+	private IJavaProject fJavaProject2;
+	public TypeHierarchyTest(String name) {
 		super(name);
 	}
-
+
 	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeHierarchyTest.class, args);
 	}		
@@ -40,31 +34,32 @@ public class TypeHierarchyTest extends TestCase {
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
 		suite.addTest(new TypeHierarchyTest("doTest1"));
-		return new JavaTestSetup(suite);
+		return suite;
 	}
 	
 	protected void setUp() throws Exception {
+		fJavaProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJavaProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 	}
-
+
 	protected void tearDown () throws Exception {
+		JavaProjectHelper.delete(fJavaProject1);
+		JavaProjectHelper.delete(fJavaProject2);		
 	}
 					
 	public void doTest1() throws Exception {
-		IWorkspaceRoot workspaceRoot= JavaTestPlugin.getWorkspace().getRoot();
 		
-		JavaTestProject proj1= new JavaTestProject(workspaceRoot, "TestProject1", "bin");
-		IPackageFragmentRoot jdk= proj1.addRTJar();
-		assert("jdk not found", jdk != null);
-		IPackageFragmentRoot root1= proj1.addSourceContainer("src");
+		IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(fJavaProject1);
+		assertTrue("jdk not found", jdk != null);
+		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
 		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
 		
 		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
 		IType type1= cu1.createType("public class A {\n}\n", null, true, null);
-			
-		JavaTestProject proj2= new JavaTestProject(workspaceRoot, "TestProject2", "bin");
-		proj2.addRTJar();
-		proj2.addRequiredProject(proj1.getJavaProject());
-		IPackageFragmentRoot root2= proj2.addSourceContainer("src");
+		
+		JavaProjectHelper.addRTJar(fJavaProject2);
+		JavaProjectHelper.addRequiredProject(fJavaProject2, fJavaProject1);
+		IPackageFragmentRoot root2= JavaProjectHelper.addSourceContainer(fJavaProject2, "src");
 		IPackageFragment pack2= root2.createPackageFragment("pack2", true, null);
 		
 		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
@@ -79,18 +74,15 @@ public class TypeHierarchyTest extends TestCase {
 			System.out.print(" - ");
 			System.out.println(allTypes[i].getJavaProject().getElementName());
 		}
-		assert("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
+		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 		
-		IType type= JavaModelUtility.findType(proj2.getJavaProject(), "pack1.A");
-		assert("Type not found", type != null);
+		IType type= JavaModelUtility.findType(fJavaProject2, "pack1.A");
+		assertTrue("Type not found", type != null);
 		System.out.println("Using findElement");
 		System.out.print(type.getElementName());
 		System.out.print(" - ");
 		System.out.println(type.getJavaProject().getElementName());
-		
-		
-		proj2.remove();
-		proj1.remove();
+
 	}	
 	
 

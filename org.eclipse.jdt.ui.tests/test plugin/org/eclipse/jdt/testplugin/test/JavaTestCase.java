@@ -4,6 +4,11 @@
  */
 package org.eclipse.jdt.testplugin.test;
 
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -13,20 +18,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.testplugin.JavaTestProject;
-import org.eclipse.jdt.testplugin.JavaTestSetup;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
-import junit.framework.TestCase;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.jdt.testplugin.*;
 
 
 public class JavaTestCase extends TestCase {
 	
-	private JavaTestProject fTestProject;
+	private IJavaProject fJavaProject;
 
 	public JavaTestCase(String name) {
 		super(name);
@@ -39,16 +37,16 @@ public class JavaTestCase extends TestCase {
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
 		suite.addTest(new JavaTestCase("doTest1"));
-		return new JavaTestSetup(suite);
+		return suite;
 	}
 	
-	/*
-	 * create a new source container "src"
+	/**
+	 * Creates a new test Java project.
 	 */	
 	protected void setUp() throws Exception {
-		fTestProject= JavaTestSetup.getTestProject();
+		fJavaProject= JavaProjectHelper.createJavaProject("HelloWorldProject", "bin");
 
-		IPackageFragmentRoot root= fTestProject.addSourceContainer("src");
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		IPackageFragment pack= root.createPackageFragment("ibm.util", true, null);
 		
 		ICompilationUnit cu= pack.getCompilationUnit("A.java");
@@ -57,31 +55,30 @@ public class JavaTestCase extends TestCase {
 		type.createMethod("public void b(java.util.Vector v) {}\n", null, true, null);
 	}
 
-	/*
-	 * remove the source container
+	/**
+	 * Removes the test java project.
 	 */	
 	protected void tearDown () throws Exception {
-		fTestProject.removeSourceContainer("src");
+		JavaProjectHelper.delete(fJavaProject);
 	}
 				
 	/*
-	 * basic test: check for created methods
+	 * Basic test: Checks for created methods.
 	 */
 	public void doTest1() throws Exception {
-		IJavaProject jproject= fTestProject.getJavaProject();
 		
 		String name= "ibm/util/A.java";
-		ICompilationUnit cu= (ICompilationUnit)jproject.findElement(new Path(name));
-		assert("A.java must exist", cu != null);
+		ICompilationUnit cu= (ICompilationUnit) fJavaProject.findElement(new Path(name));
+		assertTrue("A.java must exist", cu != null);
 		IType type= cu.getType("A");
-		assert("Type A must exist", type != null);
+		assertTrue("Type A must exist", type != null);
 		
 		System.out.println("methods of A");
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < methods.length; i++) {
 			System.out.println(methods[i].getElementName());
 		}
-		assert("Should contain 2 methods", methods.length == 2);
+		assertTrue("Should contain 2 methods", methods.length == 2);
 	}	
 	
 

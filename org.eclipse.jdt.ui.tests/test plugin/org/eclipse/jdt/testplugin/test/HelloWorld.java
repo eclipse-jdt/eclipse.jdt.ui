@@ -4,7 +4,10 @@
  */
 package org.eclipse.jdt.testplugin.test;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -12,18 +15,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.JavaTestProject;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
-import junit.framework.TestCase;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.jdt.testplugin.*;
 
 
 public class HelloWorld extends TestCase {
+	
+	private IJavaProject fJProject;
 	
 	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), HelloWorld.class, args);
@@ -38,21 +36,25 @@ public class HelloWorld extends TestCase {
 	public HelloWorld(String name) {
 		super(name);
 	}
+	
+	protected void setUp() throws Exception {
+			fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+	}
+
+
+	protected void tearDown() throws Exception {
+		JavaProjectHelper.delete(fJProject);
+	}	
 		
 	public void test1() throws Exception {
-		IWorkspaceRoot root= JavaTestPlugin.getWorkspace().getRoot();
-		JavaTestProject testProject= new JavaTestProject(root, "TestProject", "bin");
-		
-		if (testProject.addRTJar() == null) {
-			assert("jdk not found", false);
+		if (JavaProjectHelper.addRTJar(fJProject) == null) {
+			assertTrue("jdk not found", false);
 			return;
 		}
 		
-		IJavaProject jproject= testProject.getJavaProject();
-		
 		String name= "java/util/Vector.java";
-		IClassFile classfile= (IClassFile)jproject.findElement(new Path(name));
-		assert("classfile not found", classfile != null);
+		IClassFile classfile= (IClassFile) fJProject.findElement(new Path(name));
+		assertTrue("classfile not found", classfile != null);
 		
 		IType type= classfile.getType();
 		System.out.println("methods of Vector");

@@ -7,59 +7,51 @@ package org.eclipse.jdt.ui.tests.core;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
+
 import org.eclipse.core.runtime.NullProgressMonitor;
-
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.testplugin.JavaTestProject;
-import org.eclipse.jdt.testplugin.JavaTestSetup;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
+
 import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOperation;
-import org.eclipse.jdt.testplugin.*;
-
-
-
-
-public class AddUnimplementedMethodsTest extends TestCase {
+public class AddUnimplementedMethodsTest extends TestCase {
 	
-	private JavaTestProject fTestProject;
+	private IJavaProject fJavaProject;
 	private IPackageFragment fPackage;
 	private IType fClassA, fInterfaceB, fClassC, fClassD, fInterfaceE;
 
 	public AddUnimplementedMethodsTest(String name) {
 		super(name);
 	}
-
-
+
 	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), AddUnimplementedMethodsTest.class, args);
 	}		
 		
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(AddUnimplementedMethodsTest.class.getName());
 		suite.addTest(new AddUnimplementedMethodsTest("test1"));
 		suite.addTest(new AddUnimplementedMethodsTest("test2"));
 		suite.addTest(new AddUnimplementedMethodsTest("test3"));
 		suite.addTest(new AddUnimplementedMethodsTest("test4"));
-		return new JavaTestSetup(suite);
+		return suite;
 	}
 	
-	/*
-	 * create a new source container "src"
+	/**
+	 * Creates a new test Java project.
 	 */	
 	protected void setUp() throws Exception {
-		fTestProject= JavaTestSetup.getTestProject();
-
-		IPackageFragmentRoot root= fTestProject.addSourceContainer("src");
+		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackage= root.createPackageFragment("ibm.util", true, null);
 		
 		ICompilationUnit cu= fPackage.getCompilationUnit("A.java");
@@ -86,11 +78,18 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		fInterfaceE.createMethod("void e() throws java.util.NoSuchElementException;\n", null, true, null);	
 	}
 
-	/*
-	 * remove the source container
-	 */	
+	/**
+	 * Removes the test java project.
+	 */
 	protected void tearDown () throws Exception {
-		fTestProject.removeSourceContainer("src");
+		JavaProjectHelper.delete(fJavaProject);
+		fJavaProject= null;
+		fPackage= null;
+		fClassA= null;
+		fInterfaceB= null;
+		fClassC= null;
+		fClassD= null;
+		fInterfaceE= null;
 	}
 				
 	/*
@@ -161,25 +160,26 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.NoSuchElementException" }, imports);
+		assertTrue(false);
 	}
 	
 	private void checkMethods(String[] expected, IMethod[] methods) {
 		int nMethods= methods.length;
 		int nExpected= expected.length;
-		assert("" + nExpected + " methods expected, is " + nMethods, nMethods == nExpected);
+		assertTrue("" + nExpected + " methods expected, is " + nMethods, nMethods == nExpected);
 		for (int i= 0; i < nExpected; i++) {
 			String methName= expected[i];
-			assert("method " + methName + " expected", nameContained(methName, methods));
+			assertTrue("method " + methName + " expected", nameContained(methName, methods));
 		}
 	}			
 	
 	private void checkImports(String[] expected, IImportDeclaration[] imports) {
 		int nImports= imports.length;
 		int nExpected= expected.length;
-		assert("" + nExpected + " imports expected, is " + nImports, nImports == nExpected);
+		assertTrue("" + nExpected + " imports expected, is " + nImports, nImports == nExpected);
 		for (int i= 0; i < nExpected; i++) {
 			String impName= expected[i];
-			assert("import " + impName + " expected", nameContained(impName, imports));
+			assertTrue("import " + impName + " expected", nameContained(impName, imports));
 		}
 	}
 
