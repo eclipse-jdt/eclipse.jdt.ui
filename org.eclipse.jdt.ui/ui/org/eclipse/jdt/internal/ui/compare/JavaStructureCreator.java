@@ -17,7 +17,6 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.parser.*;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 import org.eclipse.compare.*;
 import org.eclipse.compare.structuremergeviewer.*;
@@ -159,7 +158,6 @@ public class JavaStructureCreator implements IStructureCreator {
 			try {
 				parser.parseCompilationUnit(builder, false);
 			} catch (ParseError ex) {
-				// System.out.println("Parse error: " + ex);
 				// parse error: bail out
 				return null;
 			}
@@ -167,39 +165,7 @@ public class JavaStructureCreator implements IStructureCreator {
 		} 
 		return null;
 	}
-	
-	/* package */ IStructureComparator getStructure(InputStream is) {
 		
-		String contents= JavaCompareUtilities.readString(is);
-		
-		if (contents != null) {
-			int n= contents.length();
-			char[] buffer= new char[n];
-			contents.getChars(0, n, buffer, 0);
-			
-			Document doc= new Document(contents);
-			IDocumentPartitioner dp= JavaCompareUtilities.createJavaPartitioner();
-			if (dp != null) {
-				doc.setDocumentPartitioner(dp);
-				dp.connect(doc);
-			}
-			
-			// we hook into the root node to intercept all node changes
-			JavaNode root= new JavaNode(doc, false);
-			JavaParseTreeBuilder builder= new JavaParseTreeBuilder(root, buffer);
-			SourceElementParser parser= new SourceElementParser(builder, new ProblemFactory(), new CompilerOptions());
-			try {
-				parser.parseCompilationUnit(builder, false);
-			} catch (ParseError ex) {
-				// System.out.println("Parse error: " + ex);
-				// parse error: bail out
-				return null;
-			}
-			return root;
-		} 
-		return null;		
-	}
-	
 	/**
 	 * Returns true because this IStructureCreator knows how to save.
 	 */
@@ -239,21 +205,34 @@ public class JavaStructureCreator implements IStructureCreator {
 				
 		if (ignoreWhiteSpace) { 	// we return everything but Java whitespace
 			
+			// replace comments and whitespace by a single blank
 			StringBuffer buf= new StringBuffer();
+			char[] b= content.toCharArray();
 			
 			// to avoid the trouble when dealing with Unicode
 			// we use the Java scanner to extract non-whitespace and non-comment tokens
-			Scanner scanner= new Scanner(false, false);	// no whitespace, no comments
-			scanner.setSourceBuffer(content.toCharArray());
+			Scanner scanner= new Scanner(true, true);	// however we request Whitespace and Comments
+			scanner.setSourceBuffer(b);
 			try {
-				while (scanner.getNextToken() != TerminalSymbols.TokenNameEOF)
-					buf.append(content.substring(scanner.startPosition, scanner.currentPosition));
+				int token;
+				while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+					switch (token) {
+					case Scanner.TokenNameWHITESPACE:
+					case Scanner.TokenNameCOMMENT_BLOCK:
+					case Scanner.TokenNameCOMMENT_JAVADOC:
+					case Scanner.TokenNameCOMMENT_LINE:
+						int l= buf.length();
+						if (l > 0 && buf.charAt(l-1) != ' ')
+							buf.append(' ');
+						break;
+					default:
+						buf.append(b, scanner.startPosition, scanner.currentPosition - scanner.startPosition);
+						break;
+					}
+				}
+				content= buf.toString();	// success! 
 			} catch (InvalidInputException ex) {
-				JavaPlugin.log(ex);
-				return null;
 			}
-
-			content= buf.toString();
 		}
 		return content;
 	}
@@ -379,7 +358,7 @@ public class JavaStructureCreator implements IStructureCreator {
 		return find(structure, path, 0);
 	}
 	
-	/* package */ static String[] createPath(IJavaElement je) {
+	private static String[] createPath(IJavaElement je) {
 			
 		// build a path starting at the given Java element and walk
 		// up the parent chain until we reach a IWorkingCopy or ICompilationUnit
