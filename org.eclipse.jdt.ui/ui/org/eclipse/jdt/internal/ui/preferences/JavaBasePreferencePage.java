@@ -5,21 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
-
-import org.eclipse.jdt.internal.ui.IPreferencesConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.widgets.Composite;import org.eclipse.jface.preference.BooleanFieldEditor;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.FileFieldEditor;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /*
  * The page for setting java plugin preferences.
@@ -30,11 +16,19 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 	public static final String KEY_LIBRARY= "org.eclipse.jdt.ui.build.jdk.library.label";
 	public static final String KEY_LINKING= "org.eclipse.jdt.ui.packages.linkselection";
 	public static final String KEY_DESCRIPTION= "org.eclipse.jdt.ui.build.jdk.library.description";
+	public static final String KEY_LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkMoveCuToRefactoring";
+	public static final String KEY_LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkRenamePackageToRefactoring";
 
 	public JavaBasePreferencePage() {
 		super(GRID);
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(JavaPlugin.getResourceString(KEY_DESCRIPTION));
+	}
+
+	public static void initDefaults(IPreferenceStore store) {
+		store.setDefault(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR, true);
+		store.setDefault(IPreferencesConstants.LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING, false);
+		store.setDefault(IPreferencesConstants.LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING, false);
 	}
 
 	protected void createFieldEditors() {
@@ -58,6 +52,22 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 			parent
         );
 		addField(boolEditor);
+		
+		/* not active yet
+		boolEditor= new BooleanFieldEditor(
+			IPreferencesConstants.LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING,
+			JavaPlugin.getResourceString(KEY_LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING),
+			parent
+		);
+		addField(boolEditor);
+		
+		boolEditor= new BooleanFieldEditor(
+			IPreferencesConstants.LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING,
+			JavaPlugin.getResourceString(KEY_LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING),
+			parent
+		);
+		addField(boolEditor);
+		*/
 	}
 
 	public void init(IWorkbench workbench) {

@@ -14,6 +14,8 @@ public interface IPreferencesConstants {
 	
 	// keys
 	static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor";
+	static final String LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkMoveCuToRefactoring";
+	static final String LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkRenamePackageToRefactoring";
 	
 	static final String ATTACH_LAUNCH_PORT= "org.eclipse.jdt.ui.attachlaunch.port";
 	static final String ATTACH_LAUNCH_HOST= "org.eclipse.jdt.ui.attachlaunch.host";

@@ -611,7 +611,8 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			}
 			if (fSelection.coveredBy(sourceStart, sourceEnd))
 				return sourceStart;
-		} else if (ifStatement.elseStatement != null) {
+		}
+		if (ifStatement.elseStatement != null) {
 			sourceStart= fBuffer.indexOfStatementCharacter(ifStatement.thenStatement.sourceEnd + 1) + ELSE_LENGTH;
 			sourceEnd= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1) - 1;
 			if (fSelection.coveredBy(sourceStart, sourceEnd))

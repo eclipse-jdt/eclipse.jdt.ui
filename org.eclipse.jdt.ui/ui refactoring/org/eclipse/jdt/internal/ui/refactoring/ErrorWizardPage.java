@@ -174,10 +174,10 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	 * Method declared in IWizardPage.
 	 */
 	public boolean canFlipToNextPage() {
-		if (fStatus != null && isRefactoringPossible())
-			return super.canFlipToNextPage();
-			
-		return false;
+		// We have to call super.getNextPage since computing the next
+		// page is expensive. So we avoid it as long as possible.
+		return fStatus != null && isRefactoringPossible() &&
+			   isPageComplete() && super.getNextPage() != null;
 	}
 	
 	/* (non-Javadoc)
