@@ -109,7 +109,7 @@ public class StructureSelectionAction extends TextSelectionAction {
 			return true;
 			
 		if (parent instanceof AbstractMethodDeclaration)
-			return true;
+			return ((AbstractMethodDeclaration)parent).statements != null;
 			
 		return false;	
 	}
