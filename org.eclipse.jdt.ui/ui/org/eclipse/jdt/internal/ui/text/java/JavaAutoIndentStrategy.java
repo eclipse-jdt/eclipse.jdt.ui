@@ -986,7 +986,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		
 		clearCachedValues();
-		if (!isSmartMode())
+		if (!isSmartMode() || c.doit == false)
 			return;
 		
 		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
