@@ -44,29 +44,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-
-
-/**
- * Wizard pages constist of UI for the input fields, code that checks the validity of
- * the input, and code that creates the element from the input.<br>
- * In the case of the class / interface and package wizards, code can be shared, therefore
- * a hierarchy is build where each type adds more fields and verification code to the base class.
- * A framework is defined to specify how to extend functionality.<br>
- * ContainerPage contains a field / browse button to enter a container for a new java element.
- * The ContainerPage is extended by ContainerPackagePage and NewPackageCreationWizard <br>
- * The page defines a framework of methods that are overridden (extended) by base classes:
- * <dl>
- * <li><code>initFields</code> is called with a input element (java element)</li>
- * <li><code>setDefaultAttributes</code> is called when the input element could not be mapped to a java element</li>
- * <li><code>fieldsUpdated</code> is called when a dialog field changed. Every subtype is required
- * to call the method itself when a own field changed</li>
- * </dl>
- * ContainerPage offers the following methods to access to in sub types
- * <dl>
- * <li><code>getPackageFragmentRoot</code></li>
- * <li><code>createContainer</code></li>
- * </dl>
- */
 public abstract class ContainerPage extends NewElementWizardPage {
 	
 	/**
@@ -269,7 +246,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	 * Returns the PackageFragmentRoot corresponding to the current input.
 	 * Can be null
 	 */ 
-	protected IWorkspaceRoot getWorkspaceRoot() {
+	public IWorkspaceRoot getWorkspaceRoot() {
 		return fWorkspaceRoot;
 	}	
 	
@@ -277,14 +254,14 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	 * Returns the PackageFragmentRoot corresponding to the current input.
 	 * Can be null
 	 */ 
-	protected IPackageFragmentRoot getPackageFragmentRoot() {
+	public IPackageFragmentRoot getPackageFragmentRoot() {
 		return fCurrRoot;
 	}
 
 	/**
 	 * Returns the text of the container field
 	 */ 	
-	protected String getContainerText() {
+	public String getContainerText() {
 		return fContainerDialogField.getText();
 	}
 	
@@ -293,7 +270,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	 * Sets the current PackageFragmentRoot (model and text field)
 	 * @param canBeModified Selects if the container field can be changed by the user
 	 */ 
-	protected void setPackageFragmentRoot(IPackageFragmentRoot root, boolean canBeModified) {
+	public void setPackageFragmentRoot(IPackageFragmentRoot root, boolean canBeModified) {
 		fCurrRoot= root;
 		String str= (root == null) ? "" : root.getPath().toString();
 		fContainerDialogField.setText(str);

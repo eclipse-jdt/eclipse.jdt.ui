@@ -24,7 +24,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private static final String DIALOG_NEW_CLASSFOLDER= PAGE_NAME + ".NewClassFolderDialog";
 	private static final String DIALOG_JAR_ARCHIVE= 	PAGE_NAME + ".JARArchiveDialog";
 	private static final String DIALOG_SOURCE_ANNOT= 	PAGE_NAME + ".SourceAttachmentDialog";
-	private static final String DIALOG_VARIABLE= PAGE_NAME + ".VariableDialog";
 	
 	private static final String DIALOGSTORE_EXTJAR_PATH= PAGE_NAME + ".ExtJARPath";	
 	
@@ -332,10 +331,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	
 	private CPListElement[] chooseExtJarFiles() {
-		IPath projpath= fCurrJProject.getProject().getFullPath();
 		String lastUsedPath= fDialogSettings.get(IUIConstants.DIALOGSTORE_LASTEXTJAR);
 		if (lastUsedPath == null) {
-			lastUsedPath= projpath.toString();
+			lastUsedPath= "";
 		}
 		FileDialog dialog= new FileDialog(getShell(), SWT.MULTI);
 		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"});
@@ -362,28 +360,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		return elems;
 	}
 	
-	
 	private CPListElement[] chooseVariableEntries() {
 		List existing= fLibrariesList.getElements();
 		
-		String[] entries= JavaCore.getClasspathVariableNames();
-		ArrayList elements= new ArrayList(entries.length);
-		for (int i= 0; i < entries.length; i++) {
-			CPListElement curr= new CPListElement(JavaCore.newVariableEntry(entries[i]), null);
-			if (!existing.contains(curr)) {
-				elements.add(curr);
-			}
-		}
-		
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new CPListLabelProvider(), false, true);
-		dialog.setTitle(JavaPlugin.getResourceString(DIALOG_VARIABLE + ".title"));
-		dialog.setMessage(JavaPlugin.getResourceString(DIALOG_VARIABLE + ".description"));
-		dialog.setEmptyListMessage(JavaPlugin.getResourceString(DIALOG_VARIABLE + ".empty"));
-		if (dialog.open(elements.toArray()) == dialog.OK) {
-			Object[] res= dialog.getResult();
-			CPListElement[] ret= new CPListElement[res.length];
-			System.arraycopy(res, 0, ret, 0, res.length);
-			return ret;
+		VariableSelectionDialog dialog= new VariableSelectionDialog(getShell(), existing);
+		if (dialog.open() == dialog.OK) {
+			IPath res= dialog.getVariable();
+			IClasspathEntry entry= JavaCore.newVariableEntry(res.segment(0));
+			return new CPListElement[] { new CPListElement(entry, null) };
 		}
 		return null;
 	}

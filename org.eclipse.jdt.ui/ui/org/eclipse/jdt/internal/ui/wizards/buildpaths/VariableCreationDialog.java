@@ -3,13 +3,13 @@
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000
  */
-package org.eclipse.jdt.internal.ui.preferences;
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-public class NewVariableDialog extends StatusDialog {
+public class VariableCreationDialog extends StatusDialog {
 	
-	private static final String PAGE_NAME= "NewVariableDialog";
+	private static final String PAGE_NAME= "VariableCreationDialog";
 	private static final String TITLE_EDIT= PAGE_NAME + ".titlenew";
 	private static final String TITLE_NEW= PAGE_NAME + ".titleedit";
 	
@@ -34,7 +34,7 @@ public class NewVariableDialog extends StatusDialog {
 	
 	private List fExistingNames;
 		
-	public NewVariableDialog(Shell parent, CPVariableElement element, List existingNames) {
+	public VariableCreationDialog(Shell parent, CPVariableElement element, List existingNames) {
 		super(parent);
 		setTitle(JavaPlugin.getResourceString((element == null) ? TITLE_NEW : TITLE_EDIT));
 		
@@ -57,7 +57,6 @@ public class NewVariableDialog extends StatusDialog {
 		
 		fExistingNames= existingNames;
 		
-		
 		if (element != null) {
 			fNameField.setText(element.getName());
 			fPathField.setText(element.getPath().toString());
@@ -68,15 +67,19 @@ public class NewVariableDialog extends StatusDialog {
 		}
 	}
 	
+
 	public CPVariableElement getClasspathElement() {
 		return new CPVariableElement(fNameField.getText(), new Path(fPathField.getText()));
 	}
-	
+
+	/**
+	 * @see Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 */	
 	protected Control createDialogArea(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
-		int marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-		int marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fNameField, fPathField }, false, 420, 0, marginWidth, marginHeight);
+		Composite composite= (Composite)super.createDialogArea(parent);
+		
+		Composite inner= new Composite(composite, SWT.NONE);
+		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameField, fPathField }, false, 420, 0);
 		
 		DialogField focusField= (fElement == null) ? fNameField : fPathField;
 		focusField.postSetFocusOnDialogField(parent.getDisplay());
@@ -104,7 +107,6 @@ public class NewVariableDialog extends StatusDialog {
 				}
 			}	
 		}
-		
 	}
 	
 	protected void doFieldUpdated(DialogField field) {	
@@ -167,6 +169,8 @@ public class NewVariableDialog extends StatusDialog {
 			if (initPath == null) {
 				initPath= "";
 			}
+		} else {
+			initPath= new Path(initPath).removeLastSegments(1).toOSString();
 		}
 		
 		FileDialog dialog= new FileDialog(getShell());

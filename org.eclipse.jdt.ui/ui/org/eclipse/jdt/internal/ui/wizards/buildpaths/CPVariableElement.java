@@ -1,18 +1,16 @@
-package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.core.runtime.IPath;
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.core.runtime.IPath;
 
 
 public class CPVariableElement {
 
 	private String fName;
 	private IPath fPath;
-	private boolean fImmutable;
 
 	public CPVariableElement(String name, IPath path) {
 		fName= name;
 		fPath= path;
-		fImmutable= false;
 	}
-
+	
 	/**
 	 * Gets the path
 	 * @return Returns a IPath

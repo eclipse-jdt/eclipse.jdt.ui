@@ -294,7 +294,7 @@ public class SourceAttachmentBlock {
 		if (prevPath.isEmpty()) {
 			prevPath= fJARFileName;
 		}
-		String initPath= prevPath.removeLastSegments(1). toOSString();
+		String initPath= prevPath.removeLastSegments(1).toOSString();
 		
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setText(JavaPlugin.getResourceString(DIALOG_EXTJARDIALOG + ".text"));

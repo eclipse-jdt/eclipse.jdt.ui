@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.DialogPage;
+package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.DialogPage;import org.eclipse.jdt.internal.ui.widgets.MessageLine;
 
 public class StatusTool {
 
@@ -32,24 +32,38 @@ public class StatusTool {
 			}
 		}
 		return max;
-	}	
+	}
 	
 	/**
-	 * Applies the status to tey status line of a dialog page
+	 * Returns error-message / warning-message for a status
 	 */
-	public static void applyToStatusLine(DialogPage page, IStatus status) {
+	public static String[] getErrorMessages(IStatus status) {
 		String message= status.getMessage();
 		if (status.matches(IStatus.ERROR) && !"".equals(message)) {
-			page.setErrorMessage(message);
-			page.setMessage(null);
+			return new String[] { message, null };
 		} else if (status.matches(IStatus.WARNING | IStatus.INFO)) {
-			page.setErrorMessage(null);
-			page.setMessage(message);
+			return new String[] { null, message };
 		} else {
-			page.setErrorMessage(null);
-			page.setMessage(null);
+			return new String[] { null, null };
 		}
 	}
-
+	
+	/**
+	 * Applies the status to the status line of a dialog page
+	 */
+	public static void applyToStatusLine(DialogPage page, IStatus status) {
+		String[] messages= getErrorMessages(status);
+		page.setErrorMessage(messages[0]);
+		page.setMessage(messages[1]);
+	}
+	
+	/**
+	 * Applies the status to the status line of a dialog page
+	 */
+	public static void applyToStatusLine(MessageLine messageLine, IStatus status) {
+		String[] messages= getErrorMessages(status);
+		messageLine.setErrorMessage(messages[0]);
+		messageLine.setMessage(messages[1]);
+	}
 
 }

@@ -65,15 +65,17 @@ public class NewContainerDialog extends StatusDialog {
 	
 		
 	protected Control createDialogArea(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite composite= (Composite)super.createDialogArea(parent);
+		
+		Composite inner= new Composite(composite, SWT.NONE);
 		MGridLayout layout= new MGridLayout();
 		layout.minimumWidth= 380;
-		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		layout.numColumns= 1;
-		composite.setLayout(layout);
+		inner.setLayout(layout);
 		
-		fContainerDialogField.doFillIntoGrid(composite, 2);
+		fContainerDialogField.doFillIntoGrid(inner, 2);
 				
 		fContainerDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		return composite;

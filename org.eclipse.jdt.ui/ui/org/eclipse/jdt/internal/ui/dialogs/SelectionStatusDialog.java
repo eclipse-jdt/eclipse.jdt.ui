@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
 
-import org.eclipse.jdt.internal.ui.widgets.MessageLine;
+import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.widgets.MessageLine;
 
 /**
  * An abstract base class for dialogs with a status bar and ok/cancel buttons.
@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.widgets.MessageLine;
 public abstract class SelectionStatusDialog extends SelectionDialog {
 	
 	private MessageLine fStatusLine;
-	private StatusInfo fLastStatus;
+	private IStatus fLastStatus;
 	private Image fImage;
 	
 	public SelectionStatusDialog(Shell parent) {
@@ -115,20 +115,11 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	 * Update the dialog's status line to reflect the given status. It is save to call
 	 * this method before the dialog has been opened.
 	 */
-	protected void updateStatus(StatusInfo status) {
+	protected void updateStatus(IStatus status) {
 		fLastStatus= status;
 		if (fStatusLine != null && !fStatusLine.isDisposed()) {
 		    updateButtonsEnableState(status);
-			if (status.isOK()) {
-				fStatusLine.clearErrorMessage();
-				fStatusLine.clearMessage();
-			} else if (status.isWarning()) {
-				fStatusLine.clearErrorMessage();
-				fStatusLine.setMessage(status.getMessage());
-			} else {
-				fStatusLine.clearMessage();
-				fStatusLine.setErrorMessage(status.getMessage());
-			}			
+		    StatusTool.applyToStatusLine(fStatusLine, status);			
 		}
 	}	
 
@@ -136,10 +127,10 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	 * Update the status of the ok button to reflect the given status. Subclasses
 	 * may override this method to update additional buttons.
 	 */
-	protected void updateButtonsEnableState(StatusInfo status) {
+	protected void updateButtonsEnableState(IStatus status) {
 		Button okButton= getOkButton();
 		if (okButton != null && !okButton.isDisposed())
-			okButton.setEnabled(!status.isError());
+			okButton.setEnabled(!status.matches(IStatus.ERROR));
 	}
 	
 	/* (non-Javadoc)

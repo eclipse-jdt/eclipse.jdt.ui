@@ -46,17 +46,7 @@ public abstract class StatusDialog extends Dialog {
 		fLastStatus= status;
 		if (fStatusLine != null && !fStatusLine.isDisposed()) {
 			updateButtonsEnableState(status);
-			String message= status.getMessage();	    
-			if (status.matches(IStatus.ERROR) && !"".equals(message)) {
-				fStatusLine.setMessage(null);
-				fStatusLine.setErrorMessage(message);
-			} else if (status.matches(IStatus.INFO | IStatus.WARNING)) {
-				fStatusLine.setErrorMessage(null);
-				fStatusLine.setMessage(message);
-			} else {
-				fStatusLine.setMessage(null);
-				fStatusLine.setErrorMessage(null);
-			}			
+			StatusTool.applyToStatusLine(fStatusLine, status);	
 		}
 	}	
 
@@ -103,7 +93,9 @@ public abstract class StatusDialog extends Dialog {
 	protected Control createButtonBar(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2; layout.marginHeight= 0; layout.marginWidth= 0;
+		layout.numColumns= 2;
+		layout.marginHeight= 0;
+		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
