@@ -247,4 +247,88 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractMethod"</code>).
 	 */
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.actions.ExtractMethod"; //$NON-NLS-1$
+	
+	/**
+	 * Search menu: name of standard Find References in Workspace global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ReferencesInWorkspace"</code>).
+	 */
+	public static final String FIND_REFERENCES_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.ReferencesInWorkspace"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find References in Hierarchy global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ReferencesInHierarchy"</code>).
+	 */
+	public static final String FIND_REFERENCES_IN_HIERARCHY= "org.eclipse.jdt.ui.actions.ReferencesInHierarchy"; //$NON-NLS-1$
+	
+	/**
+	 * Search menu: name of standard Find References in Working Set global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ReferencesInWorkingSet"</code>).
+	 */
+	public static final String FIND_REFERENCES_IN_WORKING_SET= "org.eclipse.jdt.ui.actions.ReferencesInWorkingSet"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Declarations in Workspace global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.DeclarationsInWorkspace"</code>).
+	 */
+	public static final String FIND_DECLARATIONS_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.DeclarationsInWorkspace"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Declarations in Hierarchy global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.DeclarationsInHierarchy"</code>).
+	 */
+	public static final String FIND_DECLARATIONS_IN_HIERARCHY= "org.eclipse.jdt.ui.actions.DeclarationsInHierarchy"; //$NON-NLS-1$
+	
+	/**
+	 * Search menu: name of standard Find Declarations in Working Set global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.DeclarationsInWorkingSet"</code>).
+	 */
+	public static final String FIND_DECLARATIONS_IN_WORKING_SET= "org.eclipse.jdt.ui.actions.DeclarationsInWorkingSet"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Implementors in Workspace global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ImplementorsInWorkspace"</code>).
+	 */
+	public static final String FIND_IMPLEMENTORS_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.ImplementorsInWorkspace"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Implementors in Working Set global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ImplementorsInWorkingSet"</code>).
+	 */
+	public static final String FIND_IMPLEMENTORS_IN_WORKING_SET= "org.eclipse.jdt.ui.actions.ImplementorsInWorkingSet"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Read Access in Workspace global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ReadAccessInWorkspace"</code>).
+	 */
+	public static final String FIND_READ_ACCESS_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.ReadAccessInWorkspace"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Read Access in Hierarchy global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ReadAccessInHierarchy"</code>).
+	 */
+	public static final String FIND_READ_ACCESS_IN_HIERARCHY= "org.eclipse.jdt.ui.actions.ReadAccessInHierarchy"; //$NON-NLS-1$
+	
+	/**
+	 * Search menu: name of standard Find Read Access in Working Set global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ReadAccessInWorkingSet"</code>).
+	 */
+	public static final String FIND_READ_ACCESS_IN_WORKING_SET= "org.eclipse.jdt.ui.actions.ReadAccessInWorkingSet"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Write Access in Workspace global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.WriteAccessInWorkspace"</code>).
+	 */
+	public static final String FIND_WRITE_ACCESS_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.WriteAccessInWorkspace"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Read Access in Hierarchy global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.WriteAccessInHierarchy"</code>).
+	 */
+	public static final String FIND_WRITE_ACCESS_IN_HIERARCHY= "org.eclipse.jdt.ui.actions.WriteAccessInHierarchy"; //$NON-NLS-1$
+	
+	/**
+	 * Search menu: name of standard Find Read Access in Working Set global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet"</code>).
+	 */
+	public static final String FIND_WRITE_ACCESS_IN_WORKING_SET= "org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet"; //$NON-NLS-1$
 }
