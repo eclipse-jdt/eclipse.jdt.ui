@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -33,6 +34,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -129,6 +131,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_2= JavaCore.VERSION_1_2;
 	private static final String VERSION_1_3= JavaCore.VERSION_1_3;
 	private static final String VERSION_1_4= JavaCore.VERSION_1_4;
+	private static final String VERSION_1_5= JavaCore.VERSION_1_5;
 	
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
@@ -150,7 +153,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	private ArrayList fComplianceControls;
 	private PixelConverter fPixelConverter;
-	private Composite fJavadocComposite;	
+	private Composite fJavadocComposite;
+	
+	private String[] fRememberedUserCompliance;
 
 	private IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus;
 
@@ -167,7 +172,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		if (ENABLED.equals(fWorkingValues.get(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT))) {
 			fWorkingValues.put(PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, ENABLED);
 		}
-		
+		fRememberedUserCompliance= new String[] {
+			(String) fWorkingValues.get(PREF_PB_ASSERT_AS_IDENTIFIER),
+			(String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY),
+			(String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM),
+			(String) fWorkingValues.get(PREF_COMPLIANCE),
+		};
 	}
 	
 	private final String[] KEYS= new String[] {
@@ -615,11 +625,21 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 
-		String[] values34= new String[] { VERSION_1_3, VERSION_1_4 };
-		String[] values34Labels= new String[] {
-			PreferencesMessages.getString("CompilerConfigurationBlock.version13"),  //$NON-NLS-1$
-			PreferencesMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
-		};
+		String[] values34, values34Labels;
+		if (JavaModelUtil.isJDTCore_1_5()) {
+			values34= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5 };
+			values34Labels= new String[] {
+				PreferencesMessages.getString("CompilerConfigurationBlock.version13"),  //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version14"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version15") //$NON-NLS-1$
+			};
+		} else {
+			values34= new String[] { VERSION_1_3, VERSION_1_4 };
+			values34Labels= new String[] {
+				PreferencesMessages.getString("CompilerConfigurationBlock.version13"),  //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
+			};
+		}
 
 		Composite compComposite= new Composite(folder, SWT.NULL);
 		compComposite.setLayout(layout);
@@ -643,13 +663,25 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		Control[] otherChildren= group.getChildren();	
 				
-		String[] values14= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4 };
-		String[] values14Labels= new String[] {
-			PreferencesMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
-			PreferencesMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
-			PreferencesMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
-			PreferencesMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
-		};
+		String[] values14, values14Labels;
+		if (JavaModelUtil.isJDTCore_1_5()) {
+			values14= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5 };
+			values14Labels= new String[] {
+				PreferencesMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version14"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version15") //$NON-NLS-1$
+			};
+		} else {
+			values14= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4 };
+			values14Labels= new String[] {
+				PreferencesMessages.getString("CompilerConfigurationBlock.version11"),  //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version12"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version13"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.version14") //$NON-NLS-1$
+			};
+		}
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.codegen_targetplatform.label"); //$NON-NLS-1$
 		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, values14, values14Labels, indent);	
@@ -711,17 +743,17 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		if (changedKey != null) {
 			if (INTR_DEFAULT_COMPLIANCE.equals(changedKey)) {
 				updateComplianceEnableState();
-				if (DEFAULT_CONF.equals(newValue)) {
-					updateComplianceDefaultSettings();
-				}
+				updateComplianceDefaultSettings(true);
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_COMPLIANCE.equals(changedKey)) {
 				if (checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF)) {
-					updateComplianceDefaultSettings();
+					updateComplianceDefaultSettings(false);
 				}
 				fComplianceStatus= validateCompliance();
-			} else if (PREF_SOURCE_COMPATIBILITY.equals(changedKey) ||
-					PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey) ||
+			} else if (PREF_SOURCE_COMPATIBILITY.equals(changedKey)) {
+				updateAssertAsIdentifierEnableState();
+				fComplianceStatus= validateCompliance();
+			} else if (PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey) ||
 					PREF_PB_ASSERT_AS_IDENTIFIER.equals(changedKey)) {
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_PB_MAX_PER_UNIT.equals(changedKey)) {
@@ -746,6 +778,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		} else {
 			updateEnableStates();
 			updateComplianceEnableState();
+			updateAssertAsIdentifierEnableState();
 			fComplianceStatus= validateCompliance();
 			fMaxNumberProblemsStatus= validateMaxNumberProblems();
 			fResourceFilterStatus= validateResourceFilters();
@@ -786,23 +819,31 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	private IStatus validateCompliance() {
 		StatusInfo status= new StatusInfo();
-		if (checkValue(PREF_COMPLIANCE, VERSION_1_3)) {
-			if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
-				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.cpl13src14.error")); //$NON-NLS-1$
+		String compliance= (String) fWorkingValues.get(PREF_COMPLIANCE);
+		String source= (String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY);
+		String target= (String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM);
+		
+		if (VERSION_1_3.equals(compliance)) {
+			if (VERSION_1_4.equals(source) || VERSION_1_5.equals(source)) {
+				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.cpl13src145.error")); //$NON-NLS-1$
 				return status;
-			} else if (checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4)) {
-				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.cpl13trg14.error")); //$NON-NLS-1$
+			} 
+			if (VERSION_1_4.equals(target) || VERSION_1_5.equals(target)) {
+				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.cpl13trg145.error")); //$NON-NLS-1$
 				return status;
 			}
-		}
-		if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
-			if (!checkValue(PREF_PB_ASSERT_AS_IDENTIFIER, ERROR)) {
-				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.src14asrterr.error")); //$NON-NLS-1$
+		} else if (VERSION_1_4.equals(compliance)) {
+			if (VERSION_1_5.equals(source)) {
+				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.cpl14src15.error")); //$NON-NLS-1$
 				return status;
-			}
+			} 
+			if (VERSION_1_5.equals(target)) {
+				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.cpl14trg15.error")); //$NON-NLS-1$
+				return status;
+			}			
 		}
-		if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
-			if (!checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4)) {
+		if (VERSION_1_4.equals(source)) {
+			if (!VERSION_1_4.equals(target)) {
 				status.setError(PreferencesMessages.getString("CompilerConfigurationBlock.src14tgt14.error")); //$NON-NLS-1$
 				return status;
 			}
@@ -861,21 +902,71 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			curr.setEnabled(enabled);
 		}
 	}
+	
+	private void updateAssertAsIdentifierEnableState() {
+		if (checkValue(INTR_DEFAULT_COMPLIANCE, USER_CONF)) {
+			boolean enabled= checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_3);
+			Combo combo= getComboBox(PREF_PB_ASSERT_AS_IDENTIFIER);
+			combo.setEnabled(enabled);
+			
+			if (!enabled) {
+				String val= (String) fWorkingValues.get(PREF_PB_ASSERT_AS_IDENTIFIER);
+				if (!ERROR.equals(val)) {
+					fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, ERROR);
+					updateCombo(combo);
+					fRememberedUserCompliance[0]= val;
+				}
+			} else {
+				String val= fRememberedUserCompliance[0];
+				if (!ERROR.equals(val)) {
+					fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, val);
+					updateCombo(combo);
+				}
+			}
+		}
+	}
 
 	/*
 	 * Set the default compliance values derived from the chosen level
 	 */	
-	private void updateComplianceDefaultSettings() {
-		Object complianceLevel= fWorkingValues.get(PREF_COMPLIANCE);
-		if (VERSION_1_3.equals(complianceLevel)) {
-			fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, IGNORE);
-			fWorkingValues.put(PREF_SOURCE_COMPATIBILITY, VERSION_1_3);
-			fWorkingValues.put(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_1);
-		} else if (VERSION_1_4.equals(complianceLevel)) {
-			fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, WARNING);
-			fWorkingValues.put(PREF_SOURCE_COMPATIBILITY, VERSION_1_3);
-			fWorkingValues.put(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_2);
+	private void updateComplianceDefaultSettings(boolean rememberOld) {
+		String assertAsId, source, target;
+		String complianceLevel= (String) fWorkingValues.get(PREF_COMPLIANCE);
+		boolean isDefault= checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF);
+		
+		if (isDefault) {
+			if (rememberOld) {
+				fRememberedUserCompliance[0]= (String) fWorkingValues.get(PREF_PB_ASSERT_AS_IDENTIFIER);
+				fRememberedUserCompliance[1]= (String) fWorkingValues.get(PREF_SOURCE_COMPATIBILITY);
+				fRememberedUserCompliance[2]= (String) fWorkingValues.get(PREF_CODEGEN_TARGET_PLATFORM);
+				fRememberedUserCompliance[3]= complianceLevel;
+			}
+
+			if (VERSION_1_4.equals(complianceLevel)) {
+				assertAsId= WARNING;
+				source= VERSION_1_3;
+				target= VERSION_1_2;
+			} else if (VERSION_1_5.equals(complianceLevel)) {
+				assertAsId= ERROR;
+				source= VERSION_1_5;
+				target= VERSION_1_5;
+			} else {
+				assertAsId= IGNORE;
+				source= VERSION_1_3;
+				target= VERSION_1_1;
+			}
+		} else {
+			if (rememberOld && complianceLevel.equals(fRememberedUserCompliance[3])) {
+				assertAsId= fRememberedUserCompliance[0];
+				source= fRememberedUserCompliance[1];
+				target= fRememberedUserCompliance[2];
+			} else {
+				return;
+			}
 		}
+		fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, assertAsId);
+		fWorkingValues.put(PREF_SOURCE_COMPATIBILITY, source);
+		fWorkingValues.put(PREF_CODEGEN_TARGET_PLATFORM, target);
 		updateControls();
 	}
 	

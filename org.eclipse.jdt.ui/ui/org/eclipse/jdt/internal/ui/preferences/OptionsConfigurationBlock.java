@@ -472,26 +472,35 @@ public abstract class OptionsConfigurationBlock {
 	protected void updateControls() {
 		// update the UI
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
-			Button curr= (Button) fCheckBoxes.get(i);
-			ControlData data= (ControlData) curr.getData();
-					
-			String currValue= (String) fWorkingValues.get(data.getKey());	
-			curr.setSelection(data.getSelection(currValue) == 0);			
+			updateCheckBox((Button) fCheckBoxes.get(i));
 		}
 		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
-			Combo curr= (Combo) fComboBoxes.get(i);
-			ControlData data= (ControlData) curr.getData();
-					
-			String currValue= (String) fWorkingValues.get(data.getKey());	
-			curr.select(data.getSelection(currValue));			
+			updateCombo((Combo) fComboBoxes.get(i));
 		}
 		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
-			Text curr= (Text) fTextBoxes.get(i);
-			String key= (String) curr.getData();
-			
-			String currValue= (String) fWorkingValues.get(key);
-			curr.setText(currValue);
+			updateText((Text) fTextBoxes.get(i));
 		}
+	}
+	
+	protected void updateCombo(Combo curr) {
+		ControlData data= (ControlData) curr.getData();
+		
+		String currValue= (String) fWorkingValues.get(data.getKey());	
+		curr.select(data.getSelection(currValue));					
+	}
+	
+	protected void updateCheckBox(Button curr) {
+		ControlData data= (ControlData) curr.getData();
+		
+		String currValue= (String) fWorkingValues.get(data.getKey());	
+		curr.setSelection(data.getSelection(currValue) == 0);						
+	}
+	
+	protected void updateText(Text curr) {
+		String key= (String) curr.getData();
+		
+		String currValue= (String) fWorkingValues.get(key);
+		curr.setText(currValue);				
 	}
 	
 	protected Button getCheckBox(String key) {
