@@ -346,6 +346,8 @@ public class ImportsStructure implements IImportsStructure {
 				}
 			}
 		}
+//		System.out.println("Add " + fullTypeName + " from " + fCompilationUnit.getElementName());
+
 		fHasChanges= true;
 		return typeName;
 	}
@@ -355,11 +357,14 @@ public class ImportsStructure implements IImportsStructure {
 	 */
 	public void removeImport(String qualifiedTypeName) {
 		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
+//		System.out.println("Remove " + qualifiedTypeName + " from " + fCompilationUnit.getElementName());
 		int nPackages= fPackageEntries.size();
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
 			if (entry.getName().equals(typeContainerName)) {
-				fHasChanges= entry.remove(qualifiedTypeName);
+				if (entry.remove(qualifiedTypeName)) {
+					fHasChanges= true;
+				}
 				return;
 			}
 		}
@@ -468,7 +473,7 @@ public class ImportsStructure implements IImportsStructure {
 		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
 			int nImports= pack.getNumberOfImports();
-			if (nImports == 0) {
+			if (nImports == 0 || fFilterImplicitImports && isImplicitImport(pack.getName(), fCompilationUnit)) {
 				continue;
 			}
 			

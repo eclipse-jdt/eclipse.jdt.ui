@@ -82,7 +82,7 @@ public final class ImportEdit extends SimpleTextEdit {
 	 * 	container; otherwise <code>false</code> is returned
 	 */
 	public boolean isEmpty() {
-		return fImportsStructure.hasChanges();
+		return !fImportsStructure.hasChanges();
 	}
 	
 	/* non Java-doc
