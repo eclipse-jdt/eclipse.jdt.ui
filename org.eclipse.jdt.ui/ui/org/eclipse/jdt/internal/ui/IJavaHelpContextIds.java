@@ -36,7 +36,7 @@ public interface IJavaHelpContextIds {
 
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context";
-	public static final String OPEN_TYPE_DIALOG= PREFIX + "opem_type_dialog_context";
+	public static final String OPEN_TYPE_DIALOG= PREFIX + "open_type_dialog_context";
 	public static final String EDIT_JRE_DIALOG= PREFIX + "edit_jre_dialog_context";
 	public static final String SOURCE_ATTACHMENT_DIALOG= PREFIX + "source_attachment_dialog_context";
 	public static final String VARIABLE_SELECTION_DIALOG= PREFIX + "variable_selection_dialog_context";
@@ -83,7 +83,7 @@ public interface IJavaHelpContextIds {
 	public static final String REFACTORING_PREVIEW_WIZARD_PAGE= PREFIX + "refactoring_preview_wizard_page_context";
 	
 	public static final String MOVE_CU_WIZARD_PAGE= PREFIX + "move_cu_wizard_page_context";
-	public static final String MOVE_CU_ERROR_WIZARD_PAGE= PREFIX + "move_cu_wizard_error_page_context";
+	public static final String MOVE_CU_ERROR_WIZARD_PAGE= PREFIX + "move_cu_error_wizard_page_context";
 	public static final String RENAME_PARAMS_WIZARD_PAGE= PREFIX + "rename_params_wizard_page";
 	public static final String RENAME_PARAMS_ERROR_WIZARD_PAGE= PREFIX + "rename_params_error_wizard_page";
 	public static final String EXTRACT_METHOD_WIZARD_PAGE= PREFIX + "extract_method_wizard_page_context";
@@ -91,7 +91,7 @@ public interface IJavaHelpContextIds {
 	public static final String RENAME_PACKAGE_WIZARD_PAGE= PREFIX + "rename_package_wizard_page_context";
 	public static final String RENAME_PACKAGE_ERROR_WIZARD_PAGE= PREFIX + "rename_package_error_wizard_page_context";
 	public static final String RENAME_CU_WIZARD_PAGE= PREFIX + "rename_cu_wizard_page_context";
-	public static final String RENAME_CU_ERROR_WIZARD_PAGE= PREFIX + "rename_cu_wizard_error_page_context";
+	public static final String RENAME_CU_ERROR_WIZARD_PAGE= PREFIX + "rename_cu_error_wizard_page_context";
 	public static final String RENAME_METHOD_WIZARD_PAGE= PREFIX + "rename_method_wizard_page_context";
 	public static final String RENAME_METHOD_ERROR_WIZARD_PAGE= PREFIX + "rename_method_error_wizard_page_context";
 	public static final String RENAME_TYPE_WIZARD_PAGE= PREFIX + "rename_type_wizard_page_context";

@@ -454,22 +454,23 @@ public class BuildPathsBlock {
 		}
 		fOutputLocationPath= path;
 		
-		/*
+		
+		// 1GET6BZ: ITPJUI:ALL - Error setting source folder
 		// test if the build path is overlapping with a class path entry
 		// (exception: a source contianer may be equal to the bin folder (but not nested))
-		Vector elements= fClassPathList.getElements();
+		List elements= fClassPathList.getElements();
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
-			CPListElement listElement= (CPListElement)elements.elementAt(i);
-			IPath cppath= listElement.getPath();
-			if (path.isPrefixOf(cppath)) {
-				if ((listElement.getEntryKind() == IClasspathEntry.CPE_SOURCE) && !path.equals(cppath)) {
+			CPListElement listElement= (CPListElement)elements.get(i);
+			int kind= listElement.getEntryKind();
+			
+			if (kind == IClasspathEntry.CPE_SOURCE || kind == IClasspathEntry.CPE_LIBRARY) {
+				IPath cppath= listElement.getPath();
+				if (path.isPrefixOf(cppath) && !path.equals(cppath)) {
 					fBuildPathStatus.setError(getFormattedString(BP_CPBP_CLASH_ERROR, cppath.toString()));
+					return;
 				}
-				return;
 			}
 		}
-		*/		
-		
 				
 		fBuildPathStatus.setOK();
 	}	

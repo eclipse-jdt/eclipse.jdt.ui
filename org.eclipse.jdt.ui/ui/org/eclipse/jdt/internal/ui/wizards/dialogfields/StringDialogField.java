@@ -72,12 +72,14 @@ public class StringDialogField extends DialogField {
 					doModifyText(e);
 				}
 			};
-				
+			
 			fTextControl= new Text(parent, SWT.SINGLE | SWT.BORDER);
+			// moved up due to 1GEUNW2
+			fTextControl.setText(fText);
 			fTextControl.setFont(parent.getFont());
 			fTextControl.addModifyListener(fModifyListener);
 			
-			fTextControl.setText(fText);
+			
 			fTextControl.setEnabled(isEnabled());
 		}
 		return fTextControl;
