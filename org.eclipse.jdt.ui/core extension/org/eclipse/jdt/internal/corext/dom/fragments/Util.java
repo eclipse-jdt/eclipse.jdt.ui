@@ -11,6 +11,11 @@
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 
@@ -22,18 +27,38 @@ import org.eclipse.jdt.internal.corext.SourceRange;
  * they could be moved to some less specialized package.
  */
 class Util {
-	static boolean rangeIncludesNonWhitespaceOutsideRange(SourceRange first, SourceRange second, IBuffer buffer) {
-		if(!first.covers(second))
+	static boolean rangeIncludesNonWhitespaceOutsideRange(SourceRange selection, SourceRange nodes, IBuffer buffer) {
+		if(!selection.covers(nodes))
 			return false;
 
-		if(!isJustWhitespace(first.getOffset(), second.getOffset(), buffer))
+		//TODO: skip leading comments. Consider that leading line comment must be followed by newline!
+		if(!isJustWhitespace(selection.getOffset(), nodes.getOffset(), buffer))
 			return true;
-		if(!isJustWhitespace(second.getOffset() + second.getLength(), first.getOffset() + first.getLength(), buffer))				
+		if(!isJustWhitespaceOrComment(nodes.getOffset() + nodes.getLength(), selection.getOffset() + selection.getLength(), buffer))				
 			return true;
 		return false;		
 	}
 	private static boolean isJustWhitespace(int start, int end, IBuffer buffer) {
+		if (start == end)
+			return true;
 		Assert.isTrue(start <= end);
 		return 0 == buffer.getText(start, end - start).trim().length();
+	}
+	private static boolean isJustWhitespaceOrComment(int start, int end, IBuffer buffer) {
+		if (start == end)
+			return true;
+		Assert.isTrue(start <= end);
+		String trimmedText= buffer.getText(start, end - start).trim();
+		if (0 == trimmedText.length()) {
+			return true;
+		} else {
+			IScanner scanner= ToolFactory.createScanner(false, false, false, null);
+			scanner.setSource(trimmedText.toCharArray());
+			try {
+				return scanner.getNextToken() == ITerminalSymbols.TokenNameEOF;
+			} catch (InvalidInputException e) {
+				return false;
+			}
+		}
 	}
 }

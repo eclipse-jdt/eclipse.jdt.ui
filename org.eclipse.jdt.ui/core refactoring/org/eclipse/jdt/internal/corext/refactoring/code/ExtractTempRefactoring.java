@@ -139,7 +139,8 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	public static boolean isAvailable(ASTNode[] selectedNodes, ASTNode coveringNode) {
-		return Checks.isExtractableExpression(selectedNodes, coveringNode);
+		return Checks.isExtractableExpression(selectedNodes, coveringNode) ||
+				(selectedNodes.length == 1 && selectedNodes[0] instanceof ExpressionStatement);
 	}
 
 	public static ExtractTempRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
@@ -921,6 +922,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (selectedFragment instanceof IExpressionFragment
 				&& ! Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {
 			fSelectedExpression= (IExpressionFragment) selectedFragment;
+		} else if (selectedFragment != null && selectedFragment.getAssociatedNode() instanceof ExpressionStatement) {
+			ExpressionStatement exprStatement= (ExpressionStatement) selectedFragment.getAssociatedNode();
+			Expression expression= exprStatement.getExpression();
+			fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(expression);
 		}
 
 		return fSelectedExpression;
