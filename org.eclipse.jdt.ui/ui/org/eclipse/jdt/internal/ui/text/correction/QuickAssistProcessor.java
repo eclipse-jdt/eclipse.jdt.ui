@@ -202,23 +202,29 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		}
 		
 		Statement body= null;
+		String label= null;
 		if (outer instanceof IfStatement) {
 			IfStatement ifStatement= (IfStatement) outer;
 			Statement elseBlock= ifStatement.getElseStatement();
 			if (elseBlock == null || ((elseBlock instanceof Block) && ((Block) elseBlock).statements().isEmpty())) {
 				body= ifStatement.getThenStatement();
-			}				
+			}
+			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.ifstatement");	 //$NON-NLS-1$
 		} else if (outer instanceof WhileStatement) {
 			body=((WhileStatement) outer).getBody();
+			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.whilestatement");	 //$NON-NLS-1$
 		} else if (outer instanceof ForStatement) {
 			body=((ForStatement) outer).getBody();
+			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.forstatement");	 //$NON-NLS-1$
 		} else if (outer instanceof DoStatement) {
 			body=((DoStatement) outer).getBody();
+			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.dostatement");	 //$NON-NLS-1$
 		} else if (outer instanceof TryStatement) {
 			TryStatement tryStatement= (TryStatement) outer;
 			if (tryStatement.catchClauses().isEmpty()) {
 				body= tryStatement.getBody();
 			}
+			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.trystatement");	 //$NON-NLS-1$
 		} else if (outer instanceof AnonymousClassDeclaration) {
 			List decls= ((AnonymousClassDeclaration) outer).bodyDeclarations();
 			for (int i= 0; i < decls.size(); i++) {
@@ -235,11 +241,13 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 					return;
 				}
 			}
+			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.anonymous");	 //$NON-NLS-1$
 			outer= ASTResolving.findParentStatement(outer);
 		} else if (outer instanceof Block) {
 			//	-> a block in a block
 			body= block;
 			outer= block;
+			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.block");	 //$NON-NLS-1$
 		}
 		if (body == null) {
 			return; 
@@ -247,7 +255,6 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		ASTNode inner= getCopyOfInner(rewrite, body);
 		if (inner != null) {
 			rewrite.markAsReplaced(outer, inner);
-			String label= CorrectionMessages.getString("QuickAssistProcessor.extrude.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 			proposal.ensureNoModifications();
