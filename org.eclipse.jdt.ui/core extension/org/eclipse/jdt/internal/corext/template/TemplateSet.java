@@ -286,6 +286,20 @@ public class TemplateSet {
 		return (Template[]) fTemplates.toArray(new Template[fTemplates.size()]);
 	}
 	
+	/**
+	 * Returns all templates with a given name.
+	 */
+	public Template[] getTemplates(String name) {
+		ArrayList res= new ArrayList();
+		for (Iterator iterator= fTemplates.iterator(); iterator.hasNext();) {
+			Template curr= (Template) iterator.next();
+			if (curr.getName().equals(name)) {
+				res.add(curr);
+			}
+		}
+		return (Template[]) res.toArray(new Template[res.size()]);
+	}	
+	
 	private void sort() {
 		fSortedTemplates= (Template[]) fTemplates.toArray(new Template[fTemplates.size()]);
 		Arrays.sort(fSortedTemplates, fTemplateComparator);

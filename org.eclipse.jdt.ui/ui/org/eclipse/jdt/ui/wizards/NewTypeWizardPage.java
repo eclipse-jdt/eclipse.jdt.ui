@@ -1351,12 +1351,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Gets the template of the given name, evaluated in the context of a CU.
 	 */
 	protected String getTemplate(String name, ICompilationUnit parentCU) {
-		Template[] templates= Templates.getInstance().getTemplates();
 		try {
-			for (int i= 0; i < templates.length; i++) {
-				if (name.equals(templates[i].getName())) {
-					return JavaContext.evaluateTemplate(templates[i], parentCU);
-				}
+			Template[] templates= Templates.getInstance().getTemplates(name);
+			if (templates.length > 0) {
+				return JavaContext.evaluateTemplate(templates[0], parentCU);
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
