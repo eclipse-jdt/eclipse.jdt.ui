@@ -23,9 +23,6 @@ import org.eclipse.jdt.core.JavaCore;
  * The page for setting java runtime
  */
 public abstract class JavaProjectPropertyPage extends PropertyPage {
-
-	protected static final String CORE_EXCEPTION="java_project_propertypage.core_exception";
-	protected static final String NO_JAVA="java_project_propertypage.no_java";
 	
 	private boolean fIsCreated;
 	
@@ -45,11 +42,11 @@ public abstract class JavaProjectPropertyPage extends PropertyPage {
 	protected abstract Control createJavaContents(Composite parent);
 	
 	protected Control createNoJavaContents(Composite parent) {
-		return createLabelOnly(parent, JavaLaunchUtils.getResourceString(NO_JAVA));
+		return createLabelOnly(parent, LauncherMessages.getString("javaProjectPropertyPage.notJava")); //$NON-NLS-1$
 	};
 	
 	protected Control createClosedContents(Composite parent) {
-		return createLabelOnly(parent, "Java information is not available for a closed project.");
+		return createLabelOnly(parent, LauncherMessages.getString("javaProjectPropertyPage.closed")); //$NON-NLS-1$
 	}
 	
 	protected Control createLabelOnly(Composite parent, String labelText) {
@@ -63,7 +60,7 @@ public abstract class JavaProjectPropertyPage extends PropertyPage {
 		try {
 			return proj.hasNature(JavaCore.NATURE_ID);
 		} catch (CoreException e) {
-			ErrorDialog.openError(getControl().getShell(), JavaLaunchUtils.getResourceString(CORE_EXCEPTION), null, e.getStatus());
+			ErrorDialog.openError(getControl().getShell(), LauncherMessages.getString("javaProjectPropertyPage.exception"), null, e.getStatus()); //$NON-NLS-1$
 		}
 		return false;
 	}

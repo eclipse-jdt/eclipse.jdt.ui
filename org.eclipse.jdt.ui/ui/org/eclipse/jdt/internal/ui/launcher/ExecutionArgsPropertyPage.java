@@ -32,20 +32,11 @@ import org.eclipse.jdt.launching.ExecutionArguments;
 
 public class ExecutionArgsPropertyPage extends PropertyPage {
 
-	public static final String PREFIX= "executionArgs.";
-	public static final String VMARGS_LABEL= PREFIX + "vmArgs.label";
-	public static final String PROGARGS_LABEL= PREFIX + "programArgs.label";
-	public static final String NO_ARGS_LABEL= PREFIX + "no_args.label";
-	public static final String ERROR_PREFIX= PREFIX + "error.setArgs.";
-	public static final String ERROR_MESSAGE= PREFIX + "error.setArgs.message";
-
 	private Text fVMArgs;
 	private Text fProgramArgs;
 
 	protected Control createContents(Composite parent) {
 		noDefaultAndApplyButton();
-
-		ResourceBundle bundle= JavaLaunchUtils.getResourceBundle();
 
 		Composite contents= new Composite(parent, SWT.NULL);
 
@@ -55,13 +46,13 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 
 		if (args == null) {
 			Label l= new Label(contents, SWT.NULL);
-			l.setText(bundle.getString(NO_ARGS_LABEL));
+			l.setText(LauncherMessages.getString("executionArgsPropertyPage.notAvailable")); //$NON-NLS-1$
 		} else {
 
 			GridData gd;
 			Label l= new Label(contents, SWT.NULL);
 			l.setLayoutData(new GridData());
-			l.setText(bundle.getString(PROGARGS_LABEL));
+			l.setText(LauncherMessages.getString("executionArgsPropertyPage.programArgs")); //$NON-NLS-1$
 
 			fProgramArgs= new Text(contents, SWT.BORDER);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -71,7 +62,7 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 
 			l= new Label(contents, SWT.NULL);
 			l.setLayoutData(new GridData());
-			l.setText(bundle.getString(VMARGS_LABEL));
+			l.setText(LauncherMessages.getString("executionArgsPropertyPage.vmArgs")); //$NON-NLS-1$
 
 			fVMArgs= new Text(contents, SWT.BORDER);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -96,7 +87,7 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 		} catch (CoreException e) {
 		}
 		if (args == null) {
-			args= new ExecutionArguments("", "");
+			args= new ExecutionArguments("", ""); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		return args;
 	}
@@ -112,7 +103,7 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 			try {
 				ExecutionArguments.setArguments(type, new ExecutionArguments(fVMArgs.getText(), fProgramArgs.getText()));
 			} catch (CoreException e) {
-				JavaLaunchUtils.errorDialog(getControl().getShell(), ERROR_PREFIX, e.getStatus());
+				JavaLaunchUtils.errorDialog(getControl().getShell(), LauncherMessages.getString("executionArgsPropertyPage.error.title"), LauncherMessages.getString("executionArgsPropertyPage.error.setArgs"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 		}
 	}
@@ -125,9 +116,9 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 		if (element instanceof ICompilationUnit) {
 			ICompilationUnit cu= (ICompilationUnit) element;
 			String name= cu.getElementName();
-			if (name.endsWith(".java")) {
+			if (name.endsWith(".java")) { //$NON-NLS-1$
 				//fix for 1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
-				name= name.substring(0, name.indexOf("."));
+				name= name.substring(0, name.indexOf(".")); //$NON-NLS-1$
 				IType t= cu.getType(name);
 				if (t.exists())
 					element= t;

@@ -28,7 +28,7 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 		
 		fUseDefault= new Button(parent, SWT.RADIO);
 		fUseDefault.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fUseDefault.setText("Use default JRE for launching");
+		fUseDefault.setText(LauncherMessages.getString("vmPropertyPage.useDefaultJRE")); //$NON-NLS-1$
 		fUseDefault.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event evt) {
 				enableCustom(false);
@@ -37,7 +37,7 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 		
 		fUseCustom= new Button(parent, SWT.RADIO);
 		fUseCustom.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fUseCustom.setText("Use custom JRE for launching");
+		fUseCustom.setText(LauncherMessages.getString("vmPropertyPage.useCustomJRE")); //$NON-NLS-1$
 		fUseCustom.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event evt) {
 				enableCustom(true);
@@ -90,13 +90,13 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 	public void setElement(IAdaptable element) {
 		super.setElement(element);
 		if (getJavaProject() != null && isOpenProject())
-			setDescription("Select the JRE for launching Java programs");
+			setDescription(LauncherMessages.getString("vmPropertyPage.description")); //$NON-NLS-1$
 	} 
 	
 	public void setVisible(boolean visible) {
 		if (visible && fFirstTime) {
 			fFirstTime= false;
-			setTitle("Java Runtime Environment Launch Settings");
+			setTitle(LauncherMessages.getString("vmPropertyPage.title")); //$NON-NLS-1$
 			// fix: 1GET9NJ: ITPJUI:ALL - NPE looking at JRE properties for closed project		
 			if (isCreated())
 				initFromProject(getJavaProject());

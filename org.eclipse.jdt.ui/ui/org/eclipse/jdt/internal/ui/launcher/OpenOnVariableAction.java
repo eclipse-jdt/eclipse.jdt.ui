@@ -55,14 +55,14 @@ public class OpenOnVariableAction extends OpenTypeAction {
 
 	private static Set initPrimitiveTypes() {
 		HashSet set= new HashSet();
-		set.add("short");
-		set.add("int");
-		set.add("long");
-		set.add("float");
-		set.add("double");
-		set.add("boolean");
-		set.add("byte");
-		set.add("char");
+		set.add("short"); //$NON-NLS-1$
+		set.add("int"); //$NON-NLS-1$
+		set.add("long"); //$NON-NLS-1$
+		set.add("float"); //$NON-NLS-1$
+		set.add("double"); //$NON-NLS-1$
+		set.add("boolean"); //$NON-NLS-1$
+		set.add("byte"); //$NON-NLS-1$
+		set.add("char"); //$NON-NLS-1$
 		return set;
 	}
 }

@@ -124,7 +124,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 				return true;
 			}
 		} catch (CoreException e) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_NO_LAUNCHER_PREFIX, e.getStatus());
+			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), "ScrapbookLauncher", "Exception finding launcher", e.getStatus());
 		}
 		return false;
 	}

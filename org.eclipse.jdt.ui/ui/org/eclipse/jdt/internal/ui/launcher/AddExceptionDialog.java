@@ -5,8 +5,8 @@ import java.lang.reflect.InvocationTargetException;import org.eclipse.core.run
  * Lots of stuff commented out because pending API change in 
  * Debugger
  */
-public class AddExceptionDialog extends StatusDialog {		private static final String DIALOG_SETTINGS= "AddExceptionDialog";	private static final String SETTING_CAUGHT_CHECKED= "caughtChecked";
-	private static final String SETTING_UNCAUGHT_CHECKED= "uncaughtChecked";
+public class AddExceptionDialog extends StatusDialog {		private static final String DIALOG_SETTINGS= "AddExceptionDialog"; //$NON-NLS-1$	private static final String SETTING_CAUGHT_CHECKED= "caughtChecked"; //$NON-NLS-1$
+	private static final String SETTING_UNCAUGHT_CHECKED= "uncaughtChecked"; //$NON-NLS-1$
 	//private Text fExceptionName;
 	private SelectionList fTypeList;
 	private boolean fTypeListInitialized= false;
@@ -47,7 +47,7 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 	 */
 	protected AddExceptionDialog(Shell parentShell) {
 		super(parentShell);
-		setTitle("Add Exception");
+		setTitle(LauncherMessages.getString("AddExceptionDialog.title")); //$NON-NLS-1$
 	}
 	
 	protected Control createDialogArea(Composite ancestor) {
@@ -85,7 +85,7 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 
 		Label l= new Label(parent, SWT.NULL);
 		l.setLayoutData(new GridData());
-		l.setText("Choose an Exception (? = any character, * = any string)");
+		l.setText(LauncherMessages.getString("AddExceptionDialog.message")); //$NON-NLS-1$
 		
 		fTypeList= new SelectionList(parent, SWT.BORDER | SWT.SINGLE, 
 				new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_POSTFIX), true);
@@ -97,12 +97,12 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 		
 		fCaughtBox= new Button(parent, SWT.CHECK);
 		fCaughtBox.setLayoutData(new GridData());
-		fCaughtBox.setText("Caught");
+		fCaughtBox.setText(LauncherMessages.getString("AddExceptionDialog.caught")); //$NON-NLS-1$
 		fCaughtBox.setSelection(fIsCaughtSelected);
 		
 		fUncaughtBox= new Button(parent, SWT.CHECK);
 		fUncaughtBox.setLayoutData(new GridData());		// fix: 1GEUWCI: ITPDUI:Linux - Add Exception box has confusing checkbox
-		fUncaughtBox.setText("Uncaught");		// end fix.
+		fUncaughtBox.setText(LauncherMessages.getString("AddExceptionDialog.uncaught")); //$NON-NLS-1$		// end fix.
 		fUncaughtBox.setSelection(fIsUncaughtSelected);				
 		//fAddFromTextRadio.setSelection(true);
 		//addFromTextSelected(true);
@@ -147,7 +147,7 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 		}
 		fExceptionType= getExceptionType(resolvedType);
 		if (fExceptionType == NO_EXCEPTION) {
-			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The selected class is not a subclass of java.lang.Throwable", null));
+			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("AddExceptionDialog.error.notThrowable"), null)); //$NON-NLS-1$
 			return;
 		}
 		fIsCaughtSelected= fCaughtBox.getSelection();
@@ -166,15 +166,15 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 				try {
 					ITypeHierarchy hierarchy= type.newSupertypeHierarchy(pm);
 					while (supertype != null) {
-						if ("java.lang.Throwable".equals(supertype.getFullyQualifiedName())) {
+						if ("java.lang.Throwable".equals(supertype.getFullyQualifiedName())) { //$NON-NLS-1$
 							result[0]= CHECKED_EXCEPTION;
 							return;
 						}
-						if ("java.lang.RuntimeException".equals(supertype.getFullyQualifiedName())) {
+						if ("java.lang.RuntimeException".equals(supertype.getFullyQualifiedName())) { //$NON-NLS-1$
 							result[0]= UNCHECKED_EXCEPTION;
 							return;
 						}
-						if ("java.lang.Error".equals(supertype.getFullyQualifiedName())) {
+						if ("java.lang.Error".equals(supertype.getFullyQualifiedName())) { //$NON-NLS-1$
 							result[0]= UNCHECKED_EXCEPTION;
 							return;
 						}
@@ -216,15 +216,15 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 					IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS;
 		List result= TypeCache.findTypes(searchEngine, flags, new ProgressMonitorDialog(getShell()), SearchEngine.createWorkspaceScope());
 		fTypeList.setElements(result, false);
-		fTypeList.setFilter("*Exception*", true);
+		fTypeList.setFilter("*Exception*", true); //$NON-NLS-1$
 		fTypeListInitialized= true;
 	}
 	
 	private void validateListSelection() {
 		if (fTypeList.getSelection().size() == 1) {
-			updateStatus(new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null));
+			updateStatus(new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null)); //$NON-NLS-1$
 		} else {
-			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "Selection is required", null));
+			updateStatus(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("AddExceptionDialog.error.noSelection"), null)); //$NON-NLS-1$
 		}
 	}
 	

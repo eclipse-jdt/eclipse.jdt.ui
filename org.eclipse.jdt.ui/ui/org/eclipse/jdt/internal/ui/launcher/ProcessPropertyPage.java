@@ -18,7 +18,7 @@ public class ProcessPropertyPage extends PropertyPage {
 		parent.setLayout(layout);
 		
 		Label l1= new Label(parent, SWT.NULL);
-		l1.setText("Command Line:");
+		l1.setText(LauncherMessages.getString("processPropertyPage.cmdLine")); //$NON-NLS-1$
 		
 		GridData gd= new GridData();
 		gd.verticalAlignment= gd.BEGINNING;

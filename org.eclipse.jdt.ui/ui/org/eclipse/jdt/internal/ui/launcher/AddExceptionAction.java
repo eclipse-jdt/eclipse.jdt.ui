@@ -7,10 +7,6 @@ package org.eclipse.jdt.internal.ui.launcher;
 import org.eclipse.core.resources.IMarker;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jface.action.IAction;import org.eclipse.jface.viewers.ISelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IViewActionDelegate;import org.eclipse.ui.IViewPart;
 
 public class AddExceptionAction implements IViewActionDelegate {
-	protected final static String PREFIX= "launcher.add_exception.";
-	protected final static String ERROR_HIERARCHY_PREFIX= PREFIX+"error_hierarchy.";
-	protected final static String ERROR_HIERARCHY_STATUS= ERROR_HIERARCHY_PREFIX+"status";
-
 
 	public void run(IAction action) {
 		
@@ -29,7 +25,7 @@ public class AddExceptionAction implements IViewActionDelegate {
 				IMarker e= JDIDebugModel.createExceptionBreakpoint(result, caught, uncaught, exceptionKind == AddExceptionDialog.CHECKED_EXCEPTION);
 				mgr.addBreakpoint(e);
 			} catch (DebugException exc) {
-				ExceptionHandler.handle(exc, "Add Exception", "An exception occured while adding the breakpoint");
+				ExceptionHandler.handle(exc, LauncherMessages.getString("addExceptionAction.error.title"), LauncherMessages.getString("addExceptionAction.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 			
 		}

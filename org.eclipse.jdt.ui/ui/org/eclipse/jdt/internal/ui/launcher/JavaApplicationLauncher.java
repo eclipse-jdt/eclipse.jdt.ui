@@ -16,20 +16,8 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	private ISourceLocator fSourceLocator;
 	private List fModes= new ArrayList(2);
 		
-	private static final String ATTR_MODE= "modes";
-	private static final String ATTR_ID= "id";
-	protected final static String PREFIX= "launcher.";
-	protected final static String LABEL= PREFIX+"label";
-	protected final static String ERROR_NOFILE_PREFIX= PREFIX+ "error.noFile.";
-	protected final static String ERROR_NOARGS_PREFIX= PREFIX+ "info.noArgs.";
-	protected final static String ERROR_CLASSPATH_PREFIX= PREFIX+"error.classpath.";
-	protected final static String ERROR_LAUNCH_PREFIX= PREFIX+ "error.launch.";
-	protected final static String ERROR_NO_LAUNCHER_PREFIX= PREFIX + "error.no_launcher.";
-	
-	protected final static String INFO_NOMAIN= PREFIX+"info.noMain.";
-	
-	protected final static String PROGRESS_LAUNCHING= PREFIX+"progress.launching";
-
+	private static final String ATTR_MODE= "modes"; //$NON-NLS-1$
+	private static final String ATTR_ID= "id"; //$NON-NLS-1$
 	
 	/** The list of managed processes */
 	protected MainMethodFinder fTargetFinder= new MainMethodFinder();
@@ -58,13 +46,13 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 		try {
 			classPath= JavaRuntime.computeDefaultRuntimeClassPath(javaProject);
 		} catch (CoreException e) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CLASSPATH_PREFIX, e.getStatus());
+			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), LauncherMessages.getString("javaAppLauncher.error.title"), LauncherMessages.getString("javaAppLauncher.error.classpath"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
 		try {
 			args= ExecutionArguments.getArguments(mainType);
 		} catch (CoreException e) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_NOARGS_PREFIX, e.getStatus());
+			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), LauncherMessages.getString("javaAppLauncher.error.title"), LauncherMessages.getString("javaAppLauncher.error.readArgs"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
 		return doLaunch(javaProject, mode, mainType, args, classPath, launcher);
@@ -105,14 +93,14 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	}
 	
 	protected void showNoMainDialog() {
-		String title= JavaLaunchUtils.getResourceString(INFO_NOMAIN+"title");
-		String msg= JavaLaunchUtils.getResourceString(INFO_NOMAIN+"message");
+		String title= LauncherMessages.getString("javaAppLauncher.error.title"); //$NON-NLS-1$
+		String msg= LauncherMessages.getString("javaAppLauncher.noMainClass"); //$NON-NLS-1$
 		MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(),title, msg);
 	}
 
 	protected void showNoLauncherDialog() {
-		String title= JavaLaunchUtils.getResourceString(ERROR_NO_LAUNCHER_PREFIX+"title");
-		String msg= JavaLaunchUtils.getResourceString(ERROR_NO_LAUNCHER_PREFIX+"message");
+		String title= LauncherMessages.getString("javaAppLauncher.error.title"); //$NON-NLS-1$
+		String msg= LauncherMessages.getString("javaAppLauncher.error.noJRE"); //$NON-NLS-1$
 		MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(),title, msg);
 	}
 
@@ -145,7 +133,7 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 							throw new InvocationTargetException(e);
 						}
 					}
-					pm.beginTask(JavaLaunchUtils.getResourceString(PROGRESS_LAUNCHING), IProgressMonitor.UNKNOWN);
+					pm.beginTask(LauncherMessages.getString("javaAppLauncher.progress.startVM"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 					result[0]= launcher.run(config);
 				}
 			};
@@ -163,7 +151,7 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 				}
 			return true;
 		} catch (CoreException e) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_NO_LAUNCHER_PREFIX, e.getStatus());
+			showNoLauncherDialog();
 		}
 		return false;
 	}
@@ -241,7 +229,7 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	public void setInitializationData(IConfigurationElement config, String propertyName, Object data) throws CoreException {
 		String modes= config.getAttribute(ATTR_MODE);
 		fId= config.getAttribute(ATTR_ID);
-		StringTokenizer tokenizer= new StringTokenizer(modes, ",");
+		StringTokenizer tokenizer= new StringTokenizer(modes, ","); //$NON-NLS-1$
 		while (tokenizer.hasMoreTokens()) {
 			fModes.add(tokenizer.nextToken().trim());
 		}

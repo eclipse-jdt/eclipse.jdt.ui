@@ -84,7 +84,7 @@ public class StringChoiceFieldEditor extends FieldEditor {
 	}	
 	
 	protected void doStore() {
-		String value= "";
+		String value= ""; //$NON-NLS-1$
 		if (fCombo.getSelectionIndex() >= 0) {
 			value= fCombo.getItem(fCombo.getSelectionIndex());
 		}

@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.launcher;
 import java.io.File;import java.io.IOException;import java.util.Enumeration;import java.util.zip.ZipEntry;import java.util.zip.ZipFile;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.help.WorkbenchHelp;
 
 public class AddVMDialog extends StatusDialog {
-	private static final String JAVA_LANG_OBJECT= "java/lang/Object.java";
+	private static final String JAVA_LANG_OBJECT= "java/lang/Object.java"; //$NON-NLS-1$
 
 	private VMPreferencePage fPreferencePage;
 
@@ -46,7 +46,7 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected void createDialogFields() {
 		fVMName= new StringDialogField();
-		fVMName.setLabelText("JRE name:");
+		fVMName.setLabelText(LauncherMessages.getString("addVMDialog.jreName")); //$NON-NLS-1$
 		fVMName.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[0]= validateVMName();
@@ -59,8 +59,8 @@ public class AddVMDialog extends StatusDialog {
 				browseForInstallDir();
 			}
 		});
-		fJDKRoot.setLabelText("JRE home directory:");
-		fJDKRoot.setButtonLabel("Browse...");
+		fJDKRoot.setLabelText(LauncherMessages.getString("addVMDialog.jreHome")); //$NON-NLS-1$
+		fJDKRoot.setButtonLabel(LauncherMessages.getString("addVMDialog.browse")); //$NON-NLS-1$
 		fJDKRoot.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[1]= validateJDKLocation();
@@ -72,7 +72,7 @@ public class AddVMDialog extends StatusDialog {
 		});
 		
 		fDebuggerTimeout= new StringDialogField();
-		fDebuggerTimeout.setLabelText("Debugger timeout(ms):");
+		fDebuggerTimeout.setLabelText(LauncherMessages.getString("addVMDialog.dbgTimeout")); //$NON-NLS-1$
 		fDebuggerTimeout.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[2]= validateDebuggerTimeout();
@@ -85,8 +85,8 @@ public class AddVMDialog extends StatusDialog {
 				browseForSystemLibrary();
 			}
 		});
-		fSystemLibrary.setLabelText("JRE JAR file:");
-		fSystemLibrary.setButtonLabel("Browse...");
+		fSystemLibrary.setLabelText(LauncherMessages.getString("addVMDialog.jreJar")); //$NON-NLS-1$
+		fSystemLibrary.setButtonLabel(LauncherMessages.getString("addVMDialog.browse")); //$NON-NLS-1$
 		fSystemLibrary.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[3]= validateSystemLibrary();
@@ -100,8 +100,8 @@ public class AddVMDialog extends StatusDialog {
 			}
 		}); 
 		
-		fSystemLibrarySource.setLabelText("JRE source file:");
-		fSystemLibrarySource.setButtonLabel("Browse...");
+		fSystemLibrarySource.setLabelText(LauncherMessages.getString("addVMDialog.jreSource")); //$NON-NLS-1$
+		fSystemLibrarySource.setButtonLabel(LauncherMessages.getString("addVMDialog.browse")); //$NON-NLS-1$
 		fSystemLibrarySource.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[4]= validateSystemLibrarySource();
@@ -132,7 +132,7 @@ public class AddVMDialog extends StatusDialog {
 				
 		Label l= new Label(parent, SWT.NULL);
 		l.setLayoutData(new MGridData());		
-		l.setText("JRE types:");
+		l.setText(LauncherMessages.getString("addVMDialog.jreType")); //$NON-NLS-1$
 		
 		fVMTypeCombo= new Combo(parent, SWT.READ_ONLY);
 		initVMTypeCombo();
@@ -160,7 +160,7 @@ public class AddVMDialog extends StatusDialog {
 		l.setLayoutData(gd);
 		
 		fUseDefaultLibrary= new Button(parent, SWT.CHECK);
-		fUseDefaultLibrary.setText("Use default library");
+		fUseDefaultLibrary.setText(LauncherMessages.getString("addVMDialog.useDefault")); //$NON-NLS-1$
 		gd= new MGridData();
 		gd.horizontalSpan=3;
 		fUseDefaultLibrary.setLayoutData(gd);
@@ -205,9 +205,9 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	protected void initializeFields() {
-		fVMName.setText("");
-		fJDKRoot.setText("");
-		fDebuggerTimeout.setText("3000");
+		fVMName.setText(""); //$NON-NLS-1$
+		fJDKRoot.setText(""); //$NON-NLS-1$
+		fDebuggerTimeout.setText("3000"); //$NON-NLS-1$
 		fUseDefaultLibrary.setSelection(true);
 		useDefaultSystemLibrary();
 	}
@@ -226,31 +226,31 @@ public class AddVMDialog extends StatusDialog {
 		if (systemLibrary.isFile())
 			fSystemLibrary.setText(systemLibrary.getPath());
 		else 
-			fSystemLibrary.setText("");
+			fSystemLibrary.setText(""); //$NON-NLS-1$
 			
 		File librarySource= description.getSystemLibrarySource();
 		if (librarySource.isFile())
 			fSystemLibrarySource.setText(librarySource.getPath());
 		else 
-			fSystemLibrarySource.setText("");
+			fSystemLibrarySource.setText(""); //$NON-NLS-1$
 	}
 	
 	
 	protected IStatus validateJDKLocation() {
 		String locationName= fJDKRoot.getText();
-		if (locationName == null || "".equals(locationName))
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", null);
+		if (locationName == null || "".equals(locationName)) //$NON-NLS-1$
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 		return getVMType().validateInstallLocation(new File(locationName));
 	}
 
 	protected IStatus validateVMName() {
 		String name= fVMName.getText();
-		if (name == null || "".equals(name.trim())) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", null);
+		if (name == null || "".equals(name.trim())) { //$NON-NLS-1$
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 		}
 		IVMInstallType type= getVMType();
 		if (fPreferencePage.isDuplicateName(type, name)) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The name is already ussed", null);
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.duplicateName"), null); //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -261,13 +261,13 @@ public class AddVMDialog extends StatusDialog {
 		try {
 			timeout= Long.valueOf(timeoutText).longValue();
 		} catch (NumberFormatException e) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The timeout value must be a number", e);
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.notANumber"), e); //$NON-NLS-1$
 		}
 		if (timeout < 0) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The timeout value must be >= 0", null);
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.timeoutSmall"), null); //$NON-NLS-1$
 		}
 		if (timeout > Integer.MAX_VALUE) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The timeout value must be <= "+Integer.MAX_VALUE, null);
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.timeoutLarge")+Integer.MAX_VALUE, null); //$NON-NLS-1$
 		}
 		return null;
 			
@@ -275,12 +275,12 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected void updateStatusLine() {
 		int currentSeverity= IStatus.OK;
-		String currentMessage= "";
+		String currentMessage= ""; //$NON-NLS-1$
 		for (int i= 0; i < fStati.length; i++) {
 			if (fStati[i] != null) {
 				boolean isBiggerSeverity= fStati[i].getSeverity() > currentSeverity;
 				boolean isBetterErrorMessage= fStati[i].getSeverity() == currentSeverity &&
-												(currentMessage == null || "".equals(currentMessage));
+												(currentMessage == null || "".equals(currentMessage)); //$NON-NLS-1$
 				if (isBiggerSeverity) {
 					updateStatus(fStati[i]);
 					currentSeverity= fStati[i].getSeverity();
@@ -288,7 +288,7 @@ public class AddVMDialog extends StatusDialog {
 			}
 		}
 		if (currentSeverity == IStatus.OK)
-			updateStatus(new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null));
+			updateStatus(new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null)); //$NON-NLS-1$
 	}
 	
 	protected void updateLibraryFieldDefaults() {
@@ -301,21 +301,21 @@ public class AddVMDialog extends StatusDialog {
 			flag= IStatus.WARNING;
 
 		String locationName= fSystemLibrary.getText();
-		if (locationName == null || "".equals(locationName))
-			return new Status(flag, JavaPlugin.getPluginId(), 0, "", null);
+		if (locationName == null || "".equals(locationName)) //$NON-NLS-1$
+			return new Status(flag, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 
 		File f= new File(locationName);
 		if (!f.isFile())
-			return new Status(flag, JavaPlugin.getPluginId(), 0, "The selected JRE JAR doesn't exist", null);
+			return new Status(flag, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.missingJREJar"), null); //$NON-NLS-1$
 		try {
 			ZipFile zip= null;
 			try {
 				zip= new ZipFile(f);
-				ZipEntry e= zip.getEntry("java/lang/Object.class");
+				ZipEntry e= zip.getEntry("java/lang/Object.class"); //$NON-NLS-1$
 				if (e == null)
-					return new Status(flag, JavaPlugin.getPluginId(), 0, "The selected JRE JAR doesn't contain java.lang.Object.class", null);
+					return new Status(flag, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.noObjectClass"), null); //$NON-NLS-1$
 			} catch (IOException e) {
-				return new Status(flag, JavaPlugin.getPluginId(), 0, "Exception while accessing  JRE JAR file", e);
+				return new Status(flag, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.jreJarException"), e); //$NON-NLS-1$
 			} finally {
 				if (zip != null)
 					zip.close();
@@ -331,14 +331,14 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected IStatus validateSystemLibrarySource() {
 		String locationName= fSystemLibrarySource.getText();
-		if (locationName == null || "".equals(locationName))
+		if (locationName == null || "".equals(locationName)) //$NON-NLS-1$
 			return null;
 			
 		File f= new File(locationName);
 		if (!f.isFile())
-			return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "The selected JRE sources file doesn't exist", null);
+			return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.missingJRESource"), null); //$NON-NLS-1$
 		if (determinePackagePrefix(f) == null)
-			return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "Could not find Object.java in the selected JRE sources file", null);
+			return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.noObjectSource"), null); //$NON-NLS-1$
 		return null;
 	}
 	
@@ -356,7 +356,7 @@ public class AddVMDialog extends StatusDialog {
 					String name= entry.getName();
 					if (name.endsWith(JAVA_LANG_OBJECT)) {
 						String prefix= name.substring(0, name.length() - JAVA_LANG_OBJECT.length());
-						if (prefix.endsWith("/"))
+						if (prefix.endsWith("/")) //$NON-NLS-1$
 							prefix= prefix.substring(0, prefix.length() - 1);
 						return prefix;
 					}
@@ -374,7 +374,7 @@ public class AddVMDialog extends StatusDialog {
 	private void browseForInstallDir() {
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
 		dialog.setFilterPath(fJDKRoot.getText());
-		dialog.setMessage("Select the root directory of the JRE installation");
+		dialog.setMessage(LauncherMessages.getString("addVMDialog.pickJRERoot")); //$NON-NLS-1$
 		String newPath= dialog.open();
 		if  (newPath != null)
 			fJDKRoot.setText(newPath);
@@ -383,8 +383,8 @@ public class AddVMDialog extends StatusDialog {
 	private void browseForSystemLibrary() {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(fSystemLibrary.getText());
-		dialog.setText("Select the library JAR file for the JRE installation");
-		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip"});
+		dialog.setText(LauncherMessages.getString("addVMDialog.pickJREJar")); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip"}); //$NON-NLS-2$ //$NON-NLS-1$
 		String newPath= dialog.open();
 		if  (newPath != null)
 			fSystemLibrary.setText(newPath);
@@ -393,8 +393,8 @@ public class AddVMDialog extends StatusDialog {
 	private void browseForSystemLibrarySource() {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(fSystemLibrarySource.getText());
-		dialog.setText("Select the JRE library source file");
-		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip"});
+		dialog.setText(LauncherMessages.getString("addVMDialog.pickJRESource")); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip"}); //$NON-NLS-2$ //$NON-NLS-1$
 		String newPath= dialog.open();
 		if  (newPath != null)
 			fSystemLibrarySource.setText(newPath);
@@ -449,7 +449,7 @@ public class AddVMDialog extends StatusDialog {
 			File source= getAbsoluteFileOrEmpty(fSystemLibrarySource.getText());
 			String pathString= determinePackagePrefix(source);
 			if (pathString == null)
-				pathString= "";
+				pathString= ""; //$NON-NLS-1$
 			IPath packageRoot= new Path(pathString);
 			vm.setLibraryLocation(new LibraryLocation(systemLibrary, source, packageRoot));
 		} else {
@@ -458,8 +458,8 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	protected File getAbsoluteFileOrEmpty(String path) {
-		if (path == null || "".equals(path))
-			return new File("");
+		if (path == null || "".equals(path)) //$NON-NLS-1$
+			return new File(""); //$NON-NLS-1$
 		return new File(path).getAbsoluteFile();
 	}
 }

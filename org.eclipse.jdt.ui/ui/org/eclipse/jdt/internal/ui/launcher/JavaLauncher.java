@@ -5,13 +5,23 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.text.DateFormat;import java.util.Date;import java.util.List;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.swt.widgets.Display;import com.sun.jdi.VirtualMachine;
+import java.io.File;
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.Utilities;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMRunner;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+
+import com.sun.jdi.VirtualMachine;
 
 public abstract class JavaLauncher implements IVMRunner {
-	protected final static String PREFIX= "launcher.";
-	protected final static String ERROR_CREATE_PROCESS= PREFIX+"error.create_process.";
-	protected final static String ERROR_LAUNCHING= PREFIX+"error.launch.";
-
 	protected IVMInstall fVMInstance;
 
 	public JavaLauncher(IVMInstall vmInstance) {
@@ -19,21 +29,19 @@ public abstract class JavaLauncher implements IVMRunner {
 	}
 	
 	protected String renderDebugTarget(String classToRun, int host) {
-		return classToRun+" at localhost:"+host;
+		String format= LauncherMessages.getString("javaLauncher.format.dbgTarget"); //$NON-NLS-1$
+		return MessageFormat.format(format, new String[] { classToRun, String.valueOf(host) });
 	}
 
 	public static String renderProcessLabel(String[] commandLine) {
-		StringBuffer buf= new StringBuffer(commandLine[0]);
+		String format= LauncherMessages.getString("javaLauncher.format.processLabel"); //$NON-NLS-1$
 		String timestamp= DateFormat.getInstance().format(new Date(System.currentTimeMillis()));
-		buf.append(" (");
-		buf.append(timestamp);
-		buf.append(")");
-		return buf.toString();
+		return MessageFormat.format(format, new String[] { commandLine[0], timestamp });
 	}
 	
 	protected static String renderCommandLine(String[] commandLine) {
 		if (commandLine.length < 1)
-			return "";
+			return ""; //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer(commandLine[0]);
 		for (int i= 1; i < commandLine.length; i++) {
 			buf.append(' ');
@@ -49,26 +57,24 @@ public abstract class JavaLauncher implements IVMRunner {
 			v.add(args[i]);
 	}
 	
-	protected void showErrorDialog(final String resourceKey, final IStatus error) {
+	protected void showErrorDialog(final String title, final String message, final IStatus error) {
 		Display d= Utilities.getDisplay(null);
 		if (d != null) {
 			d.syncExec(new Runnable() {
 				public void run() {
-					JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), resourceKey, error);
+					JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), title, message, error);
 				}
 			});
 		} else {
-			JavaPlugin.logErrorStatus(JavaLaunchUtils.getResourceString(resourceKey+"message"), error);
+			JavaPlugin.logErrorStatus(message, error);
 		}
 	}
 	
-	protected boolean askRetry(final String reason) {
-		final String title= JavaLaunchUtils.getResourceString(reason+"title");
-		final String msg= JavaLaunchUtils.getResourceString(reason+"message");
+	protected boolean askRetry(final String title, final String message) {
 		final boolean[] result= new boolean[1];
 		Utilities.getDisplay(null).syncExec(new Runnable() {
 			public void run() {
-				result[0]= (MessageDialog.openConfirm(JavaPlugin.getActiveWorkbenchShell(), title, msg));
+				result[0]= (MessageDialog.openConfirm(JavaPlugin.getActiveWorkbenchShell(), title, message));
 			}
 		});
 		return result[0];

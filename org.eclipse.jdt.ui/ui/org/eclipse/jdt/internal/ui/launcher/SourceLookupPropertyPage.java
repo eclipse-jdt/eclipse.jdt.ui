@@ -12,15 +12,13 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 	private Button fUseCustomLookup;
 	private boolean fFirst= true;
 	
-	private static final String PREFIX= "SourceLookupPropertyPage.";
-	private static final String ADD_PROJECT= PREFIX+"add_project.label";
-	private static final String UP= PREFIX+"up.label";
-	private static final String DOWN= PREFIX+"down.label";
-	private static final String REMOVE= PREFIX+"remove.label";
-	private static final String USE_BUILDPATH= PREFIX+"use_buildpath.label";
-	private static final String USE_CUSTOM= PREFIX+"use_custom.label";
-	private static final String ADD_PROJECT_MESSAGE= PREFIX+"add_project.message";
-	private static final String JM_EXCEPTION= PREFIX+"javamodel.error.";
+	private static final String ADD_PROJECT= LauncherMessages.getString("sourceLookupPropertyPage.addProject"); //$NON-NLS-1$
+	private static final String UP= LauncherMessages.getString("sourceLookupPropertyPage.up"); //$NON-NLS-1$
+	private static final String DOWN= LauncherMessages.getString("sourceLookupPropertyPage.down"); //$NON-NLS-1$
+	private static final String REMOVE= LauncherMessages.getString("sourceLookupPropertyPage.remove"); //$NON-NLS-1$
+	private static final String USE_BUILDPATH= LauncherMessages.getString("sourceLookupPropertyPage.useBuildpath"); //$NON-NLS-1$
+	private static final String USE_CUSTOM= LauncherMessages.getString("sourceLookupPropertyPage.useCustomPath"); //$NON-NLS-1$
+	private static final String ADD_PROJECT_MESSAGE= LauncherMessages.getString("sourceLookupPropertyPage.pickProject"); //$NON-NLS-1$
 	
 	class ListAdapter implements IListAdapter {
 		public void customButtonPressed(DialogField field, int index) {
@@ -35,13 +33,13 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 
 	public Control createJavaContents(Composite ancestor) {
 		fListField= new ListDialogField(new ListAdapter(),
-				new String[] { JavaLaunchUtils.getResourceString(ADD_PROJECT) },
+				new String[] { ADD_PROJECT },
 				new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS), 
 				ListDialogField.UPDOWN);
 				
-		fListField.setUpButtonLabel(JavaLaunchUtils.getResourceString(UP));
-		fListField.setDownButtonLabel(JavaLaunchUtils.getResourceString(DOWN));
-		fListField.setRemoveButtonLabel(JavaLaunchUtils.getResourceString(REMOVE) );
+		fListField.setUpButtonLabel(UP);
+		fListField.setDownButtonLabel(DOWN);
+		fListField.setRemoveButtonLabel(REMOVE);
 
 		Composite parent= new Composite(ancestor, SWT.NULL);
 		parent.setLayoutData(new GridData());
@@ -50,13 +48,13 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 		parent.setLayout(gl);
 		
 		fUseBuildClasspath= new Button(parent, SWT.RADIO);
-		fUseBuildClasspath.setText(JavaLaunchUtils.getResourceString(USE_BUILDPATH));
+		fUseBuildClasspath.setText(USE_BUILDPATH);
 		MGridData gd= new MGridData();
 		gd.horizontalSpan= 3;
 		fUseBuildClasspath.setLayoutData(gd);
 		
 		fUseCustomLookup= new Button(parent, SWT.RADIO);
-		fUseCustomLookup.setText(JavaLaunchUtils.getResourceString(USE_CUSTOM));
+		fUseCustomLookup.setText(USE_CUSTOM);
 		gd= new MGridData();
 		gd.horizontalSpan= 3;
 		fUseCustomLookup.setLayoutData(gd);
@@ -122,7 +120,7 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 				ProjectSourceLocator.setSourceLookupPath(p, (IJavaProject[])lookup.toArray(projects));
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), JavaLaunchUtils.getResourceBundle(), JM_EXCEPTION);
+			ExceptionHandler.handle(e, getShell(), LauncherMessages.getString("sourceLookupPropertyPage.error.title"), LauncherMessages.getString("sourceLookupPropertyPage.error.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		return true;
 	}
@@ -170,7 +168,7 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 		ListSelectionDialog dialog= new ListSelectionDialog(getShell(), unusedProjects, 
 			new ListContentProvider(), 
 			new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS), 
-			JavaLaunchUtils.getResourceString(ADD_PROJECT_MESSAGE));
+			ADD_PROJECT_MESSAGE);
 		if (dialog.open() == dialog.OK) {
 			Object[] result= dialog.getResult();
 			for (int i= 0; i < result.length; i++) {
@@ -189,7 +187,7 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 					unused.add(allProjects[i]);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), JavaLaunchUtils.getResourceBundle(), JM_EXCEPTION);
+			ExceptionHandler.handle(e, getShell(), LauncherMessages.getString("sourceLookupPropertyPage.error.title"), LauncherMessages.getString("sourceLookupPropertyPage.error.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		return unused;
 	}

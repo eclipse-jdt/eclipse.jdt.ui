@@ -115,44 +115,18 @@ public class JavaLaunchUtils {
 	/**
 	 * Utility method with conventions
 	 */
-	public static void errorDialog(Shell shell, String resourcePrefix, IStatus s) {
-		String message= getResourceString(resourcePrefix+"message");
-		String title= getResourceString(resourcePrefix+"title");
+	public static void errorDialog(Shell shell, String title, String message, IStatus s) {
 		ErrorDialog.openError(shell, title, message, s);
 	}
 	
-	/**
-	 * Utility method
-	 */
-	public static String getResourceString(String key) {
-		if (fgResourceBundle == null) {
-			fgResourceBundle= getResourceBundle();
-		}
-		if (fgResourceBundle != null) {
-			return getResourceBundle().getString(key);
-		} else {
-			return "!" + key + "!";
-		}
-	}
-	/**
-	 * Returns the resource bundle used by all parts of the launcher package.
-	 */
-	public static ResourceBundle getResourceBundle() {
-		try {
-			return ResourceBundle.getBundle("org.eclipse.jdt.internal.ui.launcher.LauncherResources");
-		} catch (MissingResourceException e) {
-			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), "Error", e.toString());
-		}		
-		return null;
-	}
 	private static IType findInPackage(IPackageFragment pkg, String name) {
-		IClassFile cf= pkg.getClassFile(name + ".class");
+		IClassFile cf= pkg.getClassFile(name + ".class"); //$NON-NLS-1$
 		try {
 			if (cf.exists())
 				return cf.getType();
 		} catch (JavaModelException e) {
 		}
-		ICompilationUnit cu= pkg.getCompilationUnit(name + ".java");
+		ICompilationUnit cu= pkg.getCompilationUnit(name + ".java"); //$NON-NLS-1$
 		if (cu.exists())
 			return cu.getType(name);
 		try {
@@ -174,7 +148,7 @@ public class JavaLaunchUtils {
 	}
 	static IType locateType(String name) {
 		int lastDot= name.lastIndexOf('.');
-		String pkgName= "";
+		String pkgName= ""; //$NON-NLS-1$
 		String typeName= name;
 		if (lastDot >= 0) {
 			pkgName= name.substring(0, lastDot);

@@ -42,8 +42,6 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 
 public class MainMethodFinder implements IJavaSearchConstants {
-	
-	public static final String ERROR_PREFIX= "searchtargetfinder.error.";
 
 	public List findTargets(IStructuredSelection selection) {
 		List v= new ArrayList(10);
@@ -54,7 +52,7 @@ public class MainMethodFinder implements IJavaSearchConstants {
 					collectTypes(v, o);
 			}
 		} catch (CoreException e) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_PREFIX, e.getStatus());
+			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), LauncherMessages.getString("mainMethodFinder.error.title"), LauncherMessages.getString("mainMethodFinder.error.exception"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return v;
 	}

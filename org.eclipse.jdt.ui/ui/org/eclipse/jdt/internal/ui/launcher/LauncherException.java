@@ -47,7 +47,7 @@ public class LauncherException extends Exception implements IStatus {
 	}
 	
 	public String getPlugin() {
-		return "org.eclipse.jdt.ui";
+		return "org.eclipse.jdt.ui"; //$NON-NLS-1$
 	}
 
 	public int getCode() {
