@@ -105,7 +105,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.IPreferencesConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
@@ -1288,11 +1287,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		boolean refreshViewer= false;
 	
-		if (event.getProperty() == IPreferencesConstants.SHOW_CU_CHILDREN) {
+		if (event.getProperty() == JavaBasePreferencePage.SHOW_CU_CHILDREN) {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			IActionBars actionBars= getViewSite().getActionBars();
 			IToolBarManager toolBar= actionBars.getToolBarManager();
-			boolean b= store.getBoolean(IPreferencesConstants.SHOW_CU_CHILDREN);
+			boolean b= JavaBasePreferencePage.showCompilationUnitChildren();
 			((JavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(b);
 			if (b) {
 				addFilterActions(toolBar);

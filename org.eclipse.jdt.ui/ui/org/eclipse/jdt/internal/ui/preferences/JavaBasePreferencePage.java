@@ -5,141 +5,374 @@
 // AW
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.swt.widgets.Composite;
+import java.util.ArrayList;
 
-import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
+
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
+import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.IPreferencesConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 	
 /*
  * The page for setting java plugin preferences.
  */
-public class JavaBasePreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class JavaBasePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+
+	// used by PackageExplorerPart to listen for changes
+	public static final String SHOW_CU_CHILDREN="org.eclipse.jdt.ui.packages.cuchildren"; //$NON-NLS-1$
+
+	private static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor"; //$NON-NLS-1$
+	private static final String LINK_TYPEHIERARCHY_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktypehierarchytoeditor"; //$NON-NLS-1$
+	private static final String SRCBIN_FOLDERS_IN_NEWPROJ= "org.eclipse.jdt.ui.wizards.srcBinFoldersInNewProjects"; //$NON-NLS-1$
+	private static final String SRCBIN_SRCNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersSrcName"; //$NON-NLS-1$
+	private static final String SRCBIN_BINNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersBinName"; //$NON-NLS-1$
+	private static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.openTypeHierarchy"; //$NON-NLS-1$
+	private static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective"; //$NON-NLS-1$
+	private static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
+	private static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo"; //$NON-NLS-1$
+
+	public static boolean useSrcAndBinFolders() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(SRCBIN_FOLDERS_IN_NEWPROJ);
+	}
+	
+	public static String getSourceFolderName() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getString(SRCBIN_SRCNAME);
+	}
+	
+	public static String getOutputLocationName() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getString(SRCBIN_BINNAME);
+	}		
+	
+	public static boolean linkPackageSelectionToEditor() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(LINK_PACKAGES_TO_EDITOR);
+	}
+	
+	public static boolean showCompilationUnitChildren() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(SHOW_CU_CHILDREN);
+	}
+
+	public static boolean linkTypeHierarchySelectionToEditor() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(LINK_TYPEHIERARCHY_TO_EDITOR);
+	}	
+		
+	public static boolean openTypeHierarchyInPerspective() {
+		return OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE.equals(
+			JavaPlugin.getDefault().getPreferenceStore().getString(OPEN_TYPE_HIERARCHY));
+	}
+	
+	public static boolean openTypeHierarchInViewPart() {
+		return OPEN_TYPE_HIERARCHY_IN_VIEW_PART.equals(
+			JavaPlugin.getDefault().getPreferenceStore().getString(OPEN_TYPE_HIERARCHY));
+	}
+	
+	public static boolean doubleClickGoesInto() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(DOUBLE_CLICK_GOES_INTO);
+	}
+
+	private ArrayList fCheckBoxes;
+	private ArrayList fRadioButtons;
+	private ArrayList fTextControls;
+	
+	private SelectionListener fSelectionListener;
+	private ModifyListener fModifyListener;
+	
+	
+	private Button fFolderButton;
+	private Text fBinFolderNameText;
+	private Text fSrcFolderNameText;
 
 	public JavaBasePreferencePage() {
-		super(GRID);
+		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(JavaUIMessages.getString("JavaBasePreferencePage.description")); //$NON-NLS-1$
+	
+		fRadioButtons= new ArrayList();
+		fCheckBoxes= new ArrayList();
+		fTextControls= new ArrayList();
+		
+		fSelectionListener= new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {}
+
+			public void widgetSelected(SelectionEvent e) {
+				controlChanged(e.widget);
+			}
+		};
+		
+		fModifyListener= new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				controlModified(e.widget);
+			}
+		};
+		
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR, true);
-		store.setDefault(IPreferencesConstants.SHOW_CU_CHILDREN, true);		
-		store.setDefault(IPreferencesConstants.LINK_TYPEHIERARCHY_TO_EDITOR, false);
-		store.setDefault(IPreferencesConstants.OPEN_TYPE_HIERARCHY, IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
-		store.setDefault(IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ, false);		
-		store.setDefault(IPreferencesConstants.DOUBLE_CLICK_GOES_INTO, false);		
+		store.setDefault(LINK_PACKAGES_TO_EDITOR, true);
+		store.setDefault(SHOW_CU_CHILDREN, true);		
+		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
+		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
+		store.setDefault(SRCBIN_FOLDERS_IN_NEWPROJ, false);
+		store.setDefault(SRCBIN_SRCNAME, "src");
+		store.setDefault(SRCBIN_BINNAME, "bin");
+				
+		store.setDefault(DOUBLE_CLICK_GOES_INTO, false);		
 	}
+	
+	/*
+	 * @see IWorkbenchPreferencePage#init(IWorkbench)
+	 */
+	public void init(IWorkbench workbench) {
+	}		
 	
 	/**
 	 * @see PreferencePage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
-		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
 		super.createControl(parent);
 		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.JAVA_BASE_PREFERENCE_PAGE));
 	}	
-	
 
-	protected void createFieldEditors() {
-		Composite parent= getFieldEditorParent();
-
-		BooleanFieldEditor boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.LINK_PACKAGES_TO_EDITOR,
-			JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), //$NON-NLS-1$
-			parent
-        );
-		addField(boolEditor);
+	private Button addCheckBox(Composite parent, String label, String key) {
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		
-		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.LINK_TYPEHIERARCHY_TO_EDITOR,
-			JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), //$NON-NLS-1$
-			parent
-        );
-		addField(boolEditor);		
+		Button checkBox= new Button(parent, SWT.CHECK);
+		checkBox.setText(label);
+		checkBox.setData(key);
+		checkBox.setLayoutData(gd);
 		
-		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.DOUBLE_CLICK_GOES_INTO,
-			JavaUIMessages.getString("JavaBasePreferencePage.dblClick"), //$NON-NLS-1$
-			parent
-		);
-		addField(boolEditor);
+		checkBox.setSelection(getPreferenceStore().getBoolean(key));
 		
-		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.SHOW_CU_CHILDREN,
-			JavaUIMessages.getString("JavaBasePreferencePage.cuChildren"), //$NON-NLS-1$
-			parent
-		);
-		addField(boolEditor);
-
-		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ,
-			JavaUIMessages.getString("JavaBasePreferencePage.folders"), //$NON-NLS-1$
-			parent
-		);
-		addField(boolEditor);
-		
-		addField(new SpacerFieldEditor(parent));
-		
-	 	RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
- 			IPreferencesConstants.OPEN_TYPE_HIERARCHY, 
- 			JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy"),  //$NON-NLS-1$
- 			1,
- 			new String[][] {
- 				{JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE}, //$NON-NLS-1$
- 				{JavaUIMessages.getString("JavaBasePreferencePage.inView"), IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART} //$NON-NLS-1$
- 			},
-           parent);	
-		addField(editor);
+		fCheckBoxes.add(checkBox);
+		return checkBox;
 	}
+	
+	private Button addRadioButton(Composite parent, String label, String key, String value) { 
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		
+		Button button= new Button(parent, SWT.RADIO);
+		button.setText(label);
+		button.setData(new String[] { key, value });
+		button.setLayoutData(gd);
 
-	public void init(IWorkbench workbench) {
+		button.setSelection(value.equals(getPreferenceStore().getString(key)));
+		
+		fRadioButtons.add(button);
+		return button;
+	}
+	
+	private Text addTextControl(Composite parent, String label, String key) {
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		Label labelControl= new Label(parent, SWT.NONE);
+		labelControl.setText(label);
+		labelControl.setLayoutData(gd);
+		
+		gd= new GridData();
+		gd.widthHint= convertWidthInCharsToPixels(40);
+		
+		Text text= new Text(parent, SWT.SINGLE | SWT.BORDER);
+		text.setText(getPreferenceStore().getString(key));
+		text.setData(key);
+		text.setLayoutData(gd);
+		
+		fTextControls.add(text);
+		return text;
 	}	
-
-	public static boolean useSrcAndBinFolders() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
-	}
 	
-	public static boolean linkPackageSelectionToEditor() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR);
-	}
 	
-	public static boolean showCompilationUnitChildren() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(IPreferencesConstants.SHOW_CU_CHILDREN);
-	}
-
-	public static boolean linkTypeHierarchySelectionToEditor() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(IPreferencesConstants.LINK_TYPEHIERARCHY_TO_EDITOR);
-	}	
+	protected Control createContents(Composite parent) {
+		initializeDialogUnits(parent);
 		
-	public static boolean openTypeHierarchyInPerspective() {
-		return IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE.equals(
-			JavaPlugin.getDefault().getPreferenceStore().getString(IPreferencesConstants.OPEN_TYPE_HIERARCHY));
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
+
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR);
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR);
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.dblClick"), DOUBLE_CLICK_GOES_INTO);
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.cuChildren"), SHOW_CU_CHILDREN);
+		
+		fFolderButton= addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.folders"), SRCBIN_FOLDERS_IN_NEWPROJ);
+		fFolderButton.addSelectionListener(fSelectionListener);
+		
+		Composite folders= new Composite(composite, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		folders.setLayout(layout);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalIndent= convertWidthInCharsToPixels(4);
+		folders.setLayoutData(gd);
+		
+		fSrcFolderNameText= addTextControl(folders, JavaUIMessages.getString("JavaBasePreferencePage.folders.src"), SRCBIN_SRCNAME);
+		fBinFolderNameText= addTextControl(folders, JavaUIMessages.getString("JavaBasePreferencePage.folders.bin"), SRCBIN_BINNAME);
+		fSrcFolderNameText.addModifyListener(fModifyListener);
+		fBinFolderNameText.addModifyListener(fModifyListener);
+		
+		new Label(composite, SWT.NONE); // spacer
+		
+		Label label= new Label(composite, SWT.NONE);
+		label.setText(JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy"));
+		
+		Composite radioGroup= new Composite(composite, SWT.NONE);
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		radioGroup.setLayout(layout);		
+
+		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE); 
+		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
+	
+		validateFolders();
+	
+		return composite;
 	}
 	
-	public static boolean openTypeHierarchInViewPart() {
-		return IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART.equals(
-			JavaPlugin.getDefault().getPreferenceStore().getString(IPreferencesConstants.OPEN_TYPE_HIERARCHY));
+	private void validateFolders() {
+		boolean useFolders= fFolderButton.getSelection();
+		
+		fSrcFolderNameText.setEnabled(useFolders);
+		fBinFolderNameText.setEnabled(useFolders);
+		if (useFolders) {
+			String srcName= fSrcFolderNameText.getText();
+			String binName= fBinFolderNameText.getText();
+			if (srcName.length() + binName.length() == 0) {
+				updateStatus(new StatusInfo(IStatus.ERROR,  JavaUIMessages.getString("JavaBasePreferencePage.folders.error.namesempty")));
+				return;
+			}
+			IWorkspace workspace= JavaPlugin.getWorkspace();
+			IStatus status;
+			if (srcName.length() != 0) {
+				status= workspace.validateName(srcName, IResource.FOLDER);
+				if (!status.isOK()) {
+					String message= JavaUIMessages.getFormattedString("JavaBasePreferencePage.folders.error.invalidsrcname", status.getMessage());
+					updateStatus(new StatusInfo(IStatus.ERROR, message));
+					return;
+				}
+			}
+			status= workspace.validateName(binName, IResource.FOLDER);
+			if (!status.isOK()) {
+				String message= JavaUIMessages.getFormattedString("JavaBasePreferencePage.folders.error.invalidbinname", status.getMessage());
+				updateStatus(new StatusInfo(IStatus.ERROR, message));
+				return;
+			}
+			IProject dmy= workspace.getRoot().getProject("dmy");
+			IClasspathEntry entry= JavaCore.newSourceEntry(dmy.getFullPath().append(srcName));
+			IPath outputLocation= dmy.getFullPath().append(binName);
+			status= JavaConventions.validateClasspath(JavaCore.create(dmy), new IClasspathEntry[] { entry }, outputLocation);
+			if (!status.isOK()) {
+				updateStatus(status);
+				return;
+			}
+		}
+		updateStatus(new StatusInfo()); // set to OK
+	}
+		
+	private void updateStatus(IStatus status) {
+		setValid(!status.matches(IStatus.ERROR));
+		StatusUtil.applyToStatusLine(this, status);
+	}		
+	
+	private void controlChanged(Widget widget) {
+		if (widget == fFolderButton) {
+			validateFolders();
+		}
 	}
 	
-	public static boolean doubleClickGoesInto() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(IPreferencesConstants.DOUBLE_CLICK_GOES_INTO);
+	private void controlModified(Widget widget) {
+		if (widget == fSrcFolderNameText || widget == fBinFolderNameText) {
+			validateFolders();
+		}
+	}	
+	
+	/*
+	 * @see PreferencePage#performDefaults()
+	 */
+	protected void performDefaults() {
+		IPreferenceStore store= getPreferenceStore();
+		for (int i= 0; i < fCheckBoxes.size(); i++) {
+			Button button= (Button) fCheckBoxes.get(i);
+			String key= (String) button.getData();
+			button.setSelection(store.getDefaultBoolean(key));
+		}
+		for (int i= 0; i < fRadioButtons.size(); i++) {
+			Button button= (Button) fRadioButtons.get(i);
+			String[] info= (String[]) button.getData();
+			button.setSelection(info[1].equals(store.getDefaultString(info[0])));
+		}
+		for (int i= 0; i < fTextControls.size(); i++) {
+			Text text= (Text) fTextControls.get(i);
+			String key= (String) text.getData();
+			text.setText(store.getDefaultString(key));
+		}
+		validateFolders();
+		super.performDefaults();
+	}
+
+	/*
+	 * @see IPreferencePage#performOk()
+	 */
+	public boolean performOk() {
+		IPreferenceStore store= getPreferenceStore();
+		for (int i= 0; i < fCheckBoxes.size(); i++) {
+			Button button= (Button) fCheckBoxes.get(i);
+			String key= (String) button.getData();
+			store.setValue(key, button.getSelection());
+		}
+		for (int i= 0; i < fRadioButtons.size(); i++) {
+			Button button= (Button) fRadioButtons.get(i);
+			if (button.getSelection()) {
+				String[] info= (String[]) button.getData();
+				store.setValue(info[0], info[1]);
+			}
+		}
+		for (int i= 0; i < fTextControls.size(); i++) {
+			Text text= (Text) fTextControls.get(i);
+			String key= (String) text.getData();
+			store.setValue(key, text.getText());
+		}			
+		
+		return super.performOk();
 	}
 
 }
