@@ -57,8 +57,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * @since 2.0
  */
 public class OpenExternalJavadocAction extends SelectionDispatchAction {
-	
-	private static boolean webBrowserOpened = false;
 		
 	private JavaEditor fEditor;
 	
