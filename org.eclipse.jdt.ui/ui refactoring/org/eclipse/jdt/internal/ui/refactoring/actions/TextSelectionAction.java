@@ -41,7 +41,7 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 	
 	//---- Accessors ------------------------------------------------------------------------------------------
 
-	protected final void setEditor(AbstractTextEditor editor) {
+	public final void setEditor(AbstractTextEditor editor) {
 		Assert.isNotNull(editor);
 		if (fEditorClass.isInstance(editor))
 			fEditor= editor;
