@@ -31,6 +31,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -88,15 +91,23 @@ public class RefreshAction extends SelectionDispatchAction {
 		final IResource[] resources= getResources(selection);
 		IWorkspaceRunnable operation= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				monitor.beginTask(ActionMessages.getString("RefreshAction.progressMessage"), resources.length + 3); //$NON-NLS-1$
+				monitor.beginTask(ActionMessages.getString("RefreshAction.progressMessage"), resources.length * 2); //$NON-NLS-1$
 				monitor.subTask(""); //$NON-NLS-1$
+				List javaElements= new ArrayList(5);
 				for (int i= 0; i < resources.length; i++) {
 					IResource resource= resources[i];
 					resource.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
-					if (resource.getType() == IResource.PROJECT)
-						checkLocationDeleted((IProject)resource);
+					if (resource.getType() == IResource.PROJECT) {
+						checkLocationDeleted(((IProject)resource));
+					}
+					IJavaElement jElement= JavaCore.create(resource);
+					if (jElement != null)
+						javaElements.add(jElement);
 				}
-				JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).refreshExternalJARs(new SubProgressMonitor(monitor, 3));
+				IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+				model.refreshExternalArchives(
+					(IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]),
+					new SubProgressMonitor(monitor, resources.length));
 			}
 		};
 		
