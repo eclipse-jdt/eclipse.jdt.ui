@@ -136,7 +136,7 @@ public class MoveMembersAction extends SelectionDispatchAction{
 			if (isEnabled())
 				run(mockSelection);
 			else
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Refactoring", "Operation not possible.");	
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("MoveMembersAction.error.title"), RefactoringMessages.getString("MoveMembersAction.error.message"));	 //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}

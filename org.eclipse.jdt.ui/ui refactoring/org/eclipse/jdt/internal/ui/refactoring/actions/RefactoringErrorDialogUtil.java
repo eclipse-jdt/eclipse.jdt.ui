@@ -36,7 +36,7 @@ public class RefactoringErrorDialogUtil {
 				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, message);
 				return null;
 			}			
-			message= message + "\n\nOK to perform the operation on this method?";
+			message= message + RefactoringMessages.getString("RefactoringErrorDialogUtil.okToPerformQuestion"); //$NON-NLS-1$
 			if (MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, message))
 				return entry.getData();
 			return null;

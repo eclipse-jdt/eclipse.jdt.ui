@@ -85,7 +85,7 @@ public class RefactoringSupportFactory {
 				if (canRename(newElementToRename))
 					rename(newElementToRename);
 				else
-					MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Rename", "Renaming not possible.");
+					MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("RefactoringSupportFactory.error.title"), RefactoringMessages.getString("RefactoringSupportFactory.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			}	
 		}
 		

@@ -28,7 +28,7 @@ public class RenameTempAction extends SelectionDispatchAction {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"));//$NON-NLS-1$
 		fEditor= editor;
-		fDialogMessageTitle= RefactoringMessages.getString("RenameTempAction.rename_Local_Variable");
+		fDialogMessageTitle= RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"); //$NON-NLS-1$
 		setEnabled(fEditor != null && getCompilationUnit() != null);
 	}
 	

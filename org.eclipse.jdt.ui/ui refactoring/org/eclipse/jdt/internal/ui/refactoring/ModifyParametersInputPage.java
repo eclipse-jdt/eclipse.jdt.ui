@@ -227,7 +227,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		Button button= new Button(buttonComposite, SWT.PUSH);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
-		button.setText("&Edit...");
+		button.setText(RefactoringMessages.getString("ModifyParametersInputPage.editButton.text")); //$NON-NLS-1$
 		button.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					ISelection selection= fTableViewer.getSelection();
@@ -235,10 +235,10 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
     					ParameterInfo[] selected= getSelectedItems();
     					Assert.isTrue(selected.length == 1);
     					ParameterInfo parameterInfo= selected[0];
-    					String key= "Enter a new name for parameter ''{0}'':";
+    					String key= RefactoringMessages.getString("ModifyParametersInputPage.inputdialog.message"); //$NON-NLS-1$
     					String message= MessageFormat.format(key, new String[]{parameterInfo.oldName});
     					IInputValidator validator= createParameterNameValidator(parameterInfo.oldName);
-    					InputDialog dialog= new InputDialog(getShell(), "Modify Parameter Name", message, parameterInfo.newName, validator);
+    					InputDialog dialog= new InputDialog(getShell(), RefactoringMessages.getString("ModifyParametersInputPage.inputDialog.title"), message, parameterInfo.newName, validator); //$NON-NLS-1$
     					if (dialog.open() == InputDialog.CANCEL) {
     						fTableViewer.setSelection(selection);
     						return;
@@ -260,10 +260,10 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	private static IInputValidator createParameterNameValidator(final String oldName){
 		return new IInputValidator(){
             public String isValid(String newText) {
-            	if (newText.equals(""))
-            		return "";
+            	if (newText.equals("")) //$NON-NLS-1$
+            		return ""; //$NON-NLS-1$
             	if (newText.equals(oldName))
-            		return "";
+            		return ""; //$NON-NLS-1$
             	IStatus status= JavaConventions.validateFieldName(newText);
             	if (status.getSeverity() == IStatus.ERROR)
             		return status.getMessage();
