@@ -218,7 +218,7 @@ content access.</li>
 <p>This section describes how to launch a Tomcat server and debug a JSP and associated 
   Java code being developed in a workspace.</p>
 <h3>Tomcat and Project Configuration</h3>
-<p>JSP debugging with the Java family example requires that you have a local installation 
+<p>JSP debugging with the javafamily plug-in requires that you have a local installation 
   of Tomcat, version 5.0.2 or higher. Tomcat can be configured to locate a web 
   application in an arbitrary loation. Thus, a web application (JSPs and Java 
   code) can be developed in an Eclipse workspace, and Tomcat can be configured 
@@ -261,9 +261,10 @@ content access.</li>
   the output location is set to &quot;<code>JSPs\webapps\myWebApp\WEB-INF\classes</code>&quot;. 
   JSPs are created in the &quot;<code>myWebApp</code>&quot; folder.</p>
 <h3>Example JSP Project</h3>
-<p>An example JSP project is included in the exampleJspProject.zip file, found 
-  in the stuff folder of the Java family project. It demonstrates the directory 
-  structure and includes a simple JSP and associated Java class.</p>
+<p>An example JSP project is included in the <code>exampleJspProject.zip</code> 
+  file, found in the <code>stuff</code> folder of the <code>javafamily</code> 
+  plug-in. It demonstrates the directory structure and includes a simple JSP and 
+  associated Java class.</p>
 <h3>Setting a Breakpoint in a JSP</h3>
 <p>To create a breakpoint in a JSP, double click in the JSP edtior ruler on the 
   line where you want the breakpoint. (NOTE: currently, the breakpoint does not 
@@ -286,5 +287,20 @@ content access.</li>
   root folder in the workspace.</p>
 <p>Now you can launch Tomcat by pressing the <b>Debug</b> button.<br>
 </p>
+<h3>Summary to Debug a JSP</h3>
+<p>The following steps must be performed to debug a JSP</p>
+<ul>
+  <li>Install Tomcat 5.0.2 or higher</li>
+  <li>Set the value of <code>${catalina_home}</code> (<b>Debug</b> &gt; <b>Launch 
+    Variables</b> preference page) to point to the Tomcat installation</li>
+  <li>Create a project (web app) in your workspace in the expanded WAR format</li>
+  <li>Ensure the output location of the project is the <code>WEB-INF/classes</code> 
+    folder</li>
+  <li>Configure Tomcat to locate the web app by adding a context entry in the 
+    <code>server.xml</code> file</li>
+  <li>Code JSPs in the web app's root folder</li>
+  <li>Create a Tomcate Server launch configuration that includes the web app location 
+    (located on the &quot;Tomcat&quot; tab of the launch config)</li>
+</ul>
 <pre>&nbsp; </pre>
 </body></html>
