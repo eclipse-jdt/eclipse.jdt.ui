@@ -52,8 +52,13 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static final String DOUBLE_CLICK= "packageview.doubleclick"; //$NON-NLS-1$
 	public static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo"; //$NON-NLS-1$
 	public static final String DOUBLE_CLICK_EXPANDS= "packageview.doubleclick.expands"; //$NON-NLS-1$
-	public static final String RECONCILE_JAVA_VIEWS= "JavaUI.reconcile"; //$NON-NLS-1$
 
+	//XXX: this is needed in order to keep the old preference (to be removed after 2.0)
+	private static final String RECONCILE_JAVA_VIEWS= "JavaUI.reconcile"; //$NON-NLS-1$
+	
+	public static final String UPDATE_JAVA_VIEWS= "JavaUI.update"; //$NON-NLS-1$
+	public static final String UPDATE_ON_SAVE= "JavaUI.update.onSave"; //$NON-NLS-1$
+	public static final String UPDATE_WHILE_EDITING= "JavaUI.update.whileEditing"; //$NON-NLS-1$
 
 	public static boolean linkBrowsingViewSelectionToEditor() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -85,14 +90,17 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	}
 	
 	public static boolean doubleClickGoesInto() {
-		return DOUBLE_CLICK_GOES_INTO.equals(
-			JavaPlugin.getDefault().getPreferenceStore().getString(DOUBLE_CLICK));
+		return DOUBLE_CLICK_GOES_INTO.equals(JavaPlugin.getDefault().getPreferenceStore().getString(DOUBLE_CLICK));
 	}
 
 	public static boolean reconcileJavaViews() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(RECONCILE_JAVA_VIEWS);
+		//XXX: this is needed in order to keep the old preference (to be removed after 2.0)
+		String update= JavaPlugin.getDefault().getPreferenceStore().getString(UPDATE_JAVA_VIEWS);
+		if (! "".equals(update))
+			return UPDATE_WHILE_EDITING.equals(update);
+		else 
+			return JavaPlugin.getDefault().getPreferenceStore().getBoolean(RECONCILE_JAVA_VIEWS);
 	}
-	
 
 	private ArrayList fCheckBoxes;
 	private ArrayList fRadioButtons;
@@ -123,7 +131,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 				controlModified(e.widget);
 			}
 		};
-		
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
@@ -134,9 +141,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		store.setDefault(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE, false);
 
 		store.setDefault(DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS);
-		store.setDefault(RECONCILE_JAVA_VIEWS, true);
+		store.setDefault(UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);
 	}
-
 
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
@@ -144,7 +150,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public void init(IWorkbench workbench) {
 	}		
 	
-	/**
+	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
@@ -207,8 +213,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
-
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.reconcileJavaViews"), RECONCILE_JAVA_VIEWS); //$NON-NLS-1$
 		
 		new Label(composite, SWT.NONE); // spacer
 		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.linkSettings.text")); //$NON-NLS-1$
@@ -216,6 +220,31 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
 
+		new Label(composite, SWT.NONE); // spacer
+		Label doubleClickLabel1= new Label(composite, SWT.NONE);
+		doubleClickLabel1.setText(JavaUIMessages.getString("JavaBasePreferencePage.updateJavaViews")); //$NON-NLS-1$
+
+		Composite doubleClickRadioGroup1= new Composite(composite, SWT.NONE);
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		doubleClickRadioGroup1.setLayout(layout);		
+		Button onSave= addRadioButton(doubleClickRadioGroup1, JavaUIMessages.getString("JavaBasePreferencePage.onSave"), UPDATE_JAVA_VIEWS, UPDATE_ON_SAVE); //$NON-NLS-1$
+		Button whileEditing= addRadioButton(doubleClickRadioGroup1, JavaUIMessages.getString("JavaBasePreferencePage.whileEditing"), UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);  //$NON-NLS-1$
+		Label notice= new Label(composite, SWT.WRAP);
+		notice.setText(JavaUIMessages.getString("JavaBasePreferencePage.notice.outliner"));  //$NON-NLS-1$
+		GridData noticeData= new GridData(GridData.FILL_HORIZONTAL);
+		noticeData.grabExcessHorizontalSpace= true;
+		noticeData.widthHint= convertWidthInCharsToPixels(60);
+		notice.setLayoutData(noticeData);
+		//XXX: this is needed in order to keep the old preference (to be removed after 2.0)
+		if (! onSave.getSelection() && !whileEditing.getSelection()){
+			boolean updateOnSaveOldPreference= JavaPlugin.getDefault().getPreferenceStore().getBoolean(RECONCILE_JAVA_VIEWS);
+			if (updateOnSaveOldPreference)
+				whileEditing.setSelection(true);
+			else
+				onSave.setSelection(true); 
+		}
+		
 		new Label(composite, SWT.NONE); // spacer
 		Label doubleClickLabel= new Label(composite, SWT.NONE);
 		doubleClickLabel.setText(JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$

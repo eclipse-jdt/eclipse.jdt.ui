@@ -188,9 +188,19 @@ public class PreferenceConstants {
 	public static final String DOUBLE_CLICK_EXPANDS= JavaBasePreferencePage.DOUBLE_CLICK_EXPANDS;
 
 	/**
-	 * Enable / Disable showing reconciled elements in viewes. Boolean value.
+	 * Selects the behaviour when showing updated elements in views. String value, UPDATE_ON_SAVE or UPDATE_WHILE_EDITING.
 	 */
-	public static final String RECONCILE_JAVA_VIEWS= JavaBasePreferencePage.RECONCILE_JAVA_VIEWS;
+	public static final String UPDATE_JAVA_VIEWS= JavaBasePreferencePage.UPDATE_JAVA_VIEWS;
+
+	/**
+	 * String value used by UPDATE_JAVA_VIEWS
+	 */
+	public static final String UPDATE_ON_SAVE= JavaBasePreferencePage.UPDATE_ON_SAVE;
+
+	/**
+	 * String value used by UPDATE_JAVA_VIEWS
+	 */
+	public static final String UPDATE_WHILE_EDITING= JavaBasePreferencePage.UPDATE_WHILE_EDITING;
 
 	/**
 	 * Path of the Javadoc command used by the Javadoc creation wizard. String value.
