@@ -89,12 +89,22 @@ public class InlineTempTests extends RefactoringTest {
 	
 	private void helper2() throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
-		ISourceRange selection= getSelection(cu);
+		helper2(cu, getSelection(cu));
+	}
+	
+	private void helper2(ICompilationUnit cu, ISourceRange selection) throws Exception{
 		InlineTempRefactoring ref= new InlineTempRefactoring(cu, selection.getOffset(), selection.getLength());
 		
 		RefactoringStatus result= performRefactoring(ref);
-		assertNotNull("precondition was supposed to fail", result);
+		assertNotNull("precondition was supposed to fail", result);		
 	}
+	
+	private void helper2(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		helper2(cu, selection);
+	}
+	
 	
 	//--- tests 
 	
@@ -229,6 +239,14 @@ public class InlineTempTests extends RefactoringTest {
 
 	public void testFail8() throws Exception{
 		helper2();
+	}
+
+	public void testFail9() throws Exception{
+		helper2(3, 9, 3, 13);
+	}
+
+	public void testFail10() throws Exception{
+		helper2(3, 5, 3, 17);
 	}
 	
 }
