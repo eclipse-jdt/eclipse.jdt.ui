@@ -874,7 +874,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				
 			
 		} else {
-			super.saveDocument(monitor, element, ignore, overwrite);
+			getParentProvider().saveDocument(monitor, element, ignore, overwrite);
 		}		
 	}
 
