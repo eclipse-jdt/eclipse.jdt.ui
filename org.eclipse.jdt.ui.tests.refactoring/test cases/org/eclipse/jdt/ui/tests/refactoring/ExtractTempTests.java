@@ -92,7 +92,7 @@ public class ExtractTempTests extends RefactoringTest {
 		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
 
 		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", checkInputResult.isOK());
+		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 	
 		performChange(ref.createChange(new NullProgressMonitor()));
 		
@@ -405,6 +405,21 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(7, 17, 7, 18, true, false, "temp");
 	}	
 		
+	public void test62() throws Exception{
+//		printTestDisabledMessage("test for bug 33405 Refactoring extract local variable fails in nested if statements");
+		helper1(10, 17, 10, 28, true, false, "temp");
+	}	
+
+	public void test63() throws Exception{
+//		printTestDisabledMessage("test for bug 33405 Refactoring extract local variable fails in nested if statements");
+		helper1(9, 20, 9, 23, true, false, "temp");
+	}	
+
+	public void test64() throws Exception{
+//		printTestDisabledMessage("test for bug 33405 Refactoring extract local variable fails in nested if statements");
+		helper1(10, 17, 10, 28, true, false, "temp");
+	}	
+
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
 		failHelper1(5, 16, 5, 17, false, false, "temp", RefactoringStatus.ERROR);

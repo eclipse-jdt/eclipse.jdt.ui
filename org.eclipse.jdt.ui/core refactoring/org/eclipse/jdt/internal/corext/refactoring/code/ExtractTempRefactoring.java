@@ -427,14 +427,15 @@ public class ExtractTempRefactoring extends Refactoring {
 		Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
 		
 		ASTNode deepestCommonParent= firstReplaceNodeParents[commonPath.length - 1];
-		if (deepestCommonParent instanceof TryStatement)
-			return deepestCommonParent;
+		if (deepestCommonParent instanceof TryStatement || deepestCommonParent instanceof IfStatement){
+			if (deepestCommonParent.getParent() instanceof Block)
+				return deepestCommonParent;
+			if (commonPath.length < firstReplaceNodeParents.length)
+				return getInnermostStatementInBlock(firstReplaceNodeParents[commonPath.length]);
+		}
 		
 		if (deepestCommonParent instanceof Block)
 			return firstReplaceNodeParents[commonPath.length];
-
-		if (deepestCommonParent instanceof IfStatement)
-			return deepestCommonParent;
 
 		return getInnermostStatementInBlock(getFirstReplacedExpression());
 	}
@@ -558,12 +559,16 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private Statement getInnermostStatementInBlock(IASTFragment fragment) {
-		Block block= (Block)ASTNodes.getParent(fragment.getAssociatedNode(), Block.class);
+		return getInnermostStatementInBlock(fragment.getAssociatedNode());
+	}
+
+	private Statement getInnermostStatementInBlock(ASTNode node) {
+		Block block= (Block)ASTNodes.getParent(node, Block.class);
 		if (block == null)
 			return null;
 		for (Iterator iter= block.statements().iterator(); iter.hasNext();) {
 			Statement statement= (Statement) iter.next();
-			if (ASTNodes.isParent(fragment.getAssociatedNode(), statement))
+			if (ASTNodes.isParent(node, statement))
 				return statement;
 		}
 		return null;
