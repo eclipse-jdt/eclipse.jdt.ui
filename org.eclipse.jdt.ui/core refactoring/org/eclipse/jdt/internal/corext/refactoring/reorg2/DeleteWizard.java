@@ -110,11 +110,12 @@ public class DeleteWizard extends RefactoringWizard{
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
+				setPageComplete(false);
 				return "Internal error. See log for details.";
 			}
 		}
 
-		private String getNameOfSingleSelectedElement() {
+		private String getNameOfSingleSelectedElement() throws JavaModelException{
 			if (getSingleSelectedResource() != null)
 				return ReorgUtils2.getName(getSingleSelectedResource());
 			else

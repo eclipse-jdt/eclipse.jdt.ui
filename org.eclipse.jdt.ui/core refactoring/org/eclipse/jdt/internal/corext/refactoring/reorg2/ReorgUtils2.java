@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -128,7 +129,7 @@ public class ReorgUtils2 {
 		return new String[]{resource.getName()};
 	}
 
-	public static String getName(IJavaElement element) {
+	public static String getName(IJavaElement element) throws JavaModelException {
 		String pattern= createNamePattern(element);
 		String[] args= createNameArguments(element);
 		return MessageFormat.format(pattern, args);
@@ -169,12 +170,12 @@ public class ReorgUtils2 {
 		}
 	}
 
-	private static String createNamePattern(IJavaElement element) {
+	private static String createNamePattern(IJavaElement element) throws JavaModelException {
 		switch(element.getElementType()){
 			case IJavaElement.CLASS_FILE:
 				return "class file ''{0}''";
 			case IJavaElement.COMPILATION_UNIT:
-				return "compilation unit ''{0}''";
+				return "file ''{0}''";
 			case IJavaElement.FIELD:
 				return "field ''{0}''";
 			case IJavaElement.IMPORT_CONTAINER:
@@ -186,15 +187,22 @@ public class ReorgUtils2 {
 			case IJavaElement.JAVA_PROJECT:
 				return "Java project ''{0}''";
 			case IJavaElement.METHOD:
-				return "method ''{0}''";
+				if (((IMethod)element).isConstructor())
+					return "constructor ''{0}''";
+				else
+					return "method ''{0}''";
 			case IJavaElement.PACKAGE_DECLARATION:
 				return "package declaration ''{0}''";
 			case IJavaElement.PACKAGE_FRAGMENT:
 				if (JavaElementUtil.isDefaultPackage(element))
 					return "the default package";
 				else
-					return "package fragment ''{0}''";
+					return "package ''{0}''";
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				if (isSourceFolder(element))
+					return "source folder ''{0}''";
+				if (isClassFolder(element))
+					return "class folder ''{0}''";
 				return "package fragment root ''{0}''";
 			case IJavaElement.TYPE:
 				return "type ''{0}''";
@@ -396,6 +404,11 @@ public class ReorgUtils2 {
 	public static boolean isSourceFolder(IJavaElement javaElement) throws JavaModelException {
 		return (javaElement instanceof IPackageFragmentRoot) &&
 				((IPackageFragmentRoot)javaElement).getKind() == IPackageFragmentRoot.K_SOURCE;
+	}
+
+	public static boolean isClassFolder(IJavaElement javaElement) throws JavaModelException {
+		return (javaElement instanceof IPackageFragmentRoot) &&
+				((IPackageFragmentRoot)javaElement).getKind() == IPackageFragmentRoot.K_BINARY;
 	}
 	
 	public static boolean isPackageFragmentRoot(IJavaProject javaProject) throws JavaModelException{
