@@ -116,7 +116,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 				if (node.equals(assignment.getLeftHandSide())) {
 					int parentParentKind= parent.getParent().getNodeType();
 					if (parentParentKind == ASTNode.EXPRESSION_STATEMENT) {
-						Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
+						Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
 						newDeclFrag.setInitializer(placeholder);
 				
 						rewrite.markAsReplaced(assignment.getParent(), newDecl);
@@ -127,7 +127,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 							VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
 							VariableDeclarationExpression expression= ast.newVariableDeclarationExpression(frag);
 							frag.setName(ast.newSimpleName(node.getIdentifier()));
-							Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
+							Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
 							frag.setInitializer(placeholder);
 							expression.setType(evaluateVariableType(ast));
 							
