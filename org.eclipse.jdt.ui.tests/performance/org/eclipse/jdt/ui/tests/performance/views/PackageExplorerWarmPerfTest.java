@@ -50,8 +50,10 @@ public class PackageExplorerWarmPerfTest extends JdtPerformanceTestCase {
 		page= activeWorkbenchWindow.openPage("org.eclipse.ui.resourcePerspective", ResourcesPlugin.getWorkspace().getRoot());
 		joinBackgroudActivities();
 		page.showView(JavaUI.ID_PACKAGES);
+		page.close();
+		page= activeWorkbenchWindow.openPage("org.eclipse.ui.resourcePerspective", ResourcesPlugin.getWorkspace().getRoot());
 		startMeasuring();
-		page.showView(JavaUI.ID_PACKAGES, JavaUI.ID_PACKAGES + "1", IWorkbenchPage.VIEW_CREATE);
+		page.showView(JavaUI.ID_PACKAGES);
 		finishMeasurements();
 	}
 }
