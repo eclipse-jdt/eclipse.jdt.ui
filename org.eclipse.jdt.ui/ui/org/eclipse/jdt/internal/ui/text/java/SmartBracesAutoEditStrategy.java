@@ -237,6 +237,30 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 		install(replacedRegion, undoEvent);
 	}
 
+	/**
+	 * Closes the block immediately on the next line.
+	 */
+	private void makeBlock(IDocument document, DocumentCommand command) throws BadLocationException {
+		int offset= command.offset;
+		
+		int insertionLine= document.getLineOfOffset(offset);
+	
+		final String lineDelimiter= getLineDelimiter(document);
+		final String lineIndentation= getLineIndentation(document, insertionLine, offset);
+	
+		final StringBuffer buffer= new StringBuffer();
+		buffer.append(lineIndentation);
+		buffer.append("}"); //$NON-NLS-1$
+		buffer.append(lineDelimiter);
+	
+		// skip line delimiter, otherwise it may clash with the insertion of '{'
+		int replaceOffset= document.getLineOffset(insertionLine) + document.getLineLength(insertionLine);
+		addReplace(document, command, replaceOffset, 0, buffer.toString());
+	}
+
+	/**
+	 * Surrounds a statement with a block.
+	 */
 	private void makeBlock(IDocument document, DocumentCommand command, IRegion replace, IRegion statement, IRegion nextStatement, IRegion prevStatement, boolean followingControl) throws BadLocationException {
 
 		final int insertionLine= document.getLineOfOffset(replace.getOffset());
@@ -258,19 +282,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 			// more than one line distance between block begin and next statement:
 			default:
 				// statement is too far away, assume normal typing; add closing braces before statement
-				{
-					final String lineDelimiter= getLineDelimiter(document);
-					final String lineIndentation= getLineIndentation(document, insertionLine, replace.getOffset());
-
-					final StringBuffer buffer= new StringBuffer();
-					buffer.append(lineIndentation);
-					buffer.append("}"); //$NON-NLS-1$					
-					buffer.append(lineDelimiter);
-
-					// skip line delimiter, otherwise it may clash with the insertion of '{'
-					int replaceOffset= document.getLineOffset(insertionLine) + document.getLineLength(insertionLine);										
-					addReplace(document, command, replaceOffset, 0, buffer.toString());
-				}
+				makeBlock(document, command);
 				break;
 
 			// statement on next line
@@ -345,11 +357,33 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 		public int delta;
 	}
 
+	private static boolean areBlocksConsistent(IDocument document, int offset) {
+		JavaCodeReader reader= new JavaCodeReader();
+		try { 
+			int begin= offset;
+			int end= offset;
+			
+			while (true) {
+				begin= searchForOpeningPeer(reader, begin, '{', '}', document);
+				end= searchForClosingPeer(reader, end, '{', '}', document);
+				if (begin == -1 && end == -1)
+					return true;
+				if (begin == -1 || end == -1)
+					return false;
+			}
+
+		} catch (IOException e) {
+			return false;
+		}		
+	}
+
 	private static IRegion getSurroundingBlock(IDocument document, int offset) {
 		JavaCodeReader reader= new JavaCodeReader();
 		try {
 			int begin= searchForOpeningPeer(reader, offset, '{', '}', document);
 			int end= searchForClosingPeer(reader, offset, '{', '}', document);
+			if (begin == -1 || end == -1)
+				return null;
 			return new Region(begin, end + 1 - begin);
 			
 		} catch (IOException e) {
@@ -366,7 +400,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 			String source= document.get(sourceRange.getOffset(), sourceRange.getLength());
 
 			StringBuffer contents= new StringBuffer();
-			contents.append("class TemporaryClass {void f()"); //$NON-NLS-1$
+			contents.append("class C{void m()"); //$NON-NLS-1$
 			final int methodOffset= contents.length();
 			contents.append(source);
 			contents.append('}');
@@ -421,6 +455,12 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 			node= node.getParent();
 
 		switch (node.getNodeType()) {
+		case ASTNode.BLOCK:
+			// normal typing: no useful AST node available
+			if (areBlocksConsistent(document, offset))
+				makeBlock(document, command);
+			break;
+
 		case ASTNode.IF_STATEMENT:
 			{
 				IfStatement ifStatement= (IfStatement) node;
