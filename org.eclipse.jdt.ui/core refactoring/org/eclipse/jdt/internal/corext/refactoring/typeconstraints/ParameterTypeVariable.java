@@ -52,7 +52,7 @@ public class ParameterTypeVariable extends ConstraintVariable {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return super.hashCode() ^ fMethodBinding.hashCode() ^ fParameterIndex;
+		return super.hashCode() ^ Bindings.hashCode(fMethodBinding) ^ fParameterIndex;
 	}
 
 	public IMethodBinding getMethodBinding() {

@@ -59,7 +59,7 @@ public class ReturnTypeVariable extends ConstraintVariable{
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return super.hashCode() ^ fMethodBinding.hashCode();
+		return super.hashCode() ^ Bindings.hashCode(fMethodBinding);
 	}
 	
 	public IMethodBinding getMethodBinding() {
