@@ -866,17 +866,20 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private SearchPatternData trySimpleTextSelection(ISelection selection) {
 		SearchPatternData result= null;
 		if (selection instanceof ITextSelection) {
-			BufferedReader reader= new BufferedReader(new StringReader(((ITextSelection)selection).getText()));
-			String text;
-			try {
-				text= reader.readLine();
-				if (text == null)
+			String selectedText= ((ITextSelection) selection).getText();
+			if (selectedText != null) {
+				BufferedReader reader= new BufferedReader(new StringReader(selectedText));
+				String text;
+				try {
+					text= reader.readLine();
+					if (text == null)
+						text= ""; //$NON-NLS-1$
+				} catch (IOException ex) {
 					text= ""; //$NON-NLS-1$
-			} catch (IOException ex) {
-				text= ""; //$NON-NLS-1$
+				}
+				result= new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, text, null);
 			}
-			result= new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, text, null);
-			}
+		}
 		return result;
 	}
 	
