@@ -72,7 +72,10 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 			for (int i= 0; i < result.length; i++) {
 				Object object= result[i];
 				toBeFiltered[0]= object;
-				if (isEssential(object) || filter(toBeFiltered).length == 1)
+				if(object instanceof LogicalPackage) {	 
+					if(filterLogicalPackages((LogicalPackage)object))
+						list.add(object);	
+				} else if (isEssential(object) || filter(toBeFiltered).length == 1)
 					list.add(object);
 			}
 		}
@@ -80,8 +83,6 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 	}
 	
 	private boolean isEssential(Object object) {
-		if(object instanceof LogicalPackage)
-			return true;
 		try {
 			if (object instanceof IPackageFragment) {
 				IPackageFragment fragment= (IPackageFragment) object;
@@ -93,7 +94,19 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 		
 		return false;
 	}
-	
+
+	private boolean filterLogicalPackages(LogicalPackage logicalPackage) {
+		IPackageFragment[] fragments= logicalPackage.getFragments();
+		Object[] toBeFiltered= new Object[1];
+		for (int i= 0; i < fragments.length; i++) {
+			IPackageFragment fragment= fragments[i];
+			toBeFiltered[0]= fragment;
+			if(isEssential(fragment) || filter(toBeFiltered).length != 0)
+				return true;
+		}
+		return false;
+	}
+		
 	// --------- see: IPackagesViewViewer ----------
 	
 	public Widget doFindItem(Object element) {

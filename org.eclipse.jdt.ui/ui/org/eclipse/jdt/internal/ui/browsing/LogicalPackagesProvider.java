@@ -20,21 +20,30 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-class LogicalPackagesProvider implements IPropertyChangeListener {
+abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElementChangedListener {
 
 	protected Map fMapToLogicalPackage;
 	protected Map fMapToPackageFragments;
 	protected boolean fCompoundState;
 	protected StructuredViewer fViewer;
+	protected boolean fProjectViewState;
 	
 	public LogicalPackagesProvider(StructuredViewer viewer){
 		fViewer= viewer;
 		fCompoundState= isInCompoundState();
+		fProjectViewState= true;
 		fMapToLogicalPackage= new HashMap();
 		fMapToPackageFragments= new HashMap();
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);	
@@ -150,4 +159,33 @@ class LogicalPackagesProvider implements IPropertyChangeListener {
 		fMapToLogicalPackage= null;
 		fMapToPackageFragments= null;
 	}
+
+	/*
+	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+	 */
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		if (newInput != null) {
+			JavaCore.addElementChangedListener(this);
+		} else {
+			JavaCore.removeElementChangedListener(this);
+		}
+		fProjectViewState= (newInput instanceof IJavaProject);
+		
+		if(viewer instanceof StructuredViewer)
+			fViewer= (StructuredViewer)viewer;
+	}
+	
+	abstract protected void processDelta(IJavaElementDelta delta) throws JavaModelException;
+
+	/*
+	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
+	 */
+	public void elementChanged(ElementChangedEvent event) {
+		try {
+			processDelta(event.getDelta());
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+	}
+	
 }

@@ -16,20 +16,15 @@ import java.util.List;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -44,7 +39,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * but might be required to later.
  * </p>
  */
-class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements IStructuredContentProvider, IElementChangedListener, IPropertyChangeListener{
+class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements IStructuredContentProvider {
 	PackagesViewFlatContentProvider(StructuredViewer viewer) {
 		super(viewer);
 	}
@@ -117,31 +112,7 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 		return getChildren(inputElement);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput != null) {
-			JavaCore.addElementChangedListener(this);
-		} else {
-			JavaCore.removeElementChangedListener(this);
-		}
-	}
-	
-
-	/*
-	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
-	 */
-	public void elementChanged(ElementChangedEvent event) {
-		try {
-			processDelta(event.getDelta());
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-	}
-
-	
-	private void processDelta(IJavaElementDelta delta) throws JavaModelException {
+	protected void processDelta(IJavaElementDelta delta) throws JavaModelException {
 
 		int kind= delta.getKind();
 		final IJavaElement element= delta.getElement();
@@ -179,8 +150,11 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 	//test to see if element to be refreshed is being filtered out
 	//and if so refresh the viewers input element (JavaProject or PackageFragmentRoot)
 	private Object findElementToRefresh(IPackageFragment fragment) {
-		if (fViewer.testFindItem(fragment) == null)
-			return null;
+		if (fViewer.testFindItem(fragment) == null) {
+			if(fProjectViewState)
+				return fragment.getJavaProject();
+			else return fragment.getParent();
+		} 
 		return fragment;
 	}
 	

@@ -85,4 +85,42 @@ public class LogicalPackage {
 	
 		return false;
 	}
+	
+	public boolean equals(Object o){
+		if (!(o instanceof LogicalPackage))
+			return false;
+			
+		LogicalPackage lp= (LogicalPackage)o;
+		if (!fJavaProject.equals(lp.getJavaProject()))
+			return false;
+		
+		IPackageFragment[] fragments= lp.getFragments();
+		
+		if (fragments.length != getFragments().length)
+			return false;
+			
+		//this works because a LogicalPackage cannot contain the same IPackageFragment twice
+		for (int i= 0; i < fragments.length; i++) {
+			IPackageFragment fragment= fragments[i];
+			if(!fPackages.contains(fragment))
+				return false;
+		}
+		
+		return true;
+	}	
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		IPackageFragment[] fragments= getFragments();
+		return fJavaProject.hashCode() + getHash(fragments, fragments.length-1);
+	}
+	
+	private int getHash(IPackageFragment[] fragments, int index) {
+		if (index <= 0)
+			return fragments[0].hashCode();
+		else return fragments[index].hashCode() + getHash(fragments, index-1);
+	}
+
 }

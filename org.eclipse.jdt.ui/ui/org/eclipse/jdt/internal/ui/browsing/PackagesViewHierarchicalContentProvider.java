@@ -23,10 +23,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
@@ -50,10 +47,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * but might be required to later.
  * </p>
  */
-class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider implements ITreeContentProvider, IElementChangedListener {
-
-	private boolean fProjectViewState= true;	
-
+class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider implements ITreeContentProvider {
+	
 	public PackagesViewHierarchicalContentProvider(StructuredViewer viewer){
 		super(viewer);
 	}
@@ -74,7 +69,6 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							//create new element mapping
 							fMapToLogicalPackage.clear();
 							fMapToPackageFragments.clear();
-							fProjectViewState= true;
 							IJavaProject project= (IJavaProject) parentElement;
 
 							IPackageFragment[] topLevelChildren= getTopLevelChildrenByElementName(project.getPackageFragments());
@@ -96,7 +90,6 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
 						{
 							IPackageFragmentRoot root= (IPackageFragmentRoot) parentElement;
-							fProjectViewState= false;
 		
 							//create new element mapping
 							fMapToLogicalPackage.clear();
@@ -304,31 +297,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		return getChildren(inputElement);
 	}
 
-	/**
-	 * Called when the view is closed and opened. When newInput is null
-	 * removes the element map and decouples ElementChangedListener.
-	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(Viewer, Object, Object)
-	 */
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if(newInput!= null){
-			JavaCore.addElementChangedListener(this);
-		} else {
-			JavaCore.removeElementChangedListener(this);
-		}
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
-	 */
-	public void elementChanged(ElementChangedEvent event) {
-		try {
-			processDelta(event.getDelta());
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-	}
-	
-	private void processDelta(IJavaElementDelta delta) throws JavaModelException {
+	protected void processDelta(IJavaElementDelta delta) throws JavaModelException {
 
 		int kind = delta.getKind();
 		final IJavaElement element = delta.getElement();
@@ -376,7 +345,6 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		return toBeRefreshed;
 	}
 
-
 	private void processAffectedChildren(IJavaElementDelta delta) throws JavaModelException {
 		IJavaElementDelta[] affectedChildren = delta.getAffectedChildren();
 		for (int i = 0; i < affectedChildren.length; i++) {
@@ -385,7 +353,6 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			}
 		}
 	}
-
 
 	private void postAdd(final Object child, final Object parent) {
 		postRunnable(new Runnable() {
@@ -397,7 +364,6 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			}
 		});
 	}
-
 
 	private void postRemove(final Object object) {
 		postRunnable(new Runnable() {
