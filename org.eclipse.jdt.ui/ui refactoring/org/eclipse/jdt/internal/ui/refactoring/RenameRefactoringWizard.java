@@ -45,6 +45,13 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		addPage(page);
 	}
 	
+	/* non java-doc
+	 * @see RefactoringWizard#addPreviewPage
+	 */ 
+	protected void addPreviewPage() {
+		addPage(new NewPreviewWizardPage());
+	}
+	
 	private IRenameRefactoring getRenameRefactoring(){
 		return (IRenameRefactoring)getRefactoring();	
 	}

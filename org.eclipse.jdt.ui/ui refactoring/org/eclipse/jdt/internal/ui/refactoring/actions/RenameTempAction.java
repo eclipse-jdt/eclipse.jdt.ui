@@ -14,7 +14,7 @@ import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard2;
+import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 
 /**
  * Extracts a new method from the text editor's text selection by using the
@@ -61,7 +61,7 @@ public class RenameTempAction extends TextSelectionBasedRefactoringAction{
 		String message= "Choose a new name for the local variable.";
 		String wizardPageHelp= IJavaHelpContextIds.RENAME_TEMP_WIZARD_PAGE; 
 		String errorPageHelp= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
-		return new RenameRefactoringWizard2((RenameTempRefactoring)refactoring, getDialogTitle(), message, wizardPageHelp, errorPageHelp);
+		return new RenameRefactoringWizard((RenameTempRefactoring)refactoring, getDialogTitle(), message, wizardPageHelp, errorPageHelp);
 	}
 }
 

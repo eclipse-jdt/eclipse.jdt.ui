@@ -36,7 +36,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard2;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 
 public class RefactoringSupportFactory {
@@ -66,7 +65,7 @@ public class RefactoringSupportFactory {
 	}
 	
 	private static RefactoringWizard createRenameWizard(IRenameRefactoring ref, String title, String message, String wizardPageHelp, String errorPageHelp, ImageDescriptor image){
-		RenameRefactoringWizard w= new RenameRefactoringWizard2(ref, title, message, wizardPageHelp, errorPageHelp);
+		RenameRefactoringWizard w= new RenameRefactoringWizard(ref, title, message, wizardPageHelp, errorPageHelp);
 		w.setInputPageImageDescriptor(image);
 		return w;
 	}
