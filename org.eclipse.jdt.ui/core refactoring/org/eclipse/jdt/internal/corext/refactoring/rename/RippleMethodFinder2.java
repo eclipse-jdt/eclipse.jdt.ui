@@ -135,7 +135,7 @@ public class RippleMethodFinder2 {
 		//check for bug 81058: 
 		Assert.isTrue(fDeclarations.contains(fMethod), "Search for method declaration did not find original element"); //$NON-NLS-1$
 		
-		createHierarchyOfDeclarations(new SubProgressMonitor(pm, 1));
+		createHierarchyOfDeclarations(new SubProgressMonitor(pm, 1), owner);
 		createTypeToMethod();
 		createUnionFind();
 		
@@ -293,13 +293,13 @@ public class RippleMethodFinder2 {
 		return Signature.toString(refTypeSig);
 	}
 	
-	private void createHierarchyOfDeclarations(IProgressMonitor pm) throws JavaModelException {
+	private void createHierarchyOfDeclarations(IProgressMonitor pm, WorkingCopyOwner owner) throws JavaModelException {
 		IRegion region= JavaCore.newRegion();
 		for (Iterator iter= fDeclarations.iterator(); iter.hasNext();) {
 			IType declaringType= ((IMethod) iter.next()).getDeclaringType();
 			region.add(declaringType);
 		}
-		fHierarchy= fMethod.getJavaProject().newTypeHierarchy(region, pm); //TODO (bug 80098): create multiple hierarchies (per project)?
+		fHierarchy= JavaCore.newTypeHierarchy(region, owner, pm);
 	}
 	
 	private void createTypeToMethod() {
