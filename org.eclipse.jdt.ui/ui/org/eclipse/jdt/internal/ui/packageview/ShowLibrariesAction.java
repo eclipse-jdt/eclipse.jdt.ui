@@ -4,9 +4,6 @@ package org.eclipse.jdt.internal.ui.packageview;import org.eclipse.jdt.interna
  */
 class ShowLibrariesAction extends SelectionProviderAction {
 
-	private static final String FILTER_TOOL_TIP = "Apply the defined filters";
-	private static final String FILTER_SELECTION_MESSAGE = "Select filters to apply";
-	
 	private PackageExplorerPart fPackagesView; 
 	private Shell fShell;
 	
@@ -41,9 +38,9 @@ class ShowLibrariesAction extends SelectionProviderAction {
 	private void updateToolTipText() {
 		LibraryFilter filter= fPackagesView.getLibraryFilter();
 		if (filter.getShowLibraries())
-			setToolTipText("Hide libraries");
+			setToolTipText("Hide referenced libraries");
 		else 
-			setToolTipText("Show libraries");
+			setToolTipText("Show referenced libraries");
 	}
 	
 	/**

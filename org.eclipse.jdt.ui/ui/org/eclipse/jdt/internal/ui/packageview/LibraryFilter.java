@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.packageview;import java.util.StringTokenizer;import java.util.Vector;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.StringMatcher;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;
+package org.eclipse.jdt.internal.ui.packageview;import java.util.StringTokenizer;import java.util.Vector;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.StringMatcher;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;
 
 
 /**
@@ -37,7 +37,21 @@ class LibraryFilter extends ViewerFilter {
 			return true;
 		if (element instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-			return !root.isArchive();
+			if (root.isArchive()) {
+				// don't filter out JARs contained in the project itself
+				IResource resource= null;
+				try {
+					resource= root.getUnderlyingResource();
+					if (resource != null) {
+						IProject jarProject= resource.getProject();
+						IProject container= root.getJavaProject().getProject();
+						return container.equals(jarProject);
+					}
+				} catch (JavaModelException e) {
+					// fall through
+				}
+				return false;
+			}
 		}
 		return true;
 	}
