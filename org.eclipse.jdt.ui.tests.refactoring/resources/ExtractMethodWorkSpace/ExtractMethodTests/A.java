@@ -1,4 +1,5 @@
 public class A{
+	public int value;
 	boolean m(){
 		return a().length != 3;
 	}

@@ -556,8 +556,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test201() throws Exception {
-		System.out.println("\n201 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=10798");		
-		// validSelectionTest();
+		validSelectionTest();
 	}
 	
 	public void test202() throws Exception {
@@ -597,8 +596,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	//---- For statement
 	
 	public void test240() throws Exception {
-		System.out.println("\n240 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=10798");		
-		// validSelectionTest();
+		validSelectionTest();
 	}
 	
 	public void test241() throws Exception {
@@ -658,7 +656,8 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	//---- do while statement
 	
 	public void test260() throws Exception {
-		validSelectionTest();
+		System.out.println("\n260 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=11106");		
+		// validSelectionTest();
 	}
 	
 	public void test261() throws Exception {
@@ -802,8 +801,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test363() throws Exception {
-		System.out.println("\n363 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=10861");				
-		// validSelectionTestChecked();
+		validSelectionTestChecked();
 	}
 	
 	public void test364() throws Exception {
@@ -1251,7 +1249,8 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}	
 	
 	public void test704() throws Exception {
-		returnTest();
+		System.out.println("\n704 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=11106");		
+		// returnTest();
 	}	
 	
 	public void test705() throws Exception {
@@ -1267,7 +1266,8 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 		
 	public void test708() throws Exception {
-		returnTest();
+		System.out.println("\n708 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=11106");		
+		// returnTest();
 	}	
 	
 	public void test709() throws Exception {
@@ -1299,18 +1299,15 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}	
 	
 	public void test716() throws Exception {
-		System.out.println("\n716 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=10865");				
-		// returnTest();
+		returnTest();
 	}	
 	
 	public void test717() throws Exception {
-		System.out.println("\n717 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=10865");				
-		// returnTest();
+		returnTest();
 	}	
 	
 	public void test718() throws Exception {
-		System.out.println("\n718 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=10865");				
-		// returnTest();
+		returnTest();
 	}	
 	
 	public void test719() throws Exception {
@@ -1364,11 +1361,13 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test754() throws Exception {
-		branchTest();
+		System.out.println("\n754 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=11106");		
+		// branchTest();
 	}
 	
 	public void test755() throws Exception {
-		branchTest();
+		System.out.println("\n755 disabled since it fails. See http://dev.eclipse.org/bugs/show_bug.cgi?id=11106");		
+		// branchTest();
 	}
 	
 	//---- Test for CUs with compiler errors
