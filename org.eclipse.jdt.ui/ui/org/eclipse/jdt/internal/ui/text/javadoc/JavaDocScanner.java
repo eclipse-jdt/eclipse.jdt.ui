@@ -162,8 +162,8 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 		
 		// Add rule for HTML comments
 		WordRule wordRule= new WordRule(new HTMLCommentDetector(), token);
-		wordRule.addWord("<!--", token);
-		wordRule.addWord("--!>", token);
+		wordRule.addWord("<!--", token); //$NON-NLS-1$
+		wordRule.addWord("--!>", token); //$NON-NLS-1$
 		list.add(wordRule);
 		
 		

@@ -437,7 +437,7 @@ public class JavaDocCompletionEvaluator {
 			if (containerName.length > 0) {
 				nameBuffer.append(containerName);
 			} else {
-				nameBuffer.append(JavaDocMessages.getString("CompletionEvaluator.default_package"));
+				nameBuffer.append(JavaDocMessages.getString("CompletionEvaluator.default_package")); //$NON-NLS-1$
 			}
 		}
 		String imageKey= isClass ? JavaPluginImages.IMG_OBJS_CLASS : JavaPluginImages.IMG_OBJS_INTERFACE;

@@ -100,14 +100,14 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 			// construct replacement text
 			StringBuffer buf= new StringBuffer();
 			buf.append(replacementString);
-			if (!replacementString.endsWith(")")) {
+			if (!replacementString.endsWith(")")) { //$NON-NLS-1$
 				buf.append(')');
 			}	
-			buf.append(" {\n");
+			buf.append(" {\n"); //$NON-NLS-1$
 			if (!createStubs(buf, fImportStructure)) {
 				return;
 			}
-			buf.append("}");
+			buf.append("}"); //$NON-NLS-1$
 			
 			// use the code formatter
 			String lineDelim= StubUtility.getLineDelimiterFor(document);

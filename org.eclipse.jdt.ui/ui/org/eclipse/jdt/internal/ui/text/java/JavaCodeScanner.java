@@ -74,7 +74,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		}
 	}
 	
-	private static final String SOURCE_VERSION= "org.eclipse.jdt.core.compiler.source";
+	private static final String SOURCE_VERSION= "org.eclipse.jdt.core.compiler.source"; //$NON-NLS-1$
 	
 	private static String[] fgKeywords= { 
 		"abstract", //$NON-NLS-1$

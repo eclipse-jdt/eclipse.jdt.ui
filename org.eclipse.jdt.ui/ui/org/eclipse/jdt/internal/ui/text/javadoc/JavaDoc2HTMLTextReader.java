@@ -70,43 +70,43 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		Iterator e= list.iterator();
 		while (e.hasNext()) {
 			String s= (String) e.next();
-			buffer.append("<dd>");
+			buffer.append("<dd>"); //$NON-NLS-1$
 			if (!firstword)
 				buffer.append(s);
 			else {
-				buffer.append("<b>");
+				buffer.append("<b>"); //$NON-NLS-1$
 				
 				int i= 0;
 				while (i < s.length() && Character.isLetterOrDigit(s.charAt(i))) { ++i; }
 				if (i < s.length()) {
 					buffer.append(s.substring(0, i));
-					buffer.append("</b>");
+					buffer.append("</b>"); //$NON-NLS-1$
 					buffer.append(s.substring(i));
 				} else {
-					buffer.append("</b>");
+					buffer.append("</b>"); //$NON-NLS-1$
 				}
 			}
-			buffer.append("</dd>");
+			buffer.append("</dd>"); //$NON-NLS-1$
 		}
 	}
 	
 	private void print(StringBuffer buffer, String tag, List elements, boolean firstword) {
 		if ( !elements.isEmpty()) {
-			buffer.append("<dt>");
+			buffer.append("<dt>"); //$NON-NLS-1$
 			buffer.append(tag);
-			buffer.append("</dt>");
+			buffer.append("</dt>"); //$NON-NLS-1$
 			printDefinitions(buffer, elements, firstword);
 		}
 	}
 	
 	private void print(StringBuffer buffer, String tag, String content) {
 		if  (content != null) {
-			buffer.append("<dt>");
+			buffer.append("<dt>"); //$NON-NLS-1$
 			buffer.append(tag);
-			buffer.append("</dt>");
-			buffer.append("<dd>");
+			buffer.append("</dt>"); //$NON-NLS-1$
+			buffer.append("<dd>"); //$NON-NLS-1$
 			buffer.append(content);
-			buffer.append("</dd>");
+			buffer.append("</dd>"); //$NON-NLS-1$
 		}
 	}
 	
@@ -115,27 +115,27 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			Iterator e= fRest.iterator();
 			while (e.hasNext()) {
 				Pair p= (Pair) e.next();
-				buffer.append("<dt>");
+				buffer.append("<dt>"); //$NON-NLS-1$
 				if (p.fTag != null)
 					buffer.append(p.fTag);
-				buffer.append("</dt>");
-				buffer.append("<dd>");
+				buffer.append("</dt>"); //$NON-NLS-1$
+				buffer.append("<dd>"); //$NON-NLS-1$
 				if (p.fContent != null)
 					buffer.append(p.fContent);
-				buffer.append("</dd>");
+				buffer.append("</dd>"); //$NON-NLS-1$
 			}
 		}
 	}
 	
 	private String printSimpleTag() {
 		StringBuffer buffer= new StringBuffer();
-		buffer.append("<dl>");
-		print(buffer, "Parameters:", fParameters, true);
-		print(buffer, "Returns:", fReturn);
-		print(buffer, "Throws:", fExceptions, true);
-		print(buffer, "See Also:", fSees, false);
+		buffer.append("<dl>"); //$NON-NLS-1$
+		print(buffer, JavaDocMessages.getString("JavaDoc2HTMLTextReader.parameters.section"), fParameters, true); //$NON-NLS-1$
+		print(buffer, JavaDocMessages.getString("JavaDoc2HTMLTextReader.returns.section"), fReturn); //$NON-NLS-1$
+		print(buffer, JavaDocMessages.getString("JavaDoc2HTMLTextReader.throws.section"), fExceptions, true); //$NON-NLS-1$
+		print(buffer, JavaDocMessages.getString("JavaDoc2HTMLTextReader.see.section"), fSees, false); //$NON-NLS-1$
 		printRest(buffer);
-		buffer.append("</dl>");
+		buffer.append("</dl>"); //$NON-NLS-1$
 		
 		return buffer.toString();
 	}
@@ -144,13 +144,13 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		
 		tagContent= tagContent.trim();
 		
-		if ("@param".equals(tag))
+		if ("@param".equals(tag)) //$NON-NLS-1$
 			fParameters.add(tagContent);
-		else if ("@return".equals(tag))
+		else if ("@return".equals(tag)) //$NON-NLS-1$
 			fReturn= tagContent;
-		else if ("@exception".equals(tag))
+		else if ("@exception".equals(tag)) //$NON-NLS-1$
 			fExceptions.add(tagContent);
-		else if ("@see".equals(tag))
+		else if ("@see".equals(tag)) //$NON-NLS-1$
 			fSees.add(subsituteQualification(tagContent));
 		else if (tagContent != null)
 			fRest.add(new Pair(tag, tagContent));
@@ -189,7 +189,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	
 	private String printBlockTag(String tag, String tagContent) {
 		
-		if ("@link".equals(tag) || "@linkplain".equals(tag)) {
+		if ("@link".equals(tag) || "@linkplain".equals(tag)) { //$NON-NLS-1$ //$NON-NLS-2$
 			
 			StringTokenizer tokenizer= new StringTokenizer(tagContent);
 			int count= tokenizer.countTokens();

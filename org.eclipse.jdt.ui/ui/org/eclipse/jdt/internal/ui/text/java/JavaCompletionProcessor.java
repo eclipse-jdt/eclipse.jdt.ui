@@ -88,9 +88,9 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	};
 	
 	
-	private final static String VISIBILITY= "org.eclipse.jdt.core.codeComplete.visibilityCheck";
-	private final static String ENABLED= "enabled";
-	private final static String DISABLED= "disabled";
+	private final static String VISIBILITY= "org.eclipse.jdt.core.codeComplete.visibilityCheck"; //$NON-NLS-1$
+	private final static String ENABLED= "enabled"; //$NON-NLS-1$
+	private final static String DISABLED= "disabled"; //$NON-NLS-1$
 	
 	
 	
@@ -111,7 +111,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		fEditor= editor;
 		fCollector= new ResultCollector();
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java");
+		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java"); //$NON-NLS-1$
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
 		fExperimentalCollector= new ExperimentalResultCollector();

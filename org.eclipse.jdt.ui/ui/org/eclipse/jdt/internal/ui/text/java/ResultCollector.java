@@ -336,7 +336,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 			nameBuffer.append(getParameterSignature(parameterTypeNames, parameterNames));
 		}
 		nameBuffer.append(')');
-		nameBuffer.append("  ");
+		nameBuffer.append("  "); //$NON-NLS-1$
 		nameBuffer.append(JavaTextMessages.getString("ResultCollector.anonymous_type")); //$NON-NLS-1$
 	
 		int length= end - start;
@@ -359,7 +359,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 			if (containerName.length() > 0) {
 				buf.append(containerName);
 			} else {
-				buf.append(JavaTextMessages.getString("ResultCollector.default_package"));
+				buf.append(JavaTextMessages.getString("ResultCollector.default_package")); //$NON-NLS-1$
 			}
 		}
 		String name= buf.toString();

@@ -58,7 +58,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	public JavaDocCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("javadoc");
+		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("javadoc"); //$NON-NLS-1$
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
 		fRestrictToMatchingCase= false;

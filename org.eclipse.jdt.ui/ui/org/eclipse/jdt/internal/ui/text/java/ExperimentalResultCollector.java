@@ -30,7 +30,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 		buffer.append('(');
 		for (int i= 0; i != count; i++) {
 			if (i != 0)
-				buffer.append(", ");
+				buffer.append(", "); //$NON-NLS-1$
 				
 			offsets[i]= buffer.length();
 			buffer.append(parameterNames[i]);
