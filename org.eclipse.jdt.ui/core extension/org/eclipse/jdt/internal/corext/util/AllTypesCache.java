@@ -411,9 +411,10 @@ public class AllTypesCache {
 			
 			switch (elem.getElementType()) {
 				case IJavaElement.JAVA_PROJECT:
-					// check if project got opened or closed
-					if ((delta.getKind()& IJavaElementDelta.CHANGED) != 0 &&
-						(delta.getFlags() & (IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_OPENED)) != 0) {
+					boolean isOpenedOrClosed= 
+						(delta.getKind()& IJavaElementDelta.CHANGED) != 0 &&
+						(delta.getFlags() & (IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_OPENED)) != 0;
+					if (isAddedOrRemoved || isOpenedOrClosed) {
 						return true;
 					}
 					return processChildrenDelta(delta);
