@@ -35,7 +35,7 @@ public class FailureDialog extends Dialog {
 	private int SIZING_TEXT_WIDTH = 400;
 	private int SIZING_TEXT_HEIGHT = 200;
 	
-	/**
+	/*
 	 * Constructor for FailureDialog
 	 */
 	public FailureDialog(Shell parentShell) {

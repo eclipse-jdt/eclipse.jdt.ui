@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
-import java.text.MessageFormat;
-import java.util.Iterator;
-
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -26,17 +23,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.preference.PreferenceManager;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.internal.dialogs.PropertyDialog;
-import org.eclipse.ui.internal.dialogs.PropertyPageContributorManager;
-import org.eclipse.ui.internal.dialogs.PropertyPageManager;
-import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -71,27 +60,6 @@ public class PreferencesTest extends TestCase {
 		return suite;
 	}	
 	
-	private static class PreferenceDialogWrapper extends PreferenceDialog {
-		
-		public PreferenceDialogWrapper(Shell parentShell, PreferenceManager manager) {
-			super(parentShell, manager);
-		}
-		protected boolean showPage(IPreferenceNode node) {
-			return super.showPage(node);
-		}
-	}
-	
-	private class PropertyDialogWrapper extends PropertyDialog {
-		
-		public PropertyDialogWrapper(Shell parentShell, PreferenceManager manager, ISelection selection) {
-			super(parentShell, manager, selection);
-		}
-		protected boolean showPage(IPreferenceNode node) {
-			return super.showPage(node);
-		}
-	}		
-	
-	
 	private boolean fIsInteractive= true;
 	
 	private static final String PROJECT_NAME = "DummyProject";
@@ -114,61 +82,11 @@ public class PreferencesTest extends TestCase {
 	
 	
 	private PreferenceDialog getPreferenceDialog(String id) {
-		PreferenceDialogWrapper dialog = null;
-		PreferenceManager manager = WorkbenchPlugin.getDefault().getPreferenceManager();
-		if (manager != null) {
-			dialog = new PreferenceDialogWrapper(getShell(), manager);
-			dialog.create();	
-
-			for (Iterator iterator = manager.getElements(PreferenceManager.PRE_ORDER).iterator();
-			     iterator.hasNext();)
-			{
-				IPreferenceNode node = (IPreferenceNode)iterator.next();
-				if ( node.getId().equals(id) ) {
-					dialog.showPage(node);
-					break;
-				}
-			}
-		}
-		return dialog;
+		return PreferencesUtil.createPreferenceDialogOn(getShell(), id, null, null);
 	}
 	
-	private PropertyDialog getPropertyDialog(String id, IAdaptable element) {
-		PropertyDialogWrapper dialog = null;
-
-		PropertyPageManager manager = new PropertyPageManager();
-		String title = "";
-		String name  = "";
-
-		// load pages for the selection
-		// fill the manager with contributions from the matching contributors
-		PropertyPageContributorManager.getManager().contribute(manager, element);
-		
-		IWorkbenchAdapter adapter = (IWorkbenchAdapter)element.getAdapter(IWorkbenchAdapter.class);
-		if (adapter != null) {
-			name = adapter.getLabel(element);
-		}
-		
-		// testing if there are pages in the manager
-		Iterator pages = manager.getElements(PreferenceManager.PRE_ORDER).iterator();		
-		if (!pages.hasNext()) {
-			return null;
-		} else {
-			title = MessageFormat.format("Properties for {0}", new Object[] {name});
-			dialog = new PropertyDialogWrapper(getShell(), manager, new StructuredSelection(element)); 
-			dialog.create();
-			dialog.getShell().setText(title);
-			for (Iterator iterator = manager.getElements(PreferenceManager.PRE_ORDER).iterator();
-			     iterator.hasNext();)
-			{
-				IPreferenceNode node = (IPreferenceNode)iterator.next();
-				if ( node.getId().equals(id) ) {
-					dialog.showPage(node);
-					break;
-				}
-			}
-		}
-		return dialog;
+	private PreferenceDialog getPropertyDialog(String id, IAdaptable element) {
+		return PreferencesUtil.createPropertyDialogOn(getShell(), element, id, null, null);
 	}
 	
 	public void testJavaBasePrefPage() {
