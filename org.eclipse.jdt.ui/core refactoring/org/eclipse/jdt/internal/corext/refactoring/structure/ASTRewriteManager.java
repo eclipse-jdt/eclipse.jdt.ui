@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -38,7 +39,15 @@ class ASTRewriteManager {
 	}
 	
 	public void clear(){
+		removeRewriteModifications();
 		fRewrites.clear();
 		//do not clear the mapper
+	}
+	
+	private void removeRewriteModifications(){
+		for (Iterator iter= fRewrites.values().iterator(); iter.hasNext();) {
+			ASTRewrite rewrite= (ASTRewrite) iter.next();
+			rewrite.removeModifications();
+		}
 	}
 }
