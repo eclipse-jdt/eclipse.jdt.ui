@@ -10,13 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -358,8 +360,8 @@ public class CodeTemplateBlock {
 			TemplateReaderWriter reader= new TemplateReaderWriter();
 			File file= new File(path);
 			if (file.exists()) {
-				Reader input= new FileReader(file);
-				TemplatePersistenceData[] datas= reader.read(input);
+				InputStream input= new BufferedInputStream(new FileInputStream(file));
+				TemplatePersistenceData[] datas= reader.read(input, null);
 				for (int i= 0; i < datas.length; i++) {
 					updateTemplate(datas[i]);
 				}
@@ -433,7 +435,7 @@ public class CodeTemplateBlock {
 
 		if (!file.exists() || confirmOverwrite(file)) {
 			try {
-				Writer output= new FileWriter(file);
+				OutputStream output= new BufferedOutputStream(new FileOutputStream(file));
 				TemplateReaderWriter writer= new TemplateReaderWriter();
 				writer.save(templates, output);
 			} catch (IOException e) {
