@@ -73,6 +73,13 @@ public abstract class QuickMenuAction extends Action {
 			return;
 		widget.setLocation(location);
 		widget.setVisible(true);
+		while (!widget.isDisposed() && widget.isVisible()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
+		if (!widget.isDisposed()) {
+			widget.dispose();
+		}
 	}
 	
 	/**
