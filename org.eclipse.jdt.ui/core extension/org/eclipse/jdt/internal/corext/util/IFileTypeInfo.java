@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -44,10 +45,12 @@ public class IFileTypeInfo extends TypeInfo {
 	protected IJavaElement getJavaElement(IJavaSearchScope scope) {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IPath path= new Path(getPath());
-		
-		IJavaElement elem= JavaCore.create(root.findMember(path));
-		if (elem.exists()) {
-			return elem;
+		IResource resource= root.findMember(path);
+		if (resource != null) {
+			IJavaElement elem= JavaCore.create(resource);
+			if (elem.exists()) {
+				return elem;
+			}
 		}
 		return null;
 	}
