@@ -71,6 +71,29 @@ public class Bindings {
 			return k2.equals(k1);
 	}
 	
+	/**
+	 * Checks if the two arrays of bindings have the same length and
+	 * their elements are equal. Uses
+	 * <code>Bindings.equals(IBinding, IBinding)</code> to compare.
+	 * @param b1 the first array of bindings. Must not be <code>null</code>.
+	 * @param b2 the second array of bindings.
+	 * @return boolean
+	 */
+	public static boolean equals(IBinding[] b1, IBinding[] b2) {
+		Assert.isNotNull(b1);
+		if (b1 == b2)
+			return true;
+		if (b2 == null)
+			return false;		
+		if (b1.length != b2.length)
+			return false;
+		for (int i= 0; i < b1.length; i++) {
+			if (! Bindings.equals(b1[i], b2[i]))
+				return false;
+		}
+		return true;
+	}
+	
 	public static int hashCode(IBinding binding){
 		Assert.isNotNull(binding);
 		String key= binding.getKey();
@@ -238,6 +261,8 @@ public class Bindings {
 		}
 		return null;
 	}
+
+
 
 	/**
 	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in

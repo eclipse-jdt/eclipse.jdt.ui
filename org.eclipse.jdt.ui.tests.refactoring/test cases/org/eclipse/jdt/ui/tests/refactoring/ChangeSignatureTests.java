@@ -23,10 +23,12 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.Modifier;
+
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ChangeSignatureTests extends RefactoringTest {
@@ -297,6 +299,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public void testFail1() throws Exception{
+		//TODO: is duplicate of testFail0()
 		helperFail(new String[]{"j", "i"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
 	}
 
@@ -1102,4 +1105,33 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("TEST.X", "method", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
+	public void testAll58()throws Exception{
+		String[] signature= {"I", "[[[QString;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+
+		String[] oldParamNames= {"a", "b"};
+		String[] newParamNames= {"abb", "bbb"};
+		int[] permutation= {1, 0};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAddRecursive1()throws Exception{
+		printTestDisabledMessage("strange NPE: method binding for super.m(1) in class Super " +
+				"is not resolved in JUnit Plugin Test (but is OK in Eclipse Runtime...).");
+//		String[] signature= {"I"};
+//		String[] newNames= {"bool"};
+//		String[] newTypes= {"boolean"};
+//		String[] newDefaultValues= {"true"};
+//		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+//		int[] newIndices= {1};
+//		helperAdd(signature, newParamInfo, newIndices);
+	}
+	
 }
