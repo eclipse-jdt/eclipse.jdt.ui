@@ -19,10 +19,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -259,7 +261,6 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
     private void initializeDefaults() {
-		fFieldName= fTempDeclarationNode.getName().getIdentifier();
         fVisibility= Modifier.PRIVATE;
         fDeclareStatic= Modifier.isStatic(getMethodDeclaration().getModifiers());
         fDeclareFinal= false;
@@ -269,7 +270,41 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	        fInitializeIn= INITIALIZE_IN_FIELD;
 	    else if (canEnableSettingDeclareInConstructors())    
 	        fInitializeIn= INITIALIZE_IN_CONSTRUCTOR;
+		fFieldName= getInitialFieldName();
     }
+    
+	private String getInitialFieldName() {
+		String tempName= fTempDeclarationNode.getName().getIdentifier();
+		String rawTempName= NamingConventions.removePrefixAndSuffixForLocalVariableName(fCu.getJavaProject(), tempName);
+		String[] excludedNames= getNamesOfFieldsInDeclaringType();
+		int dim= getTempTypeArrayDimensions();
+		String[] suggestedNames= NamingConventions.suggestFieldNames(fCu.getJavaProject(), fCu.getParent().getElementName(), rawTempName, dim, getModifiers(), excludedNames);
+		if (suggestedNames.length > 0)
+			return suggestedNames[0];
+		return tempName;
+	}
+	
+	private String[] getNamesOfFieldsInDeclaringType() {
+		TypeDeclaration type= getEnclosingType();
+		FieldDeclaration[] fields= type.getFields();
+		List result= new ArrayList(fields.length);
+		for (int i= 0; i < fields.length; i++) {
+			for (Iterator iter= fields[i].fragments().iterator(); iter.hasNext();) {
+				VariableDeclarationFragment field= (VariableDeclarationFragment)iter.next();
+				result.add(field.getName().getIdentifier());
+			}
+		}
+		return (String[])result.toArray(new String[result.size()]);
+	}
+
+	private int getTempTypeArrayDimensions() {
+		int dim= 0;
+		Type tempType= getTempDeclarationStatement().getType();
+		if (tempType.isArrayType())
+			dim += ((ArrayType)tempType).getDimensions();
+		dim += fTempDeclarationNode.getExtraDimensions();	
+		return dim;
+	}
         
     private RefactoringStatus checkTempInitializerForLocalTypeUsage() {
     	Expression initializer= fTempDeclarationNode.getInitializer();
@@ -465,7 +500,11 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
 	private String getEnclosingTypeName() {
-		return ((TypeDeclaration)ASTNodes.getParent(getTempDeclarationStatement(), TypeDeclaration.class)).getName().getIdentifier();
+		return getEnclosingType().getName().getIdentifier();
+	}
+	
+	private TypeDeclaration getEnclosingType() {
+		return (TypeDeclaration)ASTNodes.getParent(getTempDeclarationStatement(), TypeDeclaration.class);
 	}
 	
 	private String format(String src, int indentationLevel){
