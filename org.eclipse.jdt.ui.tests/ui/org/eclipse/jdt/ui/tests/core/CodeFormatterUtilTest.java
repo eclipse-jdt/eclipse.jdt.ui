@@ -16,14 +16,17 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CatchClause;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -47,7 +50,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new CodeFormatterUtilTest("test1"));
+			suite.addTest(new CodeFormatterUtilTest("testCUIndented"));
 			return new ProjectTestSetup(suite);
 		}	
 	}
@@ -80,10 +83,8 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("}\n");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
-		CompilationUnit unit= ast.newCompilationUnit();
-		
-		String formatted= CodeFormatterUtil.format(unit, contents, 0, null, "\n", null);
+	
+		String formatted= CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 0, null, "\n", null);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -97,6 +98,59 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(formatted, expected);
 	}
 	
+	public void testCUIndented() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    Runnable run= new Runnable() {};\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+		
+	
+		String formatted= CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 1, null, "\n", null);
+
+		buf= new StringBuffer();
+		buf.append("    package test1;\n");
+		buf.append("    public class A {\n");
+		buf.append("        public void foo() {\n");
+		buf.append("            Runnable run = new Runnable() {\n");
+		buf.append("            };\n");	
+		buf.append("        }\n");
+		buf.append("    }\n");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+	}	
+	
+	public void testCUNewAPI() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    Runnable run= new Runnable() {};\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+			
+		TextEdit edit= CodeFormatterUtil.format2(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 0, "\n", null);
+		Document doc= new Document(contents);
+		edit.apply(doc);
+		String formatted= doc.get();
+		
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable run = new Runnable() {\n");
+		buf.append("        };\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+	}	
+	
 	public void testCUWithPos() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -107,14 +161,11 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("}\n");
 		String contents= buf.toString();
 		
-		AST ast= new AST();
-		CompilationUnit unit= ast.newCompilationUnit();
-		
 		String word1= "new";
 		int start1= contents.indexOf(word1);
 		int[] positions= { start1, start1 + word1.length() - 1};
 		
-		String formatted= CodeFormatterUtil.format(unit, contents, 0, positions, "\n", null);
+		String formatted= CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 0, positions, "\n", null);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -277,6 +328,23 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(curr2, word2);
 		
 	}
+	
+	public void testCatchStringLiteral() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("\"Hello\" ");
+		String contents= buf.toString();
+		
+		AST ast= new AST();
+		StringLiteral node= ast.newStringLiteral();
+				
+		String formatted= CodeFormatterUtil.format(node, contents, 0, null, "\n", null);
+
+		buf= new StringBuffer();
+		buf.append("\"Hello\"");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+				
+	}	
 	
 	public void testFormatSubstring() throws Exception {
 		StringBuffer buf= new StringBuffer();

@@ -12,7 +12,11 @@ package org.eclipse.jdt.internal.corext.util;
 
 import java.util.Map;
 
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Preferences;
@@ -21,23 +25,29 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.CodeFormatter;
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.formatter.FormattingPreferences;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 
 public class CodeFormatterUtil {
 	
 	public static boolean OLD_FORMATTER= true;
+	public static boolean OLD_FUNC= true;
+	public static boolean DEBUG= false;
+	
+	private static boolean BUG_43437= true;
 	
 	public static final int K_UNKNOWN= -1;
 	public static final int K_EXPRESSION = CodeFormatter.K_EXPRESSION;
@@ -45,14 +55,17 @@ public class CodeFormatterUtil {
 	public static final int K_CLASS_BODY_DECLARATIONS = CodeFormatter.K_CLASS_BODY_DECLARATIONS;
 	public static final int K_COMPILATION_UNIT = CodeFormatter.K_COMPILATION_UNIT;
 		 
+	private static final String POS_CATEGORY= "myCategory"; //$NON-NLS-1$
+	
+	
 	/**
 	 * Creates a string that represents the given number of indents (can be spaces or tabs..)
 	 */
 	public static String createIndentString(int indent) {
 		if (OLD_FORMATTER) {
-			return old_format("", indent, null, "", null);  //$NON-NLS-1$//$NON-NLS-2$
+			return old_formatter("", indent, null, "", null);  //$NON-NLS-1$//$NON-NLS-2$
 		} else {
-			String str= new_format(K_EXPRESSION, "x", indent, null, "", null); //$NON-NLS-1$ //$NON-NLS-2$
+			String str= format(K_EXPRESSION, "x", indent, null, "", null); //$NON-NLS-1$ //$NON-NLS-2$
 			return str.substring(0, str.indexOf('x'));
 		}
 	} 
@@ -62,171 +75,196 @@ public class CodeFormatterUtil {
 		return preferences.getInt(JavaCore.FORMATTER_TAB_SIZE);
 	}
 
-	// facade API to allow switching between old and new code formatter
-	
-	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		if (OLD_FORMATTER) {
-			return old_format(string, indentationLevel, positions, lineSeparator, options);
-		} else {
-			return new_format(kind, string, indentationLevel, positions, lineSeparator, options);
-		}	
-	}
-
-	public static String format(String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		return format(K_COMPILATION_UNIT, string, start, end, indentationLevel, positions, lineSeparator, options);
-	}
-	
-	// suggested functionality
-	
-	public static String format(int kind, String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		if (OLD_FORMATTER) {
-			return emulateFormatSubstring(kind, string, start, end, indentationLevel, positions, lineSeparator, options);
-		} else {
-			//DefaultCodeFormatter.format(String,int,int,int,int[],String) not implemented yet: returns null
-			return emulateFormatSubstring(kind, string, start, end, indentationLevel, positions, lineSeparator, options);
-		}
-	}
-	
 	// transition code
 
-	private static String old_format(String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+	private static String old_formatter(String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(options);
 		return formatter.format(string, indentationLevel, positions, lineSeparator);
+	}	
+	
+	/**
+	 * @deprecated
+	 */
+	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+		return format(kind, string, 0, string.length(), indentationLevel, positions, lineSeparator, options);
 	}
 	
 	
-	
-	private static String new_format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+	/**
+	 * @deprecated
+	 */	
+	public static String format(int kind, String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+		int offset= start;
+		int length= end - start;
+		
 		try {
-			/* old api
-			    FormattingPreferences preferences= FormattingPreferences.getDefault();
-				if (options == null) {
-					options= JavaCore.getOptions();
-				}
-				convertOldOptionsToPreferences(options, preferences);
-				return new DefaultCodeFormatter(preferences).format(kind, string, indentationLevel, positions, lineSeparator, options);
-			*/
 			// new edit api
-			String cat= "myCategory"; //$NON-NLS-1$
 			
-			Document doc= new Document(string);
-			doc.addPositionCategory(cat);
-			doc.addPositionUpdater(new DefaultPositionUpdater(cat) {
-				protected boolean notDeleted() {
-					if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
-						fPosition.offset= fOffset + fLength; // deleted positions: set to end of remove
-					}
-					return false;
-				}
-			});
+			Document doc= createDocument(string);
 
-			Position[] stored= null;
-			if (positions != null) {
-				stored= new Position[positions.length];
-				for (int i= 0; i < positions.length; i++) {
-					stored[i]= new Position(positions[i], 0);
-					doc.addPosition(cat, stored[i]);
-				}
+			Position[] stored= initPositions(doc, positions);
+			TextEdit edit= format2(kind, string, offset, length, indentationLevel, lineSeparator, options);
+			if (edit != null) {
+				edit.apply(doc);
+				readPositions(stored, positions);
+				return doc.get();
 			}
-			TextEdit edit= new_api(kind, string, null, indentationLevel, lineSeparator);
-			if (edit == null) {
-				return string;
-			}
-			edit.apply(doc);
-			if (positions != null) {
-				stored= new Position[positions.length];
-				for (int i= 0; i < positions.length; i++) {
-					Position curr= stored[i];
-					Assert.isTrue(!curr.isDeleted);
-					positions[i]= curr.getOffset();
-				}
-			}
-			return doc.get();
+			JavaPlugin.logErrorMessage("format returns null-edit"); //$NON-NLS-1$
 		} catch (MalformedTreeException e) {
+			JavaPlugin.log(e);
 		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
 		} catch (BadPositionCategoryException e) {
+			JavaPlugin.log(e);
 		}
 		return string;
 	}
 	
-	private static TextEdit new_api(int kind, String string, IRegion region, int indentationLevel, String lineSeparator) {
-		// TODO To be implemented by jdt.core
-		return null;
+	/**
+	 * @deprecated
+	 */	
+	public static String format(ASTNode node, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+		if (OLD_FUNC) {
+			return old_formatter(string, indentationLevel, positions, lineSeparator, options);
+		}
+		
+		// emulate the old functionality with edits
+		try {		
+			Document doc= createDocument(string);
+			Position[] stored= initPositions(doc, positions);
+			
+			TextEdit edit= format2(node, string, indentationLevel, lineSeparator, options);
+			if (edit != null) {
+				edit.apply(doc);
+				
+				int[] positionCopy= null;
+				if (DEBUG && positions != null) {
+					positionCopy= (int[]) positions.clone();
+				}
+				
+				readPositions(stored, positions);
+				String res= doc.get();
+				
+				if (DEBUG) {
+					String oldFormat= old_formatter(string, indentationLevel, positionCopy, lineSeparator, options);
+					testSame(res, oldFormat, positions, positionCopy);
+				}
+				return res;
+			}
+			JavaPlugin.logErrorMessage("format returns null-edit"); //$NON-NLS-1$
+		} catch (MalformedTreeException e) {
+			JavaPlugin.log(e);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		} catch (BadPositionCategoryException e) {
+			JavaPlugin.log(e);
+		}
+		return string;
 	}
-
-		
-	/*
-	 * emulate the fomat substring with the old formatter
-	 */ 
-	private static String emulateFormatSubstring(int kind, String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		int inclEnd= end - 1;
-		
-		// sort 'start' and 'end' into the existing position array
-		
-		int[] newPositions= (positions != null) ? new int[positions.length + 2] : new int[2];
-		int k= 0, i= 0;
-		if (positions != null) {
-			while (i < positions.length && positions[i] <= start) {
-				newPositions[k++]= positions[i++];
-			}
+	
+	private static void testSame(String a, String b, int[] p1, int[] p2) {
+		if (!a.equals(b)) {
+			System.out.println("diff: " + a + ", " + b); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		int startIndex= k;
-		newPositions[k++]= start;
-		if (positions != null) {
-			while (i < positions.length && positions[i] < inclEnd) {
-				newPositions[k++]= positions[i++];
-			}
-		}		
-		int endIndex= k;
-		newPositions[k++]= inclEnd;
-		if (positions != null) {
-			while (i < positions.length) {
-				newPositions[k++]= positions[i++];   
-			}
-		}
-		
-		String formatted;
-		if (OLD_FORMATTER) {
-			formatted= old_format(string, indentationLevel, newPositions, lineSeparator, options);
-		} else {
-			formatted= new_format(kind, string, indentationLevel, newPositions, lineSeparator, options);
-		}
-		
-		int newStartPos= newPositions[startIndex];
-		int newEndPos= newPositions[endIndex] + 1; // incl. end 
-		
-		// update the positions array
-		
-		if (positions != null) {
-			i= 0;
-			int startDiff= newStartPos - start;
-			int endDiff= newEndPos - end - startDiff;
-			for (k= 0; k < newPositions.length; k++) {
-				if (k < startIndex) {
-					i++; // no change
-				} else if (k > startIndex && k < endIndex) {
-					positions[i++]= newPositions[k] - startDiff;
-				} else if (k > endIndex) {
-					int val= positions[i] + endDiff;
-					positions[i++]= val;
+		if (p1 != null) {
+			for (int i= 0; i < p2.length; i++) {
+				if (p1[i] != p2[i]) {
+					System.out.println("diff: " + p1[i] + ", " + p2[i]); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
-		
-		return string.substring(0, start) + formatted.substring(newStartPos, newEndPos) + string.substring(end);
 	}
 	
-	// common functionality
 	
+	public static TextEdit format2(int kind, String string, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
+		if (OLD_FORMATTER) {
+			return emulateNewWithOld(string, offset, length, indentationLevel, lineSeparator, options);
+		} else {
+			// TODO: new API
+		}
+		return null;
+		
+	}
+	
+	public static TextEdit format2(int kind, String string, int indentationLevel, String lineSeparator, Map options) {
+		return format2(kind, string, 0, string.length(), indentationLevel, lineSeparator, options);
+	}
+	
+	private static IScanner getTokenScanner(String str) {
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		scanner.setSource(str.toCharArray());
+		scanner.resetTo(0, str.length());
+		return scanner;
+	}
+	
+	private static TextEdit emulateNewWithOld(String string, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
+		String formatted= old_formatter(string, indentationLevel, null, lineSeparator, options);
+		
+		IScanner origScanner= getTokenScanner(string);
+		IScanner newScanner= getTokenScanner(formatted);
+		
+		TextEdit result= new MultiTextEdit();
+		
+		int end= offset + length;
+		try {
+			int origNextStart= 0; // original whitespace start
+			int newNextStart= 0;
+			do {
+				int origTok= origScanner.getNextToken();
+				int newTok= newScanner.getNextToken();
+				Assert.isTrue(origTok == newTok);
+				
+				int origStart= origNextStart;
+				int newStart= newNextStart;					
+				int origEnd, newEnd;
+				if (origTok == ITerminalSymbols.TokenNameEOF) {
+					origEnd= string.length();
+					newEnd= formatted.length();
+					origNextStart= -1; // eof
+				} else {
+					origEnd= origScanner.getCurrentTokenStartPosition();
+					newEnd= newScanner.getCurrentTokenStartPosition();
+					origNextStart= origScanner.getCurrentTokenEndPosition() + 1;
+					newNextStart= newScanner.getCurrentTokenEndPosition() + 1;
+				}
+				if (origStart >= offset && origEnd > offset && origStart < end && origEnd <= end) {
+					if (isDifferent(string, origStart, origEnd, formatted, newStart, newEnd)) {
+						ReplaceEdit edit= new ReplaceEdit(origStart, origEnd - origStart, formatted.substring(newStart, newEnd));
+						result.addChild(edit);
+					}
+				}
+			} while (origNextStart != -1);
+			if (indentationLevel > 0) {
+				result.addChild(new InsertEdit(offset, createIndentString(indentationLevel)));
+			}
+			return result;
+		} catch (MalformedTreeException e) {
+			JavaPlugin.log(e);
+			Assert.isTrue(false, e.getMessage());
+		} catch (InvalidInputException e) {
+			JavaPlugin.log(e);
+			Assert.isTrue(false, e.getMessage());
+		}
+		return null;
+	}
+
+	private static boolean isDifferent(String old, int oldStart, int oldEnd, String formatted, int formStart, int formEnd) {
+		if (oldEnd - oldStart != formEnd - formStart) {
+			return true;
+		}
+		for (int i= oldStart, j= formStart; i < oldEnd; i++, j++) {
+			if (old.charAt(i) != formatted.charAt(j)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Format the source whose kind is described by the passed AST node. This AST node is only used for type tests. It can be
 	 * a dummy node with no content.
 	 */
-	public static String format(ASTNode node, String str, int indentationLevel, int[] positions, String lineSeparator, Map options) {		
-		if (OLD_FORMATTER) {
-			// shortcut: old formatter can format all nodes
-			return old_format(str, indentationLevel, positions, lineSeparator, options);
-		}
+	public static TextEdit format2(ASTNode node, String str, int indentationLevel, String lineSeparator, Map options) {		
 
 		int code;
 		String prefix= ""; //$NON-NLS-1$
@@ -246,6 +284,9 @@ public class CodeFormatterUtil {
 			suffix = ";"; //$NON-NLS-1$
 		} else if (node instanceof Expression) {
 			code= CodeFormatterUtil.K_EXPRESSION;
+			if (BUG_43437 && node instanceof StringLiteral) {
+				return new InsertEdit(0, createIndentString(indentationLevel));
+			}		
 		} else if (node instanceof Type) {
 			suffix= " x;"; //$NON-NLS-1$
 			code= CodeFormatterUtil.K_STATEMENTS;
@@ -273,139 +314,75 @@ public class CodeFormatterUtil {
 			Assert.isTrue(false, "Node type not covered: " + node.getClass().getName()); //$NON-NLS-1$
 			return null;
 		}
-		if (prefix.length() + suffix.length() == 0) {
-			return format(code, str, indentationLevel, positions, lineSeparator, options);
-		} else {
-			String concatStr= prefix + str + suffix;
-			int strStart= prefix.length();
-			int strEnd= concatStr.length() - suffix.length();
-			if (positions != null) {
-				for (int i= 0; i < positions.length; i++) {
-					positions[i] += strStart;
-				}
-			}
-			String formatted= format(code, concatStr, strStart, strEnd, indentationLevel, positions, lineSeparator, options);
-			if (positions != null) {
-				for (int i= 0; i < positions.length; i++) {
-					positions[i] -= strStart;
-				} 
-			}			
-			return formatted.substring(strStart, formatted.length() - suffix.length());
+		String concatStr= prefix + str + suffix;
+		TextEdit edit= format2(code, concatStr, prefix.length(), str.length(), indentationLevel, lineSeparator, options);
+		if (prefix.length() > 0) {
+			edit= shifEdit(edit, prefix.length());
 		}
-	}	
+		return edit;
+	}
 	
-	//copied from CodeFormatterVisitor
-	private static void convertOldOptionsToPreferences(Map oldOptions, FormattingPreferences formattingPreferences) {
-		if (oldOptions == null) {
-			return;
+	private static TextEdit shifEdit(TextEdit oldEdit, int diff) {
+		TextEdit newEdit;
+		if (oldEdit instanceof ReplaceEdit) {
+			ReplaceEdit edit= (ReplaceEdit) oldEdit;
+			newEdit= new ReplaceEdit(edit.getOffset() - diff, edit.getLength(), edit.getText());
+		} else if (oldEdit instanceof InsertEdit) {
+			InsertEdit edit= (InsertEdit) oldEdit;
+			newEdit= new InsertEdit(edit.getOffset() - diff,  edit.getText());
+		} else if (oldEdit instanceof DeleteEdit) {
+			DeleteEdit edit= (DeleteEdit) oldEdit;
+			newEdit= new DeleteEdit(edit.getOffset() - diff,  edit.getLength());
+		} else if (oldEdit instanceof MultiTextEdit) {
+			newEdit= new MultiTextEdit();			
+		} else {
+			return null; // not supported
 		}
-		Object[] entries = oldOptions.entrySet().toArray();
-		
-		for (int i = 0, max = entries.length; i < max; i++){
-			Map.Entry entry = (Map.Entry)entries[i];
-			if (!(entry.getKey() instanceof String)) continue;
-			if (!(entry.getValue() instanceof String)) continue;
-			String optionID = (String) entry.getKey();
-			String optionValue = (String) entry.getValue();
-			
-			if(optionID.equals(JavaCore.FORMATTER_NEWLINE_OPENING_BRACE)){
-				if (optionValue.equals(JavaCore.INSERT)){
-					formattingPreferences.anonymous_type_declaration_brace_position = FormattingPreferences.NEXT_LINE;
-					formattingPreferences.type_declaration_brace_position = FormattingPreferences.NEXT_LINE;
-					formattingPreferences.method_declaration_brace_position = FormattingPreferences.NEXT_LINE;
-					formattingPreferences.block_brace_position = FormattingPreferences.NEXT_LINE;
-					formattingPreferences.switch_brace_position = FormattingPreferences.NEXT_LINE;
-				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
-					formattingPreferences.anonymous_type_declaration_brace_position = FormattingPreferences.END_OF_LINE;
-					formattingPreferences.type_declaration_brace_position = FormattingPreferences.END_OF_LINE;
-					formattingPreferences.method_declaration_brace_position = FormattingPreferences.END_OF_LINE;
-					formattingPreferences.block_brace_position = FormattingPreferences.END_OF_LINE;
-					formattingPreferences.switch_brace_position = FormattingPreferences.END_OF_LINE;
-				}
-				continue;
+		TextEdit[] children= oldEdit.getChildren();
+		for (int i= 0; i < children.length; i++) {
+			TextEdit shifted= shifEdit(children[i], diff);
+			if (shifted != null) {
+				newEdit.addChild(shifted);
 			}
-			if(optionID.equals(JavaCore.FORMATTER_NEWLINE_CONTROL)) {
-				if (optionValue.equals(JavaCore.INSERT)){
-					formattingPreferences.insert_new_line_in_control_statements = true;
-				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
-					formattingPreferences.insert_new_line_in_control_statements = false;
+		}
+		return newEdit;
+	}
+	
+	private static Document createDocument(String string) {
+		Document doc= new Document(string);
+		doc.addPositionCategory(POS_CATEGORY);
+		doc.addPositionUpdater(new DefaultPositionUpdater(POS_CATEGORY) {
+			protected boolean notDeleted() {
+				if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
+					fPosition.offset= fOffset + fLength; // deleted positions: set to end of remove
+					return false;
 				}
-				continue;
+				return true;
 			}
-			if(optionID.equals(JavaCore.FORMATTER_CLEAR_BLANK_LINES)) {
-				if (optionValue.equals(JavaCore.CLEAR_ALL)){
-					formattingPreferences.number_of_empty_lines_to_preserve = 0;
-				} else if (optionValue.equals(JavaCore.PRESERVE_ONE)){
-					formattingPreferences.number_of_empty_lines_to_preserve = 1;
-				}
-				continue;
-			}
-			if(optionID.equals(JavaCore.FORMATTER_NEWLINE_ELSE_IF)){
-				if (optionValue.equals(JavaCore.INSERT)){
-					formattingPreferences.compact_else_if = false;
-				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
-					formattingPreferences.compact_else_if = true;
-				}
-				continue;
-			}
-			if(optionID.equals(JavaCore.FORMATTER_NEWLINE_EMPTY_BLOCK)){
-				if (optionValue.equals(JavaCore.INSERT)){
-					formattingPreferences.insert_new_line_in_empty_anonymous_type_declaration = true;
-					formattingPreferences.insert_new_line_in_empty_type_declaration = true;
-					formattingPreferences.insert_new_line_in_empty_method_body = true;
-					formattingPreferences.insert_new_line_in_empty_block = true;
-				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
-					formattingPreferences.insert_new_line_in_empty_anonymous_type_declaration = false;
-					formattingPreferences.insert_new_line_in_empty_type_declaration = false;
-					formattingPreferences.insert_new_line_in_empty_method_body = false;
-					formattingPreferences.insert_new_line_in_empty_block = false;
-				}
-				continue;
-			}
-			if(optionID.equals(JavaCore.FORMATTER_LINE_SPLIT)){
-				try {
-					int val = Integer.parseInt(optionValue);
-					if (val >= 0) {
-						formattingPreferences.page_width = val;
-					}
-				} catch(NumberFormatException e){
-				}
-			}
-			if(optionID.equals(JavaCore.FORMATTER_COMPACT_ASSIGNMENT)){
-				if (optionValue.equals(JavaCore.COMPACT)){
-					formattingPreferences.insert_space_before_assignment_operators = false;
-				} else if (optionValue.equals(JavaCore.NORMAL)){
-					formattingPreferences.insert_space_before_assignment_operators = true;
-				}
-				continue;
-			}
-			if(optionID.equals(JavaCore.FORMATTER_TAB_CHAR)){
-				if (optionValue.equals(JavaCore.TAB)){
-					formattingPreferences.use_tab = true;
-				} else if (optionValue.equals(JavaCore.SPACE)){
-					formattingPreferences.use_tab = false;
-				}
-				continue;
-			}
-			if(optionID.equals(JavaCore.FORMATTER_TAB_SIZE)){
-				try {
-					int val = Integer.parseInt(optionValue);
-					if (val > 0) {
-						formattingPreferences.tab_size = val;
-					}
-				} catch(NumberFormatException e){
-				}
-			}
-			if(optionID.equals(JavaCore.FORMATTER_SPACE_CASTEXPRESSION)){
-				if (optionValue.equals(JavaCore.INSERT)){
-					formattingPreferences.insert_space_after_closing_paren_in_cast = true;
-				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
-					formattingPreferences.insert_space_after_closing_paren_in_cast = false;
-				}
-				continue;
-			}		
-		}		
+		});
+		return doc;
 	}
 
+	private static Position[] initPositions(Document doc, int[] positions) throws BadLocationException, BadPositionCategoryException {
+		if (positions != null) {
+			Position[] stored= new Position[positions.length];
+			for (int i= 0; i < positions.length; i++) {
+				stored[i]= new Position(positions[i], 0);
+				doc.addPosition(POS_CATEGORY, stored[i]);
+			}
+			return stored;
+		}
+		return null;
+	}
+
+	private static void readPositions(Position[] stored, int[] positions) {
+		if (positions != null) {
+			for (int i= 0; i < positions.length; i++) {
+				Position curr= stored[i];
+				Assert.isTrue(!curr.isDeleted);
+				positions[i]= curr.getOffset();
+			}
+		}
+	}
 	
 }
