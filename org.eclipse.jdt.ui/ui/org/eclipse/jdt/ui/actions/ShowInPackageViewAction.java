@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * @deprecated Action is no longer used. 
  * @since 2.0
  */
 public class ShowInPackageViewAction extends SelectionDispatchAction {

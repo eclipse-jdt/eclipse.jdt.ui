@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * @deprecated Instead of using this ActionGroup clients should integrate with the Show In support.
  * @since 2.0
  */
 public class ShowActionGroup extends ActionGroup {
@@ -42,7 +41,6 @@ public class ShowActionGroup extends ActionGroup {
 
 	private IWorkbenchSite fSite;
 	private ShowInPackageViewAction fShowInPackagesViewAction;
-	private ShowInNavigatorViewAction fShowInNavigatorViewAction;
 
 	/**
 	 * Creates a new <code>ShowActionGroup</code>. The action requires 
@@ -75,15 +73,11 @@ public class ShowActionGroup extends ActionGroup {
 		fShowInPackagesViewAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_PACKAGE_VIEW);
 		part.setAction("ShowInPackageView", fShowInPackagesViewAction); //$NON-NLS-1$
 
-		fShowInNavigatorViewAction= new ShowInNavigatorViewAction(part);
-		fShowInNavigatorViewAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_NAVIGATOR_VIEW);
-		part.setAction("ShowInNavigatorView", fShowInNavigatorViewAction); //$NON-NLS-1$
 		initialize(part.getSite(), true);
 	}
 
 	private ShowActionGroup(IWorkbenchSite site) {
 		fShowInPackagesViewAction= new ShowInPackageViewAction(site);
-		fShowInNavigatorViewAction= new ShowInNavigatorViewAction(site);
 		initialize(site , false);		
 	}
 
@@ -92,10 +86,8 @@ public class ShowActionGroup extends ActionGroup {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		fShowInPackagesViewAction.update(selection);
-		fShowInNavigatorViewAction.update(selection);
 		if (!isJavaEditor) {
 			provider.addSelectionChangedListener(fShowInPackagesViewAction);
-			provider.addSelectionChangedListener(fShowInNavigatorViewAction);
 		}
 	}
 
@@ -123,14 +115,12 @@ public class ShowActionGroup extends ActionGroup {
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		provider.removeSelectionChangedListener(fShowInPackagesViewAction);
-		provider.removeSelectionChangedListener(fShowInNavigatorViewAction);
 		super.dispose();
 	}
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
 		if (!fIsPackageExplorer)
 			actionBar.setGlobalActionHandler(JdtActionConstants.SHOW_IN_PACKAGE_VIEW, fShowInPackagesViewAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.SHOW_IN_NAVIGATOR_VIEW, fShowInNavigatorViewAction);
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {
