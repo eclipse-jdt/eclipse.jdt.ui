@@ -9,6 +9,7 @@ class A{
 			k= u;
 		}
 	}
+
 	void f(){
 		final int u= 9;
 		new Inner(u);

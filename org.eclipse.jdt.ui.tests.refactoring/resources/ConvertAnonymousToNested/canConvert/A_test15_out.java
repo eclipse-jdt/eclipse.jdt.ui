@@ -8,7 +8,8 @@ class A{
 			super(arg0);
 		}
 	}
-    void g(){
-        new Inner(6);
-    }
+
+	void g(){
+		new Inner(6);
+	}
 }

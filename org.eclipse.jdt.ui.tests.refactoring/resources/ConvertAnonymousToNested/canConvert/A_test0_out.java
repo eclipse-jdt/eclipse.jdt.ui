@@ -3,6 +3,7 @@ package p;
 class A{
 	private final class Inner extends A {
 	}
+
 	void f(){
 		new Inner();
 	}

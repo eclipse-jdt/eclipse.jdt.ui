@@ -10,6 +10,7 @@ class A{
 			int uj= u;
 		}
 	}
+
 	void f(){
 		final int u= 9;
 		new Inner(u);

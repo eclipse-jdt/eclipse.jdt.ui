@@ -12,8 +12,9 @@ class A{
 			q= p+u;
 		}
 	}
-    void f(){
-        final int u= 8;
-        new Inner(u);
-    }
+
+	void f(){
+		final int u= 8;
+		new Inner(u);
+	}
 }

@@ -5,6 +5,7 @@ class A {
 			return 0;
 		}
 	}
+
 	void f(){
 		new Inner();
 	}
