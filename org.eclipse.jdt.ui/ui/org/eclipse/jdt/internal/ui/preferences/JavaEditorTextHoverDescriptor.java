@@ -51,9 +51,9 @@ class JavaEditorTextHoverDescriptor implements Comparable {
 	/**
 	 * Creates the Java editor text hover.
 	 */
-	private IJavaEditorTextHover createTextHover() {
+	IJavaEditorTextHover createTextHover() {
 		try {
-			return (IJavaEditorTextHover)fElement.createExecutableExtension(getHoverClassName());
+			return (IJavaEditorTextHover)fElement.createExecutableExtension(CLASS_ATTRIBUTE);
 		} catch (CoreException x) {
 			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JavaUIMessages.getString("JavaTextHover.createTextHover"), null)); //$NON-NLS-1$
 		}
