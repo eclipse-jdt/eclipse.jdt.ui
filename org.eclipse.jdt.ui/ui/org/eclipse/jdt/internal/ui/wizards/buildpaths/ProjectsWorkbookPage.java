@@ -4,12 +4,32 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.resources.IProject;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.resources.IProject;
+
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class ProjectsWorkbookPage extends BuildPathBasePage {
-
-	private static final String PROJECTS= "ProjectsWorkbookPage.projects";
 			
 	private ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
@@ -23,9 +43,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		
 		fProjectsList= new CheckedListDialogField(new CPListLabelProvider(), 0);
 		fProjectsList.setDialogFieldListener(listener);
-		fProjectsList.setLabelText(JavaPlugin.getResourceString(PROJECTS + ".label"));
-		fProjectsList.setCheckAllButtonLabel(JavaPlugin.getResourceString(PROJECTS + ".checkall.button"));
-		fProjectsList.setUncheckAllButtonLabel(JavaPlugin.getResourceString(PROJECTS + ".uncheckall.button"));
+		fProjectsList.setLabelText(NewWizardMessages.getString("ProjectsWorkbookPage.projects.label")); //$NON-NLS-1$
+		fProjectsList.setCheckAllButtonLabel(NewWizardMessages.getString("ProjectsWorkbookPage.projects.checkall.button")); //$NON-NLS-1$
+		fProjectsList.setUncheckAllButtonLabel(NewWizardMessages.getString("ProjectsWorkbookPage.projects.uncheckall.button")); //$NON-NLS-1$
 	}
 	
 	public void init(IJavaProject jproject) {

@@ -4,20 +4,25 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 public class NewPackageRootCreationWizard extends NewElementWizard {
 
-	private static final String WIZARD_TITLE= "NewPackageRootCreationWizard.title";
-	
 	private NewPackageRootCreationWizardPage fPage;
 
 	public NewPackageRootCreationWizard() {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(JavaPlugin.getResourceString(WIZARD_TITLE));
+		setWindowTitle(NewWizardMessages.getString("NewPackageRootCreationWizard.title")); //$NON-NLS-1$
 	}
 
 	/**
@@ -43,7 +48,7 @@ public class NewPackageRootCreationWizard extends NewElementWizard {
 				openResource(resource);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e.getStatus());
-				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
+				// let pass, only reveal and open will fail
 			}
 			return true;
 		}

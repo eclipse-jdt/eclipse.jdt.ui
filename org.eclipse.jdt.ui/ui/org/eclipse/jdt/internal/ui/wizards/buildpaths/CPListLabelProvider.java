@@ -6,27 +6,25 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.viewers.LabelProvider;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.runtime.IPath;import org.eclipse.ui.ISharedImages;
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.viewers.LabelProvider;
+
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
-
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 class CPListLabelProvider extends LabelProvider {
-
-	private static final String R_NEW= "CPListLabelProvider.new";
-	private static final String R_ISCLASS= "CPListLabelProvider.classcontainer";
 		
 	private String fNewLabel, fClassLabel;
 	private Image fJarIcon, fExtJarIcon, fJarWSrcIcon, fExtJarWSrcIcon;
@@ -35,8 +33,8 @@ class CPListLabelProvider extends LabelProvider {
 	private Image fMissingFolderImage, fMissingProjectImage;
 	
 	public CPListLabelProvider() {
-		fNewLabel= JavaPlugin.getResourceString(R_NEW);
-		fClassLabel= JavaPlugin.getResourceString(R_ISCLASS);
+		fNewLabel= NewWizardMessages.getString("CPListLabelProvider.new"); //$NON-NLS-1$
+		fClassLabel= NewWizardMessages.getString("CPListLabelProvider.classcontainer"); //$NON-NLS-1$
 		ImageRegistry reg= JavaPlugin.getDefault().getImageRegistry();
 		
 		fJarIcon= reg.get(JavaPluginImages.IMG_OBJS_JAR);
@@ -75,8 +73,8 @@ class CPListLabelProvider extends LabelProvider {
 						return buf.toString();
 					} else {
 						String ext= path.getFileExtension();
-						if ("zip".equals(ext) || "jar".equals(ext)) {
-							return path.lastSegment() + " - " + path.removeLastSegments(1).toString();
+						if ("zip".equals(ext) || "jar".equals(ext)) { //$NON-NLS-1$ //$NON-NLS-2$
+							return path.lastSegment() + " - " + path.removeLastSegments(1).toString(); //$NON-NLS-1$
 						} else {
 							return path.toString();
 						}
@@ -87,7 +85,7 @@ class CPListLabelProvider extends LabelProvider {
 					StringBuffer buf= new StringBuffer(name);
 					IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
 					if (entryPath != null) {
-						buf.append(" - ");
+						buf.append(" - "); //$NON-NLS-1$
 						buf.append(entryPath.append(path.removeFirstSegments(1).toString()));
 					}
 					return buf.toString();

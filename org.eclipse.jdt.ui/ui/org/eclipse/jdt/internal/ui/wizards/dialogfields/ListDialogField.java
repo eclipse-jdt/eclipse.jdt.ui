@@ -74,9 +74,9 @@ public class ListDialogField extends DialogField {
 		}	
 		
 		// default labels
-		fRemoveButtonLabel= "!Remove!";
-		fUpButtonLabel= "!Up!";
-		fDownButtonLabel= "!Down!";
+		fRemoveButtonLabel= "!Remove!"; //$NON-NLS-1$
+		fUpButtonLabel= "!Up!"; //$NON-NLS-1$
+		fDownButtonLabel= "!Down!"; //$NON-NLS-1$
 		
 		fRemoveButtonEnabled= true;
 		
@@ -186,19 +186,6 @@ public class ListDialogField extends DialogField {
 		}
 		return fTableControl;
 	}
-	
-/*	private int calcColumnWidth() {
-		GC gc= new GC(fTableColumn);
-		for (int i= fElements.size() - 1; i >=0; i--) {
-			String label= 
-			
-		
-		
-		
-	
-	}*/
-	
-	
 	
 	public TableViewer getTableViewer() {
 		return fTable;

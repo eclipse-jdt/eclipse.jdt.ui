@@ -11,12 +11,12 @@ import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Display
  */
 public class NewSnippetFileCreationPage extends WizardNewFileCreationPage {
 	IWorkbench fWorkbench;
-	static final String fgDefaultExtension= "jpage";
+	static final String fgDefaultExtension= "jpage"; //$NON-NLS-1$
 
 	public NewSnippetFileCreationPage(IWorkbench workbench, IStructuredSelection selection) {
-		super("createScrapBookPage", selection);
-		setTitle("Create Java Scrapbook Page");
-		setDescription("Create a new Java scrapbook page.");
+		super("createScrapBookPage", selection); //$NON-NLS-1$
+		setTitle(NewWizardMessages.getString("NewSnipetFileCreationPage.title")); //$NON-NLS-1$
+		setDescription(NewWizardMessages.getString("NewSnipetFileCreationPage.description")); //$NON-NLS-1$
 		fWorkbench= workbench;
 	}
 
@@ -25,7 +25,7 @@ public class NewSnippetFileCreationPage extends WizardNewFileCreationPage {
 		IPath fileName= new Path(getFileName());
 		String extension= fileName.getFileExtension();
 		if (extension == null || !extension.equals(fgDefaultExtension)) {
-			setFileName(fileName.toString() + "." + fgDefaultExtension);
+			setFileName(fileName.toString() + '.' + fgDefaultExtension);
 		}
 
 		boolean retValue= super.validatePage();
@@ -47,7 +47,7 @@ public class NewSnippetFileCreationPage extends WizardNewFileCreationPage {
 				dw.getActivePage().openEditor(file);
 				return true;
 			} catch (PartInitException e) {
-				MessageDialog.openError(getShell(), "Error in NewScrapbookPage",  e.getMessage());
+				MessageDialog.openError(getShell(), NewWizardMessages.getString("NewSnipetFileCreationPage.open_error.message"),  e.getMessage()); //$NON-NLS-1$
 			}
 		}
 		return false;
@@ -64,7 +64,7 @@ public class NewSnippetFileCreationPage extends WizardNewFileCreationPage {
 			IProject project= workspaceRoot.getProject(containerPath.segment(0));
 			try {
 				if (!project.hasNature(JavaCore.NATURE_ID)) {
-					setErrorMessage("The scrapbook page can only be created in a Java project");
+					setErrorMessage(NewWizardMessages.getString("NewSnipetFileCreationPage.error.OnlyInJavaProject")); //$NON-NLS-1$
 					return false;
 				}
 			} catch (CoreException e) {
@@ -73,12 +73,12 @@ public class NewSnippetFileCreationPage extends WizardNewFileCreationPage {
 		}
 	
 		String fileName= getFileName();
-		if (fileName != null && !fileName.endsWith("." + fgDefaultExtension)) {		
-			fileName= fileName + "." + fgDefaultExtension;
+		if (fileName != null && !fileName.endsWith('.' + fgDefaultExtension)) {		
+			fileName= fileName + '.' + fgDefaultExtension;
 			IPath path= getContainerFullPath();
 			
 			if (workspaceRoot.exists(path.append(fileName))) {
-				setErrorMessage("A resource with the specified path already exists.");
+				setErrorMessage(NewWizardMessages.getString("NewSnipetFileCreationPage.error.AlreadyExists")); //$NON-NLS-1$
 				return false;
 			}
 		}

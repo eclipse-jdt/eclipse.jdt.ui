@@ -9,18 +9,17 @@ import java.util.List;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.operation.IRunnableContext;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.TypeRef;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
@@ -28,7 +27,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	
 	private static final int ADD_ID= IDialogConstants.CLIENT_ID + 1;
-	private static final String ADD_LABEL= "NewElementCreationWizard.SuperInterfaceSelectionDialog.addButton.label";
 	
 	private ListDialogField fList;
 	private List fOldContent;
@@ -51,7 +49,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	 * @see Dialog#createButtonsForButtonBar
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, ADD_ID, JavaPlugin.getResourceString(ADD_LABEL), true);
+		createButton(parent, ADD_ID, NewWizardMessages.getString("SuperInterfaceSelectionDialog.addButton.label"), true); //$NON-NLS-1$
 		super.createButtonsForButtonBar(parent);
 	}
 

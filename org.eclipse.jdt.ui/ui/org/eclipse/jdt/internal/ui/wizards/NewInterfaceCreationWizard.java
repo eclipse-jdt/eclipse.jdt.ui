@@ -4,9 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.jface.dialogs.ErrorDialog;
-
-import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -16,15 +15,13 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class NewInterfaceCreationWizard extends NewElementWizard {
 
-	private static final String WIZARD_TITLE= "NewInterfaceCreationWizard.title";
-
 	private NewInterfaceCreationWizardPage fPage;
 	
 	public NewInterfaceCreationWizard() {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWINT);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(JavaPlugin.getResourceString(WIZARD_TITLE));
+		setWindowTitle(NewWizardMessages.getString("NewInterfaceCreationWizard.title")); //$NON-NLS-1$
 	}
 
 	/**
@@ -54,7 +51,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 				openResource(resource);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e.getStatus());
-				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
+				// let pass, only reveal and open will fail
 			}
 			return true;
 		}

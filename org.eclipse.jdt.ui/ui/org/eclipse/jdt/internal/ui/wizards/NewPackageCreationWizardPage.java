@@ -4,19 +4,48 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class NewPackageCreationWizardPage extends ContainerPage {
 	
-	private static final String PAGE_NAME= "NewPackageCreationWizardPage";
+	private static final String PAGE_NAME= "NewPackageCreationWizardPage"; //$NON-NLS-1$
 	
-	protected static final String PACKAGE= "NewPackageCreationWizardPage.package";
+	protected static final String PACKAGE= "NewPackageCreationWizardPage.package"; //$NON-NLS-1$
 	
-	private static final String PK_INVALIDPACK_ERROR= "NewPackageCreationWizardPage.error.InvalidPackageName";
-	private static final String PK_INVALIDPACK_WARNING= "NewPackageCreationWizardPage.warning.DiscouragedPackageName";
-	private static final String PK_PACKEXISTS_WARNING= "NewPackageCreationWizardPage.warning.PackageExists";
-	private static final String PK_ISBINFOLDER_ERROR= "NewPackageCreationWizardPage.error.IsOutputFolder";
-
 	private StringDialogField fPackageDialogField;
 	
 	/**
@@ -28,13 +57,17 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	
 	public NewPackageCreationWizardPage(IWorkspaceRoot root) {
 		super(PAGE_NAME, root);
+		
+		setTitle(NewWizardMessages.getString("NewPackageCreationWizardPage.title")); //$NON-NLS-1$
+		setDescription(NewWizardMessages.getString("NewPackageCreationWizardPage.description"));		 //$NON-NLS-1$
+		
 		fCreatedPackageFragment= null;
 
 		PackageFieldAdapter adapter= new PackageFieldAdapter();
 		
 		fPackageDialogField= new StringDialogField();
 		fPackageDialogField.setDialogFieldListener(adapter);
-		fPackageDialogField.setLabelText(getResourceString(PACKAGE + ".label"));
+		fPackageDialogField.setLabelText(NewWizardMessages.getString("NewPackageCreationWizardPage.package.label")); //$NON-NLS-1$
 		
 		fPackageStatus= new StatusInfo();
 	}
@@ -70,7 +103,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		}		
 		
 		initContainerPage(jelem);
-		setPackageText("");
+		setPackageText(""); //$NON-NLS-1$
 		updateStatus(findMostSevereStatus());
 	}
 	
@@ -148,13 +181,13 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	private IStatus packageChanged() {
 		StatusInfo status= new StatusInfo();
 		String packName= fPackageDialogField.getText();
-		if (!"".equals(packName)) {
+		if (!"".equals(packName)) { //$NON-NLS-1$
 			IStatus val= JavaConventions.validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
-				status.setError(getFormattedString(PK_INVALIDPACK_ERROR, val.getMessage()));
+				status.setError(NewWizardMessages.getFormattedString("NewPackageCreationWizardPage.error.InvalidPackageName", val.getMessage())); //$NON-NLS-1$
 				return status;
 			} else if (val.getSeverity() == IStatus.WARNING) {
-				status.setWarning(getFormattedString(PK_INVALIDPACK_WARNING, val.getMessage()));
+				status.setWarning(NewWizardMessages.getFormattedString("NewPackageCreationWizardPage.warning.DiscouragedPackageName", val.getMessage())); //$NON-NLS-1$
 			}
 		}
 
@@ -169,7 +202,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 					// like the bin folder
 					IPath packagePath= pack.getUnderlyingResource().getFullPath();
 					if (outputPath.isPrefixOf(packagePath)) {
-						status.setError(getResourceString(PK_ISBINFOLDER_ERROR));
+						status.setError(NewWizardMessages.getString("NewPackageCreationWizardPage.error.IsOutputFolder")); //$NON-NLS-1$
 						return status;
 					}
 				}
@@ -178,7 +211,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 			}			
 
 			if (pack.exists()) {
-				status.setWarning(getResourceString(PK_PACKEXISTS_WARNING));
+				status.setWarning(NewWizardMessages.getString("NewPackageCreationWizardPage.warning.PackageExists")); //$NON-NLS-1$
 			}
 		}
 		return status;

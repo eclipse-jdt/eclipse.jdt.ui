@@ -4,36 +4,62 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.io.File;import java.io.IOException;import java.net.MalformedURLException;import java.net.URL;import java.util.zip.ZipFile;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.preferences.ZipContentProvider;import org.eclipse.jdt.internal.ui.preferences.ZipLabelProvider;import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.zip.ZipFile;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
+import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.preferences.ZipContentProvider;
+import org.eclipse.jdt.internal.ui.preferences.ZipLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class SourceAttachmentBlock {
-	
-	private static final String PAGE_NAME= "SourceAttachmentBlock";
-	
-	private static final String FILENAME= PAGE_NAME + ".filename";
-	private static final String PREFIX= PAGE_NAME + ".prefix";
-	private static final String JAVADOC= PAGE_NAME + ".javadoc";
-		
-	private static final String ERR_FILENAME_NOTVALID= FILENAME + ".error.notvalid";
-	private static final String ERR_FILENAME_DEVICEINPATH= FILENAME + ".error.deviceinpath";
-	private static final String ERR_FILENAME_VARIABLENOTEXISTS= FILENAME + ".error.varnotexists";
-	private static final String ERR_FILENAME_NOTEXISTS= FILENAME + ".error.filenotexists";
-	private static final String WARNING_FILENAME_VARIABLEEMPTY= FILENAME + ".warning.varempty";
-
-	private static final String ERR_PREFIX_NOTVALID= PREFIX + ".error.notvalid";
-	private static final String ERR_PREFIX_DEVICEINPATH= PREFIX + ".error.deviceinpath";
-	private static final String ERR_PREFIX_VARIABLENOTEXISTS= PREFIX + ".error.varnotexists";
-	
-	private static final String ERR_JDOCLOCATION_MALFORMED= JAVADOC + ".error.malformed";
-	private static final String ERR_JDOCLOCATION_NOTAFOLDER= JAVADOC + ".error.notafolder";
-	
-	private static final String ERR_JDOCLOCATION_IDXNOTFOUND= JAVADOC + ".warning.filesnotfound";
-	
-	private static final String DIALOG_INTJARDIALOG= PAGE_NAME + ".intjardialog";
-	private static final String DIALOG_PREFIXDIALOG= PAGE_NAME + ".prefixdialog";
-	private static final String DIALOG_EXTJARDIALOG= PAGE_NAME + ".extjardialog";
-	private static final String DIALOG_JDOCDIALOG= PAGE_NAME + ".jdocdialog";	
 	
 	private IStatusChangeListener fContext;
 	
@@ -77,54 +103,54 @@ public class SourceAttachmentBlock {
 		fPrefixStatus= new StatusInfo();
 		fJavaDocStatus= new StatusInfo();		
 		
-		fJARPath= (oldEntry != null) ? oldEntry.getPath() : new Path("");
+		fJARPath= (oldEntry != null) ? oldEntry.getPath() : Path.EMPTY;
 		
 		SourceAttachmentAdapter adapter= new SourceAttachmentAdapter();
 		
 		if (fIsVariableEntry) {
 			fFileNameField= new VariablePathDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
-			fFileNameField.setLabelText(JavaPlugin.getResourceString(FILENAME + ".varlabel"));
-			fFileNameField.setButtonLabel(JavaPlugin.getResourceString(FILENAME + ".external.varbutton"));
-			((VariablePathDialogField)fFileNameField).setVariableButtonLabel(JavaPlugin.getResourceString(FILENAME + ".variable.button"));
+			fFileNameField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.varlabel")); //$NON-NLS-1$
+			fFileNameField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.external.varbutton")); //$NON-NLS-1$
+			((VariablePathDialogField)fFileNameField).setVariableButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.variable.button")); //$NON-NLS-1$
 		
 			fPrefixField= new VariablePathDialogField(adapter);
 			fPrefixField.setDialogFieldListener(adapter);
-			fPrefixField.setLabelText(JavaPlugin.getResourceString(PREFIX + ".varlabel"));
-			fPrefixField.setButtonLabel(JavaPlugin.getResourceString(PREFIX + ".varbutton"));			
-			((VariablePathDialogField)fPrefixField).setVariableButtonLabel(JavaPlugin.getResourceString(PREFIX + ".variable.button"));
+			fPrefixField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.varlabel")); //$NON-NLS-1$
+			fPrefixField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.prefix.varbutton"));			 //$NON-NLS-1$
+			((VariablePathDialogField)fPrefixField).setVariableButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.prefix.variable.button")); //$NON-NLS-1$
 			
 		} else {
 			fFileNameField= new StringButtonDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
-			fFileNameField.setLabelText(JavaPlugin.getResourceString(FILENAME + ".label"));
-			fFileNameField.setButtonLabel(JavaPlugin.getResourceString(FILENAME + ".external.button"));
+			fFileNameField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.label")); //$NON-NLS-1$
+			fFileNameField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.filename.external.button")); //$NON-NLS-1$
 		
 			fInternalButtonField= new SelectionButtonDialogField(SWT.PUSH);
 			fInternalButtonField.setDialogFieldListener(adapter);
-			fInternalButtonField.setLabelText(JavaPlugin.getResourceString(FILENAME + ".internal.button"));
+			fInternalButtonField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.filename.internal.button")); //$NON-NLS-1$
 			
 			fPrefixField= new StringButtonDialogField(adapter);
 			fPrefixField.setDialogFieldListener(adapter);
-			fPrefixField.setLabelText(JavaPlugin.getResourceString(PREFIX + ".label"));
-			fPrefixField.setButtonLabel(JavaPlugin.getResourceString(PREFIX + ".button"));
+			fPrefixField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.label")); //$NON-NLS-1$
+			fPrefixField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.prefix.button")); //$NON-NLS-1$
 		}	
 			
 		fJavaDocField= new StringButtonDialogField(adapter);
 		fJavaDocField.setDialogFieldListener(adapter);
-		fJavaDocField.setLabelText(JavaPlugin.getResourceString(JAVADOC + ".label"));
-		fJavaDocField.setButtonLabel(JavaPlugin.getResourceString(JAVADOC + ".button"));		
+		fJavaDocField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.label")); //$NON-NLS-1$
+		fJavaDocField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.button"));		 //$NON-NLS-1$
 			
 		if (oldEntry != null && oldEntry.getSourceAttachmentPath() != null) {
 			fFileNameField.setText(oldEntry.getSourceAttachmentPath().toString());
 		} else {
-			fFileNameField.setText("");
+			fFileNameField.setText(""); //$NON-NLS-1$
 		}	
 				
 		if (oldEntry != null && oldEntry.getSourceAttachmentRootPath() != null) {
 			fPrefixField.setText(oldEntry.getSourceAttachmentRootPath().toString());
 		} else {
-			fPrefixField.setText("");
+			fPrefixField.setText(""); //$NON-NLS-1$
 		}
 	}
 	
@@ -190,10 +216,10 @@ public class SourceAttachmentBlock {
 		layout.numColumns= 4;		
 		composite.setLayout(layout);
 		
-		createHelpText(composite, SWT.LEFT, false, JavaPlugin.getFormattedString(PAGE_NAME + ".message", fJARPath.lastSegment()));
+		createHelpText(composite, SWT.LEFT, false, NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fJARPath.lastSegment())); //$NON-NLS-1$
 		
 		if (fIsVariableEntry) {
-			createHelpText(composite, SWT.LEFT + SWT.WRAP, true, JavaPlugin.getResourceString(FILENAME + ".description"));
+			createHelpText(composite, SWT.LEFT + SWT.WRAP, true, NewWizardMessages.getString("SourceAttachmentBlock.filename.description")); //$NON-NLS-1$
 		}			
 		
 		fFileNameField.doFillIntoGrid(composite, 4);
@@ -201,16 +227,16 @@ public class SourceAttachmentBlock {
 			DialogField.createEmptySpace(composite, 3);	
 			fInternalButtonField.doFillIntoGrid(composite, 1);
 		} else {
-			String label= JavaPlugin.getResourceString(FILENAME + ".resolvedpath");
+			String label= NewWizardMessages.getString("SourceAttachmentBlock.filename.resolvedpath"); //$NON-NLS-1$
 			fFullPathResolvedLabel= createHelpText(composite, SWT.LEFT, true, getResolvedLabelString(fFileName));
 		}
 		
 		// label
-		createHelpText(composite, SWT.LEFT + SWT.WRAP, true, JavaPlugin.getResourceString(PREFIX + ".description"));
+		createHelpText(composite, SWT.LEFT + SWT.WRAP, true, NewWizardMessages.getString("SourceAttachmentBlock.prefix.description")); //$NON-NLS-1$
 	
 		fPrefixField.doFillIntoGrid(composite, 4);
 		if (fIsVariableEntry) {
-			String label= JavaPlugin.getResourceString(PREFIX + ".resolvedpath");
+			String label= NewWizardMessages.getString("SourceAttachmentBlock.prefix.resolvedpath"); //$NON-NLS-1$
 			fPrefixResolvedLabel= createHelpText(composite, SWT.LEFT, true, getResolvedLabelString(fPrefix));
 		}
 		
@@ -218,7 +244,7 @@ public class SourceAttachmentBlock {
 		
 		//DialogField.createEmptySpace(composite, 1);
 		//Label jdocDescription= new Label(composite, SWT.LEFT + SWT.WRAP);
-		//jdocDescription.setText(JavaPlugin.getResourceString(JAVADOC + ".description"));
+		//jdocDescription.setText(NewWizardMessages.getString(JAVADOC + ".description"));
 		//DialogField.createEmptySpace(composite, 1);
 			
 		//fJavaDocField.doFillIntoGrid(composite, 3);
@@ -298,7 +324,7 @@ public class SourceAttachmentBlock {
 		if (resolvedPath != null) {
 			return resolvedPath.toString();
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}	
 	
 	private IPath getResolvedPath(IPath path) {
@@ -324,18 +350,18 @@ public class SourceAttachmentBlock {
 			return status;
 		} else {
 			if (!Path.EMPTY.isValidPath(prefix)) {
-				status.setError(JavaPlugin.getResourceString(ERR_PREFIX_NOTVALID));
+				status.setError(NewWizardMessages.getString("SourceAttachmentBlock.prefix.error.notvalid")); //$NON-NLS-1$
 				return status;
 			}
 			IPath path= new Path(prefix);
 			if (path.getDevice() != null) {
-				status.setError(JavaPlugin.getResourceString(ERR_PREFIX_DEVICEINPATH));
+				status.setError(NewWizardMessages.getString("SourceAttachmentBlock.prefix.error.deviceinpath")); //$NON-NLS-1$
 				return status;
 			} 			
 			if (fIsVariableEntry) {
 				IPath resolvedPath= getResolvedPath(path);
 				if (path == null) {
-					status.setError(JavaPlugin.getResourceString(ERR_PREFIX_VARIABLENOTEXISTS));
+					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.prefix.error.varnotexists")); //$NON-NLS-1$
 					return status;
 				}
 				fPrefixVariable= path.segment(0);
@@ -356,19 +382,19 @@ public class SourceAttachmentBlock {
 			return status;
 		} else {
 			if (!Path.EMPTY.isValidPath(fileName)) {
-				status.setError(JavaPlugin.getResourceString(ERR_FILENAME_NOTVALID));
+				status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.notvalid")); //$NON-NLS-1$
 				return status;
 			}
 			IPath filePath= new Path(fileName);
 			IPath resolvedPath;
 			if (fIsVariableEntry) {
 				if (filePath.getDevice() != null) {
-					status.setError(JavaPlugin.getResourceString(ERR_FILENAME_DEVICEINPATH));
+					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.deviceinpath")); //$NON-NLS-1$
 					return status;
 				} 
 				resolvedPath= getResolvedPath(filePath);
 				if (resolvedPath == null) {
-					status.setError(JavaPlugin.getResourceString(ERR_FILENAME_VARIABLENOTEXISTS));
+					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.varnotexists")); //$NON-NLS-1$
 					return status;
 				}
 				if (fFullPathResolvedLabel != null) {
@@ -380,13 +406,13 @@ public class SourceAttachmentBlock {
 			}
 			fFileName= filePath;
 			if (resolvedPath.isEmpty()) {
-				status.setWarning(JavaPlugin.getResourceString(WARNING_FILENAME_VARIABLEEMPTY));
+				status.setWarning(NewWizardMessages.getString("SourceAttachmentBlock.filename.warning.varempty")); //$NON-NLS-1$
 				return status;
 			}
 	
 			File resolvedFile= findFile(resolvedPath);
 			if (resolvedFile == null) {
-				String message= JavaPlugin.getFormattedString(ERR_FILENAME_NOTEXISTS, resolvedPath.toOSString());
+				String message= NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", resolvedPath.toOSString()); //$NON-NLS-1$
 				if (fIsVariableEntry) {
 					status.setWarning(message);
 				} else {
@@ -405,27 +431,27 @@ public class SourceAttachmentBlock {
 		StatusInfo status= new StatusInfo();
 		fJavaDocLocation= null;
 		String jdocLocation= fJavaDocField.getText();
-		if (!"".equals(jdocLocation)) {
+		if (!"".equals(jdocLocation)) { //$NON-NLS-1$
 			try {
 				URL url= new URL(jdocLocation);
-				if ("file".equals(url.getProtocol())) {
+				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
 					File dir= new File(url.getFile());
 					if (!dir.isDirectory()) {
-						status.setError(JavaPlugin.getResourceString(ERR_JDOCLOCATION_NOTAFOLDER));
+						status.setError(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.error.notafolder")); //$NON-NLS-1$
 						return status;
 					}
 					/*else {
 						File indexFile= new File(dir, "index.html");
 						File packagesFile= new File(dir, "package-list");
 						if (!packagesFile.exists() || !indexFile.exists()) {
-							fJavaDocStatusInfo.setWarning(JavaPlugin.getResourceString(ERR_JDOCLOCATION_IDXNOTFOUND));
+							fJavaDocStatusInfo.setWarning(NewWizardMessages.getString(ERR_JDOCLOCATION_IDXNOTFOUND));
 							// only a warning, go on
 						}
 					}*/	
 				}
 				fJavaDocLocation= url;
 			} catch (MalformedURLException e) {
-				status.setError(JavaPlugin.getFormattedString(ERR_JDOCLOCATION_MALFORMED, e.getLocalizedMessage()));
+				status.setError(NewWizardMessages.getFormattedString("SourceAttachmentBlock.javadoc.error.malformed", e.getLocalizedMessage())); //$NON-NLS-1$
 				return status;
 			}
 		}
@@ -433,30 +459,35 @@ public class SourceAttachmentBlock {
 	}
 	
 	/*
-	 * Open a dialog to choose a jar from the file system
+	 * Opens a dialog to choose a jar from the file system.
 	 */
 	private IPath chooseExtJarFile() {
-		IPath prevPath= new Path(fFileNameField.getText());
-		if (prevPath.isEmpty()) {
-			prevPath= fJARPath;
+		IPath currPath= new Path(fFileNameField.getText());
+		
+		if (currPath.isEmpty()) {
+			currPath= fJARPath;
 		}
+		IPath resolvedPath= currPath;
 		if (fIsVariableEntry) {
-			prevPath= getResolvedPath(prevPath);
+			resolvedPath= getResolvedPath(currPath);
+			if (resolvedPath == null) {
+				resolvedPath= Path.EMPTY;
+			}
 		}
-		String ext= prevPath.getFileExtension();
-		if ("jar".equals(ext) || "zip".equals(ext)) {
-			prevPath= prevPath.removeLastSegments(1);
+		String ext= resolvedPath.getFileExtension();
+		if ("jar".equals(ext) || "zip".equals(ext)) { //$NON-NLS-2$ //$NON-NLS-1$
+			resolvedPath= resolvedPath.removeLastSegments(1);
 		}
 	
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(JavaPlugin.getResourceString(DIALOG_EXTJARDIALOG + ".text"));
-		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"});
-		dialog.setFilterPath(prevPath.toOSString());
+		dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.extjardialog.text")); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
+		dialog.setFilterPath(resolvedPath.toOSString());
 		String res= dialog.open();
 		if (res != null) {
 			IPath returnPath= new Path(res).makeAbsolute();
 			if (fIsVariableEntry) {
-				returnPath= modifyPath(returnPath, fFilePathVariable);
+				returnPath= modifyPath(returnPath, currPath.segment(0));
 			}
 			return returnPath;
 		}
@@ -464,13 +495,13 @@ public class SourceAttachmentBlock {
 	}
 
 	/*
-	 * Open a dialog to choose an internal jar
+	 * Opens a dialog to choose an internal jar.
 	 */	
 	private IPath chooseInternalJarFile(String initSelection) {
 		Class[] acceptedClasses= new Class[] { IFile.class };
 		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 	
-		ViewerFilter filter= new ResourceFilter(new String[] { ".jar", ".zip" }, null);
+		ViewerFilter filter= new ResourceFilter(new String[] { ".jar", ".zip" }, null); //$NON-NLS-2$ //$NON-NLS-1$
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
@@ -478,8 +509,8 @@ public class SourceAttachmentBlock {
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp, false, true);
 		dialog.setValidator(validator);
 		dialog.addFilter(filter);
-		dialog.setTitle(JavaPlugin.getResourceString(DIALOG_INTJARDIALOG + ".title"));
-		dialog.setMessage(JavaPlugin.getResourceString(DIALOG_INTJARDIALOG + ".message"));
+		dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.message")); //$NON-NLS-1$
 		
 		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
 		IResource initSel= root.findMember(new Path(initSelection));
@@ -494,7 +525,7 @@ public class SourceAttachmentBlock {
 	}
 	
 	/*
-	 * Open a dialog to choose path in a zip file
+	 * Opens a dialog to choose path in a zip file.
 	 */		
 	private IPath choosePrefix() {
 		if (fResolvedFile != null) {
@@ -510,22 +541,23 @@ public class SourceAttachmentBlock {
 			}
 			try {
 				ZipFile zipFile= new ZipFile(fResolvedFile);			
-				ZipContentProvider contentProvider= new ZipContentProvider(initSelection, zipFile);
+				ZipContentProvider contentProvider= new ZipContentProvider(zipFile);
 				ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), new ZipLabelProvider(), contentProvider, false, true); 
-				dialog.setTitle(JavaPlugin.getResourceString(DIALOG_PREFIXDIALOG + ".title"));
-				dialog.setMessage(JavaPlugin.getResourceString(DIALOG_PREFIXDIALOG + ".message"));
-				if (dialog.open(zipFile, contentProvider.getSelectedNode()) == dialog.OK) {
+				dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.title")); //$NON-NLS-1$
+				dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.message")); //$NON-NLS-1$
+				if (dialog.open(zipFile, contentProvider.getSelectedNode(initSelection)) == dialog.OK) {
 					Object obj= dialog.getPrimaryResult();
 					IPath path= new Path(obj.toString());
 					if (fIsVariableEntry) {
-						path= modifyPath(path, fPrefixVariable);
+						path= modifyPath(path, currPath.segment(0));
 					}
 					return path;
 				}
 			} catch (IOException e) {
-				String title= JavaPlugin.getResourceString(DIALOG_PREFIXDIALOG + ".error.title");
-				String message= JavaPlugin.getFormattedString(DIALOG_PREFIXDIALOG + ".error.message", fResolvedFile.getPath());
+				String title= NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.error.title"); //$NON-NLS-1$
+				String message= NewWizardMessages.getFormattedString("SourceAttachmentBlock.prefixdialog.error.message", fResolvedFile.getPath()); //$NON-NLS-1$
 				MessageDialog.openError(getShell(), title, message);
+				JavaPlugin.log(e);
 			}				
 		
 		}
@@ -533,15 +565,15 @@ public class SourceAttachmentBlock {
 	}
 	
 	/*
-	 * Open a dialog to choose a root in the file system
+	 * Opens a dialog to choose a root in the file system.
 	 */	
 	private URL chooseJavaDocLocation() {
-		String initPath= "";
-		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) {
+		String initPath= ""; //$NON-NLS-1$
+		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) { //$NON-NLS-1$
 			initPath= (new File(fJavaDocLocation.getFile())).getPath();
 		}
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
-		dialog.setText(JavaPlugin.getResourceString(DIALOG_JDOCDIALOG + ".text"));
+		dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.jdocdialog.text")); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {
@@ -549,7 +581,7 @@ public class SourceAttachmentBlock {
 				return (new File(res)).toURL();
 			} catch (MalformedURLException e) {
 				// should not happen
-				JavaPlugin.getDefault().log(e);
+				JavaPlugin.log(e);
 			}
 		}
 		return null;		
@@ -563,7 +595,18 @@ public class SourceAttachmentBlock {
 		return JavaPlugin.getActiveWorkbenchShell();			
 	}
 	
+	/**
+	 * Takes a path and replaces the beginning with a variable name
+	 * (if the beginning matches with the variables value)
+	 */
 	private IPath modifyPath(IPath path, String varName) {
+		if (varName == null || path == null) {
+			return null;
+		}
+		if (path.isEmpty()) {
+			return new Path(varName);
+		}
+		
 		IPath varPath= JavaCore.getClasspathVariable(varName);
 		if (varPath != null) {
 			if (varPath.isPrefixOf(path)) {

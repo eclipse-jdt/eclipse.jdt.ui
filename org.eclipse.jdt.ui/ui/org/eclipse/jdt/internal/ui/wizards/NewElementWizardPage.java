@@ -9,24 +9,25 @@ import java.text.MessageFormat;import java.util.MissingResourceException;impor
 public abstract class NewElementWizardPage extends WizardPage {
 
 	private IStatus fCurrStatus;
-	private ResourceBundle fResourceBundle;
 	
 	// added for 1GEUK5C, 1GEUUN9, 1GEUNW2
 	private boolean fPageVisible;
 	
+	/**
+	 * @deprecated
+	 */
 	public NewElementWizardPage(String name, ResourceBundle bundle) {
 		super(name);
-		
-		fResourceBundle= bundle;
 		if (bundle != null) {
-			setTitle(bundle.getString(name + ".title"));
-			setDescription(bundle.getString(name + ".description"));
+			setTitle(bundle.getString(name + ".title")); //$NON-NLS-1$
+			setDescription(bundle.getString(name + ".description")); //$NON-NLS-1$
 		}
 		fPageVisible= false;	
 	}
 	
 	public NewElementWizardPage(String name) {
-		this(name, JavaPlugin.getResourceBundle());
+		this(name, NewWizardMessages.getResourceBundle());
+		fPageVisible= false;
 	}
 		
 	// ---- String Resources ----------------
@@ -35,38 +36,34 @@ public abstract class NewElementWizardPage extends WizardPage {
 	 * Returns the resource bundel currently used
 	 * Can be overwritten by clients to use a differnent resource bundle
 	 * than the JavaUi resource bundle
+	 * @deprecated
 	 */		
 	protected ResourceBundle getResourceBundle() {
-		return fResourceBundle;
+		return NewWizardMessages.getResourceBundle();
 	}
 	
 	/**
 	 * Returns the resource string for the given key
+	 * @deprecated
 	 */
 	protected String getResourceString(String key) {
-		try {
-			return fResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";
-		} catch (NullPointerException e) {
-			return "!" + key + "!";
-		}
+		return NewWizardMessages.getString(key);
 	}
 
 	/**
 	 * Returns a formatted resources string for the given key
+	 * @deprecated
 	 */	
 	protected String getFormattedString(String key, String[] args) {
-		String str= getResourceString(key);
-		return MessageFormat.format(str, args);
+		return NewWizardMessages.getFormattedString(key, args);
 	}
 
 	/**
 	 * Returns a formatted resources string for the given key
+	 * @deprecated
 	 */		
 	protected String getFormattedString(String key, String arg) {
-		String str= getResourceString(key);
-		return MessageFormat.format(str, new String[] { arg });
+		return NewWizardMessages.getFormattedString(key, arg);
 	}
 		
 	// ---- WizardPage ----------------

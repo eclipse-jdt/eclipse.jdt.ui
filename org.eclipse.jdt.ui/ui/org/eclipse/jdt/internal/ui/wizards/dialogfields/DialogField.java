@@ -26,7 +26,7 @@ public class DialogField {
 	public DialogField() {
 		fEnabled= true;
 		fLabel= null;
-		fLabelText= "";
+		fLabelText= ""; //$NON-NLS-1$
 	}
 		
 	public void setLabelText(String labeltext) {
@@ -93,11 +93,11 @@ public class DialogField {
 			fLabel= new Label(parent, SWT.LEFT);
 			fLabel.setFont(parent.getFont());
 			fLabel.setEnabled(fEnabled);		
-			if (fLabelText != null && !"".equals(fLabelText)) {
+			if (fLabelText != null && !"".equals(fLabelText)) { //$NON-NLS-1$
 				fLabel.setText(fLabelText);
 			} else {
 				// XXX: to avoid a 16 pixel wide empty label - revisit
-				fLabel.setText(".");
+				fLabel.setText("."); //$NON-NLS-1$
 				fLabel.setVisible(false);
 			}			
 		}
@@ -146,11 +146,11 @@ public class DialogField {
 	
 	
 	protected final void assertCompositeNotNull(Composite comp) {
-		Assert.isNotNull(comp, "uncreated control requested with composite null");
+		Assert.isNotNull(comp, "uncreated control requested with composite null"); //$NON-NLS-1$
 	}
 	
 	protected final void assertEnoughColumns(int nColumns) {
-		Assert.isTrue(nColumns >= getNumberOfControls(), "given number of columns is too small");
+		Assert.isTrue(nColumns >= getNumberOfControls(), "given number of columns is too small"); //$NON-NLS-1$
 	}
 	
 }

@@ -4,24 +4,41 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.JavaConventions;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IUIConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class VariableCreationDialog extends StatusDialog {
-	
-	private static final String PAGE_NAME= "VariableCreationDialog";
-	private static final String TITLE_EDIT= PAGE_NAME + ".titlenew";
-	private static final String TITLE_NEW= PAGE_NAME + ".titleedit";
-	
-	private static final String NAME= PAGE_NAME + ".name";
-	private static final String PATH= PAGE_NAME + ".path";
-
-	private static final String ERR_INVALIDPATH= PAGE_NAME + ".error.invalidpath";
-	private static final String ERR_INVALIDNAME= PAGE_NAME + ".error.invalidname";
-	private static final String ERR_NAMEEXISTS= PAGE_NAME + ".error.nameexists";
-	
-	private static final String DIALOG_EXTJARDIALOG= PAGE_NAME + ".extjardialog";
-	private static final String DIALOG_EXTDIRDIALOG= PAGE_NAME + ".extdirdialog";
-	
+		
 	private IDialogSettings fDialogSettings;
 	
 	private StringDialogField fNameField;
@@ -38,7 +55,11 @@ public class VariableCreationDialog extends StatusDialog {
 		
 	public VariableCreationDialog(Shell parent, CPVariableElement element, List existingNames) {
 		super(parent);
-		setTitle(JavaPlugin.getResourceString((element == null) ? TITLE_NEW : TITLE_EDIT));
+		if (element == null) {
+			setTitle(NewWizardMessages.getString("VariableCreationDialog.titlenew")); //$NON-NLS-1$
+		} else {
+			setTitle(NewWizardMessages.getString("VariableCreationDialog.titleedit")); //$NON-NLS-1$
+		}
 		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
@@ -50,15 +71,15 @@ public class VariableCreationDialog extends StatusDialog {
 		NewVariableAdapter adapter= new NewVariableAdapter();
 		fNameField= new StringDialogField();
 		fNameField.setDialogFieldListener(adapter);
-		fNameField.setLabelText(JavaPlugin.getResourceString(NAME + ".label"));
+		fNameField.setLabelText(NewWizardMessages.getString("VariableCreationDialog.name.label")); //$NON-NLS-1$
 
 		fPathField= new StringButtonDialogField(adapter);
 		fPathField.setDialogFieldListener(adapter);
-		fPathField.setLabelText(JavaPlugin.getResourceString(PATH + ".label"));
-		fPathField.setButtonLabel(JavaPlugin.getResourceString(PATH + ".file.button"));
+		fPathField.setLabelText(NewWizardMessages.getString("VariableCreationDialog.path.label")); //$NON-NLS-1$
+		fPathField.setButtonLabel(NewWizardMessages.getString("VariableCreationDialog.path.file.button")); //$NON-NLS-1$
 		
 		fDirButton= new StringButtonDialogField(adapter);
-		fDirButton.setButtonLabel(JavaPlugin.getResourceString(PATH + ".dir.button"));
+		fDirButton.setButtonLabel(NewWizardMessages.getString("VariableCreationDialog.path.dir.button")); //$NON-NLS-1$
 		
 		fExistingNames= existingNames;
 		
@@ -67,8 +88,8 @@ public class VariableCreationDialog extends StatusDialog {
 			fPathField.setText(element.getPath().toString());
 			fExistingNames.remove(element.getName());
 		} else {
-			fNameField.setText("");
-			fPathField.setText("");
+			fNameField.setText(""); //$NON-NLS-1$
+			fPathField.setText(""); //$NON-NLS-1$
 		}
 	}
 	
@@ -153,14 +174,14 @@ public class VariableCreationDialog extends StatusDialog {
 		StatusInfo status= new StatusInfo();
 		String name= fNameField.getText();
 		if (name.length() == 0) {
-			status.setError("");
+			status.setError(""); //$NON-NLS-1$
 			return status;
 		}
 		IStatus val= JavaConventions.validateIdentifier(name);
 		if (val.matches(IStatus.ERROR)) {
-			status.setError(JavaPlugin.getFormattedString(ERR_INVALIDNAME, val.getMessage()));
+			status.setError(NewWizardMessages.getFormattedString("VariableCreationDialog.error.invalidname", val.getMessage())); //$NON-NLS-1$
 		} else if (nameConflict(name)) {
-			status.setError(JavaPlugin.getResourceString(ERR_NAMEEXISTS));
+			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.nameexists")); //$NON-NLS-1$
 		}
 		return status;
 	}
@@ -184,7 +205,7 @@ public class VariableCreationDialog extends StatusDialog {
 		
 		String path= fPathField.getText();
 		if (path.length() == 0) {
-			status.setError("");
+			status.setError(""); //$NON-NLS-1$
 			return status;
 		}
 		return status;
@@ -196,12 +217,12 @@ public class VariableCreationDialog extends StatusDialog {
 		if (initPath.length() == 0) {		
 			initPath= fDialogSettings.get(IUIConstants.DIALOGSTORE_LASTEXTJAR);
 			if (initPath == null) {
-				initPath= "";
+				initPath= ""; //$NON-NLS-1$
 			}
 		} else {
 			IPath entryPath= new Path(initPath);
 			String fileExt= entryPath.getFileExtension();
-			if ("zip".equals(fileExt) || "jar".equals(fileExt)) {
+			if ("zip".equals(fileExt) || "jar".equals(fileExt)) { //$NON-NLS-1$ //$NON-NLS-2$
 				entryPath.removeLastSegments(1);
 			}
 			initPath= entryPath.toOSString();
@@ -217,8 +238,8 @@ public class VariableCreationDialog extends StatusDialog {
 		String initPath= getInitPath();
 		
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(JavaPlugin.getResourceString(DIALOG_EXTJARDIALOG + ".text"));
-		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"});
+		dialog.setText(NewWizardMessages.getString("VariableCreationDialog.extjardialog.text")); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {
@@ -232,7 +253,7 @@ public class VariableCreationDialog extends StatusDialog {
 		String initPath= getInitPath();
 		
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
-		dialog.setText(JavaPlugin.getResourceString(DIALOG_EXTDIRDIALOG + ".text"));
+		dialog.setText(NewWizardMessages.getString("VariableCreationDialog.extdirdialog.text")); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {

@@ -1,8 +1,8 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.swt.graphics.Image;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.swt.graphics.Image;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 
 public class CPVariableElementLabelProvider extends LabelProvider {
-		private static final String RESERVED= "CPVariableElementLabelProvider.reserved";	
+	
 	private Image fVariableImage;
 	
 	public CPVariableElementLabelProvider() {
@@ -30,9 +30,9 @@ public class CPVariableElementLabelProvider extends LabelProvider {
 			IPath path= curr.getPath();
 			StringBuffer buf= new StringBuffer(name);			if (!curr.isReserved()) {
 				if (path != null) {
-					buf.append(" - ");
+					buf.append(" - "); //$NON-NLS-1$
 					buf.append(path.toString());
-				}			} else {				buf.append(' ');				buf.append(JavaPlugin.getResourceString(RESERVED));			}			return buf.toString();
+				}			} else {				buf.append(' ');				buf.append(NewWizardMessages.getString("CPVariableElementLabelProvider.reserved")); //$NON-NLS-1$			}			return buf.toString();
 		}		
 		
 		

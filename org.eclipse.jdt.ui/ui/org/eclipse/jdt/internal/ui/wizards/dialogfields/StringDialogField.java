@@ -23,7 +23,7 @@ public class StringDialogField extends DialogField {
 	
 	public StringDialogField() {
 		super();
-		fText= "";
+		fText= ""; //$NON-NLS-1$
 	}
 			
 	// ------- layout helpers

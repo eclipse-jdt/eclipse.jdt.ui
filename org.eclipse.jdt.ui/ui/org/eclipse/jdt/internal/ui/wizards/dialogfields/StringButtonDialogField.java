@@ -26,7 +26,7 @@ public class StringButtonDialogField extends StringDialogField {
 	public StringButtonDialogField(IStringButtonAdapter adapter) {
 		super();
 		fStringButtonAdapter= adapter;
-		fBrowseButtonLabel= "!Browse...!";
+		fBrowseButtonLabel= "!Browse...!"; //$NON-NLS-1$
 		fButtonEnabled= true;
 	}
 	

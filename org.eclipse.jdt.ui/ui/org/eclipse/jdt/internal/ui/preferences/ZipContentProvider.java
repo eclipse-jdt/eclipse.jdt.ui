@@ -15,16 +15,21 @@ import org.eclipse.jface.viewers.Viewer;
 
 public class ZipContentProvider implements ITreeContentProvider {
 
-	private String fInitialSelection;
 	private ZipTreeNode fTree;
 	
-	public ZipContentProvider(String initialSelection, ZipFile zipFile){
-		fInitialSelection= initialSelection;
+	public ZipContentProvider(ZipFile zipFile){
 		fTree= ZipTreeNode.newZipTree((ZipFile) zipFile);
 	}
 	
-	public ZipTreeNode getSelectedNode(){
-		return fTree.findNode(fInitialSelection);
+	public ZipTreeNode getSelectedNode(String initialSelection) {
+		ZipTreeNode node= null;
+		if (initialSelection != null) {
+			node= fTree.findNode(initialSelection);
+		}
+		if (node == null) {
+			node= fTree.findNode("");
+		}
+		return node;
 	}
 	
 	/**

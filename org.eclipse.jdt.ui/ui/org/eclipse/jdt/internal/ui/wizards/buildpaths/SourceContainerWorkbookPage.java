@@ -4,20 +4,48 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.text.MessageFormat;import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+
+import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
+import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
-	private static final String FOLDERS= "SourceContainerWorkbookPage.folders";
-	private static final String ADDNEW= "SourceContainerWorkbookPage.folders.addnew.button";
-	private static final String ADDEXISTING= "SourceContainerWorkbookPage.folders.addnew.addexisting.button";
-	
-	private static final String RBUTTON1= "SourceContainerWorkbookPage.rb1";
-	private static final String RBUTTON2= "SourceContainerWorkbookPage.rb2";
-	
-	private static final String DIALOG_EXI_SRCFOLDER= "SourceContainerWorkbookPage.ExistingSourceFolderDialog";
-	private static final String DIALOG_NEW_SRCFOLDER= "SourceContainerWorkbookPage.NewSourceFolderDialog";	
-	
 	private ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
 	private IPath fProjPath;
@@ -44,23 +72,23 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				
 		fProjectRadioButton= new SelectionButtonDialogField(SWT.RADIO);
 		fProjectRadioButton.setDialogFieldListener(adapter);
-		fProjectRadioButton.setLabelText(getResourceString(RBUTTON1 + ".label"));
+		fProjectRadioButton.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.rb1.label")); //$NON-NLS-1$
 						
 		fFolderRadioButton= new SelectionButtonDialogField(SWT.RADIO);
 		fFolderRadioButton.setDialogFieldListener(adapter);
-		fFolderRadioButton.setLabelText(getResourceString(RBUTTON2 + ".label"));
+		fFolderRadioButton.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.rb2.label")); //$NON-NLS-1$
 		
 		String[] buttonLabels;
 		if (isNewProject) {
-			buttonLabels= new String[] { getResourceString(ADDNEW) };
+			buttonLabels= new String[] { NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button") }; //$NON-NLS-1$
 		} else {
-			buttonLabels= new String[] { getResourceString(ADDNEW), getResourceString(ADDEXISTING) };
+			buttonLabels= new String[] { NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.addexisting.button") }; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		fFoldersList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider(), 0);
 		fFoldersList.setDialogFieldListener(adapter);
-		fFoldersList.setLabelText(getResourceString(FOLDERS + ".label"));
-		fFoldersList.setRemoveButtonLabel(getResourceString(FOLDERS + ".remove.button"));
+		fFoldersList.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.label")); //$NON-NLS-1$
+		fFoldersList.setRemoveButtonLabel(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button")); //$NON-NLS-1$
 				
 		fFolderRadioButton.attachDialogField(fFoldersList);	
 	}
@@ -95,19 +123,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		// fix for 1G47IYV: ITPJUI:WINNT - Both radio buttons get selected in Project properties
 		fFolderRadioButton.setSelection(!fIsProjSelected);
 		fProjectRadioButton.setSelection(fIsProjSelected);
-	}		
-		
-	// -------- Resource Bundle ---------
-	
-	private final String getResourceString(String key) {
-		return JavaPlugin.getResourceString(key);
-	}
-	
-	private final String getFormattedString(String key, String arg) {
-		String str= getResourceString(key);
-		return MessageFormat.format(str, new String[] { arg });
-	}	
-	
+	}			
 	
 	public Control getControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
@@ -231,9 +247,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 	private CPListElement createNewSourceContainer() {	
 		IProject proj= fCurrJProject.getProject();
-		String title= getResourceString(DIALOG_NEW_SRCFOLDER + ".title");
+		String title= NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.title"); //$NON-NLS-1$
 		NewContainerDialog dialog= new NewContainerDialog(fShell, title, proj, getFilteredExistingContainerEntries());
-		dialog.setMessage(getFormattedString(DIALOG_NEW_SRCFOLDER + ".description", fProjPath.toString()));
+		dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
 		if (dialog.open() == dialog.OK) {
 			IFolder folder= dialog.getFolder();
 			return newCPSourceElement(folder);
@@ -255,8 +271,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
 		dialog.setValidator(validator);
-		dialog.setTitle(getResourceString(DIALOG_EXI_SRCFOLDER + ".title"));
-		dialog.setMessage(getResourceString(DIALOG_EXI_SRCFOLDER + ".description"));
+		dialog.setTitle(NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
 		
 		IProject proj= fCurrJProject.getProject();

@@ -4,59 +4,84 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IBuffer;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.compiler.env.IConstants;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.codemanipulation.IImportsStructure;import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jface.viewers.LabelProvider;
+
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.compiler.env.IConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.codemanipulation.IImportsStructure;
+import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 public abstract class TypePage extends ContainerPage {
 	
-	private final static String PAGE_NAME= "TypePage";
+	private final static String PAGE_NAME= "TypePage"; //$NON-NLS-1$
 	
-	protected static final String PACKAGE= PAGE_NAME + ".package";	
-	protected static final String ENCLOSING= PAGE_NAME + ".enclosing";
-	protected static final String ENCLOSINGSELECTION= ENCLOSING + ".selection";
+	protected final static String PACKAGE= PAGE_NAME + ".package";	 //$NON-NLS-1$
+	protected final static String ENCLOSING= PAGE_NAME + ".enclosing"; //$NON-NLS-1$
+	protected final static String ENCLOSINGSELECTION= ENCLOSING + ".selection"; //$NON-NLS-1$
 	
-	protected final static String TYPENAME= PAGE_NAME + ".typename";
-	protected final static String SUPER= PAGE_NAME + ".superclass";
-	protected final static String INTERFACES= PAGE_NAME + ".interfaces";
-	protected final static String MODIFIERS= PAGE_NAME + ".modifiers";
-	protected final static String METHODS= PAGE_NAME + ".methods";
-	
-	private static final String OPERATION_DESC= PAGE_NAME + ".operationdesc";
-	
-	private static final String STATUS_DEFAULT= PAGE_NAME + ".default";
-	
-	private static final String ERROR_PACKAGE_INVALIDNAME= PAGE_NAME + ".error.InvalidPackageName";
-	private static final String ERROR_PACKAGE_CLASHOUTPUTLOCATION= PAGE_NAME + ".error.ClashOutputLocation";
-	private static final String WARNING_PACKAGE_DISCOURAGEDNAME= PAGE_NAME + ".warning.DiscouragedPackageName";
-	
-	private static final String ERROR_ENCLOSING_ENTERNAME= PAGE_NAME + ".error.EnclosingTypeEnterName";
-	private static final String ERROR_ENCLOSING_NOTEXISTS= PAGE_NAME + ".error.EnclosingTypeNotExists";
-	private static final String ERROR_ENCLOSING_PARENTISBINARY= PAGE_NAME + ".error.EnclosingNotInCU";
-
-	private static final String PACKAGE_DIALOG= PAGE_NAME + ".ChoosePackageDialog";
-	private static final String ENCLOSING_DIALOG= PAGE_NAME + ".ChooseEnclosingTypeDialog";
-	
-	private final static String ERROR_TYPE_ENTERNAME= PAGE_NAME + ".error.EnterTypeName";
-	private final static String ERROR_TYPE_NAMEEXISTS= PAGE_NAME + ".error.TypeNameExists";
-	private final static String ERROR_TYPE_INVALIDNAME= PAGE_NAME + ".error.InvalidTypeName";
-	private final static String ERROR_TYPE_QUALIFIEDNAME= PAGE_NAME + ".error.QualifiedName";
-
-	private final static String WARNING_TYPE_NAMEDISCOURAGED= PAGE_NAME + ".warning.TypeNameDiscouraged";
-	
-	private final static String ERROR_SUPER_ENTERNAME= PAGE_NAME + ".error.EnterSuperClassName";
-	private final static String ERROR_SUPER_INVALIDNAME= PAGE_NAME + ".error.InvalidSuperClassName";
-	private final static String WARNING_SUPER_NOTEXISTS= PAGE_NAME + ".warning.SuperClassNotExists";
-	private final static String WARNING_SUPER_ISFINAL= PAGE_NAME + ".warning.SuperClassIsFinal";
-	private final static String WARNING_SUPER_NOTVISIBLE= PAGE_NAME + ".warning.SuperClassIsNotVisible";
-	private final static String WARNING_SUPER_NOTCLASS= PAGE_NAME + ".warning.SuperClassIsNotClass";
-	
-	private final static String WARNING_INTFC_NOTVISIBLE= PAGE_NAME + ".warning.InterfaceIsNotVisible";
-	private final static String WARNING_INTFC_NOTEXISTS= PAGE_NAME + ".warning.InterfaceNotExists";
-	private final static String WARNING_INTFC_NOTINTERFACE= PAGE_NAME + ".warning.InterfaceIsNotInterface";
-
-	private final static String ERROR_MODIFIERS_FINALANDABS= PAGE_NAME + ".error.ModifiersFinalAndAbstract";
-
-	private final static String SUPERCLASS_DIALOG= PAGE_NAME + ".SuperClassDialog";
-	private final static String INTERFACES_DIALOG= PAGE_NAME + ".InterfacesDialog";
+	protected final static String TYPENAME= PAGE_NAME + ".typename"; //$NON-NLS-1$
+	protected final static String SUPER= PAGE_NAME + ".superclass"; //$NON-NLS-1$
+	protected final static String INTERFACES= PAGE_NAME + ".interfaces"; //$NON-NLS-1$
+	protected final static String MODIFIERS= PAGE_NAME + ".modifiers"; //$NON-NLS-1$
+	protected final static String METHODS= PAGE_NAME + ".methods"; //$NON-NLS-1$
 
 	private class InterfacesListLabelProvider extends LabelProvider {
 		
@@ -113,64 +138,61 @@ public abstract class TypePage extends ContainerPage {
 		
 		TypeFieldsAdapter adapter= new TypeFieldsAdapter();
 		
-		
 		fPackageDialogField= new StringButtonStatusDialogField(adapter);
 		fPackageDialogField.setDialogFieldListener(adapter);
-		fPackageDialogField.setLabelText(getResourceString(PACKAGE + ".label"));
-		fPackageDialogField.setButtonLabel(getResourceString(PACKAGE + ".button"));
-		fPackageDialogField.setStatusWidthHint(getResourceString(STATUS_DEFAULT));
+		fPackageDialogField.setLabelText(NewWizardMessages.getString("TypePage.package.label")); //$NON-NLS-1$
+		fPackageDialogField.setButtonLabel(NewWizardMessages.getString("TypePage.package.button")); //$NON-NLS-1$
+		fPackageDialogField.setStatusWidthHint(NewWizardMessages.getString("TypePage.default")); //$NON-NLS-1$
 				
 		fEnclosingTypeSelection= new SelectionButtonDialogField(SWT.CHECK);
 		fEnclosingTypeSelection.setDialogFieldListener(adapter);
-		fEnclosingTypeSelection.setLabelText(getResourceString(ENCLOSINGSELECTION + ".label"));
+		fEnclosingTypeSelection.setLabelText(NewWizardMessages.getString("TypePage.enclosing.selection.label")); //$NON-NLS-1$
 		
 		fEnclosingTypeDialogField= new StringButtonDialogField(adapter);
 		fEnclosingTypeDialogField.setDialogFieldListener(adapter);
-		fEnclosingTypeDialogField.setLabelText(getResourceString(ENCLOSING + ".label"));
-		fEnclosingTypeDialogField.setButtonLabel(getResourceString(ENCLOSING + ".button"));
+		fEnclosingTypeDialogField.setButtonLabel(NewWizardMessages.getString("TypePage.enclosing.button")); //$NON-NLS-1$
 		
 		fTypeNameDialogField= new StringDialogField();
 		fTypeNameDialogField.setDialogFieldListener(adapter);
-		fTypeNameDialogField.setLabelText(getResourceString(TYPENAME + ".label"));
+		fTypeNameDialogField.setLabelText(NewWizardMessages.getString("TypePage.typename.label")); //$NON-NLS-1$
 		
 		fSuperClassDialogField= new StringButtonDialogField(adapter);
 		fSuperClassDialogField.setDialogFieldListener(adapter);
-		fSuperClassDialogField.setLabelText(getResourceString(SUPER + ".label"));
-		fSuperClassDialogField.setButtonLabel(getResourceString(SUPER + ".button"));
+		fSuperClassDialogField.setLabelText(NewWizardMessages.getString("TypePage.superclass.label")); //$NON-NLS-1$
+		fSuperClassDialogField.setButtonLabel(NewWizardMessages.getString("TypePage.superclass.button")); //$NON-NLS-1$
 		
-		String[] addButtons= new String[] { getResourceString(INTERFACES + ".add") };
+		String[] addButtons= new String[] { NewWizardMessages.getString("TypePage.interfaces.add") }; //$NON-NLS-1$
 		fSuperInterfacesDialogField= new ListDialogField(adapter, addButtons, new InterfacesListLabelProvider(), 0);
 		fSuperInterfacesDialogField.setDialogFieldListener(adapter);
-		fSuperInterfacesDialogField.setLabelText(getResourceString(INTERFACES + ".label"));
-		fSuperInterfacesDialogField.setRemoveButtonLabel(getResourceString(INTERFACES + ".remove"));
+		fSuperInterfacesDialogField.setLabelText(NewWizardMessages.getString("TypePage.interfaces.label")); //$NON-NLS-1$
+		fSuperInterfacesDialogField.setRemoveButtonLabel(NewWizardMessages.getString("TypePage.interfaces.remove")); //$NON-NLS-1$
 	
 		String[] buttonNames1= new String[] {
-			getResourceString(MODIFIERS + ".public"), getResourceString(MODIFIERS + ".default"),
-			getResourceString(MODIFIERS + ".private"), getResourceString(MODIFIERS + ".protected")
+			NewWizardMessages.getString("TypePage.modifiers.public"), NewWizardMessages.getString("TypePage.modifiers.default"), //$NON-NLS-1$ //$NON-NLS-2$
+			NewWizardMessages.getString("TypePage.modifiers.private"), NewWizardMessages.getString("TypePage.modifiers.protected") //$NON-NLS-2$ //$NON-NLS-1$
 		};
 		fAccMdfButtons= new SelectionButtonDialogFieldGroup(SWT.RADIO, buttonNames1, 4);
 		fAccMdfButtons.setDialogFieldListener(adapter);
-		fAccMdfButtons.setLabelText(getResourceString(MODIFIERS + ".acc.label"));		
+		fAccMdfButtons.setLabelText(NewWizardMessages.getString("TypePage.modifiers.acc.label"));		 //$NON-NLS-1$
 		fAccMdfButtons.setSelection(0, true);
 		
 		String[] buttonNames2;
 		int staticMdfIndex;
 		if (fIsClass) {
 			buttonNames2= new String[] {
-				getResourceString(MODIFIERS + ".abstract"), getResourceString(MODIFIERS + ".final"),
-				getResourceString(MODIFIERS + ".static")
+				NewWizardMessages.getString("TypePage.modifiers.abstract"), NewWizardMessages.getString("TypePage.modifiers.final"), //$NON-NLS-2$ //$NON-NLS-1$
+				NewWizardMessages.getString("TypePage.modifiers.static") //$NON-NLS-1$
 			};
 			fStaticMdfIndex= 2;
 		} else {
 			buttonNames2= new String[] {
-				getResourceString(MODIFIERS + ".static")
+				NewWizardMessages.getString("TypePage.modifiers.static") //$NON-NLS-1$
 			};
 			fStaticMdfIndex= 0;
 		}
 
 		fOtherMdfButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames2, 4);
 		fOtherMdfButtons.setDialogFieldListener(adapter);
-		fOtherMdfButtons.setLabelText(getResourceString(MODIFIERS + ".other.label"));		
 		
 		fAccMdfButtons.enableSelectionButton(2, false);
 		fAccMdfButtons.enableSelectionButton(3, false);
@@ -196,7 +218,7 @@ public abstract class TypePage extends ContainerPage {
 	 *             selection was available
 	 */
 	protected void initTypePage(IJavaElement elem) {
-		String initSuperclass= "java.lang.Object";
+		String initSuperclass= "java.lang.Object"; //$NON-NLS-1$
 		ArrayList initSuperinterfaces= new ArrayList(5);
 
 		IPackageFragment pack= null;
@@ -219,6 +241,7 @@ public abstract class TypePage extends ContainerPage {
 					}
 				}
 			} catch (JavaModelException e) {
+				JavaPlugin.log(e.getStatus());
 				// ignore this exception now
 			}
 		}			
@@ -227,7 +250,7 @@ public abstract class TypePage extends ContainerPage {
 		setEnclosingType(null, true);
 		setEnclosingTypeSelection(false, true);
 	
-		setTypeName("", true);
+		setTypeName("", true); //$NON-NLS-1$
 		setSuperClass(initSuperclass, true);
 		setSuperInterfaces(initSuperinterfaces, true);
 		
@@ -485,7 +508,7 @@ public abstract class TypePage extends ContainerPage {
 	public void setPackageFragment(IPackageFragment pack, boolean canBeModified) {
 		fCurrPackage= pack;
 		fCanModifyPackage= canBeModified;
-		String str= (pack == null) ? "" : pack.getElementName();
+		String str= (pack == null) ? "" : pack.getElementName(); //$NON-NLS-1$
 		fPackageDialogField.setText(str);
 		updateEnableState();
 	}	
@@ -510,7 +533,7 @@ public abstract class TypePage extends ContainerPage {
 	public void setEnclosingType(IType type, boolean canBeModified) {
 		fCurrEnclosingType= type;
 		fCanModifyEnclosingType= canBeModified;
-		String str= (type == null) ? "" : JavaModelUtility.getFullyQualifiedName(type);
+		String str= (type == null) ? "" : JavaModelUtility.getFullyQualifiedName(type); //$NON-NLS-1$
 		fEnclosingTypeDialogField.setText(str);
 		updateEnableState();
 	}
@@ -648,13 +671,13 @@ public abstract class TypePage extends ContainerPage {
 		fPackageDialogField.enableButton(getPackageFragmentRoot() != null);
 		
 		String packName= getPackageText();
-		if (!"".equals(packName)) {
+		if (!"".equals(packName)) { //$NON-NLS-1$
 			IStatus val= JavaConventions.validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
-				status.setError(getFormattedString(ERROR_PACKAGE_INVALIDNAME, val.getMessage()));
+				status.setError(NewWizardMessages.getFormattedString("TypePage.error.InvalidPackageName", val.getMessage())); //$NON-NLS-1$
 				return status;
 			} else if (val.getSeverity() == IStatus.WARNING) {
-				status.setWarning(getFormattedString(WARNING_PACKAGE_DISCOURAGEDNAME, val.getMessage()));
+				status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.DiscouragedPackageName", val.getMessage())); //$NON-NLS-1$
 				// continue
 			}
 		}
@@ -670,16 +693,18 @@ public abstract class TypePage extends ContainerPage {
 					// like the bin folder
 					IPath packagePath= pack.getUnderlyingResource().getFullPath();
 					if (outputPath.isPrefixOf(packagePath)) {
-						status.setError(getResourceString(ERROR_PACKAGE_CLASHOUTPUTLOCATION));
+						status.setError(NewWizardMessages.getString("TypePage.error.ClashOutputLocation")); //$NON-NLS-1$
 						return status;
 					}
 				}
 			} catch (JavaModelException e) {
+				JavaPlugin.log(e.getStatus());
+				// let pass			
 			}
 			
 			fCurrPackage= pack;
 		} else {
-			status.setError("root undef");
+			status.setError(""); //$NON-NLS-1$
 		}
 		return status;
 	}
@@ -690,10 +715,10 @@ public abstract class TypePage extends ContainerPage {
 	private void updatePackageStatusLabel() {
 		String packName= fPackageDialogField.getText();
 		
-		if ("".equals(packName)) {
-			fPackageDialogField.setStatus(getResourceString(STATUS_DEFAULT));
+		if ("".equals(packName)) { //$NON-NLS-1$
+			fPackageDialogField.setStatus(NewWizardMessages.getString("TypePage.default")); //$NON-NLS-1$
 		} else {
-			fPackageDialogField.setStatus("");
+			fPackageDialogField.setStatus(""); //$NON-NLS-1$
 		}
 	}
 	
@@ -720,31 +745,31 @@ public abstract class TypePage extends ContainerPage {
 		
 		fEnclosingTypeDialogField.enableButton(root != null);
 		if (root == null) {
-			status.setError("");
+			status.setError(""); //$NON-NLS-1$
 			return status;
 		}
 		
 		String enclName= getEnclosingTypeText();
-		if ("".equals(enclName)) {
-			status.setError(getResourceString(ERROR_ENCLOSING_ENTERNAME));
+		if ("".equals(enclName)) { //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeEnterName")); //$NON-NLS-1$
 			return status;
 		}
 		try {
 			IType type= JavaModelUtility.findType(root.getJavaProject(), enclName);
 			if (type == null) {
-				status.setError(getResourceString(ERROR_ENCLOSING_NOTEXISTS));
+				status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
 				return status;
 			}
 
 			if (type.getCompilationUnit() == null) {
-				status.setError(getResourceString(ERROR_ENCLOSING_PARENTISBINARY));
+				status.setError(NewWizardMessages.getString("TypePage.error.EnclosingNotInCU")); //$NON-NLS-1$
 				return status;
 			}
 			fCurrEnclosingType= type;
 			return status;
 		} catch (JavaModelException e) {
-			status.setError(getResourceString(ERROR_ENCLOSING_NOTEXISTS));
-			JavaPlugin.getDefault().getLog().log(e.getStatus());
+			status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
+			JavaPlugin.log(e.getStatus());
 			return status;
 		}
 	}
@@ -758,20 +783,20 @@ public abstract class TypePage extends ContainerPage {
 		StatusInfo status= new StatusInfo();
 		String typeName= getTypeName();
 		// must not be empty
-		if ("".equals(typeName)) {
-			status.setError(getResourceString(ERROR_TYPE_ENTERNAME));
+		if ("".equals(typeName)) { //$NON-NLS-1$
+			status.setError(NewWizardMessages.getString("TypePage.error.EnterTypeName")); //$NON-NLS-1$
 			return status;
 		}
 		if (typeName.indexOf('.') != -1) {
-			status.setError(getResourceString(ERROR_TYPE_QUALIFIEDNAME));
+			status.setError(NewWizardMessages.getString("TypePage.error.QualifiedName")); //$NON-NLS-1$
 			return status;
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(typeName);
 		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(getFormattedString(ERROR_TYPE_INVALIDNAME, val.getMessage()));
+			status.setError(NewWizardMessages.getFormattedString("TypePage.error.InvalidTypeName", val.getMessage())); //$NON-NLS-1$
 			return status;
-		} else if (val.getSeverity() == IStatus.ERROR) {
-			status.setWarning(getFormattedString(WARNING_TYPE_NAMEDISCOURAGED, val.getMessage()));
+		} else if (val.getSeverity() == IStatus.WARNING) {
+			status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.TypeNameDiscouraged", val.getMessage())); //$NON-NLS-1$
 			// continue checking
 		}		
 
@@ -779,9 +804,9 @@ public abstract class TypePage extends ContainerPage {
 		if (!isEnclosingTypeSelected()) {
 			IPackageFragment pack= getPackageFragment();
 			if (pack != null) {
-				ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java");
+				ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
 				if (cu.exists()) {
-					status.setError(getResourceString(ERROR_TYPE_NAMEEXISTS));
+					status.setError(NewWizardMessages.getString("TypePage.error.TypeNameExists")); //$NON-NLS-1$
 					return status;
 				}
 			}
@@ -790,7 +815,7 @@ public abstract class TypePage extends ContainerPage {
 			if (type != null) {
 				IType member= type.getType(typeName);
 				if (member.exists()) {
-					status.setError(getResourceString(ERROR_TYPE_NAMEEXISTS));
+					status.setError(NewWizardMessages.getString("TypePage.error.TypeNameExists")); //$NON-NLS-1$
 					return status;
 				}
 			}
@@ -811,13 +836,13 @@ public abstract class TypePage extends ContainerPage {
 		fSuperClass= null;
 		
 		String sclassName= getSuperClass();
-		if ("".equals(sclassName)) {
+		if ("".equals(sclassName)) { //$NON-NLS-1$
 			// accept the empty field (stands for java.lang.Object)
 			return status;
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(sclassName);
 		if (!val.isOK()) {
-			status.setError(getResourceString(ERROR_SUPER_INVALIDNAME));
+			status.setError(NewWizardMessages.getString("TypePage.error.InvalidSuperClassName")); //$NON-NLS-1$
 			return status;
 		}
 		
@@ -825,28 +850,29 @@ public abstract class TypePage extends ContainerPage {
 			try {		
 				IType type= resolveSuperTypeName(root.getJavaProject(), sclassName);
 				if (type == null) {
-					status.setWarning(getResourceString(WARNING_SUPER_NOTEXISTS));
+					status.setWarning(NewWizardMessages.getString("TypePage.warning.SuperClassNotExists")); //$NON-NLS-1$
 					return status;
 				} else {
 					if (type.isInterface()) {
-						status.setWarning(getFormattedString(WARNING_SUPER_NOTCLASS, sclassName));
+						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsNotClass", sclassName)); //$NON-NLS-1$
 						return status;
 					}
 					int flags= type.getFlags();
 					if (Flags.isFinal(flags)) {
-						status.setWarning(getFormattedString(WARNING_SUPER_ISFINAL, sclassName));
+						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsFinal", sclassName)); //$NON-NLS-1$
 						return status;
 					} else if (!JavaModelUtility.isVisible(getPackageFragment(), flags, type.getPackageFragment())) {
-						status.setWarning(getFormattedString(WARNING_SUPER_NOTVISIBLE, sclassName));
+						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.SuperClassIsNotVisible", sclassName)); //$NON-NLS-1$
 						return status;
 					}
 				}
 				fSuperClass= type;
 			} catch (JavaModelException e) {
-				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
+				status.setError(NewWizardMessages.getString("TypePage.error.InvalidSuperClassName")); //$NON-NLS-1$
+				JavaPlugin.log(e.getStatus());
 			}							
 		} else {
-			status.setError("");
+			status.setError(""); //$NON-NLS-1$
 		}
 		return status;
 		
@@ -873,8 +899,8 @@ public abstract class TypePage extends ContainerPage {
 					type= JavaModelUtility.findType(jproject, packName, sclassName);
 				}
 				// search in java.lang
-				if (type == null && !"java.lang".equals(packName)) {
-					type= JavaModelUtility.findType(jproject, "java.lang", sclassName);
+				if (type == null && !"java.lang".equals(packName)) { //$NON-NLS-1$
+					type= JavaModelUtility.findType(jproject, "java.lang", sclassName); //$NON-NLS-1$
 				}
 			}
 			// search fully qualified
@@ -905,20 +931,21 @@ public abstract class TypePage extends ContainerPage {
 				try {
 					IType type= JavaModelUtility.findType(root.getJavaProject(), intfname);
 					if (type == null) {
-						status.setWarning(getFormattedString(WARNING_INTFC_NOTEXISTS, intfname));
+						status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceNotExists", intfname)); //$NON-NLS-1$
 						return status;
 					} else {
 						if (type.isClass()) {
-							status.setWarning(getFormattedString(WARNING_INTFC_NOTINTERFACE, intfname));
+							status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceIsNotInterface", intfname)); //$NON-NLS-1$
 							return status;
 						}
 						if (!JavaModelUtility.isVisible(getPackageFragment(), type.getFlags(), type.getPackageFragment())) {
-							status.setWarning(getFormattedString(WARNING_INTFC_NOTVISIBLE, intfname));
+							status.setWarning(NewWizardMessages.getFormattedString("TypePage.warning.InterfaceIsNotVisible", intfname)); //$NON-NLS-1$
 							return status;
 						}
 					}
 				} catch (JavaModelException e) {
-					ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
+					JavaPlugin.log(e.getStatus());
+					// let pass, checking is an extra
 				}					
 			}				
 		}
@@ -934,7 +961,7 @@ public abstract class TypePage extends ContainerPage {
 		StatusInfo status= new StatusInfo();
 		int modifiers= getModifiers();
 		if (Flags.isFinal(modifiers) && Flags.isAbstract(modifiers)) {
-			status.setError(getResourceString(ERROR_MODIFIERS_FINALANDABS));
+			status.setError(NewWizardMessages.getString("TypePage.error.ModifiersFinalAndAbstract")); //$NON-NLS-1$
 		}
 		return status;
 	}
@@ -956,9 +983,9 @@ public abstract class TypePage extends ContainerPage {
 		}
 		
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), false, false);
-		dialog.setTitle(getResourceString(PACKAGE_DIALOG + ".title"));
-		dialog.setMessage(getResourceString(PACKAGE_DIALOG + ".description"));
-		dialog.setEmptyListMessage(getResourceString(PACKAGE_DIALOG + ".empty"));
+		dialog.setTitle(NewWizardMessages.getString("TypePage.ChoosePackageDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
+		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$
 		if (dialog.open(packages) == dialog.OK) {;
 			return (IPackageFragment) dialog.getPrimaryResult();
 		}
@@ -977,8 +1004,8 @@ public abstract class TypePage extends ContainerPage {
 		scope.setIncludesClasspaths(false);	
 			
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_TYPES, false, false);
-		dialog.setTitle(getResourceString(ENCLOSING_DIALOG + ".title"));
-		dialog.setMessage(getResourceString(ENCLOSING_DIALOG + ".description"));
+		dialog.setTitle(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
 		if (dialog.open() == dialog.OK) {	
 			return (IType) dialog.getPrimaryResult();
 		}
@@ -998,8 +1025,8 @@ public abstract class TypePage extends ContainerPage {
 
 		IProject project= root.getJavaProject().getProject();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES, true, true);
-		dialog.setTitle(getResourceString(SUPERCLASS_DIALOG + ".title"));
-		dialog.setMessage(getResourceString(SUPERCLASS_DIALOG + ".message"));
+		dialog.setTitle(NewWizardMessages.getString("TypePage.SuperClassDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("TypePage.SuperClassDialog.message")); //$NON-NLS-1$
 
 		if (dialog.open() == dialog.OK) {
 			return (IType) dialog.getPrimaryResult();
@@ -1015,8 +1042,8 @@ public abstract class TypePage extends ContainerPage {
 
 		IProject project= root.getJavaProject().getProject();
 		SuperInterfaceSelectionDialog dialog= new SuperInterfaceSelectionDialog(getShell(), getWizard().getContainer(), fSuperInterfacesDialogField, project);
-		dialog.setTitle(getResourceString(INTERFACES_DIALOG + ".title"));
-		dialog.setMessage(getResourceString(INTERFACES_DIALOG + ".message"));
+		dialog.setTitle(NewWizardMessages.getString("TypePage.InterfacesDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("TypePage.InterfacesDialog.message")); //$NON-NLS-1$
 		dialog.open();
 		return;
 	}	
@@ -1029,12 +1056,12 @@ public abstract class TypePage extends ContainerPage {
 	 * Creates a type using the current field values
 	 */
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
-		monitor.beginTask(getResourceString(OPERATION_DESC), 10);
+		monitor.beginTask(NewWizardMessages.getString("TypePage.operationdesc"), 10); //$NON-NLS-1$
 		
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		IPackageFragment pack= getPackageFragment();
 		if (pack == null) {
-			pack= root.getPackageFragment("");
+			pack= root.getPackageFragment(""); //$NON-NLS-1$
 		}
 		
 		if (!pack.exists()) {
@@ -1055,7 +1082,7 @@ public abstract class TypePage extends ContainerPage {
 		// fix for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
 		String lineDelimiter= null;	
 		if (!isInnerClass) {
-			ICompilationUnit parentCU= pack.getCompilationUnit(clName + ".java");
+			ICompilationUnit parentCU= pack.getCompilationUnit(clName + ".java"); //$NON-NLS-1$
 			
 			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
 			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
@@ -1126,8 +1153,8 @@ public abstract class TypePage extends ContainerPage {
 		
 	private void writeSuperClass(StringBuffer buf, IImportsStructure imports) {
 		String typename= getSuperClass();
-		if (fIsClass && !"".equals(typename) && !"java.lang.Object".equals(typename)) {
-			buf.append(" extends ");
+		if (fIsClass && !"".equals(typename) && !"java.lang.Object".equals(typename)) { //$NON-NLS-2$ //$NON-NLS-1$
+			buf.append(" extends "); //$NON-NLS-1$
 			buf.append(Signature.getSimpleName(typename));
 			if (fSuperClass != null) {
 				imports.addImport(JavaModelUtility.getFullyQualifiedName(fSuperClass));
@@ -1142,16 +1169,16 @@ public abstract class TypePage extends ContainerPage {
 		int last= interfaces.size() - 1;
 		if (last >= 0) {
 			if (fIsClass) {
-				buf.append(" implements ");
+				buf.append(" implements "); //$NON-NLS-1$
 			} else {
-				buf.append(" extends ");
+				buf.append(" extends "); //$NON-NLS-1$
 			}
 			for (int i= 0; i <= last; i++) {
 				String typename= (String) interfaces.get(i);
 				imports.addImport(typename);
 				buf.append(Signature.getSimpleName(typename));
 				if (i < last) {
-					buf.append(", ");
+					buf.append(", "); //$NON-NLS-1$
 				}
 			}
 		}
@@ -1169,14 +1196,14 @@ public abstract class TypePage extends ContainerPage {
 		if (modifiers != 0) {
 			buf.append(' ');
 		}
-		buf.append(fIsClass ? "class " : "interface ");
+		buf.append(fIsClass ? "class " : "interface "); //$NON-NLS-2$ //$NON-NLS-1$
 		buf.append(getTypeName());
 		writeSuperClass(buf, imports);
 		writeSuperInterfaces(buf, imports);	
-		buf.append(" {");
+		buf.append(" {"); //$NON-NLS-1$
 		buf.append(lineDelimiter);
 		buf.append(lineDelimiter);
-		buf.append("}");
+		buf.append('}');
 		buf.append(lineDelimiter);
 		return buf.toString();
 	}

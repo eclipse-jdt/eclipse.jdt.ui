@@ -8,8 +8,6 @@ import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.widg
 
 public abstract class NewElementWizard extends BasicNewResourceWizard implements INewWizard {
 
-	private static final String PREFIX_OP_ERROR= "NewElementWizard.op_error.";
-
 	public NewElementWizard() {
 		setNeedsProgressMonitor(true);
 	}
@@ -33,7 +31,7 @@ public abstract class NewElementWizard extends BasicNewResourceWizard implements
 							try {
 								activePage.openEditor((IFile)resource);
 							} catch (PartInitException e) {
-								MessageDialog.openError(getShell(), "Error", e.getMessage());
+								JavaPlugin.log(e);
 							}
 						}
 					});
@@ -63,8 +61,10 @@ public abstract class NewElementWizard extends BasicNewResourceWizard implements
 			getContainer().run(false, true, op);
 		} catch (InvocationTargetException e) {
 			Shell shell= getShell();
-			if (!ExceptionHandler.handle(e.getTargetException(), shell, JavaPlugin.getResourceBundle(), PREFIX_OP_ERROR)) {
-				MessageDialog.openError(shell, "Error", e.getTargetException().getMessage());
+			String title= NewWizardMessages.getString("NewElementWizard.op_error.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getString("NewElementWizard.op_error.message"); //$NON-NLS-1$
+			if (!ExceptionHandler.handle(e.getTargetException(), shell, title, message)) {
+				MessageDialog.openError(shell, title, e.getTargetException().getMessage());
 			}
 			return false;
 		} catch  (InterruptedException e) {

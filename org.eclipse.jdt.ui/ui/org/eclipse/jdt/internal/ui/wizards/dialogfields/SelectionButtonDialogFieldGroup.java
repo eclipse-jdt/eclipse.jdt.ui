@@ -129,7 +129,7 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 			
 			if (fGroupBorderStyle != -1) {
 				Group group= new Group(parent, fGroupBorderStyle);
-				if (fLabelText != null && !"".equals(fLabelText)) {
+				if (fLabelText != null && !"".equals(fLabelText)) { //$NON-NLS-1$
 					group.setText(fLabelText);
 				}
 				fButtonComposite= group;

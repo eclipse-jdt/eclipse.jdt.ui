@@ -9,21 +9,22 @@ import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;
 
 public class NewClassCreationWizardPage extends TypePage {
 	
-	private final static String PAGE_NAME= "NewClassCreationWizardPage";
-	
-	protected final static String METHODS= PAGE_NAME + ".methods";
+	private final static String PAGE_NAME= "NewClassCreationWizardPage"; //$NON-NLS-1$
 	
 	private SelectionButtonDialogFieldGroup fMethodStubsButtons;
 	
 	public NewClassCreationWizardPage(IWorkspaceRoot root) {
 		super(true, PAGE_NAME, root);
 		
+		setTitle(NewWizardMessages.getString("NewClassCreationWizardPage.title")); //$NON-NLS-1$
+		setDescription(NewWizardMessages.getString("NewClassCreationWizardPage.description")); //$NON-NLS-1$
+		
 		String[] buttonNames3= new String[] {
-			getResourceString(METHODS + ".main"), getResourceString(METHODS + ".constructors"),
-			getResourceString(METHODS + ".inherited")
+			NewWizardMessages.getString("NewClassCreationWizardPage.methods.main"), NewWizardMessages.getString("NewClassCreationWizardPage.methods.constructors"), //$NON-NLS-1$ //$NON-NLS-2$
+			NewWizardMessages.getString("NewClassCreationWizardPage.methods.inherited") //$NON-NLS-1$
 		};		
 		fMethodStubsButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames3, 1);
-		fMethodStubsButtons.setLabelText(getResourceString(METHODS + ".label"));		
+		fMethodStubsButtons.setLabelText(NewWizardMessages.getString("NewClassCreationWizardPage.methods.label"));		 //$NON-NLS-1$
 	}
 
 	// -------- Initialization ---------
@@ -171,7 +172,7 @@ public class NewClassCreationWizardPage extends TypePage {
 		}
 		
 		if (fMethodStubsButtons.isSelected(0)) {
-			String main= "public static void main(String[] args) {}";
+			String main= "public static void main(String[] args) {}"; //$NON-NLS-1$
 			newMethods.add(main);
 		}		
 		

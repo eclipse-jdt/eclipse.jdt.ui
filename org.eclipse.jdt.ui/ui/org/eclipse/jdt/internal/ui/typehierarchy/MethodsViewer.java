@@ -94,7 +94,7 @@ public class MethodsViewer extends TableViewer {
 		fFilter= new MethodsViewerFilter();
 		
 		// fields
-		String title= TypeHierarchyMessages.getString("MethodsViewer.hide_fields.title"); //$NON-NLS-1$
+		String title= TypeHierarchyMessages.getString("MethodsViewer.hide_fields.label"); //$NON-NLS-1$
 		fHideFields= new MethodsViewerFilterAction(this, fFilter, title, MethodsViewerFilter.FILTER_FIELDS, false);
 		fHideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
 		fHideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$

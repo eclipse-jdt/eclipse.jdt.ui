@@ -4,34 +4,80 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.lang.reflect.InvocationTargetException;import java.text.MessageFormat;import java.util.ArrayList;import java.util.List;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.TabFolder;import org.eclipse.swt.widgets.TabItem;import org.eclipse.swt.widgets.Widget;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.ISharedImages;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.util.CoreUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.TabFolderLayout;import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
+import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
+import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 public class BuildPathsBlock {
-	
-	private static final String CLASSPATH= "BuildPathsBlock.classpath";
-	private static final String BUILDPATH= "BuildPathsBlock.buildpath";
-	
-	private static final String TAB_SOURCE= "BuildPathsBlock.tab.source";
-	private static final String TAB_PROJECTS= "BuildPathsBlock.tab.projects";
-	private static final String TAB_LIBRARIES= "BuildPathsBlock.tab.libraries";
-	private static final String TAB_ORDER= "BuildPathsBlock.tab.order";
-		
-	private static final String BP_INVALIDPATH_ERROR= "BuildPathsBlock.error.InvalidBuildPath";
-	private static final String BP_ENTERPATH_ERROR= "BuildPathsBlock.error.EnterBuildPath";
-	private static final String BP_PROJNOTEXISTS_ERROR= "BuildPathsBlock.error.BuildPathProjNotExists";
-	private static final String BP_CPBP_CLASH_ERROR= "BuildPathsBlock.error.BuildPathInClassPath";
-	private static final String BP_CPBP_CLASH_OUTPUT= "BuildPathsBlock.error.OutputInSourceFolder";
-	private static final String BP_CPBP_CLASH_CFF= "BuildPathsBlock.error.OutputIsClassFileFolder";
-		
-	private static final String CP_RECURSIVE_ERROR= "BuildPathsBlock.error.RecursiveClassPath";
-	private static final String CP_DUPLICATE_ERROR= "BuildPathsBlock.error.DuplicateEntriesInClassPath";
-	
-	private static final String CP_CYCLES_WARNING= "BuildPathsBlock.warning.CycleInClassPath";
-	private static final String CP_ENTRYMISSING_WARNING= "BuildPathsBlock.warning.EntryMissing";
-	
-	private static final String CFD_DIALOG= "BuildPathsBlock.ChooseOutputFolderDialog";
-	
-	private static final String OPERATION_DESC= "BuildPathsBlock.operationdesc";
 
 	private IWorkspaceRoot fWorkspaceRoot;
 
@@ -50,7 +96,6 @@ public class BuildPathsBlock {
 	
 	private IPath fOutputLocationPath;
 	
-	private ResourceBundle fResourceBundle;
 	private IStatusChangeListener fContext;
 	private Control fSWTWidget;	
 	
@@ -64,7 +109,6 @@ public class BuildPathsBlock {
 		
 	public BuildPathsBlock(IWorkspaceRoot root, IStatusChangeListener context, boolean isNewProject) {
 		fWorkspaceRoot= root;
-		fResourceBundle= JavaPlugin.getResourceBundle();
 		fContext= context;
 		fIsNewProject= isNewProject;
 		fSourceContainerPage= null;
@@ -76,19 +120,19 @@ public class BuildPathsBlock {
 
 		fClassPathList= new ListDialogField(new CPListLabelProvider(), ListDialogField.UPDOWN);
 		fClassPathList.setDialogFieldListener(adapter);
-		fClassPathList.setLabelText(getResourceString(CLASSPATH + ".label"));
-		fClassPathList.setUpButtonLabel(getResourceString(CLASSPATH + ".up.button"));
-		fClassPathList.setDownButtonLabel(getResourceString(CLASSPATH + ".down.button"));
+		fClassPathList.setLabelText(NewWizardMessages.getString("BuildPathsBlock.classpath.label")); //$NON-NLS-1$
+		fClassPathList.setUpButtonLabel(NewWizardMessages.getString("BuildPathsBlock.classpath.up.button")); //$NON-NLS-1$
+		fClassPathList.setDownButtonLabel(NewWizardMessages.getString("BuildPathsBlock.classpath.down.button")); //$NON-NLS-1$
 			
 		if (isNewProject) {
 			fBuildPathDialogField= new StringDialogField();
 		} else {
 			StringButtonDialogField dialogField= new StringButtonDialogField(adapter);
-			dialogField.setButtonLabel(getResourceString(BUILDPATH + ".button"));
+			dialogField.setButtonLabel(NewWizardMessages.getString("BuildPathsBlock.buildpath.button")); //$NON-NLS-1$
 			fBuildPathDialogField= dialogField;
 		}
 		fBuildPathDialogField.setDialogFieldListener(adapter);
-		fBuildPathDialogField.setLabelText(getResourceString(BUILDPATH + ".label"));
+		fBuildPathDialogField.setLabelText(NewWizardMessages.getString("BuildPathsBlock.buildpath.label")); //$NON-NLS-1$
 
 		fBuildPathStatus= new StatusInfo();
 		fClassPathStatus= new StatusInfo();
@@ -99,25 +143,6 @@ public class BuildPathsBlock {
 		
 		fClassPathDefault= null;
 		fAddJDKToDefault= true;
-	}
-	// -------- Resource Bundle ---------
-	
-	protected String getResourceString(String key) {
-		try {
-			return fResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return "!" + key + "!";
-		}
-	}
-	
-	protected String getFormattedString(String key, String[] args) {
-		String str= getResourceString(key);
-		return MessageFormat.format(str, args);
-	}
-	
-	protected String getFormattedString(String key, String arg) {
-		String str= getResourceString(key);
-		return MessageFormat.format(str, new String[] { arg });
 	}
 	
 	// -------- UI creation ---------
@@ -150,7 +175,7 @@ public class BuildPathsBlock {
 				
 		fSourceContainerPage= new SourceContainerWorkbookPage(fWorkspaceRoot, fClassPathList, fIsNewProject);		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(getResourceString(TAB_SOURCE));
+		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.source")); //$NON-NLS-1$
 		item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
 		item.setData(fSourceContainerPage);		
 		item.setControl(fSourceContainerPage.getControl(folder));
@@ -160,14 +185,14 @@ public class BuildPathsBlock {
 		
 		fProjectsPage= new ProjectsWorkbookPage(fClassPathList);		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(getResourceString(TAB_PROJECTS));
+		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.projects")); //$NON-NLS-1$
 		item.setImage(projectImage);
 		item.setData(fProjectsPage);
 		item.setControl(fProjectsPage.getControl(folder));
 		
 		fLibrariesPage= new LibrariesWorkbookPage(fWorkspaceRoot, fClassPathList);		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(getResourceString(TAB_LIBRARIES));
+		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.libraries")); //$NON-NLS-1$
 		item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_LIBRARY));
 		item.setData(fLibrariesPage);
 		item.setControl(fLibrariesPage.getControl(folder));
@@ -178,7 +203,7 @@ public class BuildPathsBlock {
 		
 		ClasspathOrderingWorkbookPage ordpage= new ClasspathOrderingWorkbookPage(fClassPathList);		
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(getResourceString(TAB_ORDER));
+		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.order")); //$NON-NLS-1$
 		item.setImage(cpoImage);
 		item.setData(ordpage);
 		item.setControl(ordpage.getControl(folder));
@@ -230,7 +255,7 @@ public class BuildPathsBlock {
 					if (outputDir != null) {
 						fBuildPathDialogField.setText(outputDir.toString());
 					} else {
-						fBuildPathDialogField.setText("");
+						fBuildPathDialogField.setText(""); //$NON-NLS-1$
 					}
 					
 					List newClassPath= new ArrayList();
@@ -261,7 +286,7 @@ public class BuildPathsBlock {
 					setDefaultAttributes(fCurrProject);
 				}
 			} catch (JavaModelException e) {
-				ErrorDialog.openError(getShell(), "Error", "will set to default", e.getStatus());
+				JavaPlugin.log(e.getStatus());
 				setDefaultAttributes(fCurrProject);			
 			} catch (CoreException e) {
 				// must be a new (not created) project
@@ -300,7 +325,7 @@ public class BuildPathsBlock {
 		if (fClassPathDefault == null) {
 			IResource srcFolder;
 			if (JavaBasePreferencePage.useSrcAndBinFolders()) {
-				srcFolder= project.getFolder("src");
+				srcFolder= project.getFolder("src"); //$NON-NLS-1$
 			} else {
 				srcFolder= project;
 			}
@@ -328,7 +353,7 @@ public class BuildPathsBlock {
 			return fBuildPathDefault;
 		} else {
 			if (JavaBasePreferencePage.useSrcAndBinFolders()) {
-				return project.getFullPath().append("bin");
+				return project.getFullPath().append("bin"); //$NON-NLS-1$
 			} else {
 				return project.getFullPath();
 			}
@@ -401,12 +426,12 @@ public class BuildPathsBlock {
 						IPath cpelementPath= cpelement.getPath();
 						if (currPath.equals(cpelementPath)) {
 							// duplicate entry
-							fClassPathStatus.setError(getFormattedString(CP_DUPLICATE_ERROR, cpelementPath.toString()));
+							fClassPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.DuplicateEntriesInClassPath", cpelementPath.toString())); //$NON-NLS-1$
 							return;
 						} else {
 							// overlapping entry
 							if (JavaConventions.isOverlappingRoots(currPath, cpelementPath)) {
-								fClassPathStatus.setError(getFormattedString(CP_RECURSIVE_ERROR, new String[] { currPath.toString(), cpelementPath.toString()}));
+								fClassPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.RecursiveClassPath", new String[] { currPath.toString(), cpelementPath.toString()})); //$NON-NLS-1$
 								return;
 							}
 						}
@@ -417,12 +442,12 @@ public class BuildPathsBlock {
 			entryMissing= entryMissing || currElement.isMissing();
 		}
 		if (entryMissing) {
-			fClassPathStatus.setWarning(getResourceString(CP_ENTRYMISSING_WARNING));
+			fClassPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.EntryMissing")); //$NON-NLS-1$
 		}
 		
 		
 		if (fCurrJProject.hasClasspathCycle(entries)) {
-			fClassPathStatus.setWarning(getResourceString(CP_CYCLES_WARNING));
+			fClassPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.CycleInClassPath")); //$NON-NLS-1$
 		}	
 	}
 	
@@ -430,8 +455,8 @@ public class BuildPathsBlock {
 		fOutputLocationPath= null;
 		
 		String text= fBuildPathDialogField.getText();
-		if ("".equals(text)) {
-			fBuildPathStatus.setError(getResourceString(BP_ENTERPATH_ERROR));
+		if ("".equals(text)) { //$NON-NLS-1$
+			fBuildPathStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.EnterBuildPath")); //$NON-NLS-1$
 			return;
 		}
 		IPath path= new Path(text);
@@ -440,7 +465,7 @@ public class BuildPathsBlock {
 		if (res != null) {
 			// if exists, must be a folder or project
 			if (res.getType() == IResource.FILE) {
-				fBuildPathStatus.setError(getResourceString(BP_INVALIDPATH_ERROR));
+				fBuildPathStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.InvalidBuildPath")); //$NON-NLS-1$
 				return;
 			}
 		} else {
@@ -449,7 +474,7 @@ public class BuildPathsBlock {
 			if (!projPath.equals(fCurrProject.getFullPath())) {
 				IProject proj= (IProject)fWorkspaceRoot.findMember(projPath);
 				if (proj == null || !proj.isOpen()) {
-					fBuildPathStatus.setError(getResourceString(BP_PROJNOTEXISTS_ERROR));
+					fBuildPathStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.BuildPathProjNotExists")); //$NON-NLS-1$
 					return;
 				}
 			}
@@ -483,7 +508,7 @@ public class BuildPathsBlock {
 			
 			// Addition to Java Core. Avoid setting class file folder to output location
 			if (listElement.getEntryKind() == IClasspathEntry.CPE_LIBRARY && cppath.equals(fOutputLocationPath)) {
-				fBuildPathStatus.setError(getFormattedString(BP_CPBP_CLASH_CFF, cppath.toString()));
+				fBuildPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.OutputIsClassFileFolder", cppath.toString())); //$NON-NLS-1$
 				return;
 				
 			}
@@ -497,7 +522,7 @@ public class BuildPathsBlock {
 			// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
 			// prevent nesting the output location inside entry.
 			if (cppath.isPrefixOf(fOutputLocationPath)) {
-				fBuildPathStatus.setError(getFormattedString(BP_CPBP_CLASH_OUTPUT, cppath.toString()));
+				fBuildPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.OutputInSourceFolder", cppath.toString())); //$NON-NLS-1$
 				return;
 			}
 			
@@ -505,7 +530,7 @@ public class BuildPathsBlock {
 			// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
 			// Removed kind check to be consistent with check done in SetClasspathOperation
 			if (!allowNestingInOutput && fOutputLocationPath.isPrefixOf(cppath)) {
-				fBuildPathStatus.setError(getFormattedString(BP_CPBP_CLASH_ERROR, cppath.toString()));
+				fBuildPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.BuildPathInClassPath", cppath.toString())); //$NON-NLS-1$
 				return;
 			}
 				
@@ -525,7 +550,7 @@ public class BuildPathsBlock {
 				if (monitor == null) {
 					monitor= new NullProgressMonitor();
 				}				
-				monitor.beginTask(getResourceString(OPERATION_DESC), 12);
+				monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc"), 12); //$NON-NLS-1$
 				try {
 					setJavaProjectProperties(classPathEntries, path, monitor);
 				} catch (CoreException e) { 
@@ -600,9 +625,9 @@ public class BuildPathsBlock {
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 		
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), getResourceString(CFD_DIALOG + ".title"), null, lp, cp);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.title"), null, lp, cp); //$NON-NLS-1$
 		dialog.setValidator(validator);
-		dialog.setMessage(getResourceString(CFD_DIALOG + ".description"));
+		dialog.setMessage(NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
 		
 		IResource initSelection= null;

@@ -36,15 +36,15 @@ public class CheckedListDialogField extends ListDialogField {
 	public CheckedListDialogField(ILabelProvider lprovider, int config) {
 		super(lprovider, config);
 		fCheckElements= new ArrayList();
-		fCheckAllButtonLabel= "!Check All!";
-		fUncheckAllButtonLabel= "!Uncheck All!";		
+		fCheckAllButtonLabel= "!Check All!"; //$NON-NLS-1$
+		fUncheckAllButtonLabel= "!Uncheck All!";		 //$NON-NLS-1$
 	}
 	
 	public CheckedListDialogField(IListAdapter adapter, String[] customButtonLabels, ILabelProvider lprovider, int config) {
 		super(adapter, customButtonLabels, lprovider, config);
 		fCheckElements= new ArrayList();
-		fCheckAllButtonLabel= "!Check All!";
-		fUncheckAllButtonLabel= "!Uncheck All!";		
+		fCheckAllButtonLabel= "!Check All!"; //$NON-NLS-1$
+		fUncheckAllButtonLabel= "!Uncheck All!";		 //$NON-NLS-1$
 	}
 	
 	public void setCheckAllButtonLabel(String checkButtonLabel) {

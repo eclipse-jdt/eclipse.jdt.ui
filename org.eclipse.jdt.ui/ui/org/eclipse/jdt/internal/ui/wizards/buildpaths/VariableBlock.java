@@ -1,16 +1,8 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 
 public class VariableBlock {
 		
-	private static final String PAGE_NAME= "VariableBlock";
-	
-	private static final String VARS= PAGE_NAME + ".vars";
-	private static final String RESERVED= PAGE_NAME + ".reserved";
-	
-	private static final String ADD= VARS + ".add.button";
-	private static final String EDIT= VARS + ".edit.button";		private static final String OP_DESC= PAGE_NAME + ".operation_desc";
-	
 	private ListDialogField fVariablesList;
 	
 	private StatusInfo fSelectionStatus;
@@ -30,7 +22,7 @@ public class VariableBlock {
 		fSelectionStatus= new StatusInfo();	
 		
 		String[] buttonLabels= new String[] { 
-			JavaPlugin.getResourceString(ADD), JavaPlugin.getResourceString(EDIT)
+			NewWizardMessages.getString("VariableBlock.vars.add.button"), NewWizardMessages.getString("VariableBlock.vars.edit.button") //$NON-NLS-2$ //$NON-NLS-1$
 		};
 				
 		VariablesAdapter adapter= new VariablesAdapter();
@@ -39,8 +31,8 @@ public class VariableBlock {
 		
 		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider, 0);
 		fVariablesList.setDialogFieldListener(adapter);
-		fVariablesList.setLabelText(JavaPlugin.getResourceString(VARS + ".label"));
-		fVariablesList.setRemoveButtonLabel(JavaPlugin.getResourceString(VARS + ".remove.button"));
+		fVariablesList.setLabelText(NewWizardMessages.getString("VariableBlock.vars.label")); //$NON-NLS-1$
+		fVariablesList.setRemoveButtonLabel(NewWizardMessages.getString("VariableBlock.vars.remove.button")); //$NON-NLS-1$
 	
 		fVariablesList.enableCustomButton(1, false);
 		
@@ -123,7 +115,7 @@ public class VariableBlock {
 				fSelectionStatus.setOK();
 				fSelectedVariable= ((CPVariableElement)selected.get(0)).getName();
 			} else {
-				fSelectionStatus.setError("");
+				fSelectionStatus.setError(""); //$NON-NLS-1$
 			}
 			fContext.statusChanged(fSelectionStatus);
 		}	
@@ -155,6 +147,6 @@ public class VariableBlock {
 	 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 		 */
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			int steps= fToChange.size() + fToRemove.size();			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), steps);			try {				for (int i= 0; i < fToChange.size(); i++) {					CPVariableElement curr= (CPVariableElement) fToChange.get(i);					SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);					JavaCore.setClasspathVariable(curr.getName(), curr.getPath(), subMonitor);					if (monitor.isCanceled()) {						return;					}				}				for (int i= 0; i < fToRemove.size(); i++) {					SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);					JavaCore.removeClasspathVariable((String) fToRemove.get(i), subMonitor);					if (monitor.isCanceled()) {						return;					}									}			} catch (JavaModelException e) {				throw new InvocationTargetException(e);			} finally {				monitor.done();			}		}
+			int steps= fToChange.size() + fToRemove.size();			monitor.beginTask(NewWizardMessages.getString("VariableBlock.operation_desc"), steps); //$NON-NLS-1$			try {				for (int i= 0; i < fToChange.size(); i++) {					CPVariableElement curr= (CPVariableElement) fToChange.get(i);					SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);					JavaCore.setClasspathVariable(curr.getName(), curr.getPath(), subMonitor);					if (monitor.isCanceled()) {						return;					}				}				for (int i= 0; i < fToRemove.size(); i++) {					SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);					JavaCore.removeClasspathVariable((String) fToRemove.get(i), subMonitor);					if (monitor.isCanceled()) {						return;					}									}			} catch (JavaModelException e) {				throw new InvocationTargetException(e);			} finally {				monitor.done();			}		}
 	}
 }

@@ -4,33 +4,79 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.JavaElementContentProvider;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.packageview.PackageViewerSorter;import org.eclipse.jdt.internal.ui.util.CoreUtility;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
+import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.packageview.PackageViewerSorter;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		
-	private static final String PAGE_NAME= "NewPackageRootCreationWizardPage";
-
-	private static final String PREFIX_OP_ERROR= PAGE_NAME + ".op_error.";
-	
-	private static final String ROOT= PAGE_NAME + ".root";
-	private static final String PROJECT= PAGE_NAME + ".project";
-	private static final String EDITCP= PAGE_NAME + ".editclasspath";
-		
-	private static final String ROOT_DIALOG= PAGE_NAME + ".ChooseExistingRootDialog";
-	private static final String PROJECT_DIALOG= PAGE_NAME + ".ChooseProjectDialog";
-	private static final String EDITCP_DIALOG= PAGE_NAME + ".EditClassPathDialog";
-
-	private static final String ERROR_ROOT_ENTERNAME= PAGE_NAME + ".error.EnterRootName";
-	private static final String ERROR_ROOT_INVALIDNAME= PAGE_NAME + ".error.InvalidRootName";
-	private static final String ERROR_ROOT_NOFOLDER= PAGE_NAME + ".error.NotAFolder";
-	private static final String ERROR_ROOT_ALREADYEXISTS= PAGE_NAME + ".error.AlreadyExisting";
-	private static final String ERROR_ROOT_WILLOVERLAP= PAGE_NAME + ".error.WillOverlap";
-
-	private static final String ERROR_PROJECT_ENTERNAME= PAGE_NAME + ".error.EnterProjectName";
-	private static final String ERROR_PROJECT_INVALIDNAME= PAGE_NAME + ".error.InvalidProjectPath";
-	private static final String ERROR_PROJECT_NOJAVAPROJECT= PAGE_NAME + ".error.NotAJavaProject";
-	private static final String ERROR_PROJECT_PROJECTNOTEXISTS= PAGE_NAME + ".error.ProjectNotExists";
+	private static final String PAGE_NAME= "NewPackageRootCreationWizardPage"; //$NON-NLS-1$
 
 	private StringButtonDialogField fProjectField;
 	private StatusInfo fProjectStatus;
@@ -48,24 +94,28 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 	private IPackageFragmentRoot fCreatedRoot;
 	
 	public NewPackageRootCreationWizardPage(IWorkspaceRoot root) {
-		super(PAGE_NAME, JavaPlugin.getResourceBundle());
+		super(PAGE_NAME);
+		
+		setTitle(NewWizardMessages.getString("NewPackageRootCreationWizardPage.title")); //$NON-NLS-1$
+		setDescription(NewWizardMessages.getString("NewPackageRootCreationWizardPage.description"));		 //$NON-NLS-1$
+		
 		fWorkspaceRoot= root;
 		
 		RootFieldAdapter adapter= new RootFieldAdapter();
 		
 		fProjectField= new StringButtonDialogField(adapter);
 		fProjectField.setDialogFieldListener(adapter);
-		fProjectField.setLabelText(getResourceString(PROJECT + ".label"));
-		fProjectField.setButtonLabel(getResourceString(PROJECT + ".button"));	
+		fProjectField.setLabelText(NewWizardMessages.getString("NewPackageRootCreationWizardPage.project.label")); //$NON-NLS-1$
+		fProjectField.setButtonLabel(NewWizardMessages.getString("NewPackageRootCreationWizardPage.project.button"));	 //$NON-NLS-1$
 		
 		fRootDialogField= new StringButtonDialogField(adapter);
 		fRootDialogField.setDialogFieldListener(adapter);
-		fRootDialogField.setLabelText(getResourceString(ROOT + ".label"));
-		fRootDialogField.setButtonLabel(getResourceString(ROOT + ".button"));
+		fRootDialogField.setLabelText(NewWizardMessages.getString("NewPackageRootCreationWizardPage.root.label")); //$NON-NLS-1$
+		fRootDialogField.setButtonLabel(NewWizardMessages.getString("NewPackageRootCreationWizardPage.root.button")); //$NON-NLS-1$
 		
 		fEditClassPathField= new SelectionButtonDialogField(SWT.PUSH);
 		fEditClassPathField.setDialogFieldListener(adapter);
-		fEditClassPathField.setLabelText(getResourceString(EDITCP + ".button"));		
+		fEditClassPathField.setLabelText(NewWizardMessages.getString("NewPackageRootCreationWizardPage.editclasspath.button"));		 //$NON-NLS-1$
 		
 		fRootStatus= new StatusInfo();
 		fProjectStatus= new StatusInfo();
@@ -100,14 +150,14 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		
 		if (projPath != null) {
 			fProjectField.setText(projPath);
-			fRootDialogField.setText("");
+			fRootDialogField.setText(""); //$NON-NLS-1$
 		} else {
 			setDefaultAttributes();
 		}
 	}
 	
 	private void setDefaultAttributes() {
-		String projPath= "";
+		String projPath= ""; //$NON-NLS-1$
 		
 		try {
 			// find the first java project
@@ -123,7 +173,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 			// ignore here
 		}
 		fProjectField.setText(projPath);
-		fRootDialogField.setText("");		
+		fRootDialogField.setText("");		 //$NON-NLS-1$
 	}
 	
 	// -------- UI Creation ---------
@@ -203,18 +253,18 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		fCurrJProject= null;
 		
 		String str= fProjectField.getText();
-		if ("".equals(str)) {
-			fProjectStatus.setError(getResourceString(ERROR_PROJECT_ENTERNAME));
+		if ("".equals(str)) { //$NON-NLS-1$
+			fProjectStatus.setError(NewWizardMessages.getString("NewPackageRootCreationWizardPage.error.EnterProjectName")); //$NON-NLS-1$
 			return;
 		}
 		if (!fWorkspaceRoot.getWorkspace().validatePath(str, IResource.PROJECT).isOK()) {
-			fProjectStatus.setError(getResourceString(ERROR_PROJECT_INVALIDNAME));
+			fProjectStatus.setError(NewWizardMessages.getString("NewPackageRootCreationWizardPage.error.InvalidProjectPath")); //$NON-NLS-1$
 			return;
 		}
 		IPath path= new Path(str);
 		IProject project= fWorkspaceRoot.getProject(path.toString());
 		if (!project.exists()) {
-			fProjectStatus.setError(getResourceString(ERROR_PROJECT_PROJECTNOTEXISTS));
+			fProjectStatus.setError(NewWizardMessages.getString("NewPackageRootCreationWizardPage.error.ProjectNotExists")); //$NON-NLS-1$
 			return;
 		}
 		try {
@@ -228,7 +278,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 			// go to error
 			fCurrJProject= null;
 		}	
-		fProjectStatus.setError(getResourceString(ERROR_PROJECT_NOJAVAPROJECT));
+		fProjectStatus.setError(NewWizardMessages.getString("NewPackageRootCreationWizardPage.error.NotAJavaProject")); //$NON-NLS-1$
 	}
 
 	
@@ -239,17 +289,17 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 			return;
 		}
 		String str= fRootDialogField.getText();
-		if ("".equals(str)) {
-			fRootStatus.setError(getFormattedString(ERROR_ROOT_ENTERNAME, fCurrJProject.getProject().getFullPath().toString()));
+		if ("".equals(str)) { //$NON-NLS-1$
+			fRootStatus.setError(NewWizardMessages.getFormattedString("NewPackageRootCreationWizardPage.error.EnterRootName", fCurrJProject.getProject().getFullPath().toString())); //$NON-NLS-1$
 		} else {
 			IPath path= fCurrJProject.getProject().getFullPath().append(str);
 			if (!fWorkspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()) {
-				fRootStatus.setError(getResourceString(ERROR_ROOT_INVALIDNAME));
+				fRootStatus.setError(NewWizardMessages.getString("NewPackageRootCreationWizardPage.error.InvalidRootName")); //$NON-NLS-1$
 			} else {
 				IResource res= fWorkspaceRoot.findMember(path);
 				if (res != null) {
 					if (res.getType() != IResource.FOLDER) {
-						fRootStatus.setError(getResourceString(ERROR_ROOT_NOFOLDER));
+						fRootStatus.setError(NewWizardMessages.getString("NewPackageRootCreationWizardPage.error.NotAFolder")); //$NON-NLS-1$
 						return;
 					}
 				}
@@ -259,11 +309,11 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 						IPath entryPath= curr.getPath();
 						
 						if (path.equals(entryPath)) {
-							fRootStatus.setError(getResourceString(ERROR_ROOT_ALREADYEXISTS));
+							fRootStatus.setError(NewWizardMessages.getString("NewPackageRootCreationWizardPage.error.AlreadyExisting")); //$NON-NLS-1$
 							return;
 						}
 						if (JavaConventions.isOverlappingRoots(path, entryPath)) {
-							fRootStatus.setError(getFormattedString(ERROR_ROOT_WILLOVERLAP, entryPath.toString()));
+							fRootStatus.setError(NewWizardMessages.getFormattedString("NewPackageRootCreationWizardPage.error.WillOverlap", entryPath.toString())); //$NON-NLS-1$
 							return;
 						}
 						
@@ -336,8 +386,8 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setValidator(validator);
-		dialog.setTitle(getResourceString(ROOT_DIALOG + ".title"));
-		dialog.setMessage(getResourceString(ROOT_DIALOG + ".description"));
+		dialog.setTitle(NewWizardMessages.getString("NewPackageRootCreationWizardPage.ChooseExistingRootDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("NewPackageRootCreationWizardPage.ChooseExistingRootDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
 		
 		IProject proj= fCurrJProject.getProject();
@@ -357,8 +407,8 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider);
 		dialog.setValidator(validator);
 		dialog.setSorter(new PackageViewerSorter());
-		dialog.setTitle(getResourceString(PROJECT_DIALOG + ".title"));
-		dialog.setMessage(getResourceString(PROJECT_DIALOG + ".description"));
+		dialog.setTitle(NewWizardMessages.getString("NewPackageRootCreationWizardPage.ChooseProjectDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("NewPackageRootCreationWizardPage.ChooseProjectDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
 		
 		Object javaModel= JavaCore.create(fWorkspaceRoot);
@@ -415,8 +465,10 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 				getWizard().getContainer().run(false, true, op);
 			} catch (InvocationTargetException e) {
 				Shell shell= getShell();
-				if (!ExceptionHandler.handle(e, shell, JavaPlugin.getResourceBundle(), PREFIX_OP_ERROR)) {
-					MessageDialog.openError(shell, "Error", e.getTargetException().getMessage());
+				String title= NewWizardMessages.getString("NewPackageRootCreationWizardPage.op_error.title"); //$NON-NLS-1$
+				String message= NewWizardMessages.getString("NewPackageRootCreationWizardPage.op_error.message");				 //$NON-NLS-1$
+				if (!ExceptionHandler.handle(e, shell, title, message)) {
+					MessageDialog.openError(shell, title, e.getTargetException().getMessage());
 				}
 				return false;
 			} catch  (InterruptedException e) {
@@ -428,7 +480,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 	
 	private boolean showClassPathPropertyPage() {
 		EditClassPathDialog dialog= new EditClassPathDialog(getShell());
-		dialog.setTitle(getResourceString(EDITCP_DIALOG + ".title"));
+		dialog.setTitle(NewWizardMessages.getString("NewPackageRootCreationWizardPage.EditClassPathDialog.title")); //$NON-NLS-1$
 		return (dialog.open() == EditClassPathDialog.OK);
 	}
 

@@ -5,12 +5,10 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.wizard.Wizard;
 
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.NewWizardAction;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -24,7 +22,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
@@ -32,15 +29,7 @@ import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 public class NewGroup extends ContextMenuGroup {
-	
-	private final static String WIZARDS_ADD= "NewGroup.wizards_add";
-	private final static String WIZARDS_ADD_PROJECT= "NewGroup.wizards_add_project";
-	private final static String WIZARDS_ADD_PACKAGE= "NewGroup.wizards_add_package";
-	private final static String WIZARDS_ADD_CLASS= "NewGroup.wizards_add_class";
-	private final static String WIZARDS_ADD_INTERFACE= "NewGroup.wizards_add_interface";		
-	private final static String WIZARDS_ADD_PACKAGEROOT= "NewGroup.wizards_add_packageroot";	
-	private final static String WIZARDS_ADD_SNIPPET= "NewGroup.wizards_add_snippet";
-	
+		
 	private AbstractOpenWizardAction fNewProjectAction;
 	private AbstractOpenWizardAction fNewPackageAction;
 	private AbstractOpenWizardAction fNewClassAction;
@@ -63,36 +52,36 @@ public class NewGroup extends ContextMenuGroup {
 		if (fActionsCreated)
 			return;
 	
-		String label= JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGE + ".label");
+		String label= NewWizardMessages.getString("NewGroup.wizards_add_package.label"); //$NON-NLS-1$
 		Class[] acceptedTypes= new Class[] { IJavaProject.class, IPackageFragmentRoot.class };			
 		fNewPackageAction= new OpenPackageWizardAction(label, acceptedTypes);
 		fNewPackageAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKAGE);
-		fNewPackageAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGE + ".tooltip"));
-		fNewPackageAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGE + ".description"));			
+		fNewPackageAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_package.tooltip")); //$NON-NLS-1$
+		fNewPackageAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_package.description"));			 //$NON-NLS-1$
 		
-		label= JavaPlugin.getResourceString(WIZARDS_ADD_CLASS + ".label");
+		label= NewWizardMessages.getString("NewGroup.wizards_add_class.label"); //$NON-NLS-1$
 		acceptedTypes= new Class[] { IJavaProject.class, IPackageFragmentRoot.class,
 			IPackageFragment.class, ICompilationUnit.class, IClassFile.class };		
 		
 		fNewClassAction= new OpenClassWizardAction(label, acceptedTypes);
 		fNewClassAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWCLASS);
-		fNewClassAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_CLASS + ".tooltip"));
-		fNewClassAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_CLASS + ".description"));			
+		fNewClassAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_class.tooltip")); //$NON-NLS-1$
+		fNewClassAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_class.description"));			 //$NON-NLS-1$
 			
-		label= JavaPlugin.getResourceString(WIZARDS_ADD_INTERFACE + ".label");
+		label= NewWizardMessages.getString("NewGroup.wizards_add_interface.label"); //$NON-NLS-1$
 		fNewInterfaceAction= new OpenInterfaceWizardAction(label, acceptedTypes);
 		fNewInterfaceAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWINTERFACE);	
-		fNewInterfaceAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_INTERFACE + ".tooltip"));
-		fNewInterfaceAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_INTERFACE + ".description"));
+		fNewInterfaceAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_interface.tooltip")); //$NON-NLS-1$
+		fNewInterfaceAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_interface.description")); //$NON-NLS-1$
 
 		acceptedTypes= new Class[] { IJavaProject.class };
-		label= JavaPlugin.getResourceString(WIZARDS_ADD_SNIPPET + ".label");
+		label= NewWizardMessages.getString("NewGroup.wizards_add_snippet.label"); //$NON-NLS-1$
 		fNewSnippetAction= new OpenSnippetWizardAction(label, acceptedTypes);
 		fNewSnippetAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWSNIPPET);	
-		fNewSnippetAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_SNIPPET + ".tooltip"));
-		fNewSnippetAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_SNIPPET + ".description"));
+		fNewSnippetAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_snippet.tooltip")); //$NON-NLS-1$
+		fNewSnippetAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_snippet.description")); //$NON-NLS-1$
 
-		label= JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGEROOT + ".label");
+		label= NewWizardMessages.getString("NewGroup.wizards_add_packageroot.label"); //$NON-NLS-1$
 		acceptedTypes= new Class[] { IJavaProject.class };
 		fNewPackageRootAction= 
 			new AbstractOpenWizardAction(label, acceptedTypes, false) {
@@ -100,18 +89,18 @@ public class NewGroup extends ContextMenuGroup {
 				protected boolean shouldAcceptElement(Object obj) { return !isOnBuildPath(obj); }
 			};
 		fNewPackageRootAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);	
-		fNewPackageRootAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGEROOT + ".tooltip"));
-		fNewPackageRootAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGEROOT + ".description"));
+		fNewPackageRootAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_packageroot.tooltip")); //$NON-NLS-1$
+		fNewPackageRootAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_packageroot.description")); //$NON-NLS-1$
 
 			
 		// find out if the new project wizard is registered in the registry
 		if (isNewProjectWizardRegistered()) {
-			label= JavaPlugin.getResourceString(WIZARDS_ADD_PROJECT + ".label");
+			label= NewWizardMessages.getString("NewGroup.wizards_add_project.label"); //$NON-NLS-1$
 			acceptedTypes= new Class[] { IJavaModel.class };
 			fNewProjectAction= new OpenProjectWizardAction(label, acceptedTypes);
 			fNewProjectAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPROJECT);
-			fNewProjectAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_PROJECT + ".tooltip"));
-			fNewProjectAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_PROJECT + ".description"));
+			fNewProjectAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_project.tooltip")); //$NON-NLS-1$
+			fNewProjectAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_project.description")); //$NON-NLS-1$
 				
 		} else {
 			fNewProjectAction= null;
@@ -163,7 +152,7 @@ public class NewGroup extends ContextMenuGroup {
 		createActions();
 		
 		int i= 0;
-		MenuManager manager= new MenuManager(JavaPlugin.getResourceString(WIZARDS_ADD));
+		MenuManager manager= new MenuManager(NewWizardMessages.getString("NewGroup.wizards_add")); //$NON-NLS-1$
 		if (fNewProjectAction != null && fNewProjectAction.canActionBeAdded()) {
 			manager.add(fNewProjectAction);
 			i++;

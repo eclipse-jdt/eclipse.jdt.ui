@@ -4,15 +4,24 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;public class ChooseVariableDialog extends StatusDialog implements IStatusChangeListener, IDoubleClickListener {
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 
-	private static final String PAGE_NAME= "ChooseVariableDialog";
-	private static final String DIALOG_CHOOSEVARIABLE= PAGE_NAME + ".variabledialog";
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+
+import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;public class ChooseVariableDialog extends StatusDialog implements IStatusChangeListener, IDoubleClickListener {
+
 	private VariableBlock fVariableBlock;
 			
 	public ChooseVariableDialog(Shell parent, String lastVariableSelection) {
 		super(parent);
-		setTitle(JavaPlugin.getResourceString(DIALOG_CHOOSEVARIABLE + ".title"));
+		setTitle(NewWizardMessages.getString("ChooseVariableDialog.variabledialog.title")); //$NON-NLS-1$
 		fVariableBlock= new VariableBlock(this, true, lastVariableSelection);
 	}
 			
