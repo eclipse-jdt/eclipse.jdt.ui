@@ -168,9 +168,10 @@ public class NewVariableEntryDialog extends Dialog {
  	 * @see IDoubleClickListener#doubleClick(DoubleClickEvent)
  	 */
 	private void doDoubleClick() {
-		List selected= fVariableBlock.getSelectedElements();
-		if (!selected.isEmpty()) {
+		if (fOkButton.isEnabled()) {
 			okPressed();
+		} else if (fExtensionButton.isEnabled()) {
+			buttonPressed(IDialogConstants.CLIENT_ID);
 		}
 	}
 	
