@@ -140,7 +140,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 		if (!isActive()){
 			fUndoChange= new NullChange();
 		} else{
-			fUndoChange= new CompositeChange(fName, createUndoList(context, pm));
+			fUndoChange= new CompositeChange(fName, createUndoList(context, new SubProgressMonitor(pm, 1)));
 		}	
 		pm.done();
 	}
