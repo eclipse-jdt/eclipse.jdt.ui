@@ -3,7 +3,6 @@ public class TC {
 	public void runBare() {
 	}
 
-	
 	protected void run(TR tr) {
 		tr.startTest(this);
 		P p= new P() {
