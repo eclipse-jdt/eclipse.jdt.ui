@@ -241,7 +241,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				}				
 				IJavaProject jproject= JavaCore.create(proj);
 				fCurrRoot= jproject.getPackageFragmentRoot(res);
-				if (fCurrRoot.exists()) {
+				if (res.exists()) {
 					try {
 						if (!proj.hasNature(JavaCore.NATURE_ID)) {
 							if (resType == IResource.PROJECT) {
