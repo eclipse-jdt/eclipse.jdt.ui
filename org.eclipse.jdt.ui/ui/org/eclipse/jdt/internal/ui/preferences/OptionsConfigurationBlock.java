@@ -16,7 +16,12 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -344,7 +349,22 @@ public abstract class OptionsConfigurationBlock {
 					try {
 						if (fProject != null) {
 							monitor.setTaskName(PreferencesMessages.getFormattedString("OptionsConfigurationBlock.buildproject.taskname", fProject.getElementName())); //$NON-NLS-1$
-							fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
+							// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=46039
+							IWorkspaceDescription description= ResourcesPlugin.getWorkspace().getDescription();
+							if (description.isAutoBuilding()) {
+								ResourcesPlugin.getWorkspace().run(
+									new IWorkspaceRunnable() {
+										public void run(IProgressMonitor pm) throws CoreException {
+											pm.beginTask("", 6); //$NON-NLS-1$
+											fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(pm,4));
+											JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(pm,2));
+										}
+									},
+									new SubProgressMonitor(monitor, 1));
+							} else {
+								fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
+							}
+							// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=46039
 						} else {
 							monitor.setTaskName(PreferencesMessages.getString("OptionsConfigurationBlock.buildall.taskname")); //$NON-NLS-1$
 							JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
