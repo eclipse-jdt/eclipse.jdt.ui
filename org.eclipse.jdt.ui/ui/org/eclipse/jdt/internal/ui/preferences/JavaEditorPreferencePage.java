@@ -83,7 +83,6 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 	 * Creates a new preference page.
 	 */
 	public JavaEditorPreferencePage() {
-		setDescription(PreferencesMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), new OverlayPreferenceStore.OverlayKey[0]);
@@ -104,10 +103,6 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 				PreferencesMessages.getString("JavaEditorPreferencePage.folding.title"), //$NON-NLS-1$
 				PreferencesMessages.getString("JavaEditorPreferencePage.linking.title"), //$NON-NLS-1$
 		};
-	}
-	
-	protected Label createDescriptionLabel(Composite parent) {
-		return null; // no description since we add a hyperlinked text
 	}
 	
 	/*
@@ -291,11 +286,6 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 		contents.layout(false);
 		
 		return contents;
-	}
-	
-	void foo(int i,
-			int y) {
-			
 	}
 	
 	private void createHeader(Composite contents) {
