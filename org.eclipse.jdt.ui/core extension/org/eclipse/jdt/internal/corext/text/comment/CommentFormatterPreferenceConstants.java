@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.text.comment;
 
 /**
  * The CommentFormatter's preference keys.
- * TODO: make API in JDT/Core
+ * TODO: merge DefaultCodeFormatterConstants
  * 
  * @since 3.1
  */
@@ -105,4 +105,11 @@ public class CommentFormatterPreferenceConstants {
 	 * </p>
 	 */	
 	public final static String FORMATTER_COMMENT_FORMATHTML= "comment_format_html"; //$NON-NLS-1$
+
+	/**
+	 * This class is not intended for instantiation.
+	 */
+	private CommentFormatterPreferenceConstants() {
+		// Not for instantiation
+	}
 }
