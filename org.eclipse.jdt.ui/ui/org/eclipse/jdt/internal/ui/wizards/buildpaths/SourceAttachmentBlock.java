@@ -547,15 +547,13 @@ public class SourceAttachmentBlock {
 					if (!dir.isDirectory()) {
 						status.setError(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.error.notafolder")); //$NON-NLS-1$
 						return status;
-					}
-					/*else {
-						File indexFile= new File(dir, "index.html");
+					} else {
 						File packagesFile= new File(dir, "package-list");
-						if (!packagesFile.exists() || !indexFile.exists()) {
-							fJavaDocStatusInfo.setWarning(NewWizardMessages.getString(ERR_JDOCLOCATION_IDXNOTFOUND));
+						if (!packagesFile.exists()) {
+							status.setWarning(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.warning.packagelist"));
 							// only a warning, go on
 						}
-					}*/	
+					}	
 				}
 				fJavaDocLocation= url;
 			} catch (MalformedURLException e) {

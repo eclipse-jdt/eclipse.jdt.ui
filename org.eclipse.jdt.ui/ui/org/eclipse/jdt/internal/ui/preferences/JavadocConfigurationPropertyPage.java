@@ -44,7 +44,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	private IStatus fJavaDocStatus;
 
 	public JavadocConfigurationPropertyPage() {
-		setDescription("Location of the documentation for this project's source.");
+		setDescription("Specify the location (URL) of the project's Javadoc documentation.\nExample is 'file://c:/myworkspace/myproject/doc/'. This location is used by the Javadoc export wizard as default value and by the 'Open External Javadoc' action.");
 	}
 
 
@@ -123,23 +123,20 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 				if ("file".equals(url.getProtocol())) {
 					String temp= url.getFile();
 					if (temp == null) {
-						status.setError("Not a valid URL");
+						status.setError("Not a valid URL.");
 						return status;
 					} else {
 						File dir= new File(url.getFile());
 						if (!dir.isDirectory()) {
-							status.setError("Not a valid URL " + dir.getPath());
+							status.setError("Location does not exist.");
 							return status;
 						}
-					}
-					/*else {
-						File indexFile= new File(dir, "index.html");
 						File packagesFile= new File(dir, "package-list");
-						if (!packagesFile.exists() || !indexFile.exists()) {
-							fJavaDocStatusInfo.setWarning(NewWizardMessages.getString(ERR_JDOCLOCATION_IDXNOTFOUND));
+						if (!packagesFile.exists()) {
+							status.setWarning("Location does not contain file 'package-list'.");
 							// only a warning, go on
-						}
-					}*/
+						}						
+					}
 				}
 				fJavaDocLocation= url;
 			} catch (MalformedURLException e) {
@@ -157,7 +154,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 		}
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
 		dialog.setText("Javadoc Location Selection");
-		dialog.setMessage("Select project's Javadoc location");
+		dialog.setMessage("&Select project's Javadoc location:");
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {
