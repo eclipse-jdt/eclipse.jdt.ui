@@ -34,9 +34,15 @@ class ASTNodeMappingManager {
 	}
 	
 	public ICompilationUnit getCompilationUnit(ASTNode node) {
-		CompilationUnit cuNode= (CompilationUnit)ASTNodes.getParent(node, CompilationUnit.class);
+		CompilationUnit cuNode= getCompilationUnitNode(node);
 		Assert.isTrue(fCuNodesToCus.containsKey(cuNode)); //the cu node must've been created before
 		return (ICompilationUnit)fCuNodesToCus.get(cuNode);
+	}
+	
+	private static CompilationUnit getCompilationUnitNode(ASTNode node){
+		if (node instanceof CompilationUnit)
+			return (CompilationUnit)node;
+		return (CompilationUnit)ASTNodes.getParent(node, CompilationUnit.class);
 	}
 
 	public ICompilationUnit[] getAllCompilationUnits(){
