@@ -1411,8 +1411,8 @@ JavaStructureDiffViewerCreator
    
 <extension point="org.eclipse.ui.acceleratorSets">
 	<acceleratorSet
-		scopeId="org.eclipse.jdt.ui.globalScope"
-		configurationId="org.eclipse.jdt.ui.emacsAcceleratorConfiguration">
+		scopeId="org.eclipse.ui.globalScope"
+		configurationId="org.eclipse.ui.emacsAcceleratorConfiguration">
 
 		<!-- edit -->
 		<accelerator key="Alt+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />
@@ -1423,6 +1423,10 @@ JavaStructureDiffViewerCreator
 		<accelerator key="Alt+?" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
 		<accelerator key="Ctrl+1" id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
 		<accelerator key="F2" id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
+
+		<!-- override accelerators for Chinese -->
+		<accelerator key="Alt+/" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" locale="zh_CN" />
+		<accelerator key="Alt+?" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" locale="zh_CN" />
 
 		<!-- source -->
 		<accelerator key="Ctrl+/" id="org.eclipse.jdt.ui.edit.text.java.comment" />
@@ -1489,6 +1493,10 @@ JavaStructureDiffViewerCreator
 		<accelerator key="Ctrl+Shift+Space" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
 		<accelerator key="Ctrl+1" id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
 		<accelerator key="F2" id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
+
+		<!-- override accelerators for Chinese -->
+		<accelerator key="Alt+/" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" locale="zh_CN" />
+		<accelerator key="Alt+?" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" locale="zh_CN" />
 
 		<!-- source -->
 		<accelerator key="Ctrl+/" id="org.eclipse.jdt.ui.edit.text.java.comment" />
