@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorExtension;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.SelectMarkerRulerAction;
 
@@ -66,6 +67,13 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 	}
 	
 	public void update() {
+		// Begin Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20114
+		if (!(fMyTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension)fMyTextEditor).isEditorInputReadOnly()) {
+			fPosition= null;
+			super.update();
+			return;
+		}
+		// End Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20114
 		fPosition= getProblemPosition();
 		if (fPosition != null)
 			setEnabled(true);
