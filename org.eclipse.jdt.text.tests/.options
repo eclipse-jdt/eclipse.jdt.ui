@@ -1,0 +1,4 @@
+# Options for the org.eclipse.jdt.text.tests plug-in
+
+# PerformanceMeterFactory to use (fully qualified class name)
+org.eclipse.jdt.text.tests/option/performanceMeterFactory=

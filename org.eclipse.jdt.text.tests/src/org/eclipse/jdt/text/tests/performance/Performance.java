@@ -11,16 +11,37 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
+
 public class Performance {
 
-	public static String PERFORMANCE_METER_FACTORY= "PerformanceMeterFactory";
+	private static final String PLUGIN_ID= JdtTextTestPlugin.PLUGIN_ID;
+
+	private static final String PERFORMANCE_METER_FACTORY= "option/performanceMeterFactory";
+	
+	private static final String PERFORMANCE_METER_FACTORY_PROPERTY= "PerformanceMeterFactory";
 	
 	public static PerformanceMeterFactory createPerformanceMeterFactory() {
-		String factoryName= System.getProperty(PERFORMANCE_METER_FACTORY);
-		if (factoryName != null && factoryName.length() > 0)
+		PerformanceMeterFactory factory;
+		factory= tryInstantiate(System.getProperty(PERFORMANCE_METER_FACTORY_PROPERTY));
+		if (factory != null)
+			return factory;
+		
+		factory= tryInstantiate(Platform.getDebugOption(PLUGIN_ID + PERFORMANCE_METER_FACTORY));
+		if (factory != null)
+			return factory;
+		
+		return createDefaultPerformanceMeterFactory();
+	}
+	
+	private static PerformanceMeterFactory tryInstantiate(String className) {
+		PerformanceMeterFactory instance= null;
+		if (className != null && className.length() > 0) {
 			try {
-				Class c= Class.forName(factoryName);
-				return (PerformanceMeterFactory) c.newInstance();
+				Class c= Class.forName(className);
+				instance= (PerformanceMeterFactory) c.newInstance();
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			} catch (InstantiationException e) {
@@ -30,9 +51,10 @@ public class Performance {
 			} catch (ClassCastException e) {
 				e.printStackTrace();
 			}
-		return createDefaultPerformanceMeterFactory();
+		}
+		return instance;
 	}
-	
+
 	private static PerformanceMeterFactory createDefaultPerformanceMeterFactory() {
 		return new OSPerformanceMeterFactory();
 	}
