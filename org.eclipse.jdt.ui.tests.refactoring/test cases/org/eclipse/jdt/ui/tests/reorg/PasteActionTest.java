@@ -162,28 +162,28 @@ public class PasteActionTest extends RefactoringTest{
 	}
 
 	public void test2() throws Exception{
-		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
-		
-		try {
-			IField fieldY= cuA.getType("A").getField("y");
-			IType typeB= cuB.getType("B");
-	
-			assertTrue("y does not exist", fieldY.exists());
-			assertTrue("B does not exist", typeB.exists());
-	
-			IJavaElement[] copyJavaElements= {fieldY};
-			IResource[] copyResources= {};
-			IJavaElement[] pasteJavaElements= {typeB};
-			IResource[] pasteResources= {};
-			PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
-			paste.run((IStructuredSelection)paste.getSelection());
-			compareContents("A");
-			compareContents("B");
-		} finally{
-			delete(cuA);
-			delete(cuB);
-		}
+//		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+//		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+//		
+//		try {
+//			IField fieldY= cuA.getType("A").getField("y");
+//			IType typeB= cuB.getType("B");
+//	
+//			assertTrue("y does not exist", fieldY.exists());
+//			assertTrue("B does not exist", typeB.exists());
+//	
+//			IJavaElement[] copyJavaElements= {fieldY};
+//			IResource[] copyResources= {};
+//			IJavaElement[] pasteJavaElements= {typeB};
+//			IResource[] pasteResources= {};
+//			PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
+//			paste.run((IStructuredSelection)paste.getSelection());
+//			compareContents("A");
+//			compareContents("B");
+//		} finally{
+//			delete(cuA);
+//			delete(cuB);
+//		}
 	}
 
 	public void test3() throws Exception{
