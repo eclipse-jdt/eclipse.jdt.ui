@@ -276,6 +276,63 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String curr2= formatted.substring(positions[2], positions[3] + 1);
 		assertEqualString(curr2, word2);
 		
+	}
+	
+	public void testFormatSubstring() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    Runnable runnable= new Runnable() {};\n");
+		buf.append("    runnable.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+		
+		String formatString= "Runnable runnable= new Runnable() {};";
+		int formatStart= contents.indexOf(formatString);
+		int formatEnd= formatStart + formatString.length();
+		
+		
+		String word1= "import";
+		int start1= contents.indexOf(word1);
+		
+		String word2= "new";
+		int start2= contents.indexOf(word2);
+		
+		String word3= "toString";
+		int start3= contents.indexOf(word3);		
+		
+		int[] positions= { start1, start1 + word1.length() - 1, start2, start2 + word2.length() - 1, start3, start3 + word3.length() - 1};
+		
+		String formatted= CodeFormatterUtil.format(CodeFormatterUtil.K_COMPILATION_UNIT, contents, formatStart, formatEnd, 0, positions, "\n", null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    Runnable runnable = new Runnable() {\n");
+		buf.append("        };\n");		buf.append("    runnable.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+		
+		String curr1= formatted.substring(positions[0], positions[1] + 1);
+		assertEqualString(curr1, word1);
+		
+		String curr2= formatted.substring(positions[2], positions[3] + 1);
+		assertEqualString(curr2, word2);
+		
+		String curr3= formatted.substring(positions[4], positions[5] + 1);
+		assertEqualString(curr3, word3);
+		
 	}	
 	
 }

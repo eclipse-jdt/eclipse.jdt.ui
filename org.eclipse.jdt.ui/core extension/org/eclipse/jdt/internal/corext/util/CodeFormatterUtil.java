@@ -119,14 +119,14 @@ public class CodeFormatterUtil {
 		newPositions[k++]= inclEnd;
 		if (positions != null) {
 			while (i < positions.length) {
-				newPositions[k++]= positions[i++];
+				newPositions[k++]= positions[i++];   
 			}
 		}
 		
 		String formatted= old_format(string, indentationLevel, newPositions, lineSeparator, options);
 		
 		int newStartPos= newPositions[startIndex];
-		int newEndPos= newPositions[endIndex] + 1; // incl. end
+		int newEndPos= newPositions[endIndex] + 1; // incl. end 
 		
 		// update the positions array
 		
