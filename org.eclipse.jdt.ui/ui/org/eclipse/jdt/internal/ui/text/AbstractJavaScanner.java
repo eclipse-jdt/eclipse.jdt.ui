@@ -37,8 +37,20 @@ import org.eclipse.jdt.ui.text.IColorManagerExtension;
 
 /**
  * Initialized with a color manager and a preference store, its subclasses are
- * only responsible for providing a list of preference keys based on which tokens
+ * only responsible for providing a list of preference keys for based on which tokens
  * are generated and to use this tokens to define the rules controlling this scanner.
+ * <p>
+ * This scanner stores the color defined by the color preference key into
+ * the color manager under the same key. 
+ * </p>
+ * <p>
+ * Preference color key + {@link PreferenceConstants#EDITOR_BOLD_SUFFIX} are used
+ * to retrieve whether the token is rendered in bold.
+ * </p>
+ * <p>
+ * Preference color key + {@link PreferenceConstants#EDITOR_ITALIC_SUFFIX} are used
+ * to retrieve whether the token is rendered in italic.
+ * </p>
  */
 public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 			
@@ -65,8 +77,20 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	private boolean fNeedsLazyColorLoading;
 
 	/** 
-	 * Returns the list of preference keys which define the tokens
+	 * Returns an array of preference keys which define the tokens
 	 * used in the rules of this scanner.
+	 * <p>
+	 * The preference key is used access the color in the preference
+	 * store and in the color manager.
+	 * </p>
+	 * <p>
+	 * Preference key + {@link PreferenceConstants#EDITOR_BOLD_SUFFIX} is used
+	 * to retrieve whether the token is rendered in bold.
+	 * </p>
+	 * <p>
+	 * Preference key + {@link PreferenceConstants#EDITOR_ITALIC_SUFFIX} is used
+	 * to retrieve whether the token is rendered in italic.
+	 * </p>
 	 */
 	abstract protected String[] getTokenProperties();
 		
