@@ -268,7 +268,7 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(allEdits, change, getCu());
 			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
 			
-			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(allEdits, change, wc, newCUNode, compliationUnitNode));
+			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(change, wc, newCUNode, compliationUnitNode));
 			if (result.hasError())
 				return result;
 
