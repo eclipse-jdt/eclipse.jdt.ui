@@ -13,7 +13,9 @@
  *******************************************************************************/ 
 -->
 
-<templates><template name="for" description="%Templates.for_array" id="org.eclipse.jdt.ui.templates.for_array" context="java" enabled="true">for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
+<templates>
+
+<template name="for" description="%Templates.for_array" id="org.eclipse.jdt.ui.templates.for_array" context="java" enabled="true">for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
 	${line_selection}${cursor}
 }</template>
 
@@ -147,4 +149,9 @@ return ${name};</template>
 }</template>
 
 <template name="non-nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true">//$$NON-NLS$$-${N}</template>
+
+<template name="synchronized" description="%Templates.synchronized" id="org.eclipse.jdt.ui.templates.synchronized" context="java" enabled="true" deleted="false">synchronized (${mutex}) {
+	${line_selection}
+}</template>
+
 </templates>
