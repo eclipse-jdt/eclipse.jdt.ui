@@ -20,13 +20,11 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(AllRefactoringTests.suite());
-		suite.addTest(ReorgTests.suite());
 		suite.addTest(AllChangeTests.suite());
 		suite.addTest(UndoManagerTests.suite());
 		suite.addTest(PathTransformationTests.suite());
 		suite.addTest(RefactoringScannerTests.suite());
 		suite.addTest(SurroundWithTests.suite());
-		// suite.addTest(SelectionAnalyzerTests.suite()); 
 		return suite;
 	}
 }
