@@ -62,8 +62,6 @@ public class RefactoringExecutionHelper {
 					}
 				}
 				fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-				boolean success= false;
-				IUndoManager undoManager= Refactoring.getUndoManager();
 				try {
 					fChange.aboutToPerform(fContext, new NullProgressMonitor());
 					JavaCore.run(new IWorkspaceRunnable() {
