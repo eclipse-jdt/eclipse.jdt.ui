@@ -11,6 +11,7 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;import org.eclipse.jface.text.ITypedRegion;
 
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
 /**
@@ -189,7 +190,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
 				buf.append(d.get(start, whiteend - start));
 				if (getBracketCount(d, start, c.offset, true) > 0) {
-					buf.append('\t');
+					buf.append(getOneIndentLevel());
 				}
 			}
 			c.text= buf.toString();
@@ -198,6 +199,17 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message2")); //$NON-NLS-1$
 		}
 	}
+	
+	private String getOneIndentLevel() {
+		if (CodeFormatterPreferencePage.useSpaces()) {
+			StringBuffer buf= new StringBuffer();
+			for (int i= CodeFormatterPreferencePage.getTabSize() - 1; i >= 0; i--) {
+				buf.append(' ');
+			}
+			return buf.toString();
+		}
+		return String.valueOf('\t');
+	}	
 	
 	/**
 	 * Returns whether the text ends with one of the given search strings.

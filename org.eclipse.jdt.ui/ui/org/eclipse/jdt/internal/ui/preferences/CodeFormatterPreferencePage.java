@@ -106,6 +106,13 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return COMPACT.equals(JavaCore.getOptions().get(PREF_STYLE_COMPACT_ASSIGNEMENT));
 	}
 	
+	/**
+	 * Gets the current compating assignement configuration
+	 */	
+	public static boolean useSpaces() {
+		return SPACE.equals(JavaCore.getOptions().get(PREF_TAB_CHAR));
+	}	
+	
 	
 	private static int getIntValue(String string, int dflt) {
 		try {
