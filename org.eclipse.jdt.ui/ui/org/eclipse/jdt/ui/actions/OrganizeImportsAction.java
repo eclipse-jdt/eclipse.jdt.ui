@@ -158,35 +158,42 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			try {
 				if (selected[i] instanceof IJavaElement) {
 					IJavaElement elem= (IJavaElement) selected[i];
-					switch (elem.getElementType()) {
-						case IJavaElement.TYPE:
-							if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
+					if (elem.exists()) {
+					
+						switch (elem.getElementType()) {
+							case IJavaElement.TYPE:
+								if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
+									result.add(elem.getParent());
+								}
+								break;						
+							case IJavaElement.COMPILATION_UNIT:
+								result.add(elem);
+								break;
+							case IJavaElement.IMPORT_CONTAINER:
 								result.add(elem.getParent());
-							}
-							break;						
-						case IJavaElement.COMPILATION_UNIT:
-							result.add(elem);
-							break;
-						case IJavaElement.IMPORT_CONTAINER:
-							result.add(elem.getParent());
-							break;							
-						case IJavaElement.PACKAGE_FRAGMENT:
-							collectCompilationUnits((IPackageFragment) elem, result);
-							break;
-						case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-							collectCompilationUnits((IPackageFragmentRoot) elem, result);
-							break;
-						case IJavaElement.JAVA_PROJECT:
-							IPackageFragmentRoot[] roots= ((IJavaProject) elem).getPackageFragmentRoots();
-							for (int k= 0; k < roots.length; k++) {
-								collectCompilationUnits(roots[k], result);
-							}
-							break;			
+								break;							
+							case IJavaElement.PACKAGE_FRAGMENT:
+								collectCompilationUnits((IPackageFragment) elem, result);
+								break;
+							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+								collectCompilationUnits((IPackageFragmentRoot) elem, result);
+								break;
+							case IJavaElement.JAVA_PROJECT:
+								IPackageFragmentRoot[] roots= ((IJavaProject) elem).getPackageFragmentRoots();
+								for (int k= 0; k < roots.length; k++) {
+									collectCompilationUnits(roots[k], result);
+								}
+								break;			
+						}
 					}
 				} else if (selected[i] instanceof LogicalPackage) {
 					IPackageFragment[] packageFragments= ((LogicalPackage)selected[i]).getFragments();
-					for (int k= 0; k < packageFragments.length; k++)
-						collectCompilationUnits(packageFragments[k], result);
+					for (int k= 0; k < packageFragments.length; k++) {
+						IPackageFragment pack= packageFragments[k];
+						if (pack.exists()) {
+							collectCompilationUnits(pack, result);
+						}
+					}
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
@@ -215,20 +222,24 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			try {
 				if (selected[i] instanceof IJavaElement) {
 					IJavaElement elem= (IJavaElement) selected[i];
-					switch (elem.getElementType()) {
-						case IJavaElement.TYPE:
-							return elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT; // for browsing perspective
-						case IJavaElement.COMPILATION_UNIT:
-							return true;
-						case IJavaElement.IMPORT_CONTAINER:
-							return true;
-						case IJavaElement.PACKAGE_FRAGMENT:
-						case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-							IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-							return (root.getKind() == IPackageFragmentRoot.K_SOURCE);
-						case IJavaElement.JAVA_PROJECT:
-							return hasSourceFolders((IJavaProject) elem);
+					if (elem.exists()) {
+						switch (elem.getElementType()) {
+							case IJavaElement.TYPE:
+								return elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT; // for browsing perspective
+							case IJavaElement.COMPILATION_UNIT:
+								return true;
+							case IJavaElement.IMPORT_CONTAINER:
+								return true;
+							case IJavaElement.PACKAGE_FRAGMENT:
+							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+								IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+								return (root.getKind() == IPackageFragmentRoot.K_SOURCE);
+							case IJavaElement.JAVA_PROJECT:
+								return hasSourceFolders((IJavaProject) elem);
+						}
 					}
+				} else if (selected[i] instanceof LogicalPackage) {
+					return true;
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
