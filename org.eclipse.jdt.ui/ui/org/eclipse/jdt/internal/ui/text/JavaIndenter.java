@@ -382,8 +382,9 @@ public class JavaIndenter {
 				
 				case Symbols.TokenCOLON: // switch statements and labels
 					if (searchCaseGotoDefault()) {
+						if (!hasBrace)
 							fIndent++;
-							return fPosition;
+						return fPosition;
 					}
 					break;
 					
