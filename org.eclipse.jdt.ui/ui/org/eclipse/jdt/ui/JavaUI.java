@@ -1,9 +1,9 @@
-package org.eclipse.jdt.ui;/*
+/*
  * Licensed Materials - Property of IBM,
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000, 2001
  */
-
+package org.eclipse.jdt.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  */
 public final class JavaUI {
 	
-	private static final ISharedImages SHARED_IMAGES= new SharedImages();
+	private static ISharedImages fgSharedImages= null;
 	
 	private JavaUI() {
 		// prevent instantiation of JavaUI.
@@ -143,7 +143,10 @@ public final class JavaUI {
 	 * @return the shared images manager
 	 */
 	public static ISharedImages getSharedImages() {
-		return SHARED_IMAGES;
+		if (fgSharedImages == null)
+			fgSharedImages= new SharedImages();
+			
+		return fgSharedImages;
 	}
 	 
 	/**
