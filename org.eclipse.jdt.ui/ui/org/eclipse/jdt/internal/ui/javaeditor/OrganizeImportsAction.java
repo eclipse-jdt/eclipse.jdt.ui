@@ -132,6 +132,6 @@ public class OrganizeImportsAction extends Action {
 		String title= JavaEditorMessages.getString("OrganizeImportsAction.error.title");
 		String[] args= { String.valueOf(problem.getSourceLineNumber()), problem.getMessage() };
 		String message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.error.parsing.message", args);
-		MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message);
+		MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), title, message);
 	}
 }

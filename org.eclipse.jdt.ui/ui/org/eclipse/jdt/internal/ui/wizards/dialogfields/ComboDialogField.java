@@ -153,7 +153,7 @@ public class ComboDialogField extends DialogField {
 	/**
 	 * Gets the combo items.
 	 */	
-	public Object[] getItems() {
+	public String[] getItems() {
 		return fItems;
 	}
 	
@@ -164,7 +164,8 @@ public class ComboDialogField extends DialogField {
 		fItems= items;
 		if (isOkToUse(fComboControl)) {
 			fComboControl.setItems(items);
-		}	
+		}
+		dialogFieldChanged();
 	}
 	
 	/**
@@ -193,12 +194,12 @@ public class ComboDialogField extends DialogField {
 		if (isOkToUse(fComboControl)) {
 			fComboControl.select(index);
 		} else {
-			if (index < fItems.length) {
+			if (index >= 0 && index < fItems.length) {
 				fText= fItems[index];
-				fSelectionIndex= index;
-				dialogFieldChanged();
+				fSelectionIndex= index;	
 			}
 		}
+		dialogFieldChanged();
 	}
 	
 	public int getSelectionIndex() {
