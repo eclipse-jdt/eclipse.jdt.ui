@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.core.refactoring.packages;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -129,10 +130,14 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		 * not checked preconditions:
 		 *  a. native methods in locally defined types in this package (too expensive - requires AST analysis)
 		 */
-		pm.beginTask("", 14); //$NON-NLS-1$
+		pm.beginTask("", 15); //$NON-NLS-1$
 		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkNewName());
+		pm.worked(1);
+		result.merge(checkUnsavedCus());
+		if (result.hasFatalError())
+			return result;
 		pm.worked(1);
 		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 6))));
 		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.analyzing")); //$NON-NLS-1$
@@ -151,6 +156,20 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
 		fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
 		return fOccurrences;
+	}
+	
+	private RefactoringStatus checkUnsavedCus() throws JavaModelException{
+		if (getUnsavedFileList() == null)
+			return null;
+		RefactoringStatus result= new RefactoringStatus();
+		for (Iterator iter= getUnsavedFileList().iterator(); iter.hasNext(); ){
+			ICompilationUnit cu= (ICompilationUnit)JavaCore.create((IFile)iter.next());
+			if (cu != null && cu.getParent().equals(fPackage))
+				result.addFatalError("Compilation unit \"" 
+				+ Refactoring.getResource(cu).getProjectRelativePath()
+				+ "\" must be saved before this refactoring can be performed.");
+		}
+		return result;
 	}
 	
 	private RefactoringStatus checkForMainMethods() throws JavaModelException{
