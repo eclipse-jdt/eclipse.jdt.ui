@@ -1362,9 +1362,7 @@ JavaStructureDiffViewerCreator
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
 
 	<!-- source -->
-<!--
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.comment" />
--->
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.format" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.add.import" />
