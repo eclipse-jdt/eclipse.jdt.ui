@@ -111,7 +111,6 @@ import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.IEncodingSupport;
-import org.eclipse.ui.editors.text.IFoldingCommandIds;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -183,7 +182,6 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
@@ -2420,6 +2418,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return;
 			}
 			
+			if (PreferenceConstants.EDITOR_FOLDING_ENABLED.equals(property)) {
+				if (sourceViewer instanceof ProjectionViewer) {
+					ProjectionViewer pv= (ProjectionViewer) sourceViewer;
+					if (pv.isProjectionMode() != isFoldingEnabled()) {
+						if (pv.canDoOperation(ProjectionViewer.TOGGLE))
+							pv.doOperation(ProjectionViewer.TOGGLE);
+					}
+				}
+				return;
+			}
+			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
 		}
@@ -3613,14 +3622,30 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
-		IMenuManager foldingMenu= new MenuManager("Folding", "projection");
-		menu.appendToGroup("rulers", foldingMenu);
+		IMenuManager foldingMenu= new MenuManager(JavaEditorMessages.getString("Editor.FoldingMenu.name"), "projection"); //$NON-NLS-1$ //$NON-NLS-2$
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_RULERS, foldingMenu);
 		
-		IAction action= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.Toggle.", this, ProjectionViewer.TOGGLE, true);
-		action.setChecked(((ProjectionViewer) getViewer()).isProjectionMode());
-		action.setActionDefinitionId(IFoldingCommandIds.FOLDING_TOGGLE);
+		IAction action= getAction("FoldingToggle"); //$NON-NLS-1$
 		foldingMenu.add(action);
-		action= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.ExpandAll.", this, ProjectionViewer.EXPAND_ALL, true);
+		action= getAction("FoldingExpandAll"); //$NON-NLS-1$
 		foldingMenu.add(action);
+	}
+	
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#collectContextMenuPreferencePages()
+	 * @since 3.1
+	 */
+	protected String[] collectContextMenuPreferencePages() {
+		String[] ids= super.collectContextMenuPreferencePages();
+		String[] more= new String[ids.length + 6];
+		more[0]= "org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"; //$NON-NLS-1$
+		more[1]= "org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage"; //$NON-NLS-1$
+		more[2]= "org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"; //$NON-NLS-1$
+		more[3]= "org.eclipse.jdt.ui.preferences.JavaEditorHoverPreferencePage"; //$NON-NLS-1$
+		more[4]= "org.eclipse.jdt.ui.preferences.JavaEditorColoringPreferencePage"; //$NON-NLS-1$
+		more[5]= "org.eclipse.jdt.ui.preferences.SpellingPreferencePage"; //$NON-NLS-1$
+		System.arraycopy(ids, 0, more, 6, ids.length);
+		return more;
 	}
 }

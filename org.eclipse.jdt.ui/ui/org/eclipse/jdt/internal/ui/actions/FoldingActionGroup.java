@@ -10,8 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.jface.action.IMenuManager;
+import java.util.ResourceBundle;
 
+import org.eclipse.swt.SWT;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.source.projection.IProjectionListener;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
@@ -19,7 +25,13 @@ import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.editors.text.IFoldingCommandIds;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -28,9 +40,15 @@ import org.eclipse.ui.texteditor.TextOperationAction;
  * @since 3.0
  */
 public class FoldingActionGroup extends ActionGroup {
+	static abstract class PreferenceAction extends ResourceAction implements IUpdate {
+		PreferenceAction(ResourceBundle bundle, String prefix, int style) {
+			super(bundle, prefix, style);
+		}
+	}
+	
 	private ProjectionViewer fViewer;
 	
-	private TextOperationAction fToggle;
+	private PreferenceAction fToggle;
 	private TextOperationAction fExpand;
 	private TextOperationAction fCollapse;
 	private TextOperationAction fExpandAll;
@@ -45,7 +63,7 @@ public class FoldingActionGroup extends ActionGroup {
 	 * @param editor the text editor to operate on
 	 * @param viewer the viewer of the editor
 	 */
-	public FoldingActionGroup(ITextEditor editor, ITextViewer viewer) {
+	public FoldingActionGroup(final ITextEditor editor, ITextViewer viewer) {
 		if (viewer instanceof ProjectionViewer) {
 			fViewer= (ProjectionViewer) viewer;
 			
@@ -62,7 +80,20 @@ public class FoldingActionGroup extends ActionGroup {
 			
 			fViewer.addProjectionListener(fProjectionListener);
 			
-			fToggle= new TextOperationAction(ActionMessages.getResourceBundle(), "Projection.Toggle.", editor, ProjectionViewer.TOGGLE, true); //$NON-NLS-1$
+			fToggle= new PreferenceAction(ActionMessages.getResourceBundle(), "Projection.Toggle.", SWT.TOGGLE) { //$NON-NLS-1$
+				public void run() {
+					IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+					boolean current= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
+					store.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, !current);
+				}
+
+				public void update() {
+					ITextOperationTarget target= (ITextOperationTarget) editor.getAdapter(ITextOperationTarget.class);
+						
+					boolean isEnabled= (target != null && target.canDoOperation(ProjectionViewer.TOGGLE));
+					setEnabled(isEnabled);
+				}
+			};
 			fToggle.setChecked(true);
 			fToggle.setActionDefinitionId(IFoldingCommandIds.FOLDING_TOGGLE);
 			editor.setAction("FoldingToggle", fToggle); //$NON-NLS-1$
