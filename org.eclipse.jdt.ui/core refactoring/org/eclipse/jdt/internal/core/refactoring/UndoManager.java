@@ -175,7 +175,6 @@ public class UndoManager implements IUndoManager {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= new RefactoringStatus();
 		
-		//XXX: maybe i should not check that and just let it fail
 		if (fUndoChanges.empty())
 			return result;
 			
@@ -200,7 +199,7 @@ public class UndoManager implements IUndoManager {
 	public RefactoringStatus performRedo(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= new RefactoringStatus();
-		//XXX: maybe i should not check that and just let it fail
+
 		if (fRedoChanges.empty())
 			return result;
 			
