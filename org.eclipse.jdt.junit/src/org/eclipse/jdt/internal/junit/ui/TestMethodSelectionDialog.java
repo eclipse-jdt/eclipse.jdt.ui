@@ -23,9 +23,11 @@ import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -87,10 +89,8 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		Object[] elements;
 		IType testType= findTestType();
 		
-		if (testType == null) {
-			MessageDialog.openError(getShell(), "Select Test", "Cannot find '"+JUnitPlugin.TEST_INTERFACE_NAME+"' - make sure that JUnit is on the project's classpath.");
+		if (testType == null) 
 			return CANCEL;
-		}
 		
 		try {
 			elements= searchTestMethods(fElement, testType, fRunnableContext);
@@ -112,18 +112,38 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	private IType findTestType() {
 		String qualifiedName= JUnitPlugin.TEST_INTERFACE_NAME;
 		IJavaProject[] projects;
+		Set result= new HashSet();
 		try {
 			projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
 			for (int i= 0; i < projects.length; i++) {
 				IJavaProject project= projects[i];
 				IType type= project.findType(qualifiedName);
-				if (type != null) {
-					return type;
-				}
+				if (type != null) 
+					result.add(type);
 			}
 		} catch (JavaModelException e) {
+			ErrorDialog.openError(getShell(), "Find Test", "Could not find test", e.getStatus());
+			return null;
 		}
-		return null;
+		if (result.size() == 0) {
+			MessageDialog.openError(getShell(), "Select Test", "Cannot find '"+JUnitPlugin.TEST_INTERFACE_NAME+"' - make sure that JUnit is on the project's classpath.");
+			return null;
+		}
+		if (result.size() == 1)
+			return (IType)result.toArray()[0];
+		
+		return selectTestType(result);
+	}
+	
+	private IType selectTestType(Set result) {
+		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(null, labelProvider);
+		dialog.setTitle("Go To Referring Tests"); 
+		dialog.setMessage("More than project contains the type junit.framework.Test. Select the type you want to find referring tests.");
+		dialog.setElements(result.toArray());
+		if (dialog.open() == ElementListSelectionDialog.CANCEL)	
+			return null;
+		return (IType) dialog.getFirstResult();	
 	}
 	
 	public Object[] searchTestMethods(final IJavaElement element, final IType testType, IRunnableContext context) throws InvocationTargetException, InterruptedException  {
