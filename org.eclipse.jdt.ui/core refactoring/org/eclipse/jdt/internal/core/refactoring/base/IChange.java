@@ -105,5 +105,12 @@ public interface IChange {
 	 *
 	 * @return the java element this change is operating on. May return <code>null</code>.
 	 */
-	public IJavaElement getCorrespondingJavaElement();		
+	public IJavaElement getCorrespondingJavaElement();	
+	
+	/**
+	 * Returns whether the change can be undone.
+	 * If <code>false</code> is returned, then the result 
+	 * of <code>getUndoChange</code> will be ignored.
+	 */
+	public boolean isUndoable();
 }
