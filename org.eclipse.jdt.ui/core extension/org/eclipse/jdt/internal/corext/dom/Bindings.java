@@ -58,8 +58,19 @@ public class Bindings {
 			return asString((IMethodBinding)binding);
 		else if (binding instanceof ITypeBinding)
 			return asString((ITypeBinding)binding);
-		else
-			return binding.toString();
+		else if (binding instanceof IVariableBinding)
+			return asString((IVariableBinding)binding);
+		return binding.toString();
+	}
+
+	private static String asString(IVariableBinding variableBinding) {
+		if (! variableBinding.isField())
+			return variableBinding.toString();
+		StringBuffer result= new StringBuffer();
+		result.append(variableBinding.getDeclaringClass().getName());
+		result.append(':');
+		result.append(variableBinding.getName());				
+		return result.toString();		
 	}
 
 	private static String asString(ITypeBinding type) {
@@ -67,7 +78,10 @@ public class Bindings {
 	}
 		
 	private static String asString(IMethodBinding method) {
-		StringBuffer result= new StringBuffer(method.getName());
+		StringBuffer result= new StringBuffer();
+		result.append(method.getDeclaringClass().getName());
+		result.append(':');
+		result.append(method.getName());
 		result.append('(');
 		ITypeBinding[] parameters= method.getParameterTypes();
 		int lastComma= parameters.length - 1;
