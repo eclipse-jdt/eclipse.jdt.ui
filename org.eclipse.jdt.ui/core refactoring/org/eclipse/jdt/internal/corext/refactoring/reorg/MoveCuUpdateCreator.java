@@ -34,11 +34,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -83,7 +81,7 @@ public class MoveCuUpdateCreator {
 		return (ICompilationUnit)cu.getOriginalElement();	
 	}
 	
-	public ICompositeChange createUpdateChange(IProgressMonitor pm) throws JavaModelException{
+	public TextChangeManager createChangeManager(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 2);
 		try{
 			TextChangeManager changeManager= new TextChangeManager();
@@ -96,12 +94,13 @@ public class MoveCuUpdateCreator {
 				if (importEdit != null && ! importEdit.isEmpty())
 					changeManager.get(cu).addTextEdit("update imports", importEdit);
 			}
-			return new CompositeChange("reorganize elements", changeManager.getAllChanges());
+			return changeManager;
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}
+		
 	}
 
 	private void addUpdates(TextChangeManager changeManager, IProgressMonitor pm) throws CoreException {
