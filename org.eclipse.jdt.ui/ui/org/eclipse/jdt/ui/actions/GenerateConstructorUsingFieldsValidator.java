@@ -17,87 +17,74 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
+public class GenerateConstructorUsingFieldsValidator implements ISelectionStatusValidator {
 
-class GenerateConstructorUsingFieldsValidator implements ISelectionStatusValidator {
-	static int fEntries;
-	IType fType;
-	GenerateConstructorUsingFieldsSelectionDialog fDialog;
-	List fExistingSigs;
+	private GenerateConstructorUsingFieldsSelectionDialog fDialog;
 
-	GenerateConstructorUsingFieldsValidator(int entries) {
-		super();
+	private final int fEntries;
+
+	private List fSignatures;
+
+	private ITypeBinding fType= null;
+
+	public GenerateConstructorUsingFieldsValidator(GenerateConstructorUsingFieldsSelectionDialog dialog, ITypeBinding type, int entries) {
+		fEntries= entries;
+		fDialog= dialog;
+		fType= type;
+		fSignatures= getExistingConstructorSignatures();
+	}
+
+	public GenerateConstructorUsingFieldsValidator(int entries) {
 		fEntries= entries;
 		fType= null;
 	}
 
-	GenerateConstructorUsingFieldsValidator(int entries, GenerateConstructorUsingFieldsSelectionDialog dialog, IType type) {
-		super();
-		fEntries= entries;
-		fDialog= dialog;
-		fType= type;
-		// Create the potential signature and compare it to the existing ones	
-		fExistingSigs= getExistingConstructorSignatures();
-	}
-
-	public IStatus validate(Object[] selection) {
-		StringBuffer buffer= new StringBuffer();
-		buffer.append('(');
-		// first form the part of the signature corresponding to the super constructor combo choice
-		IMethod chosenSuper= fDialog.getSuperConstructorChoice();
-		try {
-			String superParamTypes[]= chosenSuper.getParameterTypes();
-			for (int i= 0; i < superParamTypes.length; i++) {
-				buffer.append(superParamTypes[i]);
-			}
-
-			// second form the part of the signature corresponding to the fields selected
-			for (int i= 0; i < selection.length; i++) {
-				if (selection[i] instanceof IField) {
-					buffer.append(((IField) selection[i]).getTypeSignature());
-				}
-			}
-		} catch (JavaModelException e) {
-		}
-
-		buffer.append(")V"); //$NON-NLS-1$
-		if (fExistingSigs.contains(buffer.toString())) {
-			return new StatusInfo(IStatus.WARNING, ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.duplicate_constructor")); //$NON-NLS-1$							
-		}
-
-		int fieldCount= countSelectedFields(selection);
-		String message= ActionMessages.getFormattedString("GenerateConstructorUsingFieldsAction.fields_selected", new Object[] { String.valueOf(fieldCount), String.valueOf(fEntries)}); //$NON-NLS-1$
-		return new StatusInfo(IStatus.INFO, message);
-	}
-
-	int countSelectedFields(Object[] selection) {
+	private int countSelectedFields(Object[] selection) {
 		int count= 0;
-		for (int i= 0; i < selection.length; i++) {
-			if (selection[i] instanceof IField)
+		for (int index= 0; index < selection.length; index++) {
+			if (selection[index] instanceof IVariableBinding)
 				count++;
 		}
 		return count;
 	}
 
-	List getExistingConstructorSignatures() {
-		List constructorMethods= new ArrayList();
-		try {
-			IMethod[] methods= fType.getMethods();
-			for (int i= 0; i < methods.length; i++) {
-				IMethod curr= methods[i];
-				if (curr.isConstructor()) {
-					constructorMethods.add(curr.getSignature());
-				}
-			}
-		} catch (JavaModelException e) {
+	private void createSignature(final IMethodBinding constructor, StringBuffer buffer, Object[] selection) {
+		ITypeBinding types[]= constructor.getParameterTypes();
+		for (int index= 0; index < types.length; index++)
+			buffer.append(types[index].getName());
+		if (selection != null) {
+			for (int index= 0; index < selection.length; index++)
+				if (selection[index] instanceof IVariableBinding)
+					buffer.append(((IVariableBinding) selection[index]).getType().getName());
 		}
-		return constructorMethods;
+	}
+
+	private List getExistingConstructorSignatures() {
+		List existing= new ArrayList();
+		IMethodBinding[] methods= fType.getDeclaredMethods();
+		for (int index= 0; index < methods.length; index++) {
+			if (methods[index].isConstructor()) {
+				StringBuffer buffer= new StringBuffer();
+				createSignature(methods[index], buffer, null);
+				existing.add(buffer.toString());
+			}
+		}
+		return existing;
+	}
+
+	public IStatus validate(Object[] selection) {
+		StringBuffer buffer= new StringBuffer();
+		final IMethodBinding constructor= fDialog.getSuperConstructorChoice();
+		createSignature(constructor, buffer, selection);
+		if (fSignatures.contains(buffer.toString()))
+			return new StatusInfo(IStatus.WARNING, ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.duplicate_constructor")); //$NON-NLS-1$							
+		return new StatusInfo(IStatus.INFO, ActionMessages.getFormattedString("GenerateConstructorUsingFieldsAction.fields_selected", new Object[] { String.valueOf(countSelectedFields(selection)), String.valueOf(fEntries)})); //$NON-NLS-1$
 	}
 }

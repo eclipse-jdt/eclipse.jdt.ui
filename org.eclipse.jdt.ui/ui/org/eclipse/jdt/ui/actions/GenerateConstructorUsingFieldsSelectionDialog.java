@@ -36,50 +36,66 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.SourceActionLabelProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 
 class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 
-	int fSuperIndex;
+	class GenerateConstructorUsingFieldsTreeViewerAdapter implements ISelectionChangedListener, IDoubleClickListener {
 
-	int fWidth= 60;
+		public void doubleClick(DoubleClickEvent event) {
+			// Do nothing
+		}
 
-	int fHeight= 18;
+		public void selectionChanged(SelectionChangedEvent event) {
+			IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
+
+			List selectedList= selection.toList();
+			GenerateConstructorUsingFieldsContentProvider cp= (GenerateConstructorUsingFieldsContentProvider) getContentProvider();
+
+			fButtonControls[GenerateNewConstructorUsingFieldsAction.UP_INDEX].setEnabled(cp.canMoveUp(selectedList));
+			fButtonControls[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX].setEnabled(cp.canMoveDown(selectedList));
+		}
+	}
+
+	static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;
+
+	static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
 
 	protected Button[] fButtonControls;
 
 	boolean[] fButtonsEnabled;
 
-	boolean fOmitSuper;
-
-	IMethod[] fSuperConstructors;
-
 	IDialogSettings fGenConstructorSettings;
 
-	GenerateConstructorUsingFieldsTreeViewerAdapter fTreeViewerAdapter;
+	int fHeight= 18;
 
-	static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
-
-	static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;
-
-	final String SETTINGS_SECTION= "GenerateConstructorUsingFieldsSelectionDialog"; //$NON-NLS-1$
-
-	final String OMIT_SUPER= "OmitCallToSuper"; //$NON-NLS-1$
+	boolean fOmitSuper;
 
 	Button fOmitSuperButton;
 
-	public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type, IMethod[] superConstructors) throws JavaModelException {
+	IMethodBinding[] fSuperConstructors;
+
+	int fSuperIndex;
+
+	GenerateConstructorUsingFieldsTreeViewerAdapter fTreeViewerAdapter;
+
+	int fWidth= 60;
+
+	final String OMIT_SUPER= "OmitCallToSuper"; //$NON-NLS-1$
+
+	final String SETTINGS_SECTION= "GenerateConstructorUsingFieldsSelectionDialog"; //$NON-NLS-1$
+
+	public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type, IMethodBinding[] superConstructors) throws JavaModelException {
 		super(parent, labelProvider, contentProvider, editor, type, true);
 		fTreeViewerAdapter= new GenerateConstructorUsingFieldsTreeViewerAdapter();
 
@@ -95,9 +111,50 @@ class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 		fOmitSuper= fGenConstructorSettings.getBoolean(OMIT_SUPER);
 	}
 
-	protected Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
-		Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
-		return visibilityComposite;
+	Composite addSuperClassConstructorChoices(Composite composite) {
+		Label label= new Label(composite, SWT.NONE);
+		label.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.sort_constructor_choices.label")); //$NON-NLS-1$
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		label.setLayoutData(gd);
+
+		SourceActionLabelProvider provider= new SourceActionLabelProvider();
+		final Combo combo= new Combo(composite, SWT.READ_ONLY);
+		for (int i= 0; i < fSuperConstructors.length; i++) {
+			combo.add(provider.getText(fSuperConstructors[i]));
+		}
+
+		// TODO: Can we be a little more intelligent about guessing the super() ?
+		combo.setText(combo.getItem(0));
+		combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		combo.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent e) {
+				fSuperIndex= combo.getSelectionIndex();
+				// Disable omit super checkbox unless default constructor
+				fOmitSuperButton.setEnabled(getSuperConstructorChoice().getParameterTypes().length == 0);
+				updateOKStatus();
+			}
+		});
+
+		return composite;
+	}
+
+	protected void buttonPressed(int buttonId) {
+		super.buttonPressed(buttonId);
+		switch (buttonId) {
+			case UP_BUTTON: {
+				GenerateConstructorUsingFieldsContentProvider contentProvider= (GenerateConstructorUsingFieldsContentProvider) getTreeViewer().getContentProvider();
+				contentProvider.up(getElementList(), getTreeViewer());
+				updateOKStatus();
+				break;
+			}
+			case DOWN_BUTTON: {
+				GenerateConstructorUsingFieldsContentProvider contentProvider= (GenerateConstructorUsingFieldsContentProvider) getTreeViewer().getContentProvider();
+				contentProvider.down(getElementList(), getTreeViewer());
+				updateOKStatus();
+				break;
+			}
+		}
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -166,6 +223,23 @@ class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 		return composite;
 	}
 
+	protected Composite createInsertPositionCombo(Composite composite) {
+		Composite entryComposite= super.createInsertPositionCombo(composite);
+		addVisibilityAndModifiersChoices(entryComposite);
+		return entryComposite;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
+	 */
+	protected Control createLinkControl(Composite composite) {
+		final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("GenerateConstructorDialog.link.text.before"), new String[] { JavaUIMessages.getString("GenerateConstructorDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "constructorcomment", JavaUIMessages.getString("GenerateConstructorDialog.link.tooltip")}, JavaUIMessages.getString("GenerateConstructorDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		data.widthHint= 150; // only expand further if anyone else requires it
+		control.setLayoutData(data);
+		return control;
+	}
+
 	protected Composite createOmitSuper(Composite composite) {
 		Composite omitSuperComposite= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -179,18 +253,18 @@ class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 
 		fOmitSuperButton.addSelectionListener(new SelectionListener() {
 
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+
 			public void widgetSelected(SelectionEvent e) {
 				boolean isSelected= (((Button) e.widget).getSelection());
 				setOmitSuper(isSelected);
 			}
-
-			public void widgetDefaultSelected(SelectionEvent e) {
-				widgetSelected(e);
-			}
 		});
 		fOmitSuperButton.setSelection(isOmitSuper());
 		// Disable omit super checkbox unless default constructor
-		fOmitSuperButton.setEnabled(getSuperConstructorChoice().getNumberOfParameters() == 0);
+		fOmitSuperButton.setEnabled(getSuperConstructorChoice().getParameterTypes().length == 0);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		fOmitSuperButton.setLayoutData(gd);
@@ -226,22 +300,9 @@ class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 		fButtonsEnabled[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX]= defaultState;
 	}
 
-	protected void buttonPressed(int buttonId) {
-		super.buttonPressed(buttonId);
-		switch (buttonId) {
-			case UP_BUTTON: {
-				GenerateConstructorUsingFieldsContentProvider contentProvider= (GenerateConstructorUsingFieldsContentProvider) getTreeViewer().getContentProvider();
-				contentProvider.up(getElementList(), getTreeViewer());
-				updateOKStatus();
-				break;
-			}
-			case DOWN_BUTTON: {
-				GenerateConstructorUsingFieldsContentProvider contentProvider= (GenerateConstructorUsingFieldsContentProvider) getTreeViewer().getContentProvider();
-				contentProvider.down(getElementList(), getTreeViewer());
-				updateOKStatus();
-				break;
-			}
-		}
+	protected Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
+		Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
+		return visibilityComposite;
 	}
 
 	List getElementList() {
@@ -255,58 +316,12 @@ class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 		return elementList;
 	}
 
-	protected Composite createInsertPositionCombo(Composite composite) {
-		Composite entryComposite= super.createInsertPositionCombo(composite);
-		addVisibilityAndModifiersChoices(entryComposite);
-		return entryComposite;
-	}
-
-	Composite addSuperClassConstructorChoices(Composite composite) {
-		Label label= new Label(composite, SWT.NONE);
-		label.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.sort_constructor_choices.label")); //$NON-NLS-1$
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		label.setLayoutData(gd);
-
-		final Combo combo= new Combo(composite, SWT.READ_ONLY);
-		for (int i= 0; i < fSuperConstructors.length; i++) {
-			combo.add(JavaElementLabels.getElementLabel(fSuperConstructors[i], JavaElementLabels.M_PARAMETER_TYPES));
-		}
-
-		// TODO: Can we be a little more intelligent about guessing the super() ?
-		combo.setText(combo.getItem(0));
-		combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		combo.addSelectionListener(new SelectionAdapter() {
-
-			public void widgetSelected(SelectionEvent e) {
-				fSuperIndex= combo.getSelectionIndex();
-				// Disable omit super checkbox unless default constructor
-				fOmitSuperButton.setEnabled(getSuperConstructorChoice().getNumberOfParameters() == 0);
-				updateOKStatus();
-			}
-		});
-
-		return composite;
-	}
-
-	public IMethod getSuperConstructorChoice() {
+	public IMethodBinding getSuperConstructorChoice() {
 		return fSuperConstructors[fSuperIndex];
 	}
 
-	class GenerateConstructorUsingFieldsTreeViewerAdapter implements ISelectionChangedListener, IDoubleClickListener {
-
-		public void selectionChanged(SelectionChangedEvent event) {
-			IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
-
-			List selectedList= selection.toList();
-			GenerateConstructorUsingFieldsContentProvider cp= (GenerateConstructorUsingFieldsContentProvider) getContentProvider();
-
-			fButtonControls[GenerateNewConstructorUsingFieldsAction.UP_INDEX].setEnabled(cp.canMoveUp(selectedList));
-			fButtonControls[GenerateNewConstructorUsingFieldsAction.DOWN_INDEX].setEnabled(cp.canMoveDown(selectedList));
-		}
-
-		public void doubleClick(DoubleClickEvent event) {
-			// Do nothing
-		}
+	public boolean isOmitSuper() {
+		return fOmitSuper;
 	}
 
 	public void setOmitSuper(boolean omitSuper) {
@@ -314,20 +329,5 @@ class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 			fOmitSuper= omitSuper;
 			fGenConstructorSettings.put(OMIT_SUPER, omitSuper);
 		}
-	}
-
-	public boolean isOmitSuper() {
-		return fOmitSuper;
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
-	 */
-	protected Control createLinkControl(Composite composite) {
-		final Control control= createLinkText(composite, new Object[] { JavaUIMessages.getString("GenerateConstructorDialog.link.text.before"), new String[] { JavaUIMessages.getString("GenerateConstructorDialog.link.text.middle"), "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage", "constructorcomment", JavaUIMessages.getString("GenerateConstructorDialog.link.tooltip")}, JavaUIMessages.getString("GenerateConstructorDialog.link.text.after")}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-		final GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-		data.widthHint= 150; // only expand further if anyone else requires it
-		control.setLayoutData(data);
-		return control;
 	}
 }
