@@ -2732,7 +2732,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fProjectionModelUpdater.initialize();
 		
 		if (isShowingOverrideIndicators())
-			installOverrideIndicator(true);
+			installOverrideIndicator(false);
 	}
 
 	/*
@@ -3006,7 +3006,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (affectsOverrideIndicatorAnnotations(event)) {
 				if (isShowingOverrideIndicators()) {
 					if (fOverrideIndicatorManager == null)
-						installOverrideIndicator(false);
+						installOverrideIndicator(true);
 				} else {
 					if (fOverrideIndicatorManager != null)
 						uninstallOverrideIndicator();
@@ -3674,16 +3674,32 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 	}
 
-	protected void installOverrideIndicator(boolean waitForReconcilation) {
+	protected void installOverrideIndicator(boolean provideAST) {
 		uninstallOverrideIndicator();
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		IJavaElement inputElement= getInputJavaElement();
+		final IJavaElement inputElement= getInputJavaElement();
 
 		if (model == null || inputElement == null)
 			return;
 
-		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, true, null);
-		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, ast);		
+		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);
+		
+		if (provideAST) {
+			Job job= new Job("Override indicator installation job") {
+				/*
+				 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+				 * @since 3.0
+				 */
+				protected IStatus run(IProgressMonitor monitor) {
+					CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, true, null);
+					fOverrideIndicatorManager.reconciled(ast, true, monitor);
+					return Status.OK_STATUS;
+				}
+			};
+			job.setPriority(Job.DECORATE);
+			job.setSystem(true);
+			job.schedule();
+		}
 	}
 	
 	/**

@@ -74,7 +74,6 @@ import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
-import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -1489,19 +1488,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installOverrideIndicator(boolean)
 	 * @since 3.0
 	 */
-	protected void installOverrideIndicator(boolean waitForReconcilation) {
-		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		if (!waitForReconcilation)
-			super.installOverrideIndicator(false);
-		else {
-			uninstallOverrideIndicator();
-			IJavaElement inputElement= getInputJavaElement();
-			if (model == null || inputElement == null)
-				return;
-			
-			fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);		
-			addReconcileListener(fOverrideIndicatorManager);
-		}
+	protected void installOverrideIndicator(boolean provideAST) {
+		super.installOverrideIndicator(provideAST);
+		addReconcileListener(fOverrideIndicatorManager);
 	}
 	
 	/*

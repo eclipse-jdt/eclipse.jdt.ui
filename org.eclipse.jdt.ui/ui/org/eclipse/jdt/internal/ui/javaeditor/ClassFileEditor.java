@@ -643,6 +643,15 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	}
 
 	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installOverrideIndicator(boolean)
+	 * @since 3.0
+	 */
+	protected void installOverrideIndicator(boolean provideAST) {
+		super.installOverrideIndicator(true);
+	}
+
+
+	/*
 	 * @see IWorkbenchPart#createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {
