@@ -27,7 +27,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 
 public class ImportRemover {
-
+	/*
+	 * Potential optimization in getImportsToRemove():
+	 * Run ImportReferencesCollector on fRemovedNodes first.
+	 * Only visit rest of AST when removed type refs found.
+	 */
 	private Set/*<String>*/ fAddedImports;
 	private List/*<ASTNode>*/ fRemovedNodes;
 	private final CompilationUnit fRoot;
