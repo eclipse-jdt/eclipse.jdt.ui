@@ -18,23 +18,24 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.IImplementMethodQuery;
+import org.eclipse.jdt.internal.corext.codemanipulation.IOverrideMethodQuery;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
-public class ImplementMethodQuery implements IImplementMethodQuery {
+public class OverrideMethodQuery implements IOverrideMethodQuery {
 
-	private static class ImplementMethodContentProvider implements ITreeContentProvider {
+	private static class OverrideMethodContentProvider implements ITreeContentProvider {
 
 		private Object[] fTypes;
 		private IMethod[] fMethods;
 		private final Object[] fEmpty= new Object[0];
 
 		/**
-		 * Constructor for ImplementMethodContentProvider.
+		 * Constructor for OverrideMethodContentProvider.
 		 */
-		public ImplementMethodContentProvider(IMethod[] methods, Object[] types) {
+		public OverrideMethodContentProvider(IMethod[] methods, Object[] types) {
 			fMethods= methods;
 			fTypes= types;
 		}
@@ -92,11 +93,11 @@ public class ImplementMethodQuery implements IImplementMethodQuery {
 		}
 	}
 	
-	private static class ImplementMethodSorter extends ViewerSorter {
+	private static class OverrideMethodSorter extends ViewerSorter {
 
 		private IType[] fAllTypes;
 
-		public ImplementMethodSorter(ITypeHierarchy typeHierarchy) {
+		public OverrideMethodSorter(ITypeHierarchy typeHierarchy) {
 			IType curr= typeHierarchy.getType();
 			IType[] superTypes= typeHierarchy.getAllSupertypes(curr);
 			fAllTypes= new IType[superTypes.length + 1];
@@ -127,7 +128,8 @@ public class ImplementMethodQuery implements IImplementMethodQuery {
 
 	}
 	
-	private class ImplementMethodValidator implements ISelectionValidator {
+	private class OverrideMethodValidator implements ISelectionValidator {
+				
 		/*
 		 * @see ISelectionValidator#validate(Object[])
 		 */
@@ -141,11 +143,13 @@ public class ImplementMethodQuery implements IImplementMethodQuery {
 			if (count == 0 && !fEmptySelectionAllowed) {
 				return new StatusInfo(IStatus.ERROR, "");
 			}
+			String message;
 			if (count == 1) {
-				return new StatusInfo(IStatus.INFO, count + " method selected.");
+				message= JavaUIMessages.getFormattedString("OverrideMethodQuery.selectioninfo.one", String.valueOf(count));
 			} else {
-				return new StatusInfo(IStatus.INFO, count + " methods selected.");
+				message= JavaUIMessages.getFormattedString("OverrideMethodQuery.selectioninfo.more", String.valueOf(count));
 			}
+			return new StatusInfo(IStatus.INFO, message);
 		}
 
 	}
@@ -153,13 +157,13 @@ public class ImplementMethodQuery implements IImplementMethodQuery {
 	private boolean fEmptySelectionAllowed;
 	private Shell fShell;
 	
-	public ImplementMethodQuery(Shell shell, boolean emptySelectionAllowed) {
+	public OverrideMethodQuery(Shell shell, boolean emptySelectionAllowed) {
 		fShell= shell;
 		fEmptySelectionAllowed= emptySelectionAllowed;
 	}
 
 	/*
-	 * @see IImplementMethodQuery#select(IMethod[], IMethod[], ITypeHierarchy)
+	 * @see IOverrideMethodQuery#select(IMethod[], IMethod[], ITypeHierarchy)
 	 */
 	public IMethod[] select(IMethod[] methods, IMethod[] defaultSelected, ITypeHierarchy typeHierarchy) {
 		HashSet types= new HashSet(methods.length);
@@ -168,7 +172,7 @@ public class ImplementMethodQuery implements IImplementMethodQuery {
 		}
 		Object[] typesArrays= types.toArray();
 		
-		ViewerSorter sorter= new ImplementMethodSorter(typeHierarchy);
+		ViewerSorter sorter= new OverrideMethodSorter(typeHierarchy);
 		sorter.sort(null, typesArrays);
 
 		HashSet expanded= new HashSet(defaultSelected.length); 
@@ -181,12 +185,12 @@ public class ImplementMethodQuery implements IImplementMethodQuery {
 		}
 		
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		ITreeContentProvider cprovider= new ImplementMethodContentProvider(methods, typesArrays);
+		ITreeContentProvider cprovider= new OverrideMethodContentProvider(methods, typesArrays);
 		
 		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(fShell, lprovider, cprovider);
-		dialog.setValidator(new ImplementMethodValidator());
-		dialog.setTitle("Implement Methods");
-		dialog.setMessage("&Select methods to implement:");
+		dialog.setValidator(new OverrideMethodValidator());
+		dialog.setTitle(JavaUIMessages.getString("OverrideMethodQuery.dialog.title"));
+		dialog.setMessage(JavaUIMessages.getString("OverrideMethodQuery.dialog.description"));
 		dialog.setInitialSelections(defaultSelected);
 		dialog.setExpandedElements(expanded.toArray());
 		dialog.setContainerMode(true);

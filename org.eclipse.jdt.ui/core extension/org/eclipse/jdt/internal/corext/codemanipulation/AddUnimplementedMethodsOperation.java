@@ -28,9 +28,9 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 	private boolean fDoSave;
 	private CodeGenerationSettings fSettings;
 	
-	private IImplementMethodQuery fSelectionQuery;
+	private IOverrideMethodQuery fSelectionQuery;
 	
-	public AddUnimplementedMethodsOperation(IType type, CodeGenerationSettings settings, IImplementMethodQuery selectionQuery, boolean save) {
+	public AddUnimplementedMethodsOperation(IType type, CodeGenerationSettings settings, IOverrideMethodQuery selectionQuery, boolean save) {
 		super();
 		fType= type;
 		fDoSave= save;

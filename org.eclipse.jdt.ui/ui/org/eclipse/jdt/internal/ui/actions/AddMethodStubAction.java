@@ -64,7 +64,15 @@ public class AddMethodStubAction extends Action {
 			fParentType= parentType;
 			fSelection= selection;
 			if (parentType != null) {
-				setText(JavaUIMessages.getFormattedString("AddMethodStubAction.detailedlabel", parentType.getElementName())); //$NON-NLS-1$
+				try {
+					if (parentType.isInterface()) {
+						setText(JavaUIMessages.getFormattedString("AddMethodStubAction.detailed.implement", parentType.getElementName())); //$NON-NLS-1$
+					} else {
+						setText(JavaUIMessages.getFormattedString("AddMethodStubAction.detailed.override", parentType.getElementName())); //$NON-NLS-1$
+					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
 			} else {
 				setText(JavaUIMessages.getString("AddMethodStubAction.label")); //$NON-NLS-1$
 			}

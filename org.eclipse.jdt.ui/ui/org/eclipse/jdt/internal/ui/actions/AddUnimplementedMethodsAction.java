@@ -13,7 +13,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -69,7 +68,7 @@ public class AddUnimplementedMethodsAction extends Action {
 				return;
 			}
 			
-			ImplementMethodQuery selectionQuery= new ImplementMethodQuery(shell, false);
+			OverrideMethodQuery selectionQuery= new OverrideMethodQuery(shell, false);
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selectionQuery, false);
 			try {

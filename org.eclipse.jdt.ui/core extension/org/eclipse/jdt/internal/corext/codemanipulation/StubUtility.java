@@ -306,7 +306,7 @@ public class StubUtility {
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
 	 */
 	public static String[] evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, 
-				IImplementMethodQuery selectionQuery, IImportsStructure imports) throws JavaModelException {
+				IOverrideMethodQuery selectionQuery, IImportsStructure imports) throws JavaModelException {
 		List allMethods= new ArrayList();
 		List toImplement= new ArrayList();
 

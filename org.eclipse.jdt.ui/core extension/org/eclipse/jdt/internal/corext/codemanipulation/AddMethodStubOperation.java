@@ -125,6 +125,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						// create method without super call, no overwrite
 						genStubSetting.callSuper= false;
 						genStubSetting.methodOverwrites= false;
+						genStubSetting.noBody= fType.isInterface();
 						content= StubUtility.genStub(fType.getElementName(), curr, genStubSetting, imports);
 					} else {
 						int flags= overwrittenMethod.getFlags();

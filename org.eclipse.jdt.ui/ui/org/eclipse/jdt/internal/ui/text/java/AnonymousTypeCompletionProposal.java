@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.ImplementMethodQuery;
+import org.eclipse.jdt.internal.ui.actions.OverrideMethodQuery;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -130,7 +130,7 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 
 		ITypeHierarchy hierarchy= fDeclaringType.newSupertypeHierarchy(null);
-		ImplementMethodQuery selectionQuery= fDeclaringType.isClass() ? new ImplementMethodQuery(JavaPlugin.getActiveWorkbenchShell(), true) : null;
+		OverrideMethodQuery selectionQuery= fDeclaringType.isClass() ? new OverrideMethodQuery(JavaPlugin.getActiveWorkbenchShell(), true) : null;
 		String[] unimplemented= StubUtility.evalUnimplementedMethods(fDeclaringType, hierarchy, true, settings, selectionQuery, imports);
 		if (unimplemented != null) {
 			for (int i= 0; i < unimplemented.length; i++) {
