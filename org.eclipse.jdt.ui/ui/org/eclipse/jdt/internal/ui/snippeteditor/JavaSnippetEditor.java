@@ -176,8 +176,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			return;
 		}
 		evaluationStarts();
-		fireEvalStateChanged();
-		
+
 		fResultMode= resultMode;
 		buildAndLaunch();
 		
@@ -559,7 +558,6 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 		
 	synchronized void evaluationStarts() {
-
 		if (fThread != null) {
 			try {
 				fThread.resume();
@@ -574,7 +572,6 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		fireEvalStateChanged();
 		showStatus(SnippetMessages.getString("SnippetEditor.evaluating")); //$NON-NLS-1$
 		getSourceViewer().setEditable(false);
-		
 	}
 	
 	/** 
@@ -582,7 +579,6 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	 * evaluating or not.
 	 */
 	protected void setTitleImage() {
-
 		Image image=null;
 		if (fEvaluating) {
 			fOldTitleImage= getTitleImage();
