@@ -766,7 +766,7 @@ public class NLSRefactoring extends Refactoring {
 		 .append("= \"") //$NON-NLS-1$
 		 .append(getResourceBundleName()).append("\";").append(NLSElement.createTagText(1)).append(ld) //$NON-NLS-1$
 		 .append(ld)
-		 .append("\tprivate static fnal ResourceBundle ") //$NON-NLS-1$
+		 .append("\tprivate static final ResourceBundle ") //$NON-NLS-1$
 		 .append(getResourceBundleConstantName())
 		 .append("= ResourceBundle.getBundle(") //$NON-NLS-1$
 		 .append(getBundleStringName())
