@@ -254,7 +254,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			TextRange range= change.getNewTextRange(curr.getTextEdits());
 			if (range != null && range.isValid() && name != null) {
 				ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
-				if (linkedModeProposals != null) {
+				if (linkedModeProposals != null && linkedModeProposals.length > 1) {
 					manager.addPosition(range.getOffset(), range.getLength(), name, linkedModeProposals);
 				} else {
 					manager.addPosition(range.getOffset(), range.getLength(), name);
