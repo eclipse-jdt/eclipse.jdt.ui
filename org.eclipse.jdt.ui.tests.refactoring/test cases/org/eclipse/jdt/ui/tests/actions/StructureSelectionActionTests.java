@@ -58,10 +58,6 @@ public class StructureSelectionActionTests extends RefactoringTest{
 		return TEST_PATH_PREFIX + getRefactoringPath() + getSimpleTestFileName(input);
 	}
 	
-	private String getPassingTestFileName(boolean input){
-		return getTestFileName(input);
-	}
-	
 	//------------
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(input), getFileContents(getTestFileName(input)));
