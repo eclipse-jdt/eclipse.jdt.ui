@@ -136,9 +136,12 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 		
 		boolean isStatic= Modifier.isStatic(bodyDecl.getModifiers()) && !isAnonymous;
+		boolean isConstructorParam= isParamToField && fNodeToAssign.getParent() instanceof MethodDeclaration && ((MethodDeclaration) fNodeToAssign.getParent()).isConstructor();
 		int modifiers= Modifier.PRIVATE;
 		if (isStatic) {
 			modifiers |= Modifier.STATIC;
+		} else if (isConstructorParam) {
+			modifiers |= Modifier.FINAL;
 		}
 		
 		String varName= suggestFieldNames(fTypeBinding, expression, modifiers);
