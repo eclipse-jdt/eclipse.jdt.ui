@@ -39,6 +39,10 @@ public class RenameTypeTests extends RefactoringTest {
 	private static final Class clazz= RenameTypeTests.class;
 	private static final String REFACTORING_PATH= "RenameType/";
 	
+	private static final boolean BUG_79803_core= true;
+	private static final boolean BUG_79860_core= true;
+	private static final boolean BUG_79691_core= true;
+	
 	public RenameTypeTests(String name) {
 		super(name);
 	}
@@ -112,7 +116,7 @@ public class RenameTypeTests extends RefactoringTest {
 	private String[] helper2(String oldName, String newName) throws Exception{
 		return helper2_0(oldName, newName, newName, true);
 	}
-				
+	
 	public void testIllegalInnerClass() throws Exception {
 		helper1();
 	}
@@ -1058,5 +1062,52 @@ public class RenameTypeTests extends RefactoringTest {
 		String definedContent= getFileContents(getTestPath() + "testQualifiedName1/out/build.xml");
 		assertEqualLines("invalid updating build.xml", newContent.toString(), definedContent);
 		
+	}
+	
+	public void testGenerics1() throws Exception {
+		helper2("A", "B");
+	}
+	
+	public void testGenerics2() throws Exception {
+		if (BUG_79803_core) {
+			printTestDisabledMessage("bug 79803");
+			return;
+		}
+		helper2("A", "B");
+	}
+	
+	public void testGenerics3() throws Exception {
+		if (BUG_79860_core)
+			return;
+		
+		helper2("A", "B");
+	}
+	
+	public void testGenerics4() throws Exception {
+		if (BUG_79860_core)
+			return;
+		
+		helper2("A", "B");
+	}
+	
+	public void testEnum1() throws Exception {		
+		if (BUG_79691_core)
+			return;
+		
+		IPackageFragment p2= getRoot().createPackageFragment("p2", true, null);
+		String folder= "p2/";
+		String type= "A";
+		ICompilationUnit cu= createCUfromTestFile(p2, type, folder);
+		
+		helper2("A", "B");
+
+		assertEqualLines("invalid renaming in p2.A", getFileContents(getOutputTestFileName(type, folder)), cu.getSource());
+	}
+
+	public void testEnum2() throws Exception {
+		if (BUG_79691_core)
+			return;
+		
+		helper2("A", "B");
 	}
 }
