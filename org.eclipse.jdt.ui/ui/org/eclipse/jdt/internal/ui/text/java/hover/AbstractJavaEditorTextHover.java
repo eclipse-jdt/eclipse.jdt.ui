@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
@@ -23,6 +25,11 @@ import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommand;
+import org.eclipse.ui.commands.ICommandManager;
+import org.eclipse.ui.commands.IKeySequenceBinding;
+import org.eclipse.ui.keys.KeySequence;
 
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
@@ -30,6 +37,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -46,7 +54,13 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 
 
 	private IEditorPart fEditor;
-	
+	private ICommand fCommand;
+	{
+		ICommandManager commandManager= PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
+		fCommand= commandManager.getCommand(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
+		if (fCommand.isDefined())
+			fCommand= null;
+	}
 
 	/*
 	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
@@ -129,9 +143,46 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 			public IInformationControl createInformationControl(Shell parent) {
 				String affordanceString= null;
 				if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
-					affordanceString= JavaHoverMessages.getString("JavaTextHover.makeStickyHint"); //$NON-NLS-1$
+					affordanceString= getTooltipAffordanceString(); //$NON-NLS-1$
 				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), affordanceString);
 			}
 		};
+	}
+	
+	/**
+	 * Returns the tool tip affordance string.
+	 * 
+	 * @return the affordance string or <code>null</code> if no key binding is defined
+	 * @since 3.0
+	 */
+	private String getTooltipAffordanceString() {
+		KeySequence[] sequences= getKeySequences();
+		if (sequences == null)
+			return null;
+		
+		String keySequence= sequences[0].format();
+		return JavaHoverMessages.getFormattedString("JavaTextHover.makeStickyHint", keySequence); //$NON-NLS-1$
+	}
+
+	/**
+	 * Returns the array of valid key sequence bindings for the
+	 * show tooltip description command.
+	 * 
+	 * @return the array with the {@link KeySequence}s
+	 * 
+	 * @since 3.0
+	 */
+	private KeySequence[] getKeySequences() {
+		if (fCommand != null) {
+			List list= fCommand.getKeySequenceBindings();
+			if (!list.isEmpty()) {
+				KeySequence[] keySequences= new KeySequence[list.size()];
+				for (int i= 0; i < keySequences.length; i++) {
+					keySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
+				}
+				return keySequences;
+			}		
+		}
+		return null;
 	}
 }
