@@ -15,7 +15,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -175,7 +174,7 @@ public class Binding2JavaModel {
 				String[][] qualifiedCandidates= scope.resolveType(Signature.toString(candidate));
 				if (qualifiedCandidates == null || qualifiedCandidates.length == 0l)
 					return false;
-				String packageName= type.getPackage().getName();
+				String packageName= type.getPackage().isUnnamed() ? "" : type.getPackage().getName(); //$NON-NLS-1$
 				String typeName= Bindings.getTypeQualifiedName(type);
 				for (int i= 0; i < qualifiedCandidates.length; i++) {
 					String[] qualifiedCandidate= qualifiedCandidates[i];
