@@ -67,7 +67,7 @@ public class RefactoringScopeFactory {
 			for (int j= 0, length2= classpath.length; j < length2; j++) {
 				IClasspathEntry entry= classpath[j];
 				if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT && path.equals(entry.getPath())) {
-					list.add(getSourceRoots(javaProject));
+					list.addAll(getSourceRoots(javaProject));
 					if (entry.isExported())
 						addReferencingProjects(javaProject.getProject(), list);
 					break;
