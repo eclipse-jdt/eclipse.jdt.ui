@@ -159,7 +159,20 @@ public class CodeCompletionTest extends CoreTests {
 		proposals[0].apply(doc);
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n" + "public class A {\n" + "    public void foo() {\n" + "        Runnable run= new Runnable(){\n" + "        \n" + "            public void run() {\n" + "                //TODO\n" + "                \n" + "            }\n" + "        \n" + "        };\n" + "    }\n" + "}\n" + "");
+		buf.append("package test1;\n" +
+				"public class A {\n" +
+				"    public void foo() {\n" +
+				"        Runnable run= new Runnable(){\n" +
+				"        \n" +
+				"            public void run() {\n" +
+				"                //TODO\n" +
+				"                \n" +
+				"            }\n" +
+				"        \n" +
+				"        };\n" +
+				"    }\n" +
+				"}\n" +
+				"");
 		assertEqualString(doc.get(), buf.toString());
 	}
 
@@ -199,7 +212,20 @@ public class CodeCompletionTest extends CoreTests {
 		proposals[0].apply(doc);
 
 		buf= new StringBuffer();
-		buf.append("package test1;\n" + "public class A {\n" + "    public void foo() {\n" + "        Runnable run= new Runnable() {\n" + "        \n" + "            public void run() {\n" + "                //TODO\n" + "        \n" + "            }\n" + "        \n" + "        };\n" + "    }\n" + "}\n" + "");
+		buf.append("package test1;\n" +
+				"public class A {\n" +
+				"    public void foo() {\n" +
+				"        Runnable run= new Runnable() {\n" +
+				"        \n" +
+				"            public void run() {\n" +
+				"                //TODO\n" +
+				"        \n" +
+				"            }\n" +
+				"        \n" +
+				"        };\n" +
+				"    }\n" +
+				"}\n" +
+				"");
 		assertEqualString(doc.get(), buf.toString());
 	}
 
@@ -273,7 +299,20 @@ public class CodeCompletionTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		String contents= "package test1;\n" + "\n" + "enum Natural {\n" + "	ONE,\n" + "	TWO,\n" + "	THREE\n" + "}\n" + "\n" + "public class Completion {\n" + "    \n" + "    void foomethod() {\n" + "        Natu//here\n" + "    }\n" + "}\n";
+		String contents= "package test1;\n" +
+				"\n" +
+				"enum Natural {\n" +
+				"	ONE,\n" +
+				"	TWO,\n" +
+				"	THREE\n" +
+				"}\n" +
+				"\n" +
+				"public class Completion {\n" +
+				"    \n" +
+				"    void foomethod() {\n" +
+				"        Natu//here\n" +
+				"    }\n" +
+				"}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("Completion.java", contents, false, null);
 
 		String str= "//here";
@@ -301,7 +340,20 @@ public class CodeCompletionTest extends CoreTests {
 		IDocument doc= new Document(contents);
 		proposal.apply(doc);
 
-		String result= "package test1;\n" + "\n" + "enum Natural {\n" + "	ONE,\n" + "	TWO,\n" + "	THREE\n" + "}\n" + "\n" + "public class Completion {\n" + "    \n" + "    void foomethod() {\n" + "        Natural//here\n" + "    }\n" + "}\n";
+		String result= "package test1;\n" +
+				"\n" +
+				"enum Natural {\n" +
+				"	ONE,\n" +
+				"	TWO,\n" +
+				"	THREE\n" +
+				"}\n" +
+				"\n" +
+				"public class Completion {\n" +
+				"    \n" +
+				"    void foomethod() {\n" +
+				"        Natural//here\n" +
+				"    }\n" +
+				"}\n";
 
 		assertEqualString(doc.get(), result);
 	}
@@ -441,7 +493,15 @@ public class CodeCompletionTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		String contents= "package test1;\n" + "\n" + "public class Completion {\n" + "    \n" + "    void foomethod() {\n" + "        Runnable run;\n" + "        run.//here\n" + "    }\n" + "}\n";
+		String contents= "package test1;\n" + 
+				"\n" +
+				"public class Completion {\n" +
+				"    \n" +
+				"    void foomethod() {\n" +
+				"        Runnable run;\n" +
+				"        run.//here\n" +
+				"    }\n" +
+				"}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("Completion.java", contents, false, null);
 
 		String str= "//here";
@@ -485,7 +545,17 @@ public class CodeCompletionTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		String contents= "package test1;\n" + "\n" + "public class Completion {\n" + "    \n" + "    void foomethod() {\n" + "        int intVal=5;\n" + "        long longVal=3;\n" + "        Runnable run;\n" + "        run.//here\n" + "    }\n" + "}\n";
+		String contents= "package test1;\n" +
+				 "\n" +
+				 "public class Completion {\n" +
+				 "    \n" +
+				 "    void foomethod() {\n" +
+				 "        int intVal=5;\n" +
+				 "        long longVal=3;\n" +
+				 "        Runnable run;\n" +
+				 "        run.//here\n" +
+				 "    }\n" +
+				 "}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("Completion.java", contents, false, null);
 
 		String str= "//here";
@@ -527,7 +597,17 @@ public class CodeCompletionTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		String contents= "package test1;\n" + "\n" + "public class Completion {\n" + "    \n" + "    void foomethod() {\n" + "        int i=5;\n" + "        long l=3;\n" + "        Runnable run;\n" + "        run.//here\n" + "    }\n" + "}\n";
+		String contents= "package test1;\n" +
+				 "\n" +
+				 "public class Completion {\n" +
+				 "    \n" +
+				 "    void foomethod() {\n" +
+				 "        int i=5;\n" +
+				 "        long l=3;\n" +
+				 "        Runnable run;\n" +
+				 "        run.//here\n" +
+				 "    }\n" +
+				 "}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("Completion.java", contents, false, null);
 
 		String str= "//here";
@@ -569,7 +649,14 @@ public class CodeCompletionTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		String contents= "package test1;\n" + "\n" + "public class Completion {\n" + "    \n" + "    void foomethod() {\n" + "        this.foo//here\n" + "    }\n" + "}\n";
+		String contents= "package test1;\n" +
+				 "\n" +
+				 "public class Completion {\n" +
+				 "    \n" +
+				 "    void foomethod() {\n" +
+				 "        this.foo//here\n" +
+				 "    }\n" +
+				 "}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("Completion.java", contents, false, null);
 
 		String str= "//here";
@@ -598,7 +685,14 @@ public class CodeCompletionTest extends CoreTests {
 		IDocument doc= new Document(contents);
 		proposal.apply(doc);
 
-		String result= "package test1;\n" + "\n" + "public class Completion {\n" + "    \n" + "    void foomethod() {\n" + "        this.foomethod()//here\n" + "    }\n" + "}\n";
+		String result= "package test1;\n" +
+				 "\n" +
+				 "public class Completion {\n" +
+				 "    \n" +
+				 "    void foomethod() {\n" +
+				 "        this.foomethod()//here\n" +
+				 "    }\n" +
+				 "}\n";
 
 		assertEqualString(doc.get(), result);
 	}
