@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrectionProposal {
 
+	private boolean fAnnotations= true;
 	private ASTNode fTypeNode;
 	private IMethodBinding[] fMethodsToOverride;
 
@@ -46,6 +47,10 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		
 		fTypeNode= typeNode;
 		fMethodsToOverride= null;
+	}
+	
+	public void setGenerateAnnotations(boolean generate) {
+		fAnnotations= generate;
 	}
 	
 	/* (non-Javadoc)
@@ -78,7 +83,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		}
 		
 		for (int i= 0; i < methods.length; i++) {
-			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, getImportRewrite(), ast, methods[i], binding.getName(), settings, annotations);
+			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, getImportRewrite(), ast, methods[i], binding.getName(), settings, fAnnotations && annotations);
 			listRewrite.insertLast(newMethodDecl, null);
 		}
 		return rewrite;
