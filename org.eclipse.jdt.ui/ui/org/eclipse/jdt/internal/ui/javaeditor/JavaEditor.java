@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
@@ -2806,9 +2807,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 		
 		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions);
-		fOccurrencesFinderJob.setPriority(Job.DECORATE);
-		fOccurrencesFinderJob.setSystem(true);
-		fOccurrencesFinderJob.schedule();
+		//fOccurrencesFinderJob.setPriority(Job.DECORATE);
+		//fOccurrencesFinderJob.setSystem(true);
+		//fOccurrencesFinderJob.schedule();
+		((OccurrencesFinderJob) fOccurrencesFinderJob).run(new NullProgressMonitor());
+		
 	}
 	
 	protected void installOccurrencesFinder() {
