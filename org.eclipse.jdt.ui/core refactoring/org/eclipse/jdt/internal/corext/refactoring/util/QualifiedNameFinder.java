@@ -14,29 +14,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
+import org.eclipse.search.internal.core.text.MatchLocator;
+import org.eclipse.search.internal.core.text.TextSearchEngine;
+import org.eclipse.search.internal.core.text.TextSearchScope;
 import org.eclipse.text.edits.ReplaceEdit;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
-import org.eclipse.search.internal.core.text.MatchLocator;
-import org.eclipse.search.internal.core.text.TextSearchEngine;
-import org.eclipse.search.internal.core.text.TextSearchScope;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class QualifiedNameFinder {
@@ -98,9 +96,9 @@ public class QualifiedNameFinder {
 			monitor= new NullProgressMonitor();
 		ResultCollector collector= new ResultCollector(result, newValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
-		engine.search(ResourcesPlugin.getWorkspace(), 
-			createScope(filePatterns, root), false,
-			collector, new MatchLocator(pattern, true, false)); //$NON-NLS-1$
+		boolean allowNIOBuffers= false;
+		engine.search(createScope(filePatterns, root), false,
+			collector, new MatchLocator(pattern, true, false), allowNIOBuffers);
 	}
 	
 	private static TextSearchScope createScope(String filePatterns, IProject root) {
