@@ -169,7 +169,10 @@ public class Selection {
 	
 	public boolean liesOutside(ASTNode node) {
 		int nodeStart= node.getStartPosition();
-		return nodeStart + node.getLength() <= fStart || fExclusiveEnd <= nodeStart;
+		int nodeEnd= nodeStart + node.getLength();
+		boolean nodeBeforeSelection= nodeEnd < fStart;
+		boolean selectionBeforeNode= fExclusiveEnd < nodeStart;
+		return nodeBeforeSelection || selectionBeforeNode;
 	}
 	
 //	public boolean intersects(int sourceStart, int sourceEnd) {

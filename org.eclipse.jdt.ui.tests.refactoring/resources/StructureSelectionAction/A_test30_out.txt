@@ -1,2 +1,1 @@
-void m(int t){
-	}
+m

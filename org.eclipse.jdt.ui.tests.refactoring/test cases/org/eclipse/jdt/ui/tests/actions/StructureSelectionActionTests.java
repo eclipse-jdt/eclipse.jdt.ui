@@ -265,12 +265,12 @@ public class StructureSelectionActionTests extends RefactoringTest{
 	}
 
 	public void test30() throws Exception{
-//		printTestDisabledMessage("regression test for bug#22082");
+//		printTestDisabledMessage("regression test for bug#80345 (not 22082)");
 		helperSelectUp(3, 10, 3, 10);
 	}
 	
 	public void test31() throws Exception{
-//		printTestDisabledMessage("regression test for bug#22082");
+//		printTestDisabledMessage("regression test for bug#80345 (not 22082)");
 		helperSelectUp(3, 10, 3, 10);
 	}
 
