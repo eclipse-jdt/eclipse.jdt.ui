@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import org.eclipse.swt.SWT;
@@ -83,22 +84,25 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 */
 	class FilterActionMenuContributionItem extends ContributionItem {
 
-		private int fId;
+		private int fItemNumber;
 		private boolean fState;
-		private FilterDescriptor fFilterDescriptor;
+		private String fFilterId;
+		private String fFilterName;
 		private CustomFiltersActionGroup fActionGroup;
 
 		/**
 		 * Constructor for FilterActionMenuContributionItem.
 		 */
-		public FilterActionMenuContributionItem(int id, CustomFiltersActionGroup actionGroup, FilterDescriptor filterDescriptor, boolean state) {
-			super(getFilterActionMenuItemId(id));
+		public FilterActionMenuContributionItem(CustomFiltersActionGroup actionGroup, String filterId, String filterName, boolean state, int itemNumber) {
+			super(filterId);
 			Assert.isNotNull(actionGroup);
-			Assert.isNotNull(filterDescriptor);
-			fId= id;
+			Assert.isNotNull(filterId);
+			Assert.isNotNull(filterName);
 			fActionGroup= actionGroup;
-			fFilterDescriptor= filterDescriptor;
+			fFilterId= filterId;
+			fFilterName= filterName;
 			fState= state;
+			fItemNumber= itemNumber;
 		}
 
 		/*
@@ -106,7 +110,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		 */
 		public void fill(Menu menu, int index) {
 			MenuItem mi= new MenuItem(menu, SWT.CHECK, index);
-			mi.setText("&" + fId + " " + fFilterDescriptor.getName());  //$NON-NLS-1$  //$NON-NLS-2$
+			mi.setText("&" + fItemNumber + " " + fFilterName);  //$NON-NLS-1$  //$NON-NLS-2$
 			/*
 			 * XXX: Don't set the image - would look bad because other menu items don't provide image
 			 * XXX: Get working set specific image name from XML - would need to cache icons
@@ -116,7 +120,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			mi.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					fState= !fState;
-					fActionGroup.setFilter(fFilterDescriptor, fState);
+					fActionGroup.setFilter(fFilterId, fState);
 				}
 			});
 		}
@@ -133,6 +137,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private static final String TAG_USER_DEFINED_PATTERNS_ENABLED= "userDefinedPatternsEnabled"; //$NON-NLS-1$
 	private static final String TAG_USER_DEFINED_PATTERNS= "userDefinedPatterns"; //$NON-NLS-1$
 	private static final String TAG_XML_DEFINED_FILTERS= "xmlDefinedFilters"; //$NON-NLS-1$
+	private static final String TAG_LRU_FILTERS = "lastRecentlyUsedFilters"; //$NON-NLS-1$
 
 	private static final String TAG_CHILD= "child"; //$NON-NLS-1$
 	private static final String TAG_PATTERN= "pattern"; //$NON-NLS-1$
@@ -142,7 +147,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private static final String SEPARATOR= ",";  //$NON-NLS-1$
 
 	private static final int MAX_FILTER_MENU_ENTRIES= 3;
-	private static final String RECENT_FILTERS_GROUP_ID= "recentFilters"; //$NON-NLS-1$
+	private static final String RECENT_FILTERS_GROUP_NAME= "recentFiltersGroup"; //$NON-NLS-1$
 
 	private IViewPart fPart;
 	private StructuredViewer fViewer;
@@ -154,18 +159,11 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private boolean fUserDefinedPatternsEnabled;
 	private String[] fUserDefinedPatterns;
 	/**
-	 * Recently changed filters stack with oldest on top (i.e. at the end).
+	 * Recently changed filter Ids stack with oldest on top (i.e. at the end).
 	 *
 	 * @since 3.0
 	 */
-	private Stack fRecentlyChangedFiltersStack; 
-	/**
-	 * Number of filter menu items when the view menu
-	 * was last shown.
-	 * 
-	 * @since 3.0
-	 */
-	private int fLRUMenuCount;
+	private Stack fLRUFilterIdsStack; 
 	/**
 	 * Handle to menu manager to dynamically update
 	 * the last recently used filters.
@@ -180,6 +178,13 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 * @since 3.0
 	 */
 	private IMenuListener fMenuListener;
+	/**
+	 * Filter Ids used in the last view menu invocation.
+	 * 
+	 * @since 3.0
+	 */
+	private String[] fFilterIdsUsedInLastViewMenu;
+	private HashMap fFilterDescriptorMap;
 	
 	/**
 	 * Creates a new <code>CustomFiltersActionGroup</code>.
@@ -193,7 +198,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fPart= part;
 		fViewer= viewer;
 
-		fRecentlyChangedFiltersStack= new Stack();
+		fLRUFilterIdsStack= new Stack();
 
 		initializeWithPluginContributions();
 		initializeWithViewDefaults();
@@ -201,7 +206,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		installFilters();
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void fillActionBars(IActionBars actionBars) {
@@ -215,10 +220,10 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 * @param filterDescriptor
 	 * @param state
 	 */
-	private void setFilter(FilterDescriptor filterDescriptor, boolean state) {
-		fEnabledFilterIds.put(filterDescriptor.getId(), new Boolean(state));
-		fRecentlyChangedFiltersStack.pop();
-		fRecentlyChangedFiltersStack.add(0, filterDescriptor);
+	private void setFilter(String filterId, boolean state) {
+		fEnabledFilterIds.put(filterId, new Boolean(state));
+		fLRUFilterIdsStack.pop();
+		fLRUFilterIdsStack.add(0, filterId);
 		updateViewerFilters(true);
 	}
 	
@@ -262,16 +267,16 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		
 		int length= Math.min(changeHistory.size(), MAX_FILTER_MENU_ENTRIES);
 		for (int i= 0; i < length; i++)
-			oldestFirstStack.push(changeHistory.pop());
+			oldestFirstStack.push(((FilterDescriptor)changeHistory.pop()).getId());
 		
-		length= Math.min(fRecentlyChangedFiltersStack.size(), MAX_FILTER_MENU_ENTRIES - oldestFirstStack.size());
+		length= Math.min(fLRUFilterIdsStack.size(), MAX_FILTER_MENU_ENTRIES - oldestFirstStack.size());
 		int NEWEST= 0;
 		for (int i= 0; i < length; i++) {
-			Object filter= fRecentlyChangedFiltersStack.remove(NEWEST);
+			Object filter= fLRUFilterIdsStack.remove(NEWEST);
 			if (!oldestFirstStack.contains(filter))
 				oldestFirstStack.push(filter);
 		}
-		fRecentlyChangedFiltersStack= oldestFirstStack;
+		fLRUFilterIdsStack= oldestFirstStack;
 	}
 	
 	private boolean areUserDefinedPatternsEnabled() {
@@ -286,8 +291,13 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 
 	private void fillViewMenu(IMenuManager viewMenu) {
+		/*
+		 * Don't change the separator group name.
+		 * Using this name ensures that other filters
+		 * get contributed to the same group.
+		 */
 		viewMenu.add(new Separator("filters")); //$NON-NLS-1$
-		viewMenu.add(new GroupMarker(RECENT_FILTERS_GROUP_ID));
+		viewMenu.add(new GroupMarker(RECENT_FILTERS_GROUP_NAME));
 		viewMenu.add(new ShowFilterDialogAction());
 
 		fMenuManager= viewMenu;
@@ -301,25 +311,31 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 
 	private void removePreviousLRUFilterActions(IMenuManager mm) {
-		for (int i= 0; i < fLRUMenuCount; i++)
-			mm.remove(getFilterActionMenuItemId(i));
+		if (fFilterIdsUsedInLastViewMenu == null)
+			return;
+		
+		for (int i= 0; i < fFilterIdsUsedInLastViewMenu.length; i++)
+			mm.remove(fFilterIdsUsedInLastViewMenu[i]);
 	}
 
-	private String getFilterActionMenuItemId(int id) {
-		return FilterActionMenuContributionItem.class.getName() + "." + id;  //$NON-NLS-1$
-	}
-	
 	private void addLRUFilterActions(IMenuManager mm) {
-		SortedSet sortedFilters= new TreeSet(fRecentlyChangedFiltersStack);
-		FilterDescriptor[] recentlyChangedFilters= (FilterDescriptor[])sortedFilters.toArray(new FilterDescriptor[sortedFilters.size()]);
-		
-		for (int i= 0; i < recentlyChangedFilters.length; i++) {
-			String id= recentlyChangedFilters[i].getId();
-			boolean state= fEnabledFilterIds.containsKey(id) && ((Boolean)fEnabledFilterIds.get(id)).booleanValue();
-			IContributionItem item= new FilterActionMenuContributionItem(i, this, recentlyChangedFilters[i], state);
-			mm.insertBefore(RECENT_FILTERS_GROUP_ID, item);
+		if (fLRUFilterIdsStack.isEmpty()) {
+			fFilterIdsUsedInLastViewMenu= null;
+			return;
 		}
-		fLRUMenuCount= recentlyChangedFilters.length;
+		
+		SortedSet sortedFilters= new TreeSet(fLRUFilterIdsStack);
+		String[] recentlyChangedFilterIds= (String[])sortedFilters.toArray(new String[sortedFilters.size()]);
+		
+		fFilterIdsUsedInLastViewMenu= new String[recentlyChangedFilterIds.length];
+		for (int i= 0; i < recentlyChangedFilterIds.length; i++) {
+			String id= recentlyChangedFilterIds[i];
+			fFilterIdsUsedInLastViewMenu[i]= id;
+			boolean state= fEnabledFilterIds.containsKey(id) && ((Boolean)fEnabledFilterIds.get(id)).booleanValue();
+			FilterDescriptor filterDesc= (FilterDescriptor)fFilterDescriptorMap.get(id);
+			IContributionItem item= new FilterActionMenuContributionItem(this, id, filterDesc.getName(), state, i+1);
+			mm.insertBefore(RECENT_FILTERS_GROUP_NAME, item);
+		}
 	}
 
 	/*
@@ -337,6 +353,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 		String viewId= fPart.getViewSite().getId();		
 		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(viewId);
+		fFilterDescriptorMap= new HashMap(filterDescs.length);
 		fEnabledFilterIds= new HashMap(filterDescs.length);
 		for (int i= 0; i < filterDescs.length; i++) {
 			String id= filterDescs[i].getId();
@@ -344,6 +361,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			if (fEnabledFilterIds.containsKey(id))
 				JavaPlugin.logErrorMessage("WARNING: Duplicate id for extension-point \"org.eclipse.jdt.ui.javaElementFilters\""); //$NON-NLS-1$
 			fEnabledFilterIds.put(id, isEnabled);
+			fFilterDescriptorMap.put(id, filterDescs[i]);
 		}
 	}
 
@@ -445,6 +463,14 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			fEnabledFilterIds.put(id, isEnabled);
 		}
 		
+		fLRUFilterIdsStack.clear();
+		String lruFilterIds= store.getString(TAG_LRU_FILTERS);
+		StringTokenizer tokenizer= new StringTokenizer(lruFilterIds, SEPARATOR);
+		while (tokenizer.hasMoreTokens()) {
+			String id= tokenizer.nextToken();
+			if (fFilterDescriptorMap.containsKey(id) && !fLRUFilterIdsStack.contains(id));
+				fLRUFilterIdsStack.push(id);
+		}
 	}
 
 	private void storeViewDefaults() {
@@ -464,6 +490,14 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			boolean isEnabled= ((Boolean)entry.getValue()).booleanValue();
 			store.setValue(id, isEnabled);
 		}
+
+		StringBuffer buf= new StringBuffer(fLRUFilterIdsStack.size() * 20);
+		iter= fLRUFilterIdsStack.iterator();
+		while (iter.hasNext()) {
+			buf.append((String)iter.next());
+			buf.append(SEPARATOR);
+		}
+		store.setValue(TAG_LRU_FILTERS, buf.toString());
 	}
 	
 	private String getPreferenceKey(String tag) {
@@ -481,10 +515,11 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		IMemento customFilters= memento.createChild(TAG_CUSTOM_FILTERS);
 		customFilters.putString(TAG_USER_DEFINED_PATTERNS_ENABLED, new Boolean(fUserDefinedPatternsEnabled).toString());
 		saveUserDefinedPatterns(customFilters);
-		saveXmlDefinedPatterns(customFilters);
+		saveXmlDefinedFilters(customFilters);
+		saveLRUFilters(customFilters);
 	}
 
-	private void saveXmlDefinedPatterns(IMemento memento) {
+	private void saveXmlDefinedFilters(IMemento memento) {
 		if(fEnabledFilterIds != null && !fEnabledFilterIds.isEmpty()) {
 			IMemento xmlDefinedFilters= memento.createChild(TAG_XML_DEFINED_FILTERS);
 			Iterator iter= fEnabledFilterIds.entrySet().iterator();
@@ -495,6 +530,24 @@ public class CustomFiltersActionGroup extends ActionGroup {
 				IMemento child= xmlDefinedFilters.createChild(TAG_CHILD);
 				child.putString(TAG_FILTER_ID, id);
 				child.putString(TAG_IS_ENABLED, isEnabled.toString());
+			}
+		}
+	}
+	/**
+	 * Stores the last recently used filter Ids into
+	 * the given memento
+	 * 
+	 * @param memento the memento into which to store the LRU filter Ids
+	 * @since 3.0
+	 */
+	private void saveLRUFilters(IMemento memento) {
+		if(fLRUFilterIdsStack != null && !fLRUFilterIdsStack.isEmpty()) {
+			IMemento lruFilters= memento.createChild(TAG_LRU_FILTERS);
+			Iterator iter= fLRUFilterIdsStack.iterator();
+			while (iter.hasNext()) {
+				String id= (String)iter.next();
+				IMemento child= lruFilters.createChild(TAG_CHILD);
+				child.putString(TAG_FILTER_ID, id);
 			}
 		}
 	}
@@ -530,6 +583,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fUserDefinedPatternsEnabled= Boolean.valueOf(userDefinedPatternsEnabled).booleanValue();
 		restoreUserDefinedPatterns(customFilters);
 		restoreXmlDefinedFilters(customFilters);
+		restoreLRUFilters(customFilters);
 		
 		updateViewerFilters(false);
 	}
@@ -548,13 +602,26 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 
 	private void restoreXmlDefinedFilters(IMemento memento) {
-		IMemento xmlDefinedPatterns= memento.getChild(TAG_XML_DEFINED_FILTERS);
-		if(xmlDefinedPatterns != null) {
-			IMemento[] children= xmlDefinedPatterns.getChildren(TAG_CHILD);
+		IMemento xmlDefinedFilters= memento.getChild(TAG_XML_DEFINED_FILTERS);
+		if(xmlDefinedFilters != null) {
+			IMemento[] children= xmlDefinedFilters.getChildren(TAG_CHILD);
 			for (int i= 0; i < children.length; i++) {
 				String id= children[i].getString(TAG_FILTER_ID);
 				Boolean isEnabled= new Boolean(children[i].getString(TAG_IS_ENABLED));
 				fEnabledFilterIds.put(id, isEnabled);
+			}
+		}
+	}
+
+	private void restoreLRUFilters(IMemento memento) {
+		IMemento lruFilters= memento.getChild(TAG_LRU_FILTERS);
+		fLRUFilterIdsStack.clear();
+		if(lruFilters != null) {
+			IMemento[] children= lruFilters.getChildren(TAG_CHILD);
+			for (int i= 0; i < children.length; i++) {
+				String id= children[i].getString(TAG_FILTER_ID);
+				if (fFilterDescriptorMap.containsKey(id) && !fLRUFilterIdsStack.contains(id))
+					fLRUFilterIdsStack.push(id);
 			}
 		}
 	}
