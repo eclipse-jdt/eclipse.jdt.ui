@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -48,8 +50,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
-
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.JavaConventions;
 
@@ -348,6 +348,7 @@ public class ChangeParametersControl extends Composite {
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				int index= fTableViewer.getTable().getSelectionIndices()[0];
 				Assert.isTrue(areAllSelectedNew());
 				ParameterInfo[] selected= getSelectedItems();
 				for (int i= 0; i < selected.length; i++) {
@@ -355,8 +356,15 @@ public class ChangeParametersControl extends Composite {
 				}
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
+				int itemCount= fTableViewer.getTable().getItemCount();
+				if (itemCount != 0){
+					if (index < itemCount)
+						fTableViewer.getTable().setSelection(index);
+					else	
+						fTableViewer.getTable().setSelection(itemCount - 1);
+				}
 				fListener.parameterListChanged();
-				button.setEnabled(false);
+				updateButtonsEnabledState();
 			}
 		});	
 		return button;
@@ -396,8 +404,6 @@ public class ChangeParametersControl extends Composite {
 		return new IInputValidator(){
 	        public String isValid(String newText) {
 	        	if (newText.equals("")) //$NON-NLS-1$
-	        		return ""; //$NON-NLS-1$
-	        	if (newText.equals(oldName))
 	        		return ""; //$NON-NLS-1$
 	        	IStatus status= JavaConventions.validateFieldName(newText);
 	        	if (status.getSeverity() == IStatus.ERROR)
