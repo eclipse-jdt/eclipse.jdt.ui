@@ -310,7 +310,8 @@ public class CompareResultDialog extends Dialog {
 	    compareConfiguration.setLeftEditable(false);
 	    compareConfiguration.setRightLabel(JUnitMessages.getString("CompareResultDialog.actualLabel"));	 //$NON-NLS-1$
 	    compareConfiguration.setRightEditable(false);
-	    
+	    compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, new Boolean(false));
+
 	    fViewer= new CompareResultMergeViewer(parent, SWT.NONE, compareConfiguration);
 	    fViewer.setInput(new DiffNode( 
         new CompareElement(fExpected), 
