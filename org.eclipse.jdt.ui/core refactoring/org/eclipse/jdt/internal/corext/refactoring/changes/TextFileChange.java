@@ -57,7 +57,11 @@ public class TextFileChange extends TextChange  {
 			return new UndoTextFileChange(getName(), fFile, changeKind, undo);
 		}
 		public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
-			return Checks.validateModifiesFiles(new IFile[] {fFile});
+			RefactoringStatus result= Checks.validateModifiesFiles(new IFile[] {fFile});
+			if (result.hasFatalError())
+				return result;
+			context.checkUnsavedFile(result, fFile);
+			return result;
 		}
 		public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
 			if (!isActive()) {
