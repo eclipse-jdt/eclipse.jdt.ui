@@ -185,6 +185,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				IDocument d= createCompilationUnitDocument(c);
 				IAnnotationModel m= createCompilationUnitAnnotationModel(element);
 				_FileSynchronizer f= new _FileSynchronizer(input);
+				f.install();
 				BufferSynchronizer b= new BufferSynchronizer(d, c);
 				b.install();
 				

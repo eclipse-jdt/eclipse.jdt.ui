@@ -136,20 +136,38 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	public void doSave(IProgressMonitor progressMonitor) {
 		
-		if (getDocumentProvider() == null)
+		IDocumentProvider p= getDocumentProvider();
+		if (p == null)
 			return;
 			
-		getStatusLineManager().setErrorMessage("");
-		
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-		
-		if (unit != null) {
-			synchronized (unit) { 
-				performSaveOperation(createSaveOperation(false), progressMonitor); 
+		if (p.isDeleted(getEditorInput())) {
+			
+			if (isSaveAsAllowed()) {
+				
+				doSaveAs();
+			
+			} else {
+				
+				Shell shell= getSite().getShell();
+				String title= getResourceString("Error.save.deleted.title");
+				String msg= getResourceString("Error.save.deleted.message");
+				MessageDialog.openError(shell, title, msg);
 			}
-		} else 
-			performSaveOperation(createSaveOperation(false), progressMonitor);
+			
+		} else {	
+			
+			getStatusLineManager().setErrorMessage("");
+			
+			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+			ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
+			
+			if (unit != null) {
+				synchronized (unit) { 
+					performSaveOperation(createSaveOperation(false), progressMonitor); 
+				}
+			} else 
+				performSaveOperation(createSaveOperation(false), progressMonitor);
+		}
 	}
 	
 	/**
@@ -287,18 +305,22 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IFolder folder= workspace.getRoot().getFolder(folderPath);
-		final IPackageFragment fragment= (IPackageFragment) JavaCore.create(folder);
+		final Object fragment= JavaCore.create(folder);
 		
 		IFile file= workspace.getRoot().getFile(filePath);
 		final FileEditorInput newInput= new FileEditorInput(file);
 		
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(final IProgressMonitor monitor) throws CoreException {
-				if (fragment != null) {
+				if (fragment instanceof IPackageFragment) {
+					
+					IPackageFragment pkgf= (IPackageFragment) fragment;
+					
 					// copy to another package
 					IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 					ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-					unit.copy(fragment, null, fileName, false, monitor);
+					unit.copy(pkgf, null, fileName, false, monitor);
+					
 				} else {
 					// copy to another directory
 					getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()), false);
