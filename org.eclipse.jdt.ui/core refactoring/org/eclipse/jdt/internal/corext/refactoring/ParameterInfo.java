@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 public class ParameterInfo {
 	
 	private static final int INDEX_FOR_ADDED= -1;
@@ -19,6 +21,7 @@ public class ParameterInfo {
 	private String fDefaultValue;
 	private String fNewName;
 	private Object fData;
+	private boolean fIsDeleted;
 	
 	public ParameterInfo(String type, String name, int index){
 		fType= type;
@@ -26,10 +29,20 @@ public class ParameterInfo {
 		fNewName= name;
 		fOldIndex= index;
 		fDefaultValue= "";
+		fIsDeleted= false;
 	}
 
 	public static ParameterInfo createInfoForAddedParameter(){
 		return new ParameterInfo("", "", INDEX_FOR_ADDED);
+	}
+	
+	public boolean isDeleted(){
+		return fIsDeleted;
+	}
+	
+	public void markAsDeleted(){
+		Assert.isTrue(! isAdded());//added param infos should be simply removed from the list
+		fIsDeleted= true;
 	}
 	
 	public boolean isAdded(){
