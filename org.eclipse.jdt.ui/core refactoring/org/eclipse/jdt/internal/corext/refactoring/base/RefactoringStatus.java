@@ -345,6 +345,14 @@ public class RefactoringStatus {
 		return fEntries;
 	}
 
+	/**
+	 * Returns the <tt>RefactoringStatusEntry</tt> at the specified index.
+	 * 	 * @param index of entry to return	 * @return the enrty at the specified index
+	 *      * @throws IndexOutOfBoundsException if the index is out of range
+	 */
+	public RefactoringStatusEntry getEntry(int index) {
+		return (RefactoringStatusEntry)fEntries.get(index);
+	}
 
 	/**
 	 * Returns the first entry which severity is equal or greater than the given

@@ -5,7 +5,10 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -20,12 +23,18 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -35,8 +44,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MethodBlock;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SimpleNameRenamer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -46,9 +57,13 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -77,6 +92,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private boolean fThrowRuntimeExceptions;
 	private int fMethodFlags= Modifier.PROTECTED;
 	private List fParameterInfos;
+	private Set fUsedNames;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
 	private static final String BLANK= " "; //$NON-NLS-1$
@@ -85,6 +101,55 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private static final String SEMICOLON= ";"; //$NON-NLS-1$
 	private static final String COMMA_BLANK= ", "; //$NON-NLS-1$
 	private static final String STATIC= "static"; //$NON-NLS-1$
+	
+
+	private static class UsedNamesCollector extends ASTVisitor {
+		private Set result= new HashSet();
+		private Set fIgnore= new HashSet();
+		public static Set perform(ASTNode[] nodes) {
+			UsedNamesCollector collector= new UsedNamesCollector();
+			for (int i= 0; i < nodes.length; i++) {
+				nodes[i].accept(collector);
+			}
+			return collector.result;
+		}
+		public boolean visit(FieldAccess node) {
+			Expression exp= node.getExpression();
+			if (exp != null)
+				fIgnore.add(node.getName());
+			return true;
+		}
+		public void endVisit(FieldAccess node) {
+			fIgnore.remove(node.getName());
+		}
+		public boolean visit(MethodInvocation node) {
+			Expression exp= node.getExpression();
+			if (exp != null)
+				fIgnore.add(node.getName());
+			return true;
+		}
+		public void endVisit(MethodInvocation node) {
+			fIgnore.remove(node.getName());
+		}
+		public boolean visit(QualifiedName node) {
+			fIgnore.add(node.getName());
+			return true;
+		}
+		public void endVisit(QualifiedName node) {
+			fIgnore.remove(node.getName());
+		}
+		public boolean visit(SimpleName node) {
+			if (!fIgnore.contains(node))
+				result.add(node.getIdentifier());
+			return true;
+		}
+		public boolean visit(TypeDeclaration node) {
+			result.add(node.getName().getIdentifier());
+			// don't dive into type declaration since they open a new
+			// context.
+			return false;
+		}
+	}
 	
 	/**
 	 * Creates a new extract method refactoring.
@@ -148,7 +213,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 				setVisibility(visibility);
 				
 			}
-			createParameterInfos();
+			initializeParameterInfos();
+			initializeUsedNames();
 			return result;
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
@@ -216,35 +282,67 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	/**
-	 * Checks if the refactoring can work on the values provided by the refactoring
-	 * client. The client defined value for the extract method refactoring is the 
-	 * new method name.
+	 * Checks if the new method name is a valid method name. This method doesn't
+	 * check if a method with the same name already exists in the hierarchy. This
+	 * check is done in <code>checkInput</code> since it is expensive.
 	 */
 	public RefactoringStatus checkMethodName() {
 		return Checks.checkMethodName(fMethodName);
 	}
 	
+	/**
+	 * Checks if the parameter names are valid.
+	 */
+	public RefactoringStatus checkParameterNames() {
+		RefactoringStatus result= new RefactoringStatus();
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo parameter= (ParameterInfo)iter.next();
+			result.merge(Checks.checkIdentifier(parameter.getNewName()));
+			for (Iterator others= fParameterInfos.iterator(); others.hasNext();) {
+				ParameterInfo other= (ParameterInfo) others.next();
+				if (parameter != other && other.getNewName().equals(parameter.getNewName())) {
+					result.addError(RefactoringCoreMessages.getFormattedString(
+						"ExtractMethodRefactoring.error.sameParameter", 
+						other.getNewName()));
+					return result;
+				}
+			}
+			if (parameter.isRenamed() && fUsedNames.contains(parameter.getNewName())) {
+				result.addError(RefactoringCoreMessages.getFormattedString(
+					"ExtractMethodRefactoring.error.nameInUse", 
+					parameter.getNewName()));
+				return result;
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns the names already in use in the selected statements/expressions.
+	 * 
+	 * @return names already in use.	 */
+	public Set getUsedNames() {
+		return fUsedNames;
+	}
 	
 	/* (non-Javadoc)
 	 * Method declared in Refactoring
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus result= null;
+		pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 2); //$NON-NLS-1$
+		pm.subTask(EMPTY);
+		
+		RefactoringStatus result= checkMethodName();
+		result.merge(checkParameterNames());
+		pm.worked(1);
+		
 		MethodDeclaration node= fAnalyzer.getEnclosingMethod();
 		if (node != null) {
-			pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 2); //$NON-NLS-1$
-			pm.subTask(EMPTY);
-		
-			result= Checks.checkMethodName(fMethodName);
-			pm.worked(1);
-			
 			fAnalyzer.checkInput(result, fMethodName, fCUnit.getJavaProject(), fAST);
 			pm.worked(1);
 		
-			pm.done();
-		} else {
-			result= new RefactoringStatus();
 		}
+		pm.done();
 		return result;
 	}
 	
@@ -344,7 +442,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	//---- Helper methods ------------------------------------------------------------------------
 	
-	private void createParameterInfos() {
+	private void initializeParameterInfos() {
 		IVariableBinding[] arguments= fAnalyzer.getArguments();
 		fParameterInfos= new ArrayList(arguments.length);
 		ASTNode root= fAnalyzer.getEnclosingMethod();
@@ -359,12 +457,20 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 	}
 	
+	private void initializeUsedNames() {
+		fUsedNames= UsedNamesCollector.perform(fAnalyzer.getSelectedNodes());
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo parameter= (ParameterInfo)iter.next();
+			fUsedNames.remove(parameter.getOldName());
+		}
+	}
+	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
 		status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.no_set_of_statements")); //$NON-NLS-1$
 		return status;	
 	}
 	
-	private TextEdit createNewMethodEdit(TextBuffer buffer) {
+	private TextEdit createNewMethodEdit(TextBuffer buffer) throws CoreException {
 		MethodDeclaration method= fAnalyzer.getEnclosingMethod();
 		final int methodStart= method.getStartPosition();
 		MethodBlock methodBlock= new MethodBlock(getSignature(), createMethodBody(buffer));
@@ -375,8 +481,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private CodeBlock createMethodBody(TextBuffer buffer) {
-		CodeBlock body= new CodeBlock(buffer, fSelectionStart, fSelectionLength);
+	private CodeBlock createMethodBody(TextBuffer buffer) throws CoreException {
+		CodeBlock body= createStatementBlock(buffer);
 		
 		// We extract an expression
 		boolean extractsExpression= fAnalyzer.isExpressionSelected();
@@ -404,6 +510,34 @@ public class ExtractMethodRefactoring extends Refactoring {
 			body.append(RETURN_BLANK + returnValue.getName() + SEMICOLON);
 		}
 		return body;
+	}
+	
+	private CodeBlock createStatementBlock(TextBuffer original) throws CoreException {
+		// ToDo: we should remove this copy. To do so we have to use AST rewrite all over
+		// the place.
+		TextBuffer buffer= TextBuffer.create(original.getContent());
+		List bindings= new ArrayList(2);
+		List newNames= new ArrayList(2);
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo parameter= (ParameterInfo)iter.next();
+			if (parameter.isRenamed()) {
+				bindings.add(parameter.getData());
+				newNames.add(parameter.getNewName());
+			}
+		}
+		ASTRewrite rewriter= new ASTRewrite(fAnalyzer.getEnclosingMethod());
+		SimpleNameRenamer.perform(
+			rewriter, 
+			(IBinding[]) bindings.toArray(new IBinding[bindings.size()]),
+			(String[]) newNames.toArray(new String[newNames.size()]),
+			fAnalyzer.getSelectedNodes());
+		TextBufferEditor editor= new TextBufferEditor(buffer);
+		NopTextEdit root= new NopTextEdit(fSelectionStart, fSelectionLength);
+		rewriter.rewriteNode(buffer, root, null);
+		editor.add(root);
+		editor.performEdits(null);
+		TextRange range= root.getTextRange();
+		return new CodeBlock(buffer, range.getOffset(), range.getLength());
 	}
 	
 	private String createCall(TextBuffer buffer, String delimiter) {

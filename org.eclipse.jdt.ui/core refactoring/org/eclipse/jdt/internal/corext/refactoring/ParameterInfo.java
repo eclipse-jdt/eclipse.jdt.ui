@@ -13,19 +13,19 @@ package org.eclipse.jdt.internal.corext.refactoring;
 public class ParameterInfo {
 	
 	private static final int INDEX_FOR_ADDED= -1;
-	private final String oldName;
-	private final int oldIndex;
-	private String type;
-	private String defaultValue;
-	private String newName;
-	private Object data;
+	private final String fOldName;
+	private final int fOldIndex;
+	private String fType;
+	private String fDefaultValue;
+	private String fNewName;
+	private Object fData;
 	
 	public ParameterInfo(String type, String name, int index){
-		this.type= type;
-		this.oldName= name;
-		this.newName= name;
-		this.oldIndex= index;
-		this.defaultValue= "";
+		fType= type;
+		fOldName= name;
+		fNewName= name;
+		fOldIndex= index;
+		fDefaultValue= "";
 	}
 
 	public static ParameterInfo createInfoForAddedParameter(){
@@ -33,46 +33,50 @@ public class ParameterInfo {
 	}
 	
 	public boolean isAdded(){
-		return oldIndex == INDEX_FOR_ADDED;
+		return fOldIndex == INDEX_FOR_ADDED;
 	}
 	
 	public String getDefaultValue(){
-		return defaultValue;
+		return fDefaultValue;
 	}
 	
 	public void setDefaultValue(String value){
-		this.defaultValue= value;
+		fDefaultValue= value;
 	}
 	
 	public String getType() {
-		return type;
+		return fType;
 	}
 	
 	public void setType(String type){
-		this.type= type;
+		fType= type;
 	}
 
 	public String getOldName() {
-		return oldName;
+		return fOldName;
 	}
 
 	public int getOldIndex() {
-		return oldIndex;
+		return fOldIndex;
 	}
 
 	public void setNewName(String newName) {
-		this.newName= newName;
+		fNewName= newName;
 	}
 
 	public String getNewName() {
-		return newName;
+		return fNewName;
 	}
 
 	public Object getData() {
-		return data;
+		return fData;
 	}
 
 	public void setData(Object data) {
-		this.data= data;
+		fData= data;
+	}
+	
+	public boolean isRenamed() {
+		return !fOldName.equals(fNewName);
 	}
 }

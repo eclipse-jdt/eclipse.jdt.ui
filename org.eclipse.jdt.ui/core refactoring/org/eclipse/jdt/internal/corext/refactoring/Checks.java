@@ -313,7 +313,7 @@ public class Checks {
 	private static RefactoringStatus checkName(String name, IStatus status) {
 		RefactoringStatus result= new RefactoringStatus();
 		if ("".equals(name)) //$NON-NLS-1$
-			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("Checks.Choose_name")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Checks.Choose_name")); //$NON-NLS-1$
 
 		if (status.isOK())
 			return result;
