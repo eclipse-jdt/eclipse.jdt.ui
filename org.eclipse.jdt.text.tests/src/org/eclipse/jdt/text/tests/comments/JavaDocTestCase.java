@@ -285,8 +285,8 @@ public class JavaDocTestCase extends CommentTestCase {
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=68577
 	 */
 	public void testLineBreaksBetweenEmptyJavaDocTags1() {
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, "false");
-		String input= PREFIX + DELIMITER + INFIX + "@custom1" + DELIMITER + INFIX + DELIMITER + INFIX + "@custom2" + DELIMITER + POSTFIX;
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, "false"); //$NON-NLS-1$
+		String input= PREFIX + DELIMITER + INFIX + "@custom1" + DELIMITER + INFIX + DELIMITER + INFIX + "@custom2" + DELIMITER + POSTFIX;  //$NON-NLS-1$//$NON-NLS-2$
 		String expected= input;
 		String result= testFormat(input);
 		assertEquals(expected, result);
@@ -297,8 +297,8 @@ public class JavaDocTestCase extends CommentTestCase {
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=68577
 	 */
 	public void testLineBreaksBetweenEmptyJavaDocTags2() {
-		setUserOption(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, "false");
-		String input= PREFIX + DELIMITER + INFIX + "@custom1" + DELIMITER + INFIX + "@custom2" + DELIMITER + POSTFIX;
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, "false"); //$NON-NLS-1$
+		String input= PREFIX + DELIMITER + INFIX + "@custom1" + DELIMITER + INFIX + "@custom2" + DELIMITER + POSTFIX;  //$NON-NLS-1$//$NON-NLS-2$
 		String expected= input;
 		String result= testFormat(input);
 		assertEquals(expected, result);
