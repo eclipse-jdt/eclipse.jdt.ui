@@ -6,10 +6,28 @@ package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -18,21 +36,15 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.util.*;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IObjectActionDelegate;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.CheckedTableSelectionDialog;
+import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
+import org.eclipse.jdt.internal.junit.util.JUnitStatus;
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
+import org.eclipse.jdt.internal.junit.util.Resources;
 
 /**
  * An object contribution action that updates existing AllTests classes.
@@ -59,6 +71,11 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			if (count == 0 && !fEmptySelectionAllowed) {
 				return new JUnitStatus(IStatus.ERROR, ""); //$NON-NLS-1$
 			}
+			
+			IStatus recursiveInclusionStatus= checkRecursiveSuiteInclusion(selection);
+			if (recursiveInclusionStatus != null && ! recursiveInclusionStatus.isOK())
+				return recursiveInclusionStatus;
+				
 			String message;
 			if (count == 1) {
 				message= WizardMessages.getFormattedString("UpdateAllTests.selected_methods.label_one", new Integer(count)); //$NON-NLS-1$
@@ -66,6 +83,18 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				message= WizardMessages.getFormattedString("UpdateAllTests.selected_methods.label_many", new Integer(count)); //$NON-NLS-1$
 			}
 			return new JUnitStatus(IStatus.INFO, message);
+		}
+		
+		private IStatus checkRecursiveSuiteInclusion(Object[] selection){
+			IType suiteClass= fSuiteMethod.getDeclaringType();
+			for (int i= 0; i < selection.length; i++) {
+				if (selection[i] instanceof IType){
+					if (((IType)selection[i]).equals(suiteClass)){
+						return new JUnitStatus(IStatus.WARNING, WizardMessages.getString("UpdateTestSuite.infinite_recursion")); //$NON-NLS-1$
+					}
+				}
+			}
+			return null;
 		}
 	}
 
@@ -82,10 +111,10 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate#run(IAction)
 	 */
-	public void run(IAction action) {
+	public void run(IAction action) {		
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		IStructuredContentProvider cprovider= new NewTestSuiteCreationWizardPage.ClassesInSuitContentProvider();
-
+	
 		/* find TestClasses already in Test Suite */
 		IType testSuiteType= fTestSuite.findPrimaryType();
 		fSuiteMethod= testSuiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
@@ -146,8 +175,12 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	}
 	
 	private void updateTestCasesInSuite(IProgressMonitor monitor) {
+
 		try {
 			monitor.beginTask(WizardMessages.getString("UpdateAllTests.beginTask"), 5); //$NON-NLS-1$
+			if (! checkValidateEditStatus(fTestSuite, fShell))
+				return;
+				
 			ISourceRange range= fSuiteMethod.getSourceRange();
 			IBuffer buf= fTestSuite.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
@@ -181,8 +214,36 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				}
 			}
 		} catch (JavaModelException e) {
-			JUnitPlugin.log(e);
+			ExceptionHandler.handle(e, fShell, WizardMessages.getString("UpdateTestSuite.update"), WizardMessages.getString("UpdateTestSuite.error")); //$NON-NLS-1$ //$NON-NLS-2$
+		} finally{
+			monitor.done();
 		}
+	}
+	
+	static boolean checkValidateEditStatus(ICompilationUnit testSuiteCu, Shell shell){
+		IStatus status= validateModifiesFiles(getTestSuiteFile(testSuiteCu));
+		if (status.isOK())	
+			return true;
+		ErrorDialog.openError(shell, WizardMessages.getString("UpdateTestSuite.update"), WizardMessages.getString("UpdateTestSuite.could_not_update"), status); //$NON-NLS-1$ //$NON-NLS-2$
+		return false;
+	}
+	
+	private static IFile getTestSuiteFile(ICompilationUnit testSuiteCu){
+		if (testSuiteCu.isWorkingCopy())
+			return (IFile)testSuiteCu.getOriginalElement().getResource();
+		else
+			return (IFile)testSuiteCu.getResource();
+	}
+	
+	private static IStatus validateModifiesFiles(IFile fileToModify) {
+		IFile[] filesToModify= {fileToModify};
+		IStatus status= Resources.checkInSync(filesToModify);
+		if (! status.isOK())
+			return status;
+		status= Resources.makeCommittable(filesToModify, null);
+		if (! status.isOK())
+			return status;
+		return new JUnitStatus();
 	}
 
 	public IRunnableWithProgress getRunnable() {

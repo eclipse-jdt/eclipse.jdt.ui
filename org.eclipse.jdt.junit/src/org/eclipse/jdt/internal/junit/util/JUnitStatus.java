@@ -36,6 +36,18 @@ public class JUnitStatus implements IStatus {
 		fStatusMessage= message;
 		fSeverity= severity;
 	}		
+
+	public static IStatus createError(String message) {
+		return new JUnitStatus(IStatus.ERROR, message);
+	}
+	
+	public static IStatus createWarning(String message) {
+		return new JUnitStatus(IStatus.WARNING, message);
+	}
+
+	public static IStatus createInfo(String message) {
+		return new JUnitStatus(IStatus.INFO, message);
+	}
 	
 	/**
 	 *  Returns if the status' severity is OK.

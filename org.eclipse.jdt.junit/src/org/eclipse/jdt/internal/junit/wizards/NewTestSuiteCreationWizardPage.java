@@ -402,13 +402,16 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		try {
 			IPackageFragment pack= getPackageFragment();
 			ICompilationUnit cu= pack.getCompilationUnit(getTypeName() + ".java"); //$NON-NLS-1$
-	
+			
 			if (!cu.exists()) {
 				createType(monitor);
 				fUpdatedExistingClassButton= false;
 				return;
 			}
 			
+			if (! UpdateTestSuite.checkValidateEditStatus(cu, getShell()))
+				return;
+
 			IType suiteType= cu.getType(getTypeName());
 			monitor.beginTask(WizardMessages.getString("NewTestSuiteWizPage.createType.beginTask"), 10); //$NON-NLS-1$
 			IMethod suiteMethod= suiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
@@ -566,8 +569,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		} else if (val.getSeverity() == IStatus.WARNING) {
 			status.setWarning(WizardMessages.getString("NewTestSuiteWizPage.typeName.error.name.name_discouraged")+val.getMessage()); //$NON-NLS-1$
 			// continue checking
-		}
-		
+		}		
+
 		JUnitStatus recursiveSuiteInclusionStatus= checkRecursiveTestSuiteInclusion();
 		if (! recursiveSuiteInclusionStatus.isOK())
 			return recursiveSuiteInclusionStatus;
@@ -584,7 +587,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		fMethodStubsButtons.setEnabled(true);
 		return status;
 	}
-	
+
 	private JUnitStatus checkRecursiveTestSuiteInclusion(){
 		if (fClassesInSuiteTable == null)
 			return new JUnitStatus();
