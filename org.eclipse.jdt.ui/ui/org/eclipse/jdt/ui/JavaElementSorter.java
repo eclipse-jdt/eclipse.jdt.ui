@@ -118,7 +118,7 @@ public class JavaElementSorter extends ViewerSorter {
 						return IMPORT_DECLARATION;
 					case IJavaElement.PACKAGE_FRAGMENT:
 						IPackageFragment pack= (IPackageFragment) je;
-						if (pack.getParent().getUnderlyingResource() instanceof IProject) {
+						if (pack.getParent().getResource() instanceof IProject) {
 							return PACKAGEFRAGMENTROOTS;
 						}
 						return PACKAGEFRAGMENT;

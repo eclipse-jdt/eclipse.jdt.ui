@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
@@ -40,12 +39,7 @@ public class JavaElementInfoPage extends PropertyPage {
 
 		IJavaElement element= (IJavaElement)getElement();
 		
-		IResource resource= null;
-		try {
-			resource= element.getUnderlyingResource(); 
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
+		IResource resource= element.getResource();
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();

@@ -154,7 +154,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 			if (root != null)
 				return isValidDestination(root);
 			else
-				return isValidDestination(jp.getUnderlyingResource());	
+				return isValidDestination(jp.getProject());	
 		}	
 		
 		//only source folders are selected

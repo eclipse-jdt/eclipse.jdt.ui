@@ -226,7 +226,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 			return 0;
 		}
 		
-		FileEditorInput editorInput= new FileEditorInput((IFile) original.getCorrespondingResource());
+		FileEditorInput editorInput= new FileEditorInput((IFile) original.getResource());
 		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(editorInput);
 		if (model != null) {
 			Iterator iter= model.getAnnotationIterator();

@@ -91,13 +91,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 			cu= (ICompilationUnit) cu.getOriginalElement();
 			
 		// find underlying file
-		IFile file= null;
-		try {
-			file= (IFile) cu.getUnderlyingResource();
-		} catch (JavaModelException ex) {
-			JavaPlugin.log(ex);
-		}
-		
+		IFile file= (IFile) cu.getResource();
 		if (file != null && file.exists())
 			return file;
 		return null;

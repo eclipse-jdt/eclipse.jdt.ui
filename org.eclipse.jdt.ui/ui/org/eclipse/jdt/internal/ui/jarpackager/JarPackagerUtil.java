@@ -72,11 +72,7 @@ public class JarPackagerUtil {
 		for (int i= 0; i < fSelectedElements.length; i++) {
 			Object element= fSelectedElements[i];
 			if (element instanceof IJavaElement) {
-				try {
-					selectedResources.add(((IJavaElement)element).getUnderlyingResource());
-				} catch (JavaModelException ex) {
-					ExceptionHandler.log(ex, "Failed to get underlying resource of java element"); //$NON-NLS-1$
-				}
+				selectedResources.add(((IJavaElement)element).getResource());
 			}
 			else if (element instanceof IResource)
 				selectedResources.add(element);
@@ -174,7 +170,7 @@ public class JarPackagerUtil {
 
 		try {
 			// Check if main method is in scope
-			IFile file= (IFile)mainClass.getUnderlyingResource();
+			IFile file= (IFile)mainClass.getResource();
 			if (file == null || !contains(asResources(data.getElements()), file))
 				return false;
 

@@ -22,8 +22,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.ui.part.FileEditorInput;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -34,11 +32,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  
 /**
  * A base content provider for Java elements. It provides access to the
@@ -201,12 +198,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			if (element instanceof IFolder)
 				return getResources((IFolder)element);
 			
-			if (fProvideMembers &&
-				element instanceof ISourceReference && element instanceof IParent) {
-				if (element instanceof ICompilationUnit && fProvideWorkingCopy) {
-					IWorkingCopy wc= getWorkingCopy((ICompilationUnit)element);
-					if (wc != null)
-						return ((IParent)wc).getChildren();
+			if (fProvideMembers && element instanceof ISourceReference && element instanceof IParent) {
+				if (fProvideWorkingCopy && element instanceof ICompilationUnit) {
+					element= JavaModelUtil.toWorkingCopy((ICompilationUnit) element);
 				}
 				return ((IParent)element).getChildren();
 			}
@@ -303,22 +297,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		}
 		return concatenate(fragment.getClassFiles(), fragment.getNonJavaResources());
 	}
-	
-	IWorkingCopy getWorkingCopy(ICompilationUnit cu) throws JavaModelException {
-		IFile file= null;
-		try {
-			file= (IFile)cu.getUnderlyingResource();
-		} catch (JavaModelException e) {
-		}
-		if (file != null) {
-			IWorkingCopyManager wm= JavaPlugin.getDefault().getWorkingCopyManager();
-			FileEditorInput ei= new FileEditorInput(file);
-			IWorkingCopy wc= wm.getWorkingCopy(ei);
-			return wc;
-		}
-		return null;
-	}
-	
+		
 	private Object[] getResources(IFolder folder) {
 		try {
 			// filter out folders that are package fragment roots
@@ -376,7 +355,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	protected boolean isProjectPackageFragmentRoot(IPackageFragmentRoot root) throws JavaModelException {
-		IResource resource= root.getUnderlyingResource();
+		IResource resource= root.getResource();
 		return (resource instanceof IProject);
 	}
 	
@@ -423,9 +402,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			// If the parent is a CU we might have shown working copy elements below CU level. If so
 			// return the original element instead of the working copy.
 			if (candidate != null && candidate.getElementType() == IJavaElement.COMPILATION_UNIT) {
-				ICompilationUnit unit= (ICompilationUnit)candidate;
-				if (unit.isWorkingCopy())
-					candidate= unit.getOriginalElement();
+				candidate= JavaModelUtil.toOriginal((ICompilationUnit) candidate);
 			}
 			return candidate;
 		}

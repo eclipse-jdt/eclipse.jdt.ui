@@ -558,25 +558,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		return this == getSite().getPage().getActivePart();
 	}
 
-	private IResource getResourceFor(Object element) {
-		if (element instanceof IJavaElement) {
-			if (element instanceof IWorkingCopy) {
-				IWorkingCopy wc= (IWorkingCopy)element;
-				IJavaElement original= wc.getOriginalElement();
-				if (original != null)
-					element= original;
-			}
-			try {
-				element= ((IJavaElement)element).getUnderlyingResource();
-			} catch (JavaModelException e) {
-				return null;
-			}
-		}
-		if (!(element instanceof IResource) || ((IResource)element).isPhantom()) {
-			return null;
-		}
-		return (IResource)element;
-	}
 	
 	public void saveState(IMemento memento) {
 		if (fViewer == null) {

@@ -352,11 +352,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			for (int i= 0; i < els.length; i++) {
 				if (els[i] instanceof IJavaProject) {
 					IJavaProject iJavaProject= (IJavaProject) els[i];
-					return iJavaProject.getUnderlyingResource().getLocation().addTrailingSeparator().append(DOCUMENT_DIRECTORY).toOSString();
+					return iJavaProject.getProject().getLocation().addTrailingSeparator().append(DOCUMENT_DIRECTORY).toOSString();
 				}
 			}
-		} catch (JavaModelException e) {
-			return ""; //$NON-NLS-1$
 		} catch (NullPointerException e) {
 			return ""; //$NON-NLS-1$
 		}
@@ -435,7 +433,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 						if (nAdded != 0) {
 							buf.append(File.pathSeparatorChar);
 						}
-						buf.append(curr.getUnderlyingResource().getLocation().toOSString());
+						buf.append(curr.getResource().getLocation().toOSString());
 						nAdded++;
 					}
 				}

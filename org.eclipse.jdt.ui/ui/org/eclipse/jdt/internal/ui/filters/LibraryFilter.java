@@ -17,7 +17,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 
 
 /**
@@ -34,15 +33,11 @@ public class LibraryFilter extends ViewerFilter {
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
 			if (root.isArchive()) {
 				// don't filter out JARs contained in the project itself
-				try {
-					IResource resource= root.getUnderlyingResource();
-					if (resource != null) {
-						IProject jarProject= resource.getProject();
-						IProject container= root.getJavaProject().getProject();
-						return container.equals(jarProject);
-					}
-				} catch (JavaModelException e) {
-					return false;
+				IResource resource= root.getResource();
+				if (resource != null) {
+					IProject jarProject= resource.getProject();
+					IProject container= root.getJavaProject().getProject();
+					return container.equals(jarProject);
 				}
 				return false;
 			}

@@ -113,14 +113,7 @@ class ClipboardActionUtil {
 		for(Iterator iter= selection.iterator(); iter.hasNext(); ) {
 			Object element= iter.next();
 			if (element instanceof IJavaProject) {
-				try {
-					result.add(((IJavaProject)element).getUnderlyingResource());
-				} catch (JavaModelException e) {
-					if (!e.isDoesNotExist()) {
-						//do not show error dialogs in a loop
-						JavaPlugin.log(e);
-					}
-				}
+				result.add(((IJavaProject)element).getResource());
 			}
 		}
 		return result;

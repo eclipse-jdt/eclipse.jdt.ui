@@ -735,7 +735,7 @@ public class JavadocOptionsManager {
 			if (curr instanceof IPackageFragment) {
 				args.add(curr.getElementName());
 			} else if (curr instanceof ICompilationUnit) {
-				args.add(curr.getUnderlyingResource().getLocation().toOSString());
+				args.add(curr.getResource().getLocation().toOSString());
 			}
 		}
 

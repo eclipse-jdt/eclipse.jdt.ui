@@ -118,7 +118,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		
 		ICompilationUnit[] notDeleted= deleteEmptyCus(mapping, new SubProgressMonitor(pm, size));
 		for (int i= 0; i < notDeleted.length; i++) {
-			IFile file= (IFile)notDeleted[i].getUnderlyingResource();
+			IFile file= (IFile)notDeleted[i].getResource();
 			if (isReadOnly(file))
 				continue;
 			deleteAll(mapping, file, new SubProgressMonitor(pm, 1));
@@ -216,7 +216,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	private static boolean isReadOnly(ICompilationUnit cu) throws JavaModelException{
 		if (cu.isReadOnly())
 			return true;
-		if (cu.getUnderlyingResource() != null && cu.getUnderlyingResource().isReadOnly())	
+		if (cu.getResource().isReadOnly())	
 			return true;
 		return false;	
 	}

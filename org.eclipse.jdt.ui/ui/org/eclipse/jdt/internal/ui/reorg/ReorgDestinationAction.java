@@ -396,14 +396,10 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		}
 	
 		public String getText(Object element) {
-			try {
-				if (element instanceof IPackageFragmentRoot) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-					if (root.getUnderlyingResource() instanceof IProject)
-						return ReorgMessages.getString("DestinationRenderer.packages"); //$NON-NLS-1$
-				}
-			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, ReorgMessages.getString("ReorgDestinationAction.exception_title"), ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			if (element instanceof IPackageFragmentRoot) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+				if (root.getResource() instanceof IProject)
+					return ReorgMessages.getString("DestinationRenderer.packages"); //$NON-NLS-1$
 			}
 			return super.getText(element);
 		}

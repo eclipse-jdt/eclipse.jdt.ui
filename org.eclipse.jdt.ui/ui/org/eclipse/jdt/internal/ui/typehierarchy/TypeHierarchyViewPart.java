@@ -863,12 +863,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		Object element= selection.getFirstElement();
 		if (!(element instanceof IJavaElement))
 			return;
-		IResource resource= null;
-		try {
-			resource= ((IJavaElement)element).getUnderlyingResource();	
-		} catch(JavaModelException e) {
-			// ignore
-		}
+				
+		IJavaElement openable= (IJavaElement) ((IJavaElement) element).getOpenable();
+		IResource resource= openable.getResource();	
 		if (!(resource instanceof IFile))
 			return; 
 

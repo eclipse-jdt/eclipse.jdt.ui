@@ -186,7 +186,7 @@ public class JavadocWriter {
 			if (curr instanceof IPackageFragment) {
 				buf.append(curr.getElementName());
 			} else {
-				buf.append(curr.getUnderlyingResource().getLocation().toOSString());
+				buf.append(curr.getResource().getLocation().toOSString());
 			}	
 		}
 		return buf.toString();

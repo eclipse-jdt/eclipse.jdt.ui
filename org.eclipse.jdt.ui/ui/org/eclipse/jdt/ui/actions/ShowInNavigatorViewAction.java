@@ -27,17 +27,11 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -89,14 +83,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		try {
-			setEnabled(getResource(selection) != null); 
-		} catch (JavaModelException e) {
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
-			setEnabled(false);
-		}
+		setEnabled(getResource(selection) != null); 
 	}
 
 	/* (non-Javadoc)
@@ -107,26 +94,14 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 			getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.dialog.message")); //$NON-NLS-1$
 		if (element == null)
 			return;
-		try {
-			run(getResource(element));
-		} catch(JavaModelException e) {
-			// This shouldn't happen. If we can't convert the selection the
-			// action is disabled.
-			JavaPlugin.log(e);
-		}
+		run(getResource(element));
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(IStructuredSelection selection) {
-		try {
-			run(getResource(selection));
-		} catch (JavaModelException e) {
-			// This shouldn't happen. If we can't convert the selection the
-			// action is disabled.
-			JavaPlugin.log(e);
-		}
+		run(getResource(selection));
 	}
 	
 	private void run(IResource resource) {
@@ -144,7 +119,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		}
 	}
 	
-	private IResource getResource(IStructuredSelection selection) throws JavaModelException {
+	private IResource getResource(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return null;
 		Object element= selection.getFirstElement();
@@ -155,36 +130,19 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		return null;
 	}
 	
-	private IResource getResource(IJavaElement element) throws JavaModelException {
+	private IResource getResource(IJavaElement element) {
 		if (element == null)
 			return null;
-		if (element instanceof IMember) {
-			IOpenable openable= ((IMember)element).getOpenable();
-			if (openable instanceof IJavaElement)
-				element= (IJavaElement)openable;
-			else
-				element= null;
-		}
+		
+		element= (IJavaElement) element.getOpenable();
 		if (element instanceof ICompilationUnit) {
-			ICompilationUnit unit= (ICompilationUnit)element;
-			if (unit.isWorkingCopy())
-				element= unit.getOriginalElement();
+			element= JavaModelUtil.toOriginal((ICompilationUnit) element);
 		}
-		if (element == null)
-			return null;
-		IResource result;
-		try {
-			result= element.getCorrespondingResource();
-			if (result == null)
-				result= element.getUnderlyingResource();
-		} catch (JavaModelException e) {
-			if (e.isDoesNotExist()) {
-				result= null;
-			} else {
-				throw e;
-			}
+		IResource resource= element.getResource();
+		if (resource.exists()) {
+			return resource;
 		}
-		return result;
+		return null;
 	}
 	
 	private static String getDialogTitle() {

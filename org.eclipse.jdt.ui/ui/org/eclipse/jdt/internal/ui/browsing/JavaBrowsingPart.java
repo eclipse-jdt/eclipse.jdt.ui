@@ -1019,26 +1019,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		return null;
 	}
 	
-	private IResource getResourceFor(Object element) {
-		if (element instanceof IJavaElement) {
-			if (element instanceof IWorkingCopy) {
-				IWorkingCopy wc= (IWorkingCopy)element;
-				IJavaElement original= wc.getOriginalElement();
-				if (original != null)
-					element= original;
-			}
-			try {
-				element= ((IJavaElement)element).getUnderlyingResource();
-			} catch (JavaModelException e) {
-				return null;
-			}
-		}
-		if (!(element instanceof IResource) || ((IResource)element).isPhantom()) {
-			return null;
-		}
-		return (IResource)element;
-	}
-
 	void setSelection(ISelection selection, boolean reveal) {
 		if (selection != null && selection.equals(fViewer.getSelection()))
 			return;
