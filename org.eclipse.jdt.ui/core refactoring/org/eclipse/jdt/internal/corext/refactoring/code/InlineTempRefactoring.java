@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -88,14 +89,26 @@ public class InlineTempRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.syntax_errors")); //$NON-NLS-1$
 				
 			initializeAST();
-							
-			return checkSelection();
+				
+			result.merge(checkSelection());
+			if (result.hasFatalError())
+				return result;
+			
+			result.merge(checkInitializer());	
+			return result;
 		} catch (CoreException e){		
 			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
 	}
+
+    private RefactoringStatus checkInitializer() {
+    	Expression initializer= fTempDeclaration.getInitializer();
+    	if (initializer instanceof NullLiteral)
+    		return RefactoringStatus.createFatalErrorStatus("Null literals cannot be inlined");
+        return null;
+    }
 
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
