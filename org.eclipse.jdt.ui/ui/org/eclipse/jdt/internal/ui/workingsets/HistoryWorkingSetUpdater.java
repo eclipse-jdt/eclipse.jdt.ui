@@ -149,17 +149,18 @@ public class HistoryWorkingSetUpdater implements IWorkingSetUpdater {
 				processDelta(event.getDelta());
 			}
 			public void processDelta(IJavaElementDelta delta) {
-				int type= delta.getElement().getElementType();
+				IJavaElement element= delta.getElement();
+				int type= element.getElementType();
 				int kind= delta.getKind();
 				int flags= delta.getFlags();
 				if (type == IJavaElement.COMPILATION_UNIT) {
 					if (kind == IJavaElementDelta.CHANGED && (flags & IJavaElementDelta.F_PRIMARY_RESOURCE) != 0) {
-						elementSaved(delta.getElement());
+						elementSaved(element);
 					} else if (kind == IJavaElementDelta.REMOVED) {
 						if ((delta.getFlags() & IJavaElementDelta.F_MOVED_TO) != 0) {
-							elementMoved(delta.getElement(), delta.getMovedToElement());
+							elementMoved(element, delta.getMovedToElement());
 						} else {
-							elementRemoved(delta.getElement());
+							elementRemoved(element);
 						}
 					}
 				} else {
