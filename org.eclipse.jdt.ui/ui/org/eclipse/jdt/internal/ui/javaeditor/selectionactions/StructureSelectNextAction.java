@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
-import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -24,6 +25,30 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public class StructureSelectNextAction extends StructureSelectionAction{
+	
+	private static class NextNodeAnalyzer extends GenericVisitor {
+		private final int fOffset;
+		private ASTNode fNextNode;
+		private NextNodeAnalyzer(int offset) {
+			super(true);
+			fOffset= offset;
+		}
+		public static ASTNode perform(int offset, ASTNode lastCoveringNode) {
+			NextNodeAnalyzer analyzer= new NextNodeAnalyzer(offset);
+			lastCoveringNode.accept(analyzer);
+			return analyzer.fNextNode;
+		}
+		protected boolean visitNode(ASTNode node) {
+			int start= node.getStartPosition();
+			int end= start + node.getLength();
+			if (start == fOffset) {
+				fNextNode= node;
+				return true;
+			} else {
+				return (start < fOffset && fOffset < end);
+			}
+		}
+	}
 	
 	public StructureSelectNextAction(JavaEditor editor, SelectionHistory history) {
 		super(JavaEditorMessages.getString("StructureSelectNext.label"), editor, history); //$NON-NLS-1$
@@ -42,6 +67,11 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 	 * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, SelectionAnalyzer)
 	 */
 	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException{
+		if (oldSourceRange.getLength() == 0 && selAnalyzer.getLastCoveringNode() != null) {
+			ASTNode previousNode= NextNodeAnalyzer.perform(oldSourceRange.getOffset(), selAnalyzer.getLastCoveringNode());
+			if (previousNode != null)
+				return getSelectedNodeSourceRange(sr, previousNode);
+		}
 		ASTNode first= selAnalyzer.getFirstSelectedNode();
 		if (first == null) 
 			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer); 

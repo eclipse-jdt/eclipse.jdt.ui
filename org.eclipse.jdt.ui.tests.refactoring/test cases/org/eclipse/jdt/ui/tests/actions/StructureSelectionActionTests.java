@@ -45,6 +45,10 @@ public class StructureSelectionActionTests extends RefactoringTest{
 		return new MySetup(new TestSuite(clazz));
 	}
 	
+	public static Test setUpTest(Test test) {
+		return new MySetup(test);
+	}
+	
 	private String getSimpleTestFileName(boolean input){
 		String fileName = "A_" + getName();
 		fileName += input ? "": "_out";
@@ -318,6 +322,31 @@ public class StructureSelectionActionTests extends RefactoringTest{
 	public void testZeroLength0() throws Exception{
 		//printTestDisabledMessage("");
 		helperZeroLength(4, 20);
+	}
+	
+	public void testZeroLength1() throws Exception{
+		helperSelectNext(4, 16, 4, 16);
+		helperSelectPrevious(4, 17, 4, 17);
+	}
+	
+	public void testZeroLength2() throws Exception{
+		helperSelectNext(4, 20, 4, 20);
+		helperSelectPrevious(4, 21, 4, 21);
+	}
+	
+	public void testZeroLength3() throws Exception{
+		helperSelectNext(3, 10, 3, 10);
+		helperSelectPrevious(3, 11, 3, 11);
+	}
+	
+	public void testZeroLength4() throws Exception{
+		helperSelectNext(4, 9, 4, 9);
+		helperSelectPrevious(4, 10, 4, 10);
+	}
+	
+	public void testZeroLength5() throws Exception{
+		helperSelectNext(4, 11, 4, 11);
+		helperSelectPrevious(4, 14, 4, 14);
 	}
 	
 	public void testWholeCu() throws Exception{
