@@ -37,10 +37,13 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-//		return new TestSuite(THIS);
-		TestSuite suite= new TestSuite();
-		suite.addTest(new ASTRewritingExpressionsTest("testSuperFieldInvocation"));
-		return suite;
+		if (true) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new ASTRewritingExpressionsTest("testVariableDeclarationFragment"));
+			return suite;
+		}		
 	}
 
 
@@ -1206,7 +1209,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
 		Block block= methodDecl.getBody();
 		List statements= block.statements();
-		assertTrue("Number of statements not 2", statements.size() == 2);
+		assertTrue("Number of statements not 1", statements.size() == 1);
 		{ // insert qualifier, replace field name, delete qualifier
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
 			Assignment assignment= (Assignment) stmt.getExpression();
@@ -1242,16 +1245,11 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public foo() {\n");
+		buf.append("    public void foo() {\n");
 		buf.append("        super.foo();\n");
-		
+		buf.append("        Outer.super.foo(i);\n");		
+		buf.append("        Outer.super.foo(foo(X.goo()), 1);\n");
 		buf.append("    }\n");
-		buf.append("    public E(int i) {\n");
-		buf.append("        foo(i + i).super(i);\n");
-		buf.append("    }\n");
-		buf.append("    public E(int i, int k) {\n");
-		buf.append("        Outer.super(foo(goo(x)), 1);\n");
-		buf.append("    }\n");	
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -1261,15 +1259,18 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
-		List bodyDeclarations= type.bodyDeclarations();
-		assertTrue("Number of bodyDeclarations not 3", bodyDeclarations.size() == 3);
-		{ // add expresssion & parameter
-			MethodDeclaration methodDecl= (MethodDeclaration) bodyDeclarations.get(0);
-			SuperConstructorInvocation invocation= (SuperConstructorInvocation) methodDecl.getBody().statements().get(0);
+		
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 3", statements.size() == 3);
+		{ // add qualifier & parameter
+			ExpressionStatement statement= (ExpressionStatement) statements.get(0);
+			SuperMethodInvocation invocation= (SuperMethodInvocation) statement.getExpression();
 
-			SimpleName newExpression= ast.newSimpleName("x");
+			SimpleName newExpression= ast.newSimpleName("X");
 			ASTRewriteAnalyzer.markAsInserted(newExpression);
-			invocation.setExpression(newExpression);
+			invocation.setQualifier(newExpression);
 			
 			
 			ASTNode arg= ast.newNumberLiteral("1");
@@ -1277,29 +1278,34 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			
 			invocation.arguments().add(arg);		
 		}
-		{ // remove expression, replace argument with argument of expression
-			MethodDeclaration methodDecl= (MethodDeclaration) bodyDeclarations.get(1);
-			SuperConstructorInvocation invocation= (SuperConstructorInvocation) methodDecl.getBody().statements().get(0);
+		{ // remove qualifier, replace argument with argument of expression
+			ExpressionStatement statement= (ExpressionStatement) statements.get(1);
+			SuperMethodInvocation invocation= (SuperMethodInvocation) statement.getExpression();
 
-			MethodInvocation expression= (MethodInvocation) invocation.getExpression();
-			ASTRewriteAnalyzer.markAsRemoved(expression);
+			Name qualifier= (Name) invocation.getQualifier();
+			ASTRewriteAnalyzer.markAsRemoved(qualifier);
 			
-			ASTNode placeHolder= ASTRewriteAnalyzer.createCopyTarget((ASTNode) expression.arguments().get(0));
+			Name placeHolder= (Name) ASTRewriteAnalyzer.createCopyTarget(qualifier);
+			
+			FieldAccess newFieldAccess= ast.newFieldAccess();
+			newFieldAccess.setExpression(placeHolder);
+			newFieldAccess.setName(ast.newSimpleName("count"));
 			
 			ASTNode arg1= (ASTNode) invocation.arguments().get(0);
-			
-			ASTRewriteAnalyzer.markAsReplaced(arg1, placeHolder);
+			ASTRewriteAnalyzer.markAsReplaced(arg1, newFieldAccess);
 		}
-		{ // remove argument, replace expression with part of argument
-			MethodDeclaration methodDecl= (MethodDeclaration) bodyDeclarations.get(2);
-			SuperConstructorInvocation invocation= (SuperConstructorInvocation) methodDecl.getBody().statements().get(0);
+		{ // remove argument, replace qualifier with part argument qualifier
+			ExpressionStatement statement= (ExpressionStatement) statements.get(2);
+			SuperMethodInvocation invocation= (SuperMethodInvocation) statement.getExpression();
 			
 			MethodInvocation arg1= (MethodInvocation) invocation.arguments().get(0);
 			ASTRewriteAnalyzer.markAsRemoved(arg1);
 			
-			ASTNode placeHolder= ASTRewriteAnalyzer.createCopyTarget((ASTNode) arg1.arguments().get(0));
+			MethodInvocation innerArg= (MethodInvocation) arg1.arguments().get(0);
 			
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) invocation.getExpression(), placeHolder);
+			ASTNode placeHolder= ASTRewriteAnalyzer.createCopyTarget((ASTNode) innerArg.getExpression());
+			
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) invocation.getQualifier(), placeHolder);
 		}
 			
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
@@ -1310,18 +1316,117 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public E() {\n");
-		buf.append("        x.super(1);\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        X.super.foo(1);\n");
+		buf.append("        super.foo(Outer.count);\n");		
+		buf.append("        X.super.foo(1);\n");
 		buf.append("    }\n");
-		buf.append("    public E(int i) {\n");
-		buf.append("        super(i + i);\n");
-		buf.append("    }\n");
-		buf.append("    public E(int i, int k) {\n");
-		buf.append("        goo(x).super(1);\n");
-		buf.append("    }\n");	
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 	}
-
+	
+	public void testThisExpression() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        return this;\n");		
+		buf.append("        return Outer.this;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 2", statements.size() == 2);
+		{ // add qualifier
+			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
+			
+			ThisExpression thisExpression= (ThisExpression) returnStatement.getExpression();
+
+			SimpleName newExpression= ast.newSimpleName("X");
+			ASTRewriteAnalyzer.markAsInserted(newExpression);
+			thisExpression.setQualifier(newExpression);
+		}
+		{ // remove qualifier
+			ReturnStatement returnStatement= (ReturnStatement) statements.get(1);
+			
+			ThisExpression thisExpression= (ThisExpression) returnStatement.getExpression();
+
+			ASTRewriteAnalyzer.markAsRemoved(thisExpression.getQualifier());
+		}
+
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        return X.this;\n");		
+		buf.append("        return this;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testTypeLiteral() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        return E.class;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		{ // replace type
+			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
+			
+			TypeLiteral typeLiteral= (TypeLiteral) returnStatement.getExpression();
+
+			Type newType= ast.newPrimitiveType(PrimitiveType.VOID);
+			
+			ASTRewriteAnalyzer.markAsReplaced(typeLiteral.getType(), newType);
+		}
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        return void.class;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+			
 }

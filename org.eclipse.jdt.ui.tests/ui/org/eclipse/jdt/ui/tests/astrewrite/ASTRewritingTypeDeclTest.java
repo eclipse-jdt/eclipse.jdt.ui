@@ -3,8 +3,6 @@ package org.eclipse.jdt.ui.tests.astrewrite;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.eclipse.core.runtime.QualifiedName;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -19,6 +17,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -27,7 +26,10 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
@@ -54,10 +56,13 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		return new TestSuite(THIS);
-//		TestSuite suite= new TestSuite();
-//		suite.addTest(new ASTRewritingTypeDeclTest("testTypeDeclInserts"));
-//		return suite;
+		if (true) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new ASTRewritingTypeDeclTest("testSingleVariableDeclaration"));
+			return suite;
+		}
 	}
 
 
@@ -71,7 +76,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+	}
+
+
+	protected void tearDown() throws Exception {
+		JavaProjectHelper.delete(fJProject1);
+	}
 		
+	public void testTypeDeclChanges() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -95,16 +107,8 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("}\n");
 		buf.append("interface G {\n");
 		buf.append("}\n");		
-		fCU_E= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
-	}
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
-
-	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
-	}
-		
-	public void testTypeDeclChanges() throws Exception {
-		ICompilationUnit cu= fCU_E;
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
@@ -171,7 +175,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 		proposal.apply(null);
 		
-		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class X extends Object implements Cloneable, Serializable {\n");
 		buf.append("    private double fCount;\n");
@@ -195,7 +199,31 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 
 	
 	public void testTypeDeclRemoves() throws Exception {
-		ICompilationUnit cu= fCU_E;
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends Exception implements Runnable, Serializable {\n");
+		buf.append("    public static class EInner {\n");
+		buf.append("        public void xee() {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");		
+		buf.append("    private int i;\n");	
+		buf.append("    private int k;\n");	
+		buf.append("    public E() {\n");
+		buf.append("    }\n");
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("    public void hee() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class F implements Runnable {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		buf.append("interface G {\n");
+		buf.append("}\n");		
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
+
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		{ // change to interface, remove supertype, remove first interface, remove field
@@ -253,7 +281,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 		proposal.apply(null);
 		
-		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("interface E extends Serializable {\n");
 		buf.append("    public static class EInner {\n");
@@ -272,7 +300,31 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	}
 
 	public void testTypeDeclInserts() throws Exception {
-		ICompilationUnit cu= fCU_E;
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends Exception implements Runnable, Serializable {\n");
+		buf.append("    public static class EInner {\n");
+		buf.append("        public void xee() {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");		
+		buf.append("    private int i;\n");	
+		buf.append("    private int k;\n");	
+		buf.append("    public E() {\n");
+		buf.append("    }\n");
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("    public void hee() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class F implements Runnable {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		buf.append("interface G {\n");
+		buf.append("}\n");		
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
+
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		AST ast= astRoot.getAST();
@@ -352,7 +404,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 		proposal.apply(null);
 		
-		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public final class E extends Exception implements Cloneable, Runnable, Serializable {\n");
 		buf.append("    public static class EInner {\n");
@@ -606,6 +658,144 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("public class Z {\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testSingleVariableDeclaration() throws Exception {
+/*		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i, int[] k, int[] x[]) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		List arguments= methodDecl.parameters();
+		assertTrue("Number of arguments not 3", arguments.size() == 3);
+		{
+			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(0);
+		}
+		{
+			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(1);
+		}
+		{
+			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(2);
+		}						
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i, int[] k, int[] x[]) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());*/
 	}	
+	
+	public void testVariableDeclarationFragment() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i, j, k= 0, x[][], y[]= {0, 1};\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		
+		VariableDeclarationStatement variableDeclStatement= (VariableDeclarationStatement) statements.get(0);
+		List fragments= variableDeclStatement.fragments();
+		assertTrue("Number of fragments not 5", fragments.size() == 5);
+		
+		{ // rename var, add dimension
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(0);
+			
+			ASTNode name= ast.newSimpleName("a");
+			ASTRewriteAnalyzer.markAsReplaced(fragment.getName(), name);
+			
+			VariableDeclarationFragment modifierNode= ast.newVariableDeclarationFragment();
+			modifierNode.setExtraDimensions(2);
+			
+			ASTRewriteAnalyzer.markAsModified(fragment, modifierNode);
+		}
+		
+		{ // add initializer
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(1);
+			
+			Expression initializer= ast.newNumberLiteral("1");
+			ASTRewriteAnalyzer.markAsInserted(initializer);
+			
+			assertTrue("Has initializer", fragment.getInitializer() == null);
+			fragment.setInitializer(initializer);
+		}
+		
+		{ // remove initializer
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(2);
+			
+			assertTrue("Has no initializer", fragment.getInitializer() != null);
+			ASTRewriteAnalyzer.markAsRemoved(fragment.getInitializer());
+		}
+		{ // add dimension, add initializer
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(3);			
+			
+			VariableDeclarationFragment modifierNode= ast.newVariableDeclarationFragment();
+			modifierNode.setExtraDimensions(4);
+			
+			ASTRewriteAnalyzer.markAsModified(fragment, modifierNode);
+
+			Expression initializer= ast.newNullLiteral();
+			ASTRewriteAnalyzer.markAsInserted(initializer);
+			
+			assertTrue("Has initializer", fragment.getInitializer() == null);
+			fragment.setInitializer(initializer);			
+			
+		}
+		{ // remove dimension
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(4);			
+			
+			VariableDeclarationFragment modifierNode= ast.newVariableDeclarationFragment();
+			modifierNode.setExtraDimensions(0);
+			
+			ASTRewriteAnalyzer.markAsModified(fragment, modifierNode);
+		}					
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int a[][], j = 1, k, x[][][][] = null, y= {0, 1};\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 }

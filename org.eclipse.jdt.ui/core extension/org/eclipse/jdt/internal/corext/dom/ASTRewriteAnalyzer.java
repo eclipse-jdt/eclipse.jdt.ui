@@ -442,12 +442,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			int firstStart= getNextExistingStartPos(list, 0, startPos);
 			addReplace(startPos, firstStart - startPos, keyword, "Update keyword");
 		}
+		int initIndent= getIndent(startPos);
 		
 		for (int i= 0; i < list.size(); i++) {
 			ASTNode elem= (ASTNode) list.get(i);
 			if (isInserted(elem)) {
 				after--;
-				addGenerated(currPos, elem, 0, false);
+				addGenerated(currPos, elem, initIndent, true);
 				if (after != 0) { // not the last that will be entered
 					addInsert(currPos, ", ", "Add comma");
 				}
@@ -465,14 +466,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 						after--;
 						if (after == 0) { // will be last node -> remove comma
 							addDeleteAndVisit(currPos, nextStart - currPos, "Remove", elem);
-							addGenerated(currPos, changed, 0, false);
+							addGenerated(currPos, changed, initIndent, true);
 						} else if (before == 0) { // was last, but not anymore -> add comma
 							addDeleteAndVisit(currPos, currEnd - currPos, "Remove", elem);
-							addGenerated(currPos, changed, 0, false);
+							addGenerated(currPos, changed, initIndent, true);
 							addInsert(currPos, ", ", "Add comma");
 						} else {
 							addDeleteAndVisit(currPos, currEnd - currPos, "Remove", elem);
-							addGenerated(currPos, changed, 0, false);
+							addGenerated(currPos, changed, initIndent, true);
 						}
 					}
 				} else { // no change
@@ -1631,28 +1632,40 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ThrowStatement)
 	 */
 	public boolean visit(ThrowStatement node) {
-		return super.visit(node);
+		rewriteRequiredNode(node.getExpression());		
+		return false;	
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TryStatement)
 	 */
 	public boolean visit(TryStatement node) {
-		return super.visit(node);
+		int pos= rewriteRequiredNode(node.getBody());
+		
+		List catchBlocks= node.catchClauses();
+		pos= rewriteList(pos, " ", catchBlocks, false);
+		
+		Block finallyBlock= node.getFinally();
+		if (finallyBlock != null) {
+			rewriteNode(finallyBlock, pos, " finally ");
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TypeDeclarationStatement)
 	 */
 	public boolean visit(TypeDeclarationStatement node) {
-		return super.visit(node);
+		rewriteRequiredNode(node.getTypeDeclaration());	
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TypeLiteral)
 	 */
 	public boolean visit(TypeLiteral node) {
-		return super.visit(node);
+		rewriteRequiredNode(node.getType());
+		return false;
 	}
 
 	/* (non-Javadoc)
@@ -1679,21 +1692,77 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(VariableDeclarationFragment)
 	 */
 	public boolean visit(VariableDeclarationFragment node) {
-		return super.visit(node);
+		int pos= rewriteRequiredNode(node.getName());
+		
+		if (isModified(node)) {
+			VariableDeclarationFragment modifedNode= (VariableDeclarationFragment) getModifiedNode(node);
+			int oldDim= node.getExtraDimensions();
+			int newDim= modifedNode.getExtraDimensions();
+			if (oldDim < newDim) {
+				for (int i= oldDim; i < newDim; i++) {
+					addInsert(pos, "[]", "Empty bracket");
+				}
+			} else if (newDim < oldDim) {
+				try {
+					IScanner scanner= getScanner(pos);
+					for (int i= newDim; i < oldDim; i++) {
+						ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameRBRACKET);
+					}
+					addDelete(pos, scanner.getCurrentTokenEndPosition() + 1 - pos, "Remove brackets");
+				} catch (InvalidInputException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		}
+		Expression initializer= node.getInitializer();
+		if (initializer != null) {
+			if (isRemoved(initializer)) {
+				int dim= node.getExtraDimensions();
+				if (dim > 0) {
+					try {
+						IScanner scanner= getScanner(pos);
+						for (int i= 0; i < dim; i++) {
+							pos= ASTResolving.getPositionAfter(scanner, ITerminalSymbols.TokenNameRBRACKET);
+						}
+					} catch (InvalidInputException e) {
+						JavaPlugin.log(e);
+					}
+				}
+			} else {
+				pos= node.getStartPosition() + node.getLength(); // insert pos
+			}
+			rewriteNode(initializer, pos, " = ");
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(VariableDeclarationStatement)
 	 */
 	public boolean visit(VariableDeclarationStatement node) {
-		return super.visit(node);
+		// same code as FieldDeclaration		
+		if (isModified(node)) {
+			VariableDeclarationStatement modifedNode= (VariableDeclarationStatement) getModifiedNode(node);
+			rewriteModifiers(node.getStartPosition(), node.getModifiers(), modifedNode.getModifiers());
+		}
+		
+		Type type= node.getType();
+		rewriteRequiredNode(type);
+		
+		List fragments= node.fragments();
+		int startPos= getNextExistingStartPos(fragments, 0, type.getStartPosition() + type.getLength());
+		rewriteList(startPos, "", fragments, false);
+
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(WhileStatement)
 	 */
 	public boolean visit(WhileStatement node) {
-		return super.visit(node);
+		rewriteRequiredNode(node.getExpression());
+		rewriteRequiredNode(node.getBody()); // body
+		return false;
 	}
 
 

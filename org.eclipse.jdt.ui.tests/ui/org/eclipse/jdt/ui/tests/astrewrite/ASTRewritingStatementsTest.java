@@ -61,10 +61,13 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-//		return new TestSuite(THIS);
-		TestSuite suite= new TestSuite();
-		suite.addTest(new ASTRewritingStatementsTest("testSwitchStatement"));
-		return suite;
+		if (true) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new ASTRewritingStatementsTest("testWhileStatement"));
+			return suite;
+		}
 	}
 
 
@@ -1141,5 +1144,443 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+
+	public void testSynchronizedStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        synchronized(this) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+
+		{ // replace expression and body
+			SynchronizedStatement statement= (SynchronizedStatement) statements.get(0);
+			ASTNode newExpression= ast.newSimpleName("obj");
+			ASTRewriteAnalyzer.markAsReplaced(statement.getExpression(), newExpression);
+			
+			Block newBody= ast.newBlock();
+						
+			Assignment assign= ast.newAssignment();
+			assign.setLeftHandSide(ast.newSimpleName("x"));
+			assign.setRightHandSide(ast.newNumberLiteral("1"));
+			assign.setOperator(Assignment.Operator.ASSIGN);
+			
+			newBody.statements().add(ast.newExpressionStatement(assign));
+			
+			ASTRewriteAnalyzer.markAsReplaced(statement.getBody(), newBody);
+		}		
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        synchronized(obj) {\n");
+		buf.append("            x = 1;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testThrowStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        throw new Exception();\n");
+		buf.append("    }\n");
+		buf.append("    public void goo() {\n");
+		buf.append("        throw new Exception('d');\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		{ // replace expression
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+			Block block= methodDecl.getBody();
+			List statements= block.statements();
+			assertTrue("Number of statements not 1", statements.size() == 1);			
+			
+			ThrowStatement statement= (ThrowStatement) statements.get(0);
+			
+			ClassInstanceCreation creation= ast.newClassInstanceCreation();
+			creation.setName(ast.newSimpleName("NullPointerException"));
+			creation.arguments().add(ast.newSimpleName("x"));
+			
+			ASTRewriteAnalyzer.markAsReplaced(statement.getExpression(), creation);
+		}
+		
+		{ // modify expression
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
+			Block block= methodDecl.getBody();
+			List statements= block.statements();
+			assertTrue("Number of statements not 1", statements.size() == 1);			
+			
+			ThrowStatement statement= (ThrowStatement) statements.get(0);			
+			
+			ClassInstanceCreation creation= (ClassInstanceCreation) statement.getExpression();
+			
+			ASTNode newArgument= ast.newSimpleName("x");
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) creation.arguments().get(0), newArgument);
+		}				
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        throw new NullPointerException(x);\n");
+		buf.append("    }\n");
+		buf.append("    public void goo() {\n");
+		buf.append("        throw new Exception(x);\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}		
+		
+	public void testTryStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        try {\n");	
+		buf.append("        } finally {\n");
+		buf.append("        }\n");		
+		buf.append("        try {\n");	
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } finally {\n");
+		buf.append("        }\n");
+		buf.append("        try {\n");	
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List blockStatements= block.statements();
+		assertTrue("Number of statements not 3", blockStatements.size() == 3);
+		{ // add catch, replace finally
+			TryStatement tryStatement= (TryStatement) blockStatements.get(0);
+			
+			CatchClause catchClause= ast.newCatchClause();
+			SingleVariableDeclaration decl= ast.newSingleVariableDeclaration();
+			decl.setType(ast.newSimpleType(ast.newSimpleName("IOException")));
+			decl.setName(ast.newSimpleName("e"));
+			catchClause.setException(decl);
+			
+			ASTRewriteAnalyzer.markAsInserted(catchClause);
+			
+			tryStatement.catchClauses().add(catchClause);
+			
+			Block body= ast.newBlock();
+			body.statements().add(ast.newReturnStatement());
+			
+			ASTRewriteAnalyzer.markAsReplaced(tryStatement.getFinally(), body);
+		}
+		{ // replace catch, remove finally
+			TryStatement tryStatement= (TryStatement) blockStatements.get(1);
+			
+			List catchClauses= tryStatement.catchClauses();
+			
+			CatchClause catchClause= ast.newCatchClause();
+			SingleVariableDeclaration decl= ast.newSingleVariableDeclaration();
+			decl.setType(ast.newSimpleType(ast.newSimpleName("Exception")));
+			decl.setName(ast.newSimpleName("x"));
+			catchClause.setException(decl);
+			
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) catchClauses.get(0), catchClause);
+					
+			ASTRewriteAnalyzer.markAsRemoved(tryStatement.getFinally());
+		}
+		{ // remove catch, add finally
+			TryStatement tryStatement= (TryStatement) blockStatements.get(2);
+			
+			List catchClauses= tryStatement.catchClauses();
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) catchClauses.get(0));
+			
+			
+			Block body= ast.newBlock();
+			body.statements().add(ast.newReturnStatement());
+			ASTRewriteAnalyzer.markAsInserted(body);
+			
+			tryStatement.setFinally(body);
+		}		
+			
+	
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        try {\n");
+		buf.append("        } catch (IOException e) {\n");		
+		buf.append("        } finally {\n");
+		buf.append("            return;\n");				
+		buf.append("        }\n");		
+		buf.append("        try {\n");	
+		buf.append("        } catch (Exception x) {\n");
+		buf.append("        }\n");
+		buf.append("        try {\n");	
+		buf.append("        } finally {\n");
+		buf.append("            return;\n");		
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testTypeDeclarationStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        class A {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		assertTrue("Parse errors", (block.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		{ // replace expression
+			TypeDeclarationStatement stmt= (TypeDeclarationStatement) statements.get(0);
+			
+			TypeDeclaration newDeclaration= ast.newTypeDeclaration();
+			newDeclaration.setName(ast.newSimpleName("X"));
+			newDeclaration.setInterface(true);
+				
+			ASTRewriteAnalyzer.markAsReplaced(stmt.getTypeDeclaration(), newDeclaration);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        interface X {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+
+	}
+	
+	public void testVariableDeclarationStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i1= 1;\n");
+		buf.append("        int i2= 1, k2= 2, n2= 3;\n");
+		buf.append("        final int i3= 1, k3= 2, n3= 3;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "A");
+		
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		assertTrue("Parse errors", (block.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		List statements= block.statements();
+		assertTrue("Number of statements not 3", statements.size() == 3);
+		{	// add modifier, change type, add fragment
+			VariableDeclarationStatement decl= (VariableDeclarationStatement) statements.get(0);
+			
+			// add modifier
+			VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
+			modifiedNode.setModifiers(Modifier.FINAL);
+			
+			ASTRewriteAnalyzer.markAsModified(decl, modifiedNode);
+			
+			PrimitiveType newType= ast.newPrimitiveType(PrimitiveType.BOOLEAN);
+			ASTRewriteAnalyzer.markAsReplaced(decl.getType(), newType);
+			
+			List fragments= decl.fragments();
+			
+			VariableDeclarationFragment frag=	ast.newVariableDeclarationFragment();
+			frag.setName(ast.newSimpleName("k1"));
+			frag.setInitializer(null);
+			
+			ASTRewriteAnalyzer.markAsInserted(frag);
+			
+			fragments.add(frag);
+		}
+		{	// add modifiers, remove first two fragments, replace last
+			VariableDeclarationStatement decl= (VariableDeclarationStatement) statements.get(1);
+			
+			// add modifier
+			VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
+			modifiedNode.setModifiers(Modifier.FINAL);
+			
+			ASTRewriteAnalyzer.markAsModified(decl, modifiedNode);
+			
+			List fragments= decl.fragments();
+			assertTrue("Number of fragments not 3", fragments.size() == 3);
+			
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) fragments.get(0));
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) fragments.get(1));
+			
+			VariableDeclarationFragment frag=	ast.newVariableDeclarationFragment();
+			frag.setName(ast.newSimpleName("k2"));
+			frag.setInitializer(null);
+			
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) fragments.get(2), frag);
+		}
+		{	// remove modifiers
+			VariableDeclarationStatement decl= (VariableDeclarationStatement) statements.get(2);
+			
+			// add modifier
+			VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
+			modifiedNode.setModifiers(0);
+			
+			ASTRewriteAnalyzer.markAsModified(decl, modifiedNode);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");		
+		buf.append("        final boolean i1= 1, k1;\n");
+		buf.append("        final int k2;\n");
+		buf.append("        int i3= 1, k3= 2, n3= 3;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testWhileStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (i == j) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+
+		{ // replace expression and body
+			WhileStatement whileStatement= (WhileStatement) statements.get(0);
+
+			BooleanLiteral literal= ast.newBooleanLiteral(true);
+			ASTRewriteAnalyzer.markAsReplaced(whileStatement.getExpression(), literal);
+			
+			Block newBody= ast.newBlock();
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			ASTRewriteAnalyzer.markAsReplaced(whileStatement.getBody(), newBody);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (true) {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}		
+
 	
 }
+
+
+
