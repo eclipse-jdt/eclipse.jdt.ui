@@ -253,14 +253,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	public void createPartControl(Composite parent) {
 		
 		fViewer= createViewer(parent);
+		fViewer.setUseHashlookup(true);
 		
 		setProviders();
 		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	
-		fViewer.setSorter(new JavaElementSorter());
-		
-		fViewer.setUseHashlookup(true);
 		
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
@@ -276,8 +274,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		makeActions(); // call before registering for selection changes
 		
-		// Set input after filter and sorter has been set. This avoids resorting
-		// and refiltering.
+		// Set input after filter and sorter has been set. This avoids resorting and refiltering.
+		restoreFilterAndSorter();
 		fViewer.setInput(findInputElement());
 		initDragAndDrop();
 		initKeyListener();
@@ -306,7 +304,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.addTreeListener(fExpansionListener);
 	
 		if (fMemento != null)
-			restoreState(fMemento);
+			restoreUIState(fMemento);
 		fMemento= null;
 	
 		// Set help for the view 
@@ -688,7 +686,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
 		//saveScrollState(memento, fViewer.getTree());
-		fActionSet.saveState(memento);
+		fActionSet.saveFilterAndSorterState(memento);
 	}
 	
 	/**
@@ -754,12 +752,17 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 
 
-	void restoreState(IMemento memento) {
+	private void restoreFilterAndSorter() {
+		fViewer.setSorter(new JavaElementSorter());
+		if (fMemento != null)	
+			fActionSet.restoreFilterAndSorterState(fMemento);
+	}
+
+	private void restoreUIState(IMemento memento) {
 		restoreExpansionState(memento);
 		restoreSelectionState(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
 		//restoreScrollState(memento, fViewer.getTree());
-		fActionSet.restoreState(memento);
 	}
 
 	protected void restoreScrollState(IMemento memento, Tree tree) {

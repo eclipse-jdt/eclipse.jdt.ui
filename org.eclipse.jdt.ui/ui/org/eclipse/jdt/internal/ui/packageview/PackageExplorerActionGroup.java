@@ -185,16 +185,13 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 
 	//---- Persistent state -----------------------------------------------------------------------
 
-	/* package */ void restoreState(IMemento memento) {
+	/* package */ void restoreFilterAndSorterState(IMemento memento) {
 		fMemberFilterActionGroup.restoreState(memento);
 		fWorkingSetFilterActionGroup.restoreState(memento);
 		fCustomFiltersActionGroup.restoreState(memento);
-		fPart.getViewer().getControl().setRedraw(false);
-		fPart.getViewer().refresh();
-		fPart.getViewer().getControl().setRedraw(true);
 	}
 	
-	/* package */ void saveState(IMemento memento) {
+	/* package */ void saveFilterAndSorterState(IMemento memento) {
 		fMemberFilterActionGroup.saveState(memento);
 		fWorkingSetFilterActionGroup.saveState(memento);
 		fCustomFiltersActionGroup.saveState(memento);
