@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -1061,11 +1062,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		markAsStateDependentAction("Uncomment", true); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.UNCOMMENT_ACTION);
 
-		action= new ToggleCommentAction(JavaEditorMessages.getResourceBundle(), "ToggleComment.", this, getSourceViewerConfiguration().getDefaultPrefixes(getSourceViewer(), "")); //$NON-NLS-1$ //$NON-NLS-2$
+		action= new ToggleCommentAction(JavaEditorMessages.getResourceBundle(), "ToggleComment.", this); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);		
 		setAction("ToggleComment", action); //$NON-NLS-1$
 		markAsStateDependentAction("ToggleComment", true); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.TOGGLE_COMMENT_ACTION);
+		configureToggleCommentAction();
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);		
@@ -1168,7 +1170,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		// Note that the previous code could result in a reconcile as side effect. Should check if that
 		// is still required.
 		return element;
-	}
+		}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getInputElement()
@@ -1345,6 +1347,22 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
 		configureTabConverter();
+		
+		configureToggleCommentAction();
+	}
+
+	/**
+	 * Configures the toggle comment action
+	 * 
+	 * @since 3.0
+	 */
+	private void configureToggleCommentAction() {
+		IAction action= getAction("ToggleComment"); //$NON-NLS-1$
+		if (action instanceof ToggleCommentAction) {
+			ISourceViewer sourceViewer= getSourceViewer();
+			SourceViewerConfiguration configuration= getSourceViewerConfiguration();
+			((ToggleCommentAction)action).configure(sourceViewer, configuration);
+		}
 	}
 
 	private void configureTabConverter() {
