@@ -190,7 +190,6 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		int length= region.getLength();
 
 		int vOffset= getInclusiveTopIndexStartOffset(fTextWidget, fSourceViewer.getDocument(), offset);		
-//		int vOffset= fSourceViewer.getTopIndexStartOffset();
 		int vLength= fSourceViewer.getBottomIndexEndOffset();		
 		
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {

@@ -82,10 +82,13 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.tasklist.TaskList;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -1377,8 +1380,32 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		int caret= offset + styledText.getCaretOffset();
 		
 		IJavaElement element= getElementAt(caret, false);
-		if (element instanceof ISourceReference)
-			fOutlinePage.select((ISourceReference) element);
+		ISourceReference reference= getSourceReference(element, caret);
+		if (reference != null)
+			fOutlinePage.select(reference);
+	}
+	
+	private ISourceReference getSourceReference(IJavaElement element, int offset) {
+		
+		if ( !(element instanceof ISourceReference))
+			return null;
+		
+		if (element.getElementType() == IJavaElement.IMPORT_DECLARATION) {
+			
+			IImportDeclaration declaration= (IImportDeclaration) element;
+			IImportContainer container= (IImportContainer) declaration.getParent();
+			ISourceRange srcRange= null;
+			
+			try {
+				srcRange= container.getSourceRange();
+			} catch (JavaModelException e) {
+			}
+			
+			if (srcRange != null && srcRange.getOffset() == offset)
+				return container;
+		}
+		
+		return (ISourceReference) element;
 	}
 		
 	/*
