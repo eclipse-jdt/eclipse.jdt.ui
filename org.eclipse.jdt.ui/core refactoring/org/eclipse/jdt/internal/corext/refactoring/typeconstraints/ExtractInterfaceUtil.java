@@ -71,18 +71,18 @@ public final class ExtractInterfaceUtil {
 				if (simple.getRight().isEqualBinding(typeBinding))
 					result.add(simple.getRight());
 			} else {
-				//TODO
+				//TODO composite constraints
 			}
 		}
 		return (ConstraintVariable[]) result.toArray(new ConstraintVariable[result.size()]);
 	}
 
-	private static ConstraintVariable[] getUpdatable(IType theClass, IType theInterface, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
+	private static ConstraintVariable[] getUpdatableVariables(IType theClass, IType theInterface, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
 		ITypeBinding classBinding= getTypeBinding(theClass, astManager);
 		ITypeBinding interfaceBinding= getTypeBinding(theInterface, astManager);
 		ICompilationUnit[] referringCus= getCusToParse(theClass, pm, astManager);
 		ITypeConstraint[] constraints= getConstraints(referringCus, astManager);
-		return getUpdatable(constraints, classBinding, interfaceBinding);
+		return getUpdatableVariables(constraints, classBinding, interfaceBinding);
 	}
 
 //	for (int i= 0; i < constraints.length; i++) {
@@ -94,11 +94,17 @@ public final class ExtractInterfaceUtil {
 	
 	public static ASTNode[] getUpdatableNodes(IType theClass, IType theInterface, IProgressMonitor pm) throws JavaModelException{
 		ASTNodeMappingManager astManager= new ASTNodeMappingManager();
-		ConstraintVariable[] updatableVars= getUpdatable(theClass, theInterface, astManager, pm);
+		ConstraintVariable[] updatableVars= getUpdatableVariables(theClass, theInterface, astManager, pm);
 		return getNodes(updatableVars, theClass.getJavaProject(), astManager);//XXX scope is bogus
 	}
 
-	private static ConstraintVariable[] getUpdatable(ITypeConstraint[] constraints, ITypeBinding classBinding, ITypeBinding interfaceBinding){
+	public static CompilationUnitRange[] getUpdatableRanges(IType theClass, IType theInterface, IProgressMonitor pm) throws JavaModelException{
+		ASTNodeMappingManager astManager= new ASTNodeMappingManager();
+		ConstraintVariable[] updatableVars= getUpdatableVariables(theClass, theInterface, astManager, pm);
+		return getRanges(updatableVars, theClass.getJavaProject(), astManager);//XXX scope is bogus
+	}
+
+	private static ConstraintVariable[] getUpdatableVariables(ITypeConstraint[] constraints, ITypeBinding classBinding, ITypeBinding interfaceBinding){
 		Set setOfAll= new HashSet(Arrays.asList(getAllOfType(constraints, classBinding)));
 		ConstraintVariable[] initialBad= getInitialBad(setOfAll, constraints, interfaceBinding);
 		Set bad= new HashSet();
@@ -372,7 +378,19 @@ public final class ExtractInterfaceUtil {
 	
 	//-- which nodes to update ----//
 	
-	private static ASTNode[] getNodes(ConstraintVariable[] variables, IJavaProject scope, ASTNodeMappingManager astManager) {
+	private static CompilationUnitRange[] getRanges(ConstraintVariable[] variables, IJavaProject scope, ASTNodeMappingManager astManager) throws JavaModelException {
+		//TODO do it in a more lighweight way. we don't need ast nodes - we just ranges
+		ASTNode[] nodes= getNodes(variables, scope, astManager);
+		CompilationUnitRange[] result= new CompilationUnitRange[nodes.length];
+		for (int i= 0; i < nodes.length; i++) {
+			ASTNode node= nodes[i];
+			ICompilationUnit cu= astManager.getCompilationUnit(node);
+			result[i]= new CompilationUnitRange(cu, node);
+		}
+		return result;
+	}
+	
+	private static ASTNode[] getNodes(ConstraintVariable[] variables, IJavaProject scope, ASTNodeMappingManager astManager) throws JavaModelException {
 		Set nodes= new HashSet();
 		for (int i= 0; i < variables.length; i++) {
 			ConstraintVariable variable= variables[i];
@@ -383,24 +401,19 @@ public final class ExtractInterfaceUtil {
 		return (ASTNode[]) nodes.toArray(new ASTNode[nodes.size()]);
 	}
 
-	private static ASTNode getNode(ConstraintVariable variable, IJavaProject scope, ASTNodeMappingManager astManager) {
-		try {
-			if (variable instanceof DeclaringTypeVariable)
-				return null;
-			else if (variable instanceof RawBindingVariable)
-				return null;
-			else if (variable instanceof ParameterTypeVariable)
-				return getNode((ParameterTypeVariable)variable, scope, astManager);
-			else if (variable instanceof ReturnTypeVariable)
-				return getNode((ReturnTypeVariable)variable, scope, astManager);
-			else if (variable instanceof TypeVariable)
-				return ((TypeVariable)variable).getType();
-			else //TODO is this enough?
-				return null;
-		} catch (JavaModelException e) {
-			//TODO log
+	private static ASTNode getNode(ConstraintVariable variable, IJavaProject scope, ASTNodeMappingManager astManager) throws JavaModelException {
+		if (variable instanceof DeclaringTypeVariable)
 			return null;
-		}
+		else if (variable instanceof RawBindingVariable)
+			return null;
+		else if (variable instanceof ParameterTypeVariable)
+			return getNode((ParameterTypeVariable)variable, scope, astManager);
+		else if (variable instanceof ReturnTypeVariable)
+			return getNode((ReturnTypeVariable)variable, scope, astManager);
+		else if (variable instanceof TypeVariable)
+			return ((TypeVariable)variable).getType();
+		else //TODO is this enough?
+			return null;
 	}
 	
 	private static ASTNode getNode(ReturnTypeVariable variable, IJavaProject scope, ASTNodeMappingManager astManager) throws JavaModelException {
