@@ -18,9 +18,8 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -214,25 +213,34 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
     private boolean needsBrackets(int offset) {
-    	if (neverNeedsBracketsAroundReferences())
-    		return false;
+		Expression initializer= fTempDeclaration.getInitializer();
+
+		if (initializer instanceof Assignment)//for esthetic reasons
+			return true;
+		    	
+		SimpleName inlineSite= getReferenceAtOffset(offset);
+    	if (inlineSite == null)
+    		return true;
+    		
+    	return ASTNodes.substituteMustBeParenthesized(initializer, inlineSite);
+    }
+
+	private SimpleName getReferenceAtOffset(int offset) {
     	SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(offset, getTempName().length()), true);
     	fCompilationUnitNode.accept(analyzer);
-    	ASTNode firstSelected= analyzer.getFirstSelectedNode();
-    	if (firstSelected == null)
-    		return true;
-    	ASTNode parent= firstSelected.getParent();
-    	if (parent instanceof VariableDeclarationFragment){
-    		VariableDeclarationFragment vdf= (VariableDeclarationFragment)parent;
-    		if (vdf.getInitializer().equals(firstSelected))
-    			return false;
-    	} else if (parent instanceof MethodInvocation){
-    		MethodInvocation mi= (MethodInvocation)parent;
-    		if (mi.arguments().contains(firstSelected))
-    			return false;
-    	}
-        return true;
-    }
+    	ASTNode reference= analyzer.getFirstSelectedNode();
+    	if(!isReference(reference))
+    		return null;
+    	return (SimpleName) reference;			
+	}
+	
+	private boolean isReference(ASTNode node) {
+		if(!(node instanceof SimpleName))
+			return false;
+		if(!((SimpleName) node).getIdentifier().equals(fTempDeclaration.getName().getIdentifier()))
+			return false;
+		return true;
+	}
 
 	private void removeTemp(TextChange change) throws JavaModelException {
 		//FIX ME - multi declarations
@@ -269,15 +277,6 @@ public class InlineTempRefactoring extends Refactoring {
 		int end= start + length;
 		return fCu.getSource().substring(start, end);
 	}
-	
-    private boolean neverNeedsBracketsAroundReferences() {
-		Expression expression= fTempDeclaration.getInitializer();
-		if (ASTNodes.needsParenthesis(expression))	
-			return false;	
-		if (expression instanceof Assignment)//for estetic reasons
-			return false;	
-		return true;		
-    }
 	
 	private Integer[] getOccurrenceOffsets() throws JavaModelException{
 		return TempOccurrenceFinder.findTempOccurrenceOffsets(fTempDeclaration, true, false);
