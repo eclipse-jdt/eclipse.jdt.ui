@@ -18,6 +18,7 @@ public class JarPackageReader extends Object {
 	
 	/**
 	 * Reads a Jar Package from the underlying stream.
+	 * It is the clients responsiblity to close the stream.
 	 **/
 	public JarPackageReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);
@@ -31,6 +32,7 @@ public class JarPackageReader extends Object {
 	}
 	/**
      * Reads the JAR specification from the underlying stream.
+     * 
      * @exception IOException				if writing to the underlying stream fails
      * @exception ClassNotFoundException	if one of the classes in the stream is not found
      * @deprecated As of 0.114, replaced by readXML - will be removed
@@ -43,10 +45,13 @@ public class JarPackageReader extends Object {
     }
 	/**
      * Closes this stream.
+	 * It is the clients responsiblity to close the stream.
+	 * 
 	 * @exception IOException
      */
     public void close() throws IOException {
-		fInputStream.close();
+    	if (fInputStream != null)
+			fInputStream.close();
 	}
 
 	public JarPackage readXML() throws IOException, SAXException {

@@ -336,7 +336,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	 * Determine if the page is complete and update the page appropriately. 
 	 */
 	protected void updatePageCompletion() {
-		boolean pageComplete= computePageCompletion();
+		boolean pageComplete= computePageCompletion() && fJarPackage.areClassFilesExported();
 		setPageComplete(pageComplete);
 		if (pageComplete) {
 			setErrorMessage(null);

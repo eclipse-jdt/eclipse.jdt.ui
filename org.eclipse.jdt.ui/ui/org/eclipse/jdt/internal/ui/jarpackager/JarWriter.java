@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedInputStream;import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class JarWriter {
 		Assert.isTrue(jarPackage.isValid(), "The JAR package specification is invalid");
 		if (!jarPackage.canCreateJar(parent))
 			throw new OperationCanceledException();
-		if (jarPackage.usesManifest()) {
+		if (jarPackage.usesManifest() && jarPackage.areClassFilesExported()) {
 			Manifest manifest= ManifestFactory.getInstance().create(jarPackage);
 			fJarOutputStream= new JarOutputStream(new FileOutputStream(jarPackage.getJarLocation().toOSString()), manifest);
 		} else
@@ -87,16 +87,15 @@ public class JarWriter {
 	 */
 	public void write(IFile resource, IPath destinationPath) throws IOException, CoreException {
 		ByteArrayOutputStream output= null;
-		InputStream contentStream= null;
+		BufferedInputStream contentStream= null;
 		try {
 			output= new ByteArrayOutputStream();
 			if (!resource.isLocal(IResource.DEPTH_ZERO))
 				throw new IOException("File not accessible: " + resource.getFullPath().toString());
-			contentStream= resource.getContents(false);
+			contentStream= new BufferedInputStream(resource.getContents(false));
 			int chunkSize= contentStream.available();
 			byte[] readBuffer= new byte[chunkSize];
-			int n;
-			while ((n= contentStream.read(readBuffer)) > 0)
+			while (contentStream.read(readBuffer, 0, chunkSize) > 0)
 				output.write(readBuffer);
 		} finally {
 			if (output != null)
@@ -128,8 +127,11 @@ public class JarWriter {
 			checksumCalculator.update(contents);
 			newEntry.setCrc(checksumCalculator.getValue());
 		}
-		fJarOutputStream.putNextEntry(newEntry);
-		fJarOutputStream.write(contents);
-		fJarOutputStream.closeEntry();
+		try {
+			fJarOutputStream.putNextEntry(newEntry);
+			fJarOutputStream.write(contents);
+		} finally  {
+			fJarOutputStream.closeEntry();
+		}
 	}
 }

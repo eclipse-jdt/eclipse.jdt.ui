@@ -172,8 +172,10 @@ public class JarPackageWriter extends Object {
 	 * @exception IOException
      */
     public void close() throws IOException {
-		fOutputStream.flush();
-		fOutputStream.close();
+    	if (fOutputStream != null) {
+			fOutputStream.flush();
+			fOutputStream.close();
+    	}
 	}
 
 	private void add(IResource resource, Element parent, Document document) {
