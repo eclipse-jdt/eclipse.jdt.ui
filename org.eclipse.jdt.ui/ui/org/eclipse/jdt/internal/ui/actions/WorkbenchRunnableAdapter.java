@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -25,17 +26,23 @@ import org.eclipse.jdt.core.JavaCore;
 /**
  * An <code>IRunnableWithProgress</code> that adapts and  <code>IWorkspaceRunnable</code>
  * so that is can be executed inside <code>IRunnableContext</code>. <code>OperationCanceledException</code> 
- * thrown by the apapted runnabled are cought and rethrown as a <code>InterruptedException</code>.
+ * thrown by the adapted runnable are caught and re-thrown as a <code>InterruptedException</code>.
  */
 public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 	
 	private IWorkspaceRunnable fWorkspaceRunnable;
 	private ISchedulingRule fRule;
 	
+	/**
+	 * Runs a workspace runnable with the workspace lock.
+	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable) {
-		this(runnable, null);
+		this(runnable, ResourcesPlugin.getWorkspace().getRoot());
 	}
 	
+	/**
+	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at all.
+	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable, ISchedulingRule rule) {
 		fWorkspaceRunnable= runnable;
 		fRule= rule;
@@ -46,11 +53,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try {
-			if (fRule == null || true) { // wait for answer of bug 53905
-				JavaCore.run(fWorkspaceRunnable, monitor);
-			} else {
-				JavaCore.run(fWorkspaceRunnable, fRule, monitor);
-			}
+			JavaCore.run(fWorkspaceRunnable, fRule, monitor);
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException(e.getMessage());
 		} catch (CoreException e) {

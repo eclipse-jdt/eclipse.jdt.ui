@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
@@ -113,17 +112,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		try {
-			final IFile[] files= getJARFiles(selection);
-			IResource rule= null;
-			for (int i= 0; i < files.length; i++) {
-				IProject curr= files[i].getProject();
-				if (rule == null) {
-					rule= curr;
-				} else if (!rule.equals(curr)) {
-					rule= curr.getParent();
-				}
-			}
-			
+			final IFile[] files= getJARFiles(selection);	
 			
 			IWorkspaceRunnable operation= new IWorkspaceRunnable() {
 				public void run(IProgressMonitor monitor) throws CoreException {
@@ -146,7 +135,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 				}
 			};	
 			
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(operation, rule));
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(operation));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
 				ActionMessages.getString("AddToClasspathAction.error.title"),  //$NON-NLS-1$

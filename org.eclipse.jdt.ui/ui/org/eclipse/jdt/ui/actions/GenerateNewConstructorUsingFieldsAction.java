@@ -391,7 +391,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				if (context == null) {
 					context= new BusyIndicatorRunnableContext();
 				}
-				context.run(false, true, new WorkbenchRunnableAdapter(op, type.getResource()));
+				context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 				IMethod res= op.getCreatedConstructor();
 				JavaModelUtil.reconcile(res.getCompilationUnit());
 				EditorUtility.revealInEditor(editor, res);

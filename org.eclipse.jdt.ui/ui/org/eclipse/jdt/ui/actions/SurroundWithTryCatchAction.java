@@ -128,7 +128,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			Change change= refactoring.createChange(new NullProgressMonitor());
 			change.initializeValidationData(new NullProgressMonitor());
 			PerformChangeOperation op= new UIPerformChangeOperation(change);
-			new BusyIndicatorRunnableContext().run(false, false, new WorkbenchRunnableAdapter(op, cu.getResource()));
+			new BusyIndicatorRunnableContext().run(false, false, new WorkbenchRunnableAdapter(op)); // lock workspace
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {

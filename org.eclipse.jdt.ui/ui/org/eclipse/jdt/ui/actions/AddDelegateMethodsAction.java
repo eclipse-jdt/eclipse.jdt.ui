@@ -420,7 +420,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			context= new BusyIndicatorRunnableContext();
 		}
 		try {
-			context.run(false, true, new WorkbenchRunnableAdapter(op, type.getResource()));
+			context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 		} catch (InterruptedException e) {
 			// cancel pressed
 			return null;

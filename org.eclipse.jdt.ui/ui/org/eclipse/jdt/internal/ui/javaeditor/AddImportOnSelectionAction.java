@@ -15,8 +15,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -151,7 +153,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, settings, false);
 					ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 					try {
-						dialog.run(false, true, new WorkbenchRunnableAdapter(op, cu.getResource()));
+						dialog.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 					} catch (InvocationTargetException e) {
 						ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
 					} catch (InterruptedException e) {
@@ -274,5 +276,13 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			return ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
 		}
 		return null;
-	}	
+	}
+	
+	/**
+	 * @return Returns the scheduling rule for this operation
+	 */
+	public ISchedulingRule getScheduleRule() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+	
 }

@@ -83,7 +83,7 @@ public class BuildPathDialog extends StatusDialog {
 				fBlock.configureJavaProject(monitor); 
 			}
 		};
-		IRunnableWithProgress op= new WorkbenchRunnableAdapter(runnable, fProject.getProject());
+		IRunnableWithProgress op= new WorkbenchRunnableAdapter(runnable); // lock on root
 		try {
 			new ProgressMonitorDialog(shell).run(true, true, op);
 		} catch (InvocationTargetException e) {

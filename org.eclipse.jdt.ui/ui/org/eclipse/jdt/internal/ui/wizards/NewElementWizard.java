@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -25,10 +26,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -82,7 +82,9 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	/**
 	 * Returns the scheduling rule for creating the element.
 	 */
-	protected abstract ISchedulingRule getSchedulingRule();
+	protected ISchedulingRule getSchedulingRule() {
+		return ResourcesPlugin.getWorkspace().getRoot(); // look all by default
+	}
 	
 	
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {

@@ -15,10 +15,12 @@ import java.util.Comparator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -86,6 +88,13 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 				return 0;
 			}
 		});	
+	}
+	
+	/**
+	 * @return Returns the scheduling rule for this operation
+	 */
+	public ISchedulingRule getScheduleRule() {
+		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
 	/**

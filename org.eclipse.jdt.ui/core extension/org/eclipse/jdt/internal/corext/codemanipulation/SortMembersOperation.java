@@ -15,27 +15,15 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.util.CompilationUnitSorter;
+
+import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -260,4 +248,11 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		CompilationUnitSorter.sort(fCompilationUnit, fPositions, new DefaultJavaElementComparator(), 0, monitor);
 	}
 
+	/**
+	 * @return Returns the scheduling rule for this operation
+	 */
+	public ISchedulingRule getScheduleRule() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+	
 }

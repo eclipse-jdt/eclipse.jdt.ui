@@ -196,7 +196,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 					fBuildPathsBlock.configureJavaProject(monitor);
 				}
 			};
-			IRunnableWithProgress op= new WorkbenchRunnableAdapter(runnable, getProject());
+			IRunnableWithProgress op= new WorkbenchRunnableAdapter(runnable);
 			try {
 				new GoToBackProgressMonitorDialog(shell).run(true, true, op);
 			} catch (InvocationTargetException e) {

@@ -200,7 +200,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 		SortMembersOperation op= new SortMembersOperation(cu, null);
 		try {
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-			context.run(false, true, new WorkbenchRunnableAdapter(op, cu.getResource()));
+			context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
 		} catch (InterruptedException e) {

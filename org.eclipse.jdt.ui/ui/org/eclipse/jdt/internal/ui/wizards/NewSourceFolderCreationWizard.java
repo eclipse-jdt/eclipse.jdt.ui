@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -46,12 +45,5 @@ public class NewSourceFolderCreationWizard extends NewElementWizard {
 		fPage.createPackageFragmentRoot(monitor); // use the full progress monitor
 		selectAndReveal(fPage.getCorrespondingResource());
 	}
-	
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getSchedulingRule()
-     */
-    protected ISchedulingRule getSchedulingRule() {
-    	return fPage.getCorrespondingResource();
-    }
-	
+		
 }

@@ -17,11 +17,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -30,10 +32,10 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.*;
-
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -617,5 +619,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	public int getNumberOfImportsAdded() {
 		return fNumberOfImportsAdded;
 	}
+
+	/**
+	 * @return Returns the scheduling rule for this operation
+	 */
+	public ISchedulingRule getScheduleRule() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+	
 	
 }

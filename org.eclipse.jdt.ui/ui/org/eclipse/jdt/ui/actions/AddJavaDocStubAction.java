@@ -167,7 +167,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		try {
 			AddJavaDocStubOperation op= new AddJavaDocStubOperation(members);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-			dialog.run(false, true, new WorkbenchRunnableAdapter(op, cu.getResource()));					
+			dialog.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));					
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
 		} catch (InterruptedException e) {

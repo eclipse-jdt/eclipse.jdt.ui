@@ -757,6 +757,9 @@ public final class JavaModelUtil {
 	
 	private static Boolean fgIsJDTCore_1_5= null;
 	
+	/**
+	 * Return true if JRE 1.5 in enabled.
+	 */
 	public static boolean isJDTCore_1_5() {
 		if (fgIsJDTCore_1_5 == null) {
 			try {
@@ -768,6 +771,9 @@ public final class JavaModelUtil {
 		}
 		return fgIsJDTCore_1_5.booleanValue();
 	}
+	
+	
+	
 	
 	
 }

@@ -13,11 +13,13 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
@@ -229,4 +231,12 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	public void setVisbility(int visbility) {
 		fVisibility= visbility;
 	}
+	
+	/**
+	 * @return Returns the scheduling rule for this operation
+	 */
+	public ISchedulingRule getScheduleRule() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+	
 }

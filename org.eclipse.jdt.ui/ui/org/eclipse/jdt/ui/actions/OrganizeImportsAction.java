@@ -296,7 +296,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				public void run(IProgressMonitor monitor) {
 					doRunOnMultiple(cus, status, monitor);
 				}
-			}));
+			})); // workspace lock
 			if (!status.isOK()) {
 				String title= ActionMessages.getString("OrganizeImportsAction.multi.status.title"); //$NON-NLS-1$
 				ProblemDialog.open(getShell(), title, null, status);
@@ -423,7 +423,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, createChooseImportQuery());
 		
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-			context.run(false, true, new WorkbenchRunnableAdapter(op, cu.getResource()));
+			context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 			IProblem parseError= op.getParseError();
 			if (parseError != null) {
 				String message= ActionMessages.getFormattedString("OrganizeImportsAction.single.error.parse", parseError.getMessage()); //$NON-NLS-1$

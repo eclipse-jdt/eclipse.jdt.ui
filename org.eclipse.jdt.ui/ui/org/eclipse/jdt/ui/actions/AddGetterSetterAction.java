@@ -521,7 +521,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (context == null) {
 				context= new BusyIndicatorRunnableContext();
 			}
-			context.run(false, true, new WorkbenchRunnableAdapter(op, cu.getResource()));
+			context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 		
 			IMethod[] createdMethods= op.getCreatedAccessors();
 			if (createdMethods.length > 0) {

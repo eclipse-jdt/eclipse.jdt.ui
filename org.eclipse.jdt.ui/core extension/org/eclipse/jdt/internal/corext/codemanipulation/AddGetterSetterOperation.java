@@ -14,10 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
@@ -311,7 +313,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	}			
 	
 	/**
-	 * Returns the created accessors. To be called after a sucessful run.
+	 * Returns the created accessors. To be called after a successful run.
 	 */
 	public IMethod[] getCreatedAccessors() {
 		return (IMethod[]) fCreatedAccessors.toArray(new IMethod[fCreatedAccessors.size()]);
@@ -336,4 +338,12 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	public IJavaElement getInsertPosition() {
 		return fInsertPosition;
 	}
+
+	/**
+	 * @return Returns the scheduling rule for this operation
+	 */
+	public ISchedulingRule getScheduleRule() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
 }
+	

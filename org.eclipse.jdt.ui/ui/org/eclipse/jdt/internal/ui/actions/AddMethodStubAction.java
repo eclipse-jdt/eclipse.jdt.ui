@@ -34,13 +34,13 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddMethodStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -108,7 +108,8 @@ public class AddMethodStubAction extends Action {
 			AddMethodStubOperation op= new AddMethodStubOperation(fParentType, methods, settings, createOverrideQuery(), createReplaceQuery(), false);
 		
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-			dialog.run(false, true, new WorkbenchRunnableAdapter(op, fParentType.getResource()));
+			
+			dialog.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 			IMethod[] res= op.getCreatedMethods();
 			if (res != null && res.length > 0 && editor != null) {
 				EditorUtility.revealInEditor(editor, res[0]);
