@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -27,6 +30,8 @@ public final class MoveIndentedSourceEdit extends MoveSourceEdit {
 	private String fDestinationIndent;
 	private int fSourceIndentLevel;
 	private int fTabWidth;
+	private SimpleTextEdit fIndentEdit;
+	private boolean fIndentCorrection;
 
 	public MoveIndentedSourceEdit(int offset, int length) {
 		super(offset, length);
@@ -52,20 +57,50 @@ public final class MoveIndentedSourceEdit extends MoveSourceEdit {
 		result.initialize(fSourceIndentLevel, fDestinationIndent, fTabWidth);
 		return result;
 	}
-
-	protected String computeContent(TextBuffer buffer) {
-		Assert.isTrue(isInitialized(), "MoveIndentedSourceEdit never initialized"); //$NON-NLS-1$
-		
-		String str= super.computeContent(buffer); 
-		
-		int destIndentLevel= Strings.computeIndent(fDestinationIndent, fTabWidth);
-		if (destIndentLevel == fSourceIndentLevel) {
-			return str;
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit#perform(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
+	 */
+	public void perform(TextBuffer buffer) throws CoreException {
+		SimpleTextEdit[] edits= getChangeIndentEdits(buffer, getTextRange());
+		fIndentCorrection= true;
+		for (int i= edits.length - 1; i >= 0; i--) {
+			fIndentEdit= edits[i];
+			buffer.replace(fIndentEdit.getTextRange(), fIndentEdit.getText());
 		}
-		return Strings.changeIndent(str, fSourceIndentLevel, fTabWidth, fDestinationIndent, buffer.getLineDelimiter());
+		fIndentCorrection= false;
+		super.perform(buffer);
 	}
 	
-	public static TextEdit[] getChangeIndentEdits(TextBuffer buffer, TextRange range, int sourceIndent, int tabWidth, String destIndent) {
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit#updateTextRange(int, java.util.List)
+	 */
+	protected void updateTextRange(int delta, List executedEdits) {
+		if (fIndentCorrection) {
+			adjustLength(delta);
+			updateParents(delta);
+			TextRange indentRange= fIndentEdit.getTextRange();
+			int indentOffest= indentRange.getOffset();
+			int size= executedEdits.size();
+			for (int i= 0; i < size; i++) {
+				TextEdit edit= (TextEdit)executedEdits.get(i);
+				TextRange range= edit.getTextRange();
+				if (range.liesBehind(indentRange)) {
+					edit.adjustOffset(delta);
+				} else if (indentRange.covers(range)) {
+					edit.markAsDeleted();
+				} else if (range.covers(indentOffest)) {
+					edit.adjustLength(range.getExclusiveEnd() - indentOffest);
+				} else if (range.covers(indentRange.getInclusiveEnd())) {
+					edit.adjustLength(indentRange.getExclusiveEnd() - range.getOffset());
+				}
+			}
+		} else {
+			super.updateTextRange(delta, executedEdits);
+		}
+	}
+	
+	private SimpleTextEdit[] getChangeIndentEdits(TextBuffer buffer, TextRange range) {
 		int endPos= range.getExclusiveEnd();
 		int firstLine= buffer.getLineOfOffset(range.getOffset());
 		int lastLine= buffer.getLineOfOffset(endPos - 1);
@@ -74,15 +109,15 @@ public final class MoveIndentedSourceEdit extends MoveSourceEdit {
 		if (nLines <= 0) {
 			return null;
 		}
-		TextEdit[] res= new TextEdit[nLines];
+		SimpleTextEdit[] res= new SimpleTextEdit[nLines];
 		for (int i= firstLine + 1, k= 0; i <= lastLine; i++) { // no indent for first line (contained in the formatted string)
 			String line= buffer.getLineContent(i);
 			int offset= buffer.getLineInformation(i).getOffset();
-			int length= line.length() - Strings.trimIndent(line, sourceIndent, tabWidth).length();
+			int length= line.length() - Strings.trimIndent(line, fSourceIndentLevel, fTabWidth).length();
 			if (offset + length > endPos) {
 				length= endPos - offset;
 			}
-			res[k++]= SimpleTextEdit.createReplace(offset, length, destIndent);
+			res[k++]= SimpleTextEdit.createReplace(offset, length, fDestinationIndent);
 		}
 		return res;	
 	}

@@ -341,13 +341,18 @@ public abstract class TextEdit {
 		return getTextRange(fChildren);
 	}
 
-	protected void adjustOffset(int delta) {
+	public void adjustOffset(int delta) {
 		getTextRange().addToOffset(delta);
 	}
 	
-	protected void adjustLength(int delta) {
+	public void adjustLength(int delta) {
 		getTextRange().addToLength(delta);
 	}
+	
+	public void markAsDeleted() {
+		getTextRange().markAsDeleted();
+	}
+	
 	
 	//---- Helpers -------------------------------------------------------------------------------------------
 	
@@ -472,6 +477,14 @@ public abstract class TextEdit {
 	
 	//---- Edit processing --------------------------------------------------------------------------------
 	
+	protected void updateTextRange(int delta, List executedEdits) {
+		for (Iterator iter= executedEdits.iterator(); iter.hasNext();) {
+			((TextEdit)iter.next()).predecessorExecuted(delta);
+		}
+		adjustLength(delta);
+		updateParents(delta);
+	}
+	
 	/* package */ void executeConnect(TextBuffer buffer) throws CoreException {
 		Assert.isTrue(isUnconnected());
 		fLifeCycle= ADDED;
@@ -506,14 +519,6 @@ public abstract class TextEdit {
 		pm.worked(1);
 	}
 	
-	/* package */ void updateTextRange(int delta, List executedEdits) {
-		for (Iterator iter= executedEdits.iterator(); iter.hasNext();) {
-			((TextEdit)iter.next()).predecessorExecuted(delta);
-		}
-		adjustLength(delta);
-		updateParents(delta);
-	}
-	
 	/* package */ void childExecuted(int delta) {
 		adjustLength(delta);
 	}
@@ -522,17 +527,17 @@ public abstract class TextEdit {
 		adjustOffset(delta);
 	}
 	
-	/* package */ void markAsDeleted(List children) {
-		if (children != null) {
-			for (Iterator iter= children.iterator(); iter.hasNext();) {
-				TextEdit element= (TextEdit) iter.next();
-				element.getTextRange().markAsDeleted();
-				markAsDeleted(element.getChildren());
+	/* package */ void markChildrenAsDeleted() {
+		if (fChildren != null) {
+			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
+				TextEdit edit= (TextEdit) iter.next();
+				edit.markAsDeleted();
+				edit.markChildrenAsDeleted();
 			}
-		}
+		}	
 	}
 	
-	/* package */ void updateParents(int delta) {
+	protected void updateParents(int delta) {
 		TextEdit edit= getParent();
 		while (edit != null) {
 			edit.childExecuted(delta);

@@ -63,11 +63,11 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingTrackingTest("testNamesWithMove3"));
+			suite.addTest(new ASTRewritingTrackingTest("testNamesWithMove2"));
 			return new ProjectTestSetup(suite);
 		}
 	}

@@ -346,6 +346,15 @@ public class TextBuffer {
 		return fgFactory.makeCommittable(this, context);
 	}
 	
+	//---- Debugging methods ----------------------------------------
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return fDocument.get();
+	}
+	
 	//---- Special methods used by the <code>TextBufferEditor</code>
 	
 	/**

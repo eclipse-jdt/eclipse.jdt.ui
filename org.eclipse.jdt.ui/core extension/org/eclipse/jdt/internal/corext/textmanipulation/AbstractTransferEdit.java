@@ -49,21 +49,26 @@ import org.eclipse.jdt.internal.corext.Assert;
 		fRange= range;
 	}
 	
-	/* package */ void predecessorExecuted(List executedEdits, TextEdit last, int delta) {
-		// The first element in the list of executed edits is the one that got
-		// executed first. So we have to iterate from the back. Additionally we
-		// have to ignore the child edits of this edit, which are the last edits
-		// in the list of executed edits.
-		for (int i= executedEdits.size() - 1 - getNumberOfChildren(); i >= 0; i--) {
+	/* package */ static void predecessorExecuted(List executedEdits, int skipEnd, int delta) {
+		int end= executedEdits.size() - skipEnd;
+		for (int i= 0; i < end; i++) {
 			TextEdit edit= (TextEdit)executedEdits.get(i);
 			edit.predecessorExecuted(delta);
-			if (edit == last)
-				return;
-			
 		}
 	}
 	
-	/* package */ void move(List children, int delta) {
+	/* package */ static void predecessorExecuted(List executedEdits, TextEdit stop, int skip, int delta) {
+		// The first element in the list of executed edits is the one that got
+		// executed first. 
+		for (int i= executedEdits.size() - 1 - skip; i >= 0; i--) {
+			TextEdit edit= (TextEdit)executedEdits.get(i);
+			edit.predecessorExecuted(delta);
+			if (edit == stop)
+				return;
+		}
+	}
+	
+	/* package */ static void move(List children, int delta) {
 		if (children != null) {
 			for (Iterator iter= children.iterator(); iter.hasNext();) {
 				TextEdit element= (TextEdit)iter.next();
@@ -71,5 +76,5 @@ import org.eclipse.jdt.internal.corext.Assert;
 				move(element.getChildren(), delta);
 			}
 		}
-	}	
+	}		
 }

@@ -77,7 +77,7 @@ public class CopySourceEdit extends AbstractTransferEdit {
 		return buffer.getContent(range.getOffset(), range.getLength());
 	}
 	
-	/* package */ void updateTextRange(int delta, List executedEdits) {
+	protected void updateTextRange(int delta, List executedEdits) {
 		boolean doIt= true;
 		for (Iterator iter= executedEdits.iterator(); iter.hasNext() && doIt;) {
 			TextEdit edit= (TextEdit)iter.next();

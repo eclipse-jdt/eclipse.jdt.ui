@@ -21,9 +21,12 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class MoveSourceEdit extends AbstractTransferEdit {
 
-	private String fContent;
 	/* package */ int fCounter;
 	private MoveTargetEdit fTarget;
+	
+	private String fContent;
+	private TextRange fContentRange;
+	private List fContentChildren;
 	
 	public MoveSourceEdit(int offset, int length) {
 		super(new TextRange(offset, length));
@@ -45,7 +48,7 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	protected String computeContent(TextBuffer buffer) {
+	private String getContent(TextBuffer buffer) {
 		TextRange range= getTextRange();
 		return buffer.getContent(range.getOffset(), range.getLength());
 	}	
@@ -54,27 +57,50 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 	 * @see TextEdit#perform
 	 */	
 	public void perform(TextBuffer buffer) throws CoreException {
-		fContent= computeContent(buffer);
-		if (++fCounter == 2) {
-			try {
-				// Delete source
-				if (!getTextRange().isDeleted()) {
-					fMode= DELETE;
-					buffer.replace(getTextRange(), ""); //$NON-NLS-1$
-				}
-				
-				if (!fTarget.getTextRange().isDeleted()) {
+		fCounter++;
+		switch(fCounter) {
+			// Position of move source > position of move target.
+			// Hence MoveTarget does the actual move. Move Source
+			// only deletes the content.
+			case 1:
+				fContent= getContent(buffer);
+				fContentRange= getTextRange().copy();
+				fContentChildren= getChildren();
+				fMode= DELETE;
+				buffer.replace(fContentRange, ""); //$NON-NLS-1$
+				// do this after executing the replace to be able to
+				// compute the number of children.
+				setChildren(null);
+				break;
+			// Position of move source < position of move target.
+			// Hence move source handles the delete and the 
+			// insert at the target position.	
+			case 2:
+				fContent= getContent(buffer);
+				fMode= DELETE;
+				buffer.replace(getTextRange(), ""); //$NON-NLS-1$
+				TextRange targetRange= fTarget.getTextRange();
+				if (!targetRange.isDeleted()) {
 					// Insert target
 					fMode= INSERT;
-					buffer.replace(fTarget.getTextRange(), fContent);
+					buffer.replace(targetRange, fContent);
 				}
-			} finally {
-				fMode= UNDEFINED;
 				clearContent();
-			}
+				break;
+			default:
+				Assert.isTrue(false, "Should never happen"); //$NON-NLS-1$
 		}
 	}
 
+	/* non Java-doc
+	 * @see TextEdit#adjustOffset
+	 */	
+	public void adjustOffset(int delta) {
+		if (fContentRange != null)
+			fContentRange.addToOffset(delta);
+		super.adjustOffset(delta);
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
@@ -95,20 +121,43 @@ public class MoveSourceEdit extends AbstractTransferEdit {
 		return fContent;
 	}
 	
-	/* package */ void clearContent() {
-		fContent= null;
+	/* package */ List getContentChildren() {
+		return fContentChildren;
 	}
 	
-	/* package */ void updateTextRange(int delta, List executedEdits) {
+	/* package */ TextRange getContentRange() {
+		return fContentRange;
+	}
+	
+	/* package */ void clearContent() {
+		fContent= null;
+		fContentChildren= null;
+		fContentRange= null;
+	}
+	
+	protected void updateTextRange(int delta, List executedEdits) {
 		if (fMode == DELETE) {
-			predecessorExecuted(executedEdits, fTarget, delta);
 			adjustLength(delta);
 			updateParents(delta);
+			if (fCounter == 1) {
+				predecessorExecuted(executedEdits, getNumberOfChildren(), delta);
+			} else {
+				// only update the edits which are executed between the move source
+				// and the move target. For all other edits nothing will change.
+				// The children of the move source will be updte when moving them 
+				// under the target edit
+				for (int i= executedEdits.size() - 1 - getNumberOfChildren(); i >= 0; i--) {
+					TextEdit edit= (TextEdit)executedEdits.get(i);
+					edit.predecessorExecuted(delta);
+					if (edit == fTarget)
+						break;
+				}
+			}
 		} else if (fMode == INSERT) {
 			fTarget.adjustLength(delta);
 			fTarget.updateParents(delta);
 			
-			markAsDeleted(fTarget.getChildren());
+			fTarget.markChildrenAsDeleted();
 			
 			List children= getChildren();
 			setChildren(null);

@@ -88,14 +88,14 @@ public final class AutoOrganizingTextEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#adjustOffset
 	 */	
-	protected void adjustOffset(int delta) {
+	public void adjustOffset(int delta) {
 		// do nothing since this edit doesn't manage its own TextRange
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#adjustLength
 	 */	
-	protected void adjustLength(int delta) {
+	public void adjustLength(int delta) {
 		// do nothing since this edit doesn't manage its own TextRange
 	}
 	

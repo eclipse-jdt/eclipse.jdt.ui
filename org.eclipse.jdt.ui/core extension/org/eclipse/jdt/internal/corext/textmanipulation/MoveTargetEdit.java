@@ -48,24 +48,10 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 	 */	
 	public void perform(TextBuffer buffer) throws CoreException {
 		if (++fSource.fCounter == 2) {
-			try {
-				String source= getSourceContent();
-	
-				if (!getTextRange().isDeleted()) {
-					// Insert target
-					fMode= INSERT;
-					buffer.replace(getTextRange(), source);
-				}
-				
-				// Delete source
-				if (!fSource.getTextRange().isDeleted()) {
-					fMode= DELETE;
-					buffer.replace(fSource.getTextRange(), ""); //$NON-NLS-1$
-				}
-			} finally {
-				fMode= UNDEFINED;
-				fSource.clearContent();
-			}
+			String source= getSourceContent();
+
+			fMode= INSERT;
+			buffer.replace(getTextRange(), source);
 		}
 	}
 	
@@ -92,23 +78,20 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	/* package */ void updateTextRange(int delta, List executedEdits) {
+	protected void updateTextRange(int delta, List executedEdits) {
 		if (fMode == INSERT) {
-			int moveDelta= getTextRange().getOffset() - fSource.getTextRange().getOffset();
+			// we have to substract the delta since <code>super.updateTextRange</code>
+			// add the delta to the move source's children.
+			int moveDelta= getTextRange().getOffset() - fSource.getContentRange().getOffset() - delta;
 			
-			predecessorExecuted(executedEdits, fSource, delta);
-			adjustLength(delta);
-			updateParents(delta);
+			markChildrenAsDeleted();
 
-			markAsDeleted(getChildren());
-			
-			List sourceChildren= fSource.getChildren();
-			fSource.setChildren(null);
+			super.updateTextRange(delta, executedEdits);			
+
+			List sourceChildren= fSource.getContentChildren();
 			move(sourceChildren, moveDelta); 
 			setChildren(sourceChildren);
-		} else if (fMode == DELETE) {
-			fSource.adjustLength(delta);
-			fSource.updateParents(delta);
+			
 		} else {
 			Assert.isTrue(false);
 		}

@@ -203,7 +203,7 @@ public final class TextRange {
 		return fLength == 0 && range.fLength == 0 && fOffset == range.fOffset;
 	}
 
-	/* package */ boolean liesBehind(TextRange range) {
+	public boolean liesBehind(TextRange range) {
 		return fOffset >= range.fOffset + range.fLength;
 	}
 
@@ -211,7 +211,13 @@ public final class TextRange {
 		return fOffset == o && fLength == 0;
 	}
 	
-	/* package */ boolean covers(TextRange other) {
+	public boolean covers(int point) {
+		if (fLength == 0)
+			return false;
+		return fOffset <= point && point < fOffset + fLength;	
+	}
+	
+	public boolean covers(TextRange other) {
 		if (fLength == 0) {	// an insertion point can't cover anything
 			return false;
 		} else if (other.fLength == 0) {
