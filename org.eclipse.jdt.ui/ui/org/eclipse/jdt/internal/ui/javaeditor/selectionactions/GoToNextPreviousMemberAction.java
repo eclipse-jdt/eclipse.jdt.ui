@@ -84,7 +84,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	 */
 	public final  void run() {
 		ITextSelection selection= getTextSelection();
-		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection));
+		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection), null);
 		// Check if new selection differs from current selection
 		if (selection.getOffset() == newRange.getOffset() && selection.getLength() == newRange.getLength())
 			return;
@@ -113,9 +113,11 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		return (ITextSelection)fEditor.getSelectionProvider().getSelection();
 	}
 	
-	public ISourceRange getNewSelectionRange(ISourceRange oldSourceRange) {
+	public ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, IType[] types) {
 		try{
-			Integer[] offsetArray= createOffsetArray(getTypes());
+			if (types == null)
+				types= getTypes();
+			Integer[] offsetArray= createOffsetArray(types);
 			if (offsetArray.length == 0)
 				return oldSourceRange;
 			Arrays.sort(offsetArray);
@@ -132,8 +134,8 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	 		return oldSourceRange;
 	 	}
 	}
-	
-	private static Integer getPreviousOffset(int index, Integer[] offsetArray, Integer oldOffset){
+		
+	private static Integer getPreviousOffset(int index, Integer[] offsetArray, Integer oldOffset) {
 		if (index == -1)
 			return oldOffset;
 		if (index == 0)
@@ -145,7 +147,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		return offsetArray[absIndex - 2];	
 	}
 	
-	private static Integer getNextOffset(int index, Integer[] offsetArray, Integer oldOffset){
+	private static Integer getNextOffset(int index, Integer[] offsetArray, Integer oldOffset) {
 		if (index == -1)
 			return offsetArray[0];
 
@@ -218,7 +220,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 
 	//-- private helper methods
 	
-	private static ISourceRange createSourceRange(ITextSelection ts){
+	private static ISourceRange createSourceRange(ITextSelection ts) {
 		return new SourceRange(ts.getOffset(), ts.getLength());
 	}
 	
