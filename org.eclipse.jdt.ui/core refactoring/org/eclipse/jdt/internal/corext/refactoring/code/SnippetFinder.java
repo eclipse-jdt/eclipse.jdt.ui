@@ -129,7 +129,7 @@ public class SnippetFinder extends GenericVisitor {
 	}
 	
 	private boolean matches(ASTNode node) {
-		if (node == fSnippet[fIndex])
+		if (isSnippetNode(node))
 			return false;
 		if (node.subtreeMatch(fMatcher, fSnippet[fIndex])) {
 			fMatch.add(node);
@@ -150,5 +150,13 @@ public class SnippetFinder extends GenericVisitor {
 	private void reset() {
 		fIndex= 0;
 		fMatch= new Match();
+	}
+	
+	private boolean isSnippetNode(ASTNode node) {
+		for (int i= 0; i < fSnippet.length; i++) {
+			if (node == fSnippet[i])
+				return true;
+		}
+		return false;
 	}
 }
