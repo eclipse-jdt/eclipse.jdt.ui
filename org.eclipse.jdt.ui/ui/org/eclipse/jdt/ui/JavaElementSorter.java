@@ -93,6 +93,10 @@ public class JavaElementSorter extends ViewerSorter {
 	/**
 	 * @deprecated Bug 22518. Method never used: does not override ViewerSorter#isSorterProperty(Object, String).
 	 * Method could be removed, but kept for API compatibility.
+	 * 
+     * @param element the element
+     * @param property the property
+     * @return always <code>true</code>
 	 */	
 	public boolean isSorterProperty(Object element, Object property) {
 		return true;

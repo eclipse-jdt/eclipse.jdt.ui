@@ -26,11 +26,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-/**
- * useful debug routines
- * no java doc
- * @deprecated not really
- */
 public final class DebugUtils {
 
 	private DebugUtils(){
@@ -158,8 +153,4 @@ public final class DebugUtils {
 			dumpImports(packages[i]);
 		}	
 	}
-
-
-
-	
 }

@@ -41,6 +41,8 @@ public final class Assert {
 	 * </p>
 	 */
 	private static class AssertionFailedException extends RuntimeException {
+		/** This class is not intended to be serialized. */
+		private static final long serialVersionUID= 1L;
 
 		/**
 		 * Constructs a new exception.
@@ -50,6 +52,7 @@ public final class Assert {
 
 		/**
 		 * Constructs a new exception with the given message.
+		 * @param detail the detail message
 		 */
 		public AssertionFailedException(String detail) {
 			super(detail);

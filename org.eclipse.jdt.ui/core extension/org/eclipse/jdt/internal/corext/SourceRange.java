@@ -67,6 +67,8 @@ public class SourceRange implements ISourceRange{
 	/**
 	 * Sorts the given ranges by offset (backwards).
 	 * Note: modifies the parameter.
+	 * @param ranges the ranges to sort
+	 * @return the sorted ranges, which are identical to the parameter ranges
 	 */
 	public static ISourceRange[] reverseSortByOffset(ISourceRange[] ranges){
 		Comparator comparator= new Comparator(){

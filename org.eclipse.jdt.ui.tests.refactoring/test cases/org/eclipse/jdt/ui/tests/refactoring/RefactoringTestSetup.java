@@ -10,29 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import java.util.Hashtable;
-
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
 
-public class RefactoringTestSetup extends TestSetup {
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
+
+public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 	
 	public RefactoringTestSetup(Test test) {
 		super(test);
 	}
+	
 	public static final String CONTAINER= "src";
 	private static IPackageFragmentRoot fgRoot;
 	private static IPackageFragment fgPackageP;
@@ -65,21 +60,6 @@ public class RefactoringTestSetup extends TestSetup {
 		JavaProjectHelper.addRTJar(fgJavaTestProject);
 		fgRoot= JavaProjectHelper.addSourceContainer(fgJavaTestProject, CONTAINER);
 		fgPackageP= fgRoot.createPackageFragment("p", true, null);
-		
-
-		Hashtable options= TestOptions.getFormatterOptions();
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
-		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-		JavaCore.setOptions(options);
-		TestOptions.initializeCodeGenerationOptions();
-		JavaPlugin.getDefault().getCodeTemplateStore().load();		
-		
-		StringBuffer comment= new StringBuffer();
-		comment.append("/**\n");
-		comment.append(" * ${tags}\n");
-		comment.append(" */");
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern(comment.toString());
 	}
 	
 	protected void tearDown() throws Exception {

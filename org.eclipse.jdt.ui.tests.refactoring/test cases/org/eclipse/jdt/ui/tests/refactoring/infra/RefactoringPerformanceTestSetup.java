@@ -8,19 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext;
+package org.eclipse.jdt.ui.tests.refactoring.infra;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
+import junit.framework.Test;
 
-/**
- * Exception thrown if a valid edit failed.
- */
-public class ValidateEditException extends CoreException {
+public class RefactoringPerformanceTestSetup extends AbstractRefactoringTestSetup {
 
-	private static final long serialVersionUID= 1L;
-
-	public ValidateEditException(IStatus status) {
-		super(status);
+	public RefactoringPerformanceTestSetup(Test test) {
+		super(test);
 	}
 }

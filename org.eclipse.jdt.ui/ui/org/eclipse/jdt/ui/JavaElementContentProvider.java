@@ -98,6 +98,8 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	 * current thread but the viewer updates are posted to the UI thread.
 	 * 
 	 * @param delta the delta to be processed
+	 * 
+	 * @throws JavaModelException if an error occurs while processing the delta
 	 */
 	protected void processDelta(IJavaElementDelta delta) throws JavaModelException {
 		int kind= delta.getKind();

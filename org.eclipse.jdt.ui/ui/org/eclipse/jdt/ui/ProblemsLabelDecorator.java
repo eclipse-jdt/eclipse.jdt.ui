@@ -72,9 +72,14 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 		/**
 		 * Note: This constructor is for internal use only. Clients should not call this constructor.
+		 * 
+		 * @param eventSource the base label provider
+		 * @param changedResource the changed resources
+		 * @param isMarkerChange <code>true<code> if the change is a marker change; otherwise
+		 *  <code>false</code> 
 		 */
-		public ProblemsLabelChangedEvent(IBaseLabelProvider source, IResource[] changedResource, boolean isMarkerChange) {
-			super(source, changedResource);
+		public ProblemsLabelChangedEvent(IBaseLabelProvider eventSource, IResource[] changedResource, boolean isMarkerChange) {
+			super(eventSource, changedResource);
 			fMarkerChange= isMarkerChange;
 		}
 		
@@ -108,14 +113,11 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		fUseNewRegistry= true;
 	}
 	
-	/*
-	 * Creates decorator with a shared image registry.
-	 * 
-	 * @param registry The registry to use or <code>null</code> to use the Java plugin's
-	 * image registry.
-	 */
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * 
+	 * @param registry The registry to use or <code>null</code> to use the Java plugin's
+	 *  image registry
 	 */
 	public ProblemsLabelDecorator(ImageDescriptorRegistry registry) {
 		fRegistry= registry;
@@ -152,6 +154,10 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * 
+	 * @param obj the element to compute the flags for
+	 * 
+	 * @return the adornment flags
 	 */
 	protected int computeAdornmentFlags(Object obj) {
 		try {

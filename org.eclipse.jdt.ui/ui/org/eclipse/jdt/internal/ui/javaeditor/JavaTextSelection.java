@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -153,11 +154,14 @@ public class JavaTextSelection extends TextSelection {
 		} else {
 			while (node != null) {
 				int nodeType= node.getNodeType();
-				if (nodeType == ASTNode.BLOCK && node.getParent() instanceof BodyDeclaration) {
-					fInInitializer= node.getParent().getNodeType() == ASTNode.INITIALIZER;
+				if (node instanceof AbstractTypeDeclaration) {
+					fInInitializer= false;
 					break;
 				} else if (nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
 					fInInitializer= false;
+					break;
+				} else if (nodeType == ASTNode.INITIALIZER) {
+					fInInitializer= true;
 					break;
 				}
 				node= node.getParent();
