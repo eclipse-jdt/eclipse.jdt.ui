@@ -1,4 +1,7 @@
 package p;
+
+import p.A.F;
+
 class B{
 	public static void m(){
 		A.F[] y;
