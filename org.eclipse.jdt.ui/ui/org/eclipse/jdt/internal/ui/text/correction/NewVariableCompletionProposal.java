@@ -162,19 +162,21 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			// x = 1; -> int x = 1;
 			Assignment assignment= (Assignment) node.getParent();
 			
+			// trick to avoid comment removal around the statement: keep the expression statement
+			// and replace the assignment with an VariableDeclarationExpression
 			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-			VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
+			VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
 			newDecl.setType(evaluateVariableType(ast));
 			
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			newDeclFrag.setInitializer(placeholder);
 			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
-			rewrite.replace(dominantStatement, newDecl, null);
+			rewrite.replace(assignment, newDecl, null);
 			
 			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			addLinkedPosition(rewrite.track(newDeclFrag.getName()), true, KEY_NAME);
 			
-			setEndPosition(rewrite.track(newDecl));
+			setEndPosition(rewrite.track(assignment.getParent()));
 
 			return rewrite;
 		} else if ((dominant != dominantStatement) && isForStatementInit(dominantStatement, node)) {
