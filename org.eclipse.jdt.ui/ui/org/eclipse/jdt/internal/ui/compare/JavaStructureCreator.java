@@ -27,8 +27,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.*;
-import org.eclipse.compare.internal.DocumentManager;
-import org.eclipse.compare.internal.IResourceProvider;
+import org.eclipse.compare.IResourceProvider;
 import org.eclipse.compare.structuremergeviewer.*;
 
 
@@ -107,7 +106,7 @@ public class JavaStructureCreator implements IStructureCreator {
 	public IStructureComparator getStructure(final Object input) {
 		String contents= null;
 		char[] buffer= null;
-		IDocument doc= DocumentManager.get(input);
+		IDocument doc= CompareUI.getDocument(input);
 		if (doc == null) {
 			if (input instanceof IStreamContentAccessor) {
 				IStreamContentAccessor sca= (IStreamContentAccessor) input;			
@@ -125,7 +124,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				contents.getChars(0, n, buffer, 0);
 				
 				doc= new Document(contents);
-				DocumentManager.put(input, doc);
+				CompareUI.registerDocument(input, doc);
 				JavaCompareUtilities.setupDocument(doc);				
 			}
 		}

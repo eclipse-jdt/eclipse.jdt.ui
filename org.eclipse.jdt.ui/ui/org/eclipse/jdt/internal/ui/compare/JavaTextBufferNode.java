@@ -17,7 +17,7 @@ import org.eclipse.compare.HistoryItem;
 import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.ResourceNode;
-import org.eclipse.compare.internal.IResourceProvider;
+import org.eclipse.compare.IResourceProvider;
 import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
