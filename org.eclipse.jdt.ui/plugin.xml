@@ -1235,7 +1235,7 @@
             nameFilter="*.xml"
             id="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard">
          <visibility>
-            <objectState name="xmlFirstTag" value="project"/>
+            <objectState name="contentTypeId" value="org.eclipse.ant.core.antBuildFile"/>
          </visibility>
           <action
                label="%CreateJavadocAction.label"
