@@ -143,6 +143,10 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "PARAMETER TYPES", methodBinding.getParameterTypes())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "EXCEPTION TYPES", methodBinding.getExceptionTypes())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", methodBinding.getTypeParameters())); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "IS PARAMETRIZED METHOD", methodBinding.isParameterizedMethod())); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "TYPE ARGUMENTS", methodBinding.getTypeArguments())); //$NON-NLS-1$			
+					res.add(new Binding(this, "ERASURE", methodBinding.getErasure(), true)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "IS RAW METHOD", methodBinding.isRawMethod())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated())); //$NON-NLS-1$
 
