@@ -247,11 +247,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 * preference store to let older versions access it. Since 2.1 the
 		 * Java editor font is managed by the workbench font preference page.
 		 */
-		PreferenceConverter.setValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT).getFontData());
+		PreferenceConverter.putValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT).getFontData());
 		fFontPropertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (PreferenceConstants.EDITOR_TEXT_FONT.equals(event.getProperty()))
-					PreferenceConverter.setValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT).getFontData());
+					PreferenceConverter.putValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT).getFontData());
 	}
 		};
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
