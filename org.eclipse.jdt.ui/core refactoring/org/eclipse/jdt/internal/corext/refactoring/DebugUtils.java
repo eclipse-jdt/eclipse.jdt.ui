@@ -18,8 +18,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-/*
- * kitchen sink for debug utils
+/**
+ * useful debug routines
  * no java doc
  * @deprecated not really
  */
@@ -113,7 +113,7 @@ public final class DebugUtils {
 
 	public static void dump(Object o){
 		if (o == null)
-			dump(o);		
+			dump("null");		
 		else
 			dump(o.toString());	
 	}
