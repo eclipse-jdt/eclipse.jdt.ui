@@ -306,10 +306,21 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		}
 		if (member.getElementType() != IJavaElement.TYPE) {
+			if (JavaBasePreferencePage.reconcileJavaViews() && cu != null) {
+				try {
+					member= (IMember) EditorUtility.getWorkingCopy(member);
+					if (member == null) {
+						return;
+					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+			}
 			Control methodControl= fMethodsViewer.getControl();
 			if (methodControl != null && !methodControl.isDisposed()) {
 				methodControl.setFocus();
 			}
+
 			fMethodsViewer.setSelection(new StructuredSelection(member), true);
 		} else {
 			Control viewerControl= getCurrentViewer().getControl();
@@ -354,6 +365,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public void setInputElement(IJavaElement element) {
 		if (element != null) {
 			if (element instanceof IMember) {
+				if (element.getElementType() != IJavaElement.TYPE) {
+					element= ((IMember) element).getDeclaringType();
+				}				
 				ICompilationUnit cu= ((IMember) element).getCompilationUnit();
 				if (cu != null && cu.isWorkingCopy()) {
 					element= cu.getOriginal(element);
@@ -361,9 +375,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 						MessageDialog.openError(getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 						return;
 					}
-				}
-				if (element.getElementType() == IJavaElement.METHOD || element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.INITIALIZER) {
-					element= ((IMember) element).getDeclaringType();
 				}
 			}
 		}	
