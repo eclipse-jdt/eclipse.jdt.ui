@@ -3613,21 +3613,21 @@
          point="org.eclipse.jdt.ui.javaElementFilters">
 <!-- Package Explorer -->
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideSystemFiles.label"
             enabled="true"
             description="%HideSystemFiles.description"
             pattern=".*">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideInnerClassFiles.label"
             enabled="true"
             description="%HideInnerClassFiles.description"
             pattern="*$*.class">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideEmptyPackages.label"
             enabled="false"
             description="%HideEmptyPackages.description"
@@ -3635,7 +3635,7 @@
             id="org.eclipse.jdt.internal.ui.PackageExplorer.EmptyPackageFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideEmptyInnerPackages.label"
             enabled="true"
             description="%HideEmptyInnerPackages.description"
@@ -3643,7 +3643,7 @@
             id="org.eclipse.jdt.internal.ui.PackageExplorer.EmptyInnerPackageFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideNonJavaElements.label"
             enabled="false"
             description="%HideNonJavaElements.description"
@@ -3651,7 +3651,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.NonJavaElementFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideReferencedLibraries.label"
             enabled="false"
             description="%HideReferencedLibraries.description"
@@ -3659,7 +3659,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.LibraryFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideJavaFiles.label"
             enabled="false"
             description="%HideJavaFiles.description"
@@ -3667,7 +3667,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.CuAndClassFileFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HidePackageDeclaration.label"
             enabled="true"
             description="%HidePackageDeclaration.description"
@@ -3675,7 +3675,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.PackageDeclarationFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideImportDeclaration.label"
             enabled="true"
             description="%HideImportDeclaration.description"
@@ -3683,7 +3683,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.ImportDeclarationFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideNonJavaProjects.label"
             enabled="false"
             description="%HideNonJavaProjects.description"
@@ -3691,7 +3691,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.NonJavaProjectsFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideNonSharedProjects.label"
             enabled="false"
             description="%HideNonSharedProjects.description"
@@ -3699,7 +3699,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.NonSharedProjectsFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideClosedProjects.label"
             enabled="false"
             description="%HideClosedProjects.description"
@@ -3707,7 +3707,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.ClosedProjectsFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideFields.label"
             enabled="false"
             description="%HideFields.description"
@@ -3715,7 +3715,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.FieldsFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideStatics.label"
             enabled="false"
             description="%HideStatics.description"
@@ -3723,7 +3723,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.StaticsFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideNonPublic.label"
             enabled="false"
             description="%HideNonPublic.description"
@@ -3731,7 +3731,7 @@
             id="org.eclipse.jdt.ui.PackageExplorer.NonPublicFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackageExplorer"
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideLocalTypes.label"
             enabled="false"
             description="%HideLocalTypes.description"
@@ -3740,7 +3740,7 @@
       </filter>
 <!-- Types view -->
       <filter
-            viewId="org.eclipse.jdt.ui.TypesView"
+            targetId="org.eclipse.jdt.ui.TypesView"
             name="%HideNonPublicType.label"
             enabled="false"
             description="%HideNonPublicType.description"
@@ -3748,7 +3748,7 @@
             id="org.eclipse.jdt.ui.TypesView.NonPublicTypeFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.TypesView"
+            targetId="org.eclipse.jdt.ui.TypesView"
             name="%HideInterface.label"
             enabled="false"
             description="%HideInterface.description"
@@ -3756,7 +3756,7 @@
             id="org.eclipse.jdt.ui.TypesView.InterfaceFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.TypesView"
+            targetId="org.eclipse.jdt.ui.TypesView"
             name="%HideClass.label"
             enabled="false"
             description="%HideClass.description"
@@ -3765,7 +3765,7 @@
       </filter>
 <!-- Packages view -->
       <filter
-            viewId="org.eclipse.jdt.ui.PackagesView"
+            targetId="org.eclipse.jdt.ui.PackagesView"
             name="%HideEmptyPackages.label"
             enabled="false"
             description="%HideEmptyPackages.description"
@@ -3773,7 +3773,7 @@
             id="org.eclipse.jdt.internal.ui.PackagesView.EmptyPackageFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.PackagesView"
+            targetId="org.eclipse.jdt.ui.PackagesView"
             name="%HideEmptyInnerPackages.label"
             enabled="true"
             description="%HideEmptyInnerPackages.description"
@@ -3782,7 +3782,7 @@
       </filter>
 <!-- Projects view -->
       <filter
-            viewId="org.eclipse.jdt.ui.ProjectsView"
+            targetId="org.eclipse.jdt.ui.ProjectsView"
             name="%HideReferencedLibraries.label"
             enabled="false"
             description="%HideReferencedLibraries.description"
@@ -3790,7 +3790,7 @@
             id="org.eclipse.jdt.ui.ProjectsView.LibraryFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.ui.ProjectsView"
+            targetId="org.eclipse.jdt.ui.ProjectsView"
             name="%HideNonSharedProjects.label"
             enabled="false"
             description="%HideNonSharedProjects.description"
@@ -3799,16 +3799,33 @@
       </filter>
 <!-- Members view -->
       <filter
-            viewId="org.eclipse.jdt.ui.MembersView"
+            targetId="org.eclipse.jdt.ui.MembersView"
             name="%HideImportDeclaration.label"
             enabled="false"
             description="%HideImportDeclaration.description"
             class="org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
             id="org.eclipse.jdt.ui.MembersView.ImportDeclarationFilter">
       </filter>
+<!-- Outline Page -->
+      <filter
+            targetId="org.eclipse.jdt.ui.JavaOutlinePage"
+            name="%HidePackageDeclaration.label"
+            enabled="false"
+            description="%HidePackageDeclaration.description"
+            class="org.eclipse.jdt.internal.ui.filters.PackageDeclarationFilter"
+            id="org.eclipse.jdt.ui.JavaOutlinePage.PackageDeclarationFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.JavaOutlinePage"
+            name="%HideImportDeclaration.label"
+            enabled="false"
+            description="%HideImportDeclaration.description"
+            class="org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
+            id="org.eclipse.jdt.ui.JavaOutlinePage.ImportDeclarationFilter">
+      </filter>
 <!-- Quick Outline -->
       <filter
-            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
             name="%HidePackageDeclaration.label"
             enabled="false"
             description="%HidePackageDeclaration.description"
@@ -3816,7 +3833,7 @@
             id="org.eclipse.jdt.internal.ui.text.QuickOutline.PackageDeclarationFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
             name="%HideImportDeclaration.label"
             enabled="false"
             description="%HideImportDeclaration.description"
@@ -3824,7 +3841,7 @@
             id="org.eclipse.jdt.internal.ui.text.QuickOutline.ImportDeclarationFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
             name="%HideFields.label"
             enabled="false"
             description="%HideFields.description"
@@ -3832,7 +3849,7 @@
             id="org.eclipse.jdt.internal.ui.text.QuickOutline.FieldsFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
             name="%HideStatics.label"
             enabled="false"
             description="%HideStatics.description"
@@ -3840,7 +3857,7 @@
             id="org.eclipse.jdt.internal.ui.text.QuickOutline.StaticsFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
             name="%HideNonPublic.label"
             enabled="false"
             description="%HideNonPublic.description"
@@ -3848,7 +3865,7 @@
             id="org.eclipse.jdt.internal.ui.text.QuickOutline.NonPublicFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
             name="%HideLocalTypes.label"
             enabled="false"
             description="%HideLocalTypes.description"
@@ -3857,7 +3874,7 @@
       </filter>
 <!-- Quick Hierarchy -->
       <filter
-            viewId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
+            targetId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
             name="%HideStatics.label"
             enabled="false"
             description="%HideStatics.description"
@@ -3865,7 +3882,7 @@
             id="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy.StaticsFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
+            targetId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
             name="%HideNonPublic.label"
             enabled="false"
             description="%HideNonPublic.description"
@@ -3873,7 +3890,7 @@
             id="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy.NonPublicFilter">
       </filter>
       <filter
-            viewId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
+            targetId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
             name="%HideLocalTypes.label"
             enabled="false"
             description="%HideLocalTypes.description"
