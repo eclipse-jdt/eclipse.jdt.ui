@@ -2030,9 +2030,11 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 * 
+	 * @deprecated since 3.1, use {@link org.eclipse.ui.texteditor.spelling.SpellingService#PREFERENCE_SPELLING_ENABLED}
+	 *             and {@link org.eclipse.ui.texteditor.spelling.SpellingService#PREFERENCE_SPELLING_ENGINE}
 	 * @since 3.0
 	 */
-	public final static String SPELLING_CHECK_SPELLING= ISpellCheckPreferenceKeys.SPELLING_CHECK_SPELLING;
+	public final static String SPELLING_CHECK_SPELLING= "spelling_check_spelling"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether words containing digits should
@@ -3023,7 +3025,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, true);
 		
 		// spell checking
-		store.setDefault(PreferenceConstants.SPELLING_CHECK_SPELLING, false);
 		store.setDefault(PreferenceConstants.SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_DIGITS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_MIXED, true);
