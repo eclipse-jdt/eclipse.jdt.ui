@@ -357,6 +357,7 @@ public class BuildPathsBlock {
 						}
 						isMissing= !path.toFile().isFile(); // look for external JARs
 					}
+					break;
 				case IClasspathEntry.CPE_SOURCE:
 					res= fWorkspaceRoot.findMember(path);
 					if (res == null) {
