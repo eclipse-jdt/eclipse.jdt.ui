@@ -311,15 +311,28 @@ public class BuildPathsBlock {
 				IResource res= null;
 				boolean isMissing= false;
 				
-				if (entryKind != IClasspathEntry.CPE_VARIABLE) {
-					res= fWorkspaceRoot.findMember(path);
-					if (res == null) {
-						isMissing= (entryKind != IClasspathEntry.CPE_LIBRARY || !path.toFile().isFile());
+				IPath resolvedPath= path;
+				if (entryKind == IClasspathEntry.CPE_VARIABLE) {
+					resolvedPath= JavaCore.getResolvedVariablePath(path);
+				}
+					
+				res= fWorkspaceRoot.findMember(resolvedPath);
+				if (res == null) {
+					if (entryKind == IClasspathEntry.CPE_LIBRARY) {
+						isMissing= !resolvedPath.toFile().isFile(); // look for external JARs
+						if (!ArchiveFileFilter.isArchivePath(resolvedPath)) {
+							if (fWorkspaceRoot.getWorkspace().validatePath(resolvedPath.toString(), IResource.FOLDER).isOK()) {
+								res= fWorkspaceRoot.getFolder(resolvedPath);
+							}
+						}
+					} else if (entryKind == IClasspathEntry.CPE_SOURCE) {
+						isMissing= true;
+						if (fWorkspaceRoot.getWorkspace().validatePath(resolvedPath.toString(), IResource.FOLDER).isOK()) {
+							res= fWorkspaceRoot.getFolder(resolvedPath);
+						}
 					}
-				} else {
-					IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
-					isMissing= (resolvedPath == null) || !resolvedPath.toFile().isFile();
-				}												
+				}
+											
 				CPListElement elem= new CPListElement(entryKind, path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath(), isExported);
 				if (projectExists) {
 					elem.setIsMissing(isMissing);
@@ -608,7 +621,7 @@ public class BuildPathsBlock {
 		// reomve old .class files
 		if (reorgQuery != null) {
 			IPath oldOutputLocation= fCurrJProject.getOutputLocation();
-			if (fWorkspaceRoot.exists(oldOutputLocation)) {
+			if (fWorkspaceRoot.exists(oldOutputLocation) && !outputLocation.equals(oldOutputLocation)) {
 				int result= reorgQuery.doQuery(oldOutputLocation);
 				if (result == reorgQuery.CANCEL) {
 					throw new InterruptedException();

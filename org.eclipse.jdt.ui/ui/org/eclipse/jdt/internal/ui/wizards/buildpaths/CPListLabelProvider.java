@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 class CPListLabelProvider extends LabelProvider {
 		
-	private String fNewLabel, fClassLabel;
+	private String fNewLabel, fClassLabel, fCreateLabel;
 	private Image fJarIcon, fExtJarIcon, fJarWSrcIcon, fExtJarWSrcIcon;
 	private Image fFolderImage, fProjectImage, fVariableImage;
 	private Image fMissingLibaryImage, fMissingVariableImage;
@@ -36,6 +36,7 @@ class CPListLabelProvider extends LabelProvider {
 	public CPListLabelProvider() {
 		fNewLabel= NewWizardMessages.getString("CPListLabelProvider.new"); //$NON-NLS-1$
 		fClassLabel= NewWizardMessages.getString("CPListLabelProvider.classcontainer"); //$NON-NLS-1$
+		fCreateLabel= NewWizardMessages.getString("CPListLabelProvider.willbecreated"); //$NON-NLS-1$
 		ImageRegistry reg= JavaPlugin.getDefault().getImageRegistry();
 		
 		fJarIcon= reg.get(JavaPluginImages.IMG_OBJS_JAR);
@@ -69,7 +70,11 @@ class CPListLabelProvider extends LabelProvider {
 						buf.append(fClassLabel);
 						if (!resource.exists()) {
 							buf.append(' ');
-							buf.append(fNewLabel);
+							if (cpentry.isMissing()) {
+								buf.append(fCreateLabel);
+							} else {
+								buf.append(fNewLabel);
+							}
 						}
 						return buf.toString();
 					} else if (resource instanceof IFile) {
@@ -103,7 +108,11 @@ class CPListLabelProvider extends LabelProvider {
 					IResource resource= cpentry.getResource();
 					if (resource != null && !resource.exists()) {
 						buf.append(' ');
-						buf.append(fNewLabel);
+						if (cpentry.isMissing()) {
+							buf.append(fCreateLabel);
+						} else {
+							buf.append(fNewLabel);
+						}
 					}
 					return buf.toString();
 				}
