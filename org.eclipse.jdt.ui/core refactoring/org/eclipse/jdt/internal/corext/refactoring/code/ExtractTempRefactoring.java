@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -790,11 +791,16 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private String getTempTypeName() throws JavaModelException {
 		final Expression expression= getSelectedExpression().getAssociatedExpression();
-		ITypeBinding binding= expression.resolveTypeBinding();
 		if (expression instanceof ClassInstanceCreation) {
 			final ClassInstanceCreation creation= (ClassInstanceCreation) expression;
-			return ASTNodes.asString(creation.getType());
+			if (creation.getExpression() instanceof ClassInstanceCreation)
+				return getClassInstanceName((ClassInstanceCreation) creation.getExpression()) + getClassInstanceName(creation);
+			return getClassInstanceName(creation);
+		} else if (expression instanceof CastExpression) {
+			final CastExpression cast= (CastExpression) expression;
+			return ASTNodes.asString(cast.getType());
 		}
+		ITypeBinding binding= expression.resolveTypeBinding();
 		final StringBuffer buffer= new StringBuffer();
 		buffer.insert(0, binding.getName());
 		while (binding.getDeclaringClass() != null) {
@@ -802,6 +808,10 @@ public class ExtractTempRefactoring extends Refactoring {
 			binding= binding.getDeclaringClass();
 		}
 		return buffer.toString();
+	}
+
+	private String getClassInstanceName(final ClassInstanceCreation creation) {
+		return ASTNodes.asString(creation.getType());
 	}
 
 	public String guessTempName() {
