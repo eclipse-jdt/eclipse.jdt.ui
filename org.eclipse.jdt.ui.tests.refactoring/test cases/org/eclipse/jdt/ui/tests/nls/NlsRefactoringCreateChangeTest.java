@@ -50,18 +50,15 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 	}
 
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(NlsRefactoringCreateChangeTest.class));
+		return setUpTest(new TestSuite(NlsRefactoringCreateChangeTest.class));
 	}
 
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 	
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new NlsRefactoringCreateChangeTest("testRenameToDuplicate"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
 	}
 
 	protected void setUp() throws Exception {
@@ -92,14 +89,14 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 
 	public void testCreateChangeWithCollidingImport() throws Exception {
-		String testClass= "package p;" + "import p.another.Messages;" + "class Test {" + "String hello=\"helloworld\";\r\n" + "}";
+		String testClass= "package p;\n" + "import p.another.Messages;\n" + "class Test {" + "String hello=\"helloworld\";\r\n" + "}";
 		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$ //$NON-NLS-2$
 				testClass); //$NON-NLS-1$
 		NLSRefactoring nls= createDefaultNls(cu);
 
 		performChange(nls);
 
-		checkContentOfCu("manipulated class", cu, "package p;" + "import p.another.Messages;\r\n" + "class Test {" + "String hello=p.Messages.getString(\"test0\"); //$NON-NLS-1$\r\n" + "}");
+		checkContentOfCu("manipulated class", cu, "package p;\n" + "import p.another.Messages;\n" + "class Test {" + "String hello=p.Messages.getString(\"test0\"); //$NON-NLS-1$\n" + "}");
 		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), "test0=helloworld\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
@@ -132,7 +129,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 	public void testCreateChangeWithNonDefaultSubstitution() throws Exception {
 		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$ //$NON-NLS-2$
-				"package p;import p.another.Messages;class Test {String hello=\"helloworld\";}"); //$NON-NLS-1$
+				"package p;\nimport p.another.Messages;\nclass Test {String hello=\"helloworld\";}"); //$NON-NLS-1$
 		NLSRefactoring nls= createDefaultNls(cu);
 
 		String string= "nonDefault(" + NLSRefactoring.KEY + ")"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -140,7 +137,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 		performChange(nls);
 		checkContentOfCu("manipulated class", //$NON-NLS-1$
-				cu, "package p;import p.another.Messages;\r\nclass Test {String hello=p.Messages.nonDefault(\"test0\");} //$NON-NLS-1$"); //$NON-NLS-1$
+				cu, "package p;\nimport p.another.Messages;\nclass Test {String hello=p.Messages.nonDefault(\"test0\");} //$NON-NLS-1$"); //$NON-NLS-1$
 		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), "test0=helloworld\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
