@@ -70,6 +70,7 @@ public class AugmentRawContainerClientsAnalyzer {
 		pm.setTaskName("Building collections hierarchy...");
 		GenericContainers genericContainers= GenericContainers.create(project, new SubProgressMonitor(pm, 1));
 		IType[] containerTypes= genericContainers.getContainerTypes();
+		genericContainers= null;
 		
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(containerTypes, IJavaSearchConstants.REFERENCES);
 		//TODO: Add container methods (from ContainerMethods)?
@@ -77,7 +78,7 @@ public class AugmentRawContainerClientsAnalyzer {
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(fElements, IJavaSearchScope.SOURCES);
 
 		SubProgressMonitor subPm= new SubProgressMonitor(pm, 3);
-		if (true) { //TODO: disabled until jdt.core has been tagged
+		if (true) {
 			analyzeInCompilerLoop(project, searchScope, pattern, subPm, result);
 		} else {
 			analyzeInSearchLoop(searchScope, pattern, subPm);

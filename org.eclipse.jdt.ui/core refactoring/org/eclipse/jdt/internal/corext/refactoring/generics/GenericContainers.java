@@ -69,6 +69,10 @@ public class GenericContainers {
 
 	public IType[] getContainerTypes() {
 		ArrayList containerTypes= new ArrayList();
+		containerTypes.add(fCollectionType);
+		containerTypes.add(fMapType);
+		containerTypes.add(fIteratorType);
+		containerTypes.add(fEnumerationType);
 		containerTypes.addAll(Arrays.asList(fAllCollectionTypes));
 		containerTypes.addAll(Arrays.asList(fAllMapTypes));
 		containerTypes.addAll(Arrays.asList(fAllIteratorTypes));
