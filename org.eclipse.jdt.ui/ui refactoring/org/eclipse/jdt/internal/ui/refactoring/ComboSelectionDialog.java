@@ -31,15 +31,17 @@ class ComboSelectionDialog extends Dialog{
 	private final String fShellTitle;
 	private final String fLabelText;
 	private final String[] fAllowedStrings;
-
-	public ComboSelectionDialog(Shell parentShell, String shellTitle, String labelText, String[] comboStrings) {
+	private final int fInitialSelectionIndex;
+	public ComboSelectionDialog(Shell parentShell, String shellTitle, String labelText, String[] comboStrings, int initialSelectionIndex) {
 		super(parentShell);
 		Assert.isNotNull(shellTitle);
 		Assert.isNotNull(labelText);
 		Assert.isTrue(comboStrings.length > 0);
+		Assert.isTrue(initialSelectionIndex >= 0 && initialSelectionIndex < comboStrings.length);
 		fShellTitle= shellTitle;
 		fLabelText= labelText;
 		fAllowedStrings= comboStrings;
+		fInitialSelectionIndex= initialSelectionIndex;
 	}
 
 	String getSelectedString(){
@@ -67,7 +69,7 @@ class ComboSelectionDialog extends Dialog{
 		for (int i = 0; i < fAllowedStrings.length; i++) {
 			combo.add(fAllowedStrings[i]);
 		}
-		combo.select(0);
+		combo.select(fInitialSelectionIndex);
 		fSelection= combo.getItem(combo.getSelectionIndex());
 		GridData gd= new GridData();
 		gd.widthHint= convertWidthInCharsToPixels(getMaxStringLength());

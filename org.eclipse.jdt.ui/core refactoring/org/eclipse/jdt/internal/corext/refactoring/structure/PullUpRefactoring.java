@@ -398,6 +398,8 @@ public class PullUpRefactoring extends Refactoring {
 		pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.calculating_required"), members.length);//not true, but not easy to give anything better //$NON-NLS-1$
 		List queue= new ArrayList(members.length);
 		queue.addAll(Arrays.asList(members));
+		if (queue.isEmpty())
+			return new IMember[0];
 		int i= 0;
 		IMember current;
 		do{

@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,8 +39,10 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
+import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -105,7 +108,7 @@ class PushDownInputPage extends UserInputWizardPage {
 	}
 
 	private static class MemberActionInfoLabelProvider extends LabelProvider implements ITableLabelProvider {
-		private final ILabelProvider fJavaElementLabelProvider= new JavaElementLabelProvider();
+		private final ILabelProvider fJavaElementLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS);
 
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
@@ -271,6 +274,12 @@ class PushDownInputPage extends UserInputWizardPage {
 				updateUIElements(null);
 			}
 		});
+		fTableViewer.addDoubleClickListener(new IDoubleClickListener(){
+			public void doubleClick(DoubleClickEvent event) {
+				PushDownInputPage.this.editSelectedMembers();
+			}
+		});
+
 		
 		fTableViewer.setInput(getPushDownRefactoring().getMemberActionInfos());
 		updateUIElements(null);
@@ -352,6 +361,8 @@ class PushDownInputPage extends UserInputWizardPage {
 	}
 
 	private void editSelectedMembers() {
+		if (! fEditButton.isEnabled())
+			return;
 		ISelection preserved= fTableViewer.getSelection();
 		try{
 			String shellTitle= RefactoringMessages.getString("PushDownInputPage.Edit_members"); //$NON-NLS-1$
@@ -359,7 +370,9 @@ class PushDownInputPage extends UserInputWizardPage {
 			Map stringMapping= createStringMappingForSelectedElements();
 			String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 			Arrays.sort(keys);
-			ComboSelectionDialog dialog= new ComboSelectionDialog(getShell(), shellTitle, labelText, keys);
+			int initialSelectionIndex= getInitialSelectionIndexForEditDialog(stringMapping, keys);
+				
+			ComboSelectionDialog dialog= new ComboSelectionDialog(getShell(), shellTitle, labelText, keys, initialSelectionIndex);
 			dialog.setBlockOnOpen(true);
 			if (dialog.open() == Dialog.CANCEL)
 				return;
@@ -368,6 +381,37 @@ class PushDownInputPage extends UserInputWizardPage {
 		} finally{
 			updateUIElements(preserved);
 		}
+	}
+
+	private int getInitialSelectionIndexForEditDialog(Map stringMapping, String[] keys) {
+		int commonActionCode= getCommonActionCodeForSelectedInfos();
+		if (commonActionCode == -1)
+			return 0;
+		for (Iterator iter= stringMapping.keySet().iterator(); iter.hasNext();) {
+			String key= (String) iter.next();
+			int action= ((Integer)stringMapping.get(key)).intValue();
+			if (commonActionCode == action){
+				for (int i= 0; i < keys.length; i++) {
+					if (key.equals(keys[i]))
+						return i;
+				}
+				Assert.isTrue(false);//there's no way
+			}
+		}
+		return 0;
+	}
+
+	private int getCommonActionCodeForSelectedInfos() {
+		MemberActionInfo[] infos= getSelectedMemberActionInfos();
+		if (infos.length == 0)
+			return -1;
+			
+		int code= infos[0].getAction();
+		for (int i= 0; i < infos.length; i++) {
+			if (code != infos[i].getAction())
+				return -1;
+		}
+		return code;
 	}
 
 	//String -> Integer
