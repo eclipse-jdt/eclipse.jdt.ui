@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.Document;
@@ -38,7 +39,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -59,7 +59,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -248,7 +248,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 	private void updateTypeHierarchyLabel(){
 		String message= RefactoringMessages.getFormattedString("PullUpInputPage.hierarchyLabal", //$NON-NLS-1$
 						new Integer(getCheckedMethods().length).toString());
-		fTypeHierarchyLabel.setText(message);
+		setMessage(message, IMessageProvider.INFORMATION);
 	}	
 	
 	private void createTreeAndSourceViewer(Composite superComposite) {
@@ -320,7 +320,11 @@ public class PullUpInputPage extends UserInputWizardPage {
 		try {
 			IRunnableWithProgress op= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
-					createHierarchyTreeComposite0(composite, pm);
+					try {
+						createHierarchyTreeComposite0(composite, pm);
+					} catch (JavaModelException e) {
+						throw new InvocationTargetException(e);
+					}
 				}
 			};
 			new ProgressMonitorDialog(getShell()).run(false, false, op);
@@ -331,7 +335,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 		}
 	}
 	
-	private void createHierarchyTreeComposite0(Composite parent, IProgressMonitor pm) {
+	private void createHierarchyTreeComposite0(Composite parent, IProgressMonitor pm) throws JavaModelException {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout layout= new GridLayout();
@@ -345,13 +349,16 @@ public class PullUpInputPage extends UserInputWizardPage {
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.heightHint= convertHeightInCharsToPixels(2);
 		fTypeHierarchyLabel.setLayoutData(gd);
+		String message= RefactoringMessages.getFormattedString("PullUpInputPage.subtypes", //$NON-NLS-1$
+							JavaElementUtil.createSignature(getPullUpMethodsRefactoring().getSuperType(new NullProgressMonitor())));
+		fTypeHierarchyLabel.setText(message);
 		
 		fTreeViewer= createTreeViewer(composite, pm);
 		updateTypeHierarchyLabel();
 	}
 
 	private PullUpTreeViewer createTreeViewer(Composite composite, IProgressMonitor pm) {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		Tree tree= new Tree(composite, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 		final PullUpTreeViewer treeViever= new PullUpTreeViewer(tree);
