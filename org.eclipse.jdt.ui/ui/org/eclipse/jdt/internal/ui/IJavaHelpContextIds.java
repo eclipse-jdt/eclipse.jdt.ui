@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids <sdavids@gmx.de> bug 38692
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
@@ -162,7 +163,6 @@ public interface IJavaHelpContextIds {
 	public static final String OPEN_HIERARCHY_ACTION= 						PREFIX + "open_hierarchy_action"; 	 //$NON-NLS-1$	
 	public static final String TOGGLE_SMART_TYPING_ACTION= 					PREFIX + "toggle_smart_typing_action"; //$NON-NLS-1$
 
-
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_DIALOG= PREFIX + "open_type_dialog_context"; //$NON-NLS-1$
@@ -243,6 +243,7 @@ public interface IJavaHelpContextIds {
 	public static final String JAVADOC_STANDARD_PAGE= PREFIX + "javadoc_standard_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_SPECIFICS_PAGE= PREFIX + "javadoc_specifics_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_TREE_PAGE= PREFIX + "javadoc_tree_page_context"; //$NON-NLS-1$
+	public static final String JAVADOC_COMMAND_PAGE= PREFIX + "javadoc_command_page_context"; //$NON-NLS-1$
 	
 	// same help for all refactoring preview pages
 	public static final String REFACTORING_PREVIEW_WIZARD_PAGE= 				PREFIX + "refactoring_preview_wizard_page_context"; //$NON-NLS-1$

@@ -64,7 +64,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.jarpackager.CheckboxTreeAndListGroup;
-import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JavadocTreeWizardPage extends JavadocWizardPage {
@@ -551,9 +550,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			case PREFERENCESTATUS :
 				fPreferenceStatus= new StatusInfo();
 				fDocletStatus= new StatusInfo();
-				if (JavadocPreferencePage.getJavaDocCommand().length() == 0) {
-					fPreferenceStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommand.error")); //$NON-NLS-1$
-				}
 				updateStatus(findMostSevereStatus());
 				break;
 			case CUSTOMSTATUS :

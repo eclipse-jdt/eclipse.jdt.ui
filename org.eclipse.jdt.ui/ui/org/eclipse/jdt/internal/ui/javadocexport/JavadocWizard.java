@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids <sdavids@gmx.de> bug 38692
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javadocexport;
 
@@ -20,6 +21,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.Launch;
+import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -31,17 +44,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.debug.core.DebugEvent;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventSetListener;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.Launch;
-import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.ui.IDebugUIConstants;
-
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -50,6 +52,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
@@ -62,8 +65,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -71,10 +72,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.jarpackager.ConfirmSaveModifiedResourcesDialog;
+import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class JavadocWizard extends Wizard implements IExportWizard {
 
+	private JavadocCommandWizardPage fJCWPage;
 	private JavadocTreeWizardPage fJTWPage;
 	private JavadocSpecificsWizardPage fJSWPage;
 	private JavadocStandardWizardPage fJSpWPage;
@@ -84,6 +87,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private boolean fWriteCustom;
 	private boolean fOpenInBrowser;
 
+	protected final String CommandDesc= "JavadocCommandPage"; //$NON-NLS-1$
 	protected final String TreePageDesc= "JavadocTreePage"; //$NON-NLS-1$
 	protected final String SpecificsPageDesc= "JavadocSpecificsPage"; //$NON-NLS-1$
 	protected final String StandardPageDesc= "JavadocStandardPage"; //$NON-NLS-1$
@@ -130,6 +134,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		IJavaProject[] projects= (IJavaProject[]) fSelectedProjects.toArray(new IJavaProject[fSelectedProjects.size()]);
 
 		//writes the new settings to store
+		if(fJCWPage != null)
+			fJCWPage.finish();
 		fJTWPage.finish();
 		if (!fJTWPage.getCustom())
 			fJSpWPage.finish();
@@ -407,7 +413,13 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 * @see IWizard#addPages()
 	 */
 	public void addPages() {
-
+		//bug 38692
+		if (JavadocPreferencePage.getJavaDocCommand().length() == 0) {
+			fJCWPage= new JavadocCommandWizardPage(CommandDesc);	
+			super.addPage(fJCWPage);
+			fJCWPage.init();
+		}
+		
 		fJTWPage= new JavadocTreeWizardPage(TreePageDesc, fStore);
 		fJSWPage= new JavadocSpecificsWizardPage(SpecificsPageDesc, fStore);
 		fJSpWPage= new JavadocStandardWizardPage(StandardPageDesc, fStore);
@@ -475,6 +487,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				return fJSpWPage;
 			}
 			return fJSWPage;
+		} else if (page instanceof JavadocCommandWizardPage) {
+			return fJTWPage;			
 		} else if (page instanceof JavadocSpecificsWizardPage) {
 			return null;
 		} else if (page instanceof JavadocStandardWizardPage)
@@ -489,8 +503,10 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				return fJSpWPage;
 			}
 			return fJSWPage;
+		} else if (page instanceof JavadocCommandWizardPage) {
+			return null;			
 		} else if (page instanceof JavadocTreeWizardPage) {
-			return null;
+			return fJCWPage;
 		} else if (page instanceof JavadocStandardWizardPage)
 			return fJTWPage;
 		else
@@ -516,5 +532,19 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	
 	void removeAllProjects() {
 		fSelectedProjects.clear();	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.wizard.IWizard#canFinish()
+	 */
+	public boolean canFinish() {
+		//bug 38692
+		//should not be able to finish wizard by only setting javadoc command
+		IWizardContainer container = getContainer();
+		
+		if ((container == null) || container.getCurrentPage().equals(fJCWPage))
+			return false;
+			
+		return super.canFinish();
 	}
 }

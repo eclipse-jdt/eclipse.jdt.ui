@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids <sdavids@gmx.de> bug 38692
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.javadocexport;
@@ -24,6 +25,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.eclipse.jdt.launching.ExecutionArguments;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -38,11 +45,6 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -50,8 +52,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.launching.ExecutionArguments;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -82,7 +82,6 @@ public class JavadocOptionsManager {
 	private String fAdditionalParams;
 	private String fOverview;
 	private String fTitle;
-	private String fJDocCommand;
 
 	private IPath[] fSourcepath;
 	private IPath[] fClasspath;
@@ -155,7 +154,6 @@ public class JavadocOptionsManager {
 	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings settings, ISelection currSelection) {
 		Element element;
 		this.fRoot= ResourcesPlugin.getWorkspace().getRoot();
-		fJDocCommand= JavadocPreferencePage.getJavaDocCommand();
 		this.fXmlfile= xmlJavadocFile;
 		this.fWizardStatus= new StatusInfo();
 		this.fLinks= new HashMap();
@@ -704,8 +702,8 @@ public class JavadocOptionsManager {
 		}
 
 		List args= new ArrayList();
-
-		args.add(fJDocCommand);
+		//bug 38692
+		args.add(JavadocPreferencePage.getJavaDocCommand());
 		if (fFromStandard) {
 			args.add("-d"); //$NON-NLS-1$
 			args.add(fDestination);
