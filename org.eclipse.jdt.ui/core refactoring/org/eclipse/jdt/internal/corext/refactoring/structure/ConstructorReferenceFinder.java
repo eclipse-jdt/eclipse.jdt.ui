@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -58,7 +59,24 @@ class ConstructorReferenceFinder {
 				return new ASTNode[0];
 			return getImplicitConstructorReferenceNodes(pm);	
 		}	
-		return ASTNodeSearchUtil.searchNodes(scope, pattern, fASTManager, pm);
+		return removeUnrealNodes(ASTNodeSearchUtil.searchNodes(scope, pattern, fASTManager, pm));
+	}
+
+	//XXX this method is a work around for bug 27236
+	private ASTNode[] removeUnrealNodes(ASTNode[] nodes) {
+		List realNodes= new ArrayList(nodes.length);
+		String typeName= fConstructors[0].getDeclaringType().getElementName();
+		for (int i= 0; i < nodes.length; i++) {
+			if (nodes[i].getParent() instanceof TypeDeclaration)
+				continue;
+			if (nodes[i].getParent() instanceof MethodDeclaration){
+				MethodDeclaration md= (MethodDeclaration)nodes[i].getParent();
+				if (md.isConstructor() && ! md.getName().getIdentifier().equals(typeName))
+					continue;
+			}	
+			realNodes.add(nodes[i]);	
+		}
+		return (ASTNode[]) realNodes.toArray(new ASTNode[realNodes.size()]);
 	}
 	
 	private IJavaSearchScope createSearchScope() throws JavaModelException{
