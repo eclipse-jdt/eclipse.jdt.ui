@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -304,11 +305,16 @@ public class CallInliner {
 			// is a statement. In this case we have to create a temporary variable if the
 			// returned expression must be evaluated.
 			if (callType == ASTNode.EXPRESSION_STATEMENT && fSourceProvider.hasReturnValue()) {
-				if (fSourceProvider.mustEvaluateReturnValue()) {
-					node= createLocalDeclaration(
-						fSourceProvider.getReturnType(), 
-						fInvocationScope.createName(fSourceProvider.getMethodName(), true), 
-						(Expression)fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION));
+				if (fSourceProvider.mustEvaluateReturnedExpression()) {
+					if (fSourceProvider.returnValueNeedsLocalVariable()) {
+						node= createLocalDeclaration(
+							fSourceProvider.getReturnType(), 
+							fInvocationScope.createName(fSourceProvider.getMethodName(), true), 
+							(Expression)fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION));
+					} else {
+						node= fTargetNode.getAST().newExpressionStatement(
+							(Expression)fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION));
+					}
 				} else {
 					node= null;
 				}
@@ -359,48 +365,6 @@ public class CallInliner {
 		InlineEvaluator evaluator= new InlineEvaluator(formalParameter);
 		actualParameter.accept(evaluator);
 		return evaluator.getResult();
-		
-		/*
-		switch (canInline(actualParameter)){
-			case 0:
-				return false;
-			case 1:
-				return true;
-			case 2:
-				// fall through
-		}
-		if (ASTNodes.isLiteral(actualParameter) && formalParameter.isReadOnly())
-			return true;
-		if (formalParameter.isWrite())
-			return false;
-		return !formalParameter.needsEvaluation();
-		*/
-	}
-	
-	/*
-	 * Return 0 if the expression can't be inlined, 1 if it can be inlined and 2 if further
-	 * investigation is needed.
-	 */
-	private int canInline(Expression expression) {
-		if (expression instanceof Name) {
-			IBinding binding= ((Name)expression).resolveBinding();
-			if (binding instanceof IVariableBinding) {
-				IVariableBinding vb= (IVariableBinding)binding;
-				if (!vb.isField()) {
-					return fFlowInfo.hasAccessMode(fFlowContext, vb, FlowInfo.UNUSED | FlowInfo.WRITE) ? 1 : 0;
-				}
-			}
-			// For other elements we don't have a flow analysis.
-			// To be on the safe side answer no.
-			return 0;
-		} else if (expression instanceof FieldAccess) {
-			return canInline(((FieldAccess)expression).getExpression());
-		} else if (expression instanceof ThisExpression) {
-			return canInline(((ThisExpression)expression).getQualifier());
-		} else if (expression instanceof SuperFieldAccess) {
-			return canInline(((SuperFieldAccess)expression).getQualifier());
-		}
-		return 2;
 	}
 	
 	private void initializeInsertionPoint(int nos) {

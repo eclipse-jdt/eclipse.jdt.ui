@@ -56,14 +56,17 @@ public class SourceProvider {
 	private MethodDeclaration fDeclaration;
 	private ASTRewrite fRewriter;
 	private SourceAnalyzer fAnalyzer;
-	private boolean fEvaluateReturnValue;
+	private boolean fMustEvalReturnedExpression;
+	private boolean fReturnValueNeedsLocalVariable= true;
 	
-	private static class ReturnAnalyzer extends ASTVisitor {
-		public boolean evalReturnValue= false;
+	private class ReturnAnalyzer extends ASTVisitor {
 		public boolean visit(ReturnStatement node) {
 			Expression expression= node.getExpression();
 			if (!(ASTNodes.isLiteral(expression) || expression instanceof Name)) {
-				evalReturnValue= true;
+				fMustEvalReturnedExpression= true;
+			}
+			if (ASTNodes.isInvocation(expression) || expression instanceof ClassInstanceCreation) {
+				fReturnValueNeedsLocalVariable= false;
 			}
 			return false;
 		}
@@ -95,7 +98,6 @@ public class SourceProvider {
 			if (last != null) {
 				ReturnAnalyzer analyzer= new ReturnAnalyzer();
 				last.accept(analyzer);
-				fEvaluateReturnValue= analyzer.evalReturnValue;
 			}
 		}
 	}
@@ -109,8 +111,12 @@ public class SourceProvider {
 		return binding.getReturnType() != fDeclaration.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
 	}
 	
-	public boolean mustEvaluateReturnValue() {
-		return fEvaluateReturnValue;
+	public boolean mustEvaluateReturnedExpression() {
+		return fMustEvalReturnedExpression;
+	}
+	
+	public boolean returnValueNeedsLocalVariable() {
+		return fReturnValueNeedsLocalVariable;
 	}
 	
 	public int getNumberOfStatements() {

@@ -13,9 +13,11 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -33,6 +35,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -94,10 +97,12 @@ class SourceAnalyzer  {
 			return true;
 		}
 		public boolean visit(SimpleName node) {
-			if (node.resolveBinding() == null && !status.hasFatalError()) {
+			IBinding binding= node.resolveBinding();
+			if (binding == null && !status.hasFatalError()) {
 				status.addFatalError(
 					RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
 					JavaSourceContext.create(fCUnit, fDeclaration));
+				return false;
 			}
 			return true;
 		}
@@ -199,16 +204,28 @@ class SourceAnalyzer  {
 			NameData name= (NameData)fNames.get(binding);
 			if (name != null)
 				name.addReference(node);
+			if (binding instanceof ITypeBinding) {
+				ITypeBinding tb= (ITypeBinding)binding;
+				Name qName= node;
+				QualifiedName parent;
+				while ((parent= (QualifiedName)ASTNodes.getParent(qName, ASTNode.QUALIFIED_NAME)) != null &&
+						parent.getQualifier() != qName) {
+					qName= (Name)parent; 
+				}
+				String typeName= null;
+				if (tb.isArray())
+					typeName= tb.getElementType().getQualifiedName();
+				else
+					typeName= tb.getQualifiedName();
+				if (!ASTNodes.asString(qName).equals(typeName))
+					fTypes.add(qName);
+			}
 			return true;
 		}
 		public boolean visit(ThisExpression node) {
 			if (fTypeCounter == 0) {
 				fImplicitReceivers.add(node);
 			}
-			return true;
-		}
-		public boolean visit(SimpleType node) {
-			fTypes.add(node.getName());
 			return true;
 		}
 		private void addNameData(SimpleName name) {
@@ -273,6 +290,9 @@ class SourceAnalyzer  {
 		ActivationAnalyzer analyzer= new ActivationAnalyzer();
 		fDeclaration.accept(analyzer);
 		result.merge(analyzer.status);
+		if (!result.hasFatalError()) {
+			
+		}
 		return result;
 	}
 

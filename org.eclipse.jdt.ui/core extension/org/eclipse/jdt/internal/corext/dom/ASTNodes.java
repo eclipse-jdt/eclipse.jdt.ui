@@ -208,6 +208,7 @@ public class ASTNodes {
 	}
 	
 	public static int getModifiers(VariableDeclaration declaration) {
+		Assert.isNotNull(declaration);
 		if (declaration instanceof SingleVariableDeclaration) {
 			return ((SingleVariableDeclaration)declaration).getModifiers();
 		} else if (declaration instanceof VariableDeclarationFragment) {
@@ -221,6 +222,7 @@ public class ASTNodes {
 	}
 	
 	public static boolean isSingleDeclaration(VariableDeclaration declaration) {
+		Assert.isNotNull(declaration);
 		if (declaration instanceof SingleVariableDeclaration) {
 			return true;
 		} else if (declaration instanceof VariableDeclarationFragment) {
@@ -234,11 +236,14 @@ public class ASTNodes {
 	}
 	
 	public static boolean isLiteral(Expression expression) {
-		if (expression == null)
-			return false;
 		int type= expression.getNodeType();
 		return type == ASTNode.BOOLEAN_LITERAL || type == ASTNode.CHARACTER_LITERAL || type == ASTNode.NULL_LITERAL || 
 			type == ASTNode.NUMBER_LITERAL || type == ASTNode.STRING_LITERAL || type == ASTNode.TYPE_LITERAL;
+	}
+	
+	public static boolean isInvocation(Expression expression) {
+		int type= expression.getNodeType();
+		return type == ASTNode.METHOD_INVOCATION || type == ASTNode.SUPER_METHOD_INVOCATION;
 	}
 	
 	public static String getTypeName(Type type) {
