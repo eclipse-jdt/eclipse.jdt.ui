@@ -203,7 +203,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
-		buf.append("        for (int i=0;;) {\n");
+		buf.append("        for (int i = 0;;) {\n");
 		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -982,7 +982,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
-		buf.append("        for (int i=0; i > 9; i++) {\n");
+		buf.append("        for (int i = 0; i > 9; i++) {\n");
 		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1023,7 +1023,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
-		buf.append("        for (int i=0; i > 9;) {\n");
+		buf.append("        for (int i = 0; i > 9;) {\n");
 		buf.append("            i++;\n");
 		buf.append("        }\n");
 		buf.append("    }\n");

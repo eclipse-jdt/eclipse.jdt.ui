@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -168,11 +167,8 @@ public class CodeFormatterUtil {
 				suffix= "}"; //$NON-NLS-1$
 				code= CodeFormatter.K_STATEMENTS;
 			}
-		} else if (node instanceof Expression) {
+		} else if (node instanceof Expression && node.getNodeType() != ASTNode.VARIABLE_DECLARATION_EXPRESSION) {
 			code= CodeFormatter.K_EXPRESSION;
-			if (node instanceof Type) {
-				suffix= " x;"; //$NON-NLS-1$
-			}
 		} else {
 			switch (node.getNodeType()) {
 				case ASTNode.METHOD_DECLARATION:
