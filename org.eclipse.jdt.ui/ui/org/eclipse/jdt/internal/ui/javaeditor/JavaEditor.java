@@ -2573,9 +2573,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			try {
 				boolean isProblem= marker.isSubtypeOf(IMarker.PROBLEM);
 				IWorkbenchPage page= getSite().getPage();
-				IViewPart view= view= page.findView(isProblem ? IPageLayout.ID_PROBLEM_VIEW: IPageLayout.ID_TASK_LIST); //$NON-NLS-1$  //$NON-NLS-2$
-				Method method= view.getClass().getMethod("setSelection", new Class[] { IStructuredSelection.class, boolean.class}); //$NON-NLS-1$
-				method.invoke(view, new Object[] {new StructuredSelection(marker), Boolean.TRUE });
+				IViewPart view= page.findView(isProblem ? IPageLayout.ID_PROBLEM_VIEW: IPageLayout.ID_TASK_LIST); //$NON-NLS-1$  //$NON-NLS-2$
+				if (view != null) {
+					Method method= view.getClass().getMethod("setSelection", new Class[] { IStructuredSelection.class, boolean.class}); //$NON-NLS-1$
+					method.invoke(view, new Object[] {new StructuredSelection(marker), Boolean.TRUE });
+				}
 			} catch (CoreException x) {
 			} catch (NoSuchMethodException x) {
 			} catch (IllegalAccessException x) {
