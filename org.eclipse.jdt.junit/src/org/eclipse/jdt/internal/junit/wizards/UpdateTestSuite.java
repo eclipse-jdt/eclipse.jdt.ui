@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 /**
  * An object contribution action that updates existing AllTests classes.
@@ -45,7 +46,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	private static boolean fEmptySelectionAllowed= false;
 	private Object[] fSelectedTestCases;
 
-	private class UpdateAllTestsValidator implements ISelectionValidator {	
+	private class UpdateAllTestsValidator implements ISelectionStatusValidator {	
 		/*
 		 * @see ISelectionValidator#validate(Object[])
 		 */

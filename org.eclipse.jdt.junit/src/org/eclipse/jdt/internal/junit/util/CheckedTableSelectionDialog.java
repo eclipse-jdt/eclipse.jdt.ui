@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 /**
@@ -45,7 +46,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	private ILabelProvider fLabelProvider;
 	private IStructuredContentProvider fContentProvider;
 	
-	private ISelectionValidator fValidator= null;
+	private ISelectionStatusValidator fValidator= null;
 	private ViewerSorter fSorter;
 	private String fEmptyListMessage= WizardMessages.getString("CheckedTableSelectionDialog.emptyListMessage"); //$NON-NLS-1$
 	
@@ -113,7 +114,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	 * The validator is invoked whenever the selection changes.
 	 * @param validator the validator to validate the selection.
 	 */
-	public void setValidator(ISelectionValidator validator) {
+	public void setValidator(ISelectionStatusValidator validator) {
 		fValidator= validator;
 	}			
 	
