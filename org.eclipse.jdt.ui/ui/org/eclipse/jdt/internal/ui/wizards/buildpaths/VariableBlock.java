@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,7 +34,11 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
@@ -54,6 +59,8 @@ public class VariableBlock {
 	private Control fControl;
 	
 	private List fSelectedElements;
+	private boolean fAskToBuild;
+	
 	
 	/**
 	 * Constructor for VariableBlock
@@ -61,6 +68,7 @@ public class VariableBlock {
 	public VariableBlock(boolean inPreferencePage, String initSelection) {
 		
 		fSelectedElements= new ArrayList(0);
+		fAskToBuild= true;
 		
 		String[] buttonLabels= new String[] { 
 			/* 0 */ NewWizardMessages.getString("VariableBlock.vars.add.button"), //$NON-NLS-1$
@@ -249,37 +257,44 @@ public class VariableBlock {
 	}
 
 	public boolean performOk() {
-		List toRemove= new ArrayList();
-		toRemove.addAll(Arrays.asList(JavaCore.getClasspathVariableNames()));
+		ArrayList removedVariables= new ArrayList();
+		ArrayList changedVariables= new ArrayList();
+		removedVariables.addAll(Arrays.asList(JavaCore.getClasspathVariableNames()));
 
 		// remove all unchanged
-		List elements= fVariablesList.getElements();
-		for (int i= elements.size()-1; i >= 0; i--) {
-			CPVariableElement curr= (CPVariableElement) elements.get(i);
+		List changedElements= fVariablesList.getElements();
+		for (int i= changedElements.size()-1; i >= 0; i--) {
+			CPVariableElement curr= (CPVariableElement) changedElements.get(i);
 			if (curr.isReserved()) {
-				elements.remove(curr);
+				changedElements.remove(curr);
 			} else {
 				IPath path= curr.getPath();
 				IPath prevPath= JavaCore.getClasspathVariable(curr.getName());
 				if (prevPath != null && prevPath.equals(path)) {
-					elements.remove(curr);
+					changedElements.remove(curr);
+				} else {
+					changedVariables.add(curr.getName());
 				}
 			}
-			toRemove.remove(curr.getName());
+			removedVariables.remove(curr.getName());
 		}
-		int steps= elements.size() + toRemove.size();
+		int steps= changedElements.size() + removedVariables.size();
 		if (steps > 0) {
 			
-			String title= NewWizardMessages.getString("VariableBlock.needsbuild.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("VariableBlock.needsbuild.message"); //$NON-NLS-1$
-			
-			MessageDialog buildDialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
-			int res= buildDialog.open();
-			if (res != 0 && res != 1) {
-				return false;
+			boolean needsBuild= false;
+			if (fAskToBuild && doesChangeRequireFullBuild(removedVariables, changedVariables)) {
+				String title= NewWizardMessages.getString("VariableBlock.needsbuild.title"); //$NON-NLS-1$
+				String message= NewWizardMessages.getString("VariableBlock.needsbuild.message"); //$NON-NLS-1$
+				
+				MessageDialog buildDialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+				int res= buildDialog.open();
+				if (res != 0 && res != 1) {
+					return false;
+				}
+				needsBuild= (res == 0);
 			}
 			
-			IRunnableWithProgress runnable= new VariableBlockRunnable(toRemove, elements, res == 0);
+			IRunnableWithProgress runnable= new VariableBlockRunnable(removedVariables, changedElements, needsBuild);
 			
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 			try {
@@ -291,9 +306,29 @@ public class VariableBlock {
 				return true;
 			}
 		}
-		
-		
 		return true;
+	}
+	
+	private boolean doesChangeRequireFullBuild(List removed, List changed) {
+		try {
+			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+			IJavaProject[] projects= model.getJavaProjects();
+			for (int i= 0; i < projects.length; i++) {
+				IClasspathEntry[] entries= projects[i].getRawClasspath();
+				for (int k= 0; k < entries.length; k++) {
+					IClasspathEntry curr= entries[k];
+					if (curr.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+						String var= curr.getPath().segment(0);
+						if (removed.contains(var) || changed.contains(var)) {
+							return true;
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			return true;
+		}
+		return false;
 	}
 	
 	private class VariableBlockRunnable implements IRunnableWithProgress {
@@ -343,4 +378,13 @@ public class VariableBlock {
 			}
 		}
 	}
+	
+	/**
+	 * If set to true, a dialog will ask the user to build on variable changed
+	 * @param askToBuild The askToBuild to set
+	 */
+	public void setAskToBuild(boolean askToBuild) {
+		fAskToBuild= askToBuild;
+	}
+
 }
