@@ -120,7 +120,7 @@ public class PreferencesTest extends TestCase {
 		if (manager != null) {
 			dialog = new PreferenceDialogWrapper(getShell(), manager);
 			dialog.create();	
-			WorkbenchHelp.setHelp(dialog.getShell(), new Object[]{IHelpContextIds.PREFERENCE_DIALOG});
+			WorkbenchHelp.setHelp(dialog.getShell(), IHelpContextIds.PREFERENCE_DIALOG);
 
 			for (Iterator iterator = manager.getElements(PreferenceManager.PRE_ORDER).iterator();
 			     iterator.hasNext();)
@@ -160,7 +160,7 @@ public class PreferencesTest extends TestCase {
 			dialog = new PropertyDialogWrapper(getShell(), manager, new StructuredSelection(element)); 
 			dialog.create();
 			dialog.getShell().setText(title);
-			WorkbenchHelp.setHelp(dialog.getShell(), new Object[]{IHelpContextIds.PROPERTY_DIALOG});
+			WorkbenchHelp.setHelp(dialog.getShell(), IHelpContextIds.PROPERTY_DIALOG);
 			for (Iterator iterator = manager.getElements(PreferenceManager.PRE_ORDER).iterator();
 			     iterator.hasNext();)
 			{

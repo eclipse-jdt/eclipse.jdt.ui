@@ -91,7 +91,6 @@ import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.internal.ui.packageview.AddBookmarkAction;
 import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
 import org.eclipse.jdt.internal.ui.packageview.OpenResourceAction;
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
@@ -134,7 +133,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private UpAction fUpAction;
 //	private GotoTypeAction fGotoTypeAction;
 //	private GotoPackageAction fGotoPackageAction;
-	private AddBookmarkAction fAddBookmarkAction;
 	private IWorkbenchPart fInputSource;
 	private Image fOriginalTitleImage;
 		
@@ -341,9 +339,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
 		
-		if (fAddBookmarkAction.canOperateOnSelection())
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fAddBookmarkAction);
-					
 		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
 		fRefreshAction.selectionChanged(selection);
 
@@ -364,7 +359,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fOpenCUAction= new OpenResourceAction(provider);
 		fPropertyDialogAction= new PropertyDialogAction(getShell(), provider);
 		fShowNavigatorAction= new ShowInNavigatorAction(provider);
-		fAddBookmarkAction= new AddBookmarkAction(provider);
 		
 		fStandardGroups= new ContextMenuGroup[] {
 			new BuildGroup(),
