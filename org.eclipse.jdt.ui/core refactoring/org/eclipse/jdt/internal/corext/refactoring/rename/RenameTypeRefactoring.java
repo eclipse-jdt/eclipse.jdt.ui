@@ -385,6 +385,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 
 			result.merge(validateModifiesFiles());
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {
