@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 
-import org.eclipse.jdt.internal.core.ant.AntPrintWriter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javadocexport.JavadocWizardPage.ToggleSelectionAdapter;
