@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -15,7 +16,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -24,6 +28,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -32,7 +37,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
   */
 public class LocalCorrectionsSubProcessor {
 
-	public static void addCastProposal(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+	public static void addCastProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		String[] args= problemPos.getArguments();
 		if (args.length == 2) {
 			ICompilationUnit cu= problemPos.getCompilationUnit();
@@ -75,7 +80,7 @@ public class LocalCorrectionsSubProcessor {
 		}	
 	}
 	
-	public static void addUncaughtExceptionProposal(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+	public static void addUncaughtExceptionProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
@@ -98,7 +103,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (decl != null && decl.getNodeType() == ASTNode.METHOD_DECLARATION) {
+		if (decl instanceof MethodDeclaration) {
 			
 			String uncaughtName= problemPos.getArguments()[0];
 			
@@ -121,6 +126,120 @@ public class LocalCorrectionsSubProcessor {
 			proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
 		
 			proposals.add(proposal);
+		}
+	}
+	
+	public static void addMethodWithConstrNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode instanceof SimpleName && selectedNode.getParent() instanceof MethodDeclaration) {
+			MethodDeclaration declaration= (MethodDeclaration) selectedNode.getParent();
+			int start= declaration.getReturnType().getStartPosition();
+			int end= declaration.getName().getStartPosition();
+			String label= "Change to constructor";
+			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, start, end - start, "", 0); 
+			proposals.add(proposal);
+		}
+
+	}
+
+	public static void addUnusedVariableProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode instanceof SimpleName) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (selectedNode instanceof VariableDeclarationFragment) {
+			ASTNode parent= selectedNode.getParent();
+			int start= parent.getStartPosition();
+			int end= start + parent.getLength();
+			IBuffer buf= cu.getBuffer();
+			while (end < buf.getLength() && Character.isWhitespace(buf.getChar(end))) {
+				end++;
+			}
+			
+			String label= "Remove local variable";
+			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, start, end - start, "", 0); 
+			proposals.add(proposal);			
+		}
+		
+	
+	}
+
+	public static void addVoidMethodReturnsProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode != null) {
+			if (selectedNode.getParent() instanceof ReturnStatement) {
+				ReturnStatement returnStatement= (ReturnStatement) selectedNode.getParent();
+				Expression expr= returnStatement.getExpression();
+				if (expr != null) {
+					ITypeBinding binding= expr.resolveTypeBinding();
+					if (binding != null) {
+						if ("null".equals(binding.getName())) {
+							binding= selectedNode.getAST().resolveWellKnownType("java.lang.Object");
+						}
+						BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(returnStatement);
+						if (decl instanceof MethodDeclaration) {
+							ASTNode returnType= ((MethodDeclaration) decl).getReturnType();
+							String label= "Change method return type to " + binding.getName();
+							ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, returnType.getStartPosition(), returnType.getLength(), binding.getName(), 0); 					
+							proposals.add(proposal);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public static void addMissingReturnTypeProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode != null) {
+			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+			if (decl instanceof MethodDeclaration) {
+				final ITypeBinding[] res= new ITypeBinding[1];
+				res[0]= null;
+				
+				decl.accept(new GenericVisitor() {
+					public boolean visit(ReturnStatement node) {
+						if (res[0] == null) {
+							Expression expr= node.getExpression();
+							if (expr != null) {
+								res[0]= expr.resolveTypeBinding();
+							} else {
+								res[0]= node.getAST().resolveWellKnownType("void");
+							}
+						}
+						return false;
+					}
+				});
+				ITypeBinding type= res[0];
+				if (type == null) {
+					type= decl.getAST().resolveWellKnownType("void");
+				} 
+				
+				String str= type.getName() + " ";
+				int pos= ((MethodDeclaration) decl).getName().getStartPosition();
+				
+				String label= "Set return type to " + type.getName();
+				InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, str, 1);
+			
+				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+				ImportEdit edit= new ImportEdit(problemPos.getCompilationUnit(), settings);
+				edit.addImport(type.getName());
+				proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
+		
+				proposals.add(proposal);
+			}
 		}
 	}
 

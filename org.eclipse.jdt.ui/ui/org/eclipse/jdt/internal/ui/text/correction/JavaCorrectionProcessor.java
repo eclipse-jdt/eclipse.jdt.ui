@@ -49,6 +49,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.UnterminatedString:
 			case IProblem.UnterminatedComment:
 			case IProblem.UndefinedMethod:
+			case IProblem.ParameterMismatch:
+			case IProblem.MethodButWithConstructorName:
 			case IProblem.UndefinedField:
 			case IProblem.UndefinedName:
 			case IProblem.PublicClassMustMatchFileName:
@@ -61,7 +63,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.ExceptionTypeNotFound:
 			case IProblem.InterfaceNotFound: 
 			case IProblem.TypeMismatch:
-			case IProblem.ParameterMismatch:
+			case IProblem.UnhandledException:
 				return true;
 			default:
 				return false;
@@ -150,7 +152,10 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					break;
 				case IProblem.ParameterMismatch:
 					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, true, proposals);
-					break;					
+					break;
+				case IProblem.MethodButWithConstructorName:	
+					LocalCorrectionsSubProcessor.addMethodWithConstrNameProposals(problemPos, proposals);
+					break;
 				case IProblem.UndefinedField:
 				case IProblem.UndefinedName:
 					UnresolvedElementsSubProcessor.getVariableProposals(problemPos, proposals);
@@ -177,13 +182,22 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.INTERFACES, proposals);
 					break;	
 				case IProblem.TypeMismatch:
-					LocalCorrectionsSubProcessor.addCastProposal(problemPos, proposals);
+					LocalCorrectionsSubProcessor.addCastProposals(problemPos, proposals);
 					break;
 				case IProblem.UnhandledException:
-					LocalCorrectionsSubProcessor.addUncaughtExceptionProposal(problemPos, proposals);
+					LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(problemPos, proposals);
+					break;
+				case IProblem.LocalVariableIsNeverUsed:
+					LocalCorrectionsSubProcessor.addUnusedVariableProposals(problemPos, proposals);
+					break;
+				case IProblem.VoidMethodReturnsValue:
+					LocalCorrectionsSubProcessor.addVoidMethodReturnsProposals(problemPos, proposals);
+					break;
+				case IProblem.MissingReturnType:
+					LocalCorrectionsSubProcessor.addMissingReturnTypeProposals(problemPos, proposals);
 					break;
 				default:
-					//proposals.add(new NoCorrectionProposal(problemPos));
+					 proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

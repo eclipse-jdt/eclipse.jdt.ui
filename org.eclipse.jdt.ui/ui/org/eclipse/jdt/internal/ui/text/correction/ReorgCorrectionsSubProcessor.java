@@ -46,7 +46,7 @@ public class ReorgCorrectionsSubProcessor {
 			Path path= new Path(args[0]);
 			String newName= path.removeFileExtension().lastSegment();
 			String label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renametype.description", newName); //$NON-NLS-1$
-			proposals.add(new ReplaceCorrectionProposal(problemPos, label, newName, 1));
+			proposals.add(new ReplaceCorrectionProposal(label, problemPos, newName, 1));
 			
 			String newCUName= args[1] + ".java"; //$NON-NLS-1$
 			final RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);

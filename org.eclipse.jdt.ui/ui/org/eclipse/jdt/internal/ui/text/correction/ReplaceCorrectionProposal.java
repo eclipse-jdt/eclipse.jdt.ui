@@ -26,19 +26,25 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	
 	private String fReplacementString;
-	private Position fPosition;
+	private int fOffset;
+	private int fLength;
 
-	public ReplaceCorrectionProposal(ProblemPosition problemPos, String label, String replacementString, int relevance) throws CoreException {
-		super(label, problemPos.getCompilationUnit(), relevance);
-		fReplacementString= replacementString;
-		fPosition= problemPos;
+	public ReplaceCorrectionProposal(String label, ProblemPosition problemPos, String replacementString, int relevance) throws CoreException {
+		this(label, problemPos.getCompilationUnit(), problemPos.getOffset(), problemPos.getLength(), replacementString, relevance);
 	}
+	
+	public ReplaceCorrectionProposal(String label, ICompilationUnit cu, int offset, int length, String replacementString, int relevance) throws CoreException {
+		super(label, cu, relevance);
+		fReplacementString= replacementString;
+		fOffset= offset;
+		fLength= length;
+	}	
 
 	/*
 	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		TextEdit edit= SimpleTextEdit.createReplace(fPosition.getOffset(), fPosition.getLength(), fReplacementString);
+		TextEdit edit= SimpleTextEdit.createReplace(fOffset, fLength, fReplacementString);
 		changeElement.addTextEdit(changeElement.getName(), edit);
 	}
 	

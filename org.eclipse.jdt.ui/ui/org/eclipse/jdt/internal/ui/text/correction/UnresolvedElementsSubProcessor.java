@@ -52,7 +52,7 @@ public class UnresolvedElementsSubProcessor {
 		for (int i= 0; i < elements.length; i++) {
 			SimilarElement curr= elements[i];
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
-			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr.getName(), 3));
+			proposals.add(new ReplaceCorrectionProposal(label, problemPos, curr.getName(), 3));
 		}
 		
 		// new field
@@ -165,7 +165,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 			
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
-			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr, 2));
+			proposals.add(new ReplaceCorrectionProposal(label, problemPos, curr, 2));
 		}
 		
 		// new method
