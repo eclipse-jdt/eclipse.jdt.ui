@@ -14,7 +14,9 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -28,17 +30,20 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.*;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -394,6 +399,31 @@ public class Bindings {
 				return method;			
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns all super types (classes and interfaces) for the given type.
+	 * @param type The type to get the supertypes of.
+	 * @return Returns all suepr types.
+	 */
+	public static ITypeBinding[] getAllSuperTypes(ITypeBinding type) {
+		Set result= new HashSet();
+		collectSuperTypes(type, result);
+		result.remove(type);
+		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
+	}
+	
+	private static void collectSuperTypes(ITypeBinding curr, Set collection) {
+		if (collection.add(curr)) {
+			ITypeBinding[] interfaces= curr.getInterfaces();
+			for (int i= 0; i < interfaces.length; i++) {
+				collectSuperTypes(interfaces[i], collection);
+			}
+			ITypeBinding superClass= curr.getSuperclass();
+			if (superClass != null) {
+				collectSuperTypes(superClass, collection);
+			}
+		}
 	}
 
 	/**

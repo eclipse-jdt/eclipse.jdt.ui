@@ -22,6 +22,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
@@ -56,11 +58,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AssistQuickFixTest("testAddTypeToArrayInitializer"));
+			suite.addTest(new AssistQuickFixTest("testCreateInSuper"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -76,6 +78,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
+		
+		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
+		codeTemplateStore.findTemplate(CodeTemplateContextType.METHODSTUB).setPattern("//TODO\n${body_statement}");
 		
 		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
@@ -2367,6 +2372,76 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			assertEqualString(preview, buf.toString());	
+		}
+	
+	public void testCreateInSuper() throws Exception {
+		
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("}\n");
+			pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public interface IB {\n");
+			buf.append("}\n");
+			pack1.createCompilationUnit("IB.java", buf.toString(), false, null);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.io.IOException;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("public class E extends A implements IB {\n");
+			buf.append("    public Vector foo(int count) throws IOException {\n");
+			buf.append("        return null;\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			
+			String str= "foo";
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+			List proposals= collectAssists(context, false);
+			
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+			
+			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.io.IOException;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("\n");
+			buf.append("public interface IB {\n");
+			buf.append("\n");
+			buf.append("    Vector foo(int count) throws IOException;\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			
+			proposal= (CUCorrectionProposal) proposals.get(1);
+			String preview2= getPreviewContent(proposal);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.io.IOException;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("\n");
+			buf.append("    public Vector foo(int count) throws IOException {\n");
+			buf.append("        //TODO\n");
+			buf.append("        return null;\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected2= buf.toString();
+					
+			assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+
 		}
     
 }

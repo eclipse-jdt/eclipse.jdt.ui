@@ -22,7 +22,49 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -63,6 +105,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getSplitVariableProposals(context, coveringNode, null)
 				|| getAddBlockProposals(context, coveringNode, null)
 				|| getArrayInitializerToArrayCreation(context, coveringNode, null)
+				|| getCreateInSuperClassProposals(context, coveringNode, null)
 				|| getInvertEqualsProposal(context, coveringNode, null);
 			
 		}
@@ -92,12 +135,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getAddBlockProposals(context, coveringNode, resultingCollections);
 				getInvertEqualsProposal(context, coveringNode, resultingCollections);
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
+				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
 	}
 	
+
 	private boolean noErrorsAtLocation(IProblemLocation[] locations) {
 		if (locations != null) {
 			for (int i= 0; i < locations.length; i++) {
@@ -833,10 +878,56 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
 		return true;	
-
-		
-		
 	}
 
+	
+	private boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
+		if (!(node instanceof SimpleName) || !(node.getParent() instanceof MethodDeclaration)) {
+			return false;
+		}
+		MethodDeclaration decl= (MethodDeclaration) node.getParent();
+		if (decl.getName() != node || decl.resolveBinding() == null) {
+			return false;
+		}
+		
+		ICompilationUnit cu= context.getCompilationUnit();
+		CompilationUnit astRoot= context.getASTRoot();
+		
+		IMethodBinding binding= decl.resolveBinding();
+		String methodName= binding.getName();
+		ITypeBinding[] paramTypes= binding.getParameterTypes();
+		
+		ITypeBinding[] superTypes= Bindings.getAllSuperTypes(binding.getDeclaringClass());
+		if (resultingCollections == null) {
+			for (int i= 0; i < superTypes.length; i++) {
+				ITypeBinding curr= superTypes[i];
+				if (curr.isFromSource() && Bindings.findMethodInType(curr, methodName, paramTypes) == null) {
+					return true;
+				}
+			}
+			return false;
+		}
+		List params= decl.parameters();
+		String[] paramNames= new String[paramTypes.length];
+		for (int i = 0; i < params.size(); i++) {
+			SingleVariableDeclaration param= (SingleVariableDeclaration) params.get(i);
+			paramNames[i]= param.getName().getIdentifier();
+		}
+
+		for (int i= 0; i < superTypes.length; i++) {
+			ITypeBinding curr= superTypes[i];
+			if (curr.isFromSource()) {
+				IMethodBinding method= Bindings.findMethodInType(curr, methodName, paramTypes);
+				if (method == null) {
+					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, curr);
+					if (targetCU != null) {
+						String label= CorrectionMessages.getFormattedString("QuickAssistProcessor.createmethodinsuper.description", curr.getName()); //$NON-NLS-1$
+						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, curr, binding, paramNames, 6));
+					}
+				}
+			}
+		}
+		return true;
+	}
 	
 }

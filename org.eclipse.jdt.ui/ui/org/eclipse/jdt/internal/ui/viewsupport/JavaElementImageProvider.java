@@ -358,6 +358,7 @@ public class JavaElementImageProvider {
 		return member.getElementType() != IJavaElement.TYPE;
 	}
 	
+	
 	public static ImageDescriptor getMethodImageDescriptor(boolean isInInterface, int flags) {
 		if (Flags.isPublic(flags) || isInInterface)
 			return JavaPluginImages.DESC_MISC_PUBLIC;
@@ -395,6 +396,11 @@ public class JavaElementImageProvider {
 			}
 		}
 	}
+	
+	public static Image getDecoratedImage(ImageDescriptor baseImage, int adornments, Point size) {
+		return JavaPlugin.getImageDescriptorRegistry().get(new JavaElementImageDescriptor(baseImage, adornments, size));
+	}
+	
 
 	private static ImageDescriptor getClassImageDescriptor(int flags) {
 		if (Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags))

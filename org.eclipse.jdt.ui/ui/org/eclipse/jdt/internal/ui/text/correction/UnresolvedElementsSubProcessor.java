@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -50,6 +51,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.SwapDescription;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class UnresolvedElementsSubProcessor {
 	
@@ -1139,7 +1141,7 @@ public class UnresolvedElementsSubProcessor {
 			if (targetCU != null) {
 				String[] args= new String[] { getMethodSignature( targetBinding.getName(), arguments) };
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", args); //$NON-NLS-1$
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+				Image image= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetBinding, 5, image));
 			}
 		}

@@ -158,7 +158,7 @@ public class TypeMismatchSubProcessor {
 			if (currBinding == null) {
 				currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			}
-			addChangeSenderTypeProposals(context, receiverNode, currBinding, true, 4, proposals);
+			addChangeSenderTypeProposals(context, receiverNode, currBinding, true, 6, proposals);
 		}
 		
 		if (castTypeBinding != null) {
