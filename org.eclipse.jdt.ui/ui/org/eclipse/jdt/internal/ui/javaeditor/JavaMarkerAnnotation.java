@@ -102,27 +102,29 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		} else {
 			
 			fType= AnnotationType.UNKNOWN;
-			try {
-				
-				if (marker.isSubtypeOf(IMarker.PROBLEM)) {
-					int severity= marker.getAttribute(IMarker.SEVERITY, -1);
-					switch (severity) {
-						case IMarker.SEVERITY_ERROR:
-							fType= AnnotationType.ERROR;
-							break;
-						case IMarker.SEVERITY_WARNING:
-							fType= AnnotationType.WARNING;
-							break;
-					}
-				} else if (marker.isSubtypeOf(IMarker.TASK))
-					fType= AnnotationType.TASK;
-				else if (marker.isSubtypeOf(SearchUI.SEARCH_MARKER)) 
-					fType= AnnotationType.SEARCH;
-				else if (marker.isSubtypeOf(IMarker.BOOKMARK))
-					fType= AnnotationType.BOOKMARK;
+			if (marker.exists()) {
+				try {
 					
-			} catch(CoreException e) {
-				JavaPlugin.log(e);
+					if (marker.isSubtypeOf(IMarker.PROBLEM)) {
+						int severity= marker.getAttribute(IMarker.SEVERITY, -1);
+						switch (severity) {
+							case IMarker.SEVERITY_ERROR:
+								fType= AnnotationType.ERROR;
+								break;
+							case IMarker.SEVERITY_WARNING:
+								fType= AnnotationType.WARNING;
+								break;
+						}
+					} else if (marker.isSubtypeOf(IMarker.TASK))
+						fType= AnnotationType.TASK;
+					else if (marker.isSubtypeOf(SearchUI.SEARCH_MARKER)) 
+						fType= AnnotationType.SEARCH;
+					else if (marker.isSubtypeOf(IMarker.BOOKMARK))
+						fType= AnnotationType.BOOKMARK;
+						
+				} catch(CoreException e) {
+					JavaPlugin.log(e);
+				}
 			}
 			super.initialize();
 		}
@@ -149,7 +151,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 */
 	public String getMessage() {
 		IMarker marker= getMarker();
-		if (marker == null)
+		if (marker == null || !marker.exists())
 			return ""; //$NON-NLS-1$
 		else
 			return marker.getAttribute(IMarker.MESSAGE, ""); //$NON-NLS-1$
@@ -166,8 +168,9 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 * @see IJavaAnnotation#getArguments()
 	 */
 	public String[] getArguments() {
-		if (isProblem())
-			return Util.getProblemArgumentsFromMarker(getMarker().getAttribute(IJavaModelMarker.ARGUMENTS, "")); //$NON-NLS-1$
+		IMarker marker= getMarker();
+		if (marker != null && marker.exists() && isProblem())
+			return Util.getProblemArgumentsFromMarker(marker.getAttribute(IJavaModelMarker.ARGUMENTS, "")); //$NON-NLS-1$
 		return null;
 	}
 
@@ -175,8 +178,9 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 * @see IJavaAnnotation#getId()
 	 */
 	public int getId() {
-		if (isProblem())
-			return getMarker().getAttribute(IJavaModelMarker.ID, -1);
+		IMarker marker= getMarker();
+		if (marker != null  && marker.exists() && isProblem())
+			return marker.getAttribute(IJavaModelMarker.ID, -1);
 		return -1;
 	}
 	
@@ -224,8 +228,11 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		if (fImageType == BREAKPOINT_IMAGE) {
 			Image result= super.getImage(display);
 			if (result == null) {
-				result= fPresentation.getImage(getMarker());
-				setImage(result);
+				IMarker marker= getMarker();
+				if (marker != null && marker.exists()) {
+					result= fPresentation.getImage(getMarker());
+					setImage(result);
+				}
 			}					
 			return result;
 		}

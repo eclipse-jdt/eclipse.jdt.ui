@@ -137,7 +137,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 			if (javaAnnotations.size() == 1) {
 				
 				// optimization
-				IJavaAnnotation javaAnnotation= (IJavaAnnotation)javaAnnotations.get(0);
+				IJavaAnnotation javaAnnotation= (IJavaAnnotation) javaAnnotations.get(0);
 				String message= javaAnnotation.getMessage();
 				if (message != null && message.trim().length() > 0)
 					return formatSingleMessage(message);
@@ -148,7 +148,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 				
 				Iterator e= javaAnnotations.iterator();
 				while (e.hasNext()) {
-					IJavaAnnotation javaAnnotation= (IJavaAnnotation)e.next();
+					IJavaAnnotation javaAnnotation= (IJavaAnnotation) e.next();
 					String message= javaAnnotation.getMessage();
 					if (message != null && message.trim().length() > 0)
 						messages.add(message.trim());
