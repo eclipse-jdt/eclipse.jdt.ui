@@ -581,9 +581,10 @@ public class PushDownRefactoring extends Refactoring {
 		IType[] accessedTypes= getTypeReferencedInPushedDownMembers(pm);
 		for (int i= 0; i < subclasses.length; i++) {
 			IType targetClass= subclasses[i];
+			ITypeHierarchy targetSupertypes= targetClass.newSupertypeHierarchy(null);
 			for (int j= 0; j < accessedTypes.length; j++) {
 				IType type= accessedTypes[j];
-				if (! canBeAccessedFrom(type, targetClass)){
+				if (! canBeAccessedFrom(type, targetClass, targetSupertypes)){
 					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.type_not_accessible", new String[]{createTypeLabel(type), createTypeLabel(targetClass)}); //$NON-NLS-1$
 					result.addError(message, JavaStatusContext.create(type));
 				}	
@@ -600,10 +601,11 @@ public class PushDownRefactoring extends Refactoring {
 		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(membersToPushDown, pm);
 		for (int i= 0; i < subclasses.length; i++) {	
 			IType targetClass= subclasses[i];
+			ITypeHierarchy targetSupertypes= targetClass.newSupertypeHierarchy(null);
 			for (int j= 0; j < accessedFields.length; j++) {
 				IField field= accessedFields[j];
 				boolean isAccessible= 	pushedDownList.contains(field) || 
-										canBeAccessedFrom(field, targetClass);
+										canBeAccessedFrom(field, targetClass, targetSupertypes);
 				if (! isAccessible){
 					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.field_not_accessible", new String[]{createFieldLabel(field), createTypeLabel(targetClass)}); //$NON-NLS-1$
 					result.addError(message, JavaStatusContext.create(field));
@@ -621,10 +623,11 @@ public class PushDownRefactoring extends Refactoring {
 		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(membersToPushDown, pm);
 		for (int i= 0; i < subclasses.length; i++) {
 			IType targetClass= subclasses[i];
+			ITypeHierarchy targetSupertypes= targetClass.newSupertypeHierarchy(null);
 			for (int j= 0; j < accessedMethods.length; j++) {
 				IMethod method= accessedMethods[j];
-				boolean isAccessible= canBeAccessedFrom(method, targetClass) ||
-									   pushedDownList.contains(method);
+				boolean isAccessible= pushedDownList.contains(method) ||
+									   canBeAccessedFrom(method, targetClass, targetSupertypes);
 				if (! isAccessible){
 					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.method_not_accessible", new String[]{createMethodLabel(method), createTypeLabel(targetClass)}); //$NON-NLS-1$
 					result.addError(message, JavaStatusContext.create(method));
@@ -635,7 +638,14 @@ public class PushDownRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private boolean canBeAccessedFrom(IMember member, IType newHome) throws JavaModelException{
+	/**
+	 * @param member a called member
+	 * @param newHome the new home of the member call
+	 * @param newHomeSupertypes supertype hierarchy of newHome
+	 * @return <code>true</code> iff member is visible from <code>newHome</code> 
+	 * @throws JavaModelException
+	 */
+	private boolean canBeAccessedFrom(IMember member, IType newHome, ITypeHierarchy newHomeSupertypes) throws JavaModelException{
 		Assert.isTrue(!(member instanceof IInitializer));
 		if (! member.exists())
 			return false;
@@ -649,7 +659,7 @@ public class PushDownRefactoring extends Refactoring {
 		if (JdtFlags.isPrivate(member))
 			return false;
 			
-		if (member.getDeclaringType() == null){ //top level
+		if (member.getDeclaringType() == null){ //top level -> end of recursion
 			if (! (member instanceof IType))
 				return false;
 
@@ -659,21 +669,23 @@ public class PushDownRefactoring extends Refactoring {
 			if (! JdtFlags.isPackageVisible(member))
 				return false;
 			
-			return JavaModelUtil.isSamePackage(((IType)member).getPackageFragment(), newHome.getPackageFragment());		
+			if (JavaModelUtil.isSamePackage(((IType) member).getPackageFragment(), newHome.getPackageFragment()))
+				return true;
+			
+			return newHomeSupertypes.contains(member.getDeclaringType());
 		} else {
 			IType enclosingType= member.getDeclaringType();
 			
-			if (! canBeAccessedFrom(enclosingType, newHome))
+			if (! canBeAccessedFrom(enclosingType, newHome, newHomeSupertypes)) // recursive
 				return false;
 
-			boolean samePackage= JavaModelUtil.isSamePackage(enclosingType.getPackageFragment(), newHome.getPackageFragment());
-			if (samePackage)
+			if (JavaModelUtil.isSamePackage(enclosingType.getPackageFragment(), newHome.getPackageFragment()))
 				return true; //private checked before
 
-			if (enclosingType.equals(getDeclaringClass()))
-				return JdtFlags.isPublic(member) || JdtFlags.isProtected(member);
-			else
-				return JdtFlags.isPublic(member);
+			if (JdtFlags.isPublic(member))
+				return true;
+			
+			return JdtFlags.isProtected(member) && newHomeSupertypes.contains(enclosingType);
 		}
 	}
 

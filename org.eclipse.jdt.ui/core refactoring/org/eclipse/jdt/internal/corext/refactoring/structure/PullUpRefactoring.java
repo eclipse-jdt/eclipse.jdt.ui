@@ -916,12 +916,13 @@ public class PullUpRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		IType[] accessedTypes= getTypeReferencedInPulledUpMembers(pm);
 		IType targetClass= getTargetClass();
+		ITypeHierarchy targetSupertypes= targetClass.newSupertypeHierarchy(null);
 		for (int i= 0; i < accessedTypes.length; i++) {
 			IType iType= accessedTypes[i];
 			if (! iType.exists())
 				continue;
 			
-			if (! canBeAccessedFrom(iType, targetClass)){
+			if (! canBeAccessedFrom(iType, targetClass, targetSupertypes)){
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.type_not_accessible", //$NON-NLS-1$
 					new String[]{createTypeLabel(iType), createTypeLabel(targetClass)});
 				result.addError(message, JavaStatusContext.create(iType));
@@ -940,6 +941,7 @@ public class PullUpRefactoring extends Refactoring {
 		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(fMembersToPullUp, new SubProgressMonitor(pm, 1));
 		
 		IType targetClass= getTargetClass();
+		ITypeHierarchy targetSupertypes= targetClass.newSupertypeHierarchy(null);
 		for (int i= 0; i < accessedFields.length; i++) {
 			IField field= accessedFields[i];
 			if (! field.exists())
@@ -947,7 +949,7 @@ public class PullUpRefactoring extends Refactoring {
 			
 			boolean isAccessible= 	pulledUpList.contains(field) ||
 									deletedList.contains(field) ||
-									canBeAccessedFrom(field, targetClass);
+									canBeAccessedFrom(field, targetClass, targetSupertypes);
 			if (! isAccessible){
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.field_not_accessible", //$NON-NLS-1$
 					new String[]{createFieldLabel(field), createTypeLabel(targetClass)});
@@ -972,6 +974,7 @@ public class PullUpRefactoring extends Refactoring {
 		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fMembersToPullUp, new SubProgressMonitor(pm, 1));
 		
 		IType targetClass= getTargetClass();
+		ITypeHierarchy targetSupertypes= targetClass.newSupertypeHierarchy(null);
 		for (int i= 0; i < accessedMethods.length; i++) {
 			IMethod method= accessedMethods[i];
 			if (! method.exists())
@@ -979,7 +982,7 @@ public class PullUpRefactoring extends Refactoring {
 			boolean isAccessible= 	pulledUpList.contains(method) || 
 									deletedList.contains(method) ||
 									declaredAbstractList.contains(method) ||
-									canBeAccessedFrom(method, targetClass);
+									canBeAccessedFrom(method, targetClass, targetSupertypes);
 			if (! isAccessible){
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.method_not_accessible", //$NON-NLS-1$
 					new String[]{createMethodLabel(method), createTypeLabel(targetClass)});
@@ -1018,7 +1021,14 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	private boolean canBeAccessedFrom(IMember member, IType newHome) throws JavaModelException{
+	/**
+	 * @param member a called member
+	 * @param newHome the new home of the member call
+	 * @param newHomeSupertypes supertype hierarchy of newHome
+	 * @return <code>true</code> iff member is visible from <code>newHome</code> 
+	 * @throws JavaModelException
+	 */
+	private boolean canBeAccessedFrom(IMember member, IType newHome, ITypeHierarchy newHomeSupertypes) throws JavaModelException {
 		Assert.isTrue(!(member instanceof IInitializer));
 		if (! member.exists())
 			return false;
@@ -1032,7 +1042,7 @@ public class PullUpRefactoring extends Refactoring {
 		if (JdtFlags.isPrivate(member))
 			return false;
 			
-		if (member.getDeclaringType() == null){ //top level
+		if (member.getDeclaringType() == null){ //top level -> end of recursion
 			if (! (member instanceof IType))
 				return false;
 
@@ -1042,11 +1052,14 @@ public class PullUpRefactoring extends Refactoring {
 			if (! JdtFlags.isPackageVisible(member))
 				return false;
 			
-			return JavaModelUtil.isSamePackage(((IType)member).getPackageFragment(), newHome.getPackageFragment());		
+			if (JavaModelUtil.isSamePackage(((IType) member).getPackageFragment(), newHome.getPackageFragment()))
+				return true;
+			
+			return newHomeSupertypes.contains(member.getDeclaringType());
 		} else {
 			IType enclosingType= member.getDeclaringType();
 			
-			if (! canBeAccessedFrom(enclosingType, newHome))
+			if (! canBeAccessedFrom(enclosingType, newHome, newHomeSupertypes)) // recursive
 				return false;
 
 			if (enclosingType.equals(getDeclaringType())) //cannot reach down the hierachy
@@ -1055,8 +1068,10 @@ public class PullUpRefactoring extends Refactoring {
 			if (JdtFlags.isPublic(member))
 				return true;
 		 
-			//FIX ME: protected and default treated the same
-			return JavaModelUtil.isSamePackage(enclosingType.getPackageFragment(), newHome.getPackageFragment());		
+			if (JavaModelUtil.isSamePackage(enclosingType.getPackageFragment(), newHome.getPackageFragment()))
+				return true;
+			
+			return JdtFlags.isProtected(member) && newHomeSupertypes.contains(enclosingType);
 		}
 	}
 	
