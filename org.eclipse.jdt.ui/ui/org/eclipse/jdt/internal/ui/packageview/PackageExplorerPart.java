@@ -568,7 +568,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		IStructuredSelection s= (IStructuredSelection) event.getSelection();
 		Object element= s.getFirstElement();
 		if (fViewer.isExpandable(element)) {
-			fViewer.setExpandedState(element, !fViewer.getExpandedState(element));
+			fZoomInAction.run();
+			//fViewer.setExpandedState(element, !fViewer.getExpandedState(element));
 			return;
 		}
 		if (fOpenCUAction.isEnabled()) {
