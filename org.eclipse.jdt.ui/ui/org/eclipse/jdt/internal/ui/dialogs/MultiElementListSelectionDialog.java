@@ -8,6 +8,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -22,8 +24,6 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
-
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
@@ -194,15 +194,23 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	protected void updateButtonsEnableState(IStatus status) {
 		boolean isOK= !status.matches(IStatus.ERROR);
 		fPages[fCurrentPage].okState= isOK;
-
-		fNextButton.setEnabled(isOK && (fCurrentPage < fNumberOfPages - 1));
-		fBackButton.setEnabled(fCurrentPage != 0);
 		
 		boolean isAllOK= isOK;
 		for (int i= 0; i != fNumberOfPages; i++)
 			isAllOK = isAllOK && fPages[i].okState;
 		
 		fFinishButton.setEnabled(isAllOK);
+		
+		boolean nextButtonEnabled= isOK && (fCurrentPage < fNumberOfPages - 1);
+		
+		fNextButton.setEnabled(nextButtonEnabled);
+		fBackButton.setEnabled(fCurrentPage != 0);		
+		
+		if (nextButtonEnabled) {
+			getShell().setDefaultButton(fNextButton);
+		} else if (isAllOK) {
+			getShell().setDefaultButton(fFinishButton);
+		}
 	}
 
 	private void turnPage(boolean toNextPage) {
@@ -257,6 +265,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		// 3. select elements
 		Object[] selectedElements= (Object[]) getInitialSelections().get(fCurrentPage);
 		setSelection(selectedElements);
+		fFilteredList.setFocus();
 	}
 	
 	private String getPageInfoMessage() {
