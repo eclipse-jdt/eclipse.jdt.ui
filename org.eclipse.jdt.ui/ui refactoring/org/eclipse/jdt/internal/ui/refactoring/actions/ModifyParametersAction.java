@@ -13,15 +13,15 @@ import org.eclipse.jdt.internal.ui.refactoring.ModifyParametersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
-public class ModifyParamatersAction extends OpenRefactoringWizardAction {
+public class ModifyParametersAction extends OpenRefactoringWizardAction {
 	
 	private static final String TITLE= RefactoringMessages.getString("RefactoringGroup.modify_Parameters_label"); //$NON-NLS-1$
 	
-	public ModifyParamatersAction(CompilationUnitEditor editor) {
+	public ModifyParametersAction(CompilationUnitEditor editor) {
 		super(TITLE, editor, IMethod.class);
 	}
 
-	public ModifyParamatersAction(UnifiedSite site) {
+	public ModifyParametersAction(UnifiedSite site) {
 		super(TITLE, site, IMethod.class);
 	}
 
