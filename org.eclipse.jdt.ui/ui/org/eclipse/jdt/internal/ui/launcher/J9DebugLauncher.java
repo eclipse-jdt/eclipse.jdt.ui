@@ -91,7 +91,7 @@ public class J9DebugLauncher extends J9Launcher {
 			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CREATE_PROCESS, new LauncherException(e));
 			return null;
 		}
-		IProcess[] processes= new IProcess[] { DebugPlugin.getDefault().newProcess(p, cmdLine[0]), DebugPlugin.getDefault().newProcess(p2, proxyCmd) };
+		IProcess[] processes= new IProcess[] { DebugPlugin.getDefault().newProcess(p, renderCommandLine(cmdLine)), DebugPlugin.getDefault().newProcess(p2, renderCommandLine(new String[] { "j9Proxy" })) };
 				
 		AttachingConnector connector= getConnector();
 		if (connector == null) {

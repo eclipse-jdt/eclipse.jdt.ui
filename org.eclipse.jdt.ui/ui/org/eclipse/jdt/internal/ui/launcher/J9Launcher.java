@@ -6,16 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Vector;
-
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.model.IProcess;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.jdt.launching.VMRunnerResult;
+import java.io.File;import java.io.IOException;import java.util.Date;import java.util.Vector;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;
 
 public class J9Launcher extends JavaLauncher {
 	
@@ -58,7 +49,7 @@ public class J9Launcher extends JavaLauncher {
 		arguments.copyInto(cmdLine);
 		try {
 			Process p= Runtime.getRuntime().exec(cmdLine);
-			IProcess[] processes= new IProcess[] { DebugPlugin.getDefault().newProcess(p, cmdLine[0]) };
+			IProcess[] processes= new IProcess[] { DebugPlugin.getDefault().newProcess(p, renderCommandLine(cmdLine)) };
 			return new VMRunnerResult(null, processes);
 		} catch (IOException e) {
 			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CREATE_PROCESS, new LauncherException(e));

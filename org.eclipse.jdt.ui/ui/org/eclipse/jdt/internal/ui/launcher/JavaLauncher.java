@@ -6,17 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.util.List;
-
-import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.Utilities;
-import org.eclipse.jdt.launching.IVMRunner;
+import java.text.DateFormat;import java.util.Date;import java.util.List;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.Utilities;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.swt.widgets.Display;
 
 public abstract class JavaLauncher implements IVMRunner {
 	protected final static String PREFIX= "launcher.";
@@ -26,10 +16,10 @@ public abstract class JavaLauncher implements IVMRunner {
 	
 	public static String renderCommandLine(String[] commandLine) {
 		StringBuffer buf= new StringBuffer(commandLine[0]);
-		for (int i= 1; i < commandLine.length; i++) {
-			buf.append(' ');
-			buf.append(commandLine[i]);
-		}
+		String timestamp= DateFormat.getInstance().format(new Date(System.currentTimeMillis()));
+		buf.append(" (");
+		buf.append(timestamp);
+		buf.append(")");
 		return buf.toString();
 	}
 	

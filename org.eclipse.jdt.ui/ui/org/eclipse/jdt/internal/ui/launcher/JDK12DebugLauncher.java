@@ -100,7 +100,7 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 			return null;
 		}
 
-		IProcess[] processes= new IProcess[] {DebugPlugin.getDefault().newProcess(p, cmdLine[0])};
+		IProcess[] processes= new IProcess[] {DebugPlugin.getDefault().newProcess(p, renderCommandLine(cmdLine))};
 
 		ListeningConnector connector= getConnector();
 		if (connector == null) {
