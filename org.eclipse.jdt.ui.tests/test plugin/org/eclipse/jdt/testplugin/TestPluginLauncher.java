@@ -11,7 +11,7 @@ import java.net.URL;
  */
 public class TestPluginLauncher {
 	
-	public static final String APP_NAME= "org.eclipse.jdt.testplugin.test";
+	public static final String APP_NAME= "org.eclipse.jdt.ui.tests.app";
 	
 	public static void run(String location, Class testCase, String[] args) {
 		run(APP_NAME, location, testCase, args);

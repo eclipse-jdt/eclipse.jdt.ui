@@ -13,7 +13,10 @@ public class UIInteractiveSuite extends TestSuite {
 	 * Construct the test suite.
 	 */
 	public UIInteractiveSuite() {
-		addTest(new TestSuite(PreferencesTest.class));
+		//addTest(new TestSuite(PreferencesTest.class));
+		//addTest(new TestSuite(WizardsTest.class));
+		addTest(new TestSuite(DialogsTest.class));
+		
 	}
 	
 	public static void main(String[] args) {

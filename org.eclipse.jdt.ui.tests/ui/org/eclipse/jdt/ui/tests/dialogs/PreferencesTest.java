@@ -36,8 +36,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class PreferencesTest extends TestCase {
+
+	public static void main(String[] args) {
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), PreferencesTest.class, args);
+	}
 	
 	private static class PreferenceDialogWrapper extends PreferenceDialog {
 		
