@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import java.util.ArrayList;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -24,11 +26,14 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class AddUnimplementedMethodsTest extends TestCase {
 	
@@ -102,6 +107,20 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		fClassD= null;
 		fInterfaceE= null;
 	}
+	
+	private IMethod[] getSelected(IType type) throws JavaModelException {
+		IMethod[] inheritedMethods= StubUtility.getOverridableMethods(type, type.newSupertypeHierarchy(null), false);
+		
+		ArrayList toImplement= new ArrayList();
+		for (int i= 0; i < inheritedMethods.length; i++) {
+			IMethod curr= inheritedMethods[i];
+			if (JdtFlags.isAbstract(curr)) {
+				toImplement.add(curr);
+			}
+		}
+		return (IMethod[]) toImplement.toArray(new IMethod[toImplement.size()]);
+	}
+	
 				
 	/*
 	 * basic test: extend an abstract class and an interface
@@ -110,7 +129,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test1.java");
 		IType testClass= cu.createType("public class Test1 extends A implements B {\n}\n", null, true, null);
 	
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), null, true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), getSelected(testClass), true, null);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
@@ -128,7 +147,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test2.java");
 		IType testClass= cu.createType("public class Test2 extends C implements B {\n}\n", null, true, null);
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), null, true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), getSelected(testClass), true, null);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
@@ -146,7 +165,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test3.java");
 		IType testClass= cu.createType("public class Test3 extends D {\n}\n", null, true, null);
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), null, true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), getSelected(testClass), true, null);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
@@ -164,7 +183,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test4.java");
 		IType testClass= cu.createType("public class Test4 implements B, E {\n}\n", null, true, null);
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), null, true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), getSelected(testClass), true, null);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
