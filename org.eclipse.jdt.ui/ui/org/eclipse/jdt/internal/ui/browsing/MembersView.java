@@ -8,6 +8,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -33,11 +35,13 @@ import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
-public class MembersView extends JavaBrowsingPart {
+public class MembersView extends JavaBrowsingPart implements IPropertyChangeListener {
 	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 
@@ -45,6 +49,7 @@ public class MembersView extends JavaBrowsingPart {
 	public MembersView() {
 		setHasWorkingSetFilter(false);
 		setHasCustomSetFilter(false);
+		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 
 	/**
@@ -266,5 +271,22 @@ public class MembersView extends JavaBrowsingPart {
 		IEditorPart editor= getViewSite().getPage().getActiveEditor();
 		if (editor != null)
 			setSelectionFromEditor(editor);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty().equals(MembersOrderPreferencePage.PREF_OUTLINE_SORT_OPTION)) {
+			getViewer().refresh();
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#dispose()
+	 */
+	public void dispose() {
+		super.dispose();
+		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 	}
 }
