@@ -51,6 +51,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	private final static String PAGE_NAME= "NewTestCaseCreationWizardPage2"; //$NON-NLS-1$
 	private final static String STORE_USE_TASKMARKER= PAGE_NAME + ".USE_TASKMARKER"; //$NON-NLS-1$
 	private final static String STORE_CREATE_FINAL_METHOD_STUBS= PAGE_NAME + ".CREATE_FINAL_METHOD_STUBS"; //$NON-NLS-1$
+	private final static String STORE_CREATE_CONSTRUCTOR= PAGE_NAME + ".CREATE_CONSTRUCTOR"; //$NON-NLS-1$
 	public final static String PREFIX= "test"; //$NON-NLS-1$
 
 	private NewTestCaseCreationWizardPage fFirstPage;	
@@ -58,6 +59,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 
 	private Button fCreateFinalMethodStubsButton;
 	private Button fCreateTasksButton;
+	private Button fCreateConstructorButton;
 	private ContainerCheckedTreeViewer fMethodsTree;
 	private Button fSelectAllButton;
 	private Button fDeselectAllButton;
@@ -86,6 +88,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		createSpacer(container);
 		createFinalMethodStubsControls(container);
 		createTasksControls(container);
+		createConstructorControls(container);
 		setControl(container);
 		restoreWidgetValues();
 		Dialog.applyDialogFont(container);
@@ -142,6 +145,31 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		fCreateTasksButton.setLayoutData(gd);
 	}
 
+	protected void createConstructorControls(Composite container) {
+		GridLayout layout;
+		GridData gd;
+		Composite prefixContainer= new Composite(container, SWT.NONE);
+		gd= new GridData();
+		gd.horizontalAlignment = GridData.FILL;
+		gd.horizontalSpan = 2;
+		prefixContainer.setLayoutData(gd);
+		
+		layout = new GridLayout();
+		layout.numColumns = 2;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		prefixContainer.setLayout(layout);
+		
+		fCreateConstructorButton= new Button(prefixContainer, SWT.CHECK | SWT.LEFT);
+		fCreateConstructorButton.setText(WizardMessages.getString("NewTestClassWizPage2.create_constructor.text")); //$NON-NLS-1$
+		fCreateConstructorButton.setEnabled(true);
+		fCreateConstructorButton.setSelection(false);
+		gd= new GridData();
+		gd.horizontalAlignment= GridData.FILL;
+		gd.horizontalSpan= 2;
+		fCreateConstructorButton.setLayoutData(gd);
+	}
+	
 	protected void createMethodsTreeControls(Composite container) {
 		Label label= new Label(container, SWT.LEFT | SWT.WRAP);
 		label.setFont(container.getFont());
@@ -391,6 +419,13 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		return fCreateFinalMethodStubsButton.getSelection();
 	}
 		
+	/**
+	 * Returns true if the checkbox for creating the constructor is checked.
+	 */
+	public boolean getCreateConstructorButtonSelection() {
+		return fCreateConstructorButton.getSelection();
+	}
+	
 	private void updateSelectedMethodsLabel() {
 		Object[] checked= fMethodsTree.getCheckedElements();
 		int checkedMethodCount= 0;
@@ -429,6 +464,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		if (settings != null) {
 			fCreateTasksButton.setSelection(settings.getBoolean(STORE_USE_TASKMARKER));
 			fCreateFinalMethodStubsButton.setSelection(settings.getBoolean(STORE_CREATE_FINAL_METHOD_STUBS));
+			fCreateConstructorButton.setSelection(settings.getBoolean(STORE_CREATE_CONSTRUCTOR));
 		}		
 	}	
 
@@ -441,6 +477,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		if (settings != null) {
 			settings.put(STORE_USE_TASKMARKER, fCreateTasksButton.getSelection());
 			settings.put(STORE_CREATE_FINAL_METHOD_STUBS, fCreateFinalMethodStubsButton.getSelection());
+			settings.put(STORE_CREATE_CONSTRUCTOR, fCreateConstructorButton.getSelection());
 		}
 	}
 }

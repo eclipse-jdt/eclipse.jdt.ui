@@ -195,7 +195,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		super.handleFieldChanged(fieldName);
 		if (fieldName.equals(CLASS_TO_TEST)) {
 			fClassToTestStatus= classToTestClassChanged();
-			updateDefaultName();
 		} else if (fieldName.equals(SUPER)) {
 			validateSuperClass(); 
 			if (!fFirstTime)
@@ -233,14 +232,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		updateStatus(status);
 	}
 
-	protected void updateDefaultName() {
-		String s= fClassToTestText.getText();
-		if (s.lastIndexOf('.') > -1)
-			s= s.substring(s.lastIndexOf('.') + 1);
-		if (s.length() > 0)
-			setTypeName(s + TEST_SUFFIX, true);
-	}
-	
 	/*
 	 * @see IDialogPage#createControl(Composite)
 	 */
@@ -267,7 +258,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		setControl(composite);
 			
 		//set default and focus
-		fClassToTestText.setText(fDefaultClassToTest);
+		if (fDefaultClassToTest.length() > 0) {
+			fClassToTestText.setText(fDefaultClassToTest);
+			fTestClassText.setText(fDefaultClassToTest+TEST_SUFFIX);
+		}
 		restoreWidgetValues();
 		Dialog.applyDialogFont(composite);
 		WorkbenchHelp.setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);	
@@ -342,7 +336,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		
 		IType type= null;
 		try {		
-			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES, false, fClassToTestText.getText());
+			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES, false, getClassToTestText());
 			dialog.setTitle(WizardMessages.getString("NewTestClassWizPage.class_to_test.dialog.title")); //$NON-NLS-1$
 			dialog.setMessage(WizardMessages.getString("NewTestClassWizPage.class_to_test.dialog.message")); //$NON-NLS-1$
 			dialog.open();
@@ -360,7 +354,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 
 	protected IStatus classToTestClassChanged() {
-		fClassToTestButton.setEnabled(getPackageFragmentRoot() != null);
+		fClassToTestButton.setEnabled(getPackageFragmentRoot() != null);	// sets the test class field?
 		IStatus status= validateClassToTest();
 		return status;
 	}
@@ -392,7 +386,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		fIndexOfFirstTestMethod= 0;
 
-		createConstructor(type, imports); 
+		if (fPage2.getCreateConstructorButtonSelection())
+			createConstructor(type, imports); 
 
 		if (fMethodStubsButtons.isSelected(0)) 
 			createMain(type);
@@ -771,19 +766,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	 */
 	public String getTypeName() {
 		return (fTestClassText==null)?fTestClassTextInitialValue:fTestClassText.getText();
-	}
-	
-	/**
-	 * Sets the type name.
-	 */	
-	public void setTypeName(String name, boolean canBeModified) {
-		if (fTestClassText == null) {
-			fTestClassTextInitialValue= name;
-		} 
-		else {
-			fTestClassText.setText(name);
-			fTestClassText.setEnabled(canBeModified);
-		}
 	}	
 
 	/**
@@ -839,7 +821,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected JUnitStatus validateClassToTest() {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		IPackageFragment pack= getPackageFragment();
-		String classToTestName= fClassToTestText.getText();
+		String classToTestName= getClassToTestText();
 		JUnitStatus status= new JUnitStatus();
 		
 		fClassToTest= null;
