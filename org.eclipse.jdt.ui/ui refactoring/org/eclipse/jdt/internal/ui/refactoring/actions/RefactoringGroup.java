@@ -113,10 +113,8 @@ public class RefactoringGroup extends ContextMenuGroup {
 			createRenameStaticMethodAction(provider, changeCreator),
 			createRenameMethodInInterfaceAction(provider, changeCreator),
 			createRenameTypeAction(provider, changeCreator),
-			createRenamePackageAction(provider, changeCreator),
 			createRenameFieldAction(provider, changeCreator),
 			createMoveCompilationUnitAction(provider, changeCreator),
-			createRenameCUAction(provider, changeCreator)
 		};
 		fIntitialized= true;
 	}
@@ -197,24 +195,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 		};
 	}
-	
-	// -------------------- package refactorings ----------------------
-	
-	private AbstractOpenRefactoringWizardAction createRenamePackageAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
-		if (linkRenameInPackagesView())
-			return null;
-			
-		String label= RefactoringResources.getResourceString("Refactoring.RenamePackage.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IPackageFragment.class) {
-			protected Wizard createWizard() { 
-				return new RenameRefactoringWizard("Refactoring.RenamePackage"); 
-			}
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new RenamePackageRefactoring(changeCreator, (IPackageFragment)obj);
-			}
-		};
-	}
-	
+		
 	// -------------------- field refactorings ----------------------
 	
 	private AbstractOpenRefactoringWizardAction createRenameFieldAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
@@ -241,26 +222,5 @@ public class RefactoringGroup extends ContextMenuGroup {
 				return new MoveCompilationUnitRefactoring(changeCreator, (ICompilationUnit)obj);
 			}
 		};
-	}
-	
-	private AbstractOpenRefactoringWizardAction createRenameCUAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
-		if (linkRenameInPackagesView())
-			return null;
-			
-		String label= RefactoringResources.getResourceString("Refactoring.RenameCompilationUnit.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, ICompilationUnit.class) {
-			protected Wizard createWizard() { 
-				return new RenameRefactoringWizard("Refactoring.RenameCompilationUnit"); 
-			}
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new RenameCompilationUnitRefactoring(changeCreator, (ICompilationUnit)obj);
-			}
-		};
-	}
-	
-	//---- Helpers --------------------------------------------------
-	private boolean linkRenameInPackagesView() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(
-			IPreferencesConstants.LINK_RENAME_IN_PACKAGES_TO_REFACTORING);
 	}
 }
