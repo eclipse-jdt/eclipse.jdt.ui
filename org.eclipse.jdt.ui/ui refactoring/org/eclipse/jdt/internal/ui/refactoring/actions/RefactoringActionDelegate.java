@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate {
 
 	private IWorkbenchWindow fWorkbenchWindow;
-	private RefactoringAction[] fPossibleTargets;
+	private IRefactoringAction[] fPossibleTargets;
 	
 	private String fOperationNotAvailableDialogMessage;
 	private String fOperationNotAvailableDialogTitle;
@@ -39,7 +39,7 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 		fOperationNotAvailableDialogMessage= operationNotAvailableDialogMessage;
 	}
 	
-	protected void initPossibleTargets(RefactoringAction[] possibleTargets) {
+	protected void initPossibleTargets(IRefactoringAction[] possibleTargets) {
 		fPossibleTargets= possibleTargets;
 	}
 	
@@ -60,7 +60,7 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 	 * Method declared in IActionDelegate
 	 */
 	public void run(IAction action) {
-		RefactoringAction targetAction= findAction();
+		IRefactoringAction targetAction= findAction();
 		if (targetAction != null) {
 			targetAction.run();
 		} else {
@@ -97,11 +97,11 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 		fWorkbenchWindow= window;
 	}
 	
-	protected RefactoringAction findAction() {
+	protected IRefactoringAction findAction() {
 		if (fPossibleTargets == null)
 			return null;
 		for (int i= 0; i < fPossibleTargets.length; i++) {
-			RefactoringAction action= fPossibleTargets[i];
+			IRefactoringAction action= fPossibleTargets[i];
 			action.update();
 			if (action.isEnabled())
 				return action;
