@@ -102,7 +102,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 			root.add( importEdit); //$NON-NLS-1$
 		}
 		root.add( fMemberEdit); //$NON-NLS-1$
-		return null;
+		return change;
 	}
 	
 	
