@@ -11,11 +11,13 @@
 
 package org.eclipse.jdt.internal.ui.text.comment;
 
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
 
@@ -72,7 +74,7 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 
 		final boolean blank= next.hasAttribute(COMMENT_BLANKLINE);
 
-		// Avoid wraping punctuation
+		// Avoid wrapping punctuation
 		if (next.getLength() <= 2 && !blank && isNonAlphaNumeric(next))
 			return true;
 
@@ -93,6 +95,32 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 
 		if (fIndentRoots && !line.hasAttribute(COMMENT_ROOT) && !line.hasAttribute(COMMENT_PARAMETER))
 			count -= stringToLength(line.getIndentationReference());
+
+		// Avoid appending consecutive immutable ranges, which together exceed the line width
+		if (next.hasAttribute(COMMENT_IMMUTABLE) && (previous == null || !previous.hasAttribute(COMMENT_IMMUTABLE))) {
+			// Breaking the abstraction by directly accessing the list of ranges for looking ahead
+			Iterator iter= getRanges().iterator();
+			CommentRange current= null;
+			while (iter.hasNext() && current != next)
+				current= (CommentRange) iter.next();
+			
+			if (current != null && iter.hasNext()) {
+				try {
+					int lineNumber= getDocument().getLineOfOffset(getOffset() + current.getOffset());
+					CommentRange last= current;
+					while (iter.hasNext()) {
+						current= (CommentRange) iter.next();
+						if (current.hasAttribute(COMMENT_IMMUTABLE) && getDocument().getLineOfOffset(getOffset() + current.getOffset()) == lineNumber)
+							last= current;
+						else
+							break;
+					}
+					count -= last.getOffset() + last.getLength() - (next.getOffset() + next.getLength());
+				} catch (BadLocationException e) {
+					// Should not happen
+				}
+			}
+		}
 
 		return super.canAppend(line, previous, next, index, count);
 	}

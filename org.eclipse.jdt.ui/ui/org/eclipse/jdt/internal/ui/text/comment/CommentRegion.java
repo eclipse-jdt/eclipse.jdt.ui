@@ -174,7 +174,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 *               line, <code>false</code> otherwise
 	 */
 	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int index, final int width) {
-		return index == 0 || index + next.getLength() < width;
+		return index == 0 || index + next.getLength() <= width;
 	}
 
 	/**
