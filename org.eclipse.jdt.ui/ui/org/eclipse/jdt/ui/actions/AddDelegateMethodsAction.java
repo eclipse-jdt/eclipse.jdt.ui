@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -240,6 +241,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
 			return;
+		if (!ActionUtil.isProcessable(getShell(), type))
+			return;			
 		showUI(type, preselected);
 	}
 
@@ -256,6 +259,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	 */
 	protected void run(ITextSelection selection) {
 		try {
+			IJavaElement input= SelectionConverter.getInput(fEditor);
+			if (!ActionUtil.isProcessable(getShell(), input))
+				return;					
+			
 			IJavaElement[] elements = SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
 				IField field = (IField) elements[0];

@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
@@ -309,13 +310,14 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					throw new OrganizeImportError();
 				}
 			};
+			
 	
 			for (int i= 0; i < cus.length; i++) {
 				ICompilationUnit cu= cus[i];
-				String cuLocation= cu.getPath().makeRelative().toString();
-				
+				if (testOnBuildPath(cu, status)) {
+					String cuLocation= cu.getPath().makeRelative().toString();
 					cu= JavaModelUtil.toWorkingCopy(cu);
-					
+				
 					monitor.subTask(cuLocation);
 					OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, query);
 					runInSync(op, cuLocation, status, monitor);
@@ -323,18 +325,38 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					
+				
 					IProblem parseError= op.getParseError();
 					if (parseError != null) {
 						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
 						status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
-					} 
+					} 					
+				}
 			}
 		} finally {
 			monitor.done();
 		}
 	}
 	
+	private boolean testOnBuildPath(ICompilationUnit cu, MultiStatus status) {
+		try {
+			IJavaProject project= cu.getJavaProject();
+			if (!project.isOnClasspath(cu)) {
+				String cuLocation= cu.getPath().makeRelative().toString();
+				String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.notoncp", cuLocation); //$NON-NLS-1$
+				status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+				return false;
+			}
+			return true;
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getStatus().getMessage()); //$NON-NLS-1$
+			status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
+			return false;
+		}
+	}
+	
+		
 	private void runInSync(final OrganizeImportsOperation op, final String cuLocation, final MultiStatus status, final IProgressMonitor monitor) {
 		Runnable runnable= new Runnable() {
 			public void run() {
@@ -359,6 +381,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	public void run(ICompilationUnit cu) {
 		if (!ElementValidator.check(cu, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), fEditor != null)) //$NON-NLS-1$ 
 			return;
+		if (!ActionUtil.isProcessable(getShell(), cu))
+			return;
+			
 		try {
 			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);

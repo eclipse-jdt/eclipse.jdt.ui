@@ -14,7 +14,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -59,7 +62,10 @@ public class JavaUIHelp {
 						selected= ((IStructuredSelection) selection).toArray();
 					}
 				} else if (fEditor != null) {
-					selected= SelectionConverter.codeResolve(fEditor);
+					IJavaElement input= SelectionConverter.getInput(fEditor);
+					if (ActionUtil.checkJavaElement(input)) {
+						selected= SelectionConverter.codeResolve(fEditor);					
+					}
 				}
 				JavadocHelpContext.displayHelp(fContextId, selected);
 			} catch (CoreException x) {

@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.AnnotationType;
@@ -175,6 +176,10 @@ public class SortMembersAction extends SelectionDispatchAction {
 	}
 	
 	private void run(Shell shell, ICompilationUnit cu, IEditorPart editor) {
+		if (!ActionUtil.isProcessable(getShell(), cu)) {
+			return;
+		}		
+		
 		if (containsRelevantMarkers(editor)) {
 			if (!MessageDialog.openConfirm(getShell(), getDialogTitle(), ActionMessages.getString("SortMembersAction.containsmarkers"))) { //$NON-NLS-1$
 				return;

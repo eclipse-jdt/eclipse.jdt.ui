@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -126,6 +125,10 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) {
+		IJavaElement input= SelectionConverter.getInput(fEditor);
+		if (!ActionUtil.isProcessable(getShell(), input))
+			return;		
+		
 		IJavaElement[] elements= SelectionConverter.codeResolveOrInputHandled(fEditor, getShell(), getDialogTitle());
 		if (elements == null)
 			return;
@@ -134,11 +137,6 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			IJavaElement[] resolvedElements= OpenTypeHierarchyUtil.getCandidates(elements[i]);
 			if (resolvedElements != null)	
 				candidates.addAll(Arrays.asList(resolvedElements));
-		}
-		for (Iterator iter= candidates.iterator(); iter.hasNext();) {
-			IJavaElement element= (IJavaElement)iter.next();
-			if (!ActionUtil.isProcessable(getShell(), element))
-				return;
 		}
 		run((IJavaElement[])candidates.toArray(new IJavaElement[candidates.size()]));
 	}
@@ -149,8 +147,19 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	protected void run(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return;
+		Object input= selection.getFirstElement();
+
+		if (input instanceof IJavaElement) {
+			IStatus status= createStatus(ActionMessages.getString("OpenTypeHierarchyAction.messages.no_java_element")); //$NON-NLS-1$
+			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.getString("OpenTypeHierarchyAction.messages.title"), status); //$NON-NLS-1$
+			return;
+		}
+		IJavaElement element= (IJavaElement) input;
+		if (!ActionUtil.isProcessable(getShell(), element))
+			return;
+
 		List result= new ArrayList(1);
-		IStatus status= compileCandidates(result, selection.getFirstElement());
+		IStatus status= compileCandidates(result, element);
 		if (status.isOK()) {
 			run((IJavaElement[]) result.toArray(new IJavaElement[result.size()]));
 		} else {
@@ -170,11 +179,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		return ActionMessages.getString("OpenTypeHierarchyAction.dialog.title"); //$NON-NLS-1$
 	}
 	
-	private static IStatus compileCandidates(List result, Object input) {
-		if (!(input instanceof IJavaElement))
-			return createStatus(ActionMessages.getString("OpenTypeHierarchyAction.messages.no_java_element")); //$NON-NLS-1$
-			
-		IJavaElement elem= (IJavaElement)input;
+	private static IStatus compileCandidates(List result, IJavaElement elem) {
 		IStatus ok= new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$		
 		try {
 			switch (elem.getElementType()) {
@@ -208,7 +213,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 					}
 					elem= elem.getAncestor(IJavaElement.COMPILATION_UNIT);				
 				case IJavaElement.CLASS_FILE:
-					result.add(((IClassFile)input).getType());
+					result.add(((IClassFile)elem).getType());
 					return ok;				
 				case IJavaElement.COMPILATION_UNIT:
 					ICompilationUnit cu= (ICompilationUnit)elem;

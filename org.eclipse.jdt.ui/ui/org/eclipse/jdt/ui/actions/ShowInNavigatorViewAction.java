@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -90,6 +91,10 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) {
+		IJavaElement input= SelectionConverter.getInput(fEditor);
+		if (!ActionUtil.isProcessable(getShell(), input))
+			return;		
+		
 		IJavaElement element= SelectionConverter.codeResolveOrInputHandled(fEditor, 
 			getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.dialog.message")); //$NON-NLS-1$
 		if (element == null)

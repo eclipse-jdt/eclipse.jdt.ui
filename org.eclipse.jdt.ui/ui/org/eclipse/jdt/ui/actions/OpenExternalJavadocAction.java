@@ -107,6 +107,10 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) {
+		IJavaElement element= SelectionConverter.getInput(fEditor);
+		if (!ActionUtil.isProcessable(getShell(), element))
+			return;
+		
 		try {
 			run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), getDialogTitle(), ActionMessages.getString("OpenExternalJavadocAction.select_element")));  //$NON-NLS-1$
 		} catch(JavaModelException e) {
@@ -120,16 +124,16 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	protected void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))
 			return;
-		run((IJavaElement)selection.getFirstElement());
+		IJavaElement element= (IJavaElement)selection.getFirstElement();
+		if (!ActionUtil.isProcessable(getShell(), element))
+			return;			
+		run(element);
 	}
 	
 	private void run(IJavaElement element) {
 		if (element == null)
 			return;
 		Shell shell= getShell();
-		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(shell, element))
-			return;
 		try {
 			String labelName= JavaElementLabels.getElementLabel(element, JavaElementLabels.M_PARAMETER_TYPES);
 			

@@ -109,6 +109,10 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 			
 			try {
 				IMethod method= (IMethod) element;
+				if (!method.getJavaProject().isOnClasspath(method)) {
+					return 0;
+				}
+				
 				int flags= method.getFlags();
 				if (method.getDeclaringType().isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
 					return getOverrideIndicators(method);

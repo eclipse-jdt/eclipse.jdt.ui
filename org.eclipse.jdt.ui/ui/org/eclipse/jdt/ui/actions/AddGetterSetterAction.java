@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -188,6 +189,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), dialogTitle, editor))
 			return;
+		if (!ActionUtil.isProcessable(getShell(), type))
+			return;			
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ILabelProvider lp= new AddGetterSetterLabelProvider();
@@ -229,18 +232,19 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				String message= ActionMessages.getFormattedString("AddGetterSetterAction.methods_selected", String.valueOf(count));//$NON-NLS-1$
 				return new StatusInfo(IStatus.INFO, message);
 			}
+
+			private int countSelectedMethods(Object[] selection){
+				int count= 0;
+				for (int i = 0; i < selection.length; i++) {
+					if (selection[i] instanceof GetterSetterEntry)
+						count++;
+				}
+				return count;
+			}			
+			
 		};
 	}
-	
-	private static int countSelectedMethods(Object[] selection){
-		int count= 0;
-		for (int i = 0; i < selection.length; i++) {
-			if (selection[i] instanceof GetterSetterEntry)
-				count++;
-		}
-		return count;
-	}
-	
+
 	private static IField[] getGetterFields(Object[] result){
 		Collection list= new ArrayList(0);
 		for (int i = 0; i < result.length; i++) {
@@ -327,6 +331,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 */		
 	protected void run(ITextSelection selection) {
 		try {
+			IJavaElement input= SelectionConverter.getInput(fEditor);
+			if (!ActionUtil.isProcessable(getShell(), input))
+				return;					
+			
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
 				IField field= (IField)elements[0];
@@ -349,11 +357,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
 	}
-	
-	private boolean checkEnabledEditor() {
-		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
-	}	
-	
+		
 	//---- Helpers -------------------------------------------------------------------
 	
 	private void run(IField[] getterFields, IField[] setterFields, IEditorPart editor) {

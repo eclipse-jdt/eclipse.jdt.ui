@@ -39,7 +39,7 @@ public class ActionUtil {
 		return false;
 	}
 
-	private static boolean checkJavaElement(IJavaElement element) {	
+	public static boolean checkJavaElement(IJavaElement element) {	
         //fix for bug http://dev.eclipse.org/bugs/show_bug.cgi?id=20051
         if (element.getElementType() == IJavaElement.JAVA_PROJECT)
             return true;

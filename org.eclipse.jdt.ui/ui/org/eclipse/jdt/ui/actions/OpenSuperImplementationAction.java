@@ -31,12 +31,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -89,7 +87,9 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(getMethod(selection) != null);
+		IMethod method= getMethod(selection);
+		
+		setEnabled(method != null && checkMethod(method));
 	}
 	
 	/* (non-Javadoc)
@@ -97,20 +97,11 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 */
 	protected void run(ITextSelection selection) {
 		IJavaElement element= elementAtOffset();
-		IMethod method= null;
 		if (element == null || !(element instanceof IMethod)) {
 			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OpenSuperImplementationAction.not_applicable")); //$NON-NLS-1$
 			return;
-		} else {
-			method= checkMethod(element);
 		}
-		
-		if (method == null) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(), 
-				ActionMessages.getFormattedString("OpenSuperImplementationAction.no_super_implementation", element.getElementName())); //$NON-NLS-1$
-			return;
-		}
-		run(method);
+		run((IMethod) element);
 	}
 	
 	/* (non-Javadoc)
@@ -122,15 +113,20 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	
 	private void run(IMethod method) {
 		if (method == null)
+			return;		
+		if (!ActionUtil.isProcessable(getShell(), method))
 			return;
+		
+		if (!checkMethod(method)) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), 
+				ActionMessages.getFormattedString("OpenSuperImplementationAction.no_super_implementation", method.getElementName())); //$NON-NLS-1$
+			return;
+		}		
+
 		try {
-			IType declaringType= method.getDeclaringType();
-			IType workingCopyType= (IType) EditorUtility.getWorkingCopy(declaringType);
-			if (workingCopyType != null) {
-				declaringType= workingCopyType;
-			}
-			IMethod impl= findSuperImplementation(declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor());
-			
+			IType type= (IType) JavaModelUtil.toWorkingCopy(method.getDeclaringType());
+
+			IMethod impl= findSuperImplementation(type, method.getElementName(), method.getParameterTypes(), method.isConstructor());
 			if (impl != null) {
 				OpenActionUtil.open(impl);
 			}
@@ -156,35 +152,31 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		if (selection.size() != 1)
 			return null;
 		Object element= selection.getFirstElement();
-		return checkMethod(element);
+		if (element instanceof IMethod) {
+			return (IMethod) element;
+		}
+		return null;
 	}
 	
-	private IMethod getMethod(ITextSelection selection) {
-		return checkMethod(elementAtOffset());
-	}
-	
-	private IMethod checkMethod(Object element) {
+	private boolean checkMethod(IMethod method) {
 		try {
-			if (element instanceof IMethod) {
-				IMethod method= (IMethod) element;
-				int flags= method.getFlags();
-				if (!Flags.isStatic(flags) && !Flags.isPrivate(flags)) {
-					IType declaringType= method.getDeclaringType();
-					// if possible, make a check. don't care about working copies ect. In doubt, the action will be enabled.
-					if (SuperTypeHierarchyCache.hasInCache(declaringType)) {
-						if (findSuperImplementation(declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor()) == null) {
-							return null;
-						}
+			int flags= method.getFlags();
+			if (!Flags.isStatic(flags) && !Flags.isPrivate(flags)) {
+				IType declaringType= method.getDeclaringType();
+				// if possible, make a check. don't care about working copies ect. In doubt, the action will be enabled.
+				if (SuperTypeHierarchyCache.hasInCache(declaringType)) {
+					if (findSuperImplementation(declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor()) == null) {
+						return false;
 					}
-					return method;
 				}
+				return true;
 			}
 		} catch (JavaModelException e) {
 			if (!e.isDoesNotExist()) {
 				JavaPlugin.log(e);
 			}
 		}
-		return null;
+		return false;
 	}
 	
 	private IJavaElement elementAtOffset() {

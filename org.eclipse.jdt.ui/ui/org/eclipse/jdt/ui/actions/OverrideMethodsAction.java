@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OverrideMethodQuery;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -167,6 +168,10 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	//---- Helpers -------------------------------------------------------------------
 	
 	private void run(Shell shell, IType type, IEditorPart editor) {
+		if (!ActionUtil.isProcessable(getShell(), type)) {
+			return;
+		}
+		
 		OverrideMethodQuery selectionQuery= new OverrideMethodQuery(shell, false);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selectionQuery, false);

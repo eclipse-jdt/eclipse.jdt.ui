@@ -13,17 +13,12 @@ package org.eclipse.jdt.internal.ui.util;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -143,27 +138,6 @@ public class OpenTypeHierarchyUtil {
 		IEditorPart part= EditorUtility.openInEditor(input, true);
 		if (input instanceof IJavaElement)
 			EditorUtility.revealInEditor(part, (IJavaElement) input);
-	}
-	
-	private static IWorkbenchPage findPage(IWorkbenchWindow window) {
-		IPerspectiveRegistry registry= PlatformUI.getWorkbench().getPerspectiveRegistry();
-		IPerspectiveDescriptor pd= registry.findPerspectiveWithId(JavaUI.ID_HIERARCHYPERSPECTIVE);
-		IWorkbenchPage pages[]= window.getPages();
-		for (int i= 0; i < pages.length; i++) {
-			IWorkbenchPage page= pages[i];
-			if (page.getPerspective().equals(pd))
-				return page;
-		}
-		return null;
-	}
-	
-	private static Object getElement(ISelection s) {
-		if (!(s instanceof IStructuredSelection))
-			return null;
-		IStructuredSelection selection= (IStructuredSelection)s;
-		if (selection.size() != 1)
-			return null;
-		return selection.getFirstElement();	
 	}
 	
 	/**

@@ -34,11 +34,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -162,8 +161,13 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	//---- Helpers -------------------------------------------------------------------
 	
 	private void run(Shell shell, IType type, IEditorPart editor, boolean activatedFromEditor) {
-		if (!ElementValidator.check(type, getShell(), getDialogTitle(), activatedFromEditor))
+		if (!ElementValidator.check(type, getShell(), getDialogTitle(), activatedFromEditor)) {
 			return;
+		}
+		if (!ActionUtil.isProcessable(getShell(), type)) {
+			return;		
+		}
+			
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, false);
 		try {

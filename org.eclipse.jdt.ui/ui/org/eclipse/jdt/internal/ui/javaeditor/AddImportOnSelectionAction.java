@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
@@ -92,6 +93,9 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		ICompilationUnit cu= getCompilationUnit();
 		if (!ElementValidator.checkValidateEdit(cu, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"))) //$NON-NLS-1$
 			return;
+		if (!ActionUtil.isProcessable(getShell(), cu))
+			return;
+			
 		if (cu != null) {
 			ISelection s= fEditor.getSelectionProvider().getSelection();
 			IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
