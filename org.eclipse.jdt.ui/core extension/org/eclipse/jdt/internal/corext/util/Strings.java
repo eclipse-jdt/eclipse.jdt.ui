@@ -9,8 +9,6 @@ import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
 /**
  * Helper class to provide String manipulation functions not available in standard JDK.
  */
@@ -267,5 +265,23 @@ public class Strings {
 		else
 			return line.substring(0, end + 1);
 	}
+	
+	public static String[] removeTrailingEmptyLines(String[] sourceLines) {
+		int lastNonEmpty= findLastNonEmptyLineIndex(sourceLines);
+		String[] result= new String[lastNonEmpty + 1];
+		for (int i= 0; i < result.length; i++) {
+			result[i]= sourceLines[i];
+		}
+		return result;
+	}
+
+	private static int findLastNonEmptyLineIndex(String[] sourceLines) {
+		for (int i= sourceLines.length - 1; i >= 0; i--) {
+			if (! sourceLines[i].trim().equals(""))//$NON-NLS-1$
+				return i;
+		}
+		return -1;
+	}
+	
 }
 
