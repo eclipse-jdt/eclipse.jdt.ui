@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -307,7 +308,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		ASTNode[] firstReplaceNodeParents= findParents(getFirstReplacedExpression());
 		ASTNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes();
 		Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
-
+		
+		if (firstReplaceNodeParents[commonPath.length - 1] instanceof TryStatement)
+			return firstReplaceNodeParents[commonPath.length - 1];
+		
 		if (isBlock(firstReplaceNodeParents[commonPath.length - 1]))
 			return firstReplaceNodeParents[commonPath.length];
 		else
