@@ -13,6 +13,7 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,7 +50,7 @@ import org.eclipse.jdi.Bootstrap;
 
 /**
  * To use this performance meter add the following VM arguments:
- * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=7777,suspend=n,server=y -Declipse.perf.debugPort=7777.</code>
+ * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=7777,suspend=n,server=y -Declipse.perf.debugPort=7777</code>.
  * Try a different port if 7777 does not work.
  * Because the performance meter uses the VM's debugging facility, it cannot be
  * debugged itself. A {@link org.eclipse.test.performance.Performance#getNullPerformanceMeter()}
@@ -351,7 +352,8 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void start() {
 		try {
-			attach("localhost", PORT); //$NON-NLS-1$
+			String localhost = InetAddress.getLocalHost().getCanonicalHostName();
+			attach(localhost, PORT); //$NON-NLS-1$
 			
 			List requests= new ArrayList();
 			for (int i= 0; i < fMethods.length; i++)
@@ -432,6 +434,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		List connectors= manager.attachingConnectors();
 		AttachingConnector connector= (AttachingConnector) connectors.get(0);
 		Map args= connector.defaultArguments();
+		
 		((Connector.Argument) args.get("port")).setValue(String.valueOf(port)); //$NON-NLS-1$
 		((Connector.Argument) args.get("hostname")).setValue(host); //$NON-NLS-1$
 		fVM= connector.attach(args);
