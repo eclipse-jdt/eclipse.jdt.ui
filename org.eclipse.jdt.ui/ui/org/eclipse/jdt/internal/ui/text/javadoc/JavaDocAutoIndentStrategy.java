@@ -759,7 +759,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			}
 
 		} catch (BadLocationException e) {
-			e.printStackTrace();
+			JavaPlugin.log(e);
 		}
 
 		if (!getPreferenceStore().getBoolean(CompilationUnitEditor.FORMAT_JAVADOCS))
@@ -770,10 +770,12 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int lineOffset= document.getLineOffset(line);
 			String prefix= jdocExtractLinePrefix(document, line);
 			boolean always= c.offset > lineOffset && c.offset <= lineOffset + prefix.length();
-			int[] caretOffset= {0};
+			int[] caretOffset= {c.offset};
 			jdocWrapParagraphFromLine(document, document.getLineOfOffset(c.offset), caretOffset, always);
+			c.offset= caretOffset[0];
 
 		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
 		}
 	}
 
