@@ -169,9 +169,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 						return getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_INFINITE, null);
 					case IJavaElement.PACKAGE_FRAGMENT:
+					case IJavaElement.COMPILATION_UNIT:
 					case IJavaElement.CLASS_FILE:
 						return getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_ONE, null);
-					case IJavaElement.COMPILATION_UNIT:
 					case IJavaElement.PACKAGE_DECLARATION:
 					case IJavaElement.IMPORT_DECLARATION:
 					case IJavaElement.IMPORT_CONTAINER:
