@@ -8,9 +8,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 
-public class ReorderParametersActionDelegate extends RefactoringActionDelegate {
+public class ModifyParametersActionDelegate extends RefactoringActionDelegate {
 
-	public ReorderParametersActionDelegate() {
+	public ModifyParametersActionDelegate() {
 		super("Modify Method Parameters", "Operation unavailable on the current selection. Select a declaration or a reference to a source method with parameters.");
 	}
 
@@ -21,7 +21,7 @@ public class ReorderParametersActionDelegate extends RefactoringActionDelegate {
 		super.init(window);
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(window.getSelectionService());
 		initPossibleTargets(new RefactoringAction[] {
-			RefactoringGroup.createReorderParametersAction(provider)
+			RefactoringGroup.createModifyParametersAction(provider)
 		});
 	}
 }

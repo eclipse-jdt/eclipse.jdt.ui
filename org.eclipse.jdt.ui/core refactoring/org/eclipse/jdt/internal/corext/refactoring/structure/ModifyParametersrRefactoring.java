@@ -17,12 +17,12 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactori
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
-public class ReorderRenameParameterWrapperRefactoring extends Refactoring implements IMultiRenameRefactoring, IReferenceUpdatingRefactoring{
+public class ModifyParametersrRefactoring extends Refactoring implements IMultiRenameRefactoring, IReferenceUpdatingRefactoring{
 	
 	private RenameParametersRefactoring fRenameParameters;
 	private ReorderParametersRefactoring fReorderParameters;
 
-	public ReorderRenameParameterWrapperRefactoring(IMethod method){
+	public ModifyParametersrRefactoring(IMethod method){
 		fRenameParameters= new RenameParametersRefactoring(method);
 		fReorderParameters= new ReorderParametersRefactoring(method);
 	}

@@ -619,10 +619,10 @@ JavaStructureDiffViewerCreator
 			label="%Refactoring.moveAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate">
 		</action>
-		<action id="ReorderParametersAction"
+		<action id="ModifyParametersAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
-			label="%Refactoring.reorderParametersAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.ReorderParametersActionDelegate">
+			label="%Refactoring.modifyParametersAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.ModifyParametersActionDelegate">
 		</action>
 		<action id="RenameAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"

@@ -42,13 +42,13 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ReorderRenameParameterWrapperRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersrRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class ReorderParametersInputPage extends UserInputWizardPage {
+public class ModifyParametersInputPage extends UserInputWizardPage {
 
-	public static final String PAGE_NAME= "ReorderParametersInputPage"; //$NON-NLS-1$
+	public static final String PAGE_NAME= "ModifyParametersInputPage"; //$NON-NLS-1$
 	
 	private static final String[] PROPERTIES= {"type", "old", "new"}; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 	private static final int TYPE_PROP= 0; 
@@ -62,7 +62,7 @@ public class ReorderParametersInputPage extends UserInputWizardPage {
 	private Label fSignaturePreview;
 	private TableViewer fTableViewer;
 	
-	public ReorderParametersInputPage() {
+	public ModifyParametersInputPage() {
 		super(PAGE_NAME, true);
 		setMessage("Specify the new order of parameters and/or their new names");
 	}
@@ -284,8 +284,8 @@ public class ReorderParametersInputPage extends UserInputWizardPage {
 		return array;
 	}
 	
-	private ReorderRenameParameterWrapperRefactoring getReorderRenameParameterWrapperRefactoring(){
-		return	(ReorderRenameParameterWrapperRefactoring)getRefactoring();
+	private ModifyParametersrRefactoring getReorderRenameParameterWrapperRefactoring(){
+		return	(ModifyParametersrRefactoring)getRefactoring();
 	}
 	
 	private Map getNewParameterNames(){
@@ -383,9 +383,9 @@ public class ReorderParametersInputPage extends UserInputWizardPage {
 	
 	private static class ParameterInfoListSorter extends ViewerSorter{
 		
-		private ReorderRenameParameterWrapperRefactoring fRefactoring;
+		private ModifyParametersrRefactoring fRefactoring;
 		
-		ParameterInfoListSorter(ReorderRenameParameterWrapperRefactoring ref){
+		ParameterInfoListSorter(ModifyParametersrRefactoring ref){
 			fRefactoring= ref;
 		}
 		
