@@ -122,7 +122,9 @@ public class JavaTextLabelProvider extends org.eclipse.jdt.internal.ui.viewsuppo
 			if (root != null) {
 				IPath path= root.getPath();
 				if (path != null) {
-					buf.append(root.getPath().makeRelative().toString());
+					if (path.getDevice() == null)
+						path= path.makeRelative();
+					buf.append(path.toString());
 					buf.append(" - "); //$NON-NLS-1$
 				}
 			}	
