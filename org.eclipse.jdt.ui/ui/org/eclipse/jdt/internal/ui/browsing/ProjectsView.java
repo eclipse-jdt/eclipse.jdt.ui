@@ -112,6 +112,7 @@ public class ProjectsView extends JavaBrowsingPart {
 		// Don't allow to clear input for this view
 		if (input != null)
 			super.setInput(input);
+		else
+			getViewer().setSelection(null);
 	}
-
 }
