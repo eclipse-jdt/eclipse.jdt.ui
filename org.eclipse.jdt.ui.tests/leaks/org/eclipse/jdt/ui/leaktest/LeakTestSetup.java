@@ -23,10 +23,12 @@ public class LeakTestSetup extends TestSetup {
 	private ProfilerConnector fConnection;
 	
 	/**
-	 * @return Returns the profiler Connection or <code>null</code> if no profiler connection
-	 * could be established (e.g. because not supported on the platform)
+	 * @return the profiler Connection or <code>null</code> if no profiler connection could be established (e.g. because not supported on the platform)
 	 */
 	public static ProfilerConnector getProfilerConnector() {
+		if (fgCurrentSetup == null)
+			return null;
+		
 		return fgCurrentSetup.getConnection();
 	}
 		
