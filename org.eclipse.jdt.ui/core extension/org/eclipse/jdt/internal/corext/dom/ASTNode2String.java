@@ -35,39 +35,39 @@ import org.eclipse.jdt.internal.corext.Assert;
 	 * 
 	 * @param modifiers the modifiers
 	 */
-	void printModifiers(int modifiers) {
+	public static void printModifiers(int modifiers, StringBuffer buf) {
 		if (Modifier.isPublic(modifiers)) {
-			fResult.append("public ");//$NON-NLS-1$
+			buf.append("public ");//$NON-NLS-1$
 		}
 		if (Modifier.isProtected(modifiers)) {
-			fResult.append("protected ");//$NON-NLS-1$
+			buf.append("protected ");//$NON-NLS-1$
 		}
 		if (Modifier.isPrivate(modifiers)) {
-			fResult.append("private ");//$NON-NLS-1$
+			buf.append("private ");//$NON-NLS-1$
 		}
 		if (Modifier.isStatic(modifiers)) {
-			fResult.append("static ");//$NON-NLS-1$
+			buf.append("static ");//$NON-NLS-1$
 		}
 		if (Modifier.isAbstract(modifiers)) {
-			fResult.append("abstract ");//$NON-NLS-1$
+			buf.append("abstract ");//$NON-NLS-1$
 		}
 		if (Modifier.isFinal(modifiers)) {
-			fResult.append("final ");//$NON-NLS-1$
+			buf.append("final ");//$NON-NLS-1$
 		}
 		if (Modifier.isSynchronized(modifiers)) {
-			fResult.append("synchronized ");//$NON-NLS-1$
+			buf.append("synchronized ");//$NON-NLS-1$
 		}
 		if (Modifier.isVolatile(modifiers)) {
-			fResult.append("volatile ");//$NON-NLS-1$
+			buf.append("volatile ");//$NON-NLS-1$
 		}
 		if (Modifier.isNative(modifiers)) {
-			fResult.append("native ");//$NON-NLS-1$
+			buf.append("native ");//$NON-NLS-1$
 		}
 		if (Modifier.isStrictfp(modifiers)) {
-			fResult.append("strictfp ");//$NON-NLS-1$
+			buf.append("strictfp ");//$NON-NLS-1$
 		}
 		if (Modifier.isTransient(modifiers)) {
-			fResult.append("transient ");//$NON-NLS-1$
+			buf.append("transient ");//$NON-NLS-1$
 		}
 	}		
 	
@@ -367,7 +367,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		printModifiers(node.getModifiers());
+		printModifiers(node.getModifiers(), fResult);
 		node.getType().accept(this);
 		fResult.append(" ");//$NON-NLS-1$
 		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {
@@ -466,7 +466,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		printModifiers(node.getModifiers());
+		printModifiers(node.getModifiers(), fResult);
 		node.getBody().accept(this);
 		return false;
 	}
@@ -496,7 +496,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		printModifiers(node.getModifiers());
+		printModifiers(node.getModifiers(), fResult);
 		if (!node.isConstructor()) {
 			node.getReturnType().accept(this);
 			fResult.append(" ");//$NON-NLS-1$
@@ -655,7 +655,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 	 * @see ASTVisitor#visit(SingleVariableDeclaration)
 	 */
 	public boolean visit(SingleVariableDeclaration node) {
-		printModifiers(node.getModifiers());
+		printModifiers(node.getModifiers(), fResult);
 		node.getType().accept(this);
 		fResult.append(" ");//$NON-NLS-1$
 		node.getName().accept(this);
@@ -812,7 +812,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		printModifiers(node.getModifiers());
+		printModifiers(node.getModifiers(), fResult);
 		fResult.append(node.isInterface() ? "interface " : "class ");//$NON-NLS-2$//$NON-NLS-1$
 		node.getName().accept(this);
 		fResult.append(" ");//$NON-NLS-1$
@@ -863,7 +863,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 	 * @see ASTVisitor#visit(VariableDeclarationExpression)
 	 */
 	public boolean visit(VariableDeclarationExpression node) {
-		printModifiers(node.getModifiers());
+		printModifiers(node.getModifiers(), fResult);
 		node.getType().accept(this);
 		fResult.append(" ");//$NON-NLS-1$
 		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {
@@ -896,7 +896,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 	 * @see ASTVisitor#visit(VariableDeclarationStatement)
 	 */
 	public boolean visit(VariableDeclarationStatement node) {
-		printModifiers(node.getModifiers());
+		printModifiers(node.getModifiers(), fResult);
 		node.getType().accept(this);
 		fResult.append(" ");//$NON-NLS-1$
 		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {

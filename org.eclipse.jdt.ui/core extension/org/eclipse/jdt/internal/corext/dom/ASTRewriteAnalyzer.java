@@ -20,8 +20,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -191,6 +191,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(MethodDeclaration)
 	 */
 	public boolean visit(MethodDeclaration methodDecl) {
+		ASTModifiedFlags modfiedFlags= getModifiedFlags(methodDecl);
+		if (modfiedFlags != null) {
+			rewriteModifiers(methodDecl.getStartPosition(), methodDecl.getModifiers(), modfiedFlags.changedModifiers);
+		}
 		Type returnType= methodDecl.getReturnType();
 		if (isReplaced(returnType)) {
 			replaceNode(returnType, getReplacingNode(returnType));
@@ -216,11 +220,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				
 				if (changedParams) {
 					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameLPAREN);
-					rewriteList(scanner.getCurrentTokenEndPosition() + 1, "", parameters);
+					rewriteList(scanner.getCurrentTokenEndPosition() + 1, "", parameters, false);
 				}
 				if (changedExc) {
 					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameRPAREN);
-					rewriteList(scanner.getCurrentTokenEndPosition() + 1, " throws ", exceptions);
+					rewriteList(scanner.getCurrentTokenEndPosition() + 1, " throws ", exceptions, false);
 				}
 				
 			} catch (InvalidInputException e) {
@@ -237,7 +241,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 
-	public void rewriteMethodBody(MethodDeclaration methodDecl, Block body) {
+	private void rewriteMethodBody(MethodDeclaration methodDecl, Block body) {
 		if (isInserted(body) || isReplaced(body)) {
 			try {
 				IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), methodDecl.getStartPosition());
@@ -286,7 +290,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 	
-	private void rewriteList(int startPos, String keyword, List list) {
+	private void rewriteList(int startPos, String keyword, List list, boolean updateKeyword) {
 		int currPos= startPos;
 		int endPos= startPos;
 		
@@ -318,6 +322,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		if (before == 0) { // creating a new list -> insert keyword first (e.g. " throws ")
 			fChange.addTextEdit("keyword", SimpleTextEdit.createInsert(startPos, keyword));
+		} else if (updateKeyword) {
+			int firstStart= getNextExistingStartPos(list, 0, startPos);
+			fChange.addTextEdit("Update keyword", SimpleTextEdit.createReplace(startPos, firstStart - startPos, keyword));
 		}
 		
 		for (int i= 0; i < list.size(); i++) {
@@ -424,7 +431,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 
 	
 	private String generateSource(ASTNode node, int indent) {
-		String str= ASTNodes.asString(node);
+		String str= ASTNode2String.perform(node);
 		return StubUtility.codeFormat(str, indent, fTextBuffer.getLineDelimiter());
 	}
 	
@@ -433,13 +440,41 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(TypeDeclaration)
 	 */
 	public boolean visit(TypeDeclaration typeDecl) {
+		
+		// modifiers & class/interface
+		boolean invertType= false;
+		ASTModifiedFlags modifiedFlags= getModifiedFlags(typeDecl);
+		if (modifiedFlags != null) {
+			rewriteModifiers(typeDecl.getStartPosition(), typeDecl.getModifiers(), modifiedFlags.changedModifiers);
+			if (modifiedFlags.invertType) { // change from class to interface or reverse
+				invertType= true;
+				try {
+					IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), typeDecl.getStartPosition());
+					int typeToken= typeDecl.isInterface() ? ITerminalSymbols.TokenNameinterface : ITerminalSymbols.TokenNameclass;
+					ASTResolving.readToToken(scanner, typeToken);
+					
+					String str= typeDecl.isInterface() ? "class" : "interface";
+					int start= scanner.getCurrentTokenStartPosition();
+					int end= scanner.getCurrentTokenEndPosition() + 1;
+					
+					fChange.addTextEdit("Invert Type", SimpleTextEdit.createReplace(start, end - start, str));
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				} catch (InvalidInputException e) {
+					// ignore
+				}
+			}
+		}
+		
+		// name
 		SimpleName simpleName= typeDecl.getName();
 		if (isReplaced(simpleName)) {
 			replaceNode(simpleName, getReplacingNode(simpleName));
 		}
-	
+		
+		// superclass
 		Name superClass= typeDecl.getSuperclass();
-		if (!typeDecl.isInterface() && superClass != null) {
+		if ((!typeDecl.isInterface() || invertType) && superClass != null) {
 			if (isInserted(superClass)) {
 				String str= " extends " + ASTNodes.asString(superClass);
 				int pos= simpleName.getStartPosition() + simpleName.getLength();
@@ -456,17 +491,20 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 			}
 		}
+		// extended interfaces
 		List interfaces= typeDecl.superInterfaces();
-		if (hasChanges(interfaces)) {
+		if (hasChanges(interfaces) || invertType) {
 			int startPos;
 			if (typeDecl.isInterface() || superClass == null || isInserted(superClass)) {
 				startPos= simpleName.getStartPosition() + simpleName.getLength();
 			} else {
 				startPos= superClass.getStartPosition() + superClass.getLength();
 			}
-			rewriteList(startPos, " implements ", interfaces);
+			String keyword= (typeDecl.isInterface() != invertType) ? " extends " : " implements ";
+			rewriteList(startPos, keyword, interfaces, invertType);
 		}
 		
+		// type members
 		List members= typeDecl.bodyDeclarations();
 		ASTNode last= null;
 		for (int i= 0; i < members.size(); i++) {
@@ -498,5 +536,52 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}	
 		return false;
 	}
+
+	private void rewriteModifiers(int startPos, int oldModifiers, int newModifiers) {
+		if (oldModifiers == newModifiers) {
+			return;
+		}
+		
+		try {
+			IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), startPos);
+			int tok= scanner.getNextToken();
+			int endPos= startPos;
+			loop: while (true) {
+				boolean keep= true;
+				switch (tok) {
+					case ITerminalSymbols.TokenNamepublic: keep= Modifier.isPublic(newModifiers); break;
+					case ITerminalSymbols.TokenNameprotected: keep= Modifier.isProtected(newModifiers); break;
+					case ITerminalSymbols.TokenNameprivate: keep= Modifier.isPrivate(newModifiers); break;
+					case ITerminalSymbols.TokenNamestatic: keep= Modifier.isStatic(newModifiers); break;
+					case ITerminalSymbols.TokenNamefinal: keep= Modifier.isFinal(newModifiers); break;
+					case ITerminalSymbols.TokenNameabstract: keep= Modifier.isAbstract(newModifiers); break;
+					case ITerminalSymbols.TokenNamenative: keep= Modifier.isNative(newModifiers); break;
+					case ITerminalSymbols.TokenNamevolatile: keep= Modifier.isVolatile(newModifiers); break;
+					case ITerminalSymbols.TokenNamestrictfp: keep= Modifier.isStrictfp(newModifiers); break;
+					case ITerminalSymbols.TokenNametransient: keep= Modifier.isTransient(newModifiers); break;
+					case ITerminalSymbols.TokenNamesynchronized: keep= Modifier.isSynchronized(newModifiers); break;
+					default:
+						break loop;
+				}
+				tok= scanner.getNextToken();
+				int currPos= endPos;
+				endPos= scanner.getCurrentTokenStartPosition();
+				if (!keep) {
+					fChange.addTextEdit("Remove Modifier", SimpleTextEdit.createReplace(currPos, endPos - currPos, ""));
+				}
+			} 
+			int addedModifiers= (newModifiers ^ oldModifiers) & newModifiers;
+			if (addedModifiers != 0) {
+				StringBuffer buf= new StringBuffer();
+				ASTNode2String.printModifiers(addedModifiers, buf);
+				fChange.addTextEdit("Remove Modifier", SimpleTextEdit.createInsert(endPos, buf.toString()));
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		} catch (InvalidInputException e) {
+			// ignore
+		}		
+	}
+
 
 }
