@@ -120,6 +120,8 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 	}
 
 	private boolean shouldAcceptElement(IType type) {
+		if (type == null)
+			return false;
 		try{
 			fRefactoring= new MoveInnerToTopRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings());
 			return fRefactoring.checkPreactivation().isOK();
