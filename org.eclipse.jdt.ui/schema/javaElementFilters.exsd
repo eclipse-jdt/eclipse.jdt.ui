@@ -2,13 +2,13 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.eclipse.jdt.ui">
 <annotation>
-   <appInfo>
-      <meta.schema plugin="org.eclipse.jdt.ui" id="javaElementFilters" name="Java Element Filter Extensions"/>
-   </appInfo>
-   <documentation>
-      This extension point is used to extend Java UI views with filters.
-   </documentation>
-</annotation>
+      <appInfo>
+         <meta.schema plugin="org.eclipse.jdt.ui" id="javaElementFilters" name="Java Element Filter Extensions"/>
+      </appInfo>
+      <documentation>
+         This extension point is used to extend Java UI views with filters.
+      </documentation>
+   </annotation>
 
    <element name="extension">
       <complexType>
@@ -78,7 +78,7 @@ be contributed to all views which use the &lt;samp&gt;org.eclipse.jdt.ui.actions
          <attribute name="enabled" type="boolean">
             <annotation>
                <documentation>
-                  the filter will be enabled if this attribute is present and its value is "true".  Most likely the user will be able to override this setting in the UI.
+                  the filter will be enabled if this attribute is present and its value is &quot;true&quot;.  Most likely the user will be able to override this setting in the UI.
                </documentation>
             </annotation>
          </attribute>
@@ -112,14 +112,14 @@ then the pattern attribute must not provided.
 
 &lt;p&gt;
 &lt;pre&gt;
- &lt;extension point="org.eclipse.jdt.ui.javaElementFilters"&gt;
+ &lt;extension point=&quot;org.eclipse.jdt.ui.javaElementFilters&quot;&gt;
   &lt;filter
-   id="org.eclipse.jdt.ui.PackageExplorer.LibraryFilter"
-   name="%HideReferencedLibraries.label"
-   description="%HideReferencedLibraries.description"
-   viewId="org.eclipse.jdt.ui.PackageExplorer"
-   class="org.eclipse.jdt.internal.ui.filters.LibraryFilter"
-   enabled="false"&gt;
+   id=&quot;org.eclipse.jdt.ui.PackageExplorer.LibraryFilter&quot;
+   name=&quot;%HideReferencedLibraries.label&quot;
+   description=&quot;%HideReferencedLibraries.description&quot;
+   viewId=&quot;org.eclipse.jdt.ui.PackageExplorer&quot;
+   class=&quot;org.eclipse.jdt.internal.ui.filters.LibraryFilter&quot;
+   enabled=&quot;false&quot;&gt;
   &lt;/filter&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
@@ -151,10 +151,10 @@ then the pattern attribute must not provided.
       </appInfo>
       <documentation>
          &lt;p&gt;
-&lt;a href="hglegal.htm"&gt;
- &lt;img SRC="ngibmcpy.gif"
-   ALT="Copyright (c) 2000, 2003 IBM Corporation and others. All Rights Reserved."
-   BORDER=0 height=14 width=324/&gt;&lt;/a&gt;
+&lt;a href=&quot;hglegal.htm&quot;&gt;
+ &lt;img SRC=&quot;ngibmcpy.gif&quot;
+   ALT=&quot;Copyright (c) 2000, 2003 IBM Corporation and others. All Rights Reserved.&quot;
+   BORDER=0 height=14 width=324&gt;&lt;/a&gt;
 &lt;/p&gt;
       </documentation>
    </annotation>
