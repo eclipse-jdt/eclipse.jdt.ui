@@ -4,20 +4,19 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.Iterator;
-
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 
-import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IMenuCreator;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class HistoryDropDownAction extends Action implements IMenuCreator {
 
@@ -29,7 +28,7 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 	public HistoryDropDownAction(TypeHierarchyViewPart view) {
 		fHierarchyView= view;
 		setToolTipText(TypeHierarchyMessages.getString("HistoryDropDownAction.label")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(this, "backward_nav.gif"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "forward_nav.gif"); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TYPEHIERARCHY_BACKWARD_ACTION });
 		setMenuCreator(this);
 	}
@@ -62,5 +61,6 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 	}
 
 	public void run() {
+		(new HistoryListAction(fHierarchyView)).run();
 	}
 }
