@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.FocusAdapter;
@@ -56,10 +57,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
@@ -74,9 +75,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private static final int KEY_PROP= 1; 
 	private static final int VAL_PROP= 2; 
 	private static final int SIZE= 3; //column counter
-	
 	private static final int ROW_COUNT= 5;
-	
 	public static final String DEFAULT_KEY_PREFIX= ""; //$NON-NLS-1$
 	
 	public static final String PAGE_NAME= "NLSWizardPage1"; //$NON-NLS-1$
@@ -196,10 +195,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private Text fPrefixField;
 	private Table fTable;
 	private TableEditor fTableEditor;
-	
 	private TableViewer fViewer;
 	private SourceViewer fSourceViewer;
 	private Label fTranslateLabel, fNoTranslateLabel, fSkipLabel;
+	private CLabel fPreviewLabel;
 	
 	public ExternalizeWizardPage() {
 		super(PAGE_NAME, false); //$NON-NLS-1$
@@ -298,6 +297,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				ExternalizeWizardPage.this.selectionChanged(event);
 			}
 		});		
+		fViewer.getControl().addFocusListener(new FocusAdapter(){
+			public void focusLost(FocusEvent e) {
+				fPreviewLabel.setText(""); //$NON-NLS-1$
+			}
+		});
 	}
 	
 	private void createSourceViewer(Composite parent){
@@ -353,12 +357,27 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 	
 	private void createLabels(Composite parent){
-		Composite labelComposite= new Composite(parent, SWT.NONE);
+		Composite labelSuperComposite= new Composite(parent, SWT.NONE);
+		GridLayout gd= new GridLayout();
+		labelSuperComposite.setLayout(gd);
+		labelSuperComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		fPreviewLabel= new CLabel(labelSuperComposite, SWT.NONE);
+		fPreviewLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL));
+		
+		createNumberLabels(labelSuperComposite);
+		
+		updateLabels();
+	}
+
+	private void createNumberLabels(Composite labelSuperComposite) {
+		Composite labelComposite= new Composite(labelSuperComposite, SWT.NONE);
 		GridLayout gd= new GridLayout();
 		gd.numColumns= 6;
+		gd.marginWidth= 0;
 		labelComposite.setLayout(gd);
 		labelComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
+		
 		Label l1= new Label(labelComposite, SWT.NONE);
 		l1.setImage(getNLSImage(NLSSubstitution.TRANSLATE));
 		l1.setLayoutData(new GridData());
@@ -374,7 +393,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
 		gdata.widthHint= 60;
 		fNoTranslateLabel.setLayoutData(gdata);
-
+		
 		Label l3= new Label(labelComposite, SWT.NONE);
 		l3.setImage(getNLSImage(NLSSubstitution.SKIP));
 		l3.setLayoutData(new GridData());
@@ -382,8 +401,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
 		gdata.widthHint= 60;
 		fSkipLabel.setLayoutData(gdata);
-		
-		updateLabels();
 	}
 	
 	private void createTableComposite(Composite parent) {
@@ -503,16 +520,24 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			
 	private void selectionChanged(SelectionChangedEvent event) {
 		ISelection s= event.getSelection();
-		if (s instanceof IStructuredSelection) {
-			IStructuredSelection ss= (IStructuredSelection) s;
-			Object first= ss.getFirstElement();
-			if (first instanceof NLSSubstitution) {
-				NLSSubstitution sub= (NLSSubstitution) first;
-				TextRegion region= sub.value.getPosition();
-				fSourceViewer.setSelectedRange(region.getOffset(), region.getLength());
-				fSourceViewer.revealRange(region.getOffset(), region.getLength());
-			}
+		if (! (s instanceof IStructuredSelection)) 
+			return;
+		IStructuredSelection ss= (IStructuredSelection) s;
+		if (ss.size() == 0){
+			fPreviewLabel.setText("");//$NON-NLS-1$
+			return;
 		}
+		NLSSubstitution first= (NLSSubstitution) ss.getFirstElement();
+		TextRegion region= first.value.getPosition();
+		fSourceViewer.setSelectedRange(region.getOffset(), region.getLength());
+		fSourceViewer.revealRange(region.getOffset(), region.getLength());
+		if (ss.size() == 1){
+			String message= NLSUIMessages.getFormattedString("ExternalizeWizardPage.preview", fPrefixField.getText() + first.key);//$NON-NLS-1$
+			fPreviewLabel.setText(message);
+		} else{
+			String message=  NLSUIMessages.getFormattedString("ExternalizeWizardPage.selected", String.valueOf(ss.size())); //$NON-NLS-1$
+			fPreviewLabel.setText(message);
+		}	
 	}
 	
 	private NLSSubstitutionContentProvider getContentProvider(){
