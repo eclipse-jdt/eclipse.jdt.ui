@@ -67,7 +67,16 @@
          </newWizardShortcut>
       </perspectiveExtension>
       <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <actionSet
+               id="org.eclipse.jdt.junit.JUnitActionSet">
+         </actionSet>
+      </perspectiveExtension>
+      <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         <actionSet
+               id="org.eclipse.jdt.junit.JUnitActionSet">
+         </actionSet>
          <newWizardShortcut
                id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
          </newWizardShortcut>
@@ -184,6 +193,23 @@
                id="updateTestSuite">
          </action>
       </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="%JUnitActionSet.label"
+            visible="false"
+            id="org.eclipse.jdt.junit.JUnitActionSet">
+         <action
+               definitionId="org.eclipse.jdt.junit.gotoTest"
+               label="%GotoTestAction.label"
+               helpContextId="org.eclipse.jdt.junit.goto_referenced_test_action_context"
+               class="org.eclipse.jdt.internal.junit.ui.GotoReferencedTestAction"
+               tooltip="%GotoTestAction.tooltip"
+               menubarPath="org.eclipse.search.menu/internalOccurrencesGroup"
+               id="junit.actions.GotoTestAction">
+         </action>
+      </actionSet>
    </extension>
    <extension
          id="junit_task"
@@ -316,4 +342,13 @@
       <testRunTab class="org.eclipse.jdt.internal.junit.ui.TestHierarchyTab"/>
    </extension>
 
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+         name="%GotoTestCommand.name"
+         description="%GotoTestCommand.description"
+         category="org.eclipse.search.ui.category.search"
+         id="org.eclipse.jdt.junit.gotoTest">
+      </command>
+   </extension>
 </plugin>
