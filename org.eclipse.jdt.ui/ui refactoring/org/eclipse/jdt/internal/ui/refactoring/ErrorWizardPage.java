@@ -20,9 +20,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jdt.core.refactoring.IChange;
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
-import org.eclipse.jdt.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatusEntry;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 

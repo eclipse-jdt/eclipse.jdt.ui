@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 

@@ -10,9 +10,9 @@ import org.eclipse.jface.action.MenuManager;
 
 import org.eclipse.ui.IWorkbench;
 
-import org.eclipse.jdt.core.refactoring.IUndoManager;
-import org.eclipse.jdt.core.refactoring.IUndoManagerListener;
-import org.eclipse.jdt.core.refactoring.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.IUndoManager;
+import org.eclipse.jdt.internal.core.refactoring.base.IUndoManagerListener;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.undo.RedoRefactoringAction;

@@ -14,9 +14,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.refactoring.IChange;
-import org.eclipse.jdt.core.refactoring.text.AbstractTextBufferChange;
-import org.eclipse.jdt.core.refactoring.text.ITextBuffer;
+import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;
+import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
 
 import org.eclipse.jdt.internal.ui.util.IDocumentManager;
 import org.eclipse.jdt.internal.ui.util.JdtHackFinder;

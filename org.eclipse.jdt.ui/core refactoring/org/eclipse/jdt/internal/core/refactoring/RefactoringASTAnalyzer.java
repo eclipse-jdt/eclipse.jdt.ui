@@ -11,8 +11,8 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.Refactoring;
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;

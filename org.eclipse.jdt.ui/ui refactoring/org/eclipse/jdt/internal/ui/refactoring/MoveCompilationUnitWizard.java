@@ -9,8 +9,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
-import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.cus.MoveCompilationUnitRefactoring;
 
 public class MoveCompilationUnitWizard extends RefactoringWizard {
 

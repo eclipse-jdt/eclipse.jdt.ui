@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.core.refactoring;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.refactoring.Change;
+import org.eclipse.jdt.internal.core.refactoring.base.Change;
 
 public abstract class CompilationUnitChange extends Change {
 

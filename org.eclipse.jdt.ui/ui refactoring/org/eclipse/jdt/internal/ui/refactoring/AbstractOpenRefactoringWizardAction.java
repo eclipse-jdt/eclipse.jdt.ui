@@ -12,9 +12,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 
-import org.eclipse.jdt.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 
 public abstract class AbstractOpenRefactoringWizardAction extends AbstractOpenWizardAction {

@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.undo;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 
 public class RedoRefactoringAction extends UndoManagerAction {
 

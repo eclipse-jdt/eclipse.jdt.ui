@@ -12,8 +12,8 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.Refactoring;
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 /**
  * Operation that, when run, check proceconditions of an <code>Refactoring</code> passed 

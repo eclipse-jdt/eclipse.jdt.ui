@@ -9,7 +9,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardPage;
 
-import org.eclipse.jdt.core.refactoring.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 
 public abstract class RefactoringWizardPage extends WizardPage {
 

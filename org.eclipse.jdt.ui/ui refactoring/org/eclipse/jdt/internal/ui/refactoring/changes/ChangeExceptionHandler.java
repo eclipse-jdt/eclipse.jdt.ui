@@ -3,7 +3,7 @@
  * All Rights Reserved.
  */
 
-package org.eclipse.jdt.internal.ui.refactoring.changes;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jdt.core.refactoring.ChangeAbortException;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.IChangeExceptionHandler;import org.eclipse.jdt.internal.ui.JavaPlugin;
+package org.eclipse.jdt.internal.ui.refactoring.changes;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.IChangeExceptionHandler;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * An implementation of <code>IChangeExceptionHandler</code> which pops up a dialog
