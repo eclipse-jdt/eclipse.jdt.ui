@@ -19,16 +19,19 @@ public class AllRefactoringTests {
 		suite.addTest(ExtractMethodTests.suite());
 		suite.addTest(SefTests.suite());
 		suite.addTest(InlineTempTests.suite());
-
+		suite.addTest(ExtractTempTests.suite());
+		suite.addTest(RenameTempTests.suite());
+		
+		//-- structure
+		suite.addTest(ReorderParametersTests.suite());
+		suite.addTest(PullUpTests.suite());
+		 
 		//--methods
 		suite.addTest(RenameVirtualMethodInClassTests.suite());
 		suite.addTest(RenameMethodInInterfaceTests.suite());
 		suite.addTest(RenamePrivateMethodTests.suite());	
 		suite.addTest(RenameStaticMethodTests.suite());
 		suite.addTest(RenameParametersTests.suite());
-		suite.addTest(RenameTempTests.suite());
-		suite.addTest(ReorderParametersTests.suite());
-		suite.addTest(PullUpTests.suite());
 		
 		//--types
 		suite.addTest(RenameTypeTests.suite());	
