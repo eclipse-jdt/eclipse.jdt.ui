@@ -71,7 +71,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 		fRefactoring= refactoring;
 
-		setTitle("Configure Accessor Class");
+		setTitle(NLSUIMessages.getString("NLSAccessorConfigurationDialog.title")); //$NON-NLS-1$
 
 		IDialogFieldListener updateListener= new IDialogFieldListener() {
 
@@ -83,32 +83,32 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		ICompilationUnit cu= refactoring.getCu();
 		IJavaProject root= cu.getJavaProject();
 
-		fAccessorPackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.getString("wizardPage2.accessor.path"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.accessor.package"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.browse1"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.browse2"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.default_package"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.accessor.dialog.title"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.accessor.dialog.message"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.accessor.dialog.emtpyMessage"), //$NON-NLS-1$
+		fAccessorPackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.path"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.package"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse1"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse2"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.default_package"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.dialog.title"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.dialog.message"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.dialog.emtpyMessage"), //$NON-NLS-1$
 				cu, root, updateListener, refactoring.getAccessorPackage());
 
-		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("wizardPage2.className"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
-		fSubstitutionPattern= createStringField(NLSUIMessages.getString("wizardPage2.substitutionPattern")); //$NON-NLS-1$
+		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.className"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
+		fSubstitutionPattern= createStringField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.substitutionPattern")); //$NON-NLS-1$
 
-		fResourceBundlePackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.getString("wizardPage2.property.path"), //$NON-NLS-1$ 
-				NLSUIMessages.getString("wizardPage2.property.package"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.browse3"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.browse4"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.default_package"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.property.dialog.title"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.property.dialog.message"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.property.dialog.emptyMessage"), //$NON-NLS-1$
+		fResourceBundlePackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.path"), //$NON-NLS-1$ 
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.package"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse3"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse4"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.default_package"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.dialog.title"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.dialog.message"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.dialog.emptyMessage"), //$NON-NLS-1$
 				cu, root, updateListener, fRefactoring.getResourceBundlePackage());
 
-		fResourceBundleFile= createStringButtonField(NLSUIMessages.getString("wizardPage2.property_file_name"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.browse5"), createPropertyFileBrowseAdapter()); //$NON-NLS-1$
+		fResourceBundleFile= createStringButtonField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.property_file_name"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse5"), createPropertyFileBrowseAdapter()); //$NON-NLS-1$
 
 		initFields();
 	}
@@ -157,7 +157,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 	private void createAccessorPart(Composite parent, final int nOfColumns, int textWidth) {
 
-		createLabel(parent, NLSUIMessages.getString("wizardPage2.resourceBundle.title"), nOfColumns); //$NON-NLS-1$
+		createLabel(parent, NLSUIMessages.getString("NLSAccessorConfigurationDialog.resourceBundle.title"), nOfColumns); //$NON-NLS-1$
 		fAccessorPackage.createControl(parent, nOfColumns, textWidth);
 
 		fAccessorClassName.doFillIntoGrid(parent, nOfColumns);
@@ -173,7 +173,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 	private void createPropertyPart(Composite parent, final int nOfColumns, final int textWidth) {
 		Separator label= new Separator(SWT.NONE);
-		((Label) label.getSeparator(parent)).setText(NLSUIMessages.getString("wizardPage2.property_location")); //$NON-NLS-1$
+		((Label) label.getSeparator(parent)).setText(NLSUIMessages.getString("NLSAccessorConfigurationDialog.property_location")); //$NON-NLS-1$
 		label.doFillIntoGrid(parent, nOfColumns, 20);
 		fResourceBundlePackage.createControl(parent, nOfColumns, textWidth);
 
@@ -195,8 +195,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private void browseForPropertyFile() {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider());
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(NLSUIMessages.getString("wizardPage2.Property_File_Selection")); //$NON-NLS-1$
-		dialog.setMessage(NLSUIMessages.getString("wizardPage2.Choose_the_property_file")); //$NON-NLS-1$
+		dialog.setTitle(NLSUIMessages.getString("NLSAccessorConfigurationDialog.Property_File_Selection")); //$NON-NLS-1$
+		dialog.setMessage(NLSUIMessages.getString("NLSAccessorConfigurationDialog.Choose_the_property_file")); //$NON-NLS-1$
 		dialog.setElements(createFileListInput());
 		dialog.setFilter('*' + NLSRefactoring.PROPERTY_FILE_EXT);
 		if (dialog.open() == Window.OK) {
@@ -209,8 +209,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	protected void browseForAccessorClass() {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider());
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(NLSUIMessages.getString("wizardPage2.Accessor_Selection")); //$NON-NLS-1$
-		dialog.setMessage(NLSUIMessages.getString("wizardPage2.Choose_the_accessor_file")); //$NON-NLS-1$
+		dialog.setTitle(NLSUIMessages.getString("NLSAccessorConfigurationDialog.Accessor_Selection")); //$NON-NLS-1$
+		dialog.setMessage(NLSUIMessages.getString("NLSAccessorConfigurationDialog.Choose_the_accessor_file")); //$NON-NLS-1$
 		dialog.setElements(createAccessorListInput());
 		dialog.setFilter(fAccessorClassName.getText());
 		if (dialog.open() == Window.OK) {
@@ -237,8 +237,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			return result.toArray();
 
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages //$NON-NLS-1$
-					.getString("wizardPage2.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.getString("NLSAccessorConfigurationDialog.externalizing"), NLSUIMessages //$NON-NLS-1$
+					.getString("NLSAccessorConfigurationDialog.exception")); //$NON-NLS-1$
 			return new Object[0];
 		}
 	}
@@ -260,8 +260,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			return result.toArray();
 
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages //$NON-NLS-1$
-					.getString("wizardPage2.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.getString("NLSAccessorConfigurationDialog.externalizing"), NLSUIMessages //$NON-NLS-1$
+					.getString("NLSAccessorConfigurationDialog.exception")); //$NON-NLS-1$
 			return new Object[0];
 		}
 	}
@@ -282,8 +282,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		validateSubstitutionPattern();
 
 		validateAccessorClassName();
-		checkPackageFragment(fAccessorPackage, NLSUIMessages.getString("wizardPage2.accessor.package.root.invalid"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.accessor.package.invalid")); //$NON-NLS-1$
+		checkPackageFragment(fAccessorPackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.package.root.invalid"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.package.invalid")); //$NON-NLS-1$
 
 		validatePropertyFilename();
 		validatePropertyPackage();
@@ -300,7 +300,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			}
 
 			if (className.indexOf('.') != -1) {
-				setInvalid(fAccessorClassName, NLSUIMessages.getString("wizardPage2.no_dot")); //$NON-NLS-1$
+				setInvalid(fAccessorClassName, NLSUIMessages.getString("NLSAccessorConfigurationDialog.no_dot")); //$NON-NLS-1$
 				return;
 			}
 
@@ -312,12 +312,12 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		if (fResourceBundleFile != null) {
 			String fileName= fResourceBundleFile.getText();
 			if ((fileName == null) || (fileName.length() == 0)) {
-				setInvalid(fResourceBundleFile, NLSUIMessages.getString("wizardPage2.enter_name")); //$NON-NLS-1$
+				setInvalid(fResourceBundleFile, NLSUIMessages.getString("NLSAccessorConfigurationDialog.enter_name")); //$NON-NLS-1$
 				return;
 			}
 
 			if (!fileName.endsWith(NLSRefactoring.PROPERTY_FILE_EXT)) {
-				setInvalid(fResourceBundleFile, NLSUIMessages.getString("wizardPage2.file_name_must_end") //$NON-NLS-1$
+				setInvalid(fResourceBundleFile, NLSUIMessages.getString("NLSAccessorConfigurationDialog.file_name_must_end") //$NON-NLS-1$
 						+ NLSRefactoring.PROPERTY_FILE_EXT + "\"."); //$NON-NLS-1$
 				return;
 			}
@@ -327,8 +327,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	}
 
 	private void validatePropertyPackage() {
-		if (!checkPackageFragment(fResourceBundlePackage, NLSUIMessages.getString("wizardPage2.property.package.root.invalid"), //$NON-NLS-1$
-				NLSUIMessages.getString("wizardPage2.property.package.invalid"))) { //$NON-NLS-1$
+		if (!checkPackageFragment(fResourceBundlePackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.package.root.invalid"), //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.package.invalid"))) { //$NON-NLS-1$
 			return;
 		}
 
@@ -347,16 +347,16 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		try {
 			IJavaElement element= project.findElement(pkgPath);
 			if (element == null || !element.exists()) {
-				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("wizardPage2.must_exist")); //$NON-NLS-1$
+				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.must_exist")); //$NON-NLS-1$
 				return;
 			}
 			IPackageFragment fPkgFragment= (IPackageFragment) element;
 			if (!PackageBrowseAdapter.canAddPackage(fPkgFragment)) {
-				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
+				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
 			if (!PackageBrowseAdapter.canAddPackageRoot((IPackageFragmentRoot) fPkgFragment.getParent())) {
-				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
+				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
 		} catch (JavaModelException e) {
@@ -386,7 +386,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 	private void validateSubstitutionPattern() {
 		if ((fSubstitutionPattern.getText() == null) || (fSubstitutionPattern.getText().length() == 0)) {
-			setInvalid(fSubstitutionPattern, NLSUIMessages.getString("wizardPage2.substitution.pattern.missing")); //$NON-NLS-1$
+			setInvalid(fSubstitutionPattern, NLSUIMessages.getString("NLSAccessorConfigurationDialog.substitution.pattern.missing")); //$NON-NLS-1$
 		} else {
 			setValid(fSubstitutionPattern);
 		}

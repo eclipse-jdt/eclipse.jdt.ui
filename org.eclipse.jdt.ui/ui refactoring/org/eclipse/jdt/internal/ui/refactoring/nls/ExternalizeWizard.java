@@ -25,8 +25,8 @@ public class ExternalizeWizard extends RefactoringWizard {
 
 	public ExternalizeWizard(NLSRefactoring refactoring) {
 		super(refactoring,CHECK_INITIAL_CONDITIONS_ON_OPEN | WIZARD_BASED_USER_INTERFACE);
-		setDefaultPageTitle(NLSUIMessages.getFormattedString("wizard.page.title", refactoring.getCu().getElementName())); //$NON-NLS-1$
-		setWindowTitle(NLSUIMessages.getString("wizard.name"));//$NON-NLS-1$
+		setDefaultPageTitle(NLSUIMessages.getFormattedString("ExternalizeWizard.page.title", refactoring.getCu().getElementName())); //$NON-NLS-1$
+		setWindowTitle(NLSUIMessages.getString("ExternalizeWizard.name"));//$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_EXTERNALIZE_STRINGS);
 	}
 
@@ -37,7 +37,7 @@ public class ExternalizeWizard extends RefactoringWizard {
 
 		NLSRefactoring nlsRefac= (NLSRefactoring) getRefactoring();
 		ExternalizeWizardPage page= new ExternalizeWizardPage(nlsRefac);
-		page.setMessage(NLSUIMessages.getString("wizard.select")); //$NON-NLS-1$
+		page.setMessage(NLSUIMessages.getString("ExternalizeWizard.select")); //$NON-NLS-1$
 		addPage(page);
 
 		/*ExternalizeWizardPage2 page2= new ExternalizeWizardPage2(nlsRefac);

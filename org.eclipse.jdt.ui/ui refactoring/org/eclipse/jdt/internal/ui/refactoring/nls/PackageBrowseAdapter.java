@@ -14,6 +14,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -21,17 +27,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 
 public class PackageBrowseAdapter implements IStringButtonAdapter {
@@ -51,8 +51,8 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(
 			Display.getCurrent().getActiveShell(), new JavaElementLabelProvider());
         dialog.setIgnoreCase(false);
-        dialog.setTitle(NLSUIMessages.getString("wizardPage2.package_selection")); //$NON-NLS-1$
-        dialog.setMessage(NLSUIMessages.getString("wizardPage2.choose_package")); //$NON-NLS-1$
+        dialog.setTitle(NLSUIMessages.getString("PackageBrowseAdapter.package_selection")); //$NON-NLS-1$
+        dialog.setMessage(NLSUIMessages.getString("PackageBrowseAdapter.choose_package")); //$NON-NLS-1$
         dialog.setElements(createPackageListInput(fCu, null));
         if (dialog.open() == Window.OK) { 
         	IPackageFragment selectedPackage= (IPackageFragment)dialog.getFirstResult();
@@ -74,7 +74,7 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 			}
 			return result.toArray();
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages.getString("wizardPage2.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			JavaPlugin.log(e);
 			return new Object[0];
 		}
 	}
@@ -141,8 +141,8 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 				}	
 			}
 			return result;
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages.getString("wizardPage2.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 			return new ArrayList(0);
 		}
     }

@@ -35,7 +35,7 @@ public class RenameKeysDialog extends StatusDialog {
 	 */
 	public RenameKeysDialog(Shell parent, List selectedSubstitutions) {
 		super(parent);
-		setTitle("Rename Keys");
+		setTitle(NLSUIMessages.getString("RenameKeysDialog.title")); //$NON-NLS-1$
 
 		fSelectedSubstitutions= selectedSubstitutions;
 		String prefix= getInitialPrefix(selectedSubstitutions);
@@ -45,9 +45,9 @@ public class RenameKeysDialog extends StatusDialog {
 		fNameField.setText(prefix);
 		
 		if (prefix.length() == 0) {
-			fNameField.setLabelText("Enter new prefix: (selected entries do not share a prefix)");
+			fNameField.setLabelText(NLSUIMessages.getString("RenameKeysDialog.description.noprefix")); //$NON-NLS-1$
 		} else {
-			fNameField.setLabelText("Enter replacement prefix for " + prefix + ':');
+			fNameField.setLabelText(NLSUIMessages.getString("RenameKeysDialog.description.withprefix") + prefix + ':'); //$NON-NLS-1$
 		}
 	}
 	
