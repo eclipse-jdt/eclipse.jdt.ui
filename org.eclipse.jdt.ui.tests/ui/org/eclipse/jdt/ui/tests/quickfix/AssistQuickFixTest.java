@@ -394,7 +394,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    static {\n");
-		buf.append("        getClass();\n");
+		buf.append("        getClass(); // comment\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -415,7 +415,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    private static Class class1;\n");
 		buf.append("\n");
 		buf.append("    static {\n");
-		buf.append("        class1 = getClass();\n");
+		buf.append("        class1 = getClass(); // comment\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -427,7 +427,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    static {\n");
-		buf.append("        Class class1 = getClass();\n");
+		buf.append("        Class class1 = getClass(); // comment\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();

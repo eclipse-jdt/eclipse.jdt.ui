@@ -92,12 +92,13 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDeclFrag.setName(ast.newSimpleName(varName));
 		newDeclFrag.setInitializer((Expression) rewrite.createCopy(expression));
 		
-		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
+		// trick for bug 43248: use an VariableDeclarationExpression and keep the ExpressionStatement
+		VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
 		
 		Type type= evaluateType(ast);
 		newDecl.setType(type);
 		
-		rewrite.markAsReplaced(fNodeToAssign, newDecl, null); 
+		rewrite.markAsReplaced(expression, newDecl, null); 
 		
 		markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME); //$NON-NLS-1$
 		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE); //$NON-NLS-1$
