@@ -16,6 +16,7 @@ public class GenerateGroup extends ContextMenuGroup {
 	public static final String GROUP_NAME= IContextMenuConstants.GROUP_GENERATE;
 	
 	private AddUnimplementedMethodsAction fAddUnimplementedMethods;
+	private AddUnimplementedConstructorsAction fAddUnimplementedConstructors;
 	private AddGetterSetterAction fAddGetterSetter;
 	private AddJavaDocStubAction fAddJavaDocStub;
 	
@@ -25,6 +26,9 @@ public class GenerateGroup extends ContextMenuGroup {
 
 		if (fAddUnimplementedMethods.canActionBeAdded())
 			manager.appendToGroup(GROUP_NAME, fAddUnimplementedMethods);
+			
+		if (fAddUnimplementedConstructors.canActionBeAdded())
+			manager.appendToGroup(GROUP_NAME, fAddUnimplementedConstructors);			
 		
 		if (fAddGetterSetter.canActionBeAdded())
 			manager.appendToGroup(GROUP_NAME, fAddGetterSetter);
@@ -37,6 +41,7 @@ public class GenerateGroup extends ContextMenuGroup {
 	private void createActions(ISelectionProvider provider) {
 		if (fAddUnimplementedMethods == null) {
 			fAddUnimplementedMethods= new AddUnimplementedMethodsAction(provider);
+			fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(provider);
 			fAddGetterSetter= new AddGetterSetterAction(provider);
 			fAddJavaDocStub= new AddJavaDocStubAction(provider);
 		}

@@ -25,27 +25,26 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-
 /**
- * Evaluates unimplemented methods of a type.
+ * Evaluates constructors needed.
  * Will open an editor for the type. Changes are unsaved.
  */
-public class AddUnimplementedMethodsAction extends Action {
+public class AddUnimplementedConstructorsAction extends Action {
 
 	private ISelectionProvider fSelectionProvider;
 
-	public AddUnimplementedMethodsAction(ISelectionProvider selProvider) {
-		super(JavaUIMessages.getString("AddUnimplementedMethodsAction.label")); //$NON-NLS-1$
-		setDescription(JavaUIMessages.getString("AddUnimplementedMethodsAction.description")); //$NON-NLS-1$
-		setToolTipText(JavaUIMessages.getString("AddUnimplementedMethodsAction.tooltip")); //$NON-NLS-1$
+	public AddUnimplementedConstructorsAction(ISelectionProvider selProvider) {
+		super(JavaUIMessages.getString("AddUnimplementedConstructorsAction.label")); //$NON-NLS-1$
+		setDescription(JavaUIMessages.getString("AddUnimplementedConstructorsAction.description")); //$NON-NLS-1$
+		setToolTipText(JavaUIMessages.getString("AddUnimplementedConstructorsAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION });
@@ -64,7 +63,7 @@ public class AddUnimplementedMethodsAction extends Action {
 			type= (IType)EditorUtility.getWorkingCopy(type);
 			
 			if (type == null) {
-				MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), JavaUIMessages.getString("AddUnimplementedMethodsAction.error.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+				MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedConstructorsAction.error.title"), JavaUIMessages.getString("AddUnimplementedConstructorsAction.error.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
 				return;
 			}
 			
@@ -75,19 +74,19 @@ public class AddUnimplementedMethodsAction extends Action {
 				dialog.run(false, true, new WorkbenchRunnableWrapper(op));
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
-					MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), JavaUIMessages.getString("AddUnimplementedMethodsAction.error.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedConstructorsAction.error.title"), JavaUIMessages.getString("AddUnimplementedConstructorsAction.error.nothing_found")); //$NON-NLS-2$ //$NON-NLS-1$
 				} else if (editor != null) {
 					EditorUtility.revealInEditor(editor, res[0]);
 				}
 			} catch (InvocationTargetException e) {
 				JavaPlugin.log(e);
-				MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
+				MessageDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedConstructorsAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
 			} catch (InterruptedException e) {
 				// Do nothing. Operation has been canceled by user.
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			ErrorDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.error.title"), null, e.getStatus()); //$NON-NLS-1$
+			ErrorDialog.openError(shell, JavaUIMessages.getString("AddUnimplementedConstructorsAction.error.title"), null, e.getStatus()); //$NON-NLS-1$
 		}			
 	}
 		

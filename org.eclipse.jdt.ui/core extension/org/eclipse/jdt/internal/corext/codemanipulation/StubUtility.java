@@ -271,14 +271,18 @@ public class StubUtility {
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
 	 */
 	public static void evalConstructors(IType type, IType supertype, CodeGenerationSettings settings, List newMethods, IImportsStructure imports) throws JavaModelException {
-		IMethod[] methods= supertype.getMethods();
+		IMethod[] superMethods= supertype.getMethods();
+		String typeName= type.getElementName();
+		IMethod[] methods= type.getMethods();
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		genStubSettings.callSuper= true;
-		for (int i= 0; i < methods.length; i++) {
-			IMethod curr= methods[i];
+		for (int i= 0; i < superMethods.length; i++) {
+			IMethod curr= superMethods[i];
 			if (curr.isConstructor() && JavaModelUtil.isVisible(curr, type.getPackageFragment())) {
-				String newStub= genStub(type.getElementName(), methods[i], genStubSettings, imports);
-				newMethods.add(newStub);
+				if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null) {
+					String newStub= genStub(typeName, superMethods[i], genStubSettings, imports);
+					newMethods.add(newStub);
+				}
 			}
 		}
 	}
