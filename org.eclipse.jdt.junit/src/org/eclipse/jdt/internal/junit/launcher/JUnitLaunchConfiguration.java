@@ -122,21 +122,24 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 		
 		try {
 			if (BootLoader.inDevelopmentMode()) {
-				// assumption is that the output folder is called bin!
+				// we first try the bin output folder
 				List junitEntries= new ArrayList();
-				junitEntries.add(Platform.asLocalURL(new URL(url, "bin")).getFile()); //$NON-NLS-1$
-				junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "bin")).getFile()); //$NON-NLS-1$
 				
 				try {
-					junitEntries.add(Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile()); //$NON-NLS-1$
-				} catch (IOException e) {
+					junitEntries.add(Platform.asLocalURL(new URL(url, "bin")).getFile()); //$NON-NLS-1$
+					junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "bin")).getFile()); //$NON-NLS-1$
+				} catch (IOException e3) {
 					// fall through
-				}			
-				try {
-					junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile()); //$NON-NLS-1$
-				} catch (IOException e1) {
-					// fall through
-				}	
+				}
+				// we didn't find the bin folders then try to find the JARs
+				if (junitEntries.size() < 2) {
+					try {
+						junitEntries.add(Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile()); //$NON-NLS-1$
+						junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile()); //$NON-NLS-1$
+					} catch (IOException e1) {
+						// fall through
+					}	
+				}
 				classPath= new String[cp.length + junitEntries.size()];
 				Object[] jea= junitEntries.toArray();
 				System.arraycopy(cp, 0, classPath, 0, cp.length);
