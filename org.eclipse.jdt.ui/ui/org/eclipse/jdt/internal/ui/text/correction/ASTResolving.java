@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -296,6 +297,36 @@ public class ASTResolving {
 		}
 		return ast.newNullLiteral();
 	}
+	
+	public static Type getTypeFromTypeBinding(AST ast, ITypeBinding binding) {
+		if (binding.isArray()) {
+			int dim= binding.getDimensions();
+			return ast.newArrayType(getTypeFromTypeBinding(ast, binding.getElementType()), dim);
+		} else if (binding.isPrimitive()) {
+			String name= binding.getName();
+			if ("int".equals(name)) {
+				return ast.newPrimitiveType(PrimitiveType.INT);
+			} else if ("boolean".equals(name)) {
+				return ast.newPrimitiveType(PrimitiveType.BOOLEAN);
+			} else if ("float".equals(name)) {
+				return ast.newPrimitiveType(PrimitiveType.FLOAT);
+			} else if ("double".equals(name)) {
+				return ast.newPrimitiveType(PrimitiveType.DOUBLE);
+			} else if ("char".equals(name)) {
+				return ast.newPrimitiveType(PrimitiveType.CHAR);
+			} else if ("byte".equals(name)) {
+				return ast.newPrimitiveType(PrimitiveType.BYTE);
+			} else if ("short".equals(name)) {
+				return ast.newPrimitiveType(PrimitiveType.SHORT);
+			} else if ("long".equals(name)) {
+				return ast.newPrimitiveType(PrimitiveType.LONG);
+			}
+		} else if (!binding.isNullType() && !binding.isAnonymous()) {
+			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
+		}
+		return null;
+	}
+	
 	
 	
 
