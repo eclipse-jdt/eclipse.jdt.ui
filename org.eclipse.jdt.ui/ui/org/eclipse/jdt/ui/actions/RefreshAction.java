@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -106,12 +107,17 @@ public class RefreshAction extends SelectionDispatchAction {
 				monitor.beginTask(ActionMessages.getString("RefreshAction.progressMessage"), resources.length * 2); //$NON-NLS-1$
 				monitor.subTask(""); //$NON-NLS-1$
 				List javaElements= new ArrayList(5);
-				for (int i= 0; i < resources.length; i++) {
-					IResource resource= resources[i];
-					resource.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+				for (int r= 0; r < resources.length; r++) {
+					IResource resource= resources[r];
 					if (resource.getType() == IResource.PROJECT) {
-						checkLocationDeleted(((IProject)resource));
+						checkLocationDeleted((IProject) resource);
+					} else if (resource.getType() == IResource.ROOT) {
+						IProject[] projects = ((IWorkspaceRoot)resource).getProjects();
+						for (int p = 0; p < projects.length; p++) {
+							checkLocationDeleted(projects[p]);
+						}
 					}
+					resource.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
 					IJavaElement jElement= JavaCore.create(resource);
 					if (jElement != null && jElement.exists())
 						javaElements.add(jElement);
