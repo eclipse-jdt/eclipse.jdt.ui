@@ -27,7 +27,7 @@ public class ToggleViewAction extends Action {
 	private int fViewerIndex;
 		
 	public ToggleViewAction(TypeHierarchyViewPart v, int viewerIndex) {
-		super();
+		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 		String contextHelpId= null;
 		if (viewerIndex == TypeHierarchyViewPart.VIEW_ID_SUPER) {
 			setText(TypeHierarchyMessages.getString("ToggleViewAction.supertypes.label")); //$NON-NLS-1$

@@ -735,6 +735,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		// set the filter menu items
 		IActionBars actionBars= getViewSite().getActionBars();
 		IMenuManager viewMenu= actionBars.getMenuManager();
+		for (int i= 0; i < fViewActions.length; i++) {
+			viewMenu.add(fViewActions[i]);
+		}
+		viewMenu.add(new Separator());
 		for (int i= 0; i < fToggleOrientationActions.length; i++) {
 			viewMenu.add(fToggleOrientationActions[i]);
 		}
