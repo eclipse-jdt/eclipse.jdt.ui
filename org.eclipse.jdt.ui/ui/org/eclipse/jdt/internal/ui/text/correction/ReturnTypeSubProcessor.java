@@ -138,8 +138,12 @@ public class ReturnTypeSubProcessor {
 				} else {
 					rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
 				}
-				proposal.markAsLinked(rewrite, newReturnType, true, "return_type"); //$NON-NLS-1$
-				
+				String key= "return_type"; //$NON-NLS-1$
+				proposal.markAsLinked(rewrite, newReturnType, true, key);
+				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(astRoot.getAST(), binding);
+				for (int i= 0; i < bindings.length; i++) {
+					proposal.addLinkedModeProposal(key, bindings[i]);
+				}
 
 				proposal.ensureNoModifications();
 				proposals.add(proposal);
@@ -201,7 +205,14 @@ public class ReturnTypeSubProcessor {
 			modifiedNode.setConstructor(false);
 			rewrite.markAsModified(methodDeclaration, modifiedNode);
 			
-			proposal.markAsLinked(rewrite, type, true, "return_type"); //$NON-NLS-1$
+			String key= "return_type"; //$NON-NLS-1$
+			proposal.markAsLinked(rewrite, type, true, key);
+			if (typeBinding != null) {
+				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(astRoot.getAST(), typeBinding);
+				for (int i= 0; i < bindings.length; i++) {
+					proposal.addLinkedModeProposal(key, bindings[i]);
+				}
+			}
 			
 			proposal.ensureNoModifications();
 			proposals.add(proposal);

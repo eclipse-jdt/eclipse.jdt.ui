@@ -195,9 +195,9 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			decls.add(findFieldInsertIndex(decls, node.getStartPosition()), newDecl);
 			rewrite.markAsInserted(newDecl);
 			
-			markAsLinked(rewrite, node, true, "name"); //$NON-NLS-1$		
-			markAsLinked(rewrite, newDecl.getType(), false, "type"); //$NON-NLS-1$
-			markAsLinked(rewrite, fragment.getName(), false, "name"); //$NON-NLS-1$		
+			markAsLinked(rewrite, node, true, KEY_NAME);	
+			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
+			markAsLinked(rewrite, fragment.getName(), false, KEY_NAME);
 			
 			return rewrite;
 		}
