@@ -65,7 +65,6 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
@@ -102,7 +101,7 @@ public final class ImportsStructure implements IImportsStructure {
 	
 	private static final String JAVA_LANG= "java.lang"; //$NON-NLS-1$
 	
-	private static final boolean USE_ALLTYPE_CACHE= true;
+	private static final boolean USE_ALLTYPE_CACHE= false;
 	
 	/**
 	 * Creates an ImportsStructure for a compilation unit. New imports
@@ -1166,40 +1165,40 @@ public final class ImportsStructure implements IImportsStructure {
 	private Set evaluateStarImportConflicts(IProgressMonitor monitor) throws JavaModelException {
 		//long start= System.currentTimeMillis();
 		
-		int nPackageEntries= fPackageEntries.size();
-		// all type containers to be star imported
-		final HashSet starImportPackages= new HashSet(nPackageEntries);
-		// all simple type names referenced in a star-imported package, annottaed with the container
-		final HashMap typeReferences= new HashMap();
-		for (int i= 0; i < nPackageEntries; i++) {
-			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
-			if (!pack.isStatic() && pack.hasStarImport(fImportOnDemandThreshold, null)) {
-				starImportPackages.add(pack.getName());
-				for (int k= 0; k < pack.getNumberOfImports(); k++) {
-					ImportDeclEntry curr= pack.getImportAt(k);
-					if (!curr.isOnDemand() && !curr.isComment()) {
-						typeReferences.put(curr.getSimpleName(), pack.getName());
-					}
-				}
-			}
-		}
-
-		if (starImportPackages.isEmpty()) {
-			return null;
-		}
-		
-		starImportPackages.add(fCompilationUnit.getParent().getElementName());
-		starImportPackages.add(JAVA_LANG);
-		final HashSet onDemandConflicts= new HashSet();
+		final HashSet/*String*/ onDemandConflicts= new HashSet();
 		
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
 
 		if (!USE_ALLTYPE_CACHE) {
-			final int[] count= {0 };
-			TypeNameRequestor requestor= new TypeNameRequestor() {
-				public void acceptType(int flags, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-					processType(packageName, simpleTypeName, enclosingTypeNames);
+			
+			ArrayList/*<char[][]>*/  starImportPackages= new ArrayList();
+			ArrayList/*<char[][]>*/ simpleTypeNames= new ArrayList();
+			int nPackageEntries= fPackageEntries.size();
+			for (int i= 0; i < nPackageEntries; i++) {
+				PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
+				if (!pack.isStatic() && pack.hasStarImport(fImportOnDemandThreshold, null)) {
+					starImportPackages.add(pack.getName().toCharArray());
+					for (int k= 0; k < pack.getNumberOfImports(); k++) {
+						ImportDeclEntry curr= pack.getImportAt(k);
+						if (!curr.isOnDemand() && !curr.isComment()) {
+							simpleTypeNames.add(curr.getSimpleName().toCharArray());
+						}
+					}
 				}
+			}
+			if (starImportPackages.isEmpty()) {
+				return null;
+			}
+			
+			starImportPackages.add(fCompilationUnit.getParent().getElementName().toCharArray());
+			starImportPackages.add(JAVA_LANG.toCharArray());
+			
+			char[][] allPackages= (char[][]) starImportPackages.toArray(new char[starImportPackages.size()][]);
+			char[][] allTypes= (char[][]) simpleTypeNames.toArray(new char[simpleTypeNames.size()][]);
+			
+			TypeNameRequestor requestor= new TypeNameRequestor() {
+				HashMap foundTypes= new HashMap();
+				
 				private String getTypeContainerName(char[] packageName, char[][] enclosingTypeNames) {
 					StringBuffer buf= new StringBuffer();
 					buf.append(packageName);
@@ -1210,25 +1209,48 @@ public final class ImportsStructure implements IImportsStructure {
 					}
 					return buf.toString();
 				}
-				private void processType(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames) {
-					count[0]++;
+				
+				public void acceptType(int flags, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
 					String name= new String(simpleTypeName);
-					String knownContainer= (String) typeReferences.get(name);
-					if (knownContainer != null) {
-						String containerName= getTypeContainerName(packageName, enclosingTypeNames);
-						if (starImportPackages.contains(containerName) && !knownContainer.equals(containerName)) {
-							onDemandConflicts.add(name);
-						}
+					String containerName= getTypeContainerName(packageName, enclosingTypeNames);
+					
+					String oldContainer= (String) foundTypes.put(name, containerName);
+					if (oldContainer != null && !oldContainer.equals(containerName)) {
+						onDemandConflicts.add(name);
 					}
 				}
 			};
-			
-			new SearchEngine().searchAllTypeNames(null, null, SearchPattern.R_PATTERN_MATCH, IJavaSearchConstants.TYPE,
-					scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+			new SearchEngine().searchAllTypeNames(allPackages, allTypes, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 			
 			//System.out.println("Ambiguous import computation (with search): " + (System.currentTimeMillis() - start) + " ms, elements: " + count[0]); //$NON-NLS-1$ //$NON-NLS-2$
 
 		} else { // USE_ALLTYPE_CACHE
+			
+			int nPackageEntries= fPackageEntries.size();
+			// all type containers to be star imported
+			final HashSet starImportPackages= new HashSet(nPackageEntries);
+			// all simple type names referenced in a star-imported package, annottaed with the container
+			final HashMap typeReferences= new HashMap();
+			for (int i= 0; i < nPackageEntries; i++) {
+				PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
+				if (!pack.isStatic() && pack.hasStarImport(fImportOnDemandThreshold, null)) {
+					starImportPackages.add(pack.getName());
+					for (int k= 0; k < pack.getNumberOfImports(); k++) {
+						ImportDeclEntry curr= pack.getImportAt(k);
+						if (!curr.isOnDemand() && !curr.isComment()) {
+							typeReferences.put(curr.getSimpleName(), pack.getName());
+						}
+					}
+				}
+			}
+
+			if (starImportPackages.isEmpty()) {
+				return null;
+			}
+			
+			starImportPackages.add(fCompilationUnit.getParent().getElementName());
+			starImportPackages.add(JAVA_LANG);
+			
 			TypeInfo[] allTypes= AllTypesCache.getAllTypes(monitor); // all types in workspace, sorted by type name
 			if (allTypes.length < 2) {
 				return null;
