@@ -514,10 +514,18 @@ public class UnresolvedElementsSubProcessor {
 				}
 				String[] arg= new String[] { getMethodName(methodBinding, !cu.equals(targetCU)) };
 				String label;
-				if (diff == 1) {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparam.description", arg); //$NON-NLS-1$
+				if (methodBinding.isConstructor()) {
+					if (diff == 1) {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparam.constr.description", arg); //$NON-NLS-1$
+					} else {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparams.constr.description", arg); //$NON-NLS-1$
+					}
 				} else {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparams.description", arg); //$NON-NLS-1$
+					if (diff == 1) {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparam.description", arg); //$NON-NLS-1$
+					} else {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparams.description", arg); //$NON-NLS-1$
+					}					
 				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
@@ -579,11 +587,19 @@ public class UnresolvedElementsSubProcessor {
 				}
 				String[] arg= new String[] { getMethodName(methodBinding, !cu.equals(targetCU)) };
 				String label;
-				if (diff == 1) {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparam.description", arg); //$NON-NLS-1$
+				if (methodBinding.isConstructor()) {
+					if (diff == 1) {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparam.constr.description", arg); //$NON-NLS-1$
+					} else {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.constr.description", arg); //$NON-NLS-1$
+					}						
 				} else {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.description", arg); //$NON-NLS-1$
-				}			
+					if (diff == 1) {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparam.description", arg); //$NON-NLS-1$
+					} else {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.description", arg); //$NON-NLS-1$
+					}
+				}	
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
@@ -663,7 +679,12 @@ public class UnresolvedElementsSubProcessor {
 							changeDesc[idx1]= new SwapDescription(idx2);
 						}
 						String[] args=  new String[] { getMethodName(methodBinding, !targetCU.equals(cu)), String.valueOf(idx1 + 1), String.valueOf(idx2 + 1) };
-						String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swapparams.description", args); //$NON-NLS-1$
+						String label;
+						if (methodBinding.isConstructor()) {
+							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swapparams.constr.description", args); //$NON-NLS-1$
+						} else {
+							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swapparams.description", args); //$NON-NLS-1$
+						}
 						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 						ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
 						proposals.add(proposal);
@@ -684,8 +705,12 @@ public class UnresolvedElementsSubProcessor {
 					changeDesc[diffIndex]= new EditDescription(argTypes[diffIndex], name);
 				}
 				String[] args=  new String[] { getMethodName(methodBinding, !targetCU.equals(cu)) };
-				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changeparamsignature.description", args); //$NON-NLS-1$
-
+				String label;
+				if (methodBinding.isConstructor()) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changeparamsignature.constr.description", args); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changeparamsignature.description", args); //$NON-NLS-1$
+				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
