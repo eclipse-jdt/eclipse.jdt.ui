@@ -2542,17 +2542,18 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	public void gotoAnnotation(boolean forward) {
 		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
 		Position position= new Position(0, 0);
-		if (false /* delayed */) {
+		if (false /* delayed - see bug 18316 */) {
 			getNextAnnotation(selection.getOffset(), selection.getLength(), forward, position);
 			selectAndReveal(position.getOffset(), position.getLength());
-		} else /* no delay */ {
+		} else /* no delay - see bug 18316 */ {
 			Annotation annotation= getNextAnnotation(selection.getOffset(), selection.getLength(), forward, position);
 			setStatusLineErrorMessage(null);
+			setStatusLineMessage(null);
 			if (annotation != null) {
 				updateAnnotationViews(annotation);
 				selectAndReveal(position.getOffset(), position.getLength());
 				if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation)annotation).isProblem())
-					setStatusLineErrorMessage(((IJavaAnnotation)annotation).getMessage());
+					setStatusLineMessage(((IJavaAnnotation)annotation).getMessage());
 			}
 		}
 	}
