@@ -141,6 +141,7 @@ public interface IRefactoringProcessorIds {
 	 * <ul>
 	 *   <li>participants registered for renaming <code>IField</code>.</li>
 	 * </ul>
+	 * @since 3.1
 	 */
 	public static String RENAME_ENUM_CONSTANT_PROCESSOR= RenameEnumConstProcessor.IDENTIFIER;
 

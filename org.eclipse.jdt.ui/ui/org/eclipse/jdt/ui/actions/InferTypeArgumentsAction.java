@@ -37,6 +37,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Infers type argumnets for raw references to generic types.
  *  
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ *
  * @since 3.1
  */
 public class InferTypeArgumentsAction extends SelectionDispatchAction {

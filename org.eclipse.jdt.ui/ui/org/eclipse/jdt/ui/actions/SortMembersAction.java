@@ -70,7 +70,7 @@ import org.eclipse.jdt.ui.JavaUI;
  */
 public class SortMembersAction extends SelectionDispatchAction {
 
-	public static final boolean BUG_81329= false;
+	private static final boolean BUG_81329= false;
 
 	private CompilationUnitEditor fEditor;
 	private final static String ID= "org.eclipse.jdt.ui.actions.SortMembersAction"; //$NON-NLS-1$

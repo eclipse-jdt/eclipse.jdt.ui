@@ -686,6 +686,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * 
 	 * @param composite the parent composite
 	 * @param nColumns number of columns to span
+	 * 
+	 * @since 3.1
 	 */			
 	protected void createCommentControls(Composite composite, int nColumns) {
         FormToolkit toolkit= new FormToolkit(composite.getDisplay());
