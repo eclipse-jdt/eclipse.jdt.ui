@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,10 +12,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -560,10 +564,12 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 * Implements method from IJarPackageWizardPage
 	 */
 	public boolean isPageComplete() {
-		boolean incompleteButNotAnError= false;
+		boolean isPageComplete= true;
+		setMessage(null);
+		
 		if (fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
 			if (fJarPackage.getManifestLocation().toString().length() == 0)
-					incompleteButNotAnError= true;
+					isPageComplete= false;
 			else {
 				IPath location= fJarPackage.getManifestLocation();
 				if (!location.toString().startsWith("/")) { //$NON-NLS-1$
@@ -582,12 +588,23 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 				}
 			}
 		}
-		if (!fJarPackage.isManifestGenerated() && !fJarPackage.isManifestAccessible()) {
-			if (fJarPackage.getManifestLocation().toString().length() == 0)
-				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noManifestFile")); //$NON-NLS-1$
-			else
-				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.invalidManifestFile")); //$NON-NLS-1$
-			return false;
+		if (!fJarPackage.isManifestGenerated()) {
+			if (fJarPackage.isManifestAccessible()) {
+				Manifest manifest= null;
+				try {
+					manifest= fJarPackage.getManifestProvider().create(fJarPackage);
+				} catch (IOException ex) {
+				} catch (CoreException ex) {
+				}
+				if (manifest.getMainAttributes().getValue(Attributes.Name.MANIFEST_VERSION) == null)
+					setMessage(JarPackagerMessages.getString("JarManifestWizardPage.warning.noManifestVersion"), WizardPage.WARNING_MESSAGE); //$NON-NLS-1$
+			} else {
+				if (fJarPackage.getManifestLocation().toString().length() == 0)
+					setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noManifestFile")); //$NON-NLS-1$
+				else
+					setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.invalidManifestFile")); //$NON-NLS-1$
+				return false;
+			}
 		}
 		Set selectedPackages= getPackagesForSelectedResources(fJarPackage);
 		if (fJarPackage.isJarSealed()
@@ -604,13 +621,9 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.invalidMainClass")); //$NON-NLS-1$
 			return false;
 		}
-		if (incompleteButNotAnError) {
-			setErrorMessage(null);
-			return false;
-		}
-		
+
 		setErrorMessage(null);
-		return true;
+		return isPageComplete;
 	}
 
 	/* 
