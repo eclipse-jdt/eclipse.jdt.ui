@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +26,14 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -50,16 +54,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
-
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -75,6 +69,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 /**
  * Surround a set of statements with a try/catch block.
@@ -102,19 +101,19 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private CodeScopeBuilder.Scope fScope;
 	private ASTNode[] fSelectedNodes;
 
-	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
+	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, ISurroundWithTryCatchQuery query) {
 		fCUnit= cu;
 		fSelection= selection;
 		fQuery= query;
 		fLeaveDirty= false;
 	}
 
-	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
-		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()), settings, query);
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection, ISurroundWithTryCatchQuery query) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()), query);
 	}
 		
-	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
-		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length), settings, query);
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length, ISurroundWithTryCatchQuery query) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length), query);
 	}
 
 	public void setLeaveDirty(boolean leaveDirty) {

@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -40,20 +39,17 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	private IType fSuperTypeToUse;
 	private IType[] fSuperTypes;
 	private boolean fUseSupertypeInInstanceOf;
-    private CodeGenerationSettings fCodeGenerationSettings;
-	
-	private UseSupertypeWherePossibleRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
+
+    private UseSupertypeWherePossibleRefactoring(IType clazz){
 		Assert.isNotNull(clazz);
-		Assert.isNotNull(codeGenerationSettings);
 		fInputType= clazz;
 		fUseSupertypeInInstanceOf= false;
-		fCodeGenerationSettings= codeGenerationSettings;
 	}
 	
-	public static UseSupertypeWherePossibleRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
+	public static UseSupertypeWherePossibleRefactoring create(IType type) throws JavaModelException{
 		if (! isAvailable(type))
 			return null;
-		return new UseSupertypeWherePossibleRefactoring(type, codeGenerationSettings);
+		return new UseSupertypeWherePossibleRefactoring(type);
 	}
 	
 	public static boolean isAvailable(IType type) throws JavaModelException{
@@ -149,26 +145,26 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 		return RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.name"); //$NON-NLS-1$
 	}
 
-	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws CoreException{
+	private TextChangeManager createChangeManager(IProgressMonitor monitor, RefactoringStatus status) throws CoreException{
 		try{
-			pm.beginTask("", 1); //$NON-NLS-1$
-			pm.setTaskName(RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.analyzing...")); //$NON-NLS-1$
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.analyzing...")); //$NON-NLS-1$
 			TextChangeManager manager= new TextChangeManager();
-			updateReferences(manager, new SubProgressMonitor(pm, 1), status);
+			updateReferences(manager, new SubProgressMonitor(monitor, 1), status);
 			return manager;
 		} finally{
-			pm.done();
+			monitor.done();
 		}	
 	}
 
-	private void updateReferences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		pm.beginTask("", 1); //$NON-NLS-1$
+	private void updateReferences(TextChangeManager manager, IProgressMonitor monitor, RefactoringStatus status) throws CoreException {
+		monitor.beginTask("", 1); //$NON-NLS-1$
 		try{
 			ExtractInterfaceUtil.updateReferences(manager, fInputType, fSuperTypeToUse, 
-			        new RefactoringWorkingCopyOwner(), true, new SubProgressMonitor(pm, 1), 
-			        status, fCodeGenerationSettings);
+			        new RefactoringWorkingCopyOwner(), true, new SubProgressMonitor(monitor, 1), 
+			        status);
 		} finally {
-			pm.done();
+			monitor.done();
 		}
 	}
 }

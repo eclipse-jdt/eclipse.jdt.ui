@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -230,15 +229,15 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		return true;
 	}
 
-	public static PushDownRefactoring create(IMember[] members, CodeGenerationSettings preferenceSettings) throws JavaModelException {
+	public static PushDownRefactoring create(IMember[] members) throws JavaModelException {
 		if (!isAvailable(members))
 			return null;
 		if (isOneTypeWithPushableMembers(members)) {
-			PushDownRefactoring result= new PushDownRefactoring(new IMember[0], preferenceSettings);
+			PushDownRefactoring result= new PushDownRefactoring(new IMember[0]);
 			result.fDeclaringType= getSingleTopLevelType(members);
 			return result;
 		}
-		return new PushDownRefactoring(members, preferenceSettings);
+		return new PushDownRefactoring(members);
 	}
 
 	private static MemberActionInfo[] createInfosForAllPushableFieldsAndMethods(IType type) throws JavaModelException {
@@ -336,8 +335,8 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 
 	private MemberActionInfo[] fMemberInfos;
 
-	private PushDownRefactoring(IMember[] members, CodeGenerationSettings settings) {
-		super(members, settings);
+	private PushDownRefactoring(IMember[] members) {
+		super(members);
 	}
 
 	private void addAllRequiredPushableMembers(List queue, IMember member, IProgressMonitor monitor) throws JavaModelException {

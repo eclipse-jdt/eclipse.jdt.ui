@@ -28,7 +28,6 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -38,7 +37,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveStarter;
@@ -175,15 +173,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (target == null)
 			return DND.DROP_NONE;
 		
-		if (fMoveProcessor == null) {
-			IResource[] resources= ReorgUtils.getResources(fElements);
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-			IJavaProject project= null;
-			if (javaElements != null && javaElements.length > 0)
-				project= javaElements[0].getJavaProject();
-			fMoveProcessor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
-		}
-		
+		if (fMoveProcessor == null)
+			fMoveProcessor= JavaMoveProcessor.create(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+
 		if (!canMoveElements())
 			return DND.DROP_NONE;	
 
@@ -230,15 +222,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	private int handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
 
-		if (fCopyRefactoring2 == null) {
-			IResource[] resources= ReorgUtils.getResources(fElements);
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-			IJavaProject project= null;
-			if (javaElements != null && javaElements.length > 0)
-				project= javaElements[0].getJavaProject();
-			fCopyRefactoring2= CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
-		}
-		
+		if (fCopyRefactoring2 == null)
+			fCopyRefactoring2= CopyRefactoring.create(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+
 		if (!canCopyElements())
 			return DND.DROP_NONE;	
 

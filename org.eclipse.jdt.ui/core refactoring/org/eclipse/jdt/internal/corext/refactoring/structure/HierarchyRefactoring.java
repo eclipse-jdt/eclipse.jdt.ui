@@ -65,7 +65,6 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
@@ -468,17 +467,13 @@ public abstract class HierarchyRefactoring extends Refactoring {
 
 	protected TextChangeManager fChangeManager;
 
-	protected final CodeGenerationSettings fCodeGenerationSettings;
-
 	protected IType fDeclaringType;
 
 	protected IMember[] fMembersToMove;
 
-	protected HierarchyRefactoring(final IMember[] members, final CodeGenerationSettings settings) {
+	protected HierarchyRefactoring(final IMember[] members) {
 		Assert.isNotNull(members);
-		Assert.isNotNull(settings);
 		fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
-		fCodeGenerationSettings= settings;
 	}
 
 	protected boolean canBeAccessedFrom(final IMember member, final IType target, final ITypeHierarchy hierarchy) throws JavaModelException {
