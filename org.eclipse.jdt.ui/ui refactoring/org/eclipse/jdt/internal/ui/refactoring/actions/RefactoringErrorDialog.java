@@ -19,7 +19,7 @@ public class RefactoringErrorDialog {
 	
 	public static void open(String dialogTitle, RefactoringStatus status) {
 		if (status.getEntries().size() == 1) {
-			String message= "The following error prevents performing the operation.\n\n" + status.getFirstMessage(RefactoringStatus.FATAL);
+			String message= "The following problem prevents performing the operation.\n\n" + status.getFirstMessage(RefactoringStatus.FATAL);
 			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, message);
 		} else {
 			openListDialog(dialogTitle, status);	
@@ -30,7 +30,7 @@ public class RefactoringErrorDialog {
 		ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell());
 		dialog.setInput(status);
 		dialog.setTitle(dialogTitle);
-		dialog.setMessage("The following errors prevent performing the operation.");
+		dialog.setMessage("The following problems prevent performing the operation.");
 		dialog.setContentProvider(new RefactoringStatusContentProvider());
 		dialog.setLabelProvider(new RefactoringStatusEntryLabelProvider());
 		dialog.open();	
