@@ -579,6 +579,8 @@ public abstract class ReorgRefactoring extends Refactoring {
 	}
 	
 	private static boolean canReorg(IPackageFragmentRoot root){
+		if (! root.exists())
+			return false;
 		try {
 			return isSourceFolder(root);
 		} catch (JavaModelException e) {
@@ -587,6 +589,8 @@ public abstract class ReorgRefactoring extends Refactoring {
 	}
 	
 	private static boolean canReorg(IPackageFragment pkg){
+	    if (! pkg.exists())
+	        return false;
 		if (pkg.isDefaultPackage())
 			return false;
 		try {
