@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -188,25 +189,42 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		
 			ICompilationUnit wc= getWorkingCopyWithNewContent(edits, change);
 			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
-
-			MethodDeclaration method= getDeclaringMethod(edits, change, newCUNode);			
-			Message[] messages= ASTNodes.getMessages(method, ASTNodes.INCLUDE_ALL_PARENTS);
-			for (int i= 0; i < messages.length; i++) {
-				Context context= JavaSourceContext.create(wc, new SourceRange(messages[i].getSourcePosition(),0));
-				result.addError(messages[i].getMessage(), context);
-			}
 			
+			result.merge(analyzeIntroducedCompileErrors(edits, change, wc, newCUNode));
 			if (result.hasError())
 				return result;
 				
 			ProblemNameNodeFinder nameVisitor= new ProblemNameNodeFinder(getRanges(edits, change), getFullDeclarationBindingKey(edits));
-			method.accept(nameVisitor);
+			getNewDeclaringMethodNode(edits, change, newCUNode).accept(nameVisitor);
 			result.merge(reportProblemNodes(wc, nameVisitor.getProblemNodes()));
 
 			return result;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
 		}
+	}
+
+	private RefactoringStatus analyzeIntroducedCompileErrors(TextEdit[] edits, TextChange change, ICompilationUnit wc, CompilationUnit newCUNode) {
+		RefactoringStatus subResult= new RefactoringStatus();				
+		Set oldErrorMessages= getOldErrorMessages(edits);
+		Message[] newErrorMessages= ASTNodes.getMessages(getNewDeclaringMethodNode(edits, change, newCUNode), ASTNodes.INCLUDE_ALL_PARENTS);
+		for (int i= 0; i < newErrorMessages.length; i++) {
+			if (! oldErrorMessages.contains(newErrorMessages[i].getMessage())){
+				Context context= JavaSourceContext.create(wc, new SourceRange(newErrorMessages[i].getSourcePosition(),0));
+				subResult.addError(newErrorMessages[i].getMessage(), context);
+			}	
+		}
+		return subResult;
+	}
+
+	private Set getOldErrorMessages(TextEdit[] edits) {
+		MethodDeclaration oldMethod= getOldDeclaringMethodNode(edits);
+		Message[] oldMessages= ASTNodes.getMessages(oldMethod, ASTNodes.INCLUDE_ALL_PARENTS);
+		Set messageSet= new HashSet(oldMessages.length);
+		for (int i= 0; i < oldMessages.length; i++) {
+			messageSet.add(oldMessages[i].getMessage());
+		}
+		return messageSet;
 	}
 	
 	private RefactoringStatus reportProblemNodes(ICompilationUnit modifiedWorkingCopy, SimpleName[] problemNodes){
@@ -241,8 +259,13 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			return (ICompilationUnit)cu.getOriginalElement();	
 	}
 	
-	private static MethodDeclaration getDeclaringMethod(TextEdit[] edits, TextChange change, CompilationUnit newCUNode) {
-		ASTNode decl= getNameNode(change.getNewTextRange(findDeclarationEdit(edits)), newCUNode);
+	private MethodDeclaration getOldDeclaringMethodNode(TextEdit[] edits) {
+		ASTNode decl= getNameNode(getTextRange(findDeclarationEdit(edits), null), fCompilationUnitNode);
+		return ((MethodDeclaration)ASTNodes.getParent(decl, MethodDeclaration.class));
+	}
+	
+	private static MethodDeclaration getNewDeclaringMethodNode(TextEdit[] edits, TextChange change, CompilationUnit newCUNode) {
+		ASTNode decl= getNameNode(getTextRange(findDeclarationEdit(edits), change), newCUNode);
 		return ((MethodDeclaration)ASTNodes.getParent(decl, MethodDeclaration.class));
 	}
 	
@@ -258,13 +281,16 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	private static TextRange[] getRanges(TextEdit[] edits, TextChange change){
 		TextRange[] result= new TextRange[edits.length];
 		for (int i= 0; i < edits.length; i++) {
-			if (change == null){
-				result[i]= edits[i].getTextRange();
-			} else{
-				result[i]= change.getNewTextRange(edits[i]);
-			}	
+			result[i]= getTextRange(edits[i], change);
 		}
 		return result;
+	}
+	
+	private static TextRange getTextRange(TextEdit edit, TextChange change){
+		if (change == null)
+			return edit.getTextRange();
+		 else
+			return change.getNewTextRange(edit);
 	}
 		
 	private static SimpleName getNameNode(TextRange range, CompilationUnit cuNode) {
