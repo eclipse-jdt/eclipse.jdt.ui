@@ -29,11 +29,10 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.compiler.IProblem;
-import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.corext.refactoring.base.FileContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -42,7 +41,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.C
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.AST;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
@@ -246,14 +244,14 @@ public class Checks {
 	/**
 	 * Checks if the new method is already used in the given type.
 	 */
-	public static RefactoringStatus checkMethodInType(ReferenceBinding type, String methodName, TypeBinding[] parameters, IJavaProject scope) {
+	public static RefactoringStatus checkMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters, IJavaProject scope) {
 		RefactoringStatus result= new RefactoringStatus();
-		if (methodName.equals(new String(type.sourceName())))
+		if (methodName.equals(type.getName()))
 			result.addWarning("New method name has constructor name");
-		MethodBinding method= Bindings.findMethodInType(type, methodName.toCharArray(), parameters);
+		IMethodBinding method= org.eclipse.jdt.internal.corext.dom.Bindings.findMethodInType(type, methodName, parameters);
 		if (method != null) 
 			result.addError(
-				"Method " + methodName + " already exists in " + new String(type.sourceName), 
+				"Method " + methodName + " already exists in " + type.getName(), 
 				JavaSourceContext.create(method, scope));
 		return result;
 	}
@@ -266,13 +264,13 @@ public class Checks {
 	 * 		super classes. </li>
 	 * </ul>
 	 */
-	public static RefactoringStatus checkMethodInHierarchy(ReferenceBinding type, String methodName, TypeBinding[] parameters, IJavaProject scope) {
+	public static RefactoringStatus checkMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding[] parameters, IJavaProject scope) {
 		RefactoringStatus result= new RefactoringStatus();
-		MethodBinding method= Bindings.findMethodInHierarchy(type, methodName.toCharArray(), parameters);
+		IMethodBinding method= org.eclipse.jdt.internal.corext.dom.Bindings.findMethodInHierarchy(type, methodName, parameters);
 		if (method != null) {
-			ReferenceBinding dc= method.declaringClass;
+			ITypeBinding dc= method.getDeclaringClass();
 			result.addError(
-				"New method " + methodName + " overrides existing method in " + new String(dc.sourceName),
+				"New method " + methodName + " overrides existing method in " + dc.getName(),
 				JavaSourceContext.create(method, scope));
 		}
 		return result;

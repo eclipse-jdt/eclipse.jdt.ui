@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -69,8 +70,9 @@ public class Bindings {
 			return new String[] { type.getName() };
 		List result= new ArrayList(3);
 		while(type != null) {
-			result.add(0, type.getName());
-			type= type.getSuperclass();
+			if (!type.isAnonymous())
+				result.add(0, type.getName());
+			type= type.getDeclaringClass();
 		}
 		return (String[]) result.toArray(new String[result.size()]);
 	}
@@ -98,25 +100,12 @@ public class Bindings {
 		return type;
 	}
 	
-	public static ASTNode getDeclaration(IBinding binding, ASTNode root) {
-		root= root.getRoot();
-		if (root instanceof CompilationUnit)
-			return ((CompilationUnit)root).findDeclaringNode(binding);
-		return null;
-	}
-	
 	public static Type getType(IVariableBinding binding, ASTNode root) {
-		ASTNode declaration= getDeclaration(binding, root);
+		ASTNode declaration= ASTNodes.findDeclaration(binding, root);
 		if (declaration instanceof FieldDeclaration) {
 			return ((FieldDeclaration)declaration).getType();
-		} if (declaration instanceof SingleVariableDeclaration) {
-			return ((SingleVariableDeclaration)declaration).getType();
-		} else if (declaration instanceof VariableDeclarationFragment) {
-			ASTNode parent= ((VariableDeclarationFragment)declaration).getParent();
-			if (parent instanceof VariableDeclarationExpression)
-				return ((VariableDeclarationExpression)parent).getType();
-			else if (parent instanceof VariableDeclarationStatement)
-				return ((VariableDeclarationStatement)parent).getType();
+		} if (declaration instanceof VariableDeclaration) {
+			return ASTNodes.getType((VariableDeclaration)declaration);
 		}
 		return createType(binding.getType(), root.getAST());
 	}
@@ -124,22 +113,25 @@ public class Bindings {
 	public static Type createType(ITypeBinding binding, AST ast) {
 		if (binding.isPrimitive()) {
 			PrimitiveType.Code code= null;
-			if (ast.resolveWellKnownType("int") == binding)
+			String name= binding.getName();
+			if (name.equals("int"))
 				code= PrimitiveType.INT;
-			else if (ast.resolveWellKnownType("char") == binding)
+			else if (name.equals("char"))
 				code= PrimitiveType.CHAR;
-			else if (ast.resolveWellKnownType("boolean") == binding)
+			else if (name.equals("boolean"))
 				code= PrimitiveType.BOOLEAN;
-			else if (ast.resolveWellKnownType("short") == binding)
+			else if (name.equals("short"))
 				code= PrimitiveType.SHORT;
-			else if (ast.resolveWellKnownType("long") == binding)
+			else if (name.equals("long"))
 				code= PrimitiveType.LONG;
-			else if (ast.resolveWellKnownType("float") == binding)
+			else if (name.equals("float"))
 				code= PrimitiveType.FLOAT;
-			else if (ast.resolveWellKnownType("double") == binding)
+			else if (name.equals("double"))
 				code= PrimitiveType.DOUBLE;
-			else if (ast.resolveWellKnownType("byte") == binding)
+			else if (name.equals("byte"))
 				code= PrimitiveType.BYTE;
+			else if (name.equals("void"))
+				code= PrimitiveType.VOID;
 			return ast.newPrimitiveType(code);
 		} else if (binding.isArray()) {
 			Type elementType= createType(binding.getElementType(), ast);

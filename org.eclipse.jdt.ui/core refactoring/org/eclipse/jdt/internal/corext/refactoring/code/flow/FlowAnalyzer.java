@@ -9,15 +9,10 @@ import java.util.HashMap;
 
 import java.util.Iterator;
 import java.util.List;
-import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;
-import org.eclipse.jdt.internal.compiler.IProblem;
-import org.eclipse.jdt.internal.compiler.ast.*;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
-import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+
+import org.eclipse.jdt.core.dom.*;
+
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
@@ -30,7 +25,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
  * the first access to a variable (read or write) and if all execution pathes
  * return a value.
  */
-abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
+abstract class FlowAnalyzer extends GenericVisitor {
 
 	static protected class SwitchData {
 		private boolean fHasDefaultCase;
@@ -66,20 +61,16 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 
 	protected abstract boolean createReturnFlowInfo(ReturnStatement node);
 
-	protected abstract boolean traverseRange(int start, int end);
+	protected abstract boolean traverseNode(ASTNode node);
 	
-	protected boolean traverseNode(AstNode node) {
-		return traverseRange(node.sourceStart, node.sourceEnd);
+	protected boolean skipNode(ASTNode node) {
+		return !traverseNode(node);
 	}
 	
-	protected boolean skipNode(AstNode node) {
-		return !traverseRange(node.sourceStart, node.sourceEnd);
+	protected final boolean visitNode(ASTNode node) {
+		return traverseNode(node);
 	}
 	
-	protected boolean skipRange(int start, int end) {
-		return !traverseRange(start, end);
-	}
-
 	//---- Hooks to create Flow info objects. User may introduce their own infos.
 	
 	protected ReturnFlowInfo createReturn(ReturnStatement statement) {
@@ -90,7 +81,7 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		return new ThrowFlowInfo();
 	}
 	
-	protected BranchFlowInfo createBranch(char[] label) {
+	protected BranchFlowInfo createBranch(SimpleName label) {
 		return new BranchFlowInfo(label, fFlowContext);
 	}
 	
@@ -140,40 +131,40 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 	
 	//---- Helpers to access flow analysis objects ----------------------------------------
 	
-	protected FlowInfo getFlowInfo(AstNode node) {
+	protected FlowInfo getFlowInfo(ASTNode node) {
 		return (FlowInfo)fData.remove(node);
 	}
 	
-	protected void setFlowInfo(AstNode node, FlowInfo info) {
+	protected void setFlowInfo(ASTNode node, FlowInfo info) {
 		fData.put(node, info);	
 	}
 	
-	protected FlowInfo assignFlowInfo(AstNode target, AstNode source) {
+	protected FlowInfo assignFlowInfo(ASTNode target, ASTNode source) {
 		FlowInfo result= getFlowInfo(source);
 		setFlowInfo(target, result);
 		return result;
 	}
 	
-	protected FlowInfo accessFlowInfo(AstNode node) {
+	protected FlowInfo accessFlowInfo(ASTNode node) {
 		return (FlowInfo)fData.get(node);
 	}
 	
 	//---- Helpers to process sequential flow infos -------------------------------------
 	
-	protected GenericSequentialFlowInfo processSequential(AstNode parent, AstNode[] nodes) {
+	protected GenericSequentialFlowInfo processSequential(ASTNode parent, List nodes) {
 		GenericSequentialFlowInfo result= createSequential(parent);
 		process(result, nodes);
 		return result;
 	}
 	
-	protected GenericSequentialFlowInfo processSequential(AstNode parent, AstNode node1) {
+	protected GenericSequentialFlowInfo processSequential(ASTNode parent, ASTNode node1) {
 		GenericSequentialFlowInfo result= createSequential(parent);
 		if (node1 != null)
 			result.merge(getFlowInfo(node1), fFlowContext);
 		return result;
 	}
 	
-	protected GenericSequentialFlowInfo processSequential(AstNode parent, AstNode node1, AstNode node2) {
+	protected GenericSequentialFlowInfo processSequential(ASTNode parent, ASTNode node1, ASTNode node2) {
 		GenericSequentialFlowInfo result= createSequential(parent);
 		if (node1 != null)
 			result.merge(getFlowInfo(node1), fFlowContext);
@@ -182,13 +173,13 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		return result;
 	}
 	
-	protected GenericSequentialFlowInfo createSequential(AstNode parent) {
+	protected GenericSequentialFlowInfo createSequential(ASTNode parent) {
 		GenericSequentialFlowInfo result= createSequential();
 		setFlowInfo(parent, result);
 		return result;
 	}
 	
-	protected GenericSequentialFlowInfo createSequential(AstNode[] nodes) {
+	protected GenericSequentialFlowInfo createSequential(List nodes) {
 		GenericSequentialFlowInfo result= createSequential();
 		process(result, nodes);
 		return result;		
@@ -196,76 +187,83 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 	
 	//---- Generic merge methods --------------------------------------------------------
 	
-	protected void process(GenericSequentialFlowInfo info, AstNode[] nodes) {
+	protected void process(GenericSequentialFlowInfo info, List nodes) {
 		if (nodes == null)
 			return;
-		for (int i= 0; i < nodes.length; i++) {
-			info.merge(getFlowInfo(nodes[i]), fFlowContext);
+		for (Iterator iter= nodes.iterator(); iter.hasNext();) {
+			info.merge(getFlowInfo((ASTNode)iter.next()), fFlowContext);
 		}
 	}
 	
-	protected void process(GenericSequentialFlowInfo info, AstNode node) {
+	protected void process(GenericSequentialFlowInfo info, ASTNode node) {
 		if (node != null)
 			info.merge(getFlowInfo(node), fFlowContext);
 	}
 	
-	protected void process(GenericSequentialFlowInfo info, AstNode node1, AstNode node2) {
+	protected void process(GenericSequentialFlowInfo info, ASTNode node1, ASTNode node2) {
 		if (node1 != null)
 			info.merge(getFlowInfo(node1), fFlowContext);
 		if (node2 != null)
 			info.merge(getFlowInfo(node2), fFlowContext);
 	}
 	
-	//---- Problem management -----------------------------------------------------------
+	//---- special visit methods -------------------------------------------------------
 	
-	public void acceptProblem(IProblem problem) {
-		// Should not be called.
+	public boolean visit(EmptyStatement node) {
+		// Empty statements aren't of any interest.
+		return false;
 	}
 	
-	//---- Reusable methods to process AST nodes ----------------------------------------
-	
-	private void process(TypeDeclaration declaration) {
-		if (skipRange(declaration.declarationSourceStart, declaration.declarationSourceEnd))
-			return;
-		GenericSequentialFlowInfo info= processSequential(declaration, declaration.superclass);
-		process(info, declaration.superInterfaces);
-		process(info, declaration.memberTypes);
-		process(info, declaration.fields);
-		process(info, declaration.methods);
-		info.setNoReturn();
+	public boolean visit(TryStatement node) {
+		if (traverseNode(node)) {
+			fFlowContext.pushExcptions(node);
+			node.getBody().accept(this);
+			fFlowContext.popExceptions();
+			List catchClauses= node.catchClauses();
+			for (Iterator iter= catchClauses.iterator(); iter.hasNext();) {
+				((CatchClause)iter.next()).accept(this);
+			}
+			Block finallyBlock= node.getFinally();
+			if (finallyBlock != null) {
+				finallyBlock.accept(this);
+			}
+		}
+		return false;
 	}
 	
 	//---- Helper to process switch statement ----------------------------------------
 	
 	protected SwitchData createSwitchData(SwitchStatement node) {
 		SwitchData result= new SwitchData();
-		Statement[] statements= node.statements;
-		if (statements == null || statements.length == 0)
+		List statements= node.statements();
+		if (statements.isEmpty())
 			return result;
 			
 		int start= -1, end= -1;
 		GenericSequentialFlowInfo info= null;
 		
-		for (int i= 0; i < statements.length; i++) {
-			Statement statement= statements[i];
-			if (statement instanceof DefaultCase) {
-				result.setHasDefaultCase();
-			}
-			if (statement instanceof Case || statement instanceof DefaultCase) {
+		for (Iterator iter= statements.iterator(); iter.hasNext(); ) {
+			Statement statement= (Statement)iter.next();
+			if (statement instanceof SwitchCase) {
+				// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10881
+				SwitchCase switchCase= (SwitchCase)statement;
+				if (switchCase.getExpression() == null || (switchCase.getExpression() instanceof SimpleName && ((SimpleName)switchCase.getExpression()).getIdentifier().equals("MISSING"))) {
+					result.setHasDefaultCase();
+				}
 				if (info == null) {
 					info= createSequential();
-					start= ASTUtil.getSourceStart(statement);
+					start= statement.getStartPosition();
 				} else {
 					if (info.isReturn() || info.isPartialReturn() || info.branches()) {
 						result.add(TextRange.createFromStartAndInclusiveEnd(start, end), info);
 						info= createSequential();
-						start= ASTUtil.getSourceStart(statement);
+						start= statement.getStartPosition();
 					}
 				}
 			} else {
 				info.merge(getFlowInfo(statement), fFlowContext);
 			}
-			end= ASTUtil.getSourceEnd(statement);
+			end= statement.getStartPosition() + statement.getLength() - 1;
 		}
 		result.add(TextRange.createFromStartAndInclusiveEnd(start, end), info);
 		return result;
@@ -274,852 +272,509 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 	protected void endVisit(SwitchStatement node, SwitchData data) {
 		SwitchFlowInfo switchFlowInfo= createSwitch();
 		setFlowInfo(node, switchFlowInfo);
-		switchFlowInfo.mergeTest(getFlowInfo(node.testExpression), fFlowContext);
+		switchFlowInfo.mergeTest(getFlowInfo(node.getExpression()), fFlowContext);
 		FlowInfo[] cases= data.getInfos();
 		for (int i= 0; i < cases.length; i++)
 			switchFlowInfo.mergeCase(cases[i], fFlowContext);
 		switchFlowInfo.mergeDefault(data.hasDefaultCase(), fFlowContext);	
 		switchFlowInfo.removeLabel(null);
 	}
+
+	//---- Helper to find correct variable binding --------------------------
+
+	private static IVariableBinding getVariableBinding(Expression reference) {
+		if (reference == null)
+			return null;
+		if (!(reference instanceof Name))
+			return null;
+		IBinding binding= ((Name)reference).resolveBinding();
+		if (!(binding instanceof IVariableBinding))
+			return null;
+		IVariableBinding result= (IVariableBinding)binding;
+		if (result.isField())
+			return null;
+		return result;
+	}
+
+	//---- concret endVisit methods ---------------------------------------------------
 	
-	//---- concret visit methods --------------------------------------------------------
-
-	public void endVisit(AllocationExpression node, BlockScope scope) {
+	public void endVisit(AnonymousClassDeclaration node) {
 		if (skipNode(node))
 			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.type);
-		process(info, node.arguments);
-	}
-
-	public void endVisit(AND_AND_Expression node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		processSequential(node, node.left, node.right);
-	}
-
-	public void endVisit(AnonymousLocalTypeDeclaration node, BlockScope scope) {
-		if (skipRange(node.declarationSourceStart, node.declarationSourceEnd))
-			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.memberTypes);
-		process(info, node.fields);
-		process(info, node.methods);
+		FlowInfo info= processSequential(node, node.bodyDeclarations());
 		info.setNoReturn();
 	}
-
-	public void endVisit(Argument node, BlockScope scope) {
+	
+	public void endVisit(ArrayAccess node) {
 		if (skipNode(node))
 			return;
-		processSequential(node, node.type, node.initialization);
-	}
-
-	public void endVisit(ArrayAllocationExpression node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.type);
-		process(info, node.dimensions);
-		process(info, node.initializer);
-	}
-
-	public void endVisit(ArrayInitializer node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		processSequential(node, node.expressions);
-	}
-
-	public void endVisit(ArrayQualifiedTypeReference node, BlockScope scope) {
-		// Leaf node.
-	}
-
-	public void endVisit(ArrayQualifiedTypeReference node, ClassScope scope) {
-		// Leaf node.
-	}
-
-	public void endVisit(ArrayReference node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		processSequential(node, node.receiver, node.position);
-	}
-
-	public void endVisit(ArrayTypeReference node, BlockScope scope) {
-		// Leaf node.
-	}
-
-	public void endVisit(ArrayTypeReference node, ClassScope scope) {
-		// Leaf node.
-	}
-
-	public void endVisit(AssertStatement node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		processSequential(node, node.assertExpression, node.exceptionArgument);
+		processSequential(node, node.getArray(), node.getIndex());
 	}
 	
-	public void endVisit(Assignment node, BlockScope scope) {
+	public void endVisit(ArrayCreation node) {
 		if (skipNode(node))
 			return;
+		GenericSequentialFlowInfo info= processSequential(node, node.getType());
+		process(info, node.dimensions());
+		process(info, node.getInitializer());
+	}
+	
+	public void endVisit(ArrayInitializer node) {
+		if (skipNode(node))
+			return;
+		processSequential(node, node.expressions());
+	}
+	
+	public void endVisit(ArrayType node) {
+		if (skipNode(node))
+			return;
+		processSequential(node, node.getElementType());
+	}
+	
+	public void endVisit(AssertStatement node) {
+		if (skipNode(node))
+			return;
+		IfFlowInfo info= new IfFlowInfo();
+		setFlowInfo(node, info);
+		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
+		info.merge(getFlowInfo(node.getMessage()), null, fFlowContext);
+	}
+	
+	public void endVisit(Assignment node) {
+		if (skipNode(node))
+			return;
+		FlowInfo lhs= getFlowInfo(node.getLeftHandSide());
+		FlowInfo rhs= getFlowInfo(node.getRightHandSide());
+		if (lhs instanceof LocalFlowInfo) {
+			((LocalFlowInfo)lhs).setWriteAccess(fFlowContext);
+			if (node.getOperator() != Assignment.Operator.ASSIGN) {
+				GenericSequentialFlowInfo tmp= createSequential();
+				IVariableBinding binding= getVariableBinding(node.getLeftHandSide());
+				tmp.merge(new LocalFlowInfo(binding, FlowInfo.READ, fFlowContext), fFlowContext);
+				tmp.merge(rhs, fFlowContext);
+				rhs= tmp;
+			}
+		}
+		GenericSequentialFlowInfo info= createSequential(node);
 		// first process right and side and then left hand side.
-		processSequential(node, node.expression, node.lhs);
+		info.merge(rhs, fFlowContext);
+		info.merge(lhs, fFlowContext);
 	}
-
-	public void endVisit(BinaryExpression node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		processSequential(node, node.left, node.right);
-	}
-
-	public void endVisit(Block node, BlockScope scope) {
+	
+	public void endVisit(Block node) {
 		if (skipNode(node))
 			return;
 		BlockFlowInfo info= createBlock();
 		setFlowInfo(node, info);
-		process(info, node.statements);
+		process(info, node.statements());
 	}
-
-	public void endVisit(Break node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		setFlowInfo(node, createBranch(node.label));
-	}
-
-	public void endVisit(Case node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		assignFlowInfo(node, node.constantExpression);
-	}
-
-	public void endVisit(CastExpression node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		processSequential(node, node.type, node.expression);
-	}
-
-	public void endVisit(CharLiteral node, BlockScope scope) {
+	
+	public void endVisit(BooleanLiteral node) {
 		// Leaf node.
 	}
-
-	public void endVisit(ClassLiteralAccess node, BlockScope scope) {
+	
+	public void endVisit(BreakStatement node) {
 		if (skipNode(node))
 			return;
-		assignFlowInfo(node, node.type);
+		setFlowInfo(node, createBranch(node.getLabel()));
 	}
-
-	public void endVisit(Clinit node, ClassScope scope) {
+	
+	public void endVisit(CastExpression node) {
+		if (skipNode(node))
+			return;
+		processSequential(node, node.getType(), node.getExpression());
+	}
+	
+	public void endVisit(CatchClause node) {
+		if (skipNode(node))
+			return;
+		processSequential(node, node.getException(), node.getBody());
+	}
+	
+	public void endVisit(CharacterLiteral node) {
 		// Leaf node.
 	}
-
-	public void endVisit(CompilationUnitDeclaration node, CompilationUnitScope scope) {
+	
+	public void endVisit(ClassInstanceCreation node) {
 		if (skipNode(node))
 			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.imports);
-		process(info, node.types);
+		GenericSequentialFlowInfo info= processSequential(node, node.getExpression());
+		process(info, node.getName());
+		process(info, node.arguments());
+		process(info, node.getAnonymousClassDeclaration());
 	}
-
-	public void endVisit(CompoundAssignment node, BlockScope scope) {
+	
+	public void endVisit(CompilationUnit node) {
 		if (skipNode(node))
 			return;
-		endVisit((Assignment)node, scope);
+		GenericSequentialFlowInfo info= processSequential(node, node.imports());
+		process(info, node.types());
 	}
-
-	public void endVisit(ConditionalExpression node, BlockScope scope) {
+	
+	public void endVisit(ConditionalExpression node) {
 		if (skipNode(node))
 			return;
 		ConditionalFlowInfo info= createConditional();
 		setFlowInfo(node, info);
-		info.mergeCondition(getFlowInfo(node.condition), fFlowContext);
+		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
 		info.merge(
-			getFlowInfo(node.valueIfTrue), 
-			getFlowInfo(node.valueIfFalse), 
+			getFlowInfo(node.getThenExpression()), 
+			getFlowInfo(node.getElseExpression()), 
 			fFlowContext);
 	}
-
-	public void endVisit(ConstructorDeclaration node, ClassScope scope) {
-		if (skipRange(node.declarationSourceStart, node.declarationSourceEnd))
-			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.arguments);
-		process(info, node.thrownExceptions);
-		process(info, node.constructorCall);
-		process(info, node.statements);
-	}
-
-	public void endVisit(Continue node, BlockScope scope) {
+	
+	public void endVisit(ConstructorInvocation node) {
 		if (skipNode(node))
 			return;
-		setFlowInfo(node, createBranch(node.label));
+		processSequential(node, node.arguments());
 	}
-
-	public void endVisit(DefaultCase node, BlockScope scope) {
-		// Leaf Node
+	
+	public void endVisit(ContinueStatement node) {
+		if (skipNode(node))
+			return;
+		setFlowInfo(node, createBranch(node.getLabel()));
 	}
-
-	public void endVisit(DoStatement node, BlockScope scope) {
+	
+	public void endVisit(DoStatement node) {
 		if (skipNode(node))
 			return;
 		DoWhileFlowInfo info= createDoWhile();
 		setFlowInfo(node, info);
-		info.mergeAction(getFlowInfo(node.action), fFlowContext);
-		info.mergeCondition(getFlowInfo(node.condition), fFlowContext);
+		info.mergeAction(getFlowInfo(node.getBody()), fFlowContext);
+		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
 		info.removeLabel(null);
 	}
-
-	public void endVisit(DoubleLiteral node, BlockScope scope) {
-		// Leaf node.
-	}
-
-	public void endVisit(EmptyStatement node, BlockScope scope) {
+	
+	public void endVisit(EmptyStatement node) {
 		// Leaf node.
 	}
 	
-	public void endVisit(EqualExpression node, BlockScope scope) {
+	public void endVisit(ExpressionStatement node) {
 		if (skipNode(node))
 			return;
-		processSequential(node, node.left, node.right);
+		assignFlowInfo(node, node.getExpression());
 	}
-
-	public void endVisit(ExplicitConstructorCall node, BlockScope scope) {
+	
+	public void endVisit(FieldAccess node) {
 		if (skipNode(node))
 			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.qualification);
-		process(info, node.arguments);
+		processSequential(node, node.getExpression(), node.getName());
 	}
-
-	public void endVisit(ExtendedStringLiteral node, BlockScope scope) {
-		// Leaf node
-	}
-
-	public void endVisit(FalseLiteral node, BlockScope scope) {
-		// Leaf node
-	}
-
-	public void endVisit(FieldDeclaration node, MethodScope scope) {
+	
+	public void endVisit(FieldDeclaration node) {
 		if (skipNode(node))
 			return;
-		processSequential(node, node.type, node.initialization);
+		GenericSequentialFlowInfo info= processSequential(node, node.getType());
+		process(info, node.fragments());
 	}
-
-	public void endVisit(FieldReference node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		assignFlowInfo(node, node.receiver);
-	}
-
-	public void endVisit(FloatLiteral floatLiteral, BlockScope scope) {
-		// Leaf node.
-	}
-
-	public void endVisit(ForStatement node, BlockScope scope) {
+	
+	public void endVisit(ForStatement node) {
 		if (skipNode(node))
 			return;
 		ForFlowInfo forInfo= createFor();
 		setFlowInfo(node, forInfo);
-		forInfo.mergeInitializer(createSequential(node.initializations), fFlowContext);
-		forInfo.mergeCondition(getFlowInfo(node.condition), fFlowContext);
-		forInfo.mergeAction(getFlowInfo(node.action), fFlowContext);
+		forInfo.mergeInitializer(createSequential(node.initializers()), fFlowContext);
+		forInfo.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
+		forInfo.mergeAction(getFlowInfo(node.getBody()), fFlowContext);
 		// Increments are executed after the action.
-		forInfo.mergeIncrement(createSequential(node.increments), fFlowContext);
+		forInfo.mergeIncrement(createSequential(node.updaters()), fFlowContext);
 		forInfo.removeLabel(null);
 	}
-
-	public void endVisit(IfStatement node, BlockScope scope) {
+	
+	public void endVisit(IfStatement node) {
 		if (skipNode(node))
 			return;
 		IfFlowInfo info= createIf();
 		setFlowInfo(node, info);
-		info.mergeCondition(getFlowInfo(node.condition), fFlowContext);
-		info.merge(getFlowInfo(node.thenStatement), getFlowInfo(node.elseStatement), fFlowContext);
+		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
+		info.merge(getFlowInfo(node.getThenStatement()), getFlowInfo(node.getElseStatement()), fFlowContext);
 	}
-
-	public void endVisit(ImportReference node, CompilationUnitScope scope) {
-		// Leaf node.
-	}
-
-	public void endVisit(Initializer node, MethodScope scope) {
+	
+	public void endVisit(ImportDeclaration node) {
 		if (skipNode(node))
 			return;
-		assignFlowInfo(node, node.block);
+		assignFlowInfo(node, node.getName());
 	}
-
-	public void endVisit(InstanceOfExpression node, BlockScope scope) {
+	
+	public void endVisit(InfixExpression node) {
 		if (skipNode(node))
 			return;
-		processSequential(node, node.type, node.expression);
+		processSequential(node, node.getLeftOperand(), node.getRightOperand());
 	}
-
-	public void endVisit(IntLiteral intLiteral, BlockScope scope) {
-		// Leaf Node.
-	}
-
-	public void endVisit(LabeledStatement node, BlockScope scope) {
+	
+	public void endVisit(Initializer node) {
 		if (skipNode(node))
 			return;
-		FlowInfo info= assignFlowInfo(node, node.statement);
+		assignFlowInfo(node, node.getBody());
+	}
+	
+	public void endVisit(Javadoc node) {
+		// no influence on flow analysis
+	}
+	
+	public void endVisit(LabeledStatement node) {
+		if (skipNode(node))
+			return;
+		FlowInfo info= assignFlowInfo(node, node.getBody());
 		if (info != null)
-			info.removeLabel(node.label);
+			info.removeLabel(node.getLabel());
 	}
-
-	public void endVisit(LocalDeclaration node, BlockScope scope) {
-		if (skipRange(node.declarationSourceStart, node.declarationSourceEnd))
-			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.type, node.initialization);
-		// ckeck if the local variable itself is selected. If so and we have an initialization
-		// we have to track a write access.
-		if (node.initialization != null && !skipRange(node.sourceStart, node.sourceEnd)) {
-			info.merge(
-				new LocalFlowInfo(node.binding, FlowInfo.WRITE, fFlowContext),
-				fFlowContext);
-		}
-	}
-
-	public void endVisit(LocalTypeDeclaration node, BlockScope scope) {
-		process(node);
-	}
-
-	public void endVisit(LongLiteral node, BlockScope scope) {
-		// Leaf Node.
-	}
-
-	public void endVisit(MemberTypeDeclaration node, ClassScope scope) {
-		process(node);
-	}
-
-	public void endVisit(MessageSend node, BlockScope scope) {
+	
+	public void endVisit(MethodDeclaration node) {
 		if (skipNode(node))
 			return;
-		MessageSendFlowInfo info= createMessageSendFlowInfo();
-		setFlowInfo(node, info);
-		if (node.arguments != null) {
-			for (int i= 0; i < node.arguments.length; i++) {
-				Expression arg= node.arguments[i];
-				info.mergeArgument(getFlowInfo(arg), fFlowContext);
-			}
-		}
-		info.mergeReceiver(getFlowInfo(node.receiver), fFlowContext);
-		info.mergeExceptions(node.binding, fFlowContext);
+		GenericSequentialFlowInfo info= processSequential(node, node.getReturnType());
+		process(info, node.parameters());
+		process(info, node.thrownExceptions());
+		process(info, node.getBody());
 	}
-
-	public void endVisit(MethodDeclaration node, ClassScope scope) {
-		if (skipRange(node.declarationSourceStart, node.declarationSourceEnd))
-			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.returnType);
-		process(info, node.arguments);
-		process(info, node.thrownExceptions);
-		process(info, node.statements);
+	
+	public void endVisit(MethodInvocation node) {
+		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10244
+		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), null);
 	}
-
-	public void endVisit(NullLiteral node, BlockScope scope) {
+	
+	public void endVisit(NullLiteral node) {
 		// Leaf node.
 	}
-
-	public void endVisit(OR_OR_Expression node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		processSequential(node, node.left, node.right);
-	}
-
-	public void endVisit(PostfixExpression node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		assignFlowInfo(node, node.lhs);
-	}
-
-	public void endVisit(PrefixExpression node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		assignFlowInfo(node, node.lhs);
-	}
-
-	public void endVisit(QualifiedAllocationExpression node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.enclosingInstance);
-		process(info, node.type);
-		process(info, node.arguments);
-		process(info, node.anonymousType);
-	}
-
-	public void endVisit(QualifiedNameReference node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		if (!(node.binding instanceof LocalVariableBinding))
-			return;
-		setFlowInfo(node, new LocalFlowInfo(
-			(LocalVariableBinding)node.binding,
-			FlowInfo.READ,
-			fFlowContext));
-	}
-
-	public void endVisit(QualifiedSuperReference node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		assignFlowInfo(node, node.qualification);
-	}
-
-	public void endVisit(QualifiedThisReference node, BlockScope scope) {
-		if (skipNode(node))
-			return;
-		assignFlowInfo(node, node.qualification);
-	}
-
-	public void endVisit(QualifiedTypeReference node, BlockScope scope) {
+	
+	public void endVisit(NumberLiteral node) {
 		// Leaf node.
 	}
-
-	public void endVisit(QualifiedTypeReference node, ClassScope scope) {
-		// Leaf node.
+	
+	public void endVisit(PackageDeclaration node) {
+		if (skipNode(node))
+			return;
+		assignFlowInfo(node, node.getName());
 	}
-
-	public void endVisit(ReturnStatement node, BlockScope scope) {
+	
+	public void endVisit(ParenthesizedExpression node) {
+		if (skipNode(node))
+			return;
+		assignFlowInfo(node, node.getExpression());
+	}
+	
+	public void endVisit(PostfixExpression node) {
+		endVisitPrePostfixExpression(node, node.getOperand());
+	}
+	
+	public void endVisit(PrefixExpression node) {
+		endVisitPrePostfixExpression(node, node.getOperand());
+	}
+	
+	public void endVisit(PrimitiveType node) {
+		// Leaf node
+	}
+	
+	public void endVisit(QualifiedName node) {
+		if (skipNode(node))
+			return;
+		processSequential(node, node.getQualifier(), node.getName());
+	}
+	
+	public void endVisit(ReturnStatement node) {
 		if (skipNode(node))
 			return;
 			
 		if (createReturnFlowInfo(node)) {
 			ReturnFlowInfo info= createReturn(node);
 			setFlowInfo(node, info);
-			info.merge(getFlowInfo(node.expression), fFlowContext);
+			info.merge(getFlowInfo(node.getExpression()), fFlowContext);
 		} else {
-			assignFlowInfo(node, node.expression);
+			assignFlowInfo(node, node.getExpression());
 		}
 	}
 	
-	public void endVisit(SingleNameReference node, BlockScope scope) {
+	public void endVisit(SimpleName node) {
 		if (skipNode(node))
 			return;
-		if (!(node.binding instanceof LocalVariableBinding))
+		IBinding binding= node.resolveBinding();
+		if (!(binding instanceof IVariableBinding))
 			return;
+		IVariableBinding varBinding= (IVariableBinding)binding;
+		if (varBinding.isField())
+			return;
+			
 		setFlowInfo(node, new LocalFlowInfo(
-			(LocalVariableBinding)node.binding,
+			varBinding,
 			FlowInfo.READ,
 			fFlowContext));
 	}
-
-	public void endVisit(SingleTypeReference node, BlockScope scope) {
-		// Leaf node.
+	
+	public void endVisit(SimpleType node) {
+		if (skipNode(node))
+			return;
+		assignFlowInfo(node, node.getName());
 	}
-
-	public void endVisit(SingleTypeReference node, ClassScope scope) {
-		// Leaf node.
+	
+	public void endVisit(SingleVariableDeclaration node) {
+		if (skipNode(node))
+			return;
+			
+		IVariableBinding binding= node.resolveBinding();
+		LocalFlowInfo nameInfo= null;
+		Expression initializer= node.getInitializer();
+		if (binding != null && !binding.isField() && initializer != null) {
+			nameInfo= new LocalFlowInfo(binding, FlowInfo.WRITE, fFlowContext);
+		}
+		GenericSequentialFlowInfo info= processSequential(node, node.getType(), initializer);
+		info.merge(nameInfo, fFlowContext);
 	}
-
-	public void endVisit(StringLiteral node, BlockScope scope) {
-		// Leaf node.
+	
+	public void endVisit(StringLiteral node) {
+		// Leaf node
 	}
-
-	public void endVisit(SuperReference node, BlockScope scope) {
-		// Leaf node.
+	
+	public void endVisit(SuperConstructorInvocation node) {
+		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10244
+		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), null);
 	}
-
-	public void endVisit(SwitchStatement node, BlockScope scope) {
+	
+	public void endVisit(SuperFieldAccess node) {
+		if (skipNode(node))
+			return;
+		processSequential(node, node.getQualifier(), node.getName());
+	}
+	
+	public void endVisit(SuperMethodInvocation node) {
+		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10244
+		endVisitMethodInvocation(node, node.getQualifier(), node.arguments(), null);
+	}
+	
+	public void endVisit(SwitchCase node) {
+		endVisitNode(node);
+	}
+	
+	public void endVisit(SwitchStatement node) {
 		if (skipNode(node))
 			return;
 		endVisit(node, createSwitchData(node));
 	}
-
-	public void endVisit(SynchronizedStatement node, BlockScope scope) {
+	
+	public void endVisit(SynchronizedStatement node) {
 		if (skipNode(node))
 			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.expression);
-		process(info, node.block);
+		GenericSequentialFlowInfo info= processSequential(node, node.getExpression());
+		process(info, node.getBody());
 	}
-
-	public void endVisit(ThisReference node, BlockScope scope) {
-		// Leaf node.
+	
+	public void endVisit(ThisExpression node) {
+		if (skipNode(node))
+			return;
+		assignFlowInfo(node, node.getQualifier());
 	}
-
-	public void endVisit(ThrowStatement node, BlockScope scope) {
+	
+	public void endVisit(ThrowStatement node) {
 		if (skipNode(node))
 			return;
 		ThrowFlowInfo info= createThrow();
 		setFlowInfo(node, info);
-		info.merge(getFlowInfo(node.exception), fFlowContext);
-		info.mergeException(node.exceptionType, fFlowContext);
+		Expression expression= node.getExpression();
+		info.merge(getFlowInfo(expression), fFlowContext);
+		info.mergeException(expression.resolveTypeBinding(), fFlowContext);
 	}
-
-	public void endVisit(TrueLiteral node, BlockScope scope) {
-		// Leaf node.
-	}
-
-	public void endVisit(TryStatement node, BlockScope scope) {
+	
+	public void endVisit(TryStatement node) {
 		if (skipNode(node))
 			return;
 		TryFlowInfo info= createTry();
 		setFlowInfo(node, info);
-		info.mergeTry(getFlowInfo(node.tryBlock), fFlowContext);
-		Block[] blocks= node.catchBlocks;
-		if (blocks != null) {
-			info.removeExceptions(node.catchArguments);
-			for (int i= 0; i < blocks.length; i++) {
-				info.mergeCatch(getFlowInfo(blocks[i]), fFlowContext);
-			}
+		info.mergeTry(getFlowInfo(node.getBody()), fFlowContext);
+		info.removeExceptions(node);
+		for (Iterator iter= node.catchClauses().iterator(); iter.hasNext();) {
+			CatchClause element= (CatchClause)iter.next();
+			info.mergeCatch(getFlowInfo(element), fFlowContext);
 		}
-		info.mergeFinally(getFlowInfo(node.finallyBlock), fFlowContext);
+		info.mergeFinally(getFlowInfo(node.getFinally()), fFlowContext);
 	}
-
-	public void endVisit(TypeDeclaration node, CompilationUnitScope scope) {
-		process(node);
-	}
-
-	public void endVisit(UnaryExpression node, BlockScope scope) {
+	
+	public void endVisit(TypeDeclaration node) {
 		if (skipNode(node))
 			return;
-		assignFlowInfo(node, node.expression);
+		GenericSequentialFlowInfo info= processSequential(node, node.getSuperclass());
+		process(info, node.superInterfaces());
+		process(info, node.bodyDeclarations());
+		info.setNoReturn();
 	}
-
-	public void endVisit(WhileStatement node, BlockScope scope) {
+	
+	public void endVisit(TypeDeclarationStatement node) {
+		if (skipNode(node))
+			return;
+		assignFlowInfo(node, node.getTypeDeclaration());
+	}
+	
+	public void endVisit(TypeLiteral node) {
+		if (skipNode(node))
+			return;
+		assignFlowInfo(node, node.getType());
+	}
+	
+	public void endVisit(VariableDeclarationExpression node) {
+		if (skipNode(node))
+			return;
+		GenericSequentialFlowInfo info= processSequential(node, node.getType());
+		process(info, node.fragments());
+	}
+	
+	public void endVisit(VariableDeclarationStatement node) {
+		if (skipNode(node))
+			return;
+		GenericSequentialFlowInfo info= processSequential(node, node.getType());
+		process(info, node.fragments());
+	}
+	
+	public void endVisit(VariableDeclarationFragment node) {
+		if (skipNode(node))
+			return;
+			
+		IVariableBinding binding= node.resolveBinding();
+		LocalFlowInfo nameInfo= null;
+		Expression initializer= node.getInitializer();
+		if (binding != null && !binding.isField() && initializer != null) {
+			nameInfo= new LocalFlowInfo(binding, FlowInfo.WRITE, fFlowContext);
+		}
+		GenericSequentialFlowInfo info= processSequential(node, initializer);
+		info.merge(nameInfo, fFlowContext);
+	}
+	
+	public void endVisit(WhileStatement node) {
 		if (skipNode(node))
 			return;
 		WhileFlowInfo info= createWhile();
 		setFlowInfo(node, info);
-		info.mergeCondition(getFlowInfo(node.condition), fFlowContext);
-		info.mergeAction(getFlowInfo(node.action), fFlowContext);
-		info.removeLabel(null);
-	}
+		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
+		info.mergeAction(getFlowInfo(node.getBody()), fFlowContext);
+		info.removeLabel(null);	}
 	
-	//---- special visit methods -------------------------------------------------------
-	
-	private boolean visitAssignment(Assignment node, BlockScope scope, int accessMode) {
-		LocalVariableBinding binding= getWrite(node.lhs);
-		if (binding != null) {
-			if (traverseNode(node.lhs)) {
-				setFlowInfo(node.lhs, new LocalFlowInfo(
-					binding,
-					accessMode,
-					fFlowContext));
-			}
-			node.expression.traverse(this, scope);
-			return false;
-		}
-		return true;
-	}		
-	
-	private static LocalVariableBinding getWrite(Reference reference) {
-		if (reference == null)
-			return null;
-		if (!(reference instanceof SingleNameReference))
-			return null;
-		SingleNameReference snr= (SingleNameReference)reference;
-		if (!(snr.binding instanceof LocalVariableBinding))
-			return null;
-		return (LocalVariableBinding)snr.binding;
-	}
-
-	public boolean visit(Assignment node, BlockScope scope) {
+	private void endVisitMethodInvocation(ASTNode node, ASTNode receiver, List arguments, IMethodBinding binding) {
 		if (skipNode(node))
-			return false;
-		return visitAssignment(node, scope, FlowInfo.WRITE);
-	}
-	
-	public boolean visit(CompoundAssignment node, BlockScope scope) {
-		int mode= FlowInfo.READ;
-		if (fFlowContext.computeReturnValues())
-			mode= FlowInfo.WRITE;
-		return visitAssignment(node, scope, mode);
-	}
-	
-	public boolean visit(PostfixExpression node, BlockScope scope) {
-		return visit((CompoundAssignment)node, scope);
-	}
-	
-	public boolean visit(PrefixExpression node, BlockScope scope) {
-		return visit((CompoundAssignment)node, scope);
-	}
-	
-	//---- Generic Visit method to determine if we have to traverse the node ----------------
-	
-	public boolean visit(AllocationExpression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(AND_AND_Expression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(AnonymousLocalTypeDeclaration node, BlockScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
-	}
-
-	public boolean visit(Argument node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ArrayAllocationExpression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ArrayInitializer node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ArrayQualifiedTypeReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ArrayQualifiedTypeReference node, ClassScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ArrayReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ArrayTypeReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ArrayTypeReference node, ClassScope scope) {
-		return traverseNode(node);
-	}
-	
-	public boolean visit(AssertStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(BinaryExpression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(Block node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(Break node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(Case node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(CastExpression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(CharLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ClassLiteralAccess node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(Clinit node, ClassScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
-	}
-
-	public boolean visit(CompilationUnitDeclaration node, CompilationUnitScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ConditionalExpression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ConstructorDeclaration node, ClassScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
-	}
-
-	public boolean visit(Continue node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(DefaultCase node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(DoStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(DoubleLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(EmptyStatement node, BlockScope scope) {
-		// Empty statements aren't of any interest.
-		return false;
-	}
-	
-	public boolean visit(EqualExpression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ExplicitConstructorCall node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ExtendedStringLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(FalseLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(FieldDeclaration node, MethodScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(FieldReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(FloatLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ForStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(IfStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ImportReference node, CompilationUnitScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(Initializer node, MethodScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(InstanceOfExpression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(IntLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(LabeledStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(LocalDeclaration node, BlockScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
-	}
-
-	public boolean visit(LocalTypeDeclaration node, BlockScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
-	}
-
-	public boolean visit(LongLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(MemberTypeDeclaration node, ClassScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
-	}
-
-	public boolean visit(MessageSend node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(MethodDeclaration node, ClassScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
-	}
-
-	public boolean visit(NullLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(OR_OR_Expression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(QualifiedAllocationExpression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(QualifiedNameReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(QualifiedSuperReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(QualifiedThisReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(QualifiedTypeReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(QualifiedTypeReference node, ClassScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ReturnStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(SingleNameReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(SingleTypeReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(SingleTypeReference node, ClassScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(StringLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(SuperReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(SwitchStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(SynchronizedStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ThisReference node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(ThrowStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(TrueLiteral node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(TryStatement node, BlockScope scope) {
-		if (traverseNode(node)) {
-			fFlowContext.pushExcptions(node.catchArguments);
-			node.tryBlock.traverse(this, scope);
-			fFlowContext.popExceptions();
-			if (node.catchArguments != null) {
-				for (int i= 0; i < node.catchArguments.length; i++) {
-					node.catchArguments[i].traverse(this, scope);
-					node.catchBlocks[i].traverse(this, scope);
-				}
-			}
-			if (node.finallyBlock != null) {
-				node.finallyBlock.traverse(this, scope);
-			}
+			return;
+		MessageSendFlowInfo info= createMessageSendFlowInfo();
+		setFlowInfo(node, info);
+		for (Iterator iter= arguments.iterator(); iter.hasNext();) {
+			Expression arg= (Expression) iter.next();
+			info.mergeArgument(getFlowInfo(arg), fFlowContext);
 		}
-		return false;
+		info.mergeReceiver(getFlowInfo(receiver), fFlowContext);
+		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10244
+		// info.mergeExceptions(binding, fFlowContext);
 	}
-
-	public boolean visit(TypeDeclaration node, CompilationUnitScope scope) {
-		return traverseRange(node.declarationSourceStart, node.declarationSourceEnd);
-	}
-
-	public boolean visit(UnaryExpression node, BlockScope scope) {
-		return traverseNode(node);
-	}
-
-	public boolean visit(WhileStatement node, BlockScope scope) {
-		return traverseNode(node);
-	}
+	
+	private void endVisitPrePostfixExpression(Expression node, Expression operand) {
+		if (skipNode(node))
+			return;
+		FlowInfo info= getFlowInfo(operand);
+		if (info instanceof LocalFlowInfo) {
+			// Normally we should do this in the parent node since the write access take place later.
+			// But I couldn't come up with a case where this influences the flow analysis. So I kept
+			// it here to simplify the code.
+			GenericSequentialFlowInfo result= createSequential(node);
+			result.merge(info, fFlowContext);
+			result.merge(
+				new LocalFlowInfo(getVariableBinding(operand), FlowInfo.WRITE, fFlowContext), 
+				fFlowContext);
+		} else {
+			setFlowInfo(node, info);
+		}
+	}		
 }

@@ -15,7 +15,7 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.code.CommentAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.code.OldCommentAnalyzer;
 
 /**
  * Analyzer to check if a selection covers a valid set of nodes of an abstract syntax
@@ -78,7 +78,7 @@ public class NewStatementAnalyzer extends NewSelectionAnalyzer{
 		AstNode[] parents= getParents();
 		if (parents != null && parents.length > 0) {
 			AstNode parent= parents[parents.length - 1];
-			fStatus.merge(CommentAnalyzer.perform(fSelection, fBuffer.getCharacters(), 
+			fStatus.merge(OldCommentAnalyzer.perform(fSelection, fBuffer.getCharacters(), 
 				ASTUtil.getSourceStart(parent), ASTUtil.getSourceEnd(parent)));
 		}
 		if (!fStatus.hasFatalError() && hasSelectedNodes())

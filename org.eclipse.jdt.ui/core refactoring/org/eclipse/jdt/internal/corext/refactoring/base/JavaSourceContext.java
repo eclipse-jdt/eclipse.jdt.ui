@@ -13,12 +13,12 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
-import org.eclipse.jdt.internal.corext.util.Binding2JavaModel;
 
 /**
  * A java element context can be used to annotate a </code>RefactoringStatusEntry<code> with
@@ -145,13 +145,13 @@ public abstract class JavaSourceContext extends Context {
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */
-	public static Context create(MethodBinding method, IJavaProject scope) {
-		ReferenceBinding declaringClass= method.declaringClass;
+	public static Context create(IMethodBinding method, IJavaProject scope) {
+		ITypeBinding declaringClass= method.getDeclaringClass();
 		IMethod mr= null;
 		try {
 			IType resource= Binding2JavaModel.find(declaringClass, scope);
 			if (resource != null)
-				mr= Binding2JavaModel.find(method, resource);
+				mr= org.eclipse.jdt.internal.corext.dom.Binding2JavaModel.find(method, resource);
 		} catch (JavaModelException e) {
 		}
 		return create(mr);

@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ChangeVisibilityEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
-import org.eclipse.jdt.internal.corext.dom.ASTUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
@@ -153,7 +153,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	private boolean processCompilerError(RefactoringStatus result, ASTNode node) {
-		Message[] messages= ASTUtil.getMessages(node, ASTUtil.INCLUDE_ALL_PARENTS);
+		Message[] messages= ASTNodes.getMessages(node, ASTNodes.INCLUDE_ALL_PARENTS);
 		if (messages.length == 0)
 			return false;
 		result.addFatalError(RefactoringCoreMessages.getFormattedString(
@@ -216,7 +216,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			sub.beginTask("", affectedCUs.length);
 			BindingIdentifier fieldIdentifier= new BindingIdentifier(fFieldDeclaration.resolveBinding());
 			BindingIdentifier declaringClass= new BindingIdentifier(
-				((TypeDeclaration)ASTUtil.getParent(fFieldDeclaration, TypeDeclaration.class)).resolveBinding());
+				((TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class)).resolveBinding());
 			for (int i= 0; i < affectedCUs.length; i++) {
 				ICompilationUnit unit= affectedCUs[i];
 				sub.subTask(unit.getElementName());
@@ -282,13 +282,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				element.getElementName()), JavaSourceContext.create(element, null));
 		}
 		return true;
-	}
+	} 
 	
 	private void computeUsedNames() {
 		fUsedReadNames= new ArrayList(0);
 		fUsedModifyNames= new ArrayList(0);
 		IVariableBinding binding= fFieldDeclaration.resolveBinding();
 		ITypeBinding type= binding.getType();
+		ITypeBinding booleanType= fFieldDeclaration.getAST().resolveWellKnownType("boolean");
 		IMethodBinding[] methods= binding.getDeclaringClass().getDeclaredMethods();
 		for (int i= 0; i < methods.length; i++) {
 			IMethodBinding method= methods[i];

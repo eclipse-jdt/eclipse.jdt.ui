@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import org.eclipse.jdt.internal.corext.dom.ASTUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -55,7 +55,7 @@ class MethodInvocationFinder {
 		private static boolean areReportedForSameNode(MethodInvocation node, SearchResult searchResult){
 			if (node.getStartPosition() > searchResult.getStart())
 				return false;
-			if (ASTUtil.getEndPosition(node) < searchResult.getEnd())	
+			if (ASTNodes.getEndPosition(node) < searchResult.getEnd())	
 				return false;
 			if (node.getName().getStartPosition() != searchResult.getStart())
 				return false;
@@ -77,7 +77,7 @@ class MethodInvocationFinder {
 				return true;
 			
 			int start= node.getStartPosition();
-			int end= ASTUtil.getEndPosition(node.getName());
+			int end= ASTNodes.getEndPosition(node.getName());
 			int length= end - start;
 			fFoundRanges.add(new SourceRange(start, length));
 			return true;

@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.*;
 
 public class GenericVisitor extends ASTVisitor {
@@ -17,6 +19,9 @@ public class GenericVisitor extends ASTVisitor {
 	protected void endVisitNode(ASTNode node) {
 	}
 
+	public boolean visit(AnonymousClassDeclaration node) {
+		return visitNode(node);
+	}
 	public boolean visit(ArrayAccess node) {
 		return visitNode(node);
 	}
@@ -54,6 +59,14 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	public boolean visit(ClassInstanceCreation node) {
+		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10933
+		AnonymousClassDeclaration dec= node.getAnonymousClassDeclaration();
+		if (dec != null) {
+			int end= node.getStartPosition() + node.getLength();
+			List arg= node.arguments();
+			int start= arg.size() == 0 ? node.getName().getStartPosition() + node.getName().getLength() + 3 : ((ASTNode)arg.get(arg.size() - 1)).getStartPosition() + 2;
+			dec.setSourceRange(start, end - start);
+		}
 		return visitNode(node);
 	}
 	public boolean visit(CompilationUnit node) {
@@ -192,12 +205,21 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	public boolean visit(VariableDeclarationFragment node) {
+		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10935
+		Expression initializer= node.getInitializer();
+		if (initializer != null) {
+			int end= initializer.getStartPosition() + initializer.getLength();
+			node.setSourceRange(node.getStartPosition(), end - node.getStartPosition());
+		}
 		return visitNode(node);
 	}
 	public boolean visit(WhileStatement node) {
 		return visitNode(node);
 	}
 
+	public void endVisit(AnonymousClassDeclaration node) {
+		endVisitNode(node);
+	}
 	public void endVisit(ArrayAccess node) {
 		endVisitNode(node);
 	}

@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.internal.corext.dom.ASTUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
@@ -42,7 +42,7 @@ public class TypeReferenceFinder2 {
 		private static boolean areReportedForSameNode(SimpleType node, SearchResult searchResult){
 			if (node.getStartPosition() != searchResult.getStart())
 				return false;
-			if (ASTUtil.getEndPosition(node) < searchResult.getEnd())	
+			if (ASTNodes.getEndPosition(node) < searchResult.getEnd())	
 				return false;
 		
 			return true;			
@@ -51,7 +51,7 @@ public class TypeReferenceFinder2 {
 		private static boolean areReportedForSameNode(ArrayType node, SearchResult searchResult){
 			if (node.getStartPosition() != searchResult.getStart())
 				return false;
-			if (ASTUtil.getEndPosition(node) < searchResult.getEnd())	
+			if (ASTNodes.getEndPosition(node) < searchResult.getEnd())	
 				return false;
 		
 			return true;			
@@ -86,7 +86,7 @@ public class TypeReferenceFinder2 {
 			if (! isReported(node))
 				return true;
 			
-			int end= ASTUtil.getEndPosition(node.getElementType());
+			int end= ASTNodes.getEndPosition(node.getElementType());
 			int length= end - node.getStartPosition();
 			fFoundRanges.add(new SourceRange(node.getStartPosition(), length));
 			return false;

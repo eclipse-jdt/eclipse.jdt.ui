@@ -5,17 +5,27 @@
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
 import java.util.HashSet;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+
+import org.eclipse.jdt.core.dom.IVariableBinding;
 
 class LocalFlowInfo extends FlowInfo {
 
-	public LocalFlowInfo(LocalVariableBinding binding, int localAccessMode, FlowContext context) {
+	private int fVariableId;
+
+	public LocalFlowInfo(IVariableBinding binding, int localAccessMode, FlowContext context) {
 		super(NO_RETURN);
+		fVariableId= binding.getVariableId();
 		if (context.considerAccessMode()) {
 			fAccessModes= new int[context.getArrayLength()];
-			fAccessModes[binding.id - context.getStartingIndex()]= localAccessMode;
+			fAccessModes[fVariableId - context.getStartingIndex()]= localAccessMode;
 			context.manageLocal(binding);
 		}
-	}	
+	}
+	
+	public void setWriteAccess(FlowContext context) {
+		if (context.considerAccessMode()) {
+			fAccessModes[fVariableId - context.getStartingIndex()]= FlowInfo.WRITE;
+		}
+	}
 }
 

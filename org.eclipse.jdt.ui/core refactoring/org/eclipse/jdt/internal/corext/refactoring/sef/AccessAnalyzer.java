@@ -18,10 +18,10 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration; 
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -121,7 +121,8 @@ class AccessAnalyzer extends ASTVisitor {
 			return result;
 			
 		if (binding instanceof IVariableBinding) {
-			TypeDeclaration type= (TypeDeclaration)ASTUtil.getParent(node, TypeDeclaration.class);
+			IVariableBinding fieldBinding= (IVariableBinding)binding;
+			TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(node, TypeDeclaration.class);
 			if (type != null) {
 				ITypeBinding declaringType= type.resolveBinding();
 				return !fDeclaringClassIdentifier.matches(declaringType);

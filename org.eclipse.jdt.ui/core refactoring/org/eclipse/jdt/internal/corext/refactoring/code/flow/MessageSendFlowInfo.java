@@ -4,9 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
-import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 class MessageSendFlowInfo extends FlowInfo {
 
@@ -26,14 +25,14 @@ class MessageSendFlowInfo extends FlowInfo {
 		mergeSequential(info, context);
 	}
 	
-	public void mergeExceptions(MethodBinding binding, FlowContext context) {
+	public void mergeExceptions(IMethodBinding binding, FlowContext context) {
 		if (binding == null)
 			return;
-		TypeBinding[] exceptions= binding.thrownExceptions;
+		ITypeBinding[] exceptions= binding.getExceptionTypes();
 		if (exceptions == null)
 			return;
 		for (int i= 0; i < exceptions.length; i++) {
-			TypeBinding exception= exceptions[i];
+			ITypeBinding exception= exceptions[i];
 			if (context.isExceptionCaught(exception))
 				addException(exception);
 		}

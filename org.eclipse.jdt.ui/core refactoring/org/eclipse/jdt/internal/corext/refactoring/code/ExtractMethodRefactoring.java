@@ -9,37 +9,38 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 
-import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.env.IConstants;
-import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
+import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.util.ASTParentTrackingAdapter;
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
-import org.eclipse.jdt.internal.corext.util.Bindings;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
@@ -61,10 +62,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private boolean fCallOnDeclarationLine= true;
 	
 	private ExtractMethodAnalyzer fAnalyzer;
-	private ExtendedBuffer fBuffer;
+	private CompilationUnitBuffer fBuffer;
 	private String fVisibility;
 	private String fMethodName;
-	private int fMethodFlags= IConstants.AccProtected;
+	private boolean fCallNeedsSemicolon;
+	private int fMethodFlags= Modifier.PROTECTED;
 
 	private static final String EMPTY= "";
 	private static final String BLANK= " ";
@@ -157,22 +159,21 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (fSelectionStart < 0 || fSelectionLength == 0)
 				return mergeTextSelectionStatus(result);
 			
-			if (!(fCUnit instanceof CompilationUnit)) {
-				result.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.Internal_error")); //$NON-NLS-1$
-				return result;
-			}
-			fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
-			((CompilationUnit)fCUnit).accept(createVisitor());
+			fBuffer= new CompilationUnitBuffer(fCUnit);
+			CompilationUnit root= AST.parseCompilationUnit(fCUnit, true);
+			root.accept(createVisitor());
 			
 			fAnalyzer.checkActivation(result);
-			if (!result.hasFatalError() && fVisibility == null) {
-				int modifiers= fAnalyzer.getEnclosingMethod().modifiers;
+			if (result.hasFatalError())
+				return result;
+			if (fVisibility == null) {
+				int modifiers= fAnalyzer.getEnclosingMethod().getModifiers();
 				String visibility= "";
-				if ((modifiers & AstNode.AccPublic) != 0)
+				if (Modifier.isPublic(modifiers))
 					visibility= "public";
-				else if ((modifiers & AstNode.AccProtected) != 0)
+				else if (Modifier.isProtected(modifiers))
 					visibility= "protected";
-				else if ((modifiers &AstNode.AccPrivate) != 0)
+				else if (Modifier.isPrivate(modifiers))
 					visibility= "private";
 				setVisibility(visibility);
 				
@@ -184,11 +185,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 	}
 	
-	private IAbstractSyntaxTreeVisitor createVisitor() {
+	private ASTVisitor createVisitor() {
 		fAnalyzer= new ExtractMethodAnalyzer(fBuffer, Selection.createFromStartLength(fSelectionStart, fSelectionLength));
-		ASTParentTrackingAdapter result= new ASTParentTrackingAdapter(fAnalyzer);
-		fAnalyzer.setParentTracker(result);
-		return result;
+		return fAnalyzer;
 	}
 	
 	/**
@@ -242,7 +241,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= null;
-		AbstractMethodDeclaration node= fAnalyzer.getEnclosingMethod();
+		MethodDeclaration node= fAnalyzer.getEnclosingMethod();
 		if (node != null) {
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 2); //$NON-NLS-1$
 			pm.subTask(EMPTY);
@@ -268,8 +267,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return null;
 		
 		fAnalyzer.aboutToCreateChange();
-		AbstractMethodDeclaration method= fAnalyzer.getEnclosingMethod();
-		String sourceMethodName= new String(method.selector);
+		MethodDeclaration method= fAnalyzer.getEnclosingMethod();
+		String sourceMethodName= method.getName().getIdentifier();
 		
 		CompilationUnitChange result= null;
 		try {
@@ -280,14 +279,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 			throw new JavaModelException(e);
 		}
 		
-		final int methodStart= method.declarationSourceStart;
-		final int methodEnd= method.declarationSourceEnd;			
-		final int insertPosition= methodEnd + 1;
+		final int methodStart= method.getStartPosition();
+		final int insertPosition= methodStart + method.getLength();
+		final int methodEnd= insertPosition - 1;
 
-		TypeBinding[] exceptions=	fAnalyzer.getExceptions();
+		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		for (int i= 0; i < exceptions.length; i++) {
-			TypeBinding exception= exceptions[i];
-			fImportEdit.addImport(Bindings.makeFullyQualifiedName(exception.qualifiedPackageName(), exception.qualifiedSourceName()));
+			ITypeBinding exception= exceptions[i];
+			fImportEdit.addImport(Bindings.asPackageQualifiedName(exception));
+		}
+		
+		if (fAnalyzer.generateImport()) {
+			fImportEdit.addImport(ASTNodes.asString(fAnalyzer.getReturnType()));
 		}
 	
 		if (!fImportEdit.isEmpty())
@@ -324,14 +327,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (fVisibility.length() > 0)
 			buffer.append(BLANK);
 			
-		if ((fAnalyzer.getEnclosingMethod().modifiers & AstNode.AccStatic) != 0) {
+		if (Modifier.isStatic(fAnalyzer.getEnclosingMethod().getModifiers())) {
 			buffer.append(STATIC);
 			buffer.append(BLANK);
 		}
 		
-		TypeReference returnType= fAnalyzer.getReturnType();
+		Type returnType= fAnalyzer.getReturnType();
 		if (returnType != null) {
-			buffer.append(returnType.toStringExpression(0));
+			if (fAnalyzer.generateImport()) {
+				buffer.append(ASTNodes.getTypeName(returnType));
+			} else {
+				buffer.append(ASTNodes.asString(returnType));
+			}
 			buffer.append(BLANK);
 		}
 
@@ -410,17 +417,20 @@ public class ExtractMethodRefactoring extends Refactoring {
 		
 		// Locals that are not passed as an arguments since the extracted method only
 		// writes to them
-		LocalVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
+		IVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
 		for (int i= 0; i < methodLocals.length; i++) {
 			if (methodLocals[i] != null)
 				appendLocalDeclaration(result, indent, methodLocals[i], delimiter);
 		}
 		
 		// We extract an expression
-		boolean extractsExpression= fAnalyzer.extractsExpression();
+		boolean extractsExpression= fAnalyzer.isExpressionSelected();
 		if (extractsExpression) {
 			result.append(indent);
-			if (fAnalyzer.getExpressionTypeBinding() != BaseTypeBinding.VoidBinding)
+			Expression expression= (Expression)fAnalyzer.getFirstSelectedNode();
+			// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10865
+			ITypeBinding binding= expression.resolveTypeBinding();
+			if (!binding.isPrimitive() || !"void".equals(binding.getName()))
 				result.append(RETURN_BLANK); //$NON-NLS-1$
 		}
 		
@@ -444,11 +454,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 			result.append(SEMICOLON);
 		result.append(delimiter);
 		
-		LocalVariableBinding returnValue= fAnalyzer.getReturnValue();
+		IVariableBinding returnValue= fAnalyzer.getReturnValue();
 		if (returnValue != null) {
 			result.append(indent);
 			result.append(RETURN_BLANK);
-			result.append(returnValue.readableName());
+			result.append(returnValue.getName());
 			result.append(SEMICOLON);
 			result.append(delimiter);
 		}
@@ -462,7 +472,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		StringBuffer result= new StringBuffer(TextUtil.createIndentString(TextUtil.getIndent(lines[0], fTabWidth)));
 		
 		
-		LocalVariableBinding[] locals= fAnalyzer.getCallerLocals();
+		IVariableBinding[] locals= fAnalyzer.getCallerLocals();
 		for (int i= 0; i < locals.length; i++) {
 			appendLocalDeclaration(result, locals[i]);
 			result.append(SEMICOLON);
@@ -473,13 +483,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 		int returnKind= fAnalyzer.getReturnKind();
 		switch (returnKind) {
 			case ExtractMethodAnalyzer.ACCESS_TO_LOCAL:
-				LocalVariableBinding binding= fAnalyzer.getReturnLocal();
+				IVariableBinding binding= fAnalyzer.getReturnLocal();
 				if (binding != null) {
 					appendLocalDeclaration(result, binding);
 					result.append(fAssignment);
 				} else {
 					binding= fAnalyzer.getReturnValue();
-					result.append(binding.readableName());
+					result.append(binding.getName());
 					result.append(fAssignment);
 				}
 				break;
@@ -489,7 +499,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				break;
 		}
 		
-		LocalVariableBinding[] arguments= fAnalyzer.getArguments();
+		IVariableBinding[] arguments= fAnalyzer.getArguments();
 		result.append(fMethodName);
 		result.append("("); //$NON-NLS-1$
 		for (int i= 0; i < arguments.length; i++) {
@@ -497,7 +507,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				continue;
 			if (i > 0)
 				result.append(COMMA_BLANK);
-			result.append(arguments[i].readableName());
+			result.append(arguments[i].getName());
 		}		
 		result.append(")"); //$NON-NLS-1$
 						
@@ -526,35 +536,20 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	
 	private boolean callNeedsSemicolon() {
-		if (selectionIncludesSemicolon())
-			return true;
-	
-		if (fAnalyzer.isExpressionSelected()) {
-			return false;	
-		} else {
-			return !fAnalyzer.getNeedsSemicolon();				
-		}		
+		ASTNode node= fAnalyzer.getLastSelectedNode();
+		return node instanceof Statement;
 	}
 	
 	private boolean sourceNeedsSemicolon() {
-		return !callNeedsSemicolon();
+		ASTNode node= fAnalyzer.getLastSelectedNode();
+		return node instanceof Expression;
 	}	
-	
-	private boolean selectionIncludesSemicolon() {
-		int start= fAnalyzer.getEndOfLastSelectedNode() + 1;
-		int length= fSelectionLength - (start - fSelectionStart);
-		
-		if (length <= 0)
-			return false;
-		
-		return fBuffer.indexOf(Scanner.TokenNameSEMICOLON, start, start + length - 1) != -1;
-	}
 	
 	private void appendArguments(StringBuffer buffer) {
 		buffer.append('(');
-		LocalVariableBinding[] arguments= fAnalyzer.getArguments();
+		IVariableBinding[] arguments= fAnalyzer.getArguments();
 		for (int i= 0; i < arguments.length; i++) {
-			LocalVariableBinding argument= arguments[i];
+			IVariableBinding argument= arguments[i];
 			if (argument == null)
 				continue;
 				
@@ -566,27 +561,32 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	private void appendThrownExceptions(StringBuffer buffer) {
-		TypeBinding[] exceptions= fAnalyzer.getExceptions();
+		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		if (exceptions.length == 0)
 			return;
 		buffer.append(" throws "); //$NON-NLS-1$
 		for (int i= 0; i < exceptions.length; i++) {
-			TypeBinding exception= exceptions[i];
+			ITypeBinding exception= exceptions[i];
 			if (i > 0)
 				buffer.append(", "); //$NON-NLS-1$
-			buffer.append(exception.sourceName());
+			buffer.append(exception.getName());
 		}
 	}
 	
-	private void appendLocalDeclaration(StringBuffer buffer, LocalVariableBinding local) {
-		LocalDeclaration declaration= local.declaration;
-		buffer.append(declaration.modifiersString(declaration.modifiers));
-		buffer.append(declaration.type.toStringExpression(0));
+	private void appendLocalDeclaration(StringBuffer buffer, IVariableBinding local) {
+		ASTNode root= fAnalyzer.getEnclosingMethod();
+		VariableDeclaration declaration= ASTNodes.findVariableDeclaration(local, root);
+		String modifiers= ASTNodes.modifierString(ASTNodes.getModifiers(declaration));
+		if (modifiers.length() > 0) {
+			buffer.append(modifiers);
+			buffer.append(BLANK);
+		}
+		buffer.append(ASTNodes.asString(ASTNodes.getType(declaration)));
 		buffer.append(BLANK);
-		buffer.append(local.readableName());
+		buffer.append(local.getName());
 	}
 	
-	private void appendLocalDeclaration(StringBuffer buffer, String indent, LocalVariableBinding local, String delimiter) {
+	private void appendLocalDeclaration(StringBuffer buffer, String indent, IVariableBinding local, String delimiter) {
 		buffer.append(indent);
 		appendLocalDeclaration(buffer, local);
 		buffer.append(SEMICOLON);

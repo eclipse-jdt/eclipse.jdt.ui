@@ -8,8 +8,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNode2String;
-import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
@@ -23,7 +22,7 @@ final class EncapsulateWriteAccess extends MultiTextEdit {
 			add(SimpleTextEdit.createReplace(offset, length, setter + "("));
 			add(SimpleTextEdit.createInsert(bracket, ")"));
 		} else {
-			boolean needsParentheses= ASTUtil.needsParenthesis(assignment.getRightHandSide());
+			boolean needsParentheses= ASTNodes.needsParenthesis(assignment.getRightHandSide());
 			add(SimpleTextEdit.createInsert(offset, setter + "("));
 			add(SimpleTextEdit.createReplace(offset, length, getGetter(getter, assignment) + "() " + getOperator(assignment) + " " + (needsParentheses ? "(" : "")));
 			add(SimpleTextEdit.createInsert(bracket, ")" + (needsParentheses ? ")" : "")));
@@ -51,7 +50,7 @@ final class EncapsulateWriteAccess extends MultiTextEdit {
 	private static String getGetter(String getter, Assignment assignment) {
 		Expression lhs= assignment.getLeftHandSide();
 		if (lhs instanceof QualifiedName) {
-			return ASTNode2String.perform(((QualifiedName)lhs).getQualifier()) + "." + getter;
+			return ASTNodes.asString(((QualifiedName)lhs).getQualifier()) + "." + getter;
 		} else {
 			return getter;
 		}		

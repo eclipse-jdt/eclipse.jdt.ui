@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.internal.compiler.ast.Argument;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TryStatement;
+
 import org.eclipse.jdt.internal.corext.Assert;
 
 public class FlowContext {
@@ -27,10 +29,10 @@ public class FlowContext {
 	private boolean fConsiderAccessMode;
 	private boolean fLoopReentranceMode;
 	private Enum fComputeMode;
-	private LocalVariableBinding[] fLocals;
+	private IVariableBinding[] fLocals;
 	private List fExceptionStack;
 	
-	private static final Argument[] EMPTY_ARGUMENTS= new Argument[0];
+	private static final List EMPTY_CATCH_CLAUSE= new ArrayList(0);
 	
 	public FlowContext(int start, int length) {
 		fStart= start;
@@ -74,17 +76,17 @@ public class FlowContext {
 		return fComputeMode == RETURN_VALUES;
 	}
 	
-	public LocalVariableBinding getLocalFromId(int id) {
+	public IVariableBinding getLocalFromId(int id) {
 		return getLocalFromIndex(id - fStart);
 	}
 	
-	public LocalVariableBinding getLocalFromIndex(int index) {
+	public IVariableBinding getLocalFromIndex(int index) {
 		if (fLocals == null || index > fLocals.length)
 			return null;
 		return fLocals[index];
 	}
 	
-	public int getIndexFromLocal(LocalVariableBinding local) {
+	public int getIndexFromLocal(IVariableBinding local) {
 		if (fLocals == null)
 			return -1;
 		for (int i= 0; i < fLocals.length; i++) {
@@ -94,18 +96,19 @@ public class FlowContext {
 		return -1;
 	}
 	
-	void manageLocal(LocalVariableBinding local) {
+	void manageLocal(IVariableBinding local) {
 		if (fLocals == null)
-			fLocals= new LocalVariableBinding[fLength];
-		fLocals[local.id - fStart]= local;
+			fLocals= new IVariableBinding[fLength];
+		fLocals[local.getVariableId() - fStart]= local;
 	}
 	
 	//---- Exception handling --------------------------------------------------------
 	
-	void pushExcptions(Argument[] catchArguments) {
-		if (catchArguments == null)
-			catchArguments= EMPTY_ARGUMENTS;
-		fExceptionStack.add(catchArguments);
+	void pushExcptions(TryStatement node) {
+		List catchClauses= node.catchClauses();
+		if (catchClauses == null)
+			catchClauses= EMPTY_CATCH_CLAUSE;
+		fExceptionStack.add(catchClauses);
 	}
 	
 	void popExceptions() {
@@ -113,18 +116,18 @@ public class FlowContext {
 		fExceptionStack.remove(fExceptionStack.size() - 1);
 	}
 	
-	boolean isExceptionCaught(TypeBinding excpetionType) {
-		for (Iterator iter= fExceptionStack.iterator(); iter.hasNext(); ) {
-			Argument[] catchArguments= (Argument[])iter.next();
-			for (int i= 0; i < catchArguments.length; i++) {
-				Argument arg= catchArguments[i];
-				if (arg.binding == null)
+	boolean isExceptionCaught(ITypeBinding excpetionType) {
+		for (Iterator exceptions= fExceptionStack.iterator(); exceptions.hasNext(); ) {
+			for (Iterator catchClauses= ((List)exceptions.next()).iterator(); catchClauses.hasNext(); ) {
+				SingleVariableDeclaration catchedException= ((CatchClause)catchClauses.next()).getException();
+				IVariableBinding binding= catchedException.resolveBinding();
+				if (binding == null)
 					continue;
-				ReferenceBinding catchedType= (ReferenceBinding)catchArguments[i].binding.type;
+				ITypeBinding catchedType= binding.getType();
 				while (catchedType != null) {
 					if (catchedType == excpetionType)
 						return true;
-					catchedType= catchedType.superclass();
+					catchedType= catchedType.getSuperclass();
 				}
 			}
 		}

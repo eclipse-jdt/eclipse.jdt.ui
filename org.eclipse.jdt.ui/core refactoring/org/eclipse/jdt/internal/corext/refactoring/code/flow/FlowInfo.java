@@ -9,12 +9,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.internal.compiler.ast.Argument;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TryStatement;
 
 public abstract class FlowInfo {
 	
@@ -77,7 +76,7 @@ public abstract class FlowInfo {
 	};
 		
 	protected static final String UNLABELED = "@unlabeled"; //$NON-NLS-1$
-	protected static final LocalVariableBinding[] EMPTY_ARRAY= new LocalVariableBinding[0];
+	protected static final IVariableBinding[] EMPTY_ARRAY= new IVariableBinding[0];
 
 	protected int fReturnKind;
 	protected int[] fAccessModes;
@@ -163,7 +162,7 @@ public abstract class FlowInfo {
 		return fBranches;
 	}
 	
-	protected void removeLabel(char[] label) {
+	protected void removeLabel(SimpleName label) {
 		if (fBranches != null) {
 			fBranches.remove(makeString(label));
 			if (fBranches.isEmpty())
@@ -171,54 +170,59 @@ public abstract class FlowInfo {
 		}
 	}
 	
-	protected static String makeString(char[] label) {
+	protected static String makeString(SimpleName label) {
 		if (label == null)
 			return UNLABELED;
 		else
-			return new String(label);
+			return label.getIdentifier();
 	}
 	
 	//---- Exceptions -----------------------------------------------------------------------
 	
-	public TypeBinding[] getExceptions() {
+	public ITypeBinding[] getExceptions() {
 		if (fExceptions == null)
-			return new TypeBinding[0];
-		return (TypeBinding[]) fExceptions.toArray(new TypeBinding[fExceptions.size()]);
+			return new ITypeBinding[0];
+		return (ITypeBinding[]) fExceptions.toArray(new ITypeBinding[fExceptions.size()]);
 	}
 
 	protected boolean hasUncaughtException() {
 		return fExceptions != null && !fExceptions.isEmpty();
 	}
 	
-	protected void addException(TypeBinding type) {
+	protected void addException(ITypeBinding type) {
 		if (fExceptions == null)
 			fExceptions= new HashSet(2);
 		fExceptions.add(type);
 	}
 	
-	protected void removeExceptions(Argument[] catchArguments) {
+	protected void removeExceptions(TryStatement node) {
 		if (fExceptions == null)
 			return;
-		TypeBinding[] exceptions= (TypeBinding[]) fExceptions.toArray(new TypeBinding[fExceptions.size()]);
+			
+		List catchClauses= node.catchClauses();
+		if (catchClauses.isEmpty())
+			return;
+		// Make sure we have a copy since we are modifing the fExceptions list	
+		ITypeBinding[] exceptions= (ITypeBinding[]) fExceptions.toArray(new ITypeBinding[fExceptions.size()]);
 		for (int i= 0; i < exceptions.length; i++) {
-			handleException(catchArguments, exceptions[i]);
+			handleException(catchClauses, exceptions[i]);
 		}
 		if (fExceptions.isEmpty())
 			fExceptions= null;
 	}
 
-	private void handleException(Argument[] catchArguments, TypeBinding type) {
-		for (int j= 0; j < catchArguments.length; j++) {
-			Argument arg= catchArguments[j];
-			if (arg.binding == null)
+	private void handleException(List catchClauses, ITypeBinding type) {
+		for (Iterator iter= catchClauses.iterator(); iter.hasNext();) {
+			IVariableBinding binding= ((CatchClause)iter.next()).getException().resolveBinding();
+			if (binding == null)
 				continue;
-			ReferenceBinding catchedType= (ReferenceBinding)arg.binding.type;
+			ITypeBinding catchedType= binding.getType();
 			while (catchedType != null) {
 				if (catchedType == type) {
 					fExceptions.remove(type);
 					return;
 				}
-				catchedType= catchedType.superclass();
+				catchedType= catchedType.getSuperclass();
 			}
 		}
 	}
@@ -265,7 +269,7 @@ public abstract class FlowInfo {
 	//---- Local access handling --------------------------------------------------
 	
 	/**
-	 * Returns an array of <code>LocalVariableBinding</code> that conform to the given
+	 * Returns an array of <code>IVariableBinding</code> that conform to the given
 	 * access mode <code>mode</code>.
 	 * 
 	 * @param context the flow context object used to compute this flow info
@@ -273,7 +277,7 @@ public abstract class FlowInfo {
 	 *  <code>UNKNOWN</code> and any combination of them.
 	 * @return an array of local variable bindings conforming to the given type.
 	 */
-	public LocalVariableBinding[] get(FlowContext context, int mode) {
+	public IVariableBinding[] get(FlowContext context, int mode) {
 		List result= new ArrayList();
 		int[] locals= getAccessModes();
 		if (locals == null)
@@ -283,7 +287,7 @@ public abstract class FlowInfo {
 			if ((accessMode & mode) != 0)
 				result.add(context.getLocalFromIndex(i));
 		}
-		return (LocalVariableBinding[])result.toArray(new LocalVariableBinding[result.size()]);
+		return (IVariableBinding[])result.toArray(new IVariableBinding[result.size()]);
 	}
 	
 	/**
@@ -292,7 +296,7 @@ public abstract class FlowInfo {
 	 * @return <code>true</code> if the binding has the given access mode. 
 	 * 	<code>False</code> otherwise
 	 */
-	public boolean hasAccessMode(FlowContext context, LocalVariableBinding local, int mode) {
+	public boolean hasAccessMode(FlowContext context, IVariableBinding local, int mode) {
 		int index= context.getIndexFromLocal(local);
 		if (index == -1)
 			return false;
@@ -303,10 +307,10 @@ public abstract class FlowInfo {
 		return fAccessModes;
 	}
 	
-	protected void clearAccessMode(LocalVariableBinding binding, FlowContext context) {
+	protected void clearAccessMode(IVariableBinding binding, FlowContext context) {
 		if (fAccessModes == null)	// all are unused
 			return;
-		fAccessModes[binding.id - context.getStartingIndex()]= UNUSED;
+		fAccessModes[binding.getVariableId() - context.getStartingIndex()]= UNUSED;
 	}
 	
 	protected void mergeAccessModeSequential(FlowInfo otherInfo, FlowContext context) {

@@ -6,60 +6,55 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.List;
 
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
-import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 
-/* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
+import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer2;
 
-	private AbstractMethodDeclaration fEnclosingMethod;
+/* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer2 {
+
+	private MethodDeclaration fEnclosingMethod;
 	
-	private ExceptionAnalyzer(AbstractMethodDeclaration enclosingMethod) {
+	private ExceptionAnalyzer(MethodDeclaration enclosingMethod) {
 		fEnclosingMethod= enclosingMethod;
 	}
 	
-	public static TypeBinding[] perform(AbstractMethodDeclaration enclosingMethod, AstNode[] statements, BlockScope scope) {
+	public static ITypeBinding[] perform(MethodDeclaration enclosingMethod, ASTNode[] statements) {
 		ExceptionAnalyzer analyzer= new ExceptionAnalyzer(enclosingMethod);
 		for (int i= 0; i < statements.length; i++) {
-			AstNode node= statements[i];
-			if (scope instanceof MethodScope)
-				node.traverse(analyzer, (MethodScope)scope);
-			else
-				node.traverse(analyzer, scope);
+			statements[i].accept(analyzer);
 		}
 		List exceptions= analyzer.getCurrentExceptions();
-		return (TypeBinding[]) exceptions.toArray(new TypeBinding[exceptions.size()]);
+		return (ITypeBinding[]) exceptions.toArray(new ITypeBinding[exceptions.size()]);
 	}
 
-	public boolean visit(ThrowStatement node, BlockScope scope) {
-		TypeBinding exception= node.exceptionType;
+	public boolean visit(ThrowStatement node) {
+		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (exception == null)		// Safety net for null bindings when compiling fails.
 			return false;
 		
-		if (isRuntimeException(exception, scope) && !methodThrowsException(exception))
+		if (isRuntimeException(exception, node.getAST()) && !methodThrowsException(exception))
 			return false;
 			
 		addException(exception);
 		return true;
 	}
 	
-	public boolean visit(MessageSend statement, BlockScope scope) {
-		return handleExceptions(statement.binding);
+	public boolean visit(MethodInvocation node) {
+		return handleExceptions((IMethodBinding)node.getName().resolveBinding());
 	}
 	
-	public boolean visit(AllocationExpression node, BlockScope scope) {
-		return handleExceptions(node.binding);
+	public boolean visit(ClassInstanceCreation node) {
+		return handleExceptions(node.resolveConstructorBinding());
 	}
 	
-	private boolean methodThrowsException(TypeBinding exception) {
-		ReferenceBinding[] methodExceptions = fEnclosingMethod.binding.thrownExceptions;
+	private boolean methodThrowsException(ITypeBinding exception) {
+		ITypeBinding[] methodExceptions = fEnclosingMethod.resolveBinding().getExceptionTypes();
 		for (int i= 0; i < methodExceptions.length; i++) {
 			if (exception == methodExceptions[i])
 				return true;

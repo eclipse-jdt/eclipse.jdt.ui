@@ -6,8 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
 import java.util.HashSet;
 
-import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 class ThrowFlowInfo extends FlowInfo {
 	
@@ -22,7 +21,7 @@ class ThrowFlowInfo extends FlowInfo {
 		assignAccessMode(info);
 	}
 	
-	public void mergeException(TypeBinding exception, FlowContext context) {
+	public void mergeException(ITypeBinding exception, FlowContext context) {
 		if (exception != null && context.isExceptionCaught(exception))
 			addException(exception);
 	}

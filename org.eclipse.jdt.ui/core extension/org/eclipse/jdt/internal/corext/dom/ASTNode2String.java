@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.dom.*;
 
-public class ASTNode2String extends ASTVisitor {
+/* package */ class ASTNode2String extends ASTVisitor {
 
 	private StringBuffer fResult;
 
