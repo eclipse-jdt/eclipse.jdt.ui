@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -36,9 +37,26 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		return REFACTORING_PATH;
 	}
 
+	private CodeGenerationSettings getSettings(){
+		CodeGenerationSettings settings= new CodeGenerationSettings();
+		settings.createComments= true;
+		settings.createNonJavadocComments= true;
+		settings.importOrder= new String[]{"java", "javax", "com"};
+		settings.importThreshold= 99;
+		return settings;
+	}
+	
+	private String[] getPrefixes(){
+		return new String[]{"f", "fg", "_", "m_"};
+	}
+	
+	private String[] getSuffixes(){
+		return new String[0];
+	}
+	
 	private void helper1_0(String fieldName, String newFieldName) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName), getSettings(), getPrefixes(), getSuffixes());
 		ref.setNewName(newFieldName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
@@ -49,19 +67,23 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 	
 	private void helper2(String fieldName, String newFieldName) throws Exception{
-		helper2(fieldName, newFieldName, true, false, false, false);
+		helper2(fieldName, newFieldName, true, false, false, false, false, false);
 	}
 	
 	private void helper2(String fieldName, String newFieldName, boolean updateReferences,  boolean updateJavaDoc, 
-											boolean updateComments, boolean updateStrings) throws Exception{
+											boolean updateComments, boolean updateStrings,
+											boolean renameGetter, boolean renameSetter) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName), getSettings(), getPrefixes(), getSuffixes());
 		ref.setUpdateReferences(updateReferences);
 		ref.setUpdateJavaDoc(updateJavaDoc);
 		ref.setUpdateComments(updateComments);
 		ref.setUpdateStrings(updateStrings);
+		ref.setRenameGetter(renameGetter);
+		ref.setRenameSetter(renameSetter);
 		ref.setNewName(newFieldName);
+		
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("was supposed to pass", null, result);
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
@@ -84,7 +106,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 	
 	private void helper2(boolean updateReferences) throws Exception{
-		helper2("f", "g", updateReferences, false, false, false);
+		helper2("f", "g", updateReferences, false, false, false, false, false);
 	}
 
 	//--------- tests ----------	
@@ -130,7 +152,11 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}	
 	
 	public void test3() throws Exception{
-		helper2("f", "gg", true, true, true, true);
+		helper2("f", "gg", true, true, true, true, false, false);
+	}	
+
+	public void test4() throws Exception{
+		helper2("fMe", "fYou", true, false, false, false, true, true);
 	}	
 	
 }
