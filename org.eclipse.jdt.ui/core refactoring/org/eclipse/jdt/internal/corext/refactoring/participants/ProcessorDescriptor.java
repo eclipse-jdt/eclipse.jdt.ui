@@ -13,9 +13,13 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.*;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
+
 public class ProcessorDescriptor {
 	
 	private IConfigurationElement fConfigurationElement;
+	private static final ExpressionParser PARSER= new ExpressionParser(new IElementHandler[] { StandardElementHandler.getInstance() }); 
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String OVERRIDE= "override"; //$NON-NLS-1$
@@ -42,8 +46,8 @@ public class ProcessorDescriptor {
 	public boolean matches(Object element) throws CoreException {
 		IConfigurationElement objectState= fConfigurationElement.getChildren(OBJECT_STATE)[0];
 		if (objectState != null) {
-			Expression exp= new ObjectStateExpression(objectState);
-			return exp.evaluate(element);
+			Expression exp= PARSER.parse(objectState);
+			return convert(exp.evaluate(element));
 		}
 		return true;
 	}
@@ -51,4 +55,10 @@ public class ProcessorDescriptor {
 	public IRefactoringProcessor createProcessor() throws CoreException {
 		return (IRefactoringProcessor)fConfigurationElement.createExecutableExtension(CLASS);
 	}
+	
+	private boolean convert(int eval) {
+		if (eval == ITestResult.FALSE)
+			return false;
+		return true;
+	}	
 }

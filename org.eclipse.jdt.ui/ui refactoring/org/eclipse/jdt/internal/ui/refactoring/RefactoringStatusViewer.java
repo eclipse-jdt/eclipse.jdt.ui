@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -54,11 +52,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
-
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 class RefactoringStatusViewer extends SashForm {
 
@@ -139,7 +134,7 @@ class RefactoringStatusViewer extends SashForm {
 	private PageBook fContextViewerContainer;
 	private ViewerPane fContextViewerPane;
 	private Image fPaneImage;
-	private Map fStatusContextViewers;
+	private StatusContextViewerDescriptor fCurrentDescriptor;
 	private IStatusContextViewer fCurrentContextViewer;
 	private NullContextViewer fNullContextViewer;
 	
@@ -148,7 +143,6 @@ class RefactoringStatusViewer extends SashForm {
 	
 	public RefactoringStatusViewer(Composite parent, int style) {
 		super(parent, style | SWT.VERTICAL);
-		fStatusContextViewers= new HashMap();
 		createContents();
 	}
 
@@ -210,7 +204,9 @@ class RefactoringStatusViewer extends SashForm {
 		fNullContextViewer.createControl(fContextViewerContainer);
 		fContextViewerContainer.showPage(fNullContextViewer.getControl());
 		fCurrentContextViewer= fNullContextViewer;
-		fContextViewerPane.setContent(fContextViewerContainer);	
+		fContextViewerPane.setContent(fContextViewerContainer);
+		fCurrentContextViewer= fNullContextViewer;
+		fCurrentDescriptor= null;	
 		
 		setWeights(new int[]{35, 65});
 		
@@ -292,30 +288,36 @@ class RefactoringStatusViewer extends SashForm {
 	private void showContextViewer(RefactoringStatusEntry entry) {
 		Context context= entry.getContext();
 		if (context == null) {
-			fCurrentContextViewer= fNullContextViewer;
+			showNullContextViewer();
 		} else {
 			try {
 				StatusContextViewerDescriptor descriptor= StatusContextViewerDescriptor.get(context);
-				if (descriptor == null) {
-					fCurrentContextViewer= fNullContextViewer;
-				} else {
-					IStatusContextViewer viewer= (IStatusContextViewer)fStatusContextViewers.get(descriptor);
-					if (viewer == null) {
-						viewer= descriptor.createViewer();
-						viewer.createControl(fContextViewerContainer);
-						fStatusContextViewers.put(descriptor, viewer);
+				if (fCurrentDescriptor != descriptor) {
+					IStatusContextViewer newViewer;
+					if (descriptor != null) {
+						newViewer= descriptor.createViewer();
+						newViewer.createControl(fContextViewerContainer);
+					} else {
+						newViewer= fNullContextViewer;
 					}
-					fCurrentContextViewer= viewer;
+					fCurrentDescriptor= descriptor;
+					newViewer.setInput(context);
+					if (fCurrentContextViewer != null && fCurrentContextViewer != fNullContextViewer)
+						fCurrentContextViewer.getControl().dispose();
+					fCurrentContextViewer= newViewer;				
+					fContextViewerContainer.showPage(fCurrentContextViewer.getControl());
+				} else {
+					fCurrentContextViewer.setInput(context);
 				}
 			} catch (CoreException e) {
+				showNullContextViewer();
 			}
 		}
-		try {
-			fCurrentContextViewer.setInput(context);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-			fCurrentContextViewer= fNullContextViewer;
-		}
+	}
+	
+	private void showNullContextViewer() {
+		fCurrentContextViewer= fNullContextViewer;
+		fCurrentDescriptor= null;
 		fContextViewerContainer.showPage(fCurrentContextViewer.getControl());
 	}
 	
@@ -327,10 +329,6 @@ class RefactoringStatusViewer extends SashForm {
 		return (RefactoringStatusEntry)fStatus.getEntries().get(0);
 	}
 		
-	private static JavaTextTools getJavaTextTools() {
-		return JavaPlugin.getDefault().getJavaTextTools();	
-	}
-	
 	private void revealElement(boolean next) {
 		List entries= fStatus.getEntries();
 		if (entries.isEmpty()) {

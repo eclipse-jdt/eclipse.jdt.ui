@@ -13,15 +13,15 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.core.runtime.CoreException;
 
 /**
- * A special viewer to present a context for a <code>RefactoringStatusEntry</code>.
+ * Presents a preview of a <code>ChangeElement</code>
  */
-public interface  IStatusContextViewer {
-	
+public interface IChangePreviewViewer {
+
 	/**
-	 * Creates the status viewer's widget hierarchy. This method 
+	 * Creates the preview viewer's widget hierarchy. This method 
 	 * should only be called once. Method <code>getControl()</code>
 	 * should be use retrieve the widget hierarchy.
 	 * 
@@ -32,17 +32,22 @@ public interface  IStatusContextViewer {
 	public void createControl(Composite parent);
 	
 	/**
-	 * Returns the status context viewer's SWT control.
+	 * Returns the preview viewer's SWT control.
 	 * 
-	 * @return the status context viewer's SWT control
+	 * @return the preview viewer's SWT control
 	 */
 	public Control getControl();	
 	
 	/**
-	 * Sets the status context viewer's input element.
+	 * Sets the preview viewer's input element.
 	 * 
 	 * @param input the input element
 	 */
-	public void setInput(Context input);
+	public void setInput(Object input) throws CoreException;
+	
+	/**
+	 * Refreshes the preview viewer.
+	 */
+	public void refresh();	
 }
 

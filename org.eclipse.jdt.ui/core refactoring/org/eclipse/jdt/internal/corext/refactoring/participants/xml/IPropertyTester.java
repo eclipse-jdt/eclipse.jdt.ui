@@ -8,18 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.participants;
+package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
 
-public class AndExpression extends CompositeExpression { 
-
-	public static final Object NAME= "and"; //$NON-NLS-1$
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
-	 */
-	public boolean evaluate(Object element) throws CoreException {
-		return evaluateAnd(element);
-	}	
+public interface IPropertyTester extends ITestResult {
+	
+	public int test(Object element, String propertyName, String value);
 }

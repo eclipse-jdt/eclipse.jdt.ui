@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-
+import org.eclipse.core.runtime.CoreException;
 
 /**
  * Instances of <code>ChangeElement<code> are used to present <code>
@@ -55,6 +55,16 @@ abstract class ChangeElement {
 	public ChangeElement getParent() {
 		return fParent;
 	}
+	
+	/**
+	 * Returns the viewer used to present a preview of this change element
+	 * 
+	 * @return the viewer suitable to present a preview of this change or
+	 *  <code>null</code> if no previewer is configured.
+	 */
+	public abstract ChangePreviewViewerDescriptor getChangePreviewViewer() throws CoreException;
+	
+	public abstract void feedInput(IChangePreviewViewer viewer) throws CoreException;
 	
 	/**
 	 * Sets the activation status for this <code>ChangeElement</code>. When a 

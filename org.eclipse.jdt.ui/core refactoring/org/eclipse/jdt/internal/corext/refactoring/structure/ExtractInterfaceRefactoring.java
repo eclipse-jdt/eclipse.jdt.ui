@@ -371,7 +371,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		try{
 			newCuWC= WorkingCopyUtil.getNewWorkingCopy(getInputClassPackage(), getCuNameForNewInterface());
 			String formattedSource= formatSource(createExtractedInterfaceCUSource(newCuWC, new SubProgressMonitor(pm, 1)));
-			return new CreateTextFileChange(interfaceCuPath, formattedSource, true);	
+			return new CreateTextFileChange(interfaceCuPath, formattedSource, "java");	 //$NON-NLS-1$
 		} finally{
 			if (newCuWC != null)
 				newCuWC.destroy();

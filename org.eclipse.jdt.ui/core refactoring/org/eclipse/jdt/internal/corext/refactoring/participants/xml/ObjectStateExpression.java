@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.participants;
+package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -21,39 +21,24 @@ public class ObjectStateExpression extends CompositeExpression {
 	
 	private String fAdaptable;
 	
+	public static final String NAME= "objectState"; //$NON-NLS-1$
+	
 	private static final String ADAPTABLE= "adaptable"; //$NON-NLS-1$
 	
 	public ObjectStateExpression(IConfigurationElement element) {
 		fAdaptable= element.getAttribute(ADAPTABLE);
-		parse(this, element);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public boolean evaluate(Object element) throws CoreException {
+	public int evaluate(Object element) throws CoreException {
 		if (fAdaptable != null) {
 			if (("*".equals(fAdaptable) || isInstanceOf(element, fAdaptable)) && (element instanceof IAdaptable)) //$NON-NLS-1$
 				element= ((IAdaptable)element).getAdapter(IResource.class); 
 		}
+		if (element == null)
+			return ITestResult.FALSE;
 		return evaluateAnd(element);
-	}
-
-	private static void parse(CompositeExpression result, IConfigurationElement root) {
-		IConfigurationElement[] children= root.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			String name= children[i].getName();
-			if (PropertyExpression.NAME.equals(name)) {
-				result.add(new PropertyExpression(children[i]));
-			} else if (OrExpression.NAME.equals(name)) {
-				OrExpression expression= new OrExpression();
-				result.add(expression);
-				parse(expression, children[i]);
-			} else if (AndExpression.NAME.equals(name)) {
-				AndExpression expression= new AndExpression();
-				result.add(expression);
-				parse(expression, children[i]);
-			}
-		}
 	}
 }

@@ -22,20 +22,20 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
 public class CreateTextFileChange extends CreateFileChange {
 	
-	private final boolean fIsJavaFile;
+	private final String fTextType;
 	
-	public CreateTextFileChange(IPath path, String source, boolean isJava){
+	public CreateTextFileChange(IPath path, String source, String textType) {
 		super(path, source);
-		fIsJavaFile= isJava;
+		fTextType= textType;
 	}
 
-	public CreateTextFileChange(IPath path, String source, String encoding, boolean isJava){
+	public CreateTextFileChange(IPath path, String source, String encoding, String textType) {
 		super(path, source, encoding);
-		fIsJavaFile= isJava;
+		fTextType= textType;
 	}
 	
-	public boolean isJavaFile(){
-		return fIsJavaFile;
+	public String getTextType() {
+		return fTextType;
 	}
 	
 	public String getCurrentContent() throws JavaModelException {

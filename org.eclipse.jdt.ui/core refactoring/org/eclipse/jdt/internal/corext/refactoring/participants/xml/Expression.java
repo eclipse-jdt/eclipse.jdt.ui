@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.participants;
+package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -16,8 +16,20 @@ public abstract class Expression {
 	
 	protected final String VALUE= "value"; //$NON-NLS-1$
 	
-	public abstract boolean evaluate(Object element) throws CoreException;
-
+	public static final Expression TRUE= new Expression() {
+		public int evaluate(Object element) throws CoreException {
+			return ITestResult.TRUE;
+		}	
+	};
+	
+	public static final Expression FALSE= new Expression() {
+		public int evaluate(Object element) throws CoreException {
+			return ITestResult.FALSE;
+		}	
+	};
+	
+	public abstract int evaluate(Object element) throws CoreException;
+		
 	protected static boolean isInstanceOf(Object element, String type) {
 		return isSubtype(element.getClass(), type); 
 	}

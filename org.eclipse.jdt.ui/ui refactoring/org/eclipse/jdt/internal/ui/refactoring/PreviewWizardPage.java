@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -37,28 +31,24 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.part.PageBook;
-
 import org.eclipse.compare.CompareUI;
 
-import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.ViewerPane;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.PageBook;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
-import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.util.ViewerPane;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * Presents the changes made by the refactoring.
@@ -89,20 +79,18 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		}
 	}
 	
-	private static class NullPreviewer implements IPreviewViewer {
+	private static class NullPreviewer implements IChangePreviewViewer {
 		private Label fLabel;
-		public NullPreviewer(Composite parent) {
+		public void createControl(Composite parent) {
 			fLabel= new Label(parent, SWT.CENTER | SWT.FLAT);
 			fLabel.setText(RefactoringMessages.getString("PreviewWizardPage.no_preview")); //$NON-NLS-1$
 		}
-		public void setInput(Object input) {
-			// do nothing
-		}
 		public void refresh() {
-			// do nothing
 		}
 		public Control getControl() {
 			return fLabel;
+		}
+		public void setInput(Object input) throws CoreException {
 		}
 	}
 	
@@ -139,9 +127,9 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	private Control fNullPage;
 	private ChangeElementTreeViewer fTreeViewer;
 	private PageBook fPreviewContainer;
-	private IPreviewViewer fCurrentPreviewViewer;
-	private IPreviewViewer fNullPreviewer;
-	private ComparePreviewer fComparePreview;
+	private ChangePreviewViewerDescriptor fCurrentDescriptor;
+	private IChangePreviewViewer fCurrentPreviewViewer;
+	private IChangePreviewViewer fNullPreviewer;
 	
 	/**
 	 * Creates a new proposed changes wizard page.
@@ -192,107 +180,6 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 */
 	protected ILabelProvider createTreeLabelProvider() {
 		return new ChangeElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS);
-	}
-	
-	/**
-	 * Returns the <code>CompareInput</code> element, if the preview for the given 
-	 * <code>ChangeElement</code> can be presented in a compare viewer. The method
-	 * may return <code>null</code> indicating that the preview cannot be displayed using
-	 * a compare viewer.
-	 * <p>
-	 * Subclasses may override to provide their own input element.
-	 * 
-	 * @return the compare input if the preview for the given change element can be
-	 * 	presented using a compare viewer; otherwise <code>null</code>.
-	 */
-	protected CompareInput getCompareInput(ChangeElement element) {
-		try {
-			if (element instanceof DefaultChangeElement) {
-				IChange change= ((DefaultChangeElement)element).getChange();
-				if (change instanceof TextChange) {
-					TextChange cuc= (TextChange)change;
-					String type= ComparePreviewer.TEXT_TYPE;
-					if (change instanceof CompilationUnitChange)
-						type= ComparePreviewer.JAVA_TYPE;
-					return createCompareInput(
-						element,
-						cuc.getCurrentContent(),
-						cuc.getPreviewContent(),
-						type);
-				} else if (change instanceof CreateTextFileChange){
-					CreateTextFileChange ctfc= (CreateTextFileChange)change;
-					String type= ctfc.isJavaFile() ? ComparePreviewer.JAVA_TYPE: ComparePreviewer.TEXT_TYPE;
-					return createCompareInput(
-						element,
-						ctfc.getCurrentContent(),
-						ctfc.getPreview(),
-						type);
-				}
-			} else if (element instanceof TextEditChangeElement) {
-				EditChange tec= ((TextEditChangeElement)element).getTextEditChange();
-				TextChange change= tec.getTextChange();
-				if (change instanceof CompilationUnitChange) {
-					ISourceReference sourceReference= findSourceReference(element);
-					if (sourceReference != null) {
-						CompilationUnitChange cuc= (CompilationUnitChange)change;
-						return createCompareInput(
-							element,
-							cuc.getCurrentContent(sourceReference),
-							cuc.getPreviewContent(sourceReference, new EditChange[] {tec}),
-							ComparePreviewer.JAVA_TYPE);
-					}
-				}
-				return createCompareInput(
-					element,
-					change.getCurrentContent(tec, 2),
-					change.getPreviewContent(tec, 2),
-					ComparePreviewer.TEXT_TYPE);
-			} else if (element instanceof PseudoJavaChangeElement) {
-				PseudoJavaChangeElement pjce= (PseudoJavaChangeElement)element;
-				List l= collectTextEditChanges(pjce);
-				if (l.size() > 0) {
-					EditChange[] changes= (EditChange[]) l.toArray(new EditChange[l.size()]);
-					CompilationUnitChange change= (CompilationUnitChange)changes[0].getTextChange();
-					ISourceReference sourceReference= (ISourceReference)pjce.getJavaElement();
-					return createCompareInput(
-						element,
-						change.getCurrentContent(sourceReference),
-						change.getPreviewContent(sourceReference, changes),
-						ComparePreviewer.JAVA_TYPE);
-				}
-			}
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PreviewWizardPage.showing_preview"), RefactoringMessages.getString("PreviewWizardPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		return null;
-	}
-	
-	private CompareInput createCompareInput(ChangeElement element, String left, String right, String type) {
-		if (element == null || left == null || right == null || type == null)
-			return null;
-		return new CompareInput(element, left, right, type);
-	}
-	
-	/**
-	 * Returns a viewer used to show a preview for the given change element. The returned viewer
-	 * is kept referenced until the wizard page gets disposed. So it is up to the implementor of this
-	 * method to reuse existing viewers over different change elements. The method may return
-	 * <code>nulll</code> indicating that no preview is available for the given change element.
-	 * <p>
-	 * Subclasses may override to provide their own preview.
-	 * 
-	 * @param element the change element for which a preview control is requested
-	 * @param currentViewer the currently used preview viewer
-	 * @param parent the parent to be used if a new preview viewer must be created
-	 * @return the viewer to show a preview for the given change element
-	 */
-	protected IPreviewViewer getPreviewer(ChangeElement element, IPreviewViewer currentViewer, Composite parent) {
-		CompareInput input= getCompareInput(element);
-		if (input != null) {
-			fComparePreview.setInput(input);
-			return fComparePreview;
-		}
-		return null;
 	}
 	
 	/* (non-JavaDoc)
@@ -346,9 +233,11 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		setTreeViewerInput();
 		
 		fPreviewContainer= new PageBook(sashForm, SWT.NONE);
-		fComparePreview= new ComparePreviewer(fPreviewContainer);
-		fNullPreviewer= new NullPreviewer(fPreviewContainer);
+		fNullPreviewer= new NullPreviewer();
+		fNullPreviewer.createControl(fPreviewContainer);
 		fPreviewContainer.showPage(fNullPreviewer.getControl());
+		fCurrentPreviewViewer= fNullPreviewer;
+		fCurrentDescriptor= null;
 		
 		sashForm.setWeights(new int[]{33, 67});
 		GridData gd= new GridData(GridData.FILL_BOTH);
@@ -456,42 +345,30 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	}	
 
 	private void showPreview(ChangeElement element) {
-		if (element != null)
-			fCurrentPreviewViewer= getPreviewer(element, fCurrentPreviewViewer, fPreviewContainer);
-		else
-			fCurrentPreviewViewer= null;
-			
-		if (fCurrentPreviewViewer == null)
+		try {
+			ChangePreviewViewerDescriptor descriptor= element.getChangePreviewViewer();
+			if (fCurrentDescriptor != descriptor) {
+				IChangePreviewViewer newViewer;
+				if (descriptor != null) {
+					newViewer= descriptor.createViewer();
+					newViewer.createControl(fPreviewContainer);
+				} else {
+					newViewer= fNullPreviewer;
+				}
+				fCurrentDescriptor= descriptor;
+				element.feedInput(newViewer);
+				if (fCurrentPreviewViewer != null && fCurrentPreviewViewer != fNullPreviewer)
+					fCurrentPreviewViewer.getControl().dispose();
+				fCurrentPreviewViewer= newViewer;				
+				fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
+			} else {
+				element.feedInput(fCurrentPreviewViewer);
+			}
+		} catch (CoreException e) {
+			fCurrentDescriptor= null;
 			fCurrentPreviewViewer= fNullPreviewer;
-		fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
-	}
-	
-	private ISourceReference findSourceReference(ChangeElement element) {
-		if (element == null) {
-			return null;
-		} else if (element instanceof PseudoJavaChangeElement) {
-			return (ISourceReference)((PseudoJavaChangeElement)element).getJavaElement();
-		} else if (element instanceof DefaultChangeElement) {
-			IChange change= ((DefaultChangeElement)element).getChange();
-			if (change instanceof CompilationUnitChange) {
-				return ((CompilationUnitChange)change).getCompilationUnit();
-			}
+			fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
 		}
-		return findSourceReference(element.getParent());
-	}
-	
-	private List collectTextEditChanges(PseudoJavaChangeElement element) {
-		List result= new ArrayList(10);
-		ChangeElement[] children= element.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			ChangeElement child= children[i];
-			if (child instanceof TextEditChangeElement) {
-				result.add(((TextEditChangeElement)child).getTextEditChange());
-			} else if (child instanceof PseudoJavaChangeElement) {
-				result.addAll(collectTextEditChanges((PseudoJavaChangeElement)child));
-			}
-		}
-		return result;
 	}
 	
 	/**

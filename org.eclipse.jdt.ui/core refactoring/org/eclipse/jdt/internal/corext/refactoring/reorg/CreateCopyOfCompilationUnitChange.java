@@ -44,7 +44,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	private INewNameQuery fNameQuery;
 	
 	public CreateCopyOfCompilationUnitChange(IPath path, String source, ICompilationUnit oldCu, INewNameQuery nameQuery) {
-		super(path, source, true);
+		super(path, source, "java"); //$NON-NLS-1$
 		fOldCu= oldCu;
 		fNameQuery= nameQuery;
 	}

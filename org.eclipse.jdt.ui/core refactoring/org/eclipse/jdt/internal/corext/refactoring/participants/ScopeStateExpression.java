@@ -13,29 +13,40 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.CompositeExpression;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IElementHandler;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
+
 
 public class ScopeStateExpression extends CompositeExpression {
+	
+	public static class XMLHandler implements IElementHandler {
+		public Expression create(IConfigurationElement config, ExpressionParser creator) {
+			String name= config.getName();
+			if (NatureExpression.NAME.equals(name)) {
+				return new NatureExpression(config);
+			} else if (ScopeStateExpression.NAME.equals(name)) {
+				ScopeStateExpression result= new ScopeStateExpression(config);
+				creator.processChildren(result, config);
+				return result;
+			}
+			return null;
+		}
+	}
+	
+	public static final String NAME= "scopeState"; //$NON-NLS-1$
 
 	public ScopeStateExpression(IConfigurationElement element) {
-		parse(element);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public boolean evaluate(Object element) throws CoreException {
+	public int evaluate(Object element) throws CoreException {
 		if (fExpressions == null || fExpressions.size() == 0)
-			return false;
+			return ITestResult.FALSE;
 		return evaluateAnd(element);
-	}
-	
-	private void parse(IConfigurationElement root) {
-		IConfigurationElement[] children= root.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			String name= children[i].getName();
-			if (NatureExpression.NAME.equals(name)) {
-				add(new NatureExpression(children[i]));
-			}
-		}
-	}
+	}	
 }

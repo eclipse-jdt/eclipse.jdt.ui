@@ -78,7 +78,7 @@ public abstract class SourceContextViewer  implements IStatusContextViewer {
 			if (ctrl != null)
 				ctrl.setRedraw(false);
 			fSourceViewer.setInput(document);
-			if (range != null) {
+			if (range != null && document != null) {
 				int offset= range.getOffset();
 				int length= range.getLength();
 				if (offset >= 0 && length >= 0) {

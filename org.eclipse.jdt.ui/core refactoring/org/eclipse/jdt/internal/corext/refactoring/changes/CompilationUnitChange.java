@@ -10,17 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 
 public class CompilationUnitChange extends TextFileChange {
 
@@ -34,8 +30,9 @@ public class CompilationUnitChange extends TextFileChange {
 	 */
 	public CompilationUnitChange(String name, ICompilationUnit cunit) throws CoreException {
 		super(name, getFile(cunit));
+		Assert.isNotNull(cunit);
 		fCUnit= cunit;
-		Assert.isNotNull(fCUnit);
+		setTextType("java"); //$NON-NLS-1$
 	}
 	
 	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
@@ -58,38 +55,6 @@ public class CompilationUnitChange extends TextFileChange {
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCUnit;
-	}
-	
-	public String getCurrentContent(ISourceReference element) throws CoreException {
-		TextBuffer buffer= null;
-		try {
-			buffer= acquireTextBuffer();
-			ISourceRange range= element.getSourceRange();
-			int offset= buffer.getLineInformationOfOffset(range.getOffset()).getOffset();
-			int length= range.getLength() + range.getOffset() - offset;
-			return buffer.getContent(offset, length);
-		} finally {
-			if (buffer != null)
-				releaseTextBuffer(buffer);
-		}
-	}
-	
-	public String getPreviewContent(ISourceReference element, EditChange[] changes) throws CoreException {
-		TextBuffer buffer= createTextBuffer();
-		TextBufferEditor editor= new TextBufferEditor(buffer);
-		addTextEdits(editor, changes);
-		int oldLength= buffer.getLength();
-		editor.performEdits(new NullProgressMonitor());
-		int delta= buffer.getLength() - oldLength;
-		ISourceRange range= element.getSourceRange();
-		int offset= buffer.getLineInformationOfOffset(range.getOffset()).getOffset();
-		int length= range.getLength() + range.getOffset() - offset + delta;
-		if (length > 0) {
-			return buffer.getContent(offset, length);
-		} else {
-			// source reference got removed.
-			return ""; //$NON-NLS-1$
-		}
-	}
+	}	
 }
 

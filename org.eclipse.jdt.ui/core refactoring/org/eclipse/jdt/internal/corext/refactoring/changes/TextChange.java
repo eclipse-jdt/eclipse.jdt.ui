@@ -93,6 +93,7 @@ public abstract class TextChange extends AbstractTextChange {
 	private TextEdit fEdit;
 	private boolean fKeepExecutedTextEdits;
 	private boolean fAutoMode;
+	private String fTextType;
 
 	/**
 	 * Creates a new <code>TextChange</code> with the given name.
@@ -102,6 +103,29 @@ public abstract class TextChange extends AbstractTextChange {
 	protected TextChange(String name) {
 		super(name, ORIGINAL_CHANGE);
 		fTextEditChanges= new ArrayList(5);
+		fTextType= "txt"; //$NON-NLS-1$
+	}
+	
+	/**
+	 * Sets the text type. Text types are defined by the extension
+	 * point >>TODO<<. 
+	 * 
+	 * @param type the text type. If <code>null</code> is passed the
+	 *  text type is resetted to the default text type "text".
+	 */
+	protected void setTextType(String type) {
+		if (type == null)
+			fTextType= "txt"; //$NON-NLS-1$
+		fTextType= type;
+	}
+	
+	/**
+	 * Returns the text change's text type.
+	 * 
+	 * @return the text change's text type
+	 */
+	public String getTextType() {
+		return fTextType;
 	}
 	
 	/**
@@ -294,6 +318,51 @@ public abstract class TextChange extends AbstractTextChange {
 	 */
 	public String getPreviewContent(EditChange change, int surroundingLines) throws CoreException {
 		return getContent(change, surroundingLines, true);
+	}
+
+	/**
+	 * Returns the current content denoted by the given <code>range</code>.
+	 * 
+	 * @param range the range describing the content to be returned
+	 * @return the current content denoted by the given <code>range</code>
+	 */	
+	public String getCurrentContent(TextRange range) throws CoreException {
+		TextBuffer buffer= null;
+		try {
+			buffer= acquireTextBuffer();
+			int offset= buffer.getLineInformationOfOffset(range.getOffset()).getOffset();
+			int length= range.getLength() + range.getOffset() - offset;
+			return buffer.getContent(offset, length);
+		} finally {
+			if (buffer != null)
+				releaseTextBuffer(buffer);
+		}
+	}
+
+	/**
+	 * Returns a preview denoted by the given <code>range</code>. First the changes
+	 * passed in argument <code>changes</code> are applied and then a string denoted
+	 * by <code>range</code> is extracted from the result.
+	 * 
+	 * @param changes the changes to apply
+	 * @param range the range denoting the resulting string.
+	 * @return the computed preview 
+	 */	
+	public String getPreviewContent(EditChange[] changes, TextRange range) throws CoreException {
+		TextBuffer buffer= createTextBuffer();
+		TextBufferEditor editor= new TextBufferEditor(buffer);
+		addTextEdits(editor, changes);
+		int oldLength= buffer.getLength();
+		editor.performEdits(new NullProgressMonitor());
+		int delta= buffer.getLength() - oldLength;
+		int offset= buffer.getLineInformationOfOffset(range.getOffset()).getOffset();
+		int length= range.getLength() + range.getOffset() - offset + delta;
+		if (length > 0) {
+			return buffer.getContent(offset, length);
+		} else {
+			// range got removed
+			return ""; //$NON-NLS-1$
+		}
 	}
 
 	/**

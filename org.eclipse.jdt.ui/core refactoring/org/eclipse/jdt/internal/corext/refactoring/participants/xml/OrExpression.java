@@ -8,14 +8,18 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.participants.properties;
+package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
 
-public interface IPropertyEvaluator {
-	
-	static final int FALSE= 0;
-	static final int TRUE= 1;
-	static final int UNKNOWN= 2; 
-	
-	public int eval(Object o, String name, String value);
+public class OrExpression extends CompositeExpression { 
+
+	public static final Object NAME= "or"; //$NON-NLS-1$
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
+	 */
+	public int evaluate(Object element) throws CoreException {
+		return evaluateOr(element);
+	}	
 }

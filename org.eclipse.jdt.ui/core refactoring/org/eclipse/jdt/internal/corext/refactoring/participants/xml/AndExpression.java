@@ -8,36 +8,18 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.participants;
+package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
 
-import org.eclipse.core.resources.IProject;
+public class AndExpression extends CompositeExpression { 
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
-
-
-public class NatureExpression extends Expression {
-
-	private String fValue;
-	
-	public static final String NAME= "nature";  //$NON-NLS-1$
-
-	public NatureExpression(IConfigurationElement element) {
-		fValue= element.getAttribute(VALUE);
-	}
+	public static final Object NAME= "and"; //$NON-NLS-1$
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
 	public int evaluate(Object element) throws CoreException {
-		IProject[] projects= (IProject[])element;
-		for (int i= 0; i < projects.length; i++) {
-			if (projects[i].hasNature(fValue))
-				return ITestResult.TRUE;
-		}
-		return ITestResult.FALSE;
-	}
+		return evaluateAnd(element);
+	}	
 }

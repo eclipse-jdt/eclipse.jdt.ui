@@ -47,7 +47,7 @@ public class JavaStatusContextViewer extends SourceContextViewer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.IStatusContextViewer#setInput(java.lang.Object)
 	 */
-	public void setInput(Context context) throws JavaModelException {
+	public void setInput(Context context) {
 		if (context instanceof JavaStatusContext) {
 			JavaStatusContext jsc= (JavaStatusContext)context;
 			IDocument document= null;
@@ -57,7 +57,11 @@ public class JavaStatusContextViewer extends SourceContextViewer {
 			} else {
 				ICompilationUnit cunit= jsc.getCompilationUnit();
 				if (cunit.isWorkingCopy()) {
-					document= newJavaDocument(cunit.getSource());
+					try {
+						document= newJavaDocument(cunit.getSource());
+					} catch (JavaModelException e) {
+						// document is null which is a valid input.
+					}
 				} else {
 					IEditorInput editorInput= new FileEditorInput((IFile)cunit.getResource());
 					document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);

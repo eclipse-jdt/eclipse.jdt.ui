@@ -14,26 +14,26 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 
-public class StatusContextViewerDescriptor extends AbstractDescriptor {
+public class ChangePreviewViewerDescriptor extends AbstractDescriptor {
 	
-	private static final String EXT_ID= "statusContextViewers"; //$NON-NLS-1$
+	private static final String EXT_ID= "changePreviewViewers"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
 	
 	private static DescriptorManager fgDescriptions= new DescriptorManager(EXT_ID) {
 		protected AbstractDescriptor createDescriptor(IConfigurationElement element) {
-			return new StatusContextViewerDescriptor(element);
+			return new ChangePreviewViewerDescriptor(element);
 		}
 	};
 	
-	public static StatusContextViewerDescriptor get(Object element) throws CoreException {
-		return (StatusContextViewerDescriptor)fgDescriptions.getDescriptor(element);
+	public static ChangePreviewViewerDescriptor get(Object element) throws CoreException {
+		return (ChangePreviewViewerDescriptor)fgDescriptions.getDescriptor(element);
 	}
 
-	public StatusContextViewerDescriptor(IConfigurationElement element) {
+	public ChangePreviewViewerDescriptor(IConfigurationElement element) {
 		super(element);
 	}
 	
-	public IStatusContextViewer createViewer() throws CoreException {
-		return (IStatusContextViewer)fConfigurationElement.createExecutableExtension(CLASS);
-	}	
+	public IChangePreviewViewer createViewer() throws CoreException {
+		return (IChangePreviewViewer)fConfigurationElement.createExecutableExtension(CLASS);
+	}
 }

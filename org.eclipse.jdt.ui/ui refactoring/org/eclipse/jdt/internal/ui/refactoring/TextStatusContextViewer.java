@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.FileStatusContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
-public class FileStatusContextViewer extends SourceContextViewer {
+public class TextStatusContextViewer extends SourceContextViewer {
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.IStatusContextViewer#createControl(org.eclipse.swt.widgets.Composite)
@@ -39,7 +39,7 @@ public class FileStatusContextViewer extends SourceContextViewer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.IStatusContextViewer#setInput(java.lang.Object)
 	 */
-	public void setInput(Context context) throws JavaModelException {
+	public void setInput(Context context) {
 		FileStatusContext fc= (FileStatusContext)context;
 		IEditorInput editorInput= new FileEditorInput(fc.getFile());
 		IDocument document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);

@@ -26,3 +26,16 @@
   avoid this in code. Another option is that a participant can specify if it is
   interested in the comupted resource modifications. Can be a property for some
   state XML element.
+
+
+======================================= UI ===============================================
+  
+- UI: Label and image of preview viewer. Must be determined by the change element
+  structor creator.
+  
+- NeedsPane flag on previewer ??
+
+- Make pane handling consistent in Error and Preview. In error the pane is for free
+  in preview the viewer has to provide the pane.
+  
+- Composite change in preview tree. Strip away root composite that have only one child.

@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -44,6 +46,20 @@ class DefaultChangeElement extends ChangeElement {
 	 */
 	public IChange getChange() {
 		return fChange;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.refactoring.ChangeElement#getChangePreviewViewer()
+	 */
+	public ChangePreviewViewerDescriptor getChangePreviewViewer() throws CoreException {
+		return ChangePreviewViewerDescriptor.get(fChange);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.refactoring.ChangeElement#feedInput(org.eclipse.jdt.internal.ui.refactoring.IChangePreviewViewer)
+	 */
+	public void feedInput(IChangePreviewViewer viewer) throws CoreException {
+		viewer.setInput(fChange);
 	}
 	
 	/* non Java-doc

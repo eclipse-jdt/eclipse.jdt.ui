@@ -2951,6 +2951,24 @@
 </extension>
 -->
 
+<extension-point name="%propertyTesterExtensionPoint" id="propertyTesters"/>
+
+<extension point="org.eclipse.jdt.ui.propertyTesters">
+
+  <propertyTester
+     id="IResourcePropertyTester"
+     type="org.eclipse.core.resources.IResource"
+     properties="name"
+     class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.ResourcePropertyTester"/>
+     
+  <propertyTester
+     id="ITypePropertyTester"
+     type="org.eclipse.jdt.core.IType"
+     properties="hasMainType"
+     class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypePropertyTester"/>
+     
+</extension>
+
 <extension-point name="%renameProcessorExtensionPoint" id="renameProcessors"/>
 <extension-point name="%renameParticipantsExtensionPoint" id="renameParticipants"/>
 <extension-point name="%moveParticipantsExtensionPoint" id="moveParticipants"/>
@@ -2992,11 +3010,10 @@
 </extension>
 
 <extension-point name="%statusViewerExtensionPoint" id="statusContextViewers"/>
-<extension-point name="%changeViewerExtensionPoint" id="changeViewers"/>
+<extension-point name="%changeViewerExtensionPoint" id="changePreviewViewers"/>
 
 <extension point="org.eclipse.jdt.ui.statusContextViewers">
-	
-  <statusViewer
+  <statusContextViewer
     id="org.eclipse.jdt.ui.javaStatusContextViewer"
     class="org.eclipse.jdt.internal.ui.refactoring.JavaStatusContextViewer">
     <objectState>
@@ -3005,16 +3022,33 @@
           <property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext"/>
        </or>   
     </objectState>
-  </statusViewer>
+  </statusContextViewer>
   
-  <statusViewer
+  <statusContextViewer
   	id="org.eclipse.jdt.ui.fileStatusContextViewer"
-  	class="org.eclipse.jdt.internal.ui.refactoring.FileStatusContextViewer">
+  	class="org.eclipse.jdt.internal.ui.refactoring.TextStatusContextViewer">
   	<objectState>
        <property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.base.FileStatusContext"/>
   	</objectState>
-  </statusViewer>
-  
+  </statusContextViewer>
+</extension>
+
+<extension point="org.eclipse.jdt.ui.changePreviewViewers">
+	<changePreviewViewer
+	  id="org.eclipse.jdt.ui.textChangePreviewViewer"
+	  class="org.eclipse.jdt.internal.ui.refactoring.TextChangePreviewViewer">
+	  <objectState>
+	     <property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.changes.TextChange"/>
+	  </objectState>
+	</changePreviewViewer>
+	
+	<changePreviewViewer
+	  id="org.eclipse.jdt.ui.createTextFileChangePreviewViewer"
+	  class="org.eclipse.jdt.internal.ui.refactoring.CreateTextFileChangePreviewViewer">
+	  <objectState>
+	     <property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange"/>
+	  </objectState>
+	</changePreviewViewer>
 </extension>
 
 <extension point="org.eclipse.ui.views">

@@ -8,18 +8,38 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.participants;
+package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import org.eclipse.core.runtime.CoreException;
 
-public class OrExpression extends CompositeExpression { 
+import org.eclipse.jdt.internal.corext.Assert;
 
-	public static final Object NAME= "or"; //$NON-NLS-1$
 
+public class NotExpression extends Expression {
+
+	private Expression fExpression;
+
+	public static final String NAME= "not"; //$NON-NLS-1$
+
+	private static final int[] NOT= new int[] {
+		//FALSE				//TRUE				//NOT_LOADED			//UNKNOWN
+		ITestResult.TRUE,	ITestResult.FALSE,	ITestResult.NOT_LOADED,	ITestResult.UNKNOWN
+	};
+
+	private static int not(int op) {
+		return NOT[op];
+	}
+	
+	
+	public NotExpression(Expression expression) {
+		Assert.isNotNull(expression);
+		fExpression= expression;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public boolean evaluate(Object element) throws CoreException {
-		return evaluateOr(element);
-	}	
+	public int evaluate(Object element) throws CoreException {
+		return not(fExpression.evaluate(element));
+	}
 }
