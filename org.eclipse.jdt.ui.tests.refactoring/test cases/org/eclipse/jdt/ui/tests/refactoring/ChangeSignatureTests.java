@@ -368,7 +368,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 			String name= JavaModelUtil.getFullyQualifiedName(info.getType());
 			for (int i= 0; i < removeExceptions.length; i++) {
 				if (name.equals(removeExceptions[i]))
-					iter.remove();
+					info.markAsDeleted();
 			}
 		}
 		for (int i= 0; i < addExceptions.length; i++) {
@@ -385,8 +385,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public void testFail1() throws Exception{
-		//TODO: is duplicate of testFail0()
-		helperFail(new String[]{"j", "i"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
+		helperFail(new String[0], new String[0], RefactoringStatus.FATAL);
 	}
 
 	public void testFailAdd2() throws Exception{
@@ -1225,6 +1224,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperException(signature, remove, add);
 	}
 	
+	public void testException02() throws Exception {
+		helperException(new String[0], new String[0], new String[] {"java.lang.RuntimeException"});
+	}
+
+	public void testException03() throws Exception {
+		helperException(new String[0], new String[] {"java.lang.RuntimeException"}, new String[0]);
+	}
+
 	public void testInStatic01() throws Exception { //bug 47062
 		String[] signature= {"QString;", "QString;"};
 		ParameterInfo[] newParamInfo= null;

@@ -485,7 +485,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					return result;
 			}
 			fCU= AST.parseCompilationUnit(getCu(), true, null, null);
-			fExceptionInfos= createExceptionInfoList();
+			result.merge(createExceptionInfoList());
 			
 			return result;
 		} finally{
@@ -493,25 +493,30 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 
-	private List createExceptionInfoList() {
+	private RefactoringStatus createExceptionInfoList() {
+		fExceptionInfos= new ArrayList(0);
 		try {
 			IJavaProject project= fMethod.getJavaProject();
 			ASTNode nameNode= NodeFinder.perform(fCU, fMethod.getNameRange());
 			if (nameNode == null || ! (nameNode instanceof Name) || ! (nameNode.getParent() instanceof MethodDeclaration))
-				return new ArrayList(0);
+				return null;
 			MethodDeclaration methodDeclaration= (MethodDeclaration) nameNode.getParent();
 			List exceptions= methodDeclaration.thrownExceptions();
 			List result= new ArrayList(exceptions.size());
 			for (int i= 0; i < exceptions.size(); i++){
 				Name name= (Name) exceptions.get(i);
 				ITypeBinding typeBinding= name.resolveTypeBinding();
+				if (typeBinding == null)
+					return RefactoringStatus.createFatalErrorStatus(
+							RefactoringCoreMessages.getString("ChangeSignatureRefactoring.no_exception_binding")); //$NON-NLS-1$
 				IType type= Bindings.findType(typeBinding, project);
 				result.add(ExceptionInfo.createInfoForOldException(type, typeBinding));
 			}
-			return result;
+			fExceptionInfos= result;
+			return null;
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
-			return new ArrayList(0);
+			return null;
 		}
 	}
 
@@ -1360,7 +1365,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			 * Removing Exception should remove AWTException,
 			 * but NOT remove IOException (or a subclass of JavaModelException). */
 			 // if (Bindings.isSuperType(typeToRemove, currentType))
-			if (typeToRemove.getQualifiedName().equals(currentType.getQualifiedName()))
+			if (currentType == null)
+				continue;
+			if (Bindings.equals(typeToRemove, currentType))
 				rewrite.markAsRemoved(currentName);
 		}
 	}
@@ -1370,8 +1377,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		for (Iterator iter= exceptionsNodeList.iterator(); iter.hasNext(); ) {
 			Name exName= (Name) iter.next();
 			//XXX: existing superclasses of the added exception are redundant and could be removed
-			if (exName.resolveTypeBinding().getQualifiedName().equals(fullyQualified))
-				return;
+			ITypeBinding typeBinding= exName.resolveTypeBinding();
+			if (typeBinding == null)
+				continue;
+			if (typeBinding.getQualifiedName().equals(fullyQualified))
+				return; // don't add it again
 		}
 		String simple= importRewrite.addImport(JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType()));
 		ASTNode exNode= rewrite.createPlaceholder(simple, ASTRewrite.NAME);
