@@ -24,18 +24,25 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
+
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 /**
  * Tests for the PackageExplorerContentProvider.
@@ -190,6 +197,49 @@ public class ContentProviderTests3 extends TestCase {
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack4);
 		assertTrue("Wrong parent found for a NON top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
+	}
+	
+	public void testDeleteBottomLevelFragmentFolding() throws Exception {
+
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createDelta(fPack4, IJavaElementDelta.REMOVED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
+		assertTrue("Single refresh", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
+	}
+
+	public void testAddBottomLevelFragmentFolding() throws Exception {
+		IPackageFragment test= fRoot1.createPackageFragment("test", true, null); //$NON-NLS-1$
+
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createDelta(test, IJavaElementDelta.ADDED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
+		assertTrue("Single refreshe", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
+	}
+
+	public void testChangedTopLevelPackageFragmentFolding() throws Exception {
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createDelta(fPack3, IJavaElementDelta.CHANGED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		assertEquals("No refreshs", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+
+	public void testChangeBottomLevelPackageFragmentFolding() throws Exception {
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createDelta(fPack6, IJavaElementDelta.CHANGED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		assertEquals("No refreshs",0,  fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 	
 

@@ -12,6 +12,7 @@ Contributors:
 package org.eclipse.jdt.ui.tests.packageview;
 
 
+import java.util.ArrayList;
 import java.util.zip.ZipFile;
 
 import junit.framework.Test;
@@ -20,27 +21,29 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.viewers.ITreeContentProvider;
+
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * Tests for the PackageExplorerContentProvider.
@@ -95,6 +98,7 @@ public class ContentProviderTests1 extends TestCase {
 	private ICompilationUnit fCUSimpleTest;
 	private ZipFile zipfile;
 	private boolean fEnableAutoBuildAfterTesting;
+	private ICompilationUnit fCU3;
 	
 	public ContentProviderTests1(String name) {
 		super(name);
@@ -120,21 +124,6 @@ public class ContentProviderTests1 extends TestCase {
 		Object[] children= fProvider.getChildren(fPack2);
 		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
-	
-//	public void testGetChildrenBottomLevelFragmentWithResource() throws Exception {
-//		System.out.println("Testing getChildren of a bottom level PackageFragment with resource");
-//		Object[] expectedChildren = new Object[] { fFile3 };
-//		Object[] children = fProvider.getChildren(fPack1);
-//		boolean assertion = false;
-//		if (expectedChildren.length == children.length) {
-//			if (children[0] instanceof IFile) {
-//				IFile file = (IFile) children[0];
-//				if (file.getName().equals(fFile3.getName()))
-//					assertion = true;
-//			}
-//		}
-//		assertTrue("Wrong children found for PackageFragment", assertion);
-//	}
 
 	public void testGetChildrenMidLevelFragmentInArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fPackJunitSamplesMoney, fCUAllTests, fCUSimpleTest, fCUVectorTest };
@@ -195,10 +184,10 @@ public class ContentProviderTests1 extends TestCase {
 		
 		//send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener)fProvider;
-		IJavaElementDelta delta= createDelta(fPack4, IJavaElementDelta.REMOVED);
+		IJavaElementDelta delta= TestDelta.createDelta(fPack4, IJavaElementDelta.REMOVED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 		
-		assertTrue("Remove happened", fMyPart.removeHappened());//$NON-NLS-1$
+		assertTrue("Remove happened", fMyPart.hasRemoveHappened());//$NON-NLS-1$
 		assertTrue("Correct Remove", fPack4.equals(fMyPart.getRemovedObject()));//$NON-NLS-1$
 		assertTrue("No refreshes", fMyPart.getRefreshedObject().size()==0);//$NON-NLS-1$
 	}
@@ -208,58 +197,65 @@ public class ContentProviderTests1 extends TestCase {
 
 		//send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
-		IJavaElementDelta delta= createDelta(test, IJavaElementDelta.ADDED);
+		IJavaElementDelta delta= TestDelta.createDelta(test, IJavaElementDelta.ADDED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
-		assertTrue("Add happened", fMyPart.addHappened()); //$NON-NLS-1$
+		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertTrue("Correct Add", test.equals(fMyPart.getAddedObject())); //$NON-NLS-1$
 		assertTrue("No refreshes", fMyPart.getRefreshedObject().size() == 0); //$NON-NLS-1$
 	}
 
-	public void testChangedTopLevelPackageFragment() {
+	public void testChangedTopLevelPackageFragment() throws Exception {
 		//send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
-		IJavaElementDelta delta= createDelta(fPack3, IJavaElementDelta.CHANGED);
+		IJavaElementDelta delta= TestDelta.createDelta(fPack3, IJavaElementDelta.CHANGED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
-		assertTrue("Refresh happened", fMyPart.wasObjectRefreshed(fPack3)); //$NON-NLS-1$
-		assertEquals(1, fMyPart.getRefreshedObject().size());
+		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 	
-	public void testChangeBottomLevelPackageFragment() {
+	public void testChangeBottomLevelPackageFragment() throws Exception{
 		//send a delta indicating fragment deleted
+		fMyPart.fRefreshedObjects= new ArrayList();
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
-		IJavaElementDelta delta= createDelta(fPack6, IJavaElementDelta.CHANGED);
+		IJavaElementDelta delta= TestDelta.createDelta(fPack6, IJavaElementDelta.CHANGED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
-		assertTrue("Refresh happened", fMyPart.wasObjectRefreshed(fPack6)); //$NON-NLS-1$
-		assertEquals(1, fMyPart.getRefreshedObject().size());
+		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
-
-	private IJavaElementDelta createDelta(IJavaElementDelta[] fragmentdeltas, int[] actions){
-			
-		return null;
-	}
-
-	private IJavaElementDelta createDelta(IPackageFragment frag, int action) {
-		TestDelta delta= new TestDelta(action, frag);
+	
+	
+	//XXX: These delta tests don't correctly wait for the display thread yet.
 		
-		IJavaElement root= frag.getParent();
-		TestDelta rootDelta= new TestDelta(IJavaElementDelta.CHANGED, root);
-		
-		IJavaProject proj= root.getJavaProject();
-		TestDelta projectDelta= new TestDelta(IJavaElementDelta.CHANGED, proj);
-		
-		IJavaModel model= proj.getJavaModel();
-		TestDelta modelDelta= new TestDelta(IJavaElementDelta.CHANGED, model);
-		
-		//set affected children
-		modelDelta.setAffectedChildren(new IJavaElementDelta[]{projectDelta});
-		projectDelta.setAffectedChildren(new IJavaElementDelta[]{rootDelta});
-		rootDelta.setAffectedChildren(new IJavaElementDelta[]{delta});
-				
-		return modelDelta;
-	}
+//	public void testRemoveCUsFromPackageFragment() throws Exception{
+//		//send a delta indicating fragment deleted
+//		IElementChangedListener listener= (IElementChangedListener) fProvider;
+//		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { fCU2, fCU3 }, fPack6, IJavaElementDelta.REMOVED);
+//		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+//
+//		//wait on display thread
+//		if(!fMyPart.notifyHappened())	
+//			this.wait(10);
+//
+//		assertTrue("Refresh happened", fMyPart.refreshHappened()); //$NON-NLS-1$
+//		assertTrue("Correct refresh", fPack6.equals(fMyPart.getRefreshedObject())); //$NON-NLS-1$
+//		assertTrue("No refreshes", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
+//	}
+//	
+//	public void testRemoveCUFromPackageFragment() throws Exception {
+//		//send a delta indicating fragment deleted
+//		IElementChangedListener listener= (IElementChangedListener) fProvider;
+//		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[]{fCU2}, fPack6, IJavaElementDelta.REMOVED);
+//		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+//
+//		//wait on display thread
+//		if(!fMyPart.notifyHappened())
+//			this.wait(10);
+//
+//		assertTrue("Refresh happened", fMyPart.refreshHappened()); //$NON-NLS-1$
+//		assertTrue("Correct refresh", fPack6.equals(fMyPart.getRefreshedObject())); //$NON-NLS-1$
+//		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+//	}
 
 	/**
 	 * @see TestCase#setUp()
@@ -338,6 +334,7 @@ public class ContentProviderTests1 extends TestCase {
 		
 		fCU1= fPack2.createCompilationUnit("Object.java", "", true, null);//$NON-NLS-1$//$NON-NLS-2$
 		fCU2= fPack6.createCompilationUnit("Object.java","", true, null);//$NON-NLS-1$//$NON-NLS-2$
+		fCU3= fPack6.createCompilationUnit("Jen.java","", true,null);//$NON-NLS-1$//$NON-NLS-2$
 		
 		//set up the mock view
 		setUpMockView();
@@ -443,89 +440,6 @@ public class ContentProviderTests1 extends TestCase {
 			}
 		}
 		return false;
-	}
-	
-	/**
-	   * @author Jen Thorsley
-	   *
-	   * Test class used to test delta handeling in the PackageFragmentProvider
-	   */
-	private class TestDelta implements IJavaElementDelta {
-		private int fKind;
-		private IJavaElement fElement;
-	
-		private IJavaElementDelta[] fAffectedChildren;
-
-		public TestDelta(int kind, IJavaElement element) {
-			fKind= kind;
-			fElement= element;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getAddedChildren()
-			*/
-		public IJavaElementDelta[] getAddedChildren() {
-			return null;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getAffectedChildren()
-			*/
-		public IJavaElementDelta[] getAffectedChildren() {
-			if(fAffectedChildren==null)	
-				return new IJavaElementDelta[0];
-			else return fAffectedChildren;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getChangedChildren()
-			*/
-		public IJavaElementDelta[] getChangedChildren() {
-			return null;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getElement()
-			*/
-		public IJavaElement getElement() {
-			return fElement;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getFlags()
-			*/
-		public int getFlags() {
-			return 0;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getKind()
-			*/
-		public int getKind() {
-			return fKind;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getMovedFromElement()
-			*/
-		public IJavaElement getMovedFromElement() {
-			return null;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getMovedToElement()
-			*/
-		public IJavaElement getMovedToElement() {
-			return null;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getRemovedChildren()
-			*/
-		public IJavaElementDelta[] getRemovedChildren() {
-			return null;
-		}
-		/**
-			* @see org.eclipse.jdt.core.IJavaElementDelta#getResourceDeltas()
-			*/
-		public IResourceDelta[] getResourceDeltas() {
-			return null;
-		}
-		
-		public void setAffectedChildren(IJavaElementDelta[] children){
-			fAffectedChildren= children;
-		}
 	}
 
 }

@@ -21,6 +21,8 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.ui.IViewPart;
+
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -47,7 +49,6 @@ public class MockPluginView extends PackageExplorerPart {
 	private Object fAddedObject;
 	private Object fAddedParentObject;
 
-
 	/**
 	 * Constructor for MockPluginView.
 	 */
@@ -63,8 +64,6 @@ public class MockPluginView extends PackageExplorerPart {
 	 */
 	public void createPartControl(Composite parent) {
 	
-	
-		
 		//create viewer
 		fViewer= createViewer(parent);
 		
@@ -75,11 +74,10 @@ public class MockPluginView extends PackageExplorerPart {
 		//set content provider
 		fViewer.setContentProvider(contentProvider);
 		
-		
 	}
 	
 	private TreeViewer createViewer(Composite parent) {
-		return new TestProblemTreeViewer(parent, SWT.MULTI);
+		return new TestProblemTreeViewer(parent, SWT.MULTI, this);
 	}
 
 	public void dispose() {
@@ -133,14 +131,16 @@ public class MockPluginView extends PackageExplorerPart {
 	
 	private class TestProblemTreeViewer extends ProblemTreeViewer{
 		
+		private IViewPart fPart;
 		
-		public TestProblemTreeViewer(Composite parent, int flag){
-			super(parent,flag);
+		public TestProblemTreeViewer(Composite parent, int flag, IViewPart part){
+			super(parent, flag);
+			fPart= part;
 		}
 		
 		public void refresh(Object object){
 			fRefreshHappened= true;
-			fRefreshedObjects.add(object);	
+			fRefreshedObjects.add(object);
 		}
 		
 		public void remove (Object object){
@@ -179,7 +179,7 @@ public class MockPluginView extends PackageExplorerPart {
 	 * Returns true if something was added to the viewer
 	 * @return boolean
 	 */
-	public boolean addHappened() {
+	public boolean hasAddHappened() {
 		return fAddHappened;
 	}
 
@@ -195,7 +195,7 @@ public class MockPluginView extends PackageExplorerPart {
 	 * Returns true if an object was removed from the viewer
 	 * @return boolean
 	 */
-	public boolean removeHappened() {
+	public boolean hasRemoveHappened() {
 		return fRemoveHappened;
 	}
 
@@ -213,5 +213,6 @@ public class MockPluginView extends PackageExplorerPart {
 	 */
 	public void setFolding(boolean fold) {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
-	}
+	}	
+	
 }
