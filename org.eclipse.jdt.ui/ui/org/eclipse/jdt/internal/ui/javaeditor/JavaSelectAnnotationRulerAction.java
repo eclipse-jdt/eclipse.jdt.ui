@@ -40,9 +40,13 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistLightBulbUpdater.AssistAnnotation;
 
 /**
- * Java select marker ruler action.
+ * Action which gets triggered when selecting (annotations) in the vertical ruler.
+ * 
+ * <p>
+ * Was originally called >code>JavaSelectMarkerRulerAction</code>.
+ * </p>
  */
-public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
+public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 
 	private ITextEditor fTextEditor;
 	private Position fPosition;
@@ -50,7 +54,7 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 	private AnnotationPreferenceLookup fAnnotationPreferenceLookup;
 	private IPreferenceStore fStore;
 
-	public JavaSelectMarkerRulerAction(ResourceBundle bundle, String prefix, ITextEditor editor, IVerticalRulerInfo ruler) {
+	public JavaSelectAnnotationRulerAction(ResourceBundle bundle, String prefix, ITextEditor editor, IVerticalRulerInfo ruler) {
 		super(bundle, prefix, editor, ruler);
 		fTextEditor= editor;
 		
