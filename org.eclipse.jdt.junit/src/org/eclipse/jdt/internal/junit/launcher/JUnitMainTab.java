@@ -386,7 +386,19 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		Shell shell = getShell();
 		
 		IJavaProject javaProject = getJavaProject();
-		SelectionDialog dialog = new TestSelectionDialog(shell, javaProject);
+		
+		IType[] types= new IType[0];
+		try {
+			types= TestSearchEngine.findTests(getLaunchConfigurationDialog(), new Object[] {javaProject}); 
+		} catch (InterruptedException e) {
+			setErrorMessage(e.getMessage());
+			return;
+		} catch (InvocationTargetException e) {
+			JUnitPlugin.log(e.getTargetException());
+			return;
+		}
+
+		SelectionDialog dialog = new TestSelectionDialog(shell, types);
 		dialog.setTitle(JUnitMessages.getString("JUnitMainTab.testdialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JUnitMessages.getString("JUnitMainTab.testdialog.message")); //$NON-NLS-1$
 		if (dialog.open() == Window.CANCEL) {

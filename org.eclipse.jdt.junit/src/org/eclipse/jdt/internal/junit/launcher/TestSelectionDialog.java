@@ -27,6 +27,7 @@ import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 public class TestSelectionDialog extends TwoPaneElementSelector {
 
 	private IJavaProject fProject;
+	private IType[] fTypes;
 	
 	private static class PackageRenderer extends JavaElementLabelProvider {
 		public PackageRenderer() {
@@ -53,6 +54,12 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 		fProject= project;
 	}
 	
+	public TestSelectionDialog(Shell shell, IType[] types) {
+		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
+				new PackageRenderer());
+		fTypes= types;
+	}
+
 	/**
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
@@ -65,17 +72,19 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	 * @see Window#open()
 	 */
 	public int open() {
-		IType[] types= new IType[0];
-		try {
-			types= TestSearchEngine.findTests(new Object[] {fProject});
-		} catch (InterruptedException e) {
-			return CANCEL;
-		} catch (InvocationTargetException e) {
-			JUnitPlugin.log(e.getTargetException());
-			return CANCEL;
+		if (fTypes == null) {
+			fTypes= new IType[0];
+			try {
+				fTypes= TestSearchEngine.findTests(new Object[]{fProject});
+			} catch (InterruptedException e) {
+				return CANCEL;
+			} catch (InvocationTargetException e) {
+				JUnitPlugin.log(e.getTargetException());
+				return CANCEL;
+			}
 		}
 		
-		setElements(types);
+		setElements(fTypes);
 		return super.open();
 	}
 	
