@@ -21,11 +21,20 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -137,8 +146,15 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @throws JavaModelException
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
-		IType type= method.getDeclaringType();
+		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST((IJavaElement) method.getOpenable(), false, null);
+		if (astRoot != null) {
+			int res= findInHierarchyWithAST(astRoot, method);
+			if (res != -1) {
+				return res;
+			}
+		}
 		
+		IType type= method.getDeclaringType();
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
 		if (hierarchy != null) {
 			return findInHierarchy(type, hierarchy, method.getElementName(), method.getParameterTypes());
@@ -146,6 +162,25 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		return 0;
 	}
 	
+	private int findInHierarchyWithAST(CompilationUnit astRoot, IMethod method) throws JavaModelException {
+		ASTNode node= NodeFinder.perform(astRoot, method.getNameRange());
+		if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration) {
+			IMethodBinding binding= ((MethodDeclaration) node.getParent()).resolveBinding();
+			if (binding != null) {
+				IMethodBinding defining= Bindings.findMethodDefininition(binding, true);
+				if (defining != null) {
+					if (defining.getDeclaringClass().isInterface()) {
+						return JavaElementImageDescriptor.IMPLEMENTS;
+					} else {
+						return JavaElementImageDescriptor.OVERRIDES;
+					}
+				}
+				return 0;
+			}
+		}		
+		return -1;
+	}
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param type The declaring type of the method to decorate.
@@ -156,13 +191,14 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @throws JavaModelException
 	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
-		IMethod impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, name, paramTypes, false);
-		if (impl != null && JavaModelUtil.isVisibleInHierarchy(impl, type.getPackageFragment())) {
-			IMethod overridden= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, name, paramTypes, false);
-			if (overridden != null) {
-				return JavaElementImageDescriptor.OVERRIDES;
-			} else {
-				return JavaElementImageDescriptor.IMPLEMENTS;
+		IMethod overridden= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, name, paramTypes, false);
+		if (overridden != null && JavaModelUtil.isVisibleInHierarchy(overridden, type.getPackageFragment())) {
+			return JavaElementImageDescriptor.OVERRIDES;
+		}
+		IType[] interfaces= hierarchy.getAllSuperInterfaces(type);
+		for (int i= 0; i < interfaces.length; i++) {
+			if (JavaModelUtil.findMethod(name, paramTypes, false, interfaces[i]) != null) {
+				return JavaElementImageDescriptor.IMPLEMENTS; // methods in interfaces are always visible
 			}
 		}
 		return 0;
