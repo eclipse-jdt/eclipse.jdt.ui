@@ -331,7 +331,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fResources))));
+		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotLinked(fResources))));
 		IResource[] javaResources= ReorgUtils.getResources(fJavaElements);
 		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
 		for (int i= 0; i < fJavaElements.length; i++) {

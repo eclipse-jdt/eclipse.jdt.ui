@@ -575,6 +575,16 @@ public class ReorgUtils {
 		return (IResource[]) result.toArray(new IResource[result.size()]);
 	}
 	
+	public static IResource[] getNotLinked(IResource[] resources) {
+		Collection result= new ArrayList(resources.length);
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			if (resource != null && ! result.contains(resource) && ! resource.isLinked())
+				result.add(resource);
+		}
+		return (IResource[]) result.toArray(new IResource[result.size()]);
+	}
+	
 	/* List<IJavaElement> javaElements
 	 * return ICompilationUnit -> List<IJavaElement>
 	 */
