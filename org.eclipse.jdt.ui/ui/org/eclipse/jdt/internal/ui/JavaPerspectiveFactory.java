@@ -17,10 +17,10 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.console.IConsoleConstants;
-import org.eclipse.ui.progress.IProgressConstants;
 
 public class JavaPerspectiveFactory implements IPerspectiveFactory {
 	
+	public static final String ID_PROGRESS_VIEW= "org.eclipse.ui.views.ProgressView"; // see bug 63563  //$NON-NLS-1$
 	/**
 	 * Constructs a new Default layout engine.
 	 */
@@ -43,7 +43,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		outputfolder.addPlaceholder(NewSearchUI.SEARCH_VIEW_ID);
 		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
-		outputfolder.addPlaceholder(IProgressConstants.PROGRESS_VIEW_ID);
+		outputfolder.addPlaceholder(ID_PROGRESS_VIEW);
 		
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float)0.75, editorArea);
 		
