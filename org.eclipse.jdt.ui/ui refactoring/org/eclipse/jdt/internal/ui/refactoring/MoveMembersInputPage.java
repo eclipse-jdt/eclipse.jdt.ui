@@ -1,12 +1,10 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -19,10 +17,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -30,6 +28,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -67,6 +66,32 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		
 		fTextField= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fTextField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fTextField.addModifyListener(new ModifyListener(){
+			public void modifyText(ModifyEvent e) {
+				IStatus status= JavaConventions.validateJavaTypeName(fTextField.getText());
+				if (status.getSeverity() == IStatus.ERROR){
+					error(status.getMessage());
+				} else {
+					try {
+						IType resolvedType= getMoveRefactoring().getDeclaringType().getJavaProject().findType(fTextField.getText());
+						if (resolvedType == null){
+							String message= RefactoringMessages.getFormattedString("MoveMembersInputPage.not_found", fTextField.getText());//$NON-NLS-1$
+							error(message);
+						}else {
+							setErrorMessage(null);
+							setPageComplete(true);
+						}	
+					} catch(JavaModelException ex) {
+						JavaPlugin.log(ex); //no ui here
+						error(RefactoringMessages.getString("MoveMembersInputPage.invalid_name")); //$NON-NLS-1$
+					}
+				}	
+			}
+			private void error(String message){
+				setErrorMessage(message);
+				setPageComplete(false);
+			}
+		});
 		
 		Button button= new Button(composite, SWT.PUSH);
 		button.setText(RefactoringMessages.getString("MoveMembersInputPage.browse")); //$NON-NLS-1$
@@ -95,31 +120,12 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		try {
 			getMoveRefactoring().setDestinationTypeFullyQualifiedName(fTextField.getText());
 		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("MoveMembersInputPage.move_Member"), RefactoringMessages.getString("MoveMembersInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("MoveMembersInputPage.move_Member"), RefactoringMessages.getString("MoveMembersInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
-	private static IJavaSearchScope createWorkspaceSourceScope(){
-		JavaCore javaCore = JavaCore.getJavaCore();
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		List elems= new ArrayList();
-		for (int i = 0; i < projects.length; i++) {
-			IProject project = projects[i];
-			if (project.isAccessible()) {
-				IJavaProject jp= javaCore.create(project);
-				try {
-					IPackageFragmentRoot[] roots= jp.getPackageFragmentRoots();
-					for (int j= 0; j < roots.length; j++) {
-						if (canMoveToTypesDeclaredIn(roots[j]))
-							elems.add(roots[j]);	
-					}
-				} catch(JavaModelException e) {
-					//ignore
-				}
-			}
-		}
-		IPackageFragmentRoot[] roots= (IPackageFragmentRoot[]) elems.toArray(new IPackageFragmentRoot[elems.size()]);
-		return SearchEngine.createJavaSearchScope(roots);
+	private IJavaSearchScope createWorkspaceSourceScope(){
+		return SearchEngine.createJavaSearchScope(new IJavaElement[]{getMoveRefactoring().getDeclaringType().getJavaProject()}, true);
 	}
 	
 	private static boolean canMoveToTypesDeclaredIn(IPackageFragmentRoot root) throws JavaModelException{
