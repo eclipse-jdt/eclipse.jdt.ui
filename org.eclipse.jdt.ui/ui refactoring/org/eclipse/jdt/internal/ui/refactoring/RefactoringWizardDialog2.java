@@ -102,10 +102,14 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 			fMessage.setLayoutData(gd);
 		}
 		public void setMessage(IWizardPage page) {
-			String msg= page.getMessage();
-			int type= IMessageProvider.NONE;
-			if (msg != null && page instanceof IMessageProvider) 
-				type = ((IMessageProvider)page).getMessageType();
+			String msg= page.getErrorMessage();
+			int type= IMessageProvider.ERROR;
+			if (msg == null || msg.length() == 0) {
+				msg= page.getMessage();
+				type= IMessageProvider.NONE;
+				if (msg != null && page instanceof IMessageProvider) 
+					type = ((IMessageProvider)page).getMessageType();
+			}
 			Image image= null;
 			switch (type) {
 				case IMessageProvider.INFORMATION:
