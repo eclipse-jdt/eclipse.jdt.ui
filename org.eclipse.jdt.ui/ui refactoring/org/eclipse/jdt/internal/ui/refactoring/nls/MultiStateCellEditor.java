@@ -14,15 +14,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 public class MultiStateCellEditor extends CellEditor {
 	
 	private int fValue;
-	private int fStateCount;
-	
-	/**
-	 * initial state will be 0
-	 * @param stateCount must be > 1
-	 */
-	public MultiStateCellEditor(Composite parent, int stateCount) {
-		this(parent, stateCount, 0);
-	}
+	private final int fStateCount;
 	
 	/**
 	 * @param stateCount must be > 1
@@ -38,8 +30,10 @@ public class MultiStateCellEditor extends CellEditor {
 		
 		setValueValid(true);
 	}
-	
 
+	/*
+	 * @see org.eclipse.jface.viewers.CellEditor#activate()
+	 */
 	public void activate() {
 		fValue= getNextValue(fStateCount, fValue);
 		fireApplyEditorValue();
@@ -51,25 +45,30 @@ public class MultiStateCellEditor extends CellEditor {
 		return (currentValue + 1) % stateCount;
 	}
 
+	/*
+	 * @see org.eclipse.jface.viewers.CellEditor#createControl(org.eclipse.swt.widgets.Composite)
+	 */
 	protected Control createControl(Composite parent) {
 		return null;
 	}
 
-	/**
+	/*
+	 * @see org.eclipse.jface.viewers.CellEditor#doGetValue()
 	 * @return the Integer value
 	 */
 	protected Object doGetValue() {
 		return new Integer(fValue);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on CellEditor.
+	/*
+	 * @see org.eclipse.jface.viewers.CellEditor#doSetFocus()
 	 */
 	protected void doSetFocus() {
 		// Ignore
 	}
 
-	/**
+	/*
+	 * @see org.eclipse.jface.viewers.CellEditor#doSetValue(java.lang.Object)
 	 * @param value an Integer value
 	 * must be >=0 and < stateCount (value passed in the constructor)
 	 */
