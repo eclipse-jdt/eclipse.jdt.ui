@@ -49,7 +49,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 	private void run(IStructuredSelection selection) {
 		IJavaElement[] elements= getSelectedElements(selection);
 		if (elements == null || elements.length == 0) {
-			MessageDialog.openInformation(getShell(), "Go to Test", "Select a method or type to open tests that refer to them.");
+			MessageDialog.openInformation(getShell(), "Go to Test", "Select a method, type, or compilation unit to open tests that refer to them.");
 			return;
 		}
 		try {
