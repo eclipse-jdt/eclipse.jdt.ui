@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
@@ -64,13 +65,31 @@ public final class SuperTypeConstraintsSolver {
 	}
 
 	/**
+	 * Computes the necessary equality constraints for conditional expressions.
+	 * 
+	 * @param constraints the type constraints (element type: <code>ITypeConstraint2</code>)
+	 * @param level the compliance level
+	 */
+	private void computeConditionalTypeConstraints(final Collection constraints, final int level) {
+		ITypeConstraint2 constraint= null;
+		for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
+			constraint= (ITypeConstraint2) iterator.next();
+			if (constraint instanceof ConditionalTypeConstraint) {
+				final ConditionalTypeConstraint conditional= (ConditionalTypeConstraint) constraint;
+				fModel.createEqualityConstraint(constraint.getLeft(), constraint.getRight());
+				fModel.createEqualityConstraint(conditional.getExpression(), constraint.getLeft());
+				fModel.createEqualityConstraint(conditional.getExpression(), constraint.getRight());
+			}
+		}
+	}
+
+	/**
 	 * Computes the initial type estimate for the specified constraint variable.
 	 * 
 	 * @param variable the constraint variable
 	 * @return the initial type estimate
 	 */
 	private ITypeSet computeInitialTypeEstimate(final ConstraintVariable2 variable) {
-		Assert.isNotNull(variable);
 		final TType type= variable.getType();
 		if (variable instanceof ImmutableTypeVariable2 || !type.equals(fModel.getSubType()))
 			return SuperTypeSet.createTypeSet(type);
@@ -81,14 +100,16 @@ public final class SuperTypeConstraintsSolver {
 	 * Computes the necessary equality constraints for non-covariant return types.
 	 * 
 	 * @param constraints the type constraints (element type: <code>ITypeConstraint2</code>)
+	 * @param level the compliance level
 	 */
-	private void computeNonCovariantConstraints(final Collection constraints) {
-		Assert.isNotNull(constraints);
-		ITypeConstraint2 constraint= null;
-		for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
-			constraint= (ITypeConstraint2) iterator.next();
-			if (constraint instanceof CovariantTypeConstraint)
-				fModel.createEqualityConstraint(constraint.getLeft(), constraint.getRight());
+	private void computeNonCovariantConstraints(final Collection constraints, final int level) {
+		if (level != AST.JLS3) {
+			ITypeConstraint2 constraint= null;
+			for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
+				constraint= (ITypeConstraint2) iterator.next();
+				if (constraint instanceof CovariantTypeConstraint)
+					fModel.createEqualityConstraint(constraint.getLeft(), constraint.getRight());
+			}
 		}
 	}
 
@@ -98,7 +119,6 @@ public final class SuperTypeConstraintsSolver {
 	 * @param variables the cast variables (element type: <code>CastVariable2</code>)
 	 */
 	private void computeObsoleteCasts(final Collection variables) {
-		Assert.isNotNull(variables);
 		fObsoleteCasts= new HashMap();
 		CastVariable2 variable= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
@@ -124,7 +144,6 @@ public final class SuperTypeConstraintsSolver {
 	 * @param variables the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
 	private void computeTypeEstimates(final Collection variables) {
-		Assert.isNotNull(variables);
 		ConstraintVariable2 variable= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
 			variable= (ConstraintVariable2) iterator.next();
@@ -152,7 +171,6 @@ public final class SuperTypeConstraintsSolver {
 	 * @param variables the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
 	private void computeTypeOccurrences(final Collection variables) {
-		Assert.isNotNull(variables);
 		fTypeOccurrences= new HashMap();
 		TType type= null;
 		ITypeSet estimate= null;
@@ -209,11 +227,11 @@ public final class SuperTypeConstraintsSolver {
 	 * @param constraints the type constraints to process (element type: <code>ITypeConstraint2</code>)
 	 */
 	private void processConstraints(final Collection constraints) {
-		Assert.isNotNull(constraints);
+		final int level= fModel.getCompliance();
 		ITypeConstraint2 constraint= null;
 		for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
 			constraint= (ITypeConstraint2) iterator.next();
-			if (fModel.isUsingCovariance() || !(constraint instanceof CovariantTypeConstraint)) {
+			if ((level == AST.JLS3 || !(constraint instanceof CovariantTypeConstraint)) && !(constraint instanceof ConditionalTypeConstraint)) {
 				final ConstraintVariable2 leftVariable= constraint.getLeft();
 				final ITypeSet leftEstimate= leftVariable.getTypeEstimate();
 				final TypeEquivalenceSet set= leftVariable.getTypeEquivalenceSet();
@@ -232,8 +250,13 @@ public final class SuperTypeConstraintsSolver {
 	public final void solveConstraints() {
 		fProcessable= new LinkedList();
 		final Collection variables= fModel.getConstraintVariables();
-		if (!fModel.isUsingCovariance())
-			computeNonCovariantConstraints(variables);
+		final Collection constraints= fModel.getTypeConstraints();
+		final int level= fModel.getCompliance();
+		computeNonCovariantConstraints(constraints, level);
+
+		// TODO: use most specific common type for AST.JLS3
+		computeConditionalTypeConstraints(constraints, level);
+
 		computeTypeEstimates(variables);
 		fProcessable.addAll(variables);
 		ConstraintVariable2 variable= null;
