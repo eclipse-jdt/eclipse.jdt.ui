@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.MethodDeclarationMatch;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -96,6 +97,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		SearchPattern pattern= createReferenceSearchPattern();
 		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, createRefactoringScope(),
 			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1));
+		//Workaround bug 39700. Manually add declaration match:
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -103,16 +105,16 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 				IResource resource= group.getResource();
 				int start= getMethod().getNameRange().getOffset();
 				int length= getMethod().getNameRange().getLength();
-				SearchMatch declarationResult= new SearchMatch(getMethod(), SearchMatch.A_ACCURATE, start, length, SearchEngine.getDefaultSearchParticipant(), resource);
-				group.add(declarationResult);
+				MethodDeclarationMatch declarationMatch= new MethodDeclarationMatch(getMethod(), SearchMatch.A_ACCURATE, start, length, SearchEngine.getDefaultSearchParticipant(), resource);
+				group.add(declarationMatch);
 				break;//no need to go further
 			}	
 		}
 		return groups;	
 	}
 		
-	/* non java-doc
-	 * overriding RenameMethodrefactoring@addOccurrences
+	/*
+	 * @see RenameMethodProcessor#addOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
@@ -125,8 +127,8 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		return getMethod().getCompilationUnit();
 	}
 
-	/* non java-doc
-	 * overriding RenameMethodrefactoring@createSearchPattern
+	/*
+	 * @see RenameMethodProcessor#createOccurrenceSearchPattern(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	SearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$

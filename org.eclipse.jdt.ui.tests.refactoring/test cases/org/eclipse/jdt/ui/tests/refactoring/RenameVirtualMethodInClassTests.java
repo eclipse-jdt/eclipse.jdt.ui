@@ -255,10 +255,9 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		helper1_0("m", "k", new String[]{"QString;"});
 	}
 	
-	public void testFail35() throws Exception{
-		printTestDisabledMessage("does not detect introduced compile error - method declared in enclosing and inheritance hierarchy");
-//		helper1();
-	}
+//	//test removed - was invalid
+//	public void testFail35() throws Exception{
+//	}
 	
 	public void testFail36() throws Exception{
 		helper1();
@@ -269,8 +268,12 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void testFail38() throws Exception{
-		printTestDisabledMessage("must fix - nested type");
-		//helper1();
+		//printTestDisabledMessage("must fix - nested type");
+		helper1();
+	}
+	
+	public void testFail39() throws Exception{
+		helper1();
 	}
 	
 	public void test1() throws Exception{
@@ -307,8 +310,8 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}		
 	
 	public void test17() throws Exception{
-		printTestDisabledMessage("overloading");
-		//helper2_0("m", "kk", new String[]{Signature.SIG_INT});
+		//printTestDisabledMessage("overloading");
+		helper2_0("m", "kk", new String[]{Signature.SIG_INT});
 	}		
 	
 	public void test18() throws Exception{
@@ -411,6 +414,10 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	public void test38() throws Exception {
 		printTestDisabledMessage("difficult to set up test in current testing framework");
 //		helper2();
+	}
+	
+	public void test39() throws Exception {
+		helper2();
 	}
 	
 	//anonymous inner class

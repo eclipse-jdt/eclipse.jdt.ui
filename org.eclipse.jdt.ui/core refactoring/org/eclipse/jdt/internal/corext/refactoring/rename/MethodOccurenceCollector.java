@@ -12,11 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
@@ -39,10 +35,7 @@ final class MethodOccurenceCollector extends CollectingSearchRequestor {
 			if (unit == null)
 				return;
 			
-			IResource res= match.getResource();
-			int accuracy= match.getAccuracy();
 			int start= match.getOffset();
-			IJavaElement element= (IJavaElement) match.getElement();
 			
 			String matchText= unit.getBuffer().getText(start, match.getLength());
 			//TODO: use Scanner
@@ -54,13 +47,16 @@ final class MethodOccurenceCollector extends CollectingSearchRequestor {
 		
 			int theDotIndex= matchText.lastIndexOf("."); //$NON-NLS-1$
 			if (theDotIndex == -1) {
-				super.acceptSearchMatch(new SearchMatch(element, accuracy, start, fNameLength, SearchEngine.getDefaultSearchParticipant(), res));
+				match.setLength(fNameLength);
+				super.acceptSearchMatch(match);
 			} else {
 				start= start + theDotIndex + 1;
 				for (int i= theDotIndex + 1; i < matchText.length() && Strings.isIndentChar(matchText.charAt(i)); i++) {
 					start++;
 				}
-				super.acceptSearchMatch(new SearchMatch(element, accuracy, start, fNameLength, SearchEngine.getDefaultSearchParticipant(), res));
+				match.setOffset(start);
+				match.setLength(fNameLength);
+				super.acceptSearchMatch(match);
 			}
 		}	
 	}

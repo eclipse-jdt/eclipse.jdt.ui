@@ -13,5 +13,8 @@ class A {
 		void f(){
 			m();
 		}
+		public void foo() {
+			
+		}
 	}
 }

@@ -1,7 +1,7 @@
-//can't rename A.m to k
+//can rename A.m to k
 package p;
 class A{
-	void m(){
+	void k(){
 	}
 }
 class X{
@@ -12,7 +12,7 @@ class X{
 		}
 		class C extends A{
 			void f(){
-				m();
+				k();
 			}
 		}	
 	}

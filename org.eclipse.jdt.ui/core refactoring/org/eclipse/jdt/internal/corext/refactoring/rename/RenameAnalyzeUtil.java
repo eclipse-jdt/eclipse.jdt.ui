@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -20,8 +24,13 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.search.FieldDeclarationMatch;
+import org.eclipse.jdt.core.search.MethodDeclarationMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jface.text.IRegion;
@@ -57,10 +66,7 @@ class RenameAnalyzeUtil {
 			for (int j= 0; j < oldSearchResults.length; j++) {
 				SearchMatch oldSearchResult= oldSearchResults[j];
 				if (! RenameAnalyzeUtil.existsInNewOccurrences(oldSearchResult, newOccurrences, manager)){
-					ISourceRange range= new SourceRange(oldSearchResult.getOffset(), oldSearchResult.getLength());
-					RefactoringStatusContext context= JavaStatusContext.create(cunit, range); //XXX
-					String message= RefactoringCoreMessages.getFormattedString("RenameAnalyzeUtil.shadows", cunit.getElementName());	//$NON-NLS-1$
-					result.addError(message , context);
+					addShadowsError(cunit, oldSearchResult, result);
 				}	
 			}
 		}
@@ -96,13 +102,19 @@ class RenameAnalyzeUtil {
 		ICompilationUnit[] newWorkingCopies= new ICompilationUnit[compilationUnitsToModify.length];
 		for (int i= 0; i < compilationUnitsToModify.length; i++) {
 			ICompilationUnit cu= compilationUnitsToModify[i];
-			newWorkingCopies[i]= cu.getWorkingCopy(owner, null, null);
-			String previewContent= manager.get(cu).getPreviewContent(new NullProgressMonitor());
-			newWorkingCopies[i].getBuffer().setContents(previewContent);
-			newWorkingCopies[i].reconcile(ICompilationUnit.NO_AST, false, owner, new SubProgressMonitor(pm, 1));
+			newWorkingCopies[i]= createNewWorkingCopy(cu, manager, owner, new SubProgressMonitor(pm, 1));
 		}
 		pm.done();
 		return newWorkingCopies;
+	}
+	
+	static ICompilationUnit createNewWorkingCopy(ICompilationUnit cu, TextChangeManager manager,
+			WorkingCopyOwner owner, SubProgressMonitor pm) throws CoreException {
+		ICompilationUnit newWc= cu.getWorkingCopy(owner, null, null);
+		String previewContent= manager.get(cu).getPreviewContent(new NullProgressMonitor());
+		newWc.getBuffer().setContents(previewContent);
+		newWc.reconcile(ICompilationUnit.NO_AST, false, owner, pm);
+		return newWc;
 	}
 	
 	private static boolean existsInNewOccurrences(SearchMatch searchResult, SearchResultGroup[] newOccurrences, TextChangeManager manager) {
@@ -154,5 +166,142 @@ class RenameAnalyzeUtil {
 				return newOccurrences[i];
 		}
 		return null;
+	}
+	
+//--- find missing changes in BOTH directions
+	
+	//TODO: Currently filters out declarations (MethodDeclarationMatch, FieldDeclarationMatch).
+	//Long term solution: only pass reference search results in.
+	static RefactoringStatus analyzeRenameChanges2(TextChangeManager manager,
+			SearchResultGroup[] oldReferences, SearchResultGroup[] newReferences, String newElementName) {
+		RefactoringStatus result= new RefactoringStatus();
+		
+		HashMap cuToNewResults= new HashMap(newReferences.length);
+		for (int i1= 0; i1 < newReferences.length; i1++) {
+			ICompilationUnit cu= newReferences[i1].getCompilationUnit();
+			if (cu != null)
+				cuToNewResults.put(cu.getPrimary(), newReferences[i1].getSearchResults());
+		}
+		
+		for (int i= 0; i < oldReferences.length; i++) {
+			SearchResultGroup oldGroup= oldReferences[i];
+			SearchMatch[] oldMatches= oldGroup.getSearchResults();
+			ICompilationUnit cu= oldGroup.getCompilationUnit();
+			if (cu == null)
+				continue;
+			
+			SearchMatch[] newSearchMatches= (SearchMatch[]) cuToNewResults.remove(cu);
+			if (newSearchMatches == null) {
+				for (int j = 0; j < oldMatches.length; j++) {
+					SearchMatch oldMatch = oldMatches[j];
+					addShadowsError(cu, oldMatch, result);
+				}
+			} else {
+				analyzeChanges(cu, manager.get(cu), oldMatches, newSearchMatches, newElementName, result);
+			}
+		}
+		
+		for (Iterator iter= cuToNewResults.keySet().iterator(); iter.hasNext();) {
+			ICompilationUnit cu= (ICompilationUnit) iter.next();
+			SearchMatch[] newSearchMatches= (SearchMatch[]) cuToNewResults.remove(cu);
+			for (int i= 0; i < newSearchMatches.length; i++) {
+				SearchMatch newMatch= newSearchMatches[i];
+				addReferenceShadowedError(cu, newMatch, newElementName, result);
+			}
+		}
+		return result;
+	}
+
+	private static void analyzeChanges(ICompilationUnit cu, TextChange change,
+			SearchMatch[] oldMatches, SearchMatch[] newMatches, String newElementName, RefactoringStatus result) {
+		Map updatedOldOffsets= getUpdatedChangeOffsets(change, oldMatches);
+		for (int i= 0; i < newMatches.length; i++) {
+			SearchMatch newMatch= newMatches[i];
+			Integer offsetInNew= new Integer(newMatch.getOffset());
+			SearchMatch oldMatch= (SearchMatch) updatedOldOffsets.remove(offsetInNew);
+			if (oldMatch == null) {
+				addReferenceShadowedError(cu, newMatch, newElementName, result);
+			}
+		}
+		for (Iterator iter= updatedOldOffsets.values().iterator(); iter.hasNext();) {
+			// remaining old matches are not found any more -> they have been shadowed
+			SearchMatch oldMatch= (SearchMatch) iter.next();
+			addShadowsError(cu, oldMatch, result);
+		}
+	}
+	
+	/** @return Map &lt;Integer updatedOffset, SearchMatch oldMatch&gt; */
+	private static Map getUpdatedChangeOffsets(TextChange change, SearchMatch[] oldMatches) {
+		Map/*<Integer updatedOffset, SearchMatch oldMatch>*/ updatedOffsets= new HashMap();
+		Map oldToUpdatedOffsets= getEditChangeOffsetUpdates(change);
+		for (int i= 0; i < oldMatches.length; i++) {
+			SearchMatch oldMatch= oldMatches[i];
+			Integer updatedOffset= (Integer) oldToUpdatedOffsets.get(new Integer(oldMatch.getOffset()));
+			if (updatedOffset == null)
+				updatedOffset= new Integer(-1); //match not updated
+			updatedOffsets.put(updatedOffset, oldMatch);
+		}
+		return updatedOffsets;
+	}
+
+	/** @return Map &lt;Integer oldOffset, Integer updatedOffset&gt; */
+	private static Map getEditChangeOffsetUpdates(TextChange change) {
+		TextEditChangeGroup[] editChanges= change.getTextEditChangeGroups();
+		Map/*<oldOffset, newOffset>*/ offsetUpdates= new HashMap(editChanges.length);
+		for (int i= 0; i < editChanges.length; i++) {
+			TextEditChangeGroup editChange= editChanges[i];
+			IRegion oldRegion= editChange.getRegion();
+			if (oldRegion == null)
+				continue;
+			IRegion updatedRegion= TextEdit.getCoverage(change.getPreviewEdits(editChange.getTextEdits()));
+			if (updatedRegion == null)
+				continue;
+			
+			offsetUpdates.put(new Integer(oldRegion.getOffset()), new Integer(updatedRegion.getOffset()));
+		}
+		return offsetUpdates;
+	}
+
+	private static void addReferenceShadowedError(ICompilationUnit cu, SearchMatch newMatch, String newElementName, RefactoringStatus result) {
+		//Found a new match with no corresponding old match.
+		//-> The new match is a reference which was pointing to another element,
+		//but that other element has been shadowed
+		
+		//TODO: should not have to filter declarations:
+		if (newMatch instanceof MethodDeclarationMatch || newMatch instanceof FieldDeclarationMatch)
+			return;
+		ISourceRange range= getOldSourceRange(newMatch);
+		RefactoringStatusContext context= JavaStatusContext.create(cu, range);
+		String message= RefactoringCoreMessages.getFormattedString(
+				"RenameAnalyzeUtil.reference_shadowed", //$NON-NLS-1$
+				new String[] {cu.getElementName(), newElementName});
+		result.addError(message, context);
+	}
+
+	private static ISourceRange getOldSourceRange(SearchMatch newMatch) {
+		// cannot transfom offset in preview to offset in original -> just show enclosing method
+		IJavaElement newMatchElement= (IJavaElement) newMatch.getElement();
+		IJavaElement primaryElement= newMatchElement.getPrimaryElement();
+		ISourceRange range= null;
+		if (primaryElement.exists() && primaryElement instanceof ISourceReference) {
+			try {
+				range= ((ISourceReference) primaryElement).getSourceRange();
+			} catch (JavaModelException e) {
+				// can live without source range
+			}
+		}
+		return range;
+	}
+
+	private static void addShadowsError(ICompilationUnit cu, SearchMatch oldMatch, RefactoringStatus result) {
+		// Old match not found in new matches -> reference has been shadowed
+		
+		//TODO: should not have to filter declarations:
+		if (oldMatch instanceof MethodDeclarationMatch || oldMatch instanceof FieldDeclarationMatch)
+			return;
+		ISourceRange range= new SourceRange(oldMatch.getOffset(), oldMatch.getLength());
+		RefactoringStatusContext context= JavaStatusContext.create(cu, range);
+		String message= RefactoringCoreMessages.getFormattedString("RenameAnalyzeUtil.shadows", cu.getElementName()); //$NON-NLS-1$
+		result.addError(message, context);
 	}
 }
