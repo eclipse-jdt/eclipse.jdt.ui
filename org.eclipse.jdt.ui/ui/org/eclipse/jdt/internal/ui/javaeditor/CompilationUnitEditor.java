@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
@@ -502,10 +503,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			new OpenViewActionGroup(this), 
 			new ShowActionGroup(this), 
 			new GenerateActionGroup(this),
-			new RefactorActionGroup(this)
+			new RefactorActionGroup(this),
+			new JavaSearchActionGroup(this)
 		});		
 	}
-	
+
 	/*
 	 * @see JavaEditor#getElementAt(int)
 	 */

@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
  */
 public class GroupContext {
 
-	private IInputSelectionProvider fProvider;
+	private ISelectionProvider fProvider;
 	private Class fCommonSuperType;
 
 	/**
@@ -30,6 +30,15 @@ public class GroupContext {
 	 * given selection provider and input element.
 	 */
 	public GroupContext(IInputSelectionProvider provider) {
+		fProvider= provider;
+		Assert.isNotNull(fProvider);
+	} 
+
+	/**
+	 * Creates a new <code>ContributorContext</code> based on the
+	 * given selection provider and input element.
+	 */
+	public GroupContext(ISelectionProvider provider) {
 		fProvider= provider;
 		Assert.isNotNull(fProvider);
 	} 
@@ -45,7 +54,10 @@ public class GroupContext {
 	 * Returns the current input element.
 	 */
 	public Object getInput() {
-		return fProvider.getInput();
+		if (fProvider instanceof IInputSelectionProvider)
+			return ((IInputSelectionProvider)fProvider).getInput();
+		else
+			return null;
 	}
 	
 	/**

@@ -76,6 +76,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
@@ -670,7 +671,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				new ShowActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this), 
 				new RefactorActionGroup(this),
-				new GenerateActionGroup(this)});
+				new GenerateActionGroup(this),
+				new JavaSearchActionGroup(this, fSelectionProviderMediator)});
 		
 		fActionGroups.fillActionBars(getViewSite().getActionBars());
 	}

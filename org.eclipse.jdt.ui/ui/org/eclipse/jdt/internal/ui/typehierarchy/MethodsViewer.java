@@ -39,7 +39,6 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
@@ -67,8 +66,6 @@ public class MethodsViewer extends ProblemTableViewer {
 	
 	private OpenAction fOpen;
 	private ShowInheritedMembersAction fShowInheritedMembersAction;
-	// We should use the JavaSearchActionGroup as soon as is is following the new stanadard.
-	private ContextMenuGroup[] fStandardGroups;
 	
 	public MethodsViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
@@ -89,8 +86,6 @@ public class MethodsViewer extends ProblemTableViewer {
 		
 		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);
 		showInheritedMethods(false);
-		
-		fStandardGroups= new ContextMenuGroup[] {new JavaSearchGroup()};
 		
 		setSorter(new JavaElementSorter());
 		
@@ -184,7 +179,6 @@ public class MethodsViewer extends ProblemTableViewer {
 	 * Should be called by the creator of the context menu
 	 */	
 	public void contributeToContextMenu(IMenuManager menu) {
-		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}
 
 	/**

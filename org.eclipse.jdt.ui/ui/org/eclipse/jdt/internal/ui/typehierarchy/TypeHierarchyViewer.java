@@ -31,16 +31,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	
 	private OpenAction fOpen;
-	// We should use the JavaSearchActionGroup as soon as is is following the new stanadard.
-	private ContextMenuGroup[] fStandardGroups;
 			
 	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
 		super(new Tree(parent, SWT.SINGLE));
@@ -75,8 +72,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 			}
 		});
 		
-		fStandardGroups= new ContextMenuGroup[] {new JavaSearchGroup()};
-		
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 	}
 	
@@ -97,7 +92,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	 * Should be called by the creator of the context menu
 	 */	
 	public void contributeToContextMenu(IMenuManager menu) {
-		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}
 
 	/**
@@ -153,7 +147,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		return null;
 	}	
 			
-		
 	/**
 	 * Returns true if the hierarchy contains element the element.
 	 */ 
