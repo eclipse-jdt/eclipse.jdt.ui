@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -314,7 +315,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (Modifier.isPrivate(modifiers)) {
 				return false; // imports for privates are not required
 			}
-			ITypeBinding currTypeBinding= ASTResolving.getBindingOfParentType(ref);
+			ITypeBinding currTypeBinding= Bindings.getBindingOfParentType(ref);
 			if (currTypeBinding == null) {
 				return false; // not in a type
 			}

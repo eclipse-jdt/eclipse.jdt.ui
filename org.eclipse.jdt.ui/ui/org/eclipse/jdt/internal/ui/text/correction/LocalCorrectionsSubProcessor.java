@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -94,7 +95,7 @@ public class LocalCorrectionsSubProcessor {
 			if (binding != null && decl instanceof MethodDeclaration) {
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
 	
-				binding= ASTResolving.normalizeTypeBinding(binding);
+				binding= Bindings.normalizeTypeBinding(binding);
 				if (binding == null) {
 					binding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 				}
@@ -145,7 +146,7 @@ public class LocalCorrectionsSubProcessor {
 	
 
 	private static boolean canCast(String castTarget, ITypeBinding bindingToCast) {
-		bindingToCast= ASTResolving.normalizeTypeBinding(bindingToCast);
+		bindingToCast= Bindings.normalizeTypeBinding(bindingToCast);
 		if (bindingToCast == null) {
 			return false;
 		}
@@ -458,7 +459,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}        
 		if (qualifier != null) {
-			ITypeBinding instanceTypeBinding= ASTResolving.normalizeTypeBinding(qualifier.resolveTypeBinding());
+			ITypeBinding instanceTypeBinding= Bindings.normalizeTypeBinding(qualifier.resolveTypeBinding());
 			if (instanceTypeBinding != null && instanceTypeBinding != declaringTypeBinding) {
 				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
 				

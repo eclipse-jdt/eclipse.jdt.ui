@@ -25,11 +25,14 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -497,6 +500,42 @@ public class Bindings {
 		int arrayCount= Signature.getArrayCount(s);
 		return s.charAt(arrayCount) == Signature.C_RESOLVED;
 	}
+
+	/**
+	 * Normalizes a type binding received from an expression to a type binding that can be used in a declaration signature. 
+	 * Anonymous types are normalized, to the super class or interface. For null or void bindings
+	 * <code>null</code> is returned. 
+	 */
+	public static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
+		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) { //$NON-NLS-1$
+			if (binding.isAnonymous()) {
+				ITypeBinding[] baseBindings= binding.getInterfaces();
+				if (baseBindings.length > 0) {
+					return baseBindings[0];
+				}
+				return binding.getSuperclass();
+			}
+			return binding;
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the type binding of the node's parent type declararation
+	 * @param node
+	 * @return CompilationUnit
+	 */
+	public static ITypeBinding getBindingOfParentType(ASTNode node) {
+		while (node != null) {
+			if (node instanceof TypeDeclaration) {
+				return ((TypeDeclaration) node).resolveBinding();
+			} else if (node instanceof AnonymousClassDeclaration) {
+				return ((AnonymousClassDeclaration) node).resolveBinding();
+			}
+			node= node.getParent();
+		}
+		return null;
+	}				
 
 	
 	

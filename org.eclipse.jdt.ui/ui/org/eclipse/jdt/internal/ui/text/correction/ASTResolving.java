@@ -25,23 +25,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class ASTResolving {
 	
-	public static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
-		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) { //$NON-NLS-1$
-			if (binding.isAnonymous()) {
-				ITypeBinding[] baseBindings= binding.getInterfaces();
-				if (baseBindings.length > 0) {
-					return baseBindings[0];
-				}
-				return binding.getSuperclass();
-			}
-			return binding;
-		}
-		return null;
-	}
-	
-	
 	public static ITypeBinding guessBindingForReference(ASTNode node) {
-		return normalizeTypeBinding(getPossibleReferenceBinding(node));
+		return Bindings.normalizeTypeBinding(getPossibleReferenceBinding(node));
 	}
 		
 	private static ITypeBinding getPossibleReferenceBinding(ASTNode node) {	
@@ -197,7 +182,7 @@ public class ASTResolving {
 	}
 	
     public static ITypeBinding guessBindingForTypeReference(ASTNode node) {
-    	return normalizeTypeBinding(getPossibleTypeBinding(node));
+    	return Bindings.normalizeTypeBinding(getPossibleTypeBinding(node));
     }
     	
     private static ITypeBinding getPossibleTypeBinding(ASTNode node) {
@@ -278,24 +263,6 @@ public class ASTResolving {
 		}
 		return node;
 	}	
-	
-	/**
-	 * Returns the type binding of the node's parent type declararation
-	 * @param node
-	 * @return CompilationUnit
-	 */
-	public static ITypeBinding getBindingOfParentType(ASTNode node) {
-		while (node != null) {
-			if (node instanceof TypeDeclaration) {
-				return ((TypeDeclaration) node).resolveBinding();
-			} else if (node instanceof AnonymousClassDeclaration) {
-				return ((AnonymousClassDeclaration) node).resolveBinding();
-			}
-			node= node.getParent();
-		}
-		return null;
-	}		
-	
 	
 	public static Statement findParentStatement(ASTNode node) {
 		while ((node != null) && (!(node instanceof Statement))) {

@@ -144,7 +144,7 @@ public class ModifierCorrectionSubProcessor {
 	
 	
 	private static int getNeededVisibility(ASTNode currNode, ITypeBinding targetType) {
-		ITypeBinding currNodeBinding= ASTResolving.getBindingOfParentType(currNode);
+		ITypeBinding currNodeBinding= Bindings.getBindingOfParentType(currNode);
 		if (currNodeBinding == null) { // import
 			return Modifier.PUBLIC;
 		}

@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
@@ -255,7 +256,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	}
 	
 	private Type getParameterType(AST ast, Expression elem) throws CoreException {
-		ITypeBinding binding= ASTResolving.normalizeTypeBinding(elem.resolveTypeBinding());
+		ITypeBinding binding= Bindings.normalizeTypeBinding(elem.resolveTypeBinding());
 		if (binding != null) {
 			String typeName= addImport(binding);
 			return ASTNodeFactory.newType(ast, typeName);

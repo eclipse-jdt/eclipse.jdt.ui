@@ -173,7 +173,7 @@ public class ScopeAnalyzer {
 		if (node instanceof TypeDeclaration || node instanceof AnonymousClassDeclaration) {
 			addLocalDeclarations(node.getParent(), flags);
 			
-			ITypeBinding parentTypeBidning= ASTResolving.getBindingOfParentType(node.getParent());
+			ITypeBinding parentTypeBidning= Bindings.getBindingOfParentType(node.getParent());
 			if (parentTypeBidning != null) {
 				addTypeDeclarations(parentTypeBidning, flags);
 			}
@@ -211,7 +211,7 @@ public class ScopeAnalyzer {
 				return null;			
 			case ASTNode.SUPER_FIELD_ACCESS:
 			case ASTNode.SUPER_METHOD_INVOCATION:
-				ITypeBinding curr= ASTResolving.getBindingOfParentType(parent);
+				ITypeBinding curr= Bindings.getBindingOfParentType(parent);
 				return curr.getSuperclass();
 			default:
 				return null;
@@ -223,7 +223,7 @@ public class ScopeAnalyzer {
 			ITypeBinding binding= getQualifier(selector);
 			if (binding == null) {
 				addLocalDeclarations(selector, flags);
-				binding= ASTResolving.getBindingOfParentType(selector);
+				binding= Bindings.getBindingOfParentType(selector);
 			}
 			if (binding != null) {
 				addTypeDeclarations(binding, flags);
@@ -248,7 +248,7 @@ public class ScopeAnalyzer {
 		
 		try {
 			addLocalDeclarations(node, offset, flags);
-			ITypeBinding binding= ASTResolving.getBindingOfParentType(node);				
+			ITypeBinding binding= Bindings.getBindingOfParentType(node);				
 			if (binding != null) {
 				addTypeDeclarations(binding, flags);
 			}

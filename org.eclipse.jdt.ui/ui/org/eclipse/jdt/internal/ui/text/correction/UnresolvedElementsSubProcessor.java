@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -58,7 +59,7 @@ public class UnresolvedElementsSubProcessor {
 		
 		// type that defines the variable
 		ITypeBinding binding= null;
-		ITypeBinding declaringTypeBinding= ASTResolving.getBindingOfParentType(selectedNode);
+		ITypeBinding declaringTypeBinding= Bindings.getBindingOfParentType(selectedNode);
 		if (declaringTypeBinding == null) {
 			return;
 		}
@@ -150,7 +151,7 @@ public class UnresolvedElementsSubProcessor {
 			if (binding == null && senderBinding.isAnonymous()) {
 				ASTNode anonymDecl= astRoot.findDeclaringNode(senderBinding);
 				if (anonymDecl != null) {
-					senderBinding= ASTResolving.getBindingOfParentType(anonymDecl.getParent());
+					senderBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
 					if (!senderBinding.isAnonymous()) {
 						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { simpleName.getIdentifier(), senderBinding.getName() } ); //$NON-NLS-1$
 						image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
@@ -455,7 +456,7 @@ public class UnresolvedElementsSubProcessor {
 		if (sender != null) {
 			binding= sender.resolveTypeBinding();
 		} else {
-			binding= ASTResolving.getBindingOfParentType(invocationNode);
+			binding= Bindings.getBindingOfParentType(invocationNode);
 			if (isSuperInvocation && binding != null) {
 				binding= binding.getSuperclass();
 			}				
@@ -479,7 +480,7 @@ public class UnresolvedElementsSubProcessor {
 				if (binding.isAnonymous() && cu.equals(targetCU)) {
 					ASTNode anonymDecl= astRoot.findDeclaringNode(binding);
 					if (anonymDecl != null) {
-						binding= ASTResolving.getBindingOfParentType(anonymDecl.getParent());
+						binding= Bindings.getBindingOfParentType(anonymDecl.getParent());
 						if (!binding.isAnonymous()) {
 							String[] args= new String[] { sig, binding.getName() };
 							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", args); //$NON-NLS-1$
@@ -655,7 +656,7 @@ public class UnresolvedElementsSubProcessor {
 					int idx= indexSkipped[i];
 					Expression arg= (Expression) arguments.get(idx);
 					String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;
-					ITypeBinding newType= ASTResolving.normalizeTypeBinding(argTypes[idx]);
+					ITypeBinding newType= Bindings.normalizeTypeBinding(argTypes[idx]);
 					if (newType == null) {
 						newType= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 					}
@@ -697,7 +698,7 @@ public class UnresolvedElementsSubProcessor {
 		ITypeBinding[] params= new ITypeBinding[args.size()];
 		for (int i= 0; i < args.size(); i++) {
 			Expression expr= (Expression) args.get(i);
-			ITypeBinding curr= ASTResolving.normalizeTypeBinding(expr.resolveTypeBinding());
+			ITypeBinding curr= Bindings.normalizeTypeBinding(expr.resolveTypeBinding());
 			if (curr == null) {
 				curr= expr.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			}
@@ -821,7 +822,7 @@ public class UnresolvedElementsSubProcessor {
 			if (curr == null) {
 				return null;
 			}
-			curr= ASTResolving.normalizeTypeBinding(curr);
+			curr= Bindings.normalizeTypeBinding(curr);
 			if (curr == null) {
 				curr= expression.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			}
@@ -852,13 +853,13 @@ public class UnresolvedElementsSubProcessor {
 				arguments= creation.arguments();		
 			}
 		} else if (type == ASTNode.SUPER_CONSTRUCTOR_INVOCATION) {
-			ITypeBinding typeBinding= ASTResolving.getBindingOfParentType(selectedNode);
+			ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
 			if (typeBinding != null && !typeBinding.isAnonymous()) {
 				targetBinding= typeBinding.getSuperclass();
 				arguments= ((SuperConstructorInvocation) selectedNode).arguments();
 			}
 		} else if (type == ASTNode.CONSTRUCTOR_INVOCATION) {
-			ITypeBinding typeBinding= ASTResolving.getBindingOfParentType(selectedNode);
+			ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
 			if (typeBinding != null && !typeBinding.isAnonymous()) {
 				targetBinding= typeBinding;
 				arguments= ((ConstructorInvocation) selectedNode).arguments();

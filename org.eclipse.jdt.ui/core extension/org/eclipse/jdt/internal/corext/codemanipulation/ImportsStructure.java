@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
@@ -40,7 +41,6 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -397,7 +397,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * to a conflict. 
 	 */
 	public String addImport(ITypeBinding binding) {
-		ITypeBinding normalizedBinding= ASTResolving.normalizeTypeBinding(binding);
+		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(binding);
 		if (normalizedBinding == null) {
 			return binding.getName();
 		}
@@ -522,7 +522,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * Removes an import from the structure.
 	 */
 	public boolean removeImport(ITypeBinding binding) {
-		binding= ASTResolving.normalizeTypeBinding(binding);
+		binding= Bindings.normalizeTypeBinding(binding);
 		if (binding == null) {
 			return false;
 		}		

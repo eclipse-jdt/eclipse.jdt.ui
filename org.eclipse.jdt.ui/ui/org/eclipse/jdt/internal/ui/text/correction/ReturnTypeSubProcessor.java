@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -46,7 +47,7 @@ public class ReturnTypeSubProcessor {
 				ReturnStatement node= (ReturnStatement) fResult.get(i);
 				Expression expr= node.getExpression();
 				if (expr != null) {
-					ITypeBinding binding= ASTResolving.normalizeTypeBinding(expr.resolveTypeBinding());
+					ITypeBinding binding= Bindings.normalizeTypeBinding(expr.resolveTypeBinding());
 					if (binding != null) {
 						return binding;
 					} else {
@@ -111,7 +112,7 @@ public class ReturnTypeSubProcessor {
 			ReturnStatement returnStatement= (ReturnStatement) selectedNode;
 			Expression expr= returnStatement.getExpression();
 			if (expr != null) {
-				ITypeBinding binding= ASTResolving.normalizeTypeBinding(expr.resolveTypeBinding());
+				ITypeBinding binding= Bindings.normalizeTypeBinding(expr.resolveTypeBinding());
 				if (binding == null) {
 					binding= selectedNode.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 				}
@@ -170,7 +171,7 @@ public class ReturnTypeSubProcessor {
 			decl.accept(eval);
 
 			ITypeBinding typeBinding= eval.getTypeBinding(decl.getAST());
-			typeBinding= ASTResolving.normalizeTypeBinding(typeBinding);
+			typeBinding= Bindings.normalizeTypeBinding(typeBinding);
 
 			ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
 			AST ast= astRoot.getAST();
