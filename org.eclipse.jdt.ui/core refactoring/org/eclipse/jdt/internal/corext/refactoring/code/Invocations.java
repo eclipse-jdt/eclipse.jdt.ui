@@ -29,7 +29,7 @@ public class Invocations {
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				return ((SuperMethodInvocation)invocation).arguments();
 			default:
-				Assert.isTrue(false, "Should not happen.");
+				Assert.isTrue(false, "Should not happen."); //$NON-NLS-1$
 				return null;
 		}
 	}
@@ -41,7 +41,7 @@ public class Invocations {
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				return null;
 			default:
-				Assert.isTrue(false, "Should not happen.");
+				Assert.isTrue(false, "Should not happen."); //$NON-NLS-1$
 				return null;
 		}
 	}
@@ -58,7 +58,7 @@ public class Invocations {
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				return ((SuperMethodInvocation)invocation).getName();
 			default:
-				Assert.isTrue(false, "Should not happen.");
+				Assert.isTrue(false, "Should not happen."); //$NON-NLS-1$
 				return null;
 		}
 	}
