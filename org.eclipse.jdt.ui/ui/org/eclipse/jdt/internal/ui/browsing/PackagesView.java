@@ -109,5 +109,14 @@ public class PackagesView extends JavaBrowsingPart {
 			default:
 				return findElementToSelect(je.getParent());
 		}
-	}	
+	}
+	
+		
+	/**
+	 * @see IWorkbenchPart#getTitle()
+	 */
+	public String getTitle() {
+		return JavaBrowsingMessages.getString("JavaBrowsing.packageView.title"); //$NON-NLS-1$
+	}
+
 }
