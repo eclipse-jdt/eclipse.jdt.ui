@@ -19,17 +19,6 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
  */
 public class RefactoringStatusEntry{
 	
-	/**
-	 * A <code>Context<code> can be used to annotate a <code>RefactoringStatusEntry</code>with 
-	 * additional information presentable in the UI.
-	 */
-	public static class Context {
-	
-		/** A singleton for the null context */
-		public static final Context NULL_CONTEXT= new Context();
-		
-	}
-
 	private String fMessage;
 	private int fSeverity;
 	private Context fContext;

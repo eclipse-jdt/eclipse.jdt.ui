@@ -5,11 +5,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
 import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.ISourceRange;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
+import org.eclipse.jdt.core.ISourceRange;
 
 /**
  * A file context can be used to annotate a </code>RefactoringStatusEntry<code> with
