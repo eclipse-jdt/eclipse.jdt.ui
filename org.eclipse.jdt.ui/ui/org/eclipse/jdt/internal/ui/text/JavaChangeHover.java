@@ -97,8 +97,7 @@ public class JavaChangeHover extends LineChangeHover  {
 			return IDocument.DEFAULT_CONTENT_TYPE;
 		try {
 			ITypedRegion region= TextUtilities.getPartition(doc, fPartitioning, doc.getLineOffset(startLine) - 1);
-			if (region != null)
-				return region.getType();
+			return region.getType();
 		} catch (BadLocationException e) {
 		}
 		return IDocument.DEFAULT_CONTENT_TYPE;

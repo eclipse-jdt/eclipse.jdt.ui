@@ -197,8 +197,6 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		throws CoreException, BadLocationException
 	{
 		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset);
-		if (partition == null)
-			return null;
 		ISourceRange sourceRange= method.getSourceRange();
 		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
 			return null;
@@ -254,8 +252,6 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			IRegion line= document.getLineInformation(lineIndex);
 			ITypedRegion partition= TextUtilities.getPartition(document, partitioning, commandOffset);
-			if (partition == null)
-				return false;
 			if (document.getLineOffset(lineIndex) >= partition.getOffset() + partition.getLength())
 				return false;
 
@@ -310,8 +306,6 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			}
 
 			ITypedRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset);
-			if (partition == null)
-				return;			
 			int partitionStart= partition.getOffset();
 			int partitionEnd= partition.getLength() + partitionStart;			
 			

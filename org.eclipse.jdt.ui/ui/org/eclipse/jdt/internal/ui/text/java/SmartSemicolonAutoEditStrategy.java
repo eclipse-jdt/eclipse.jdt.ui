@@ -628,7 +628,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		
 		try {
 			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position);
-			return region != null && region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
+			return region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
 			
 		} catch (BadLocationException e) {
 		}
@@ -846,17 +846,15 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 		try {
 			ITypedRegion partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
-			if (partition != null) {
-				validPosition= getValidPositionForPartition(document, partition, eol);
-				while (validPosition == -1) {
-					nextPartitionPos= partition.getOffset() - 1;
-					if (nextPartitionPos <= docOffset) {
-						validPosition= docOffset;
-						break;
-					}
-					partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
-					validPosition= getValidPositionForPartition(document, partition, eol);
+			validPosition= getValidPositionForPartition(document, partition, eol);
+			while (validPosition == -1) {
+				nextPartitionPos= partition.getOffset() - 1;
+				if (nextPartitionPos <= docOffset) {
+					validPosition= docOffset;
+					break;
 				}
+				partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
+				validPosition= getValidPositionForPartition(document, partition, eol);
 			}
 		} catch (BadLocationException e) {
 		}

@@ -364,7 +364,7 @@ public class JavadocView extends AbstractInfoView {
 					return null;
 				
 				ITypedRegion typedRegion= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, textSelection.getOffset());
-				if (typedRegion != null && IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
+				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
 					return TextSelectionConverter.getElementAtOffset((JavaEditor)part, textSelection);
 				else
 					return null;

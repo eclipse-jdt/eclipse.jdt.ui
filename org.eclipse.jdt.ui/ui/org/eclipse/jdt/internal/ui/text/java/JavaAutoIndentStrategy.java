@@ -297,7 +297,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				int start= d.getLineOffset(line);
 
 				ITypedRegion region= TextUtilities.getPartition(d, fPartitioning, start);
-				if (region != null && IJavaPartitions.JAVA_DOC.equals(region.getType()))
+				if (IJavaPartitions.JAVA_DOC.equals(region.getType()))
 					start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
 
 				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
@@ -635,7 +635,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		
 		try {
 			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position);
-			return region != null && region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
+			return region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
 			
 		} catch (BadLocationException e) {
 		}
@@ -1018,13 +1018,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 			// if line is at end of a javadoc comment, take the indent from the comment's begin line
 			ITypedRegion typedRegion= TextUtilities.getPartition(document, fPartitioning, start);
-			if (typedRegion != null) {
 			if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType())) {
 				start= document.getLineInformationOfOffset(typedRegion.getOffset()).getOffset();
 			} else if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(typedRegion.getType())) {
 				buffer.append(COMMENT);
 				start += 2;
-			}
 			}
 			
 			int whiteend= findEndOfWhiteSpace(document, start, command.offset);

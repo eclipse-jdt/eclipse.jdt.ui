@@ -156,7 +156,7 @@ public class RemoveBlockCommentAction extends TextEditorAction {
 		try {
 			
 			ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, selection.getOffset() + selection.getLength());
-			if (region != null && region.getType() == IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
+			if (region.getType() == IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 				return region;
 				
 		} catch (BadLocationException e) {

@@ -96,9 +96,6 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	private void javaStringIndentAfterNewLine(IDocument document, DocumentCommand command) throws BadLocationException {
 
 		ITypedRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset);
-		if (partition == null)
-			return;
-		
 		int offset= partition.getOffset();
 		int length= partition.getLength();
 
