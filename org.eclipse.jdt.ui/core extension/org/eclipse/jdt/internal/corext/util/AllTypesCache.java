@@ -223,8 +223,9 @@ public class AllTypesCache {
 			for (int i= index - 1; i>= 0; i--) {
 				TypeInfo curr= allTypes[i];
 				if (simpleTypeName.equals(curr.getTypeName())) {
-					if (namesFound.add(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
+					if (!namesFound.contains(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
 						result.add(curr);
+						namesFound.add(curr.getFullyQualifiedName());
 					}
 				} else {
 					break;
@@ -234,8 +235,9 @@ public class AllTypesCache {
 			for (int i= index; i < allTypes.length; i++) {
 				TypeInfo curr= allTypes[i];
 				if (simpleTypeName.equals(curr.getTypeName())) {
-					if (namesFound.add(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
+					if (!namesFound.contains(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
 						result.add(curr);
+						namesFound.add(curr.getFullyQualifiedName());
 					}
 				} else {
 					break;
