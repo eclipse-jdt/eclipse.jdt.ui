@@ -65,8 +65,9 @@ public class AugmentRawContainerClientsWizard extends RefactoringWizard {
 			layout.verticalSpacing= 8;
 			result.setLayout(layout);
 			
-			Label doit= new Label(result, SWT.NONE);
-			doit.setText("Augment raw references to container classes to use generics.");
+			Label doit= new Label(result, SWT.WRAP);
+			doit.setText("Infer generic type parameters for Collection classes and remove unnecessary casts.\n\n" +
+					"Note: This refactoring is work in progress.");
 			doit.setLayoutData(new GridData());
 			
 			updateStatus();
