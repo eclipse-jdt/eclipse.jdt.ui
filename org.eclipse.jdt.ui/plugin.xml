@@ -820,12 +820,14 @@ JavaStructureDiffViewerCreator
 		<action id="openTypeInHierarchy"
 			menubarPath="navigate/open.ext2"
 			label="%OpenTypeInHierarchyAction.label"
+			accelerator="Ctrl+Shift+H"
 			tooltip="%OpenTypeInHierarchyAction.tooltip"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeInHierarchyAction"/>
 		<action id="openType"
 			menubarPath="navigate/open.ext2"
 			toolbarPath="Normal/Search"			
 			label="%OpenTypeAction.label"
+			accelerator="Ctrl+Shift+T"
 			tooltip="%OpenTypeAction.tooltip"
 			icon="icons/full/ctool16/opentype.gif"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
@@ -847,6 +849,7 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
       		menubarPath="navigate/open.ext"
       		label="%OpenTypeHierarchyAction.label"
+      		accelerator="F4"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.Open"
@@ -854,6 +857,7 @@ JavaStructureDiffViewerCreator
       		label="%OpenAction.label"
 			tooltip="%OpenAction.tooltip"
 			description="%OpenAction.description"
+			accelerator="F3"
 			retarget="true" 
 			allowLabelUpdate="true"/>
 	</actionSet>			
@@ -890,6 +894,7 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"
       		menubarPath="navigate/open.ext"
       		label="%OpenExternalJavadocAction.label"
+      		accelerator="Shift+F2"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.OpenSuperImplementation"
@@ -939,10 +944,12 @@ JavaStructureDiffViewerCreator
 		<action id="RedoAction"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
 			label="%Refactoring.redoAction.label"
+			accelerator="Ctrl+Shift+Y"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.RedoRefactoringAction"/>
 		<action id="UndoAction"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
 			label="%Refactoring.undoAction.label"
+			accelerator="Ctrl+Shift+Z"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
 				
 		<!-- reorg group  -->
@@ -1058,11 +1065,13 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.AddImport"
       		menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
       		label="%AddImportAction.label"
+      		accelerator="Ctrl+Shift+M"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.OrganizeImports"
       		menubarPath="org.eclipse.jdt.ui.source.menu/importGroup"
       		label="%OrganizeImportsAction.label"
+      		accelerator="Ctrl+Shift+O"
 			retarget="true" />
 			
 			
@@ -1071,6 +1080,7 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.Format"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%FormatAction.label"
+      		accelerator="Ctrl+Shift+F"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ShiftLeft"
@@ -1086,11 +1096,13 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.Uncomment"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%UncommentAction.label"
+      		accelerator="Ctrl+Shift+\\"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.Comment"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%CommentAction.label"
+      		accelerator="Ctrl+Shift+/"
 			retarget="true" />
 
 		<!-- convert group -->	
@@ -1248,6 +1260,7 @@ JavaStructureDiffViewerCreator
 			<action id="org.eclipse.jdt.ui.actions.DeclarationsInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
       			label="%DeclarationsInWorkspace.label"
+      			accelerator="Ctrl+G"
       			allowLabelUpdate="true"
 				retarget="true" />	
 
@@ -1270,6 +1283,7 @@ JavaStructureDiffViewerCreator
 			<action id="org.eclipse.jdt.ui.actions.ReferencesInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
       			label="%ReferencesInWorkspace.label"
+      			accelerator="Ctrl+Shift+G"
       			allowLabelUpdate="true"
 				retarget="true" />	
 	</actionSet>			
