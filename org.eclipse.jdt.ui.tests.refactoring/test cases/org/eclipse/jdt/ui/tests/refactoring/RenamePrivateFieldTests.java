@@ -86,8 +86,8 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		ref.setUpdateJavaDoc(updateJavaDoc);
 		ref.setUpdateComments(updateComments);
 		ref.setUpdateStrings(updateStrings);
-		assertEquals("getter rename enabled", expectedGetterRenameEnabled, ref.canEnableGetterRenaming());
-		assertEquals("setter rename enabled", expectedSetterRenameEnabled, ref.canEnableSetterRenaming());
+		assertEquals("getter rename enabled", expectedGetterRenameEnabled, ref.canEnableGetterRenaming() == null);
+		assertEquals("setter rename enabled", expectedSetterRenameEnabled, ref.canEnableSetterRenaming() == null);
 		ref.setRenameGetter(renameGetter);
 		ref.setRenameSetter(renameSetter);
 		ref.setNewName(newFieldName);
