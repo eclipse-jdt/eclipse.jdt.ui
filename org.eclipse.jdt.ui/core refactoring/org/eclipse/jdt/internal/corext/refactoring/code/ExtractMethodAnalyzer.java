@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -501,6 +502,17 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		boolean result= super.visit(node);
 		if (isFirstSelectedNode(node)) {
 			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_anonymous_type"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
+			return false;
+		}
+		return result;
+	}
+	
+	public boolean visit(Assignment node) {
+		boolean result= super.visit(node);
+		if (getSelection().getVisitSelectionMode(node.getLeftHandSide()) == Selection.SELECTED) {
+			invalidSelection(
+				RefactoringCoreMessages.getString("ExtractMethodAnalyzer.leftHandSideOfAssignment"),  //$NON-NLS-1$
+				JavaStatusContext.create(fCUnit, node));
 			return false;
 		}
 		return result;
