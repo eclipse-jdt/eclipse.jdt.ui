@@ -128,6 +128,15 @@
             helpContextId="org.eclipse.jdt.junit.junit_tab_group"
             class="org.eclipse.jdt.internal.junit.launcher.JUnitTabGroup"
             id="org.eclipse.jdt.junit.launchConfigurationTabGroup.junit">
+            <launchMode 
+                  mode="debug"
+                  perspective="org.eclipse.debug.ui.DebugPerspective"
+                  description="%JUnitTabGroupDescription.debug">
+            </launchMode>
+            <launchMode
+                  mode="run"
+                  description="%JUnitTabGroupDescription.run">
+            </launchMode>
       </launchConfigurationTabGroup>
    </extension>
    <extension
