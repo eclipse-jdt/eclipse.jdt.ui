@@ -5,30 +5,33 @@ package org.eclipse.jdt.internal.debug.ui.display;
  * All Rights Reserved.
  */
 
-import org.eclipse.jdt.internal.ui.snippeteditor.JavaSnippetCompletionProcessor;
-import org.eclipse.jdt.internal.ui.snippeteditor.JavaSnippetEditor;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.LineWrappingTextPresenter;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
+import org.eclipse.jface.text.HoverTextControl;
 import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IHoverControl;
+import org.eclipse.jface.text.IHoverControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.internal.html.HoverBrowserControl;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
-import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.rules.RuleBasedDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  *  The source viewer configuration for the Display view
@@ -140,5 +143,16 @@ public class DisplayViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public String[] getIndentPrefixes(ISourceViewer sourcePart, String contentType) {
 		return new String[] { "\t", "    " }; 
+	}
+	
+	/*
+	 * @see SourceViewerConfiguration#getHoverControlCreator(ISourceViewer)
+	 */
+	public IHoverControlCreator getHoverControlCreator(ISourceViewer sourceViewer) {
+		return new IHoverControlCreator() {
+			public IHoverControl createHoverControl(Shell parent) {
+				return new HoverTextControl(parent, new LineWrappingTextPresenter());
+			}
+		};
 	}
 }

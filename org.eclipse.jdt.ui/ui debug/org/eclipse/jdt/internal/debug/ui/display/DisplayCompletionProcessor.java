@@ -55,8 +55,9 @@ public class DisplayCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getContextInformationValidator()
 	 */
 	public IContextInformationValidator getContextInformationValidator() {
-		if (fValidator == null)
+		if (fValidator == null) {
 			fValidator= new JavaParameterListValidator();
+		}
 		return fValidator;
 	}
 
