@@ -57,7 +57,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
-import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -190,7 +189,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return;
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		ILabelProvider lp= new AddGetterSetterLabelProvider(createNameProposer(settings));
+		ILabelProvider lp= new AddGetterSetterLabelProvider();
 		Map entries= createGetterSetterMapping(type, settings);
 		if (entries.isEmpty()){
 			MessageDialog.openInformation(getShell(), dialogTitle, ActionMessages.getString("AddGettSetterAction.typeContainsNoFields.message")); //$NON-NLS-1$
@@ -265,10 +264,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}	
 		}
 		return (IField[]) list.toArray(new IField[list.size()]);			
-	}
-	
-	private static NameProposer createNameProposer(CodeGenerationSettings settings) {
-		return new NameProposer(settings);
 	}
 	
 	private void generate(IField[] getterFields, IField[] setterFields) throws CoreException{
@@ -381,7 +376,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		IRequestQuery skipSetterForFinalQuery= skipSetterForFinalQuery();
 		IRequestQuery skipReplaceQuery= skipReplaceQuery();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		return new AddGetterSetterOperation(getterFields, setterFields, createNameProposer(settings), settings, skipSetterForFinalQuery, skipReplaceQuery);
+		return new AddGetterSetterOperation(getterFields, setterFields, settings, skipSetterForFinalQuery, skipReplaceQuery);
 	}
 	
 	private IRequestQuery skipSetterForFinalQuery() {
@@ -490,10 +485,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 	
 	private static class AddGetterSetterLabelProvider extends JavaElementLabelProvider {
-		private final NameProposer fNameProposer;
 		
-		AddGetterSetterLabelProvider(NameProposer nameProposer) {
-			fNameProposer= nameProposer;
+		AddGetterSetterLabelProvider() {
 		}
 		
 		/*
@@ -504,9 +497,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				GetterSetterEntry entry= (GetterSetterEntry) element;
 				try {
 					if (entry.isGetterEntry) {
-						return fNameProposer.proposeGetterName(entry.field) + "()"; //$NON-NLS-1$
+						return GetterSetterUtil.getGetterName(entry.field, null) + "()"; //$NON-NLS-1$
 					} else {
-						return fNameProposer.proposeSetterName(entry.field) + '(' + Signature.getSimpleName(Signature.toString(entry.field.getTypeSignature())) + ')';
+						return GetterSetterUtil.getSetterName(entry.field, null) + '(' + Signature.getSimpleName(Signature.toString(entry.field.getTypeSignature())) + ')';
 					}
 				} catch (JavaModelException e) {
 					return ""; //$NON-NLS-1$
@@ -542,14 +535,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private static Map createGetterSetterMapping(IType type, CodeGenerationSettings settings) throws JavaModelException{
 		IField[] fields= type.getFields();
 		Map result= new HashMap();
-		String[] prefixes= settings.fieldPrefixes;
-		String[] suffixes= settings.fieldSuffixes;
 		for (int i= 0; i < fields.length; i++) {
 			List l= new ArrayList(2);
-			if (GetterSetterUtil.getGetter(fields[i], prefixes, suffixes) == null)
+			if (GetterSetterUtil.getGetter(fields[i]) == null)
 				l.add(new GetterSetterEntry(fields[i], true));
 				
-			if (GetterSetterUtil.getSetter(fields[i], prefixes, suffixes) == null)
+			if (GetterSetterUtil.getSetter(fields[i]) == null)
 				l.add(new GetterSetterEntry(fields[i], false));	
 
 			if (! l.isEmpty())

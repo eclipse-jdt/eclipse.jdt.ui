@@ -14,6 +14,9 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+/**
+ * @deprecated
+ */
 public class NameProposer {
 	
 	private String[] fNamePrefixes;

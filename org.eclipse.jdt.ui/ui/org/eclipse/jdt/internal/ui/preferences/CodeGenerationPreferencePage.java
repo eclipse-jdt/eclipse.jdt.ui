@@ -123,7 +123,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		LayoutUtil.setHorizontalIndent(fCreateNonJavadocComments.getSelectionButton(null), horizontalIndent);
 		fCreateFileComments.doFillIntoGrid(javaDocGroup, 2);
 	
-		Group getterSetterGroup= new Group(result, SWT.NONE);
+/*		Group getterSetterGroup= new Group(result, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;
 		getterSetterGroup.setLayout(layout);
@@ -132,7 +132,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 
 		fUseGetterSetterPrefix.doFillIntoGrid(getterSetterGroup, 2);
 		fUseGetterSetterSuffix.doFillIntoGrid(getterSetterGroup, 2);
-		
+*/		
 		Control control= fConfigurationBlock.createContents(result);
 		control.setLayoutData(new GridData(GridData.FILL_BOTH));
 		

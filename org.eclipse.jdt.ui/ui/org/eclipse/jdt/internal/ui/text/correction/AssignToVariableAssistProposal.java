@@ -19,6 +19,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -30,20 +32,19 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal {
 
@@ -91,11 +92,11 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		Expression expression= fExpressionStatement.getExpression();
 		ASTRewrite rewrite= new ASTRewrite(fExpressionStatement.getParent());
 		AST ast= fExpressionStatement.getAST();
-		NameProposer nameProposer= new NameProposer();
-		String[] varName= nameProposer.proposeLocalVariableName(fTypeBinding.getName());
+
+		String varName= suggestLocalVariableNames(fTypeBinding);
 
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-		newDeclFrag.setName(ast.newSimpleName(varName[0]));
+		newDeclFrag.setName(ast.newSimpleName(varName));
 		newDeclFrag.setInitializer((Expression) rewrite.createCopy(expression));
 		
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
@@ -116,9 +117,8 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		
 		ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
 		AST ast= fExpressionStatement.getAST();
-		
-		NameProposer nameProposer= new NameProposer(JavaPreferencesSettings.getCodeGenerationSettings());
-		String varName= nameProposer.proposeFieldName(fTypeBinding.getName());
+			
+		String varName= suggestFieldNames(fTypeBinding);
 
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		newDeclFrag.setName(ast.newSimpleName(varName));
@@ -139,6 +139,38 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		rewrite.markAsInserted(newDecl);
 		return rewrite;		
 	}
+	
+	private String suggestLocalVariableNames(ITypeBinding binding) {
+		IJavaProject project= getCompilationUnit().getJavaProject();
+		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
+		IPackageBinding packBinding= base.getPackage();
+		String packName= packBinding != null ? packBinding.getName() : "";
+		
+		String[] excludedNames= new String[0];
+		String typeName= base.getName();
+		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
+		if (names.length == 0) {
+			System.out.println("No name for " + typeName);
+			return String.valueOf(Character.toLowerCase(typeName.charAt(0)));
+		}
+		return names[0];
+	}
+	
+	private String suggestFieldNames(ITypeBinding binding) {
+		IJavaProject project= getCompilationUnit().getJavaProject();
+		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
+		IPackageBinding packBinding= base.getPackage();
+		String packName= packBinding != null ? packBinding.getName() : "";
+		
+		String[] excludedNames= new String[0];
+		String typeName= base.getName();
+		String[] names= NamingConventions.suggestFieldNames(project, packName, typeName, binding.getDimensions(), binding.getModifiers(), excludedNames);
+		if (names.length == 0) {
+			System.out.println("No name for " + typeName);
+			return String.valueOf(Character.toLowerCase(typeName.charAt(0)));
+		}
+		return names[0];		
+	}	
 	
 	private int findInsertIndex(List decls, int currPos) {
 		for (int i= decls.size() - 1; i >= 0; i--) {

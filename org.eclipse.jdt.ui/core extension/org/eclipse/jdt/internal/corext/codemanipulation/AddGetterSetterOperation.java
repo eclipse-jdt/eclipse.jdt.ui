@@ -16,9 +16,11 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -37,7 +39,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	private boolean fSkipAllFinalSetters;
 	private boolean fSkipAllExisting;
 
-	private NameProposer fNameProposer;	
 	private CodeGenerationSettings fSettings;
 	
 	/**
@@ -48,18 +49,17 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 * @param skipExistingQuery Callback to ask if setter / getters that already exist can be skipped.
 	 *        Argument of the query is the existing method. <code>null</code> is a valid input and stands for skip all.
 	 */
-	public AddGetterSetterOperation(IField[] fields, NameProposer nameProposer, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
-		this(fields, fields, nameProposer, settings, skipFinalSettersQuery, skipExistingQuery);
+	public AddGetterSetterOperation(IField[] fields, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
+		this(fields, fields, settings, skipFinalSettersQuery, skipExistingQuery);
 	}
 	
-	public AddGetterSetterOperation(IField[] getterFields, IField[] setterFields, NameProposer nameProposer, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
+	public AddGetterSetterOperation(IField[] getterFields, IField[] setterFields, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
 		super();
 		fGetterFields= getterFields;
 		fSetterFields= setterFields;
 		fSkipExistingQuery= skipExistingQuery;
 		fSkipFinalSettersQuery= skipFinalSettersQuery;
 		fSettings= settings;
-		fNameProposer= nameProposer;
 		fCreatedAccessors= new ArrayList();
 	}
 	
@@ -127,7 +127,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	
 	private void generateGetter(IField field) throws JavaModelException, OperationCanceledException {
 		String fieldName= field.getElementName();
-		String argname= fNameProposer.proposeArgName(field);
 		
 		boolean isStatic= Flags.isStatic(field.getFlags());
 
@@ -139,8 +138,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
 		int indent= StubUtility.getIndentUsed(field);
 
-
-		String getterName= fNameProposer.proposeGetterName(field);
+		String getterName= GetterSetterUtil.getGetterName(field, null);
 		IMethod existingGetter= JavaModelUtil.findMethod(getterName, new String[0], false, parentType);
 		boolean doCreateGetter= ((existingGetter == null) || !querySkipExistingMethods(existingGetter));
 
@@ -149,7 +147,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			StringBuffer buf= new StringBuffer();
 			if (addComments) {
 				buf.append("/**\n"); //$NON-NLS-1$
-				buf.append(" * Returns the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				buf.append(" * @return "); buf.append(typeName); buf.append('\n'); //$NON-NLS-1$
 				buf.append(" */\n"); //$NON-NLS-1$
 			}
@@ -174,7 +171,9 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	
 	private void generateSetter(IField field) throws JavaModelException, OperationCanceledException {
 		String fieldName= field.getElementName();
-		String argname= fNameProposer.proposeArgName(field);
+		IJavaProject project= field.getJavaProject();
+		
+		String argname= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, field.getFlags());
 		
 		boolean isStatic= Flags.isStatic(field.getFlags());
 		boolean isFinal= Flags.isFinal(field.getFlags());
@@ -187,8 +186,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
 		int indent= StubUtility.getIndentUsed(field);
 
+		String setterName= GetterSetterUtil.getSetterName(field, null);
 
-		String setterName= fNameProposer.proposeSetterName(field);
 		String[] args= new String[] { field.getTypeSignature() };		
 		IMethod existingSetter= JavaModelUtil.findMethod(setterName, args, false, parentType);			
 		boolean doCreateSetter= ((!isFinal || !querySkipFinalSetters(field)) && (existingSetter == null || querySkipExistingMethods(existingSetter)));

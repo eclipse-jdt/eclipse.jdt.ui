@@ -24,11 +24,12 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -102,7 +103,6 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		decl.setModifiers(evaluateModifiers(targetTypeDecl));
 		decl.setName(ast.newSimpleName(getMethodName()));
 		
-		NameProposer nameProposer= new NameProposer();
 		List arguments= fArguments;
 		List params= decl.parameters();
 		
@@ -111,9 +111,9 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression elem= (Expression) arguments.get(i);
 			SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
-			Type type= evaluateParameterType(ast, elem);
+			Type type= getParameterType(ast, elem);
 			param.setType(type);
-			param.setName(ast.newSimpleName(getParameterName(nameProposer, names, elem, type)));
+			param.setName(ast.newSimpleName(getParameterName(names, elem, type)));
 			params.add(param);
 		}
 		
@@ -159,20 +159,41 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		return decl;
 	}
 			
-	private String getParameterName(NameProposer nameProposer, ArrayList takenNames, Expression argNode, Type type) {
-		String name;
+	private String getParameterName(ArrayList takenNames, Expression argNode, Type type) {
 		if (argNode instanceof SimpleName) {
-			name= ((SimpleName) argNode).getIdentifier();
-		} else {
-			name= nameProposer.proposeParameterName(ASTNodes.asString(type));
+			String name= ((SimpleName) argNode).getIdentifier();
+			while (takenNames.contains(name)) {
+				name += '1';
+			}
+			takenNames.add(name);
+			return name;
 		}
-		String base= name;
-		int i= 1;
-		while (takenNames.contains(name)) {
-			name= base + i++;
+		
+		int dim= 0;
+		if (type.isArrayType()) {
+			ArrayType arrayType= (ArrayType) type;
+			dim= arrayType.getDimensions();
+			type= arrayType.getElementType();
 		}
-		takenNames.add(name);
-		return name;
+		String typeName= ASTNodes.getTypeName(type);
+		String packName= Signature.getQualifier(typeName);
+		
+		IJavaProject project= getCompilationUnit().getJavaProject();
+		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
+		String[] names= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excludedNames);
+		
+		if (names.length == 0) {
+			System.out.println("No name for " + typeName);
+			String name= String.valueOf(Character.toLowerCase(typeName.charAt(0)));
+			while (takenNames.contains(name)) {
+				name += '1';
+			}
+			takenNames.add(name);
+			return name;
+		}
+		
+		takenNames.add(names[0]);
+		return names[0];
 	}
 		
 	private int findInsertIndex(List decls, int currPos) {
@@ -235,8 +256,8 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		return null;
 	}
 	
-	private Type evaluateParameterType(AST ast, Expression expr) throws CoreException {
-		ITypeBinding binding= ASTResolving.normalizeTypeBinding(expr.resolveTypeBinding());
+	private Type getParameterType(AST ast, Expression elem) throws CoreException {
+		ITypeBinding binding= ASTResolving.normalizeTypeBinding(elem.resolveTypeBinding());
 		if (binding != null) {
 			addImport(binding);
 			return ASTResolving.getTypeFromTypeBinding(ast, binding);

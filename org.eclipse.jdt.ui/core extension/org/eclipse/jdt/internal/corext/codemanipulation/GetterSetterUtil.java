@@ -3,23 +3,54 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class GetterSetterUtil {
 	
+	private static final String[] empty= new String[0];
+	
 	//no instances
 	private GetterSetterUtil(){
 	}
 	
+	/**
+	 * @deprecated use getGetter(IField) instead
+	 */
 	public static IMethod getGetter(IField field, String[] namePrefixes, String[] nameSuffixes) throws JavaModelException{
-		String getterName= new NameProposer(namePrefixes, nameSuffixes).proposeGetterName(field);
-		return JavaModelUtil.findMethod(getterName, new String[0], false, field.getDeclaringType());
+		return getGetter(field);
+	}
+
+	/**
+	 * @deprecated use getSetter(IField) instead
+	 */	
+	public static IMethod getSetter(IField field, String[] namePrefixes, String[] nameSuffixes) throws JavaModelException{
+		return getSetter(field);
 	}
 	
-	public static IMethod getSetter(IField field, String[] namePrefixes, String[] nameSuffixes) throws JavaModelException{
-		String[] args= new String[] { field.getTypeSignature() };	
-		String setterName= new NameProposer(namePrefixes, nameSuffixes).proposeSetterName(field);
-		return JavaModelUtil.findMethod(setterName, args, false, field.getDeclaringType());
+	public static String getGetterName(IField field, String[] excludedNames) throws JavaModelException {
+		boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
+		if (excludedNames == null) {
+			excludedNames= empty;
+		}
+		return NamingConventions.suggestGetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), isBoolean, excludedNames);
 	}
+	
+	public static String getSetterName(IField field, String[] excludedNames) throws JavaModelException {
+		if (excludedNames == null) {
+			excludedNames= empty;
+		}		
+		return NamingConventions.suggestSetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), excludedNames);
+	}	
+	
+	public static IMethod getGetter(IField field) throws JavaModelException{
+		return JavaModelUtil.findMethod(getGetterName(field, empty), new String[0], false, field.getDeclaringType());
+	}
+	
+	public static IMethod getSetter(IField field) throws JavaModelException{
+		String[] args= new String[] { field.getTypeSignature() };	
+		return JavaModelUtil.findMethod(getSetterName(field, empty), args, false, field.getDeclaringType());
+	}	
 }
