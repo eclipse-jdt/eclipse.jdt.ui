@@ -22,8 +22,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 /**
  * An imlementation of the IWorkbenchAdapter for IJavaElements.
  */
@@ -32,11 +30,9 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 	protected static final Object[] NO_CHILDREN= new Object[0];
 	
 	private JavaElementImageProvider fImageProvider;
-	private JavaElementLabelProvider fLabelProvider;
-
+	
 	public JavaWorkbenchAdapter() {
 		fImageProvider= new JavaElementImageProvider();
-		fLabelProvider= new JavaElementLabelProvider();
 	}
 
 	public Object[] getChildren(Object element) {
