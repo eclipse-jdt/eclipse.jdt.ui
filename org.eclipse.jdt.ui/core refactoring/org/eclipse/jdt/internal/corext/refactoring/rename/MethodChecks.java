@@ -13,6 +13,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -41,7 +43,7 @@ public class MethodChecks {
 		Context context= JavaSourceContext.create(overrides);
 		String message= RefactoringCoreMessages.getFormattedString("MethodChecks.overrides", //$NON-NLS-1$
 				new String[]{JavaElementUtil.createMethodSignature(overrides), JavaModelUtil.getFullyQualifiedName(overrides.getDeclaringType())});
-		return RefactoringStatus.createFatalErrorStatus(message, context);
+		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, overrides, RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD);
 	}
 	
 	public static RefactoringStatus checkIfComesFromInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
@@ -53,7 +55,7 @@ public class MethodChecks {
 		Context context= JavaSourceContext.create(inInterface);
 		String message= RefactoringCoreMessages.getFormattedString("MethodChecks.implements", //$NON-NLS-1$
 				new String[]{JavaElementUtil.createMethodSignature(inInterface), JavaModelUtil.getFullyQualifiedName(inInterface.getDeclaringType())});
-		return RefactoringStatus.createFatalErrorStatus(message, context);
+		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, inInterface, RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE);
 	}
 	
 	//works for virtual methods
@@ -81,7 +83,7 @@ public class MethodChecks {
 	}
 	
 	private static IMethod overridesAnotherMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
-		IMethod found= JavaModelUtil.findMethodImplementationInHierarchy(
+		IMethod found= JavaModelUtil.findMethodDeclarationInHierarchy(
 						method.getDeclaringType().newSupertypeHierarchy(pm), 
 						method.getDeclaringType(), 
 						method.getElementName(), 
