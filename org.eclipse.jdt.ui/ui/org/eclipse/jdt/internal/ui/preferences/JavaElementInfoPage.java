@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -22,6 +23,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
@@ -32,7 +34,6 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  */
 public class JavaElementInfoPage extends PropertyPage {
 	protected Control createContents(Composite parent) {
-
 		// ensure the page has no special buttons
 		noDefaultAndApplyButton();
 
@@ -120,6 +121,7 @@ public class JavaElementInfoPage extends PropertyPage {
 			Label packageName= new Label(composite, SWT.NONE);
 			packageName.setText(((IJavaProject)element).getProject().getLocation().toOSString());
 		}
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAVA_ELEMENT_INFO_PAGE);		
 		
 		return composite;
 	}

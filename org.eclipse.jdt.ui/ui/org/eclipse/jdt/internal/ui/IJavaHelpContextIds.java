@@ -51,7 +51,6 @@ public interface IJavaHelpContextIds {
 	public static final String GOTO_PACKAGE_ACTION= PREFIX + "goto_package_action"; //$NON-NLS-1$
 	public static final String HISTORY_ACTION= PREFIX + "history_action"; //$NON-NLS-1$
 	public static final String HISTORY_LIST_ACTION= PREFIX + "history_list_action"; //$NON-NLS-1$
-	public static final String JAVA_HISTORY_EDITOR_ACTION= PREFIX + "java_history_editor_action"; //$NON-NLS-1$
 	public static final String LEXICAL_SORTING_OUTLINE_ACTION= PREFIX + "lexical_sorting_outline_action"; //$NON-NLS-1$
 	public static final String LEXICAL_SORTING_BROWSING_ACTION= PREFIX + "lexical_sorting_browsing_action"; //$NON-NLS-1$
 	public static final String OPEN_JAVA_PERSPECTIVE_ACTION= PREFIX + "open_java_perspective_action"; //$NON-NLS-1$
@@ -102,7 +101,7 @@ public interface IJavaHelpContextIds {
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_DIALOG= PREFIX + "open_type_dialog_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_DIALOG= PREFIX + "source_attachment_dialog_context"; //$NON-NLS-1$
-	public static final String ADVANCED_DIALOG= PREFIX + "advanced_dialog_context"; //$NON-NLS-1$
+	public static final String LIBRARIES_WORKBOOK_PAGE_ADVANCED_DIALOG= PREFIX + "advanced_dialog_context"; //$NON-NLS-1$
 	public static final String CONFIRM_SAVE_MODIFIED_RESOURCES_DIALOG= PREFIX + "confirm_save_modified_resources_dialog_context"; //$NON-NLS-1$
 	public static final String NEW_VARIABLE_ENTRY_DIALOG= PREFIX + "new_variable_dialog_context"; //$NON-NLS-1$
 	public static final String COMPARE_DIALOG= PREFIX + "compare_dialog_context"; //$NON-NLS-1$

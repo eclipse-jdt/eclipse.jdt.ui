@@ -643,6 +643,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		protected void configureShell(Shell shell) {
 			super.configureShell(shell);
 			shell.setText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.title")); //$NON-NLS-1$
+			WorkbenchHelp.setHelp(shell, IJavaHelpContextIds.LIBRARIES_WORKBOOK_PAGE_ADVANCED_DIALOG);
 		}
 
 		protected Control createDialogArea(Composite parent) {

@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -25,6 +26,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -59,9 +62,11 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
+		
 		IJavaElement elem= getJavaElement();
 		fJavadocConfigurationBlock= new JavadocConfigurationBlock(elem, getShell(), this);
 		Control control= fJavadocConfigurationBlock.createContents(parent);
+		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
 
 		return control;
 	}
