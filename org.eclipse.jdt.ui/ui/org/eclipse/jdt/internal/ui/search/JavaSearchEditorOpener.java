@@ -10,20 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.search.internal.ui.SearchPlugin;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -34,6 +27,18 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 
 public class JavaSearchEditorOpener {
 	private IEditorPart fEditor;
@@ -87,7 +92,7 @@ public class JavaSearchEditorOpener {
 	private String getEditorID(IFile file) throws PartInitException {
 		IEditorDescriptor desc= IDE.getEditorDescriptor(file);
 		if (desc == null)
-			return SearchPlugin.getDefault().getWorkbench().getEditorRegistry().findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID).getId();
+			return JavaPlugin.getDefault().getWorkbench().getEditorRegistry().findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID).getId();
 		else
 			return desc.getId();
 	}
