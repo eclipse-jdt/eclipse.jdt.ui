@@ -340,7 +340,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		composite.setLayout(gl);
 		
 		fEditButton= new Button(composite, SWT.PUSH);
-		fEditButton.setText("&Edit Selected...");
+		fEditButton.setText("&Edit...");
 		fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fEditButton.setEnabled(false);
 		SWTUtil.setButtonDimensionHint(fEditButton);
