@@ -166,6 +166,9 @@ public class EditTemplateDialog extends StatusDialog {
 	public EditTemplateDialog(Shell parent, Template template, boolean edit) {
 		super(parent);
 		
+		int shellStyle= getShellStyle();
+		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
+		
 		if (edit)
 			setTitle(TemplateMessages.getString("EditTemplateDialog.title.edit")); //$NON-NLS-1$
 		else

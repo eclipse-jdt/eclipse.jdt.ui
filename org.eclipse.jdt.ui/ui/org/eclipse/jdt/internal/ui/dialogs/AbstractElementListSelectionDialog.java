@@ -65,6 +65,9 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	{
 		super(parent);		
 		fRenderer= renderer;
+		
+		int shellStyle= getShellStyle();
+		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
 	}
 
 	/**
