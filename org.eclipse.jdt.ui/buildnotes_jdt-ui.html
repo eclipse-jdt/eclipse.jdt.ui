@@ -27,6 +27,15 @@ To see which bugs have been addressed in one of the builds simply open the <a hr
 - there's now an Externalized String hover which shows the externalized
   value when hovering over an NLS key in the Java editor.
 - pushed Quick Fix/Assist command down to org.eclipse.ui.ide, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=74675">bug 74675</a> for details.
+- calls to reconcile a CU have been improved by only enabling the JDT UI's
+  problem requestor when reconcile(...) is called by the Java reconciler, hence problems
+  are now only reported to JDT UI's problem requestor when the Java reconciler calls
+  reconcile(...). Note that clients requesting an AST when calling reconcile(...) will
+  now get null or an empty AST due to bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=76738">76738</a>. Either use the ASTProvider to get the AST or enable
+  (and disable later) the problem requestor.
+- the AST provider no longer clears the cache when an editor gets deactivated. This
+  reduces the number of AST creations.
+- bug fixing
 </pre>
 ========== Eclipse Build Input October 19th 2004 ==========<br>
 <pre>
