@@ -471,6 +471,12 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDeleteWithinCu16() throws Exception{
+		if (true) {
+			printTestDisabledMessage("testDeleteWithinCu16 desaibled for bug#55221");		
+			return;
+		}
+		
+		
 //		printTestDisabledMessage("test for bug#15412 deleting type removes too much from editor");		
 //		if (true)
 //			return;
