@@ -158,7 +158,16 @@
                id="org.eclipse.jsp.actions.ToggleJspBreakpointAction">
          </action>
       </editorContribution>
-   </extension>   
+   </extension>
+   
+   	<extension 
+		point="org.eclipse.ui.markerImageProviders">
+		<imageprovider 
+			id="org.eclipse.jsp.breakpointMarkerProvider"
+			markertype="org.eclipse.debug.core.breakpointMarker"
+			icon="icons/full/obj16/brkp_obj.gif">
+		</imageprovider>
+	</extension>
    
    <extension
          point="org.eclipse.debug.core.sourceLocators">
