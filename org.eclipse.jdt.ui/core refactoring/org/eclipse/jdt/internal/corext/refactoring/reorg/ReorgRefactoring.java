@@ -613,6 +613,9 @@ public abstract class ReorgRefactoring extends Refactoring {
 		if (dest instanceof IPackageFragmentRoot)
 			return ((IPackageFragmentRoot)dest).getPackageFragment(DEFAULT_PACKAGE);
 		
+		if (dest instanceof ICompilationUnit && ((ICompilationUnit)dest).getParent() instanceof IPackageFragment)
+			return (IPackageFragment)((ICompilationUnit)dest).getParent();
+			
 		return null;
 	}	
 	
