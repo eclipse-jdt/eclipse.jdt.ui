@@ -393,7 +393,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 			if (fActiveRegion == null)
 				return;
-			
+				
 			ISourceViewer viewer= getSourceViewer();
 			if (viewer != null) {
 				resetCursor(viewer);
@@ -412,13 +412,17 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
 					offset= extension.modelOffset2WidgetOffset(offset);
 				} else {
-				offset -= viewer.getVisibleRegion().getOffset();
+					offset -= viewer.getVisibleRegion().getOffset();
 				}
 				
 				StyledText text= viewer.getTextWidget();
-				text.redrawRange(offset, length, true);					
+				try {
+					text.redrawRange(offset, length, true);
+				} catch (IllegalArgumentException x) {
+					JavaPlugin.log(x);
+				}
 			}
-
+			
 			fActiveRegion= null;
 		}
 
@@ -748,7 +752,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (fRememberedPosition != null && !fRememberedPosition.isDeleted()) {
 				event.getDocument().removePosition(fRememberedPosition);
 				fActiveRegion= new Region(fRememberedPosition.getOffset(), fRememberedPosition.getLength());
-		}
+			}
 			fRememberedPosition= null;
 
 			ISourceViewer viewer= getSourceViewer();
