@@ -1,0 +1,10 @@
+/**
+ * This is about <code>className</code>.
+ * @author author
+ */
+public class className {
+	/* This comment may span multiple lines. */
+	private int integer= 0;
+	// This comment may span only this line
+	private String string= "zero";
+}

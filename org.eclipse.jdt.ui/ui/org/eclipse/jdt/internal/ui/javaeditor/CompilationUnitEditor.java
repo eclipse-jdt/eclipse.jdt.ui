@@ -21,6 +21,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -42,6 +43,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -55,9 +58,14 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -88,11 +96,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
+import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
 import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor.BracketHighlighter.BracketPositionManager;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor.BracketHighlighter.HighlightBrackets;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
 /**
@@ -122,7 +129,10 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			public HighlightBrackets() {
 				fTextWidget= fSourceViewer.getTextWidget();
-				fColor= fTextWidget.getDisplay().getSystemColor(SWT.COLOR_BLUE);
+			}
+			
+			public void setHighlightColor(Color color) {
+				fColor= color;
 			}
 						
 			public void dispose() {
@@ -131,8 +141,8 @@ public class CompilationUnitEditor extends JavaEditor {
 					fMatcher= null;
 				}
 				
-				fTextWidget= null;
 				fColor= null;
+				fTextWidget= null;
 			}
 						
 			public void deactivate(boolean redraw) {
@@ -192,7 +202,8 @@ public class CompilationUnitEditor extends JavaEditor {
 			}
 			
 			public void paintControl(PaintEvent event) {
-				handleDrawRequest(event.gc);
+				if (fTextWidget != null)
+					handleDrawRequest(event.gc);
 			}
 			
 			private void handleDrawRequest(GC gc) {
@@ -288,6 +299,10 @@ public class CompilationUnitEditor extends JavaEditor {
 		public BracketHighlighter(ISourceViewer sourceViewer) {
 			fSourceViewer= sourceViewer;
 			fHighlightBrackets= new HighlightBrackets();
+		}
+		
+		public void setHighlightColor(Color color) {
+			fHighlightBrackets.setHighlightColor(color);
 		}
 		
 		public void install() {
@@ -412,6 +427,28 @@ public class CompilationUnitEditor extends JavaEditor {
 				fManager.install(newInput);
 		}
 	};
+	
+	
+	class InternalSourceViewer extends SourceViewer {
+		
+		public InternalSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+			super(parent, ruler, styles);
+		}
+		
+		public IContentAssistant getContentAssistant() {
+			return fContentAssistant;
+		}
+	};
+	
+	/** Preference key for matching brackets */
+	public final static String MATCHING_BRACKETS=  "matchingBrackets";
+	/** Preference key for matching brackets color */
+	public final static String MATCHING_BRACKETS_COLOR=  "matchingBracketsColor";
+	/** Preference key for auto content assist */
+	public final static String AUTO_CONTENT_ASSIST=  "autoContentAssist";
+	/** Preference key for auto content assist delay */
+	public final static String AUTO_CONTENT_ASSIST_DELAY=  "autoContentAssistDelay";
+	
 	
 	
 	/** The status line clearer */
@@ -868,6 +905,39 @@ public class CompilationUnitEditor extends JavaEditor {
 		fJavaEditorErrorTickUpdater.setAnnotationModel(getDocumentProvider().getAnnotationModel(input));
 	}
 	
+	private void startBracketHighlighting() {
+		if (fBracketHighlighter == null) {
+			ISourceViewer sourceViewer= getSourceViewer();
+			fBracketHighlighter= new BracketHighlighter(sourceViewer);
+			fBracketHighlighter.setHighlightColor(getBracketHighlightingColor());
+			fBracketHighlighter.install();
+		}
+	}
+	
+	private void stopBracketHighlighting() {
+		if (fBracketHighlighter != null) {
+			fBracketHighlighter.dispose();
+			fBracketHighlighter= null;
+		}
+	}
+	
+	private boolean isBracketHighlightingEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(MATCHING_BRACKETS);
+	}
+	
+	private boolean isAutoContentAssistEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(AUTO_CONTENT_ASSIST);
+	}
+	
+	private Color getBracketHighlightingColor() {
+		IPreferenceStore store= getPreferenceStore();
+		RGB rgb= PreferenceConverter.getColor(store, MATCHING_BRACKETS_COLOR);
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		return textTools.getColorManager().getColor(rgb);
+	}
+	
 	/*
 	 * @see AbstractTextEditor#dispose()
 	 */
@@ -877,10 +947,7 @@ public class CompilationUnitEditor extends JavaEditor {
 			fJavaEditorErrorTickUpdater= null;
 		}
 		
-		if (fBracketHighlighter != null) {
-			fBracketHighlighter.dispose();
-			fBracketHighlighter= null;
-		}
+		stopBracketHighlighting();
 		
 		super.dispose();
 	}
@@ -890,10 +957,46 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-		
-		// create and install bracket highlighter
-		ISourceViewer sourceViewer= getSourceViewer();
-		fBracketHighlighter= new BracketHighlighter(sourceViewer);
-		fBracketHighlighter.install();
+		if (isBracketHighlightingEnabled())
+			startBracketHighlighting();
+	}
+	
+	/*
+	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
+	 */
+	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
+		String p= event.getProperty();
+		if (MATCHING_BRACKETS.equals(p)) {
+			if( isBracketHighlightingEnabled())
+				startBracketHighlighting();
+			else
+				stopBracketHighlighting();
+		} else if (MATCHING_BRACKETS_COLOR.equals(p)) {
+			if (fBracketHighlighter != null)
+				fBracketHighlighter.setHighlightColor(getBracketHighlightingColor());
+		} else if (AUTO_CONTENT_ASSIST.equals(p)) {
+			InternalSourceViewer isv= (InternalSourceViewer) getSourceViewer();
+			IContentAssistant assistant= isv.getContentAssistant();
+			if (assistant instanceof ContentAssistant) {
+				((ContentAssistant) assistant).enableAutoActivation(isAutoContentAssistEnabled());
+			}
+		} /* else if (AUTO_CONTENT_ASSIST_DELAY.equals ... */
+		super.handlePreferenceStoreChanged(event);
+	}
+
+	/*
+	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
+	 */
+	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
+		String p= event.getProperty();
+		boolean affects=MATCHING_BRACKETS_COLOR.equals(p);
+		return affects ? affects : super.affectsTextPresentation(event);
+	}
+	
+	/*
+	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
+	 */
+	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+		return new InternalSourceViewer(parent, ruler, styles);
 	}
 }

@@ -14,6 +14,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
 
@@ -31,8 +32,7 @@ public class JavaTextTools {
 	
 	private class PreferenceListener implements IPropertyChangeListener {
 		public void propertyChange(PropertyChangeEvent event) {
-			if (affectsBehavior(event))
-				adaptToPreferenceChange(event);
+			adaptToPreferenceChange(event);
 		}
 	};
 		
@@ -40,6 +40,10 @@ public class JavaTextTools {
 	private JavaColorManager fColorManager;
 	/** The Java source code scanner */
 	private JavaCodeScanner fCodeScanner;
+	/** The Java multiline comment scanner */
+	private SingleTokenJavaScanner fMultilineCommentScanner;
+	/** The Java singleline comment scanner */
+	private SingleTokenJavaScanner fSinglelineCommentScanner;
 	/** The JavaDoc scanner */
 	private JavaDocScanner fJavaDocScanner;
 	/** The Java partitions scanner */
@@ -58,9 +62,11 @@ public class JavaTextTools {
 		fPreferenceStore= store;
 		fPreferenceStore.addPropertyChangeListener(fPreferenceListener);
 		
-		fColorManager= new JavaColorManager(store);
-		fCodeScanner= new JavaCodeScanner(fColorManager);
-		fJavaDocScanner= new JavaDocScanner(fColorManager);
+		fColorManager= new JavaColorManager();
+		fCodeScanner= new JavaCodeScanner(fColorManager, store);
+		fMultilineCommentScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
+		fSinglelineCommentScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
+		fJavaDocScanner= new JavaDocScanner(fColorManager, store);
 		fPartitionScanner= new JavaPartitionScanner();
 	}
 	
@@ -70,6 +76,8 @@ public class JavaTextTools {
 	public void dispose() {
 		
 		fCodeScanner= null;
+		fMultilineCommentScanner= null;
+		fSinglelineCommentScanner= null;
 		fJavaDocScanner= null;
 		fPartitionScanner= null;
 		
@@ -102,6 +110,24 @@ public class JavaTextTools {
 	 */
 	public RuleBasedScanner getCodeScanner() {
 		return fCodeScanner;
+	}
+	
+	/**
+	 * Returns a scanner which is configured to scan Java multiline comments.
+	 *
+	 * @return a Java multiline comment scanner
+	 */
+	public RuleBasedScanner getMultilineCommentScanner() {
+		return fMultilineCommentScanner;
+	}
+
+	/**
+	 * Returns a scanner which is configured to scan Java singleline comments.
+	 *
+	 * @return a Java singleline comment scanner
+	 */
+	public RuleBasedScanner getSinglelineCommentScanner() {
+		return fSinglelineCommentScanner;
 	}
 	
 	/**
@@ -165,7 +191,10 @@ public class JavaTextTools {
 	 * @return <code>true</code> if event causes a behavioral change
 	 */
 	public boolean affectsBehavior(PropertyChangeEvent event) {
-		return fColorManager.affectsBehavior(event);
+		return  fCodeScanner.affectsBehavior(event) ||
+					fMultilineCommentScanner.affectsBehavior(event) ||
+					fSinglelineCommentScanner.affectsBehavior(event) ||
+					fJavaDocScanner.affectsBehavior(event);
 	}
 	
 	/**
@@ -175,8 +204,13 @@ public class JavaTextTools {
 	 * @param event the event to whch to adapt
 	 */
 	protected void adaptToPreferenceChange(PropertyChangeEvent event) {
-		fColorManager.adaptToPreferenceChange(event);
-		fCodeScanner.colorManagerChanged();
-		fJavaDocScanner.colorManagerChanged();
+		if (fCodeScanner.affectsBehavior(event))
+			fCodeScanner.adaptToPreferenceChange(event);
+		else if (fMultilineCommentScanner.affectsBehavior(event))
+			fMultilineCommentScanner.adaptToPreferenceChange(event);
+		else if (fSinglelineCommentScanner.affectsBehavior(event))
+			fSinglelineCommentScanner.adaptToPreferenceChange(event);
+		else if (fJavaDocScanner.affectsBehavior(event))
+			fJavaDocScanner.adaptToPreferenceChange(event);
 	}
 }

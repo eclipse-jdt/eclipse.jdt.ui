@@ -64,22 +64,6 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
 public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	
-	private class DynamicToken extends Token {
-		
-		private String fKey;
-		
-		public DynamicToken(String key) {
-			super(null);
-			fKey= key;
-		}
-		
-		public Object getData() {
-			Color c= getColorManager().getColor(fKey);
-			return new TextAttribute(c);
-		}
-	};
-	
-	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
 	
@@ -102,6 +86,24 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	protected RuleBasedScanner getCodeScanner() {
 		return fJavaTextTools.getCodeScanner();
+	}
+	
+	/**
+	 * Returns the Java multiline comment scanner for this configuration.
+	 *
+	 * @return the Java multiline comment scanner
+	 */
+	protected RuleBasedScanner getMultilineCommentScanner() {
+		return fJavaTextTools.getMultilineCommentScanner();
+	}
+	
+	/**
+	 * Returns the Java singleline comment scanner for this configuration.
+	 *
+	 * @return the Java singleline comment scanner
+	 */
+	protected RuleBasedScanner getSinglelineCommentScanner() {
+		return fJavaTextTools.getSinglelineCommentScanner();
 	}
 	
 	/**
@@ -146,15 +148,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_DOC);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_DOC);
 
-		RuleBasedScanner scanner= new RuleBasedScanner();
-		scanner.setDefaultReturnToken(new DynamicToken(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT));
-		dr= new RuleBasedDamagerRepairer(scanner);		
+		dr= new RuleBasedDamagerRepairer(getMultilineCommentScanner());		
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
 
-		scanner= new RuleBasedScanner();
-		scanner.setDefaultReturnToken(new DynamicToken(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT));
-		dr= new RuleBasedDamagerRepairer(scanner);		
+		dr= new RuleBasedDamagerRepairer(getSinglelineCommentScanner());		
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
 		
