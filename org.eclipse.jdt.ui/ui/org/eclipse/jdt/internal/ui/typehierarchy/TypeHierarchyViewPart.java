@@ -4,8 +4,85 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.ArrayList;import java.util.List;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.custom.ViewForm;import org.eclipse.swt.events.KeyAdapter;import org.eclipse.swt.events.KeyEvent;import org.eclipse.swt.events.KeyListener;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.ToolBar;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.action.ToolBarManager;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IInputSelectionProvider;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IMemento;import org.eclipse.ui.IViewSite;import org.eclipse.ui.PartInitException;import org.eclipse.ui.actions.OpenWithMenu;import org.eclipse.ui.help.ViewContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.part.PageBook;import org.eclipse.ui.part.ViewPart;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.ITypeHierarchyViewPart;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ToolBar;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.IInputSelectionProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.OpenWithMenu;
+import org.eclipse.ui.help.ViewContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.PageBook;
+import org.eclipse.ui.part.ViewPart;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
+import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
+import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
+import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 /**
  * view showing the supertypes/subtypes of its input.
@@ -57,7 +134,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	private AddMethodStubAction fAddStubAction;
 	private FocusOnTypeAction fFocusOnTypeAction;
 	private FocusOnSelectionAction fFocusOnSelectionAction;
-			
+	
+	private IPartListener fPartListener;
+	
 	public TypeHierarchyViewPart() {
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle();
 		fHierarchyLifeCycle.addChangedListener(this);
@@ -102,6 +181,17 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		fAllViewers= new TypeHierarchyViewer[3];
 		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
+	
+		fPartListener= new IPartListener() {
+			public void partActivated(IWorkbenchPart part) {
+				if (part instanceof IEditorPart)
+					editorActivated((IEditorPart) part);
+			}
+			public void partBroughtToTop(IWorkbenchPart part) {}
+			public void partClosed(IWorkbenchPart part) {}
+			public void partDeactivated(IWorkbenchPart part) {}
+			public void partOpened(IWorkbenchPart part) {}
+		};	
 	}	
 		
 	/**
@@ -244,6 +334,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		fHierarchyLifeCycle.freeHierarchy();
 		fHierarchyLifeCycle.removeChangedListener(this);
 		fPaneLabelProvider.dispose();
+		getSite().getPage().removePartListener(fPartListener);
 		super.dispose();
 	}
 
@@ -444,6 +535,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		selProvider.addSelectionChangedListener(new StatusBarUpdater(slManager));
 		
 		getSite().setSelectionProvider(selProvider);
+		getSite().getPage().addPartListener(fPartListener);
+		
 		fFocusOnSelectionAction= new FocusOnSelectionAction(this, selProvider);		
 		
 		IType input= determineInputElement();
@@ -632,7 +725,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	private void revealElementInEditor(Object elem) {
 		// only allow revealing when the type hierarchy is the active pagae
 		// no revealing after selection events due to model changes
-		if (getSite().getPage() != this) {
+		if (getSite().getPage().getActivePart() != this) {
 			return;
 		}
 		
@@ -828,6 +921,37 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		}
 		
 		fMethodsViewer.restoreState(memento);
+	}
+	
+	/*
+	 * Link selection to active editor
+	 */
+	private void editorActivated(IEditorPart editor) {
+		if (!JavaBasePreferencePage.linkTypeHierarchySelectionToEditor()) {
+			return;
+		}
+		IJavaElement elem= (IJavaElement)editor.getEditorInput().getAdapter(IJavaElement.class);
+		try {
+			TypeHierarchyViewer currentViewer= getCurrentViewer();
+			if (elem instanceof IClassFile) {
+				IType type= ((IClassFile)elem).getType();
+				if (currentViewer.containsElement(type)) {
+					currentViewer.setSelection(new StructuredSelection(type));
+				}
+			} else if (elem instanceof ICompilationUnit) {
+				IType[] allTypes= ((ICompilationUnit)elem).getAllTypes();
+				for (int i= 0; i < allTypes.length; i++) {
+					if (currentViewer.containsElement(allTypes[i])) {
+						currentViewer.setSelection(new StructuredSelection(allTypes[i]));
+						return;
+					}
+				}
+			}	
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
+		}
+		
 	}	
+	
 
 }

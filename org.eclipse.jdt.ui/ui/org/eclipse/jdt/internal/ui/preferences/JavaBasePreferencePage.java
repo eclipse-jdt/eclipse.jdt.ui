@@ -20,6 +20,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR, true);
+		store.setDefault(IPreferencesConstants.LINK_TYPEHIERARCHY_TO_EDITOR, false);
 		store.setDefault(IPreferencesConstants.OPEN_TYPE_HIERARCHY, IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ, false);		
 		store.setDefault(IPreferencesConstants.DOUBLE_CLICK_GOES_INTO, false);		
@@ -40,10 +41,17 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 
 		BooleanFieldEditor boolEditor= new BooleanFieldEditor(
 			IPreferencesConstants.LINK_PACKAGES_TO_EDITOR,
-			JavaUIMessages.getString("JavaBasePreferencePage.link"), //$NON-NLS-1$
+			JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), //$NON-NLS-1$
 			parent
         );
 		addField(boolEditor);
+		
+		boolEditor= new BooleanFieldEditor(
+			IPreferencesConstants.LINK_PACKAGES_TO_EDITOR,
+			JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), //$NON-NLS-1$
+			parent
+        );
+		addField(boolEditor);		
 		
 		boolEditor= new BooleanFieldEditor(
 			IPreferencesConstants.DOUBLE_CLICK_GOES_INTO,
@@ -83,6 +91,11 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR);
 	}
+	
+	public static boolean linkTypeHierarchySelectionToEditor() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(IPreferencesConstants.LINK_TYPEHIERARCHY_TO_EDITOR);
+	}	
 		
 	public static boolean openTypeHierarchyInPerspective() {
 		return IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE.equals(

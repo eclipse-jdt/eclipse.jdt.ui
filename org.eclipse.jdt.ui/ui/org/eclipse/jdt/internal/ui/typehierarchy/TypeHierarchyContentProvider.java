@@ -262,8 +262,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		if (getHierarchy() != null) {
 			try {
 				processDelta(event.getDelta());
-			} catch(JavaModelException e) {
-				JavaPlugin.getDefault().getLog().log(e.getStatus());
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e.getStatus());
 			}
 		}
 	}
@@ -302,6 +302,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		switch (delta.getKind()) {
 			case IJavaElementDelta.REMOVED:
 			case IJavaElementDelta.ADDED:
+				// type hierarchy change listener
 				fViewer.refresh();
 				return true;
 			case IJavaElementDelta.CHANGED:
