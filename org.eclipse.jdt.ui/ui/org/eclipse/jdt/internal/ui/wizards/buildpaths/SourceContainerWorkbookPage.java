@@ -296,14 +296,23 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void editAttributeEntry(CPListElementAttribute elem) {
-		if (elem.getKey().equals(CPListElement.OUTPUT)) {
+		String key= elem.getKey();
+		if (key.equals(CPListElement.OUTPUT)) {
 			CPListElement selElement= (CPListElement) elem.getParent();
 			OutputLocationDialog dialog= new OutputLocationDialog(getShell(), selElement);
 			if (dialog.open() == OutputLocationDialog.OK) {
 				selElement.setAttribute(CPListElement.OUTPUT, dialog.getOutputLocation());
 				fFoldersList.refresh();
-				fClassPathList.dialogFieldChanged();
+				fClassPathList.dialogFieldChanged(); // validate
 			}
+		} else if (key.equals(CPListElement.EXCLUSION)) {
+			CPListElement selElement= (CPListElement) elem.getParent();
+			ExclusionPatternDialog dialog= new ExclusionPatternDialog(getShell(), selElement);
+			if (dialog.open() == OutputLocationDialog.OK) {
+				selElement.setAttribute(CPListElement.EXCLUSION, dialog.getExclusionPattern());
+				fFoldersList.refresh();
+				fClassPathList.dialogFieldChanged(); // validate
+			}		
 		}
 	}
 
@@ -323,10 +332,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
-			String key= ((CPListElementAttribute) elem).getKey();
-			if (key.equals(CPListElement.OUTPUT)) {
-				return true;
-			}
+			return true;
 		}
 		return false;
 	}	
@@ -367,7 +373,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		// backwards, as entries will be deleted
 		for (int i= cpelements.size() - 1; i >= 0 ; i--) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
-			if (cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+			if (isEntryKind(cpe.getEntryKind())) {
 				// if it is a source folder, but not one of the accepted entries, remove it
 				// at the same time, for the entries seen, remove them from the accepted list
 				if (!srcelements.remove(cpe)) {
@@ -499,13 +505,14 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	 * @see BuildPathBasePage#setSelection
 	 */	
 	public void setSelection(List selElements) {
-//		if (!fIsProjSelected) {
-			filterSelection(selElements, IClasspathEntry.CPE_SOURCE);
-			fFoldersList.selectElements(new StructuredSelection(selElements));
-//		}
+		fFoldersList.selectElements(new StructuredSelection(selElements));
 	}	
 	
-		
-
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
+	 */
+	public boolean isEntryKind(int kind) {
+		return kind == IClasspathEntry.CPE_SOURCE;
+	}	
 
 }

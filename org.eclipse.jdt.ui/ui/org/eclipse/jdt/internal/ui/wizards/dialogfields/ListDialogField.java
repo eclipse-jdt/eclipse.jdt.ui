@@ -828,7 +828,7 @@ public class ListDialogField extends DialogField {
 				}
 			}
 		}
-		return result;
+		return new ArrayList(0);
 	}
 	
 	// ------- ListViewerAdapter

@@ -55,13 +55,15 @@ public class OutputLocationDialog extends StatusDialog {
 		
 	public OutputLocationDialog(Shell parent, CPListElement entryToEdit) {
 		super(parent);
-		setTitle("Output Location for " + entryToEdit.getPath().makeRelative().toString());
+		setTitle(NewWizardMessages.getString("OutputLocationDialog.title"));
 		fContainerFieldStatus= new StatusInfo();
+		
+		String label= NewWizardMessages.getFormattedString("OutputLocationDialog.location.label", entryToEdit.getPath().makeRelative().toString());
 		
 		OutputLocationAdapter adapter= new OutputLocationAdapter();
 		fContainerDialogField= new StringButtonDialogField(adapter);
-		fContainerDialogField.setLabelText("Output location:");
-		fContainerDialogField.setButtonLabel("Browse...");
+		fContainerDialogField.setLabelText(label);
+		fContainerDialogField.setButtonLabel(NewWizardMessages.getString("OutputLocationDialog.location.button"));
 		fContainerDialogField.setDialogFieldListener(adapter);
 		
 		fCurrProject= entryToEdit.getJavaProject().getProject();
@@ -70,7 +72,7 @@ public class OutputLocationDialog extends StatusDialog {
 		if (outputLocation == null) {
 			fContainerDialogField.setText(""); //$NON-NLS-1$
 		} else {
-			fContainerDialogField.setText(outputLocation.toString());
+			fContainerDialogField.setText(outputLocation.makeRelative().toString());
 		}
 	}
 	
@@ -166,7 +168,7 @@ public class OutputLocationDialog extends StatusDialog {
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.NEW_CONTAINER_DIALOG);
+		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.OUTPUT_LOCATION_DIALOG);
 	}
 	
 	// ---------- util method ------------

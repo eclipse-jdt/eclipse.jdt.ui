@@ -52,6 +52,13 @@ public class ClasspathOrderingWorkbookPage extends BuildPathBasePage {
 	 */	
 	public void setSelection(List selElements) {
 		fClassPathList.selectElements(new StructuredSelection(selElements));
-	}		
+	}
+			
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
+	 */
+	public boolean isEntryKind(int kind) {
+		return true;
+	}
 
 }

@@ -639,14 +639,12 @@ public class BuildPathsBlock {
 						
 			// set javadoc location
 			URL javadocLocation= (URL) entry.getAttribute(CPListElement.JAVADOC);
-			if (javadocLocation != null) {
-				IPath path= entry.getPath();
-				if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-					path= JavaCore.getResolvedVariablePath(path);
-				}
-				if (path != null) {
-					JavaUI.setLibraryJavadocLocation(path, javadocLocation);
-				}
+			IPath path= entry.getPath();
+			if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				path= JavaCore.getResolvedVariablePath(path);
+			}
+			if (path != null) {
+				JavaUI.setLibraryJavadocLocation(path, javadocLocation);
 			}
 		}	
 		monitor.worked(1);

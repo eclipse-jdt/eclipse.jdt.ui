@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -758,13 +759,17 @@ public class TreeListDialogField extends DialogField {
 	* Returns the selected elements.
 	*/
 	public List getSelectedElements() {
+		ArrayList result= new ArrayList();
 		if (fTree != null) {
 			ISelection selection= fTree.getSelection();
 			if (selection instanceof IStructuredSelection) {
-				return ((IStructuredSelection) selection).toList();
+				Iterator iter= ((IStructuredSelection)selection).iterator();
+				while (iter.hasNext()) {
+					result.add(iter.next());
+				}
 			}
 		}
-		return new ArrayList(0);
+		return result;
 	}
 
 	// ------- ListViewerAdapter

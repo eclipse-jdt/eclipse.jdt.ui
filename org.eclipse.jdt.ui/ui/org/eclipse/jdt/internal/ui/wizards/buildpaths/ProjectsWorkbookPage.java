@@ -75,7 +75,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			List cpelements= fClassPathList.getElements();
 			for (int i= cpelements.size() - 1 ; i >= 0; i--) {
 				CPListElement cpelem= (CPListElement)cpelements.get(i);
-				if (cpelem.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
+				if (isEntryKind(cpelem.getEntryKind())) {
 					existingProjects.add(cpelem.getResource());
 					projects.add(cpelem);
 					checkedProjects.add(cpelem);
@@ -135,7 +135,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		// backwards, as entries will be deleted
 		for (int i= cpelements.size() -1; i >= 0 ; i--) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
-			if (cpe.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
+			if (isEntryKind(cpe.getEntryKind())) {
 				if (!projelements.remove(cpe)) {
 					cpelements.remove(i);
 					remove= true;
@@ -161,9 +161,15 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	 * @see BuildPathBasePage#setSelection
 	 */	
 	public void setSelection(List selElements) {
-		filterSelection(selElements, IClasspathEntry.CPE_PROJECT);
 		fProjectsList.selectElements(new StructuredSelection(selElements));
-	}	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
+	 */
+	public boolean isEntryKind(int kind) {
+		return kind == IClasspathEntry.CPE_PROJECT;
+	}
 
 
 }

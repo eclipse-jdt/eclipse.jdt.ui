@@ -127,9 +127,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		updateLibrariesList();
 	}
 	
-	private boolean isLibraryKind(int kind) {
-		return kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE || kind == IClasspathEntry.CPE_CONTAINER;
-	}
 	
 	private void updateLibrariesList() {
 		List cpelements= fClassPathList.getElements();
@@ -138,7 +135,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		int nElements= cpelements.size();
 		for (int i= 0; i < nElements; i++) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
-			if (isLibraryKind(cpe.getEntryKind())) {
+			if (isEntryKind(cpe.getEntryKind())) {
 				libelements.add(cpe);
 			}
 		}
@@ -359,7 +356,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		for (int i= cpelements.size() - 1; i >= 0; i--) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
 			int kind= cpe.getEntryKind();
-			if (isLibraryKind(kind)) {
+			if (isEntryKind(kind)) {
 				if (!projelements.remove(cpe)) {
 					cpelements.remove(i);
 					remove= true;
@@ -856,6 +853,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
+	 */
+	public boolean isEntryKind(int kind) {
+		return kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE || kind == IClasspathEntry.CPE_CONTAINER;
+	}
 	
 	/*
 	 * @see BuildPathBasePage#getSelection
@@ -868,12 +871,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	 * @see BuildPathBasePage#setSelection
 	 */	
 	public void setSelection(List selElements) {
-		for (int i= selElements.size()-1; i >= 0; i--) {
-			CPListElement curr= (CPListElement) selElements.get(i);
-			if (!isLibraryKind(curr.getEntryKind())) {
-				selElements.remove(i);
-			}
-		}
 		fLibrariesList.selectElements(new StructuredSelection(selElements));
 	}	
 
