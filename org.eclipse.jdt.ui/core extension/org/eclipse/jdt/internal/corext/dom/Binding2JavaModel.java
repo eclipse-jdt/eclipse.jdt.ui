@@ -9,16 +9,19 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 
-import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * A helper class to convert compiler bindings into corresponding 
@@ -65,6 +68,10 @@ public class Binding2JavaModel {
 		}
 		return null;
 	}
+
+//	public static IMethod lookupIMethod(IMethodBinding method, IType type) throws JavaModelException {
+//		return find(method, type);
+//	}
 	
 	public static IMethod find(IMethodBinding method, IJavaProject scope) throws JavaModelException {
 		IType type= find(method.getDeclaringClass(), scope);
@@ -163,5 +170,68 @@ public class Binding2JavaModel {
 		int arrayCount= Signature.getArrayCount(s);
 		return s.charAt(arrayCount) == Signature.C_RESOLVED;
 	}	
+
+//----
+	public static IField lookupIField(IVariableBinding field, IJavaProject in) throws JavaModelException {
+		Assert.isTrue(field.isField());
+		IType declaringClass = lookupIType(field.getDeclaringClass(), in);
+		if (declaringClass == null)
+			return null;
+	    return declaringClass.getField(field.getName());
+	}
+//
+//  public static IMethod lookupIMethod(IMethodBinding method, IJavaProject in) throws JavaModelException {
+//     IType declaringClass= lookupIType(method.getDeclaringClass(), in);
+//     if (declaringClass == null) 
+//     	return null;
+//	return declaringClass.getMethod(method.getName(), getParameterTypeSignatures(method));
+//  }
+//
+	private static IType lookupIType(ITypeBinding type, IJavaProject in) throws JavaModelException {
+	    String fullyQualifiedName= getFullyQualifiedName(type);
+	    if (fullyQualifiedName == null)
+	    	return null;
+	     return in.findType(fullyQualifiedName);
+	}
+
+	private static String getFullyQualifiedName(ITypeBinding type) {
+	    if (type.isAnonymous()) 
+	      return null;
+	    StringBuffer buff=  new StringBuffer();
+	    buff.append(getPackageName(type))
+	    	 .append(getTypeQualifiedName(type))
+	    	 .append(type.getName());
+	    return buff.toString();
+	}
+
+	private static String getTypeQualifiedName(ITypeBinding type){
+		StringBuffer buff= new StringBuffer();
+	    ITypeBinding declaringType = type;
+	    while (declaringType.isNested()) {
+	      declaringType = declaringType.getDeclaringClass();
+	      buff.append(declaringType.getName()).append(".");
+	    }
+	    return buff.toString();
+	}
+	
+	private static ITypeBinding getBaseType(ITypeBinding type) {
+		return (type.isArray() ? type.getElementType() : type);
+	}
+	
+	private static String getPackageName(ITypeBinding type){
+	    IPackageBinding typePackage = getBaseType(type).getPackage();
+	    if (typePackage == null || typePackage.isUnnamed())
+	    	return "";
+		return typePackage.getName() + ".";
+	}
+
+//	private static String[] getParameterTypeSignatures(IMethodBinding method){
+//		String[] parameterTypeSignatures = new String[method.getParameterTypes().length];
+//		for (int i = 0; i < parameterTypeSignatures.length; i++) {
+//			parameterTypeSignatures[i]= Signature.createTypeSignature(getFullyQualifiedName(method.getParameterTypes()[i]), true);
+//		}
+//		return parameterTypeSignatures;
+//	}
+//
 }
 
