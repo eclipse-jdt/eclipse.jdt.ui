@@ -503,6 +503,10 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(7, 48, 7, 49, true, false, "temp", "j");
 	}	
 
+	public void test77() throws Exception {
+//		printTestDisabledMessage("test for bug 40353: extracting fragment which matches for_initializer");
+		helper1(10, 13, 10, 17, true, false, "temp", "i");
+	}
 
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
@@ -656,6 +660,16 @@ public class ExtractTempTests extends RefactoringTest {
 	public void testFail32() throws Exception {
 //		printTestDisabledMessage("test for bug 40353: extracting for_test referring to loop variable");
 		failHelper1(6, 35, 6, 36, true, false, "temp", RefactoringStatus.FATAL);
+	}
+
+	public void testFail33() throws Exception {
+//		printTestDisabledMessage("test for bug 40353: extracting for_updater");
+		failHelper1(6, 17, 6, 21, true, false, "temp", RefactoringStatus.FATAL);
+	}
+
+	public void testFail34() throws Exception {
+//		printTestDisabledMessage("test for bug 40353: extracting for_initializer");
+		failHelper1(9, 20, 9, 24, true, false, "temp", RefactoringStatus.FATAL);
 	}
 
 }
