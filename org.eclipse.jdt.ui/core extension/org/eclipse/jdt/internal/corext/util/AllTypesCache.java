@@ -41,7 +41,7 @@ import org.eclipse.jface.util.Assert;
  */
 public class AllTypesCache {
 	
-	private static final boolean DEBUG= true;
+	private static final boolean DEBUG= false;
 	
 	private static final int INITIAL_DELAY= 6000;
 	private static final int TIMEOUT= 3000;

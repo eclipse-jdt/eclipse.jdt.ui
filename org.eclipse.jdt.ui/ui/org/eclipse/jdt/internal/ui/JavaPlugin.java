@@ -63,6 +63,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
@@ -261,6 +262,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 		};
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
+		
+		AllTypesCache.initialize();
 	}
 		
 	/* (non - Javadoc)
@@ -275,6 +278,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public void shutdown() throws CoreException {
 		
+		AllTypesCache.terminate();
+
 		if (fImageDescriptorRegistry != null)
 			fImageDescriptorRegistry.dispose();
 		
