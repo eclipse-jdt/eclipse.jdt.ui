@@ -415,7 +415,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					
 					updateItem(item, element);
-					updatePlus(item, element);					
+					updatePlus(item, element);
 					internalExpandToLevel(item, ALL_LEVELS);
 					
 					fReusedExpandedItem= null;
@@ -436,10 +436,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				}
 				
 				protected ISourceRange getSourceRange(IJavaElement element) throws JavaModelException {
-					if (element instanceof IMember && !(element instanceof IInitializer))
-						return ((IMember) element).getNameRange();
 					if (element instanceof ISourceReference)
 						return ((ISourceReference) element).getSourceRange();
+					if (element instanceof IMember && !(element instanceof IInitializer))
+						return ((IMember) element).getNameRange();
 					return null;
 				}
 				
@@ -469,6 +469,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					Item[] children= getChildren(w);
 
 					boolean doUpdateParent= false;
+					boolean doUpdateParentsPlus= false;
 										
 					Vector deletions= new Vector();
 					Vector additions= new Vector();				
@@ -485,6 +486,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						    	break;
 						
 						if (j == children.length) {
+							// remove from collapsed parent
+							if ((status & IJavaElementDelta.REMOVED) != 0) {
+								doUpdateParentsPlus= true;
+								continue;
+							}							
 							// addition
 							if ((status & IJavaElementDelta.CHANGED) != 0 &&							
 								(affectedDelta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0 &&
@@ -618,6 +624,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					
 					if (doUpdateParent)
 						updateItem(w, delta.getElement());
+					if (!doUpdateParent && doUpdateParentsPlus && w instanceof Item)
+						updatePlus((Item)w, delta.getElement());
 				}
 				
 
