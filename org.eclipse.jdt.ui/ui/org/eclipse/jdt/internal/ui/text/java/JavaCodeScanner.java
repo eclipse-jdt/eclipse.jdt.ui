@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -34,6 +35,7 @@ import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
+import org.eclipse.jdt.internal.ui.text.IVersionDependent;
 
 
 /**
@@ -156,24 +158,23 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		}
 	}
 
-	private static class VersionedWordMatcher extends CombinedWordRule.WordMatcher {
+	private static class VersionedWordMatcher extends CombinedWordRule.WordMatcher implements IVersionDependent {
 
 		private final IToken fDefaultToken;
 		private final String fVersion;
-		private final boolean fEnable;
-		
-		private String fCurrentVersion;
+		private boolean fIsVersionMatch;
 
-		public VersionedWordMatcher(IToken defaultToken, String version, boolean enable, String currentVersion) {
-
+		public VersionedWordMatcher(IToken defaultToken, String version, String currentVersion) {
 			fDefaultToken= defaultToken;
 			fVersion= version;
-			fEnable= enable;
-			fCurrentVersion= currentVersion;
+			setCurrentVersion(currentVersion);
 		}
 		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.IVersionDependent#setCurrentVersion(java.lang.String)
+		 */
 		public void setCurrentVersion(String version) {
-			fCurrentVersion= version;
+			fIsVersionMatch= fVersion.compareTo(version) <= 0;
 		}
 	
 		/*
@@ -182,16 +183,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		public IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
 			IToken token= super.evaluate(scanner, word);
 
-			if (fEnable) {
-				if (fCurrentVersion.compareTo(fVersion) >= 0 || token.isUndefined())
-					return token;
-				return fDefaultToken;
-			} else {
-				if (fCurrentVersion.compareTo(fVersion) >= 0)
-					return Token.UNDEFINED;
-					
+			if (fIsVersionMatch || token.isUndefined())
 				return token;
-			}
+			
+			return fDefaultToken;
 		}
 	}
 	
@@ -216,7 +211,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	
 	private static final String RETURN= "return"; //$NON-NLS-1$
 	private static String[] fgJava14Keywords= { "assert" }; //$NON-NLS-1$
-	private static String[] fgJava15Keywords= { "enum" }; //$NON-NLS-1$
+	private static String[] fgJava15Keywords= { "enum", "@interface" }; //$NON-NLS-1$ //$NON-NLS-2$
 	
 	private static String[] fgTypes= { "void", "boolean", "char", "byte", "short", "strictfp", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-5$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-8$ //$NON-NLS-9$  //$NON-NLS-10$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$
 	
@@ -232,9 +227,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVA_OPERATOR
 	};
 	
-	private VersionedWordMatcher fJava14WordMatcher;
-	private VersionedWordMatcher fJava15WordMatcher;
-
+	private List fVersionDependentRules= new ArrayList(3);
+	
 	/**
 	 * Creates a Java code scanner
 	 * 
@@ -269,27 +263,32 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		rules.add(new WhitespaceRule(new JavaWhitespaceDetector()));
 		
 		
-		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		CombinedWordRule combinedWordRule= new CombinedWordRule(new JavaWordDetector(), token);
-		
 		// Add word rule for new keywords, 4077
 		String version= getPreferenceStore().getString(SOURCE_VERSION);
+		JavaWordDetector wordDetector= new JavaWordDetector();
+		wordDetector.setCurrentVersion(version);
+		fVersionDependentRules.add(wordDetector);
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		fJava14WordMatcher= new VersionedWordMatcher(token, "1.4", true, version); //$NON-NLS-1$
+		CombinedWordRule combinedWordRule= new CombinedWordRule(wordDetector, token);
+		
+		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
+		VersionedWordMatcher j14Matcher= new VersionedWordMatcher(token, "1.4", version); //$NON-NLS-1$
 		
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i=0; i<fgJava14Keywords.length; i++)
-			fJava14WordMatcher.addWord(fgJava14Keywords[i], token);
+			j14Matcher.addWord(fgJava14Keywords[i], token);
 
-		combinedWordRule.addWordMatcher(fJava14WordMatcher);
+		combinedWordRule.addWordMatcher(j14Matcher);
+		fVersionDependentRules.add(j14Matcher);
 
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		fJava15WordMatcher= new VersionedWordMatcher(token, "1.5", true, version); //$NON-NLS-1$
+		VersionedWordMatcher j15Matcher= new VersionedWordMatcher(token, "1.5", version); //$NON-NLS-1$
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i=0; i<fgJava15Keywords.length; i++)
-			fJava15WordMatcher.addWord(fgJava15Keywords[i], token);
+			j15Matcher.addWord(fgJava15Keywords[i], token);
 
-		combinedWordRule.addWordMatcher(fJava15WordMatcher);
+		combinedWordRule.addWordMatcher(j15Matcher);
+		fVersionDependentRules.add(j15Matcher);
 
 		// Add rule for operators and brackets
 		token= getToken(IJavaColorConstants.JAVA_OPERATOR);
@@ -341,10 +340,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			if (value instanceof String) {
 				String s= (String) value;
 	
-				if (fJava14WordMatcher != null)
-					fJava14WordMatcher.setCurrentVersion(s);
-				if (fJava15WordMatcher != null)
-					fJava15WordMatcher.setCurrentVersion(s);
+				for (Iterator it= fVersionDependentRules.iterator(); it.hasNext();) {
+					IVersionDependent dependent= (IVersionDependent) it.next();
+					dependent.setCurrentVersion(s);
+				}
 			}
 			
 		} else if (super.affectsBehavior(event)) {
