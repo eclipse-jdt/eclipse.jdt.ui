@@ -134,13 +134,22 @@ public class SelectionConverter {
 		try {
 			return codeResolveOrInput(editor, shell, title, message);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.converstion_failed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.codeResolveOrInput_failed")); //$NON-NLS-1$
 		}
 		return null;
 	}
 		
 	public static IJavaElement[] codeResolve(JavaEditor editor) throws JavaModelException {
 			return codeResolve(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
+	}
+	
+	public static IJavaElement[] codeResolveHandled(JavaEditor editor, Shell shell, String title) {
+		try {
+			return codeResolve(editor);
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.codeResolve_failed")); //$NON-NLS-1$
+		}
+		return null;
 	}
 	
 	public static IJavaElement elementAtOffset(JavaEditor editor) throws JavaModelException {

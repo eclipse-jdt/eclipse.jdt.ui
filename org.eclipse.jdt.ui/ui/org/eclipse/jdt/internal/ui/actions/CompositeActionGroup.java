@@ -20,12 +20,22 @@ import org.eclipse.ui.actions.ActionGroup;
 public class CompositeActionGroup extends ActionGroup {
 
 	private ActionGroup[] fGroups;
+	
+	private static final ActionGroup[] EMPTY_ARRAY= new ActionGroup[0];
 
+	public CompositeActionGroup() {
+		this(EMPTY_ARRAY);
+	}
+	
 	public CompositeActionGroup(ActionGroup[] groups) {
-		Assert.isNotNull(groups);
-		fGroups= groups;
+		setGroups(groups);
 	}
 
+	protected void setGroups(ActionGroup[] groups) {
+		Assert.isNotNull(groups);
+		fGroups= groups;		
+	}
+	
 	public void dispose() {
 		super.dispose();
 		for (int i= 0; i < fGroups.length; i++) {
@@ -45,10 +55,6 @@ public class CompositeActionGroup extends ActionGroup {
 		for (int i= 0; i < fGroups.length; i++) {
 			fGroups[i].fillContextMenu(menu);
 		}
-	}
-
-	public ActionContext getContext() {
-		return super.getContext();
 	}
 
 	public void setContext(ActionContext context) {

@@ -96,7 +96,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled(selection));
+		setEnabled(fEditor != null);
 	}
 
 	private boolean checkEnabled(ITextSelection selection) {

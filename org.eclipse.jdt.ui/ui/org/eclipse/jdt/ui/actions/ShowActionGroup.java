@@ -39,6 +39,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 public class ShowActionGroup extends ActionGroup {
 
 	private boolean fIsPackageExplorer;
+	private IMenuManager fNavigateMenu;
 
 	private ShowInPackageViewAction fShowInPackagesViewAction;
 	private ShowInNavigatorViewAction fShowInNavigatorViewAction;
@@ -90,14 +91,16 @@ public class ShowActionGroup extends ActionGroup {
 		}
 	}
 
+	/* package */ void setNavigateMenu(IMenuManager menu) {
+		fNavigateMenu= menu;
+	}
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
-		if (!fIsPackageExplorer)
-			actionBar.setGlobalActionHandler(RetargetActionIDs.SHOW_IN_PACKAGE_VIEW, fShowInPackagesViewAction);
-		actionBar.setGlobalActionHandler(RetargetActionIDs.SHOW_IN_NAVIGATOR_VIEW, fShowInNavigatorViewAction);
+		setGlobalActionHandlers(actionBar);
 	}
 	
 	/* (non-Javadoc)
@@ -107,5 +110,19 @@ public class ShowActionGroup extends ActionGroup {
 		super.fillContextMenu(menu);
 		if (!fIsPackageExplorer)
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackagesViewAction);
+		fillNavigateMenu(menu);
+	}
+	
+	private void setGlobalActionHandlers(IActionBars actionBar) {
+		if (!fIsPackageExplorer)
+			actionBar.setGlobalActionHandler(RetargetActionIDs.SHOW_IN_PACKAGE_VIEW, fShowInPackagesViewAction);
+		actionBar.setGlobalActionHandler(RetargetActionIDs.SHOW_IN_NAVIGATOR_VIEW, fShowInNavigatorViewAction);
+	}
+	
+	private void fillNavigateMenu(IMenuManager contextMenu) {
+		if (fNavigateMenu == null)
+			return;
+		if (fShowInNavigatorViewAction.isEnabled())
+			fNavigateMenu.add(fShowInNavigatorViewAction);
 	}
 }

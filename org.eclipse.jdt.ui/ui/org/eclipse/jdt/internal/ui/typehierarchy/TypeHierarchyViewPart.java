@@ -92,7 +92,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 /**
@@ -661,7 +663,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 		
 		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
-				new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+				new OpenEditorActionGroup(this), new OpenViewActionGroup(this), new ShowActionGroup(this), 
+				new GenerateActionGroup(this)});
 		
 		fStandardActionGroups.fillActionBars(getViewSite().getActionBars());
 	}
@@ -755,7 +758,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false), new ReorgGroup() }, viewer);
 		
 		// XXX workaround until we have fully converted the code to use the new action groups
-		fStandardActionGroups.get(1).fillContextMenu(menu);			
+		fStandardActionGroups.get(2).fillContextMenu(menu);			
 	}
 
 	/**
@@ -774,7 +777,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		addRefactoring(menu, fMethodsViewer);
 		
 		// XXX workaround until we have fully converted the code to use the new action groups
-		fStandardActionGroups.get(1).fillContextMenu(menu);
+		fStandardActionGroups.get(2).fillContextMenu(menu);
 	}
 	
 	private void addRefactoring(IMenuManager menu, IInputSelectionProvider viewer){

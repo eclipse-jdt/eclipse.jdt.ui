@@ -5,8 +5,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import org.eclipse.jface.action.IMenuManager;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
@@ -16,7 +14,6 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
@@ -27,7 +24,8 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 
-import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 /**
@@ -73,7 +71,7 @@ public class ClassFileEditor extends JavaEditor {
 		setAction(ITextEditorActionConstants.ADD_TASK, null);
 		
 		fStandardActionGroups= new CompositeActionGroup(
-			new ActionGroup[] {new OpenActionGroup(this), new ShowActionGroup(this) });
+			new ActionGroup[] {new OpenEditorActionGroup(this), new OpenViewActionGroup(this), new ShowActionGroup(this) });
 	}
 	
 	/**

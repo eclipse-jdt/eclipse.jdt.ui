@@ -393,34 +393,6 @@
     </actionSet>
 </extension>
 
-<extension point="org.eclipse.ui.popupMenus">
-	<objectContribution
-		id="org.eclipse.jdt.ui.actions.OpenSuperImplementationAction"
-		objectClass="org.eclipse.jdt.core.IMethod">
-		<action
-			id="org.eclipse.jdt.ui.actions.OpenSuperImplementationAction"
-			label="%OpenSuperImplementationAction.label"
-			tooltip="%OpenSuperImplementationAction.tooltip"
-			menubarPath="group.open"
-			class="org.eclipse.jdt.ui.actions.OpenSuperImplementationAction$ObjectDelegate"
-			enablesFor="1">
-		</action>
-	</objectContribution>
-	
-	<objectContribution
-		id="org.eclipse.jdt.ui.actions.OpenExternalJavadocAction"
-		objectClass="org.eclipse.jdt.core.IJavaElement">
-		<action
-			id="org.eclipse.jdt.ui.actions.OpenExternalJavadocAction"
-			label="%OpenExternalJavadocAction.label"
-			tooltip="%OpenExternalJavadocAction.tooltip"
-			menubarPath="group.open"
-			class="org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction"
-			enablesFor="1">
-		</action>
-	</objectContribution>	
-</extension>
-
 <!-- =========================================================================== -->
 <!-- Java Search Page                                                            -->
 <!-- =========================================================================== -->
@@ -823,6 +795,7 @@ JavaStructureDiffViewerCreator
 <!-- =========================================================================== -->
 <!-- Java Action Set (Adding the source, refactor and navigate menu              -->
 <!-- =========================================================================== -->
+
 <extension point="org.eclipse.ui.actionSets">
 	<actionSet
 		id="org.eclipse.jdt.ui.JavaActionSet"
@@ -941,10 +914,10 @@ JavaStructureDiffViewerCreator
 			label="%Refactoring.extractMethodAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction">
 		</action>
-		<action id="SelfEncapsulateFieldAction"
+		<action id="org.eclipse.jdt.ui.actions.SelfEncapsulateField"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
 			label="%Refactoring.selfEncapsulateFieldAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.SelfEncapsulateFieldActionDelegate"/>	
+			retarget="true"/>	
 		<action id="InlineTempAction"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
 			label="%Refactoring.inlineTempAction.label"
@@ -1049,6 +1022,8 @@ JavaStructureDiffViewerCreator
 		<part id="org.eclipse.jdt.ui.MembersView"/>
 	</actionSetPartAssociation>
 </extension>
+
+<!-- Java Action Set (Adding the source, refactor and navigate menu -->
 
 <extension
 	point="org.eclipse.ui.popupMenus">         

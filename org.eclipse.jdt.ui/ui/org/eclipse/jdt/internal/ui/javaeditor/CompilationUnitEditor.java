@@ -106,7 +106,8 @@ import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -484,7 +485,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fSelectionHistory.setHistoryAction(historyAction);		
 
 		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
-			new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+			new OpenEditorActionGroup(this), new OpenViewActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
 	}
 	
 	/*

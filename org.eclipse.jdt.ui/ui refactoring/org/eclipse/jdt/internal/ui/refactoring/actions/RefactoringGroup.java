@@ -39,6 +39,16 @@ public class RefactoringGroup extends ContextMenuGroup {
 	private RefactoringAction[] fRefactoringActions;
 	private boolean fIntitialized= false;
 	
+	private boolean fCreateSEF;
+	
+	public RefactoringGroup() {
+		this(true);
+	}
+	
+	public RefactoringGroup(boolean createSEF) {
+		fCreateSEF= createSEF;
+	}
+	
 	public void fill(IMenuManager manager, GroupContext context) {
 		createActions(context.getSelectionProvider());
 		
@@ -56,12 +66,20 @@ public class RefactoringGroup extends ContextMenuGroup {
 		
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(p);	
 		
-		fRefactoringActions= new RefactoringAction[]{
-			createModifyParametersAction(provider),
-			createPullUpAction(provider),
-			createMoveMembersAction(provider),
-			new SelfEncapsulateFieldAction(provider)
-		};
+		if (fCreateSEF) {
+			fRefactoringActions= new RefactoringAction[]{
+				createModifyParametersAction(provider),
+				createPullUpAction(provider),
+				createMoveMembersAction(provider),
+				new SelfEncapsulateFieldAction(provider)
+			};
+		} else {
+			fRefactoringActions= new RefactoringAction[]{
+				createModifyParametersAction(provider),
+				createPullUpAction(provider),
+				createMoveMembersAction(provider)
+			};
+		}
 		
 		fIntitialized= true;
 	}

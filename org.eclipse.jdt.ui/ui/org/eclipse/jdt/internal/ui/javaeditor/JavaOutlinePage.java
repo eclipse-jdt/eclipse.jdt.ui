@@ -96,7 +96,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 
@@ -708,7 +710,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 
 		// we must create the groups after we have set the selection provider to the site
 		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
-				new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+				new OpenViewActionGroup(this), new ShowActionGroup(this), 
+				new RefactorActionGroup(this, fOutlineViewer), new GenerateActionGroup(this)});
 				
 		// register global actions
 		IActionBars bars= getSite().getActionBars();

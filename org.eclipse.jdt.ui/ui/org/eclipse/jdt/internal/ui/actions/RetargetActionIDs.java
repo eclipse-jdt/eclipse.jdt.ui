@@ -78,4 +78,8 @@ public class RetargetActionIDs {
 	public static String SELECT_PREVIOUS_ELEMENT= "org.eclipse.jdt.ui.actions.SelectPreviousElement"; //$NON-NLS-1$
 	
 	public static String RESTORE_LAST_SELECTION= "org.eclipse.jdt.ui.actions.RestoreLastSelection";	 //$NON-NLS-1$
+	
+	// Refactor menu
+	
+	public static String SELF_ENCAPSULATE_FIELD= "org.eclipse.jdt.ui.actions.SelfEncapsulateField"; //$NON-NLS-1$
 }

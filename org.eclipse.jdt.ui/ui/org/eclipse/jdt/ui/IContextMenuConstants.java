@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -98,10 +104,19 @@ public interface IContextMenuConstants {
 	public static final String GROUP_REORGANIZE=	IWorkbenchActionConstants.GROUP_REORGANIZE;	
 	
 	/**
-	 * Pop-up menu: name of group for code generation or refactoring actions (
+	 * Pop-up menu: name of group for code generation actions (
 	 * value <code>"group.generate"</code>).
 	 */	
 	public static final String GROUP_GENERATE=	"group.generate"; //$NON-NLS-1$
+
+	/**
+	 * Pop-up menu: name of group for source actions. This is an alias for
+	 * <code>GROUP_GENERATE</code> to be more consistent with main menu
+	 * bar structure.
+	 * 
+	 * @since 2.0
+	 */	
+	public static final String GROUP_SOURCE=	GROUP_GENERATE;
 
 	/**
 	 * Pop-up menu: name of group for search actions (value <code>"group.search"</code>).
@@ -109,7 +124,7 @@ public interface IContextMenuConstants {
 	public static final String GROUP_SEARCH=		"group.search"; //$NON-NLS-1$
 	
 	/**
-	 * Pop-up menu: name of group for additional actions (value <code>"group.additions"</code>).
+	 * Pop-up menu: name of group for additional actions (value <code>"additions"</code>).
 	 */	
 	public static final String GROUP_ADDITIONS=	"additions"; //$NON-NLS-1$
 

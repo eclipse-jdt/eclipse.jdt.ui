@@ -39,7 +39,7 @@ public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
 		}
 		
 		if (!javaSearchMM.isEmpty())
-			manager.add(javaSearchMM);
+			manager.appendToGroup(GROUP_ID, javaSearchMM);
 	}
 	public IMenuManager getMenuManagerForGroup(IStructuredSelection selection) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID); //$NON-NLS-1$
