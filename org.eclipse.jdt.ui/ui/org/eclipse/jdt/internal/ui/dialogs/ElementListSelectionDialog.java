@@ -8,6 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import java.util.List;
 import java.util.Arrays;
 import org.eclipse.jface.viewers.ILabelProvider;
 
@@ -20,9 +21,8 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 	
 	/**
 	 * Creates a list selection dialog.
-	 * @param renderer          the label renderer.
-	 * @param ignoreCase        specifies whether sorting, folding and filtering are case sensitive.
-	 * @param multipleSelection specifies whether multiple selection is allowed.
+	 * @param parent   the parent widget.
+	 * @param renderer the label renderer.
 	 */	
 	public ElementListSelectionDialog(Shell parent,	ILabelProvider renderer) {
 		super(parent, renderer);
@@ -54,9 +54,11 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 		createFilteredList(contents);
 
 		setListElements(fElements);
-		
-		// XXX set initial selections
-						
+
+		List initialSelections= getInitialSelections();
+		if (initialSelections != null)
+			setSelection(initialSelections.toArray());
+					
 		return contents;
 	}
 }
