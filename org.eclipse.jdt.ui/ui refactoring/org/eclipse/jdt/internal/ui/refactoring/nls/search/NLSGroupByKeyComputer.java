@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class NLSGroupByKeyComputer implements IGroupByKeyComputer {
+class NLSGroupByKeyComputer implements IGroupByKeyComputer {
 
 	IJavaElement fLastJavaElement= null;;
 	String fLastHandle= null;;

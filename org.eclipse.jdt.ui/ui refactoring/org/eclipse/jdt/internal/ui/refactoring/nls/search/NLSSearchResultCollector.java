@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.SearchUI;
@@ -40,7 +41,7 @@ import org.eclipse.jdt.internal.ui.search.GroupByKeyComputer;
 import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
-public class NLSSearchResultCollector implements IJavaSearchResultCollector {
+class NLSSearchResultCollector implements IJavaSearchResultCollector {
 
 	private static final String MATCH= NLSSearchMessages.getString("SearchResultCollector.match"); //$NON-NLS-1$
 	private static final String MATCHES= NLSSearchMessages.getString("SearchResultCollector.matches"); //$NON-NLS-1$
@@ -68,13 +69,14 @@ public class NLSSearchResultCollector implements IJavaSearchResultCollector {
 		fView= SearchUI.getSearchResultView();
 		fMatchCount= 0;
 		if (fView != null)
-			fView.searchStarted(NLSSearchPage.EXTENSION_POINT_ID, fOperation.getSingularLabel(), fOperation.getPluralLabelPattern(), fOperation.getImageDescriptor(), null, new NLSSearchResultLabelProvider(), new GotoMarkerAction(), new NLSGroupByKeyComputer(), fOperation);
+			fView.searchStarted(NLSSearchPage.EXTENSION_POINT_ID, fOperation.getSingularLabel(), fOperation.getPluralLabelPattern(), fOperation.getImageDescriptor(), null, new NLSSearchResultLabelProvider(), new org.eclipse.jdt.internal.ui.search.GotoMarkerAction(), new NLSGroupByKeyComputer(), fOperation);
 		loadProperties(fPropertyFile);
 		fUsedPropertyNames= new HashSet(fProperties.size());
 
 		if (!getProgressMonitor().isCanceled())
 			getProgressMonitor().subTask(SEARCHING);
 	}
+	
 	/**
 	 * @see IJavaSearchResultCollector#accept
 	 */
@@ -169,6 +171,7 @@ public class NLSSearchResultCollector implements IJavaSearchResultCollector {
 		}
 		return false;
 	}
+	
 	/**
 	 * Finds the key defined by the given match. The assumption is that
 	 * the key is the first argument and it is a string i.e. quoted ("...").
@@ -232,7 +235,6 @@ public class NLSSearchResultCollector implements IJavaSearchResultCollector {
 				attributes.put(IMarker.MESSAGE, NLSSearchMessages.getFormattedString("NLSSearchResultCollector.unusedKeys", fPropertyFile.getName())); //$NON-NLS-1$
 				attributes.put(IMarker.CHAR_START, new Integer(Math.max(start, 0)));
 				attributes.put(IMarker.CHAR_END, new Integer(Math.max(start + propertyName.length(), 0)));
-				attributes.put(IWorkbenchPage.EDITOR_ID_ATTR, JavaUI.ID_CU_EDITOR);
 				try {
 					marker.setAttributes(attributes);
 				} catch (CoreException ex) {
@@ -244,6 +246,7 @@ public class NLSSearchResultCollector implements IJavaSearchResultCollector {
 			}
 		}
 	}
+	
 	/**
 	 * Finds the start position in the property file. We assume that
 	 * the key is the first match on a line.

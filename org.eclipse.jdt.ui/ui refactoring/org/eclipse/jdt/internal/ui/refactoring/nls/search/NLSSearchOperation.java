@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 
-public class NLSSearchOperation extends WorkspaceModifyOperation {
+class NLSSearchOperation extends WorkspaceModifyOperation {
 	
 	private IWorkspace fWorkspace;
 	private IJavaElement fElementPattern;

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
@@ -8,7 +8,7 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class NLSSearchMessages {
+class NLSSearchMessages {
 
 	private static final String RESOURCE_BUNDLE= NLSSearchMessages.class.getName();
 

@@ -9,7 +9,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultLabelProvider;
 
-public class NLSSearchResultLabelProvider extends JavaSearchResultLabelProvider {
+class NLSSearchResultLabelProvider extends JavaSearchResultLabelProvider {
 
 	public String getText(Object o) {
 		IMarker marker= getMarker(o);
