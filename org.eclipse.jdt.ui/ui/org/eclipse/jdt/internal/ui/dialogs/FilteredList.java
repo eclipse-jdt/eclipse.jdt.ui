@@ -82,6 +82,7 @@ public class FilteredList extends Composite {
 	private int fFilteredCount;
 	
 	private FilterMatcher fFilterMatcher= new DefaultFilterMatcher();
+	private Comparator fComparator;
 
 	private static class Label {
 		public final String string;
@@ -102,7 +103,7 @@ public class FilteredList extends Composite {
 		}
 	}
 
-	private class LabelComparator implements Comparator {
+	private final class LabelComparator implements Comparator {
 		private boolean fIgnoreCase;
 	
 		LabelComparator(boolean ignoreCase) {
@@ -112,10 +113,16 @@ public class FilteredList extends Composite {
 		public int compare(Object left, Object right) {
 			Label leftLabel= (Label) left;
 			Label rightLabel= (Label) right;			
-				
-			int value= fIgnoreCase
-				? leftLabel.string.compareToIgnoreCase(rightLabel.string)
-				: leftLabel.string.compareTo(rightLabel.string);
+
+			int value;
+			
+			if (fComparator == null) {
+				value= fIgnoreCase
+					? leftLabel.string.compareToIgnoreCase(rightLabel.string)
+					: leftLabel.string.compareTo(rightLabel.string);
+			} else {
+			    value= fComparator.compare(leftLabel.string, rightLabel.string);
+			}
 
 			if (value != 0)
 				return value;
@@ -220,6 +227,14 @@ public class FilteredList extends Composite {
 	public void setFilterMatcher(FilterMatcher filterMatcher) {
 		Assert.isNotNull(filterMatcher);
 		fFilterMatcher= filterMatcher;
+	}
+	
+	/**
+	 * Sets a custom comparator for sorting the list.
+	 */
+	public void setComparator(Comparator comparator) {
+	    Assert.isNotNull(comparator);
+	    fComparator= comparator;
 	}
 
     /**

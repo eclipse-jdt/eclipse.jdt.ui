@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
@@ -72,6 +73,27 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			return fQualifierMatcher.match(type.getTypeContainerName());
 		}	
 	}
+	
+	/*
+	 * A string comparator which is aware of obfuscated code
+	 * (type names starting with lower case characters).
+	 */
+	private static class StringComparator implements Comparator {
+	    public int compare(Object left, Object right) {
+	     	String leftString= (String) left;
+	     	String rightString= (String) right;
+	     		     	
+	     	if (Character.isLowerCase(leftString.charAt(0)) &&
+	     		!Character.isLowerCase(rightString.charAt(0)))
+	     		return +1;
+
+	     	if (Character.isLowerCase(rightString.charAt(0)) &&
+	     		!Character.isLowerCase(leftString.charAt(0)))
+	     		return -1;
+	     	
+			return leftString.compareToIgnoreCase(rightString);
+	    }
+	}
 
 	private IRunnableContext fRunnableContext;
 	private IJavaSearchScope fScope;
@@ -115,6 +137,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
  		FilteredList list= super.createFilteredList(parent);
  		
 		fFilteredList.setFilterMatcher(new TypeFilterMatcher());
+		fFilteredList.setComparator(new StringComparator());
 		
 		return list;
 	}
