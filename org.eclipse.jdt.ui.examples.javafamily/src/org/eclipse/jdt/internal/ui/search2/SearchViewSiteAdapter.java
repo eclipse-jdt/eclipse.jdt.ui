@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.search2;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.PlatformObject;
 
 import org.eclipse.swt.widgets.Shell;
@@ -37,7 +36,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -50,7 +48,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  * 
  * @since 2.0
  */
-class SearchViewSiteAdapter extends PlatformObject implements IWorkbenchPartSite, IAdaptable {
+class SearchViewSiteAdapter extends PlatformObject implements IWorkbenchPartSite {
 	
 	private ISelectionProvider fProvider;
 	private IWorkbenchSite fSite;
