@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -86,7 +86,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 	private ICompilationUnit fCUnit;
 	private CompilationUnit fRootNode;
-	private ASTRewrite fRewriter;
+	private OldASTRewrite fRewriter;
 	private ImportRewrite fImportRewrite;
 	private CodeScopeBuilder.Scope fScope;
 	private ASTNode fSelectedNode;
@@ -167,7 +167,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			result.setEdit(root);
 			buffer= TextBuffer.acquire(getFile());
 			ASTNodes.expandRange(fAnalyzer.getSelectedNodes(), buffer, fSelection.getOffset(), fSelection.getLength());
-			fRewriter= new ASTRewrite(fAnalyzer.getEnclosingBodyDeclaration());
+			fRewriter= new OldASTRewrite(fAnalyzer.getEnclosingBodyDeclaration());
 			fImportRewrite= new ImportRewrite(fCUnit, fSettings);
 			
 			fScope= CodeScopeBuilder.perform(fAnalyzer.getEnclosingBodyDeclaration(), fSelection).
@@ -180,7 +180,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			List newStatements= createLocals();
 			newStatements.add(createTryCatchStatement(buffer.getLineDelimiter()));
 			if (newStatements.size() == 1) {
-				fRewriter.markAsReplaced(fSelectedNode, (ASTNode)newStatements.get(0), null);
+				fRewriter.replace(fSelectedNode, (ASTNode)newStatements.get(0), null);
 			} else {
 				List container= getSelectedNodeContainer();
 				if (selectedNodeIsDeclaration()) {
@@ -192,10 +192,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 					}
 				} else {
 					if (newStatements.isEmpty()) {
-						fRewriter.markAsRemoved(fSelectedNode, null);
+						fRewriter.remove(fSelectedNode, null);
 					} else {
 						Statement[] collapsedTargetStatements= ((Statement[])newStatements.toArray(new Statement[newStatements.size()]));
-						fRewriter.markAsReplaced(fSelectedNode, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements), null);
+						fRewriter.replace(fSelectedNode, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements), null);
 					}
 				}
 			}
@@ -243,7 +243,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				Block block= getAST().newBlock();
 				fStatementsOfSelectedNode= block.statements();
 				fStatementsOfSelectedNode.add(fRewriter.createCopy(fSelectedNode));
-				fRewriter.markAsRemoved(fSelectedNode, null);
+				fRewriter.remove(fSelectedNode, null);
 			}
 		}
 		return fStatementsOfSelectedNode;
@@ -293,7 +293,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				Assignment assignment= ast.newAssignment();
 				assignment.setLeftHandSide((Expression)ASTNode.copySubtree(ast, fragment.getName()));
 				assignment.setRightHandSide((Expression)fRewriter.createCopy(initializer));
-				fRewriter.markAsRemoved(initializer, null);
+				fRewriter.remove(initializer, null);
 				ExpressionStatement es= ast.newExpressionStatement(assignment);
 				if (isSelectedNode) {
 					fTryBody.add(es);
@@ -303,10 +303,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			}
 		}
 		if (newAssignments.isEmpty()) {
-			fRewriter.markAsRemoved(statement, null);
+			fRewriter.remove(statement, null);
 		} else {
 			Statement[] collapsedTargetStatements= ((Statement[]) newAssignments.toArray(new Statement[newAssignments.size()]));
-			fRewriter.markAsReplaced(statement, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements), null);
+			fRewriter.replace(statement, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements), null);
 		}
 		return result;
 	}
@@ -345,7 +345,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		if (s == null) {
 			return null;
 		} else {
-			return (Statement)fRewriter.createPlaceholder(s, ASTRewrite.STATEMENT);
+			return (Statement)fRewriter.createPlaceholder(s, ASTNode.RETURN_STATEMENT);
 		}
 	}
 	

@@ -85,7 +85,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -351,7 +351,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		ICompilationUnit declaringCu= getDeclaringCu();
 		for (Iterator iter= getMergedSet(typeReferences.keySet(), constructorReferences.keySet()).iterator(); iter.hasNext();) {
 			ICompilationUnit processedCu= (ICompilationUnit) iter.next();
-			ASTRewrite rewrite= createRewrite(typeReferences, constructorReferences, declaringCu, processedCu, false);
+			OldASTRewrite rewrite= createRewrite(typeReferences, constructorReferences, declaringCu, processedCu, false);
 			if(processedCu.equals(declaringCu)) {	
 				fNewSourceOfInputType= getNewSourceForInputType(processedCu, rewrite);	
 				rewrite.removeModifications();
@@ -367,7 +367,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
 	}
 
-	private String getNewSourceForInputType(ICompilationUnit processedCu, ASTRewrite rewrite) throws CoreException, JavaModelException {
+	private String getNewSourceForInputType(ICompilationUnit processedCu, OldASTRewrite rewrite) throws CoreException, JavaModelException {
 		TextChange ch= new CompilationUnitChange("", processedCu); //$NON-NLS-1$
 		TextEdit edit= getRewriteTextEdit(processedCu, rewrite);
 		TextChangeCompatibility.addTextEdit(ch, "", edit);
@@ -377,9 +377,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return newSource.substring(td.getStartPosition(), ASTNodes.getExclusiveEnd(td));
 	}
 
-	private ASTRewrite createRewrite(Map typeReferences, Map constructorReferences, ICompilationUnit declaringCu, ICompilationUnit processedCu, boolean removeTypeDeclaration) throws CoreException {
+	private OldASTRewrite createRewrite(Map typeReferences, Map constructorReferences, ICompilationUnit declaringCu, ICompilationUnit processedCu, boolean removeTypeDeclaration) throws CoreException {
 		CompilationUnit cuNode= getAST(processedCu);
-		ASTRewrite rewrite= new ASTRewrite(cuNode);
+		OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 		if (processedCu.equals(declaringCu)){
 			TypeDeclaration td= findTypeDeclaration(fType, cuNode);
 			if (! removeTypeDeclaration && ! isInputTypeStatic() && fCreateInstanceField) {
@@ -392,7 +392,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			}
 			modifyAccessesToMembersFromEnclosingInstance(td, rewrite);
 			if (removeTypeDeclaration)
-				rewrite.markAsRemoved(td, null);
+				rewrite.remove(td, null);
 			else 
 				removeUnusedTypeModifiers(td, rewrite);
 		}
@@ -548,14 +548,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return ASTNodeSearchUtil.getAstNodes(results, cuNode);
 	}
 
-	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
+	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
 		TextChange textChange= manager.get(cu);
 		TextEdit resultingEdit= getRewriteTextEdit(cu, rewrite);
 		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.30"), resultingEdit);
 		rewrite.removeModifications();
 	}
 
-	private TextEdit getRewriteTextEdit(ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
+	private TextEdit getRewriteTextEdit(ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdit= new MultiTextEdit();
 		rewrite.rewriteNode(textBuffer, resultingEdit);
@@ -566,7 +566,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return resultingEdit;
 	}
 
-	private void modifyAccessesToMembersFromEnclosingInstance(TypeDeclaration typeDeclaration, ASTRewrite rewrite) {
+	private void modifyAccessesToMembersFromEnclosingInstance(TypeDeclaration typeDeclaration, OldASTRewrite rewrite) {
 		MemberAccessNodeCollector collector= new MemberAccessNodeCollector(getEnclosingType());
 		typeDeclaration.accept(collector);
 		modifyAccessToMethodsFromEnclosingInstance(rewrite, collector.getMethodInvocations(), typeDeclaration);
@@ -574,7 +574,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		modifyAccessToFieldsFromEnclosingInstance(rewrite, collector.getSimpleFieldNames(), typeDeclaration);
 	}
 	
-	private void modifyAccessToFieldsFromEnclosingInstance(ASTRewrite rewrite, SimpleName[] simpleNames, TypeDeclaration inputType) {
+	private void modifyAccessToFieldsFromEnclosingInstance(OldASTRewrite rewrite, SimpleName[] simpleNames, TypeDeclaration inputType) {
 		for (int i= 0; i < simpleNames.length; i++) {
 			SimpleName simpleName= simpleNames[i];
 			IBinding vb= simpleName.resolveBinding();
@@ -584,11 +584,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			FieldAccess access= simpleName.getAST().newFieldAccess();
 			access.setExpression(newExpression);
 			access.setName(simpleName.getAST().newSimpleName(simpleName.getIdentifier()));
-			rewrite.markAsReplaced(simpleName, access, null);
+			rewrite.replace(simpleName, access, null);
 		}
 	}
 
-	private void modifyAccessToFieldsFromEnclosingInstance(ASTRewrite rewrite, FieldAccess[] fieldAccesses, TypeDeclaration inputType) {
+	private void modifyAccessToFieldsFromEnclosingInstance(OldASTRewrite rewrite, FieldAccess[] fieldAccesses, TypeDeclaration inputType) {
 		for (int i= 0; i < fieldAccesses.length; i++) {
 			FieldAccess fieldAccess= fieldAccesses[i];
 			Assert.isNotNull(fieldAccess.getExpression());
@@ -599,11 +599,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			if (vb == null)
 				continue;
 			Expression newExpression= createAccessExpressionToEnclosingInstanceFieldText(fieldAccess, vb, inputType);
-			rewrite.markAsReplaced(fieldAccess.getExpression(), newExpression, null);
+			rewrite.replace(fieldAccess.getExpression(), newExpression, null);
 		}
 	}
 
-	private void modifyAccessToMethodsFromEnclosingInstance(ASTRewrite rewrite, MethodInvocation[] methodInvocations, TypeDeclaration inputType) {
+	private void modifyAccessToMethodsFromEnclosingInstance(OldASTRewrite rewrite, MethodInvocation[] methodInvocations, TypeDeclaration inputType) {
 		for (int i= 0; i < methodInvocations.length; i++) {
 			MethodInvocation methodInvocation= methodInvocations[i];
 			IMethodBinding mb= methodInvocation.resolveMethodBinding();
@@ -618,7 +618,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				if (! (methodInvocation.getExpression() instanceof ThisExpression) || !(((ThisExpression)methodInvocation.getExpression()).getQualifier() != null))
 					continue;
 				Expression newExpression= createAccessExpressionToEnclosingInstanceFieldText(methodInvocation, mb, inputType);
-				rewrite.markAsReplaced(invocExpression, newExpression, null);
+				rewrite.replace(invocExpression, newExpression, null);
 			}
 		}
 	}	
@@ -661,7 +661,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return anon != null && ASTNodes.isParent(anon, inputType);
 	}
 
-	private void modifyConstructors(TypeDeclaration td, ASTRewrite rewrite) throws CoreException {
+	private void modifyConstructors(TypeDeclaration td, OldASTRewrite rewrite) throws CoreException {
 		MethodDeclaration[] constructorNodes= getConstructorDeclarationNodes(td);
 		for (int i= 0; i < constructorNodes.length; i++) {
 			MethodDeclaration decl= constructorNodes[i];
@@ -671,7 +671,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private void setEnclosingInstanceFieldInConstructor(ASTRewrite rewrite, MethodDeclaration decl) throws JavaModelException {
+	private void setEnclosingInstanceFieldInConstructor(OldASTRewrite rewrite, MethodDeclaration decl) throws JavaModelException {
 		Block body= decl.getBody();
 		List statements= body.statements();
 		AST ast= decl.getAST();
@@ -700,7 +700,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private void addParameterToConstructor(ASTRewrite rewrite, MethodDeclaration declaration) throws JavaModelException {
+	private void addParameterToConstructor(OldASTRewrite rewrite, MethodDeclaration declaration) throws JavaModelException {
 		AST ast= declaration.getAST();
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		Type paramType= getTypeOfEnclosingInstanceField(ast);
@@ -711,8 +711,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		rewrite.markAsInserted(param);
 	}
 
-	private void createConstructor(TypeDeclaration declaration, ASTRewrite rewrite) throws CoreException {
-		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(formatConstructorSource(getNewConstructorSource(), 0), ASTRewrite.METHOD_DECLARATION);
+	private void createConstructor(TypeDeclaration declaration, OldASTRewrite rewrite) throws CoreException {
+		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(formatConstructorSource(getNewConstructorSource(), 0), ASTNode.METHOD_DECLARATION);
 		declaration.bodyDeclarations().add(0, newConst);
 		rewrite.markAsInserted(newConst);
 	}
@@ -743,7 +743,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return new String[]{getTypeOfEnclosingInstanceField()};
 	}
 
-	private void addEnclosingInstanceDeclaration(TypeDeclaration type, ASTRewrite rewrite){
+	private void addEnclosingInstanceDeclaration(TypeDeclaration type, OldASTRewrite rewrite){
 		VariableDeclarationFragment fragment= type.getAST().newVariableDeclarationFragment();
 		fragment.setName(type.getAST().newSimpleName(fEnclosingInstanceFieldName));
 		FieldDeclaration newField= type.getAST().newFieldDeclaration(fragment);
@@ -760,13 +760,13 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			return Modifier.PRIVATE;
 	}
 
-	private void removeUnusedTypeModifiers(TypeDeclaration type, ASTRewrite rewrite) {
+	private void removeUnusedTypeModifiers(TypeDeclaration type, OldASTRewrite rewrite) {
 		int newModifiers= JdtFlags.clearFlag(Modifier.STATIC | Modifier.PROTECTED | Modifier.PRIVATE, type.getModifiers());
 		rewrite.set(type, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
 		
 	}
 	
-	private void updateTypeReference(ASTNode node, ASTRewrite rewrite, ICompilationUnit cu) throws CoreException{
+	private void updateTypeReference(ASTNode node, OldASTRewrite rewrite, ICompilationUnit cu) throws CoreException{
 		ImportDeclaration enclosingImport= getEnclosingImportDeclaration(node);
 		if (enclosingImport != null){
 			updateReferenceInImport(enclosingImport, node, cu);
@@ -812,7 +812,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	/*
 	 * returns whether reference was updated 
 	 */
-	private boolean updateReference(ASTNode node, ASTRewrite rewrite) {
+	private boolean updateReference(ASTNode node, OldASTRewrite rewrite) {
 		if (node.getNodeType() == ASTNode.QUALIFIED_NAME)
 			return updateNameReference((QualifiedName)node, rewrite);
 		else if (node.getNodeType() == ASTNode.SIMPLE_TYPE)
@@ -821,14 +821,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			return false;
 	}
 
-	private boolean updateNameReference(Name name, ASTRewrite rewrite) {
+	private boolean updateNameReference(Name name, OldASTRewrite rewrite) {
 		if (name instanceof SimpleName)	
 			return false;
 		if (isFullyQualifiedName(name)){
-			rewrite.markAsReplaced(name, name.getAST().newName(Strings.splitByToken(getNewFullyQualifiedNameOfInputType(), ".")), null); //$NON-NLS-1$
+			rewrite.replace(name, name.getAST().newName(Strings.splitByToken(getNewFullyQualifiedNameOfInputType(), ".")), null); //$NON-NLS-1$
 			return true;
 		}
-		rewrite.markAsReplaced(name, name.getAST().newSimpleName(fType.getElementName()), null);
+		rewrite.replace(name, name.getAST().newSimpleName(fType.getElementName()), null);
 		return true;
 	}
 
@@ -909,7 +909,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 
-	private void updateConstructorReference(ASTNode refNode, ASTRewrite rewrite, ICompilationUnit cu) throws CoreException {
+	private void updateConstructorReference(ASTNode refNode, OldASTRewrite rewrite, ICompilationUnit cu) throws CoreException {
 		if (refNode instanceof SuperConstructorInvocation)
 			updateConstructorReference((SuperConstructorInvocation)refNode, rewrite, cu);
 		else if (refNode instanceof ClassInstanceCreation)
@@ -918,18 +918,18 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			updateConstructorReference((ClassInstanceCreation)refNode.getParent(), rewrite, cu);
 	}
 	
-	private void updateConstructorReference(SuperConstructorInvocation sci, ASTRewrite rewrite, ICompilationUnit cu) throws CoreException{
+	private void updateConstructorReference(SuperConstructorInvocation sci, OldASTRewrite rewrite, ICompilationUnit cu) throws CoreException{
 		if (fCreateInstanceField)
 			insertExpressionAsParameter(sci, rewrite, cu);
 		if (sci.getExpression() != null)
-			rewrite.markAsRemoved(sci.getExpression(), null);
+			rewrite.remove(sci.getExpression(), null);
 	}
 
-	private void updateConstructorReference(ClassInstanceCreation cic, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException {
+	private void updateConstructorReference(ClassInstanceCreation cic, OldASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException {
 		if (fCreateInstanceField)
 			insertExpressionAsParameter(cic, rewrite, cu);
 		if (cic.getExpression() != null)
-			rewrite.markAsRemoved(cic.getExpression(), null);
+			rewrite.remove(cic.getExpression(), null);
 	}
 	
 	private MethodDeclaration[] getConstructorDeclarationNodes(TypeDeclaration declaration){
@@ -943,18 +943,18 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
 	}
 	
-	private boolean insertExpressionAsParameter(ClassInstanceCreation cic, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException{
+	private boolean insertExpressionAsParameter(ClassInstanceCreation cic, OldASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException{
 		return addAsFirstArgument(rewrite, createEnclosingInstanceCreationString(cic, cu), cic.arguments());
 	}
 
-	private boolean insertExpressionAsParameter(SuperConstructorInvocation sci, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException{
+	private boolean insertExpressionAsParameter(SuperConstructorInvocation sci, OldASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException{
 		return addAsFirstArgument(rewrite, createEnclosingInstanceCreationString(sci, cu), sci.arguments());
 	}
 
-	private static boolean addAsFirstArgument(ASTRewrite rewrite, String expression, List arguments) {
+	private static boolean addAsFirstArgument(OldASTRewrite rewrite, String expression, List arguments) {
 		if (expression == null)
 			return false;
-		Expression newArgument= (Expression)rewrite.createPlaceholder(expression, ASTRewrite.EXPRESSION);
+		Expression newArgument= (Expression)rewrite.createPlaceholder(expression, ASTNode.METHOD_INVOCATION);
 		arguments.add(0, newArgument);
 		rewrite.markAsInserted(newArgument);
 		return true;

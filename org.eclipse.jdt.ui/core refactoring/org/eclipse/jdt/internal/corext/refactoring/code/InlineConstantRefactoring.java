@@ -59,7 +59,7 @@ import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
@@ -745,9 +745,9 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 				
 		private TextEdit createSubstituteStringForExpressionEdit(String string, Expression expression) throws JavaModelException {
-			ASTRewrite rewrite= new ASTRewrite(expression.getRoot());
+			OldASTRewrite rewrite= new OldASTRewrite(expression.getRoot());
 
-			rewrite.markAsReplaced(expression, rewrite.createPlaceholder(string, ASTRewrite.getPlaceholderType(expression)), null);
+			rewrite.replace(expression, rewrite.createPlaceholder(string, expression.getNodeType()), null);
 			
 			TextEdit edit= new MultiTextEdit();
 			TextBuffer textBuffer= TextBuffer.create(fUnit.getBuffer().getContents());
@@ -1114,9 +1114,9 @@ public class InlineConstantRefactoring extends Refactoring {
 		ASTNode toRemove= getNodeToRemoveForConstantDeclarationRemoval();
 		Assert.isNotNull(toRemove);
 
-		ASTRewrite rewrite= new ASTRewrite(toRemove.getRoot());
+		OldASTRewrite rewrite= new OldASTRewrite(toRemove.getRoot());
 	
-		rewrite.markAsRemoved(toRemove, null);
+		rewrite.remove(toRemove, null);
 			
 		TextEdit edit= new MultiTextEdit();
 		TextBuffer textBuffer= TextBuffer.create(getDeclaringCompilationUnit().getBuffer().getContents());

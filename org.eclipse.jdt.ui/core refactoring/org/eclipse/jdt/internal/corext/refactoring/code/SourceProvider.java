@@ -51,7 +51,7 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -65,7 +65,7 @@ public class SourceProvider {
 	private ICompilationUnit fCUnit;
 	private TextBuffer fBuffer;
 	private MethodDeclaration fDeclaration;
-	private ASTRewrite fRewriter;
+	private OldASTRewrite fRewriter;
 	private SourceAnalyzer fAnalyzer;
 	private boolean fMustEvalReturnedExpression;
 	private boolean fReturnValueNeedsLocalVariable;
@@ -95,7 +95,7 @@ public class SourceProvider {
 			ParameterData data= new ParameterData(element);
 			element.setProperty(ParameterData.PROPERTY, data);
 		}
-		fRewriter= new ASTRewrite(fDeclaration);
+		fRewriter= new OldASTRewrite(fDeclaration);
 		fAnalyzer= new SourceAnalyzer(fCUnit, fDeclaration);
 		fReturnValueNeedsLocalVariable= true;
 		fReturnExpressions= new ArrayList();
@@ -222,8 +222,8 @@ public class SourceProvider {
 	}
 	
 	public TextEdit getDeleteEdit() {
-		ASTRewrite rewriter= new ASTRewrite(fDeclaration.getParent());
-		rewriter.markAsRemoved(fDeclaration, null);
+		OldASTRewrite rewriter= new OldASTRewrite(fDeclaration.getParent());
+		rewriter.remove(fDeclaration, null);
 		MultiTextEdit result= new MultiTextEdit();
 		rewriter.rewriteNode(fBuffer, result);
 		rewriter.removeModifications();
@@ -295,8 +295,8 @@ public class SourceProvider {
 			List references= parameter.references();
 			for (Iterator iter= references.iterator(); iter.hasNext();) {
 				ASTNode element= (ASTNode) iter.next();
-				ASTNode newNode= fRewriter.createPlaceholder(expression, ASTRewrite.getPlaceholderType(element));
-				fRewriter.markAsReplaced(element, newNode, null);
+				ASTNode newNode= fRewriter.createPlaceholder(expression, element.getNodeType());
+				fRewriter.replace(element, newNode, null);
 			}
 		}
 	}
@@ -310,8 +310,8 @@ public class SourceProvider {
 				List references= nd.references();
 				for (Iterator refs= references.iterator(); refs.hasNext();) {
 					SimpleName element= (SimpleName) refs.next();
-					ASTNode newNode= fRewriter.createPlaceholder(newName, ASTRewrite.EXPRESSION);
-					fRewriter.markAsReplaced(element, newNode, null);
+					ASTNode newNode= fRewriter.createPlaceholder(newName, ASTNode.METHOD_INVOCATION);
+					fRewriter.replace(element, newNode, null);
 				}
 			}
 		}
@@ -330,7 +330,7 @@ public class SourceProvider {
 				final ClassInstanceCreation inst= (ClassInstanceCreation)node;
 				inst.setExpression(createReceiver(context, inst.resolveConstructorBinding()));
 			} else if (node instanceof Expression) {
-				fRewriter.markAsReplaced(node, fRewriter.createPlaceholder(context.receiver, ASTRewrite.EXPRESSION), null);
+				fRewriter.replace(node, fRewriter.createPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
 			}
 		}
 	}
@@ -343,7 +343,7 @@ public class SourceProvider {
 			if (binding != null && !binding.isLocal()) {
 				String s= importer.addImport(binding);
 				if (!ASTNodes.asString(element).equals(s)) {
-					fRewriter.markAsReplaced(element, fRewriter.createPlaceholder(s, ASTRewrite.EXPRESSION), null);
+					fRewriter.replace(element, fRewriter.createPlaceholder(s, ASTNode.METHOD_INVOCATION), null);
 				}
 			}
 		}
@@ -354,7 +354,7 @@ public class SourceProvider {
 		if (!context.receiverIsStatic && Modifier.isStatic(method.getModifiers())) {
 			receiver= context.importer.addImport(fDeclaration.resolveBinding().getDeclaringClass()); 
 		}
-		Expression exp= (Expression)fRewriter.createPlaceholder(receiver, ASTRewrite.EXPRESSION);
+		Expression exp= (Expression)fRewriter.createPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
 		fRewriter.markAsInserted(exp);
 		return exp;
 	}

@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -287,7 +287,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			
 			typeCu= WorkingCopyUtil.getNewWorkingCopy(getInputTypeCU(), fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
 			CompilationUnit typeCuNode= AST.parseCompilationUnit(typeCu, true, fWorkingCopyOwner, null);
-			ASTRewrite typeCuRewrite= new ASTRewrite(typeCuNode);
+			OldASTRewrite typeCuRewrite= new OldASTRewrite(typeCuNode);
 			IType theType= (IType)JavaModelUtil.findInCompilationUnit(typeCu, fInputType);
 			TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(theType, typeCuNode);
 
@@ -333,7 +333,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}	
 	}
 	
-	private void modifyInputTypeCu(ICompilationUnit typeCu, CompilationUnit typeCuNode, ASTRewrite typeCuRewrite, TypeDeclaration td) throws CoreException, JavaModelException {
+	private void modifyInputTypeCu(ICompilationUnit typeCu, CompilationUnit typeCuNode, OldASTRewrite typeCuRewrite, TypeDeclaration td) throws CoreException, JavaModelException {
 		deleteExtractedFields(typeCuNode, typeCu, typeCuRewrite);
 		if (fInputType.isInterface())
 			deleteExtractedMethods(typeCuNode, typeCu, typeCuRewrite);
@@ -350,7 +350,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}
 	}
 
-	private TextEditGroup trackReferenceNodes(CompilationUnit typeCuNode, ASTRewrite typeCuRewrite, TypeDeclaration td) {
+	private TextEditGroup trackReferenceNodes(CompilationUnit typeCuNode, OldASTRewrite typeCuRewrite, TypeDeclaration td) {
 		ASTNode[] refs= getReferencesToType(typeCuNode, td.resolveBinding());
 		TextEditGroup description= new TextEditGroup("N.N"); //$NON-NLS-1$
 		for (int i= 0; i < refs.length; i++) {
@@ -381,7 +381,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
 	}
 
-	private static TextChange addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
+	private static TextChange addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdits= new MultiTextEdit();
 		rewrite.rewriteNode(textBuffer, resultingEdits);
@@ -392,11 +392,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return textChange;
 	}
     
-	private void deleteExtractedMethods(CompilationUnit typeCuNode, ICompilationUnit cu, ASTRewrite typeCuRewrite) throws CoreException {
+	private void deleteExtractedMethods(CompilationUnit typeCuNode, ICompilationUnit cu, OldASTRewrite typeCuRewrite) throws CoreException {
 		ASTNodeDeleteUtil.markAsDeleted(getExtractedMethods(cu), typeCuNode, typeCuRewrite);
 	}
 
-	private void deleteExtractedFields(CompilationUnit typeCuNode, ICompilationUnit cu, ASTRewrite typeCuRewrite) throws CoreException {
+	private void deleteExtractedFields(CompilationUnit typeCuNode, ICompilationUnit cu, OldASTRewrite typeCuRewrite) throws CoreException {
 		ASTNodeDeleteUtil.markAsDeleted(getExtractedFields(cu), typeCuNode, typeCuRewrite);
 	}
 	

@@ -36,8 +36,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.ListRewriter;
-import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 
@@ -124,13 +124,13 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertFirst(decl1, null);
 		listRewrite.insertLast(decl2, null);
 				
@@ -188,7 +188,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 		
@@ -197,7 +197,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		
 		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, middleDecl, null);
 		listRewrite.insertAfter(decl2, middleDecl, null);
 				
@@ -256,7 +256,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
@@ -264,7 +264,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		MethodDeclaration decl3= newMethodDeclaration(ast, "new3");
 		MethodDeclaration decl4= newMethodDeclaration(ast, "new4");
 				
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertFirst(decl1, null);
 		listRewrite.insertAfter(decl2, decl1, null);
 		listRewrite.insertLast(decl3, null);
@@ -328,13 +328,13 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertFirst(decl1, null);
 		listRewrite.insertLast(decl2, null);
 		
@@ -391,7 +391,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
@@ -399,7 +399,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		FieldDeclaration decl3= newFieldDeclaration(ast, "new3");
 		FieldDeclaration decl4= newFieldDeclaration(ast, "new4");
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertFirst(decl1, null);
 		listRewrite.insertAfter(decl2, decl1, null);
 		listRewrite.insertLast(decl3, null);
@@ -464,7 +464,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 		
@@ -473,7 +473,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 
 		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, middleDecl, null);
 		listRewrite.insertAfter(decl2, middleDecl, null);
 				
@@ -529,12 +529,12 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= createAST(cu);
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 			
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -577,11 +577,11 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= createAST(cu);
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
+		rewrite.remove((ASTNode) decls.get(1), null);
 			
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -628,12 +628,12 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= createAST(cu);
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(1), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 			
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -676,13 +676,13 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= createAST(cu);
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(1), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 			
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -724,17 +724,17 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
 
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertFirst(decl1, null);
 		listRewrite.insertLast(decl2, null);
 			
@@ -786,12 +786,12 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
@@ -800,7 +800,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		
 		ASTNode firstDecl= (ASTNode) decls.get(0);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, firstDecl, null);
 		listRewrite.insertAfter(decl2, firstDecl, null);
 		listRewrite.insertLast(decl3, null);
@@ -859,18 +859,18 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
+		rewrite.remove((ASTNode) decls.get(1), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
 		
 		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, middleDecl, null);
 		listRewrite.insertAfter(decl2, middleDecl, null);
 			
@@ -925,17 +925,17 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
 				
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertFirst(decl1, null);
 		listRewrite.insertLast(decl2, null);
 		
@@ -988,12 +988,12 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
@@ -1002,7 +1002,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 
 		ASTNode firstDecl= (ASTNode) decls.get(0);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, firstDecl, null);
 		listRewrite.insertAfter(decl2, firstDecl, null);
 		listRewrite.insertLast(decl3, null);
@@ -1060,18 +1060,18 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
+		rewrite.remove((ASTNode) decls.get(1), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
 
 		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, middleDecl, null);
 		listRewrite.insertAfter(decl2, middleDecl, null);
 			
@@ -1125,19 +1125,19 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
 
 		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, middleDecl, null);
 		listRewrite.insertAfter(decl2, middleDecl, null);	   
 			
@@ -1189,19 +1189,19 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
 
 		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, middleDecl, null);
 		listRewrite.insertAfter(decl2, middleDecl, null);	
 			
@@ -1251,12 +1251,12 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
@@ -1266,7 +1266,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		ASTNode firstDecl= (ASTNode) decls.get(0);
 		ASTNode lastDecl= (ASTNode) decls.get(2);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, firstDecl, null);
 		listRewrite.insertAfter(decl2, firstDecl, null);
 		listRewrite.insertBefore(decl3, lastDecl, null);
@@ -1325,12 +1325,12 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
@@ -1340,7 +1340,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		ASTNode firstDecl= (ASTNode) decls.get(0);
 		ASTNode lastDecl= (ASTNode) decls.get(2);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, firstDecl, null);
 		listRewrite.insertAfter(decl2, firstDecl, null);
 		listRewrite.insertBefore(decl3, lastDecl, null);
@@ -1399,18 +1399,18 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(1), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertFirst(decl1, null);
 		listRewrite.insertLast(decl2, null);
 			
@@ -1458,18 +1458,18 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(1), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
 
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertFirst(decl1, null);
 		listRewrite.insertLast(decl2, null);
 			
@@ -1518,20 +1518,20 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(1), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
 
 		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, middleDecl, null);
 		listRewrite.insertAfter(decl2, middleDecl, null);
 			
@@ -1579,20 +1579,20 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
-		rewrite.markAsRemoved((ASTNode) decls.get(0), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(1), null);
-		rewrite.markAsRemoved((ASTNode) decls.get(2), null);
+		rewrite.remove((ASTNode) decls.get(0), null);
+		rewrite.remove((ASTNode) decls.get(1), null);
+		rewrite.remove((ASTNode) decls.get(2), null);
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
 
 		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		ListRewriter listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertBefore(decl1, middleDecl, null);
 		listRewrite.insertAfter(decl2, middleDecl, null);
 			

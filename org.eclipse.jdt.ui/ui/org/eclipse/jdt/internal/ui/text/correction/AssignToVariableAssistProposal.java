@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -73,7 +73,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 	}	
 				
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected OldASTRewrite getRewrite() throws CoreException {
 		if (fVariableKind == FIELD) {
 			return doAddField();
 		} else { // LOCAL
@@ -81,9 +81,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	private ASTRewrite doAddLocal() throws CoreException {
+	private OldASTRewrite doAddLocal() throws CoreException {
 		Expression expression= ((ExpressionStatement) fNodeToAssign).getExpression();
-		ASTRewrite rewrite= new ASTRewrite(fNodeToAssign.getParent());
+		OldASTRewrite rewrite= new OldASTRewrite(fNodeToAssign.getParent());
 		AST ast= fNodeToAssign.getAST();
 
 		String varName= suggestLocalVariableNames(fTypeBinding);
@@ -98,7 +98,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		Type type= evaluateType(ast);
 		newDecl.setType(type);
 		
-		rewrite.markAsReplaced(expression, newDecl, null); 
+		rewrite.replace(expression, newDecl, null); 
 		
 		markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME); //$NON-NLS-1$
 		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE); //$NON-NLS-1$
@@ -107,7 +107,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		return rewrite;
 	}
 
-	private ASTRewrite doAddField() throws CoreException {
+	private OldASTRewrite doAddField() throws CoreException {
 		boolean isParamToField= fNodeToAssign.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION;
 			
 		ASTNode newTypeDecl= ASTResolving.findParentType(fNodeToAssign);
@@ -121,7 +121,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		ChildListPropertyDescriptor property=  isAnonymous ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
 		List decls= (List) newTypeDecl.getStructuralProperty(property);
 		
-		ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
+		OldASTRewrite rewrite= new OldASTRewrite(newTypeDecl);
 		AST ast= newTypeDecl.getAST();
 		
 		BodyDeclaration bodyDecl= ASTResolving.findParentBodyDeclaration(fNodeToAssign);
@@ -185,7 +185,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			selectionNode= statement;
 			
 		} else {			
-			rewrite.markAsReplaced(expression, assignment, null);
+			rewrite.replace(expression, assignment, null);
 			selectionNode= fNodeToAssign;
 		} 
 		

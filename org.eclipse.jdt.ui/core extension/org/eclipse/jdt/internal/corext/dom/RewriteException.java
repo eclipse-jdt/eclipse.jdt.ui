@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,27 +11,32 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 /**
- * An exception representing a failure in the DOM AST rewriting
+ * A checked exception representing a failure in the DOM AST
+ * rewriting.
+ * <p>
+ * This class is not intended to be subclassed.
+ * </p>
+ * TODO - eliminate RewriteException if possible
  *
  * @since 3.0
  */
 public class RewriteException extends Exception {
 	/**
-     * Create a RewriteException with no message. 
+     * Creates a new exception with no message. 
      */
     public RewriteException() {
     	super();
     }
     
-	/**
-     * Create a RewriteException with a throwable.
+	/** 
+     * Create a new exception with a throwable.                     
      */
     public RewriteException(Throwable throwable) {
     	super(throwable);
     }
 
     /**
-     * Create a RewriteException with a message. 
+     * Create a new exception with a message.
      */
     public RewriteException(String msg) {
     	super(msg);

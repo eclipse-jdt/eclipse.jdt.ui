@@ -33,7 +33,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -121,8 +121,8 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 					return;
 				}
 				
-				ASTRewrite rewriter= new ASTRewrite(root);
-				rewriter.markAsReplaced(node, rewriter.createPlaceholder(newContent, ASTRewrite.getPlaceholderType(node)), null);
+				OldASTRewrite rewriter= new OldASTRewrite(root);
+				rewriter.replace(node, rewriter.createPlaceholder(newContent, node.getNodeType()), null);
 				
 				if (inEditor) {
 					JavaEditor je= getEditor(file);

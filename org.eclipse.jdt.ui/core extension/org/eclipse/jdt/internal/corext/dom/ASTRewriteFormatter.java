@@ -105,12 +105,12 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}
 	}
 	
-	protected String fLineDelimiter;
+	final String fLineDelimiter;
 	
-	protected NodeInfoStore fPlaceholders;
-	private RewriteEventStore fEventStore;
+	final NodeInfoStore fPlaceholders;
+	final RewriteEventStore fEventStore;
 
-	private Map fOptions;
+	final Map fOptions;
 	
 	public ASTRewriteFormatter(NodeInfoStore placeholders, RewriteEventStore eventStore, Map options, String lineDelimiter) {
 		fPlaceholders= placeholders;

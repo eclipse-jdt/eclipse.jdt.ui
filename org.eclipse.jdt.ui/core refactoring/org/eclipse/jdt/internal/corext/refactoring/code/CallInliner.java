@@ -69,7 +69,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
@@ -100,7 +100,7 @@ public class CallInliner {
 	private int fNumberOfLocals;
 	
 	private ASTNode fInvocation;
-	private ASTRewrite fRewriter;
+	private OldASTRewrite fRewriter;
 	private List fStatements;
 	private int fInsertionIndex;
 	private boolean fNeedsStatement;
@@ -276,13 +276,13 @@ public class CallInliner {
 		// but block can't be a child of field initializer
 		ASTNode parentField= ASTNodes.getParent(fInvocation, ASTNode.FIELD_DECLARATION);
 		if(parentField != null) {
-			fRewriter= new ASTRewrite(parentField);
+			fRewriter= new OldASTRewrite(parentField);
 			fFieldInitializer= true;
 		}
 		else {
 			ASTNode parentBlock= ASTNodes.getParent(fInvocation, ASTNode.BLOCK);
 			Assert.isNotNull(parentBlock);
-			fRewriter= new ASTRewrite(parentBlock);
+			fRewriter= new OldASTRewrite(parentBlock);
 		}
 	}
 
@@ -525,14 +525,14 @@ public class CallInliner {
 		// Inline empty body
 		if (blocks.length == 0) {
 			if (fNeedsStatement) {
-				fRewriter.markAsReplaced(fTargetNode, fTargetNode.getAST().newEmptyStatement(), null);
+				fRewriter.replace(fTargetNode, fTargetNode.getAST().newEmptyStatement(), null);
 			} else {
-				fRewriter.markAsRemoved(fTargetNode, null);
+				fRewriter.remove(fTargetNode, null);
 			}
 		} else {
 			ASTNode node= null;
 			for (int i= 0; i < blocks.length - 1; i++) {
-				node= fRewriter.createPlaceholder(blocks[i], ASTRewrite.STATEMENT);
+				node= fRewriter.createPlaceholder(blocks[i], ASTNode.RETURN_STATEMENT);
 				fRewriter.markAsInserted(node);
 				fStatements.add(fInsertionIndex++, node);
 			}
@@ -546,16 +546,16 @@ public class CallInliner {
 						node= createLocalDeclaration(
 							fSourceProvider.getReturnType(), 
 							fInvocationScope.createName(fSourceProvider.getMethodName(), true), 
-							(Expression)fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION));
+							(Expression)fRewriter.createPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					} else {
 						node= fTargetNode.getAST().newExpressionStatement(
-							(Expression)fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION));
+							(Expression)fRewriter.createPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					}
 				} else {
 					node= null;
 				}
 			} else if (fTargetNode instanceof Expression) {
-				node= fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION);
+				node= fRewriter.createPlaceholder(block, ASTNode.METHOD_INVOCATION);
 				
 				// fixes bug #24941
 				if(needsExplicitCast()) {
@@ -574,7 +574,7 @@ public class CallInliner {
 					node= pExp;
 				}
 			} else {
-				node= fRewriter.createPlaceholder(block, ASTRewrite.STATEMENT);
+				node= fRewriter.createPlaceholder(block, ASTNode.RETURN_STATEMENT);
 			}
 			
 			// Now replace the target node with the source node
@@ -583,11 +583,11 @@ public class CallInliner {
 					fRewriter.markAsInserted(node);
 					fStatements.add(fInsertionIndex++, node);
 				} else {
-					fRewriter.markAsReplaced(fTargetNode, node, null);
+					fRewriter.replace(fTargetNode, node, null);
 				}
 			} else {
 				if (fTargetNode != null) {
-					fRewriter.markAsRemoved(fTargetNode, null);
+					fRewriter.remove(fTargetNode, null);
 				}
 			}
 		}
@@ -707,7 +707,7 @@ public class CallInliner {
 					// have to insert all statements to be inlined.
 					fTargetNode= null;
 				}
-				fRewriter.markAsReplaced(currentStatement, block, null);
+				fRewriter.replace(currentStatement, block, null);
 			}
 		}
 		// We only insert one new statement or we delete the existing call. 

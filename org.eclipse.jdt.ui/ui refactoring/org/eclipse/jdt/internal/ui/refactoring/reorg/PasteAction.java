@@ -61,7 +61,7 @@ import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -577,7 +577,7 @@ public class PasteAction extends SelectionDispatchAction{
 
 			public Change createChange(IProgressMonitor pm) throws CoreException {
 				CompilationUnit cuNode= AST.parseCompilationUnit(getDestinationCu(), false);
-				ASTRewrite rewrite= new ASTRewrite(cuNode);
+				OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 				for (int i= 0; i < fSources.length; i++) {
 					pasteSource(fSources[i], rewrite, cuNode);
 				}
@@ -591,13 +591,13 @@ public class PasteAction extends SelectionDispatchAction{
 				return result;
 			}
 			
-			private void pasteSource(TypedSource source, ASTRewrite rewrite, CompilationUnit cuNode) throws CoreException {
+			private void pasteSource(TypedSource source, OldASTRewrite rewrite, CompilationUnit cuNode) throws CoreException {
 				ASTNode node= createAndInsertNewNode(source, cuNode, rewrite);
 				if (node != null)
 					rewrite.markAsInserted(node);
 			}
 			
-			private ASTNode createAndInsertNewNode(TypedSource source, CompilationUnit cuNode, ASTRewrite rewrite) throws CoreException {
+			private ASTNode createAndInsertNewNode(TypedSource source, CompilationUnit cuNode, OldASTRewrite rewrite) throws CoreException {
 				ASTNode destinationNode= getDestinationNodeForSourceElement(fDestination, source.getType(), cuNode);
 				if (destinationNode == null) {
 					return null;
@@ -657,29 +657,29 @@ public class PasteAction extends SelectionDispatchAction{
 			private static IType getAncestorType(IJavaElement destinationElement) {
 				return destinationElement.getElementType() == IJavaElement.TYPE ? (IType)destinationElement: (IType)destinationElement.getAncestor(IJavaElement.TYPE);
 			}
-			private ASTNode createNewNodeToInsertToCu(TypedSource source, ASTRewrite rewrite) {
+			private ASTNode createNewNodeToInsertToCu(TypedSource source, OldASTRewrite rewrite) {
 				switch(source.getType()){
 					case IJavaElement.TYPE:
-						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.TYPE_DECLARATION);
+						return rewrite.createPlaceholder(source.getSource(), ASTNode.TYPE_DECLARATION);
 					case IJavaElement.PACKAGE_DECLARATION:
-						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.PACKAGE_DECLARATION);
+						return rewrite.createPlaceholder(source.getSource(), ASTNode.PACKAGE_DECLARATION);
 					case IJavaElement.IMPORT_DECLARATION:
-						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.IMPORT_DECLARATION);
+						return rewrite.createPlaceholder(source.getSource(), ASTNode.IMPORT_DECLARATION);
 					default: Assert.isTrue(false, String.valueOf(source.getType()));
 						return null;
 				}
 			}
 			
-			private ASTNode createNewNodeToInsertToType(TypedSource source, ASTRewrite rewrite) {
+			private ASTNode createNewNodeToInsertToType(TypedSource source, OldASTRewrite rewrite) {
 				switch(source.getType()){
 					case IJavaElement.TYPE:
-						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.TYPE_DECLARATION);
+						return rewrite.createPlaceholder(source.getSource(), ASTNode.TYPE_DECLARATION);
 					case IJavaElement.METHOD:
-						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.METHOD_DECLARATION);
+						return rewrite.createPlaceholder(source.getSource(), ASTNode.METHOD_DECLARATION);
 					case IJavaElement.FIELD:
-						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.FIELD_DECLARATION);
+						return rewrite.createPlaceholder(source.getSource(), ASTNode.FIELD_DECLARATION);
 					case IJavaElement.INITIALIZER:
-						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.INITIALIZER);
+						return rewrite.createPlaceholder(source.getSource(), ASTNode.INITIALIZER);
 					default: Assert.isTrue(false);
 						return null;
 				}

@@ -21,7 +21,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.RewriteException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
@@ -29,16 +29,16 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
   */
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
-	private ASTRewrite fRewrite;
+	private OldASTRewrite fRewrite;
 
-	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
+	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, OldASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, relevance, image);
 		fRewrite= rewrite;
 	}
 		
 	protected void addEdits(IDocument document) throws CoreException {
 		super.addEdits(document);
-		ASTRewrite rewrite= getRewrite();
+		OldASTRewrite rewrite= getRewrite();
 		if (rewrite != null) {
 			try {
 				TextEdit edit= rewrite.rewriteAST(document, null);
@@ -50,7 +50,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		}
 	}
 	
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected OldASTRewrite getRewrite() throws CoreException {
 		return fRewrite;
 	}
 	

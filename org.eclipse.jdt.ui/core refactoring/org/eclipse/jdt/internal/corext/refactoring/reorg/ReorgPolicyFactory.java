@@ -68,7 +68,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -508,7 +508,7 @@ class ReorgPolicyFactory {
 			return (ICompilationUnit) destination.getAncestor(IJavaElement.COMPILATION_UNIT);
 		}
 	
-		protected static TextChange addTextEditFromRewrite(ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
+		protected static TextChange addTextEditFromRewrite(ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
 			TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 			TextEdit resultingEdits= new MultiTextEdit();
 			rewrite.rewriteNode(textBuffer, resultingEdits);
@@ -525,7 +525,7 @@ class ReorgPolicyFactory {
 			return textChange;
 		}
 	
-		protected void copyToDestination(IJavaElement element, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
+		protected void copyToDestination(IJavaElement element, OldASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			switch(element.getElementType()){
 				case IJavaElement.FIELD: 
 					copyFieldToDestination((IField)element, rewrite, sourceCuNode, destinationCuNode);
@@ -553,7 +553,7 @@ class ReorgPolicyFactory {
 			}
 		}
 
-		private void copyFieldToDestination(IField field, ASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
+		private void copyFieldToDestination(IField field, OldASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			//cannot copy the whole field declaration - it can contain more than 1 field
 			FieldDeclaration copiedNode= createNewFieldDeclarationNode(field, getAST(targetRewrite), sourceCuNode);
 			targetRewrite.markAsInserted(copiedNode);
@@ -575,7 +575,7 @@ class ReorgPolicyFactory {
 			return newFieldDeclaration;
 		}
 
-		private void copyImportsToDestination(IImportContainer container, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
+		private void copyImportsToDestination(IImportContainer container, OldASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			//there's no special AST node for the container - we copy all imports
 			IJavaElement[] importDeclarations= container.getChildren();
 			for (int i= 0; i < importDeclarations.length; i++) {
@@ -585,36 +585,36 @@ class ReorgPolicyFactory {
 			}
 		}
 
-		private void copyImportToDestination(IImportDeclaration declaration, ASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
+		private void copyImportToDestination(IImportDeclaration declaration, OldASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			ImportDeclaration sourceNode= ASTNodeSearchUtil.getImportDeclarationNode(declaration, sourceCuNode);
 			ImportDeclaration copiedNode= (ImportDeclaration) ASTNode.copySubtree(getAST(targetRewrite), sourceNode);
 			targetRewrite.markAsInserted(copiedNode);
 			destinationCuNode.imports().add(copiedNode);
 		}
 
-		private void copyPackageDeclarationToDestination(IPackageDeclaration declaration, ASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
+		private void copyPackageDeclarationToDestination(IPackageDeclaration declaration, OldASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			PackageDeclaration sourceNode= ASTNodeSearchUtil.getPackageDeclarationNode(declaration, sourceCuNode);
 			Initializer copiedNode= (Initializer) ASTNode.copySubtree(getAST(targetRewrite), sourceNode);
 			targetRewrite.markAsInserted(copiedNode);
 			destinationCuNode.types().add(copiedNode);
 		}
 
-		private void copyInitializerToDestination(IInitializer initializer, ASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			BodyDeclaration newInitializer= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(initializer), ASTRewrite.INITIALIZER);
+		private void copyInitializerToDestination(IInitializer initializer, OldASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
+			BodyDeclaration newInitializer= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(initializer), ASTNode.INITIALIZER);
 			targetRewrite.markAsInserted(newInitializer);
 			TypeDeclaration targetClass= getTargetType(destinationCuNode);
 			targetClass.bodyDeclarations().add(newInitializer);
 		}
 
-		private void copyTypeToDestination(IType type, ASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			TypeDeclaration newType= (TypeDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(type), ASTRewrite.TYPE_DECLARATION);
+		private void copyTypeToDestination(IType type, OldASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
+			TypeDeclaration newType= (TypeDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(type), ASTNode.TYPE_DECLARATION);
 			targetRewrite.markAsInserted(newType);
 			//always put on top level - we could create member types but that is wrong most of the time
 			destinationCuNode.types().add(newType);
 		}
 
-		private void copyMethodToDestination(IMethod method, ASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			BodyDeclaration newMethod= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(method), ASTRewrite.METHOD_DECLARATION);
+		private void copyMethodToDestination(IMethod method, OldASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
+			BodyDeclaration newMethod= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(method), ASTNode.METHOD_DECLARATION);
 			targetRewrite.markAsInserted(newMethod);
 			TypeDeclaration targetClass= getTargetType(destinationCuNode);
 			targetClass.bodyDeclarations().add(newMethod);
@@ -627,7 +627,7 @@ class ReorgPolicyFactory {
 			return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed((IJavaElement) sourceReference));
 		}
 
-		private static AST getAST(ASTRewrite rewrite){
+		private static AST getAST(OldASTRewrite rewrite){
 			return rewrite.getAST();
 		}
 		
@@ -886,7 +886,7 @@ class ReorgPolicyFactory {
 				CompilationUnit sourceCuNode= createSourceCuNode();
 				ICompilationUnit destinationCu= getDestinationCu();
 				CompilationUnit destinationCuNode= AST.parseCompilationUnit(destinationCu, false);
-				ASTRewrite rewrite= new ASTRewrite(destinationCuNode);
+				OldASTRewrite rewrite= new OldASTRewrite(destinationCuNode);
 				IJavaElement[] javaElements= getJavaElements();
 				for (int i= 0; i < javaElements.length; i++) {
 					copyToDestination(javaElements[i], rewrite, sourceCuNode, destinationCuNode);
@@ -1626,12 +1626,12 @@ class ReorgPolicyFactory {
 				CompilationUnit sourceCuNode= createSourceCuNode();
 				ICompilationUnit destinationCu= getDestinationCu();
 				CompilationUnit destinationCuNode= getSourceCu().equals(destinationCu) ? sourceCuNode: AST.parseCompilationUnit(destinationCu, false);
-				ASTRewrite targetRewrite= new ASTRewrite(destinationCuNode);
+				OldASTRewrite targetRewrite= new OldASTRewrite(destinationCuNode);
 				IJavaElement[] javaElements= getJavaElements();
 				for (int i= 0; i < javaElements.length; i++) {
 					copyToDestination(javaElements[i], targetRewrite, sourceCuNode, destinationCuNode);
 				}
-				ASTRewrite sourceRewrite= getSourceCu().equals(destinationCu) ? targetRewrite: new ASTRewrite(sourceCuNode);
+				OldASTRewrite sourceRewrite= getSourceCu().equals(destinationCu) ? targetRewrite: new OldASTRewrite(sourceCuNode);
 				ASTNodeDeleteUtil.markAsDeleted(javaElements, sourceCuNode, sourceRewrite);
 				Change targetCuChange= addTextEditFromRewrite(destinationCu, targetRewrite);
 				if (getSourceCu().equals(destinationCu)){

@@ -63,7 +63,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -493,7 +493,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private void addAllChangesFor(ICompilationUnit icu, Set vars, CompilationUnitChange unitChange) throws CoreException {
 		CompilationUnit	unit=  ASTCreator.createAST(icu, null);
-		ASTRewrite unitRewriter= new ASTRewrite(unit);
+		OldASTRewrite unitRewriter= new OldASTRewrite(unit);
 		TextBuffer buffer= null;
 		MultiTextEdit root= new MultiTextEdit();
 		 
@@ -510,7 +510,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	private void updateCu(CompilationUnit unit, Set vars, CompilationUnitChange unitChange, 
-			ASTRewrite unitRewriter, String typeName) throws JavaModelException {
+			OldASTRewrite unitRewriter, String typeName) throws JavaModelException {
 		for (Iterator it=vars.iterator(); it.hasNext(); ){
 			ConstraintVariable cv = (ConstraintVariable)it.next();
 			ASTNode decl= findDeclaration(unit, cv);
@@ -524,7 +524,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	private void updateType(CompilationUnit cu, Type oldType, CompilationUnitChange unitChange, 
-							ASTRewrite unitRewriter, String typeName) {
+							OldASTRewrite unitRewriter, String typeName) {
 		
 		String oldName= oldType.resolveBinding().getName();
 		String description= 
@@ -534,7 +534,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		AST	ast= cu.getAST();
 		//TODO handle types other than simple (e.g., arrays)
 		Type newType= ast.newSimpleType(ast.newSimpleName(typeName)); 
-		unitRewriter.markAsReplaced(oldType, newType, gd);
+		unitRewriter.replace(oldType, newType, gd);
 		unitChange.addTextEditGroup(gd);
 	}	
 	

@@ -18,9 +18,9 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class ASTRewriteClear extends ASTVisitor {
 
-	private ASTRewrite fRewrite;
+	private OldASTRewrite fRewrite;
 
-	public ASTRewriteClear(ASTRewrite rewrite) {
+	public ASTRewriteClear(OldASTRewrite rewrite) {
 		fRewrite= rewrite;
 	}
 	

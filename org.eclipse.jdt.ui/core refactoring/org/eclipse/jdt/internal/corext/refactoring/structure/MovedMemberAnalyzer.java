@@ -77,7 +77,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
 			SimpleName replace= (SimpleName)fAst.rewriter.createCopy(node.getName());
-			fAst.rewriter.markAsReplaced(node, replace, null);
+			fAst.rewriter.replace(node, replace, null);
 			return false;
 		}
 		return super.visit(node);
@@ -93,7 +93,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 				rewrite(node, fSource);
 			
 		} else if (isTargetAccess(binding)) {
-			fAst.rewriter.markAsRemoved(node.getExpression(), null);
+			fAst.rewriter.remove(node.getExpression(), null);
 		}	
 		return super.visit(node);
 	}
@@ -110,7 +110,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 				rewrite(node, fSource);
 			
 		} else if (isTargetAccess(binding)) {
-			fAst.rewriter.markAsRemoved(node.getExpression(), null);
+			fAst.rewriter.remove(node.getExpression(), null);
 		}	
 		return super.visit(node);
 	}
@@ -129,7 +129,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
 			SimpleName replace= (SimpleName)fAst.rewriter.createCopy(node.getName());
-			fAst.rewriter.markAsReplaced(node, replace, null);
+			fAst.rewriter.replace(node, replace, null);
 		}	
 		return super.visit(node);
 	}
@@ -146,7 +146,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
 			SimpleName replace= (SimpleName)fAst.rewriter.createCopy(node.getName());
-			fAst.rewriter.markAsReplaced(node, replace, null);
+			fAst.rewriter.replace(node, replace, null);
 		}	
 		return super.visit(node);
 	}

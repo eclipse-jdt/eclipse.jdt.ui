@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 
 public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 
@@ -45,7 +45,7 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		fExcludedModifiers= excludedModifiers;
 	}
 	
-	protected ASTRewrite getRewrite() {
+	protected OldASTRewrite getRewrite() {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
@@ -61,7 +61,7 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
 		if (declNode != null) {
-			ASTRewrite rewrite= new ASTRewrite(declNode.getParent());
+			OldASTRewrite rewrite= new OldASTRewrite(declNode.getParent());
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
 				int newModifiers= (methodDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;

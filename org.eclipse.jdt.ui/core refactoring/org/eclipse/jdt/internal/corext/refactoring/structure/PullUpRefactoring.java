@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -1217,7 +1217,7 @@ public class PullUpRefactoring extends Refactoring {
 					continue;
 				}	
 				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode : AST.parseCompilationUnit(cu, true);
-				ASTRewrite rewrite= new ASTRewrite(cuNode);
+				OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 				if (membersToDeleteMap.containsKey(cu)){
 					List members= (List) membersToDeleteMap.get(cu);
 					deleteDeclarationNodes(cuNode, rewrite, members);
@@ -1251,7 +1251,7 @@ public class PullUpRefactoring extends Refactoring {
 	/*
 	 * members: List<IMember>
 	 */
-	private static void deleteDeclarationNodes(CompilationUnit cuNode, ASTRewrite rewrite, List members) throws JavaModelException {
+	private static void deleteDeclarationNodes(CompilationUnit cuNode, OldASTRewrite rewrite, List members) throws JavaModelException {
 		List declarationNodes= getDeclarationNodes(cuNode, members);
 		for (Iterator iter= declarationNodes.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
@@ -1259,12 +1259,12 @@ public class PullUpRefactoring extends Refactoring {
 				if (node.getParent() instanceof FieldDeclaration){
 					FieldDeclaration fd= (FieldDeclaration)node.getParent();
 					if (areAllFragmentsDeleted(fd, declarationNodes))
-						rewrite.markAsRemoved(fd, null);
+						rewrite.remove(fd, null);
 					else
-						rewrite.markAsRemoved(node, null);
+						rewrite.remove(node, null);
 				}
 			} else {
-				rewrite.markAsRemoved(node, null);
+				rewrite.remove(node, null);
 			}
 		}
 	}
@@ -1319,7 +1319,7 @@ public class PullUpRefactoring extends Refactoring {
 				nonAbstractSubclassesMap.containsKey(unit);
 	}
 
-	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
+	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdits= new MultiTextEdit();
 		rewrite.rewriteNode(textBuffer, resultingEdits);
@@ -1341,7 +1341,7 @@ public class PullUpRefactoring extends Refactoring {
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	private void increaseVisibilityOfMethodsDeclaredAbstract(ASTRewrite rewrite, CompilationUnit cuNode, IProgressMonitor pm) throws JavaModelException {
+	private void increaseVisibilityOfMethodsDeclaredAbstract(OldASTRewrite rewrite, CompilationUnit cuNode, IProgressMonitor pm) throws JavaModelException {
 		for (int i= 0; i < fMethodsToDeclareAbstract.length; i++) {
 			IMethod method= fMethodsToDeclareAbstract[i];
 			if (! needsToChangeVisibility(method, pm, false))
@@ -1353,7 +1353,7 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 
-	private void createAbstractMethodsInTargetClass(CompilationUnit targetCuNode, CompilationUnit declaringCuNode, ASTRewrite rewrite, IProgressMonitor pm) throws JavaModelException {
+	private void createAbstractMethodsInTargetClass(CompilationUnit targetCuNode, CompilationUnit declaringCuNode, OldASTRewrite rewrite, IProgressMonitor pm) throws JavaModelException {
 		TypeDeclaration targetClass= ASTNodeSearchUtil.getTypeDeclarationNode(getTargetClass(), targetCuNode);
 		pm.beginTask("", fMethodsToDeclareAbstract.length);
 		for (int i= 0; i < fMethodsToDeclareAbstract.length; i++) {
@@ -1362,7 +1362,7 @@ public class PullUpRefactoring extends Refactoring {
 		pm.done();
 	}
 	
-	private void createAbstractMethodInTargetClass(IMethod sourceMethod, CompilationUnit declaringCuNode, ASTRewrite rewrite, TypeDeclaration targetClass, IProgressMonitor pm) throws JavaModelException {
+	private void createAbstractMethodInTargetClass(IMethod sourceMethod, CompilationUnit declaringCuNode, OldASTRewrite rewrite, TypeDeclaration targetClass, IProgressMonitor pm) throws JavaModelException {
 		MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(sourceMethod, declaringCuNode);
 		AST ast= getAST(rewrite);
 		MethodDeclaration newMethod= ast.newMethodDeclaration();
@@ -1392,7 +1392,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	//concreteSubclasses: List of IType
-	private void addMethodStubsToNonAbstractSubclassesOfTargetClass(List concreteSubclasses, CompilationUnit cuNode, CompilationUnit declaringCuNode, ASTRewrite rewrite, IProgressMonitor pm) throws CoreException {
+	private void addMethodStubsToNonAbstractSubclassesOfTargetClass(List concreteSubclasses, CompilationUnit cuNode, CompilationUnit declaringCuNode, OldASTRewrite rewrite, IProgressMonitor pm) throws CoreException {
 		IType declaringType= getDeclaringType();
 		IMethod[] methods= getAbstractMethodsAddedToTargetClass();
 		IType[] typesToImport= getTypesReferencedInDeclarations(methods, declaringCuNode);
@@ -1420,7 +1420,7 @@ public class PullUpRefactoring extends Refactoring {
 		pm.done();
 	}
 
-	private void addStub(IMethod sourceMethod, CompilationUnit declaringCuNode, TypeDeclaration typeToCreateStubIn, ICompilationUnit newCu, ASTRewrite rewrite, IProgressMonitor pm) throws CoreException {
+	private void addStub(IMethod sourceMethod, CompilationUnit declaringCuNode, TypeDeclaration typeToCreateStubIn, ICompilationUnit newCu, OldASTRewrite rewrite, IProgressMonitor pm) throws CoreException {
 		MethodDeclaration methodToCreateStubFor= ASTNodeSearchUtil.getMethodDeclarationNode(sourceMethod, declaringCuNode);
 		AST ast= getAST(rewrite);
 		MethodDeclaration newMethod= ast.newMethodDeclaration();
@@ -1450,7 +1450,7 @@ public class PullUpRefactoring extends Refactoring {
 		return body;
 	}
 
-	private Javadoc createJavadocForStub(String enclosingTypeName, MethodDeclaration oldMethod, MethodDeclaration newMethodNode, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
+	private Javadoc createJavadocForStub(String enclosingTypeName, MethodDeclaration oldMethod, MethodDeclaration newMethodNode, ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
 		if (! fPreferenceSettings.createComments)
 			return null;
 		IMethodBinding binding= oldMethod.resolveBinding();
@@ -1463,7 +1463,7 @@ public class PullUpRefactoring extends Refactoring {
 			fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
 		}
 		String comment= StubUtility.getMethodComment(cu, enclosingTypeName, newMethodNode, true, false, fullTypeName, fullParamNames, String.valueOf('\n'));
-		return (Javadoc) rewrite.createPlaceholder(comment, ASTRewrite.JAVADOC);
+		return (Javadoc) rewrite.createPlaceholder(comment, ASTNode.JAVADOC);
 	}
 
 	private int createModifiersForMethodStubs(IMethod method, MethodDeclaration methodDeclaration, IProgressMonitor pm) throws JavaModelException {
@@ -1505,7 +1505,7 @@ public class PullUpRefactoring extends Refactoring {
 		return fCreateMethodStubs && getAbstractMethodsAddedToTargetClass().length > 0;
 	}
 
-	private void makeTargetClassAbstract(ASTRewrite rewrite, CompilationUnit cuNode) throws JavaModelException {
+	private void makeTargetClassAbstract(OldASTRewrite rewrite, CompilationUnit cuNode) throws JavaModelException {
 		TypeDeclaration targetClass= ASTNodeSearchUtil.getTypeDeclarationNode(getTargetClass(), cuNode);
 	
 		int newModifiers= targetClass.getModifiers() | Modifier.ABSTRACT;
@@ -1548,7 +1548,7 @@ public class PullUpRefactoring extends Refactoring {
 		return declaringType.newSupertypeHierarchy(pm).getSuperclass(declaringType);
 	}
 
-	private void copyMembersToTargetClass(CompilationUnit declaringCuNode, CompilationUnit targetCuNode, ASTRewrite rewrite, IProgressMonitor pm) throws JavaModelException {
+	private void copyMembersToTargetClass(CompilationUnit declaringCuNode, CompilationUnit targetCuNode, OldASTRewrite rewrite, IProgressMonitor pm) throws JavaModelException {
 		TypeDeclaration targetClass= ASTNodeSearchUtil.getTypeDeclarationNode(getTargetClass(), targetCuNode);
 		fMembersToPullUp= JavaElementUtil.sortByOffset(fMembersToPullUp);
 		pm.beginTask("", fMembersToPullUp.length); //$NON-NLS-1$
@@ -1567,24 +1567,24 @@ public class PullUpRefactoring extends Refactoring {
 		pm.done();
 	}
 	
-	private void copyTypeToTargetClass(IType type, CompilationUnit declaringCuNode, TypeDeclaration targetClass, ASTRewrite rewrite) throws JavaModelException {
+	private void copyTypeToTargetClass(IType type, CompilationUnit declaringCuNode, TypeDeclaration targetClass, OldASTRewrite rewrite) throws JavaModelException {
 		BodyDeclaration newType= createNewTypeDeclarationNode(type, declaringCuNode, rewrite);
 		rewrite.markAsInserted(newType);
 		targetClass.bodyDeclarations().add(newType);
 	}
 
-	private BodyDeclaration createNewTypeDeclarationNode(IType type, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
+	private BodyDeclaration createNewTypeDeclarationNode(IType type, CompilationUnit declaringCuNode, OldASTRewrite rewrite) throws JavaModelException {
 		TypeDeclaration oldType= ASTNodeSearchUtil.getTypeDeclarationNode(type, declaringCuNode);
 		return createPlaceholderForTypeDeclaration(oldType, getDeclaringWorkingCopy(), rewrite, true);
 	}
 
-	private void copyMethodToTargetClass(IMethod method, CompilationUnit declaringCuNode, TypeDeclaration targetClass, ASTRewrite targetRewrite, IProgressMonitor pm) throws JavaModelException {
+	private void copyMethodToTargetClass(IMethod method, CompilationUnit declaringCuNode, TypeDeclaration targetClass, OldASTRewrite targetRewrite, IProgressMonitor pm) throws JavaModelException {
 		MethodDeclaration newMethod= createNewMethodDeclarationNode(method, declaringCuNode, targetRewrite, pm);
 		targetRewrite.markAsInserted(newMethod);
 		targetClass.bodyDeclarations().add(newMethod);
 	}
 
-	private MethodDeclaration createNewMethodDeclarationNode(IMethod sourceMethod, CompilationUnit declaringCuNode, ASTRewrite targetRewrite, IProgressMonitor pm) throws JavaModelException {
+	private MethodDeclaration createNewMethodDeclarationNode(IMethod sourceMethod, CompilationUnit declaringCuNode, OldASTRewrite targetRewrite, IProgressMonitor pm) throws JavaModelException {
 		MethodDeclaration sourceMethodNode= ASTNodeSearchUtil.getMethodDeclarationNode(sourceMethod, declaringCuNode);
 		AST ast= getAST(targetRewrite);
 		MethodDeclaration newMethod= ast.newMethodDeclaration();
@@ -1600,7 +1600,7 @@ public class PullUpRefactoring extends Refactoring {
 		return newMethod;
 	}
 
-	private void copyBodyOfPulledUpMethod(ASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod, IProgressMonitor pm) throws JavaModelException {
+	private void copyBodyOfPulledUpMethod(OldASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod, IProgressMonitor pm) throws JavaModelException {
 		if (oldMethod.getBody() == null){
 			newMethod.setBody(null);
 			return;
@@ -1620,7 +1620,7 @@ public class PullUpRefactoring extends Refactoring {
 		String[] lines= Strings.convertIntoLines(newBodySource);
 		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 		newBodySource= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(method));
-		Block newBody= (Block)targetRewrite.createPlaceholder(newBodySource, ASTRewrite.BLOCK);
+		Block newBody= (Block)targetRewrite.createPlaceholder(newBodySource, ASTNode.BLOCK);
 		newMethod.setBody(newBody);
 	}
 	
@@ -1649,7 +1649,7 @@ public class PullUpRefactoring extends Refactoring {
 		return (SimpleName)ASTNode.copySubtree(ast, simpleName);
 	}
 	
-	private static void copyParameters(ASTRewrite targetRewrite, ICompilationUnit cu, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
+	private static void copyParameters(OldASTRewrite targetRewrite, ICompilationUnit cu, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
 		for (int i= 0, n= oldMethod.parameters().size(); i < n; i++) {
 			SingleVariableDeclaration oldParam= (SingleVariableDeclaration)oldMethod.parameters().get(i);
 			SingleVariableDeclaration newParam= createPlaceholderForSingleVariableDeclaration(oldParam, cu, targetRewrite);
@@ -1657,12 +1657,12 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	private static void copyReturnType(ASTRewrite targetRewrite, ICompilationUnit sourceCu, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
+	private static void copyReturnType(OldASTRewrite targetRewrite, ICompilationUnit sourceCu, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
 		Type newReturnType= createPlaceholderForType(oldMethod.getReturnType(), sourceCu, targetRewrite);
 		newMethod.setReturnType(newReturnType);
 	}
 	
-	private static void copyJavadocNode(ASTRewrite rewrite, IMember member, BodyDeclaration oldDeclaration, BodyDeclaration newDeclaration) throws JavaModelException {
+	private static void copyJavadocNode(OldASTRewrite rewrite, IMember member, BodyDeclaration oldDeclaration, BodyDeclaration newDeclaration) throws JavaModelException {
 		Javadoc oldJavaDoc= oldDeclaration.getJavadoc();
 		if (oldJavaDoc == null)
 			return;
@@ -1670,17 +1670,17 @@ public class PullUpRefactoring extends Refactoring {
 		String[] lines= Strings.convertIntoLines(source);
 		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 		source= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(member));
-		Javadoc newJavaDoc= (Javadoc)rewrite.createPlaceholder(source, ASTRewrite.JAVADOC);
+		Javadoc newJavaDoc= (Javadoc)rewrite.createPlaceholder(source, ASTNode.JAVADOC);
 		newDeclaration.setJavadoc(newJavaDoc);
 	}
 
-	private void copyFieldToTargetClass(IField field, CompilationUnit declaringCuNode, TypeDeclaration targetClass, ASTRewrite rewrite, IProgressMonitor pm) throws JavaModelException {
+	private void copyFieldToTargetClass(IField field, CompilationUnit declaringCuNode, TypeDeclaration targetClass, OldASTRewrite rewrite, IProgressMonitor pm) throws JavaModelException {
 		FieldDeclaration newField= createNewFieldDeclarationNode(field, declaringCuNode, rewrite, pm);
 		rewrite.markAsInserted(newField);
 		targetClass.bodyDeclarations().add(newField);
 	}
 
-	private FieldDeclaration createNewFieldDeclarationNode(IField field, CompilationUnit declaringCuNode, ASTRewrite rewrite, IProgressMonitor pm) throws JavaModelException {
+	private FieldDeclaration createNewFieldDeclarationNode(IField field, CompilationUnit declaringCuNode, OldASTRewrite rewrite, IProgressMonitor pm) throws JavaModelException {
 		AST ast= getAST(rewrite);
 		VariableDeclarationFragment oldFieldFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, declaringCuNode);
 		VariableDeclarationFragment newFragment= ast.newVariableDeclarationFragment();
@@ -1812,7 +1812,7 @@ public class PullUpRefactoring extends Refactoring {
 		return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
 	}
 
-	private static AST getAST(ASTRewrite rewrite){
+	private static AST getAST(OldASTRewrite rewrite){
 		return rewrite.getAST();
 	}
 	
@@ -1836,20 +1836,20 @@ public class PullUpRefactoring extends Refactoring {
 			
 	//---- placeholder creators ----
 
-	private static Expression createPlaceholderForExpression(Expression expression, ICompilationUnit cu, ASTRewrite rewrite) throws JavaModelException{
-		return (Expression)rewrite.createPlaceholder(getBufferText(expression, cu), ASTRewrite.EXPRESSION);
+	private static Expression createPlaceholderForExpression(Expression expression, ICompilationUnit cu, OldASTRewrite rewrite) throws JavaModelException{
+		return (Expression)rewrite.createPlaceholder(getBufferText(expression, cu), ASTNode.METHOD_INVOCATION);
 	}
 			
-	private static SingleVariableDeclaration createPlaceholderForSingleVariableDeclaration(SingleVariableDeclaration declaration, ICompilationUnit cu, ASTRewrite rewrite) throws JavaModelException{
-		return (SingleVariableDeclaration)rewrite.createPlaceholder(getBufferText(declaration, cu), ASTRewrite.SINGLEVAR_DECLARATION);
+	private static SingleVariableDeclaration createPlaceholderForSingleVariableDeclaration(SingleVariableDeclaration declaration, ICompilationUnit cu, OldASTRewrite rewrite) throws JavaModelException{
+		return (SingleVariableDeclaration)rewrite.createPlaceholder(getBufferText(declaration, cu), ASTNode.SINGLE_VARIABLE_DECLARATION);
 	}
 	
-	private static Type createPlaceholderForType(Type type, ICompilationUnit cu, ASTRewrite rewrite) throws JavaModelException{
-		return (Type)rewrite.createPlaceholder(getBufferText(type, cu), ASTRewrite.TYPE);
+	private static Type createPlaceholderForType(Type type, ICompilationUnit cu, OldASTRewrite rewrite) throws JavaModelException{
+		return (Type)rewrite.createPlaceholder(getBufferText(type, cu), ASTNode.SIMPLE_TYPE);
 	}
 
-	private static BodyDeclaration createPlaceholderForTypeDeclaration(BodyDeclaration bodyDeclaration, ICompilationUnit cu, ASTRewrite rewrite, boolean removeIndentation) throws JavaModelException{
+	private static BodyDeclaration createPlaceholderForTypeDeclaration(BodyDeclaration bodyDeclaration, ICompilationUnit cu, OldASTRewrite rewrite, boolean removeIndentation) throws JavaModelException{
 		String newBufferText= getNewText(bodyDeclaration, cu, removeIndentation);
-		return (BodyDeclaration)rewrite.createPlaceholder(newBufferText, ASTRewrite.TYPE_DECLARATION);
+		return (BodyDeclaration)rewrite.createPlaceholder(newBufferText, ASTNode.TYPE_DECLARATION);
 	}
 }

@@ -161,7 +161,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return fNodeInfos.isCollapsed(node);
 	}
 	
-	private final boolean isInsertBoundToPrevious(ASTNode node) {
+	final boolean isInsertBoundToPrevious(ASTNode node) {
 		return fEventStore.isInsertBoundToPrevious(node);
 	}	
 		
@@ -176,7 +176,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	private final RewriteEvent getEvent(ASTNode parent, StructuralPropertyDescriptor property) {
 		return fEventStore.getEvent(parent, property);
 	}
-	private final TextEditGroup getEditGroup(RewriteEvent change) {
+	final TextEditGroup getEditGroup(RewriteEvent change) {
 		return fEventStore.getEventEditGroup(change);
 	}
 	
@@ -188,16 +188,15 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return fEventStore.getNewValue(parent, property);
 	}	
 	
-	private final void addEdit(TextEdit edit) {
+	final void addEdit(TextEdit edit) {
 		fCurrentEdit.addChild(edit);
 	}
 	
-	
-	private final String getLineDelimiter() {
+	final String getLineDelimiter() {
 		return TextUtilities.getDefaultLineDelimiter(fDocument);
 	}
 	
-	private final void doTextInsert(int offset, String insertString, TextEditGroup editGroup) {
+	final void doTextInsert(int offset, String insertString, TextEditGroup editGroup) {
 		if (insertString.length() > 0) {
 			TextEdit edit= new InsertEdit(offset, insertString);
 			addEdit(edit);
@@ -207,12 +206,12 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 	
-	private final void addEditGroup(TextEditGroup editGroup, TextEdit edit) {
+	final void addEditGroup(TextEditGroup editGroup, TextEdit edit) {
 		editGroup.addTextEdit(edit);
 	}
 
 	
-	private final TextEdit doTextRemove(int offset, int len, TextEditGroup editGroup) {
+	final TextEdit doTextRemove(int offset, int len, TextEditGroup editGroup) {
 		if (len == 0) {
 			return null;
 		}
@@ -224,7 +223,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return edit;
 	}
 	
-	private final void doTextRemoveAndVisit(int offset, int len, ASTNode node, TextEditGroup editGroup) {
+	final void doTextRemoveAndVisit(int offset, int len, ASTNode node, TextEditGroup editGroup) {
 		TextEdit edit= doTextRemove(offset, len, editGroup);
 		if (edit != null) {
 			fCurrentEdit= edit;
@@ -233,7 +232,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 	
-	private final int doVisit(ASTNode node) {
+	final int doVisit(ASTNode node) {
 		node.accept(this);
 		return node.getStartPosition() + node.getLength();
 	}
@@ -2528,7 +2527,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return true;
 	}
 
-	private void handleException(Throwable e) {
+	void handleException(Throwable e) {
 		JavaPlugin.log(e);
 		throw new RewriteRuntimeException(e);
 	}

@@ -76,7 +76,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		QualifiedName name= ast.newQualifiedName(
 			ast.newSimpleName(type.getName()),
 			(SimpleName)fAst.rewriter.createCopy(node));
-		fAst.rewriter.markAsReplaced(node, name, fAst.createGroupDescription(REFERENCE_UPDATE));
+		fAst.rewriter.replace(node, name, fAst.createGroupDescription(REFERENCE_UPDATE));
 		fProcessed.add(node);
 		fNeedsImport= true;
 	}
@@ -151,12 +151,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 				fullyQualified= true;
 		}
 		if (fullyQualified) {
-			fAst.rewriter.markAsReplaced(
+			fAst.rewriter.replace(
 				name, 
 				ASTNodeFactory.newName(creator, type.getQualifiedName()),
 				fAst.createGroupDescription(REFERENCE_UPDATE));
 		} else {
-			fAst.rewriter.markAsReplaced(
+			fAst.rewriter.replace(
 				name, 
 				creator.newSimpleName(type.getName()),
 				fAst.createGroupDescription(REFERENCE_UPDATE));
@@ -166,7 +166,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 			
 	private void rewriteExpression(ASTNode node, Expression exp, ITypeBinding type) {
 		SimpleName replace= node.getAST().newSimpleName(type.getName());
-		fAst.rewriter.markAsReplaced(exp, replace, fAst.createGroupDescription(REFERENCE_UPDATE));
+		fAst.rewriter.replace(exp, replace, fAst.createGroupDescription(REFERENCE_UPDATE));
 		fNeedsImport= true;
 		nonStaticAccess(node);
 	}

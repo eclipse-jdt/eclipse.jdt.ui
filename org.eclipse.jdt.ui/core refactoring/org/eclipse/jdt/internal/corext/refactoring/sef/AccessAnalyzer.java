@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -59,7 +59,7 @@ class AccessAnalyzer extends ASTVisitor {
 	private ITypeBinding fDeclaringClassBinding;	
 	private String fGetter;
 	private String fSetter;
-	private ASTRewrite fRewriter;
+	private OldASTRewrite fRewriter;
 	private List fGroupDescriptions;
 	private RefactoringStatus fStatus;
 	private boolean fSetterMustReturnValue;
@@ -71,7 +71,7 @@ class AccessAnalyzer extends ASTVisitor {
 	private static final String PREFIX_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_prefix_access"); //$NON-NLS-1$
 	private static final String POSTFIX_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_postfix_access"); //$NON-NLS-1$
 		
-	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, IVariableBinding field, ITypeBinding declaringClass, ASTRewrite rewriter) {
+	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, IVariableBinding field, ITypeBinding declaringClass, OldASTRewrite rewriter) {
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(unit);
 		Assert.isNotNull(field);
@@ -141,7 +141,7 @@ class AccessAnalyzer extends ASTVisitor {
 				exp.setRightOperand(rhs);
 				arguments.add(exp);
 			}
-			fRewriter.markAsReplaced(node, invocation, createGroupDescription(WRITE_ACCESS));
+			fRewriter.replace(node, invocation, createGroupDescription(WRITE_ACCESS));
 		}
 		node.getRightHandSide().accept(this);
 		return false;
@@ -149,9 +149,9 @@ class AccessAnalyzer extends ASTVisitor {
 
 	public boolean visit(SimpleName node) {
 		if (!node.isDeclaration() && considerBinding(node.resolveBinding(), node)) {
-			fRewriter.markAsReplaced(
+			fRewriter.replace(
 				node, 
-				fRewriter.createPlaceholder(fGetter + "()", ASTRewrite.EXPRESSION), //$NON-NLS-1$
+				fRewriter.createPlaceholder(fGetter + "()", ASTNode.METHOD_INVOCATION), //$NON-NLS-1$
 				createGroupDescription(READ_ACCESS));
 		}
 		return true;
@@ -168,7 +168,7 @@ class AccessAnalyzer extends ASTVisitor {
 			
 		checkParent(node);
 		
-		fRewriter.markAsReplaced(node, 
+		fRewriter.replace(node, 
 			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()), 
 			createGroupDescription(PREFIX_ACCESS));
 		return false;
@@ -185,7 +185,7 @@ class AccessAnalyzer extends ASTVisitor {
 				JavaStatusContext.create(fCUnit, new SourceRange(node)));
 			return false;
 		}
-		fRewriter.markAsReplaced(node, 
+		fRewriter.replace(node, 
 			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()), 
 			createGroupDescription(POSTFIX_ACCESS));
 		return false;

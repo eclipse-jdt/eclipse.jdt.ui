@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -52,16 +52,16 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected OldASTRewrite getRewrite() throws CoreException {
 		char[] content= getCompilationUnit().getBuffer().getCharacters();
 		CompilationUnit astRoot= AST.parseCompilationUnit(content, fOldName + ".java", getCompilationUnit().getJavaProject()); //$NON-NLS-1$
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		OldASTRewrite rewrite= new OldASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 		TypeDeclaration decl= findTypeDeclaration(astRoot.types(), fOldName);
 		if (decl != null) {
 			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(astRoot, decl.getName());
 			for (int i= 0; i < sameNodes.length; i++) {
-				rewrite.markAsReplaced(sameNodes[i], ast.newSimpleName(fNewName), null);
+				rewrite.replace(sameNodes[i], ast.newSimpleName(fNewName), null);
 			}
 		}
 		return rewrite;

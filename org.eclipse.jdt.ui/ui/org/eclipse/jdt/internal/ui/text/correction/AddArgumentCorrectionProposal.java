@@ -27,8 +27,8 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.ListRewriter;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -49,16 +49,16 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected ASTRewrite getRewrite() {
+	protected OldASTRewrite getRewrite() {
 		AST ast= fCallerNode.getAST();
-		ASTRewrite rewrite= new ASTRewrite(fCallerNode);
+		OldASTRewrite rewrite= new OldASTRewrite(fCallerNode);
 		ChildListPropertyDescriptor property= getProperty();
 
 		for (int i= 0; i < fInsertIndexes.length; i++) {
 			int idx= fInsertIndexes[i];
 			String key= "newarg_" + i; //$NON-NLS-1$
 			Expression newArg= evaluateArgumentExpressions(ast, fParamTypes[idx], key);
-			ListRewriter listRewriter= rewrite.getListRewrite(fCallerNode, property);
+			ListRewrite listRewriter= rewrite.getListRewrite(fCallerNode, property);
 			listRewriter.insertAt(newArg, idx, null);
 			
 			markAsLinked(rewrite, newArg, i == 0, key); 

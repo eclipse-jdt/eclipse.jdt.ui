@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 
@@ -31,19 +31,19 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 public class ASTNodeDeleteUtil {
 	private ASTNodeDeleteUtil(){}
 	
-	public static void markAsDeleted(IJavaElement[] javaElements, CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException{
+	public static void markAsDeleted(IJavaElement[] javaElements, CompilationUnit cuNode, OldASTRewrite rewrite) throws JavaModelException{
 		for (int i= 0; i<javaElements.length;i++) {
 			markAsDeleted(javaElements[i], cuNode, rewrite);
 		}
 		propagateFieldDeclarationNodeDeletions(rewrite);			
 	}
 	
-	private static void markAsDeleted(IJavaElement element, CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException {
+	private static void markAsDeleted(IJavaElement element, CompilationUnit cuNode, OldASTRewrite rewrite) throws JavaModelException {
 		ASTNode[] declarationNodes= getNodesToDelete(element, cuNode);
 		for (int i= 0; i < declarationNodes.length; i++) {
 			ASTNode node= declarationNodes[i];
 			if (node != null)
-				rewrite.markAsRemoved(node, null);
+				rewrite.remove(node, null);
 		}
 	}
 
@@ -66,7 +66,7 @@ public class ASTNodeDeleteUtil {
 	}
 
 	//TODO use this method in pull up and push down
-	private static void propagateFieldDeclarationNodeDeletions(ASTRewrite rewrite) {
+	private static void propagateFieldDeclarationNodeDeletions(OldASTRewrite rewrite) {
 		Set removedNodes= getRemovedNodes(rewrite);
 		for (Iterator iter= removedNodes.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
@@ -74,7 +74,7 @@ public class ASTNodeDeleteUtil {
 				if (node.getParent() instanceof FieldDeclaration){
 					FieldDeclaration fd= (FieldDeclaration)node.getParent();
 					if (! rewrite.isRemoved(fd) && removedNodes.containsAll(fd.fragments()))
-						rewrite.markAsRemoved(fd, null);
+						rewrite.remove(fd, null);
 				}
 			}
 		}
@@ -83,7 +83,7 @@ public class ASTNodeDeleteUtil {
 	/*
 	 * return Set<ASTNode>
 	 */
-	private static Set getRemovedNodes(final ASTRewrite rewrite) {
+	private static Set getRemovedNodes(final OldASTRewrite rewrite) {
 		final Set result= new HashSet();
 		ASTNode rootNode= rewrite.getRootNode();
 		if (rootNode != null) {

@@ -36,7 +36,7 @@ public class ListRewriteEvent extends RewriteEvent {
 	 * @param originalNodes The original nodes (type ASTNode) 
 	 */
 	public ListRewriteEvent(List originalNodes) {
-		fOriginalNodes= originalNodes;
+		fOriginalNodes= new ArrayList(originalNodes);
 	}
 
 	/**
@@ -143,6 +143,16 @@ public class ListRewriteEvent extends RewriteEvent {
 			}
 		}
 		return null;
+	}
+	
+	public void revertChange(NodeRewriteEvent event) {
+		Object originalValue = event.getOriginalValue();
+		if(originalValue == null) {
+			List listEntries= getEntries();
+			listEntries.remove(event);
+		} else {
+			event.setNewValue(originalValue);
+		}
 	}
 	
 	public int getIndex(ASTNode node, int kind) {

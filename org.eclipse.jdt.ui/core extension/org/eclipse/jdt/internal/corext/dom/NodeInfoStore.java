@@ -18,36 +18,16 @@ import java.util.Set;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.TryStatement;
 
 import org.eclipse.jdt.internal.corext.dom.RewriteEventStore.CopySourceInfo;
 
 /**
  *
  */
-public final class NodeInfoStore {
-	
-	/** Constant used to create place holder nodes */
-	public static final int UNKNOWN= -1;
-	public static final int BLOCK= 2;
-	public static final int EXPRESSION= 3;
-	public static final int STATEMENT= 4;
-	public static final int SINGLEVAR_DECLARATION= 5;
-	public static final int TYPE= 6;
-	public static final int NAME= 7;
-	public static final int JAVADOC= 8;
-	public static final int VAR_DECLARATION_FRAGMENT= 9;
-	public static final int TYPE_DECLARATION= 10;
-	public static final int FIELD_DECLARATION= 11;
-	public static final int METHOD_DECLARATION= 12;
-	public static final int INITIALIZER= 13;
-	public static final int PACKAGE_DECLARATION= 14;
-	public static final int IMPORT_DECLARATION= 15;
-	public static final int METHOD_REF_PARAMETER= 16;
-	public static final int TAG_ELEMENT= 17;
-	
+public final class NodeInfoStore {	
 	private AST fAst;
 	
 	private Map fPlaceholderNodes;
@@ -59,58 +39,6 @@ public final class NodeInfoStore {
 		fPlaceholderNodes= null;
 		fCollapsedNodes= null;
 	}
-	
-	/**
-	 * Returns the node type that should be used to create a place holder for the given node
-	 * <code>existingNode</code>.
-	 * 
-	 * @param existingNode an existing node for which a place holder is to be created
-	 * @return the node type of a potential place holder
-	 */
-	public static int getPlaceholderType(ASTNode existingNode) {
-		switch (existingNode.getNodeType()) {
-			case ASTNode.SIMPLE_NAME:
-			case ASTNode.QUALIFIED_NAME:
-				return NAME;
-			case ASTNode.SIMPLE_TYPE:
-			case ASTNode.PRIMITIVE_TYPE:
-			case ASTNode.ARRAY_TYPE:
-				return TYPE;				
-			case ASTNode.BLOCK:
-				return BLOCK;
-			case ASTNode.TYPE_DECLARATION:
-				return TYPE_DECLARATION;
-			case ASTNode.METHOD_DECLARATION:
-				return METHOD_DECLARATION;
-			case ASTNode.FIELD_DECLARATION:
-				return FIELD_DECLARATION;
-			case ASTNode.INITIALIZER:
-				return INITIALIZER;
-			case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				return SINGLEVAR_DECLARATION;			
-			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
-				return VAR_DECLARATION_FRAGMENT;
-			case ASTNode.JAVADOC:
-				return JAVADOC;
-			case ASTNode.METHOD_REF_PARAMETER:
-				return METHOD_REF_PARAMETER;
-			case ASTNode.TAG_ELEMENT:
-				return TAG_ELEMENT;
-			case ASTNode.PACKAGE_DECLARATION:
-				return PACKAGE_DECLARATION;
-			case ASTNode.IMPORT_DECLARATION:
-				return IMPORT_DECLARATION;
-			default:
-				if (existingNode instanceof Expression) {
-					return EXPRESSION;
-				} else if (existingNode instanceof Statement) {
-					// is not Block: special case statement for block
-					return STATEMENT;
-				}
-		}
-		return UNKNOWN;
-	}
-	
 
 	/**
 	 * Marks a node as a placehoder for a plain string content. The type of the node should correspond to the
@@ -134,7 +62,7 @@ public final class NodeInfoStore {
 		data.copySource= copySource;
 		setPlaceholderData(target, data);
 	}
-		
+	
 	/**
 	 * Creates a placeholder node of the given type. <code>null</code> if the type is not supported
 	 * @param nodeType Type of the node to create. Use the type constants in {@link NodeInfoStore}.
@@ -143,45 +71,177 @@ public final class NodeInfoStore {
 	public final ASTNode newPlaceholderNode(int nodeType) {
 		AST ast= fAst;
 		switch (nodeType) {
-			case NAME:
-				return ast.newSimpleName("z"); //$NON-NLS-1$
-			case EXPRESSION:
-				MethodInvocation expression = ast.newMethodInvocation(); 
-				expression.setName(ast.newSimpleName("z")); //$NON-NLS-1$
-				return expression;
-			case TYPE:
-				return ast.newSimpleType(ast.newSimpleName("X")); //$NON-NLS-1$		
-			case STATEMENT:
-				return ast.newReturnStatement();
-			case BLOCK:
+			case ASTNode.ANNOTATION_TYPE_DECLARATION :
+				return ast.newAnnotationTypeDeclaration();
+			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION :
+				return ast.newAnnotationTypeMemberDeclaration();
+			case ASTNode.ANONYMOUS_CLASS_DECLARATION :
+				return ast.newAnonymousClassDeclaration();
+			case ASTNode.ARRAY_ACCESS :
+				return ast.newArrayAccess();
+			case ASTNode.ARRAY_CREATION :
+				return ast.newArrayCreation();
+			case ASTNode.ARRAY_INITIALIZER :
+				return ast.newArrayInitializer();
+			case ASTNode.ARRAY_TYPE :
+				return ast.newArrayType(ast.newPrimitiveType(PrimitiveType.INT));
+			case ASTNode.ASSERT_STATEMENT :
+				return ast.newAssertStatement();
+			case ASTNode.ASSIGNMENT :
+				return ast.newAssignment();
+			case ASTNode.BLOCK :
 				return ast.newBlock();
-			case METHOD_DECLARATION:
-				return ast.newMethodDeclaration();
-			case FIELD_DECLARATION:
+			case ASTNode.BLOCK_COMMENT :
+				return ast.newBlockComment();
+			case ASTNode.BOOLEAN_LITERAL :
+				return ast.newBooleanLiteral(false);
+			case ASTNode.BREAK_STATEMENT :
+				return ast.newBreakStatement();
+			case ASTNode.CAST_EXPRESSION :
+				return ast.newCastExpression();
+			case ASTNode.CATCH_CLAUSE :
+				return ast.newCatchClause();
+			case ASTNode.CHARACTER_LITERAL :
+				return ast.newCharacterLiteral();
+			case ASTNode.CLASS_INSTANCE_CREATION :
+				return ast.newClassInstanceCreation();
+			case ASTNode.COMPILATION_UNIT :
+				return ast.newCompilationUnit();
+			case ASTNode.CONDITIONAL_EXPRESSION :
+				return ast.newConditionalExpression();
+			case ASTNode.CONSTRUCTOR_INVOCATION :
+				return ast.newConstructorInvocation();
+			case ASTNode.CONTINUE_STATEMENT :
+				return ast.newContinueStatement();
+			case ASTNode.DO_STATEMENT :
+				return ast.newDoStatement();
+			case ASTNode.EMPTY_STATEMENT :
+				return ast.newEmptyStatement();
+			case ASTNode.ENHANCED_FOR_STATEMENT :
+				return ast.newEnhancedForStatement();
+			case ASTNode.ENUM_CONSTANT_DECLARATION :
+				return ast.newEnumConstantDeclaration();
+			case ASTNode.ENUM_DECLARATION :
+				return ast.newEnumDeclaration();
+			case ASTNode.EXPRESSION_STATEMENT :
+				return ast.newExpressionStatement(ast.newMethodInvocation());
+			case ASTNode.FIELD_ACCESS :
+				return ast.newFieldAccess();
+			case ASTNode.FIELD_DECLARATION :
 				return ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-			case INITIALIZER:
-				return ast.newInitializer();				
-			case SINGLEVAR_DECLARATION:
-				return ast.newSingleVariableDeclaration();
-			case VAR_DECLARATION_FRAGMENT:
-				return ast.newVariableDeclarationFragment();
-			case JAVADOC:
-				return ast.newJavadoc();
-			case METHOD_REF_PARAMETER:
-				return ast.newMethodRefParameter();
-			case TAG_ELEMENT:
-				return ast.newTagElement();
-			case TYPE_DECLARATION:
-				return ast.newTypeDeclaration();
-			case PACKAGE_DECLARATION:
-				return ast.newPackageDeclaration();
-			case IMPORT_DECLARATION:
+			case ASTNode.FOR_STATEMENT :
+				return ast.newForStatement();
+			case ASTNode.IF_STATEMENT :
+				return ast.newIfStatement();
+			case ASTNode.IMPORT_DECLARATION :
 				return ast.newImportDeclaration();
+			case ASTNode.INFIX_EXPRESSION :
+				return ast.newInfixExpression();
+			case ASTNode.INITIALIZER :
+				return ast.newInitializer();
+			case ASTNode.INSTANCEOF_EXPRESSION :
+				return ast.newInstanceofExpression();
+			case ASTNode.JAVADOC :
+				return ast.newJavadoc();
+			case ASTNode.LABELED_STATEMENT :
+				return ast.newLabeledStatement();
+			case ASTNode.LINE_COMMENT :
+				return ast.newLineComment();
+			case ASTNode.MARKER_ANNOTATION :
+				return ast.newMarkerAnnotation();
+			case ASTNode.MEMBER_REF :
+				return ast.newMemberRef();
+			case ASTNode.MEMBER_VALUE_PAIR :
+				return ast.newMemberValuePair();
+			case ASTNode.METHOD_DECLARATION :
+				return ast.newMethodDeclaration();
+			case ASTNode.METHOD_INVOCATION :
+				return ast.newMethodInvocation();
+			case ASTNode.METHOD_REF :
+				return ast.newMethodRef();
+			case ASTNode.METHOD_REF_PARAMETER :
+				return ast.newMethodRefParameter();
+			case ASTNode.MODIFIER :
+				return ast.newModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD);
+			case ASTNode.NORMAL_ANNOTATION :
+				return ast.newNormalAnnotation();
+			case ASTNode.NULL_LITERAL :
+				return ast.newNullLiteral();
+			case ASTNode.NUMBER_LITERAL :
+				return ast.newNumberLiteral();
+			case ASTNode.PACKAGE_DECLARATION :
+				return ast.newPackageDeclaration();
+			case ASTNode.PARAMETERIZED_TYPE :
+				return ast.newParameterizedType(ast.newSimpleName("id")); //$NON-NLS-1$
+			case ASTNode.PARENTHESIZED_EXPRESSION :
+				return ast.newParenthesizedExpression();
+			case ASTNode.POSTFIX_EXPRESSION :
+				return ast.newPostfixExpression();
+			case ASTNode.PREFIX_EXPRESSION :
+				return ast.newPrefixExpression();
+			case ASTNode.PRIMITIVE_TYPE :
+				return ast.newPrimitiveType(PrimitiveType.INT);
+			case ASTNode.QUALIFIED_NAME :
+				return ast.newQualifiedName(ast.newSimpleName("id"), ast.newSimpleName("id"));  //$NON-NLS-1$//$NON-NLS-2$
+			case ASTNode.QUALIFIED_TYPE :
+				return ast.newQualifiedType(ast.newSimpleType(ast.newSimpleName("id")), ast.newSimpleName("id")); //$NON-NLS-1$ //$NON-NLS-2$
+			case ASTNode.RETURN_STATEMENT :
+				return ast.newReturnStatement();
+			case ASTNode.SIMPLE_NAME :
+				return ast.newSimpleName("id"); //$NON-NLS-1$
+			case ASTNode.SIMPLE_TYPE :
+				return ast.newSimpleType(ast.newSimpleName("id")); //$NON-NLS-1$
+			case ASTNode.SINGLE_MEMBER_ANNOTATION :
+				return ast.newSingleMemberAnnotation();
+			case ASTNode.SINGLE_VARIABLE_DECLARATION :
+				return ast.newSingleVariableDeclaration();
+			case ASTNode.STRING_LITERAL :
+				return ast.newStringLiteral();
+			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
+				return ast.newSuperConstructorInvocation();
+			case ASTNode.SUPER_FIELD_ACCESS :
+				return ast.newFieldAccess();
+			case ASTNode.SUPER_METHOD_INVOCATION :
+				return ast.newSuperMethodInvocation();
+			case ASTNode.SWITCH_CASE:
+				return ast.newSwitchCase();
+			case ASTNode.SWITCH_STATEMENT :
+				return ast.newSwitchStatement();
+			case ASTNode.SYNCHRONIZED_STATEMENT :
+				return ast.newSynchronizedStatement();
+			case ASTNode.TAG_ELEMENT :
+				return ast.newTagElement();
+			case ASTNode.TEXT_ELEMENT :
+				return ast.newTextElement();
+			case ASTNode.THIS_EXPRESSION :
+				return ast.newThisExpression();
+			case ASTNode.THROW_STATEMENT :
+				return ast.newThrowStatement();
+			case ASTNode.TRY_STATEMENT :
+				TryStatement tryStatement= ast.newTryStatement();
+				tryStatement.setFinally(ast.newBlock()); // have to set at least a finally clock to be legal code
+				return tryStatement;
+			case ASTNode.TYPE_DECLARATION :
+				return ast.newTypeDeclaration();
+			case ASTNode.TYPE_DECLARATION_STATEMENT :
+				return ast.newTypeDeclarationStatement(ast.newTypeDeclaration());
+			case ASTNode.TYPE_LITERAL :
+				return ast.newTypeLiteral();
+			case ASTNode.TYPE_PARAMETER :
+				return ast.newTypeParameter();
+			case ASTNode.VARIABLE_DECLARATION_EXPRESSION :
+				return ast.newVariableDeclarationExpression(ast.newVariableDeclarationFragment());
+			case ASTNode.VARIABLE_DECLARATION_FRAGMENT :
+				return ast.newVariableDeclarationFragment();
+			case ASTNode.VARIABLE_DECLARATION_STATEMENT :
+				return ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
+			case ASTNode.WHILE_STATEMENT :
+				return ast.newWhileStatement();
+			case ASTNode.WILDCARD_TYPE :
+				return ast.newWildcardType();
 		}
-		return null;
-	}	
-
-
+		throw new IllegalArgumentException();
+	}
 	
 	
 	// collapsed nodes: in source: use one node that represents many; to be used as
@@ -219,6 +279,7 @@ public final class NodeInfoStore {
 	}
 	
 	private static class PlaceholderData {
+		// base class
 	}
 			
 	protected static final class CopyPlaceholderData extends PlaceholderData {
@@ -235,7 +296,6 @@ public final class NodeInfoStore {
 		}
 	}
 
-	
 	/**
 	 * 
 	 */

@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.text.java.*;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -89,7 +89,7 @@ public class ReturnTypeSubProcessor {
 		if (selectedNode instanceof MethodDeclaration) {
 			MethodDeclaration declaration= (MethodDeclaration) selectedNode;
 			
-			ASTRewrite rewrite= new ASTRewrite(declaration);
+			OldASTRewrite rewrite= new OldASTRewrite(declaration);
 			rewrite.set(declaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.TRUE, null);
 			
 			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.constrnamemethod.description"); //$NON-NLS-1$
@@ -121,7 +121,7 @@ public class ReturnTypeSubProcessor {
 				}
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;   
 				
-				ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
+				OldASTRewrite rewrite= new OldASTRewrite(methodDeclaration);
 					
 				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.voidmethodreturns.description", binding.getName()); //$NON-NLS-1$	
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -135,7 +135,7 @@ public class ReturnTypeSubProcessor {
 					rewrite.set(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
 					rewrite.set(methodDeclaration, MethodDeclaration.RETURN_TYPE_PROPERTY, newReturnType, null);
 				} else {
-					rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType, null);
+					rewrite.replace(methodDeclaration.getReturnType(), newReturnType, null);
 				}
 				String key= "return_type"; //$NON-NLS-1$
 				proposal.markAsLinked(rewrite, newReturnType, true, key);
@@ -147,8 +147,8 @@ public class ReturnTypeSubProcessor {
 				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			}
-			ASTRewrite rewrite= new ASTRewrite(decl);
-			rewrite.markAsRemoved(returnStatement, null);
+			OldASTRewrite rewrite= new OldASTRewrite(decl);
+			rewrite.remove(returnStatement, null);
 			
 			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.removereturn.description"); //$NON-NLS-1$	
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
@@ -178,7 +178,7 @@ public class ReturnTypeSubProcessor {
 			ITypeBinding typeBinding= eval.getTypeBinding(decl.getAST());
 			typeBinding= Bindings.normalizeTypeBinding(typeBinding);
 
-			ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
+			OldASTRewrite rewrite= new OldASTRewrite(methodDeclaration);
 			ImportRewrite imports= new ImportRewrite(cu);
 			AST ast= astRoot.getAST();
 
@@ -241,9 +241,9 @@ public class ReturnTypeSubProcessor {
 				
 			Type returnType= methodDecl.getReturnType();
 			if (!"void".equals(ASTNodes.asString(returnType))) { //$NON-NLS-1$
-				ASTRewrite rewrite= new ASTRewrite(methodDecl);
+				OldASTRewrite rewrite= new OldASTRewrite(methodDecl);
 				AST ast= methodDecl.getAST();
-				rewrite.markAsReplaced(returnType, ast.newPrimitiveType(PrimitiveType.VOID), null);
+				rewrite.replace(returnType, ast.newPrimitiveType(PrimitiveType.VOID), null);
 
 				String label= CorrectionMessages.getString("ReturnTypeSubProcessor.changetovoid.description"); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);

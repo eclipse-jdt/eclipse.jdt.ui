@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -145,7 +145,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			
 			CompilationUnit root= AST.parsePartialCompilationUnit(cu2, 0, false, null, null);
 			
-			ASTRewrite rewriter= new ASTRewrite(root);
+			OldASTRewrite rewriter= new OldASTRewrite(root);
 			
 			List list= getContainerList(parent, root);
 			if (list == null) {
@@ -200,7 +200,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	 * @return a ASTNode or null
 	 * @throws CoreException
 	 */
-	private ASTNode createASTNode(ASTRewrite rewriter, ITypedElement element, String delimiter) throws CoreException {
+	private ASTNode createASTNode(OldASTRewrite rewriter, ITypedElement element, String delimiter) throws CoreException {
 		if (element instanceof IStreamContentAccessor) {
 			String content= JavaCompareUtilities.readString((IStreamContentAccessor)element);
 			if (content != null) {
@@ -251,17 +251,17 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				
 			case JavaNode.CLASS:
 			case JavaNode.INTERFACE:
-				return ASTRewrite.TYPE_DECLARATION;
+				return ASTNode.TYPE_DECLARATION;
 				
 			case JavaNode.CONSTRUCTOR:
 			case JavaNode.METHOD:
-				return ASTRewrite.METHOD_DECLARATION;
+				return ASTNode.METHOD_DECLARATION;
 				
 			case JavaNode.FIELD:
-				return ASTRewrite.FIELD_DECLARATION;
+				return ASTNode.FIELD_DECLARATION;
 				
 			case JavaNode.INIT:
-				return ASTRewrite.INITIALIZER;
+				return ASTNode.INITIALIZER;
 				
 			default:
 				break;				
@@ -270,7 +270,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			
 		// cannot happen
 		Assert.isTrue(false);
-		return ASTRewrite.UNKNOWN;
+		return 0;
 	}
 
 	/**

@@ -37,8 +37,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.ListRewriter;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
 public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
@@ -91,7 +91,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		fParameterChanges= changes;
 	}
 	
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected OldASTRewrite getRewrite() throws CoreException {
 		CompilationUnit astRoot= (CompilationUnit) fInvocationNode.getRoot();
 		ASTNode methodDecl= astRoot.findDeclaringNode(fSenderBinding);
 		ASTNode newMethodDecl= null;
@@ -105,14 +105,14 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			newMethodDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		if (newMethodDecl instanceof MethodDeclaration) {
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			OldASTRewrite rewrite= new OldASTRewrite(astRoot);
 			modifySignature(rewrite, (MethodDeclaration) newMethodDecl, isInDifferentCU);
 			return rewrite;
 		}
 		return null;
 	}
 	
-	private void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
+	private void modifySignature(OldASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
 		AST ast= methodDecl.getAST();
 
 		ArrayList usedNames= new ArrayList();
@@ -124,7 +124,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		}
 		
 		ImportRewrite imports= getImportRewrite();
-		ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.PARAMETERS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.PARAMETERS_PROPERTY);
 		
 		List parameters= methodDecl.parameters(); // old parameters
 		int k= 0; // index over the oldParameters
@@ -169,8 +169,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				SingleVariableDeclaration decl1= (SingleVariableDeclaration) parameters.get(k);
 				SingleVariableDeclaration decl2= (SingleVariableDeclaration) parameters.get(((SwapDescription) curr).index);
 				
-				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2), null);
-				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1), null);
+				rewrite.replace(decl1, rewrite.createCopy(decl2), null);
+				rewrite.replace(decl2, rewrite.createCopy(decl1), null);
 				
 				usedNames.add(decl1.getName().getIdentifier());
 				k++;	
@@ -192,7 +192,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		fixupNames(rewrite, usedNames, isInDifferentCU);
 	}
 
-	private void fixupNames(ASTRewrite rewrite, ArrayList usedNames, boolean isInDifferentCU) {
+	private void fixupNames(OldASTRewrite rewrite, ArrayList usedNames, boolean isInDifferentCU) {
 		AST ast= rewrite.getAST();
 		// set names for new parameters
 		for (int i= 0; i < fParameterChanges.length; i++) {

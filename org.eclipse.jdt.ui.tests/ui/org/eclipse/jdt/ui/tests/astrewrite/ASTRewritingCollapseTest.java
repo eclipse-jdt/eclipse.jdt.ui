@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 public class ASTRewritingCollapseTest extends ASTRewritingTest {
@@ -99,7 +99,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		OldASTRewrite rewrite= new OldASTRewrite(astRoot);
 		
 		String str= "return;";
 		ReturnStatement returnStatement= (ReturnStatement) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
@@ -113,7 +113,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		ExpressionStatement st2= ast.newExpressionStatement(newMethodInv2);
 		
 		Block placeholder= rewrite.getCollapseTargetPlaceholder(new Statement[] { st1, st2 });
-		rewrite.markAsReplaced(returnStatement, placeholder, null);
+		rewrite.replace(returnStatement, placeholder, null);
 			
 		String preview= evaluateRewrite(cu, rewrite); 
 		
@@ -146,7 +146,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		OldASTRewrite rewrite= new OldASTRewrite(astRoot);
 		
 		String str= "return;";
 		ReturnStatement returnStatement= (ReturnStatement) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
@@ -162,7 +162,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		ReturnStatement st3= (ReturnStatement) rewrite.createCopyTarget(returnStatement);
 		
 		Block placeholder= rewrite.getCollapseTargetPlaceholder(new Statement[] { st1, st2, st3 });
-		rewrite.markAsReplaced(returnStatement.getParent(), placeholder, null);
+		rewrite.replace(returnStatement.getParent(), placeholder, null);
 		
 		String preview= evaluateRewrite(cu, rewrite);
 		
@@ -197,7 +197,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		OldASTRewrite rewrite= new OldASTRewrite(astRoot);
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -209,7 +209,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
 			
 			ASTNode placeholder= rewrite.createCopyTarget(collapsed);
-			rewrite.markAsRemoved(collapsed, null);
+			rewrite.remove(collapsed, null);
 			
 			rewrite.getListRewrite(methodDecl.getBody(), Block.STATEMENTS_PROPERTY).insertLast(placeholder, null);
 		}	
@@ -247,7 +247,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		OldASTRewrite rewrite= new OldASTRewrite(astRoot);
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -296,7 +296,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 		
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		OldASTRewrite rewrite= new OldASTRewrite(astRoot);
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -308,7 +308,7 @@ public class ASTRewritingCollapseTest extends ASTRewritingTest {
 			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
 			
 			ASTNode newStatement= ast.newReturnStatement();
-			rewrite.markAsReplaced(collapsed, newStatement, null);
+			rewrite.replace(collapsed, newStatement, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);

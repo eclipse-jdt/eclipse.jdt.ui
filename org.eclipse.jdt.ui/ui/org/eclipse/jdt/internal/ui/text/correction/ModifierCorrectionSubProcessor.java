@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -264,7 +264,7 @@ public class ModifierCorrectionSubProcessor {
 		boolean hasNoBody= (decl.getBody() == null);
 		
 		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstractClass) {
-			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
+			OldASTRewrite rewrite= new OldASTRewrite(decl.getParent());
 			
 			AST ast= astRoot.getAST();
 			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
@@ -290,8 +290,8 @@ public class ModifierCorrectionSubProcessor {
 		}
 		
 		if (!hasNoBody && problem.getProblemId() == IProblem.BodyForAbstractMethod) {
-			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
-			rewrite.markAsRemoved(decl.getBody(), null);
+			OldASTRewrite rewrite= new OldASTRewrite(decl.getParent());
+			rewrite.remove(decl.getBody(), null);
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -326,7 +326,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	
 		{
-			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
+			OldASTRewrite rewrite= new OldASTRewrite(decl.getParent());
 			
 			AST ast= astRoot.getAST();
 			
@@ -351,8 +351,8 @@ public class ModifierCorrectionSubProcessor {
 		}
 		
 		if (decl.getBody() != null) {
-			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
-			rewrite.markAsRemoved(decl.getBody(), null);
+			OldASTRewrite rewrite= new OldASTRewrite(decl.getParent());
+			rewrite.remove(decl.getBody(), null);
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -366,7 +366,7 @@ public class ModifierCorrectionSubProcessor {
 	
 	
 	public static ASTRewriteCorrectionProposal getMakeTypeAbstractProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration, int relevance) throws CoreException {
-		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getParent());
+		OldASTRewrite rewrite= new OldASTRewrite(typeDeclaration.getParent());
 				
 		int newModifiers= typeDeclaration.getModifiers() | Modifier.ABSTRACT;
 		rewrite.set(typeDeclaration, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
@@ -388,7 +388,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 		MethodDeclaration decl=  (MethodDeclaration) selectedNode;
 		{
-			ASTRewrite rewrite= new ASTRewrite(decl);
+			OldASTRewrite rewrite= new OldASTRewrite(decl);
 			
 			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
 			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);		
@@ -414,7 +414,7 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal);
 		}
 		{
-			ASTRewrite rewrite= new ASTRewrite(decl);
+			OldASTRewrite rewrite= new OldASTRewrite(decl);
 			
 			int newModifiers= decl.getModifiers() | Modifier.ABSTRACT;
 			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);

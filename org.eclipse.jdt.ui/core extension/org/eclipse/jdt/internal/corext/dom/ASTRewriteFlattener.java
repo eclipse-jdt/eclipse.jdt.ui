@@ -113,9 +113,6 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	}
 	
 	protected Object getAttribute(ASTNode parent, StructuralPropertyDescriptor childProperty) {
-		if (!parent.structuralPropertiesForType().contains(childProperty)) {
-			System.out.print("Property doesn'y match node");
-		}
 		return fStore.getNewValue(parent, childProperty);
 	}
 	

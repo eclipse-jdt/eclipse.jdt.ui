@@ -203,7 +203,7 @@ public final class RewriteEventStore {
 		
 	
 	/** all events */
-	private final List fEvents;
+	final List fEvents;
 	
 	/** cache for last accessed event */
 	private EventHolder fLastEvent;
@@ -212,10 +212,10 @@ public final class RewriteEventStore {
 	private Map fEditGroups;
 		
 	/** Stores which nodes are source of a copy or move */
-	private List fCopySources;
+	List fCopySources;
 	
 	/** Stores which nodes are tracked and the corresponding edit group*/
-	private Map fTrackedNodes;
+	Map fTrackedNodes;
 	
 	/** Stores which inserted nodes bound to the previous node. If not, a node is
 	 * always bound to the next node */
@@ -392,15 +392,6 @@ public final class RewriteEventStore {
 	}
 	
 	
-	public RewriteEvent findEventByOriginal(Object original) {
-		return findEvent(original, ORIGINAL);
-	}
-	
-	public RewriteEvent findEventByNew(Object original) {
-		return findEvent(original, NEW);
-	}
-	
-	
 	public Object getOriginalValue(ASTNode parent, StructuralPropertyDescriptor property) {
 		RewriteEvent event= getEvent(parent, property);
 		if (event != null) {
@@ -418,7 +409,7 @@ public final class RewriteEventStore {
 	}
 	
 	public int getChangeKind(ASTNode node) {
-		RewriteEvent event= findEventByOriginal(node);
+		RewriteEvent event= findEvent(node, ORIGINAL);
 		if (event != null) {
 			return event.getChangeKind();
 		}
@@ -445,12 +436,10 @@ public final class RewriteEventStore {
 	}
 	
 	public void setEventEditGroup(RewriteEvent event, TextEditGroup editGroup) {
-		if (editGroup != null) {
-			if (fEditGroups == null) {
-				fEditGroups= new IdentityHashMap(5);
-			}	
-			fEditGroups.put(event, editGroup);
-		}
+		if (fEditGroups == null) {
+			fEditGroups= new IdentityHashMap(5);
+		}	
+		fEditGroups.put(event, editGroup);
 	}
 	
 	
@@ -520,6 +509,7 @@ public final class RewriteEventStore {
 	}
 	
 	private void assertNoNesting(CopySourceInfo copySource) {
+		// todo
 	}
 	
 	/**
@@ -599,8 +589,4 @@ public final class RewriteEventStore {
 	public static boolean isNewNode(ASTNode node) {
 		return node.getStartPosition() == -1; // should be changed with new API
 	}
-
-
-
-
 }

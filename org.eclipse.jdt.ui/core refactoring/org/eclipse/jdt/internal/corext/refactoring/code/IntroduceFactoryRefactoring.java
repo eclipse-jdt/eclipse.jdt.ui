@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -517,7 +517,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param unitRewriter the ASTRewrite to be used
 	 * @return
 	 */
-	private MethodDeclaration createFactoryMethod(AST ast, IMethodBinding ctorBinding, ASTRewrite unitRewriter) {
+	private MethodDeclaration createFactoryMethod(AST ast, IMethodBinding ctorBinding, OldASTRewrite unitRewriter) {
 		MethodDeclaration		newMethod= ast.newMethodDeclaration();
 		SimpleName				newMethodName= ast.newSimpleName(fNewMethodName);
 		ClassInstanceCreation	newCtorCall= ast.newClassInstanceCreation();
@@ -603,7 +603,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param ctorCall the ClassInstanceCreation to be marked as replaced
 	 */
 	private MethodInvocation createFactoryMethodCall(AST ast, ClassInstanceCreation ctorCall,
-													 ASTRewrite unitRewriter, TextEditGroup gd) {
+													 OldASTRewrite unitRewriter, TextEditGroup gd) {
 		MethodInvocation	factoryMethodCall= ast.newMethodInvocation();
 
 		List	actualFactoryArgs= factoryMethodCall.arguments();
@@ -636,7 +636,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 //			actualFactoryArgs.add(rewrittenArg);
 		}
 
-		unitRewriter.markAsReplaced(ctorCall, factoryMethodCall, gd);
+		unitRewriter.replace(ctorCall, factoryMethodCall, gd);
 
 		return factoryMethodCall;
 	}
@@ -670,7 +670,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param root
 	 * @param buffer
 	 */
-	private boolean protectConstructor(CompilationUnit unitAST, ASTRewrite unitRewriter, TextEditGroup declGD) {
+	private boolean protectConstructor(CompilationUnit unitAST, OldASTRewrite unitRewriter, TextEditGroup declGD) {
 		MethodDeclaration constructor= (MethodDeclaration) unitAST.findDeclaringNode(fCtorBinding.getKey());
 
 		// No need to rewrite the modifiers if the visibility is what we already want it to be.
@@ -695,7 +695,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 //		ICompilationUnit	unitHandle= rg.getCompilationUnit();
 		Assert.isTrue(rg == null || rg.getCompilationUnit() == unitHandle);
 		CompilationUnit		unit= getASTFor(unitHandle);
-		ASTRewrite			unitRewriter= new ASTRewrite(unit);
+		OldASTRewrite			unitRewriter= new OldASTRewrite(unit);
 		TextBuffer			buffer= null;
 		MultiTextEdit		root= new MultiTextEdit();
 		boolean				someChange= false;
@@ -775,7 +775,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @return true iff at least one constructor call site was rewritten.
 	 */
 	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit,
-											ASTRewrite unitRewriter, CompilationUnitChange unitChange)
+											OldASTRewrite unitRewriter, CompilationUnitChange unitChange)
 	throws JavaModelException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
 		SearchResult[]	hits= rg.getSearchResults();
@@ -865,7 +865,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param unit
 	 * @param gd the <code>GroupDescription</code> to associate with the changes made
 	 */
-	private void createFactoryChange(ASTRewrite unitRewriter, CompilationUnit unit, TextEditGroup gd) {
+	private void createFactoryChange(OldASTRewrite unitRewriter, CompilationUnit unit, TextEditGroup gd) {
 		// ================================================================================
 		// First add the factory itself (method, class, and interface as needed/directed by user)
 		AST				ast= unit.getAST();

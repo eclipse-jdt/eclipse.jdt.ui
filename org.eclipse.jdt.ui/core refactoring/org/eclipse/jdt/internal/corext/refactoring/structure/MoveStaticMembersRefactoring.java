@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -93,7 +93,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		public ASTData(ICompilationUnit u, boolean resolveBindings) throws JavaModelException {
 			unit= u;
 			root= AST.parseCompilationUnit(unit, resolveBindings);
-			rewriter= new ASTRewrite(root);
+			rewriter= new OldASTRewrite(root);
 		}
 		
 		public ASTData(ICompilationUnit u, boolean resolveBindings, CodeGenerationSettings settings) throws CoreException {
@@ -103,7 +103,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		}
 		public ICompilationUnit unit;
 		public CompilationUnit root;
-		public ASTRewrite rewriter;
+		public OldASTRewrite rewriter;
 		public List groups;
 		public ImportRewrite imports;
 		
@@ -890,10 +890,10 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		TextEditGroup add= fTarget.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.addMembers")); //$NON-NLS-1$
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
-			fSource.rewriter.markAsRemoved(declaration, delete);
+			fSource.rewriter.remove(declaration, delete);
 			ASTNode node= fTarget.rewriter.createPlaceholder(
 				sources[i],
-				ASTRewrite.getPlaceholderType(declaration));
+				declaration.getNodeType());
 			fTarget.rewriter.markAsInserted(node, add);
 			container.add(ASTNodes.getInsertionIndex((BodyDeclaration)node, container), node);
 		}

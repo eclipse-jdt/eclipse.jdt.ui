@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -94,7 +94,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private int fSelectionStart;
 	private int fSelectionLength;
 	private AST fAST;
-	private ASTRewrite fRewriter;
+	private OldASTRewrite fRewriter;
 	private ExtractMethodAnalyzer fAnalyzer;
 	private int fVisibility;
 	private String fMethodName;
@@ -364,7 +364,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fAnalyzer.aboutToCreateChange();
 		BodyDeclaration declaration= fAnalyzer.getEnclosingBodyDeclaration();
 		TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(declaration, TypeDeclaration.class);
-		fRewriter= new ASTRewrite(type);
+		fRewriter= new OldASTRewrite(type);
 		String sourceMethodName= declaration.getNodeType() == ASTNode.METHOD_DECLARATION 
 			? ((MethodDeclaration)declaration).getName().getIdentifier()
 			: ""; //$NON-NLS-1$
@@ -398,7 +398,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			result.addTextEditGroup(description);
 			
 			ASTNode[] callNodes= createCallNodes(null);
-			fRewriter.markAsReplaced(target, callNodes[0], description);
+			fRewriter.replace(target, callNodes[0], description);
 			if (callNodes.length > 1) {
 				container= ASTNodes.getContainingList(target);
 				int index= container.indexOf(target);
@@ -629,7 +629,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (!duplicate.isMethodBody()) {
 				ASTNode target= getTargetNode(duplicate.getNodes());
 				ASTNode[] callNodes= createCallNodes(duplicate);
-				fRewriter.markAsReplaced(target, callNodes[0], description);
+				fRewriter.replace(target, callNodes[0], description);
 				if (callNodes.length > 1) {
 					List container= ASTNodes.getContainingList(target);
 					int index= container.indexOf(target);
@@ -682,7 +682,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 					(TypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), TypeDeclaration.class);
 				String string= CodeGeneration.getMethodComment(fCUnit, enclosingType.getName().getIdentifier(), result, null, lineDelimiter);
 				if (string != null) {
-					Javadoc javadoc= (Javadoc)fRewriter.createPlaceholder(string, ASTRewrite.JAVADOC);
+					Javadoc javadoc= (Javadoc)fRewriter.createPlaceholder(string, ASTNode.JAVADOC);
 					result.setJavadoc(javadoc);
 				}
 			}
@@ -712,7 +712,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				for (int n= 0; n < selected.length; n++) {
 					SimpleName[] oldNames= LinkedNodeFinder.findByBinding(selected[n], (IBinding) parameter.getData());
 					for (int i= 0; i < oldNames.length; i++) {
-						fRewriter.markAsReplaced(oldNames[i], fAST.newSimpleName(parameter.getNewName()), null);
+						fRewriter.replace(oldNames[i], fAST.newSimpleName(parameter.getNewName()), null);
 					}
 				}
 			}

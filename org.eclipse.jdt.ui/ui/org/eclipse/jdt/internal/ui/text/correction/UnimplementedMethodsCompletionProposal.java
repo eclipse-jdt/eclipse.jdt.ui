@@ -31,10 +31,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.ListRewriter;
-import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -56,10 +56,10 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected OldASTRewrite getRewrite() throws CoreException {
 		ITypeBinding binding;
-		ASTRewrite rewrite= new ASTRewrite(fTypeNode);
-		ListRewriter listRewrite;
+		OldASTRewrite rewrite= new OldASTRewrite(fTypeNode);
+		ListRewrite listRewrite;
 		if (fTypeNode instanceof AnonymousClassDeclaration) {
 			AnonymousClassDeclaration decl= (AnonymousClassDeclaration) fTypeNode;
 			binding= decl.resolveBinding();
@@ -86,7 +86,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		return rewrite;
 	}
 	
-	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, String typeName, CodeGenerationSettings commentSettings) throws CoreException {
+	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, OldASTRewrite rewrite, String typeName, CodeGenerationSettings commentSettings) throws CoreException {
 		ImportRewrite imports= getImportRewrite();
 		
 		MethodDeclaration decl= ast.newMethodDeclaration();
@@ -128,14 +128,14 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 
 		String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), typeName, binding.getName(), false, bodyStatement, String.valueOf('\n')); 	
 		if (placeHolder != null) {
-			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, NewASTRewrite.STATEMENT);
+			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
 			body.statements().add(todoNode);
 		}
 		
 		if (commentSettings != null) {
 			String string= CodeGeneration.getMethodComment(getCompilationUnit(), typeName, decl, binding, String.valueOf('\n'));
 			if (string != null) {
-				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, NewASTRewrite.JAVADOC);
+				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
 			}
 		}

@@ -31,10 +31,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.ListRewriter;
-import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
@@ -54,7 +54,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		fSenderBinding= binding;
 	}
 			
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected OldASTRewrite getRewrite() throws CoreException {
 		
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
@@ -69,7 +69,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		if (newTypeDecl != null) {
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			OldASTRewrite rewrite= new OldASTRewrite(astRoot);
 			
 			ChildListPropertyDescriptor property= fSenderBinding.isAnonymous() ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
 			List members= (List) newTypeDecl.getStructuralProperty(property);
@@ -84,7 +84,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			} else {
 				insertIndex= members.size();
 			}
-			ListRewriter listRewriter= rewrite.getListRewrite(newTypeDecl, property);
+			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newStub, insertIndex, null);
 
 			if (!isInDifferentCU) {
@@ -107,7 +107,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		return fNode.getNodeType() != ASTNode.METHOD_INVOCATION && fNode.getNodeType() != ASTNode.SUPER_METHOD_INVOCATION;
 	}
 	
-	private MethodDeclaration getStub(ASTRewrite rewrite, ASTNode targetTypeDecl) throws CoreException {
+	private MethodDeclaration getStub(OldASTRewrite rewrite, ASTNode targetTypeDecl) throws CoreException {
 		AST ast= targetTypeDecl.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		
@@ -165,7 +165,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			body= ast.newBlock();
 			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), getMethodName(), isConstructor(), bodyStatement, String.valueOf('\n')); 	
 			if (placeHolder != null) {
-				ASTNode todoNode= rewrite.createPlaceholder(placeHolder, NewASTRewrite.STATEMENT);
+				ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
 				body.statements().add(todoNode);
 			}
 		}
@@ -175,7 +175,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		if (settings.createComments && !fSenderBinding.isAnonymous()) {
 			String string= CodeGeneration.getMethodComment(getCompilationUnit(), fSenderBinding.getName(), decl, null, String.valueOf('\n'));
 			if (string != null) {
-				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, NewASTRewrite.JAVADOC);
+				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
 			}
 		}

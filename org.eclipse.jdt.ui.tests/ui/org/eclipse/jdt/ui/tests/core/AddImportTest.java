@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import java.util.Hashtable;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -19,6 +21,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 
@@ -50,6 +54,10 @@ public class AddImportTest extends CoreTests {
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
+		
+		Hashtable options= JavaCore.getDefaultOptions();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
+		JavaCore.setOptions(options);
 	}
 
 

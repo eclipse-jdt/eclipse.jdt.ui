@@ -25,9 +25,9 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
-import org.eclipse.jdt.internal.corext.dom.ListRewriter;
+import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 
 public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
@@ -53,7 +53,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		fSenderBinding= senderBinding;
 	}
 		
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected OldASTRewrite getRewrite() throws CoreException {
 
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
 		if (fVariableKind == PARAM) {
@@ -65,19 +65,19 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	private ASTRewrite doAddParam(CompilationUnit cu) throws CoreException {
+	private OldASTRewrite doAddParam(CompilationUnit cu) throws CoreException {
 		AST ast= cu.getAST();
 		SimpleName node= fOriginalNode;
 
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration) {
-			ASTRewrite rewrite= new ASTRewrite(decl);
+			OldASTRewrite rewrite= new OldASTRewrite(decl);
 			
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
 			newDecl.setType(evaluateVariableType(ast));
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
 			
-			ListRewriter listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
+			ListRewrite listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
 			listRewriter.insertLast(newDecl, null);
 			
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
@@ -113,7 +113,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 	}
 	
 
-	private ASTRewrite doAddLocal(CompilationUnit cu) throws CoreException {
+	private OldASTRewrite doAddLocal(CompilationUnit cu) throws CoreException {
 		AST ast= cu.getAST();
 		
 		Block body;
@@ -125,7 +125,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		} else {
 			return null;
 		}
-		ASTRewrite rewrite= new ASTRewrite(decl);
+		OldASTRewrite rewrite= new OldASTRewrite(decl);
 		
 		SimpleName[] names= getAllReferences(body);
 		ASTNode dominant= getDominantNode(names);
@@ -144,7 +144,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
 			newDeclFrag.setInitializer(placeholder);
 			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
-			rewrite.markAsReplaced(dominantStatement, newDecl, null);
+			rewrite.replace(dominantStatement, newDecl, null);
 			
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
 			markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME);
@@ -164,7 +164,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			frag.setInitializer(placeholder);
 			expression.setType(evaluateVariableType(ast));
 			
-			rewrite.markAsReplaced(assignment, expression, null);
+			rewrite.replace(assignment, expression, null);
 			
 			markAsLinked(rewrite, expression.getType(), false, KEY_TYPE); 
 			markAsLinked(rewrite, frag.getName(), true, KEY_NAME); 
@@ -255,7 +255,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		return parent;
 	}	
 
-	private ASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
+	private OldASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
 		SimpleName node= fOriginalNode;
 		boolean isInDifferentCU= false;
 		
@@ -267,7 +267,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		
 		if (newTypeDecl != null) {
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			OldASTRewrite rewrite= new OldASTRewrite(astRoot);
 			
 			AST ast= newTypeDecl.getAST();
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
@@ -290,7 +290,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 						
 			int insertIndex= findFieldInsertIndex(decls, node.getStartPosition());
 			
-			ListRewriter listRewriter= rewrite.getListRewrite(newTypeDecl, property);
+			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newDecl, insertIndex, null);
 			
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);

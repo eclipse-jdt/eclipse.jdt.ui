@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
@@ -192,8 +192,8 @@ class InstanceMethodMover {
 		
 		private void addNewMethodToMyClass(TextChangeManager manager, String newMethodText, List allTypesUsedWithoutQualification) throws CoreException {
 			TypeDeclaration myClassDeclaration= getReceiverClassDeclaration();
-			ASTRewrite rewrite= new ASTRewrite(myClassDeclaration);
-			BodyDeclaration newMethodNode= (BodyDeclaration) rewrite.createPlaceholder(newMethodText, ASTRewrite.METHOD_DECLARATION);
+			OldASTRewrite rewrite= new OldASTRewrite(myClassDeclaration);
+			BodyDeclaration newMethodNode= (BodyDeclaration) rewrite.createPlaceholder(newMethodText, ASTNode.METHOD_DECLARATION);
 			myClassDeclaration.bodyDeclarations().add(newMethodNode);
 			rewrite.markAsInserted(newMethodNode);
 
@@ -608,7 +608,7 @@ class InstanceMethodMover {
 		
 		static class MethodEditSession {
 			private final Method fMethod;
-			private final ASTRewrite fRewrite;
+			private final OldASTRewrite fRewrite;
 			
 			private TypeReferences fTypeReferences;
 			
@@ -630,7 +630,7 @@ class InstanceMethodMover {
 			private boolean replaceExplicitThisReferencesWith(String name) {
 				ThisExpression[] thisReferences= fMethod.getExplicitThisReferences();
 				for(int i= 0; i < thisReferences.length; i++)
-					fRewrite.markAsReplaced(thisReferences[i], thisReferences[i].getAST().newSimpleName(name), null);
+					fRewrite.replace(thisReferences[i], thisReferences[i].getAST().newSimpleName(name), null);
 				return thisReferences.length != 0;
 			}
 	
@@ -641,7 +641,7 @@ class InstanceMethodMover {
 					FieldAccess replacement= fieldName.getAST().newFieldAccess();
 					replacement.setExpression(fieldName.getAST().newSimpleName(name));
 					replacement.setName(fieldName.getAST().newSimpleName(fieldName.getIdentifier()));
-					fRewrite.markAsReplaced(fieldName, replacement, null);
+					fRewrite.replace(fieldName, replacement, null);
 				}
 				return fieldReferences.length != 0;
 			}
@@ -694,11 +694,11 @@ class InstanceMethodMover {
 			}
 			
 			private void replaceReceiverWithImplicitThis(MethodInvocation invocation) {
-				fRewrite.markAsRemoved(invocation.getExpression(), null);
+				fRewrite.remove(invocation.getExpression(), null);
 			}
 	
 			private void replaceReceiverWithImplicitThis(FieldAccess fieldAccess) {
-				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()), null);			
+				fRewrite.replace(fieldAccess, fRewrite.createCopy(fieldAccess.getName()), null);			
 			}
 			
 			/**
@@ -706,11 +706,11 @@ class InstanceMethodMover {
 			 */
 			private void replaceReceiverWithImplicitThis(QualifiedName fieldAccess) {
 				Assert.isTrue(isFieldAccess(fieldAccess));
-				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()), null);
+				fRewrite.replace(fieldAccess, fRewrite.createCopy(fieldAccess.getName()), null);
 			}
 	
 			private void replaceExpressionWithExplicitThis(Expression expression) {
-				fRewrite.markAsReplaced(expression, expression.getAST().newThisExpression(), null);
+				fRewrite.replace(expression, expression.getAST().newThisExpression(), null);
 			}
 	
 			private static boolean isQualifiedNameUsedAsFieldAccessOnObject(QualifiedName fieldAccess, Expression object) {
@@ -753,7 +753,7 @@ class InstanceMethodMover {
 				if(declaring == null)
 					return;
 	
-				fRewrite.markAsReplaced(
+				fRewrite.replace(
 					name,
 					name.getAST().newQualifiedName(
 						getClassNameQualifiedToTopLevel(declaring, name.getAST()),
@@ -810,7 +810,7 @@ class InstanceMethodMover {
 				Assert.isNotNull(newName);
 				SimpleName originalName= fMethod.getNameNode();
 				if (! originalName.getIdentifier().equals(newName))
-					fRewrite.markAsReplaced(originalName, originalName.getAST().newSimpleName(newName), null);
+					fRewrite.replace(originalName, originalName.getAST().newSimpleName(newName), null);
 			}
 			
 			public void addNewFirstParameter(ITypeBinding parameterType, String parameterName) {
@@ -823,7 +823,7 @@ class InstanceMethodMover {
 			}
 			
 			public void removeParameter(Parameter parameter) {
-				fRewrite.markAsRemoved(fMethod.getParameterDeclaration(parameter), null);
+				fRewrite.remove(fMethod.getParameterDeclaration(parameter), null);
 				ITypeBinding parameterType= parameter.getType();
 				if(parameterType.isClass() || parameterType.isInterface()) {
 					Assert.isNotNull(fTypeReferences, "this session has already been destroyed.");	 //$NON-NLS-1$
@@ -834,7 +834,7 @@ class InstanceMethodMover {
 			private Block replaceBody() {
 				Block originalBody= fMethod.getBody();
 				Block newBody= originalBody.getAST().newBlock();
-				fRewrite.markAsReplaced(originalBody, newBody, null);
+				fRewrite.replace(originalBody, newBody, null);
 				return newBody;	
 			}
 			
@@ -1504,8 +1504,8 @@ class InstanceMethodMover {
 			return new Region(fMethodNode.getStartPosition(), fMethodNode.getLength());	
 		}
 		
-		private ASTRewrite createRewrite() {
-			return new ASTRewrite(fMethodNode);	
+		private OldASTRewrite createRewrite() {
+			return new OldASTRewrite(fMethodNode);	
 		}
 		
 		public MethodEditSession createEditSession() throws JavaModelException {

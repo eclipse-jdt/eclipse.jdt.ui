@@ -38,9 +38,9 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.ListRewriter;
+import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -148,8 +148,8 @@ public class JavadocTagsSubProcessor {
 		MethodDeclaration methodDecl= (MethodDeclaration) declaration;
 		
 		AST ast= javadoc.getAST();
-		ASTRewrite rewrite= new ASTRewrite(javadoc);
-		ListRewriter tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
+		OldASTRewrite rewrite= new OldASTRewrite(javadoc);
+		ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 		
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG);
@@ -184,7 +184,7 @@ public class JavadocTagsSubProcessor {
 		}		
 		proposals.add(proposal);
 		
-		rewrite= new ASTRewrite(javadoc);
+		rewrite= new OldASTRewrite(javadoc);
 		tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 		
 		String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.allmissing.description"); //$NON-NLS-1$
@@ -263,7 +263,7 @@ public class JavadocTagsSubProcessor {
 	}
 	
 	
-	private static void insertThrowsTag(Javadoc javadoc, ListRewriter rewriter, TagElement newElement, ASTNode node) {
+	private static void insertThrowsTag(Javadoc javadoc, ListRewrite rewriter, TagElement newElement, ASTNode node) {
 		Set previousArgs= new HashSet();
 		List list= ((MethodDeclaration) javadoc.getParent()).thrownExceptions();
 		for (int i= 0; i < list.size() && node != list.get(i); i++) {
@@ -292,7 +292,7 @@ public class JavadocTagsSubProcessor {
 		}
 	}
 
-	private static void insertReturnTag(Javadoc javadoc, ListRewriter rewriter, TagElement newElement) {
+	private static void insertReturnTag(Javadoc javadoc, ListRewrite rewriter, TagElement newElement) {
 		List tags= rewriter.getRewrittenList();
 
 		ASTNode before= null;
@@ -313,7 +313,7 @@ public class JavadocTagsSubProcessor {
 		}
 	}
 
-	private static void insertParamTag(Javadoc javadoc, ListRewriter rewriter, TagElement newElement, ASTNode node) {
+	private static void insertParamTag(Javadoc javadoc, ListRewrite rewriter, TagElement newElement, ASTNode node) {
 		Set previousArgs= new HashSet();
 
 		List list= ((MethodDeclaration) javadoc.getParent()).parameters();

@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 	
@@ -83,7 +83,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -135,7 +135,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -148,7 +148,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			assertTrue("Cannot find inner class", members.get(0) instanceof TypeDeclaration);
 			TypeDeclaration innerType= (TypeDeclaration) members.get(0);
 			
-			rewrite.markAsRemoved(innerType, null);
+			rewrite.remove(innerType, null);
 			ASTNode movedNode= rewrite.createCopyTarget(innerType);
 
 			rewrite.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertLast(movedNode, null);
@@ -166,7 +166,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				toMove= (Statement) statements.get(1);
 				toCopy= (Statement) statements.get(3);
 				
-				rewrite.markAsRemoved(toMove, null);
+				rewrite.remove(toMove, null);
 			}
 			{
 				MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
@@ -246,7 +246,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -354,7 +354,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -374,7 +374,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				TypeDeclaration outerType= findTypeDeclaration(astRoot, "G");
 				assertTrue("G not found", outerType != null);
 				
-				rewrite.markAsRemoved(outerType, null);
+				rewrite.remove(outerType, null);
 				
 				ASTNode insertNodeForCopy= rewrite.createCopyTarget(outerType);
 				
@@ -406,7 +406,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				List newStatements= newBody.statements();				
 				newStatements.add(whileStatement);
 				
-				rewrite.markAsReplaced(body, newBody, null);
+				rewrite.replace(body, newBody, null);
 			}			
 		}	
 					
@@ -474,7 +474,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -521,7 +521,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				List newStatements= newBody.statements();				
 				newStatements.add(whileStatement);
 				
-				rewrite.markAsReplaced(body, newBody, null);
+				rewrite.replace(body, newBody, null);
 			}			
 		}	
 					
@@ -589,7 +589,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -628,8 +628,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY).insertFirst(whileStatement, null);
 			rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY).insertAfter(insertNodeForCopy1, whileStatement, null);
 			
-			rewrite.markAsRemoved((ASTNode) statements.get(1), null);
-			rewrite.markAsRemoved((ASTNode) statements.get(2), null);
+			rewrite.remove((ASTNode) statements.get(1), null);
+			rewrite.remove((ASTNode) statements.get(2), null);
 		}	
 					
 
@@ -687,7 +687,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -768,7 +768,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -777,7 +777,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
 			assertTrue("Cannot find foo", methodDecl != null);
 			
-			rewrite.markAsRemoved(methodDecl, null);
+			rewrite.remove(methodDecl, null);
 			
 			Block body= methodDecl.getBody();
 			List statements= body.statements();
@@ -825,7 +825,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -840,7 +840,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			
 			// prepare ifStatement to move
 			IfStatement ifStatement= (IfStatement) fooStatements.get(0);
-			rewrite.markAsRemoved(ifStatement, null);
+			rewrite.remove(ifStatement, null);
 			
 			ASTNode placeHolder= rewrite.createCopyTarget(ifStatement);
 			
@@ -856,7 +856,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			List gooStatements= methodGoo.getBody().statements();
 			assertTrue("Cannot find statement in goo", gooStatements.size() == 1);
 			
-			rewrite.markAsReplaced((ASTNode) gooStatements.get(0), placeHolder, null);
+			rewrite.replace((ASTNode) gooStatements.get(0), placeHolder, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -894,7 +894,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -926,7 +926,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			List gooStatements= methodGoo.getBody().statements();
 			assertTrue("Cannot find statement in goo", gooStatements.size() == 1);
 			
-			rewrite.markAsReplaced((ASTNode) gooStatements.get(0), placeHolder, null);
+			rewrite.replace((ASTNode) gooStatements.get(0), placeHolder, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -959,7 +959,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -983,8 +983,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			ASTNode placeHolder0= rewrite.createCopyTarget(arg0);
 			ASTNode placeHolder1= rewrite.createCopyTarget(arg1);
 			
-			rewrite.markAsReplaced(arg0, placeHolder1, null);
-			rewrite.markAsReplaced(arg1, placeHolder0, null);
+			rewrite.replace(arg0, placeHolder1, null);
+			rewrite.replace(arg1, placeHolder0, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1012,7 +1012,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -1036,8 +1036,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			ASTNode placeHolder0= rewrite.createMoveTarget(arg0);
 			ASTNode placeHolder1= rewrite.createMoveTarget(arg1);
 			
-			rewrite.markAsReplaced(arg0, placeHolder1, null); // replace instead of remove
-			rewrite.markAsReplaced(arg1, placeHolder0, null); // replace instead of remove
+			rewrite.replace(arg0, placeHolder1, null); // replace instead of remove
+			rewrite.replace(arg1, placeHolder0, null); // replace instead of remove
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1070,7 +1070,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -1085,7 +1085,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			rewrite.getListRewrite(methodDecl.getBody(), Block.STATEMENTS_PROPERTY).insertLast(placeholder1, null);
 
 			ASTNode placeholder2= rewrite.createCopyTarget(node);
-			rewrite.markAsReplaced((ASTNode) ifStatementBody.get(0), placeholder2, null);
+			rewrite.replace((ASTNode) ifStatementBody.get(0), placeholder2, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1286,7 +1286,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -1301,7 +1301,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			rewrite.getListRewrite(methodDecl.getBody(), Block.STATEMENTS_PROPERTY).insertLast(placeholder1, null);
 
 			ASTNode placeholder2= rewrite.createCopyTarget(node);
-			rewrite.markAsReplaced((ASTNode) ifStatementBody.get(0), placeholder2, null);
+			rewrite.replace((ASTNode) ifStatementBody.get(0), placeholder2, null);
 			
 			ASTNode placeholder3= rewrite.createMoveTarget(node);
 			rewrite.getListRewrite(methodDecl.getBody(), Block.STATEMENTS_PROPERTY).insertFirst(placeholder3, null);
@@ -1341,7 +1341,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -1357,7 +1357,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(body, newBody, null);
+			rewrite.replace(body, newBody, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1388,7 +1388,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		
@@ -1404,7 +1404,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			Block newBody= ast.newBlock();
 			newBody.statements().add(placeholder);
 			
-			rewrite.markAsReplaced(body, newBody, null);
+			rewrite.replace(body, newBody, null);
 		}	
 					
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1436,7 +1436,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 
 		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		TypeDeclaration typeDecl= findTypeDeclaration(astRoot, "E");
 		MethodDeclaration methDecl= findMethodDeclaration(typeDecl, "foo");
@@ -1452,8 +1452,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		parents.setExpression(newCast);
 		
 		ASTNode node= rewrite.createCopyTarget(invocation);
-		rewrite.markAsReplaced(expression, node, null);
-		rewrite.markAsReplaced(invocation.getExpression(), parents, null);
+		rewrite.replace(expression, node, null);
+		rewrite.replace(invocation.getExpression(), parents, null);
 				
 		String preview= evaluateRewrite(cu, rewrite);
 		

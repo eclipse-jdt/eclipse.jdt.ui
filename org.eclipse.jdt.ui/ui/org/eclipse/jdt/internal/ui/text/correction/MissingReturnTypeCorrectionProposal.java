@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -47,13 +47,13 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected ASTRewrite getRewrite() {
+	protected OldASTRewrite getRewrite() {
 		AST ast= fMethodDecl.getAST();
 		
 		ITypeBinding returnBinding= getReturnTypeBinding();
 		
 		if (fExistingReturn != null) {
-			ASTRewrite rewrite= new ASTRewrite(fExistingReturn.getParent());
+			OldASTRewrite rewrite= new OldASTRewrite(fExistingReturn.getParent());
 			
 			Expression expression= evaluateReturnExpressions(ast, returnBinding, fExistingReturn.getStartPosition());
 			if (expression != null) {
@@ -63,7 +63,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 			}
 			return rewrite;
 		} else {
-			ASTRewrite rewrite= new ASTRewrite(fMethodDecl);
+			OldASTRewrite rewrite= new OldASTRewrite(fMethodDecl);
 			
 			Block block= fMethodDecl.getBody();
 				
@@ -83,7 +83,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(placeHolder);
 					
-					rewrite.markAsReplaced(lastStatement, returnStatement, null);
+					rewrite.replace(lastStatement, returnStatement, null);
 					return rewrite;
 				}
 			}

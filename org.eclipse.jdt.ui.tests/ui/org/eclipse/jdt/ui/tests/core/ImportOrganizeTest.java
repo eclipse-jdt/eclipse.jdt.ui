@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.io.File;
+import java.util.Hashtable;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -26,9 +27,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
@@ -63,6 +64,10 @@ public class ImportOrganizeTest extends CoreTests {
 
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
+	
+		Hashtable options= JavaCore.getDefaultOptions();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
+		JavaCore.setOptions(options);
 	}
 
 
@@ -1542,7 +1547,7 @@ public class ImportOrganizeTest extends CoreTests {
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		ICompilationUnit unit= pack1.getCompilationUnit("A.java");
-		ICompilationUnit wc= (ICompilationUnit) unit.getWorkingCopy(null, JavaUI.getBufferFactory(), null);
+		unit.becomeWorkingCopy(null, null);
 		try {
 			StringBuffer buf= new StringBuffer();
 			buf.append("package test1;\n");
@@ -1550,12 +1555,12 @@ public class ImportOrganizeTest extends CoreTests {
 			buf.append("    public Object foo() {\n");
 			buf.append("    }\n");
 			buf.append("}\n");	
-			wc.getBuffer().setContents(buf.toString());
+			unit.getBuffer().setContents(buf.toString());
 			
 			String[] order= new String[] { "com", "com.foreigncompany", "com.mycompany" };
 			int threshold= 99;
 	
-			ImportsStructure importsStructure= new ImportsStructure(wc, order, threshold, true);
+			ImportsStructure importsStructure= new ImportsStructure(unit, order, threshold, true);
 			importsStructure.addImport("java.util.HashMap");
 			importsStructure.create(false, null);
 	
@@ -1569,9 +1574,9 @@ public class ImportOrganizeTest extends CoreTests {
 			buf.append("    }\n");
 			buf.append("}\n");	
 			
-			assertEqualStringIgnoreDelim(wc.getSource(), buf.toString());
+			assertEqualStringIgnoreDelim(unit.getSource(), buf.toString());
 		} finally {
-			wc.destroy();
+			unit.discardWorkingCopy();
 		}
 	}
 	

@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 /**
   */
@@ -73,7 +73,7 @@ public class ASTRewritingTest extends TestCase {
 	/**
 	 * Returns the result of a rewrite.
 	 */
-	protected String evaluateRewrite(ICompilationUnit cu, NewASTRewrite rewrite) throws Exception {
+	protected String evaluateRewrite(ICompilationUnit cu, ASTRewrite rewrite) throws Exception {
 		Document document= new Document(cu.getSource());
 		TextEdit res= rewrite.rewriteAST(document, cu.getJavaProject().getOptions(true));
 		

@@ -18,7 +18,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -98,20 +98,20 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected ASTRewrite getRewrite() {
+	protected OldASTRewrite getRewrite() {
 		IBinding binding= fName.resolveBinding();
 		CompilationUnit root= (CompilationUnit) fName.getRoot();
-		ASTRewrite rewrite;
+		OldASTRewrite rewrite;
 		if (binding.getKind() != IBinding.VARIABLE) {
 			ASTNode declaration= root.findDeclaringNode(binding);
-			rewrite= new ASTRewrite(declaration.getParent());
-			rewrite.markAsRemoved(declaration, null);
+			rewrite= new OldASTRewrite(declaration.getParent());
+			rewrite.remove(declaration, null);
 		} else { // variable
 			// needs full AST
 			CompilationUnit completeRoot= AST.parseCompilationUnit(getCompilationUnit(), true, null, null);
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
 
-			rewrite= new ASTRewrite(completeRoot); 
+			rewrite= new OldASTRewrite(completeRoot); 
 			SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
 			for (int i= 0; i < references.length; i++) {
 				removeVariableReferences(rewrite, references[i]);
@@ -124,7 +124,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 					if (javadoc != null) {
 						TagElement tagElement= findThrowsTag(javadoc, nameNode.resolveBinding());
 						if (tagElement != null) {
-							rewrite.markAsRemoved(tagElement, null);
+							rewrite.remove(tagElement, null);
 						}
 					}
 				}
@@ -156,7 +156,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	 * Remove the field or variable declaration including the initializer.
 	 * 
 	 */
-	private void removeVariableReferences(ASTRewrite rewrite, SimpleName reference) {
+	private void removeVariableReferences(OldASTRewrite rewrite, SimpleName reference) {
 		int nameParentType= reference.getParent().getNodeType();
 		if (nameParentType == ASTNode.ASSIGNMENT) {
 			Assignment assignment= (Assignment) reference.getParent();
@@ -166,10 +166,10 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
 				removeVariableWithInitializer(rewrite, rightHand, parent);
 			}	else {
-				rewrite.markAsReplaced(assignment, rewrite.createCopy(rightHand), null);
+				rewrite.replace(assignment, rewrite.createCopy(rightHand), null);
 			}
 		} else if (nameParentType == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-			rewrite.markAsRemoved(reference.getParent(), null);
+			rewrite.remove(reference.getParent(), null);
 		} else if (nameParentType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) reference.getParent();
 			ASTNode varDecl= frag.getParent();
@@ -182,19 +182,19 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 				fragments= ((VariableDeclarationStatement) varDecl).fragments();
 			}
 			if (fragments.size() == 1) {
-				rewrite.markAsRemoved(varDecl, null);
+				rewrite.remove(varDecl, null);
 			} else {
-				rewrite.markAsRemoved(frag, null); // don't try to preserve
+				rewrite.remove(frag, null); // don't try to preserve
 			}
 		}
 	}
 	
-	private void removeVariableWithInitializer(ASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode) {
+	private void removeVariableWithInitializer(OldASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode) {
 		ArrayList sideEffectNodes= new ArrayList();
 		initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 		int nSideEffects= sideEffectNodes.size();
 		if (nSideEffects == 0) {
-			rewrite.markAsRemoved(statementNode, null); 
+			rewrite.remove(statementNode, null); 
 		} else {
 			// do nothing yet
 		}

@@ -61,7 +61,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -91,7 +91,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	private CompilationUnit fRoot;
 	private VariableDeclarationFragment fFieldDeclaration;
-	private ASTRewrite fRewriter;
+	private OldASTRewrite fRewriter;
 
 	private int fVisibility;
 	private String fGetterName;
@@ -199,7 +199,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 		computeUsedNames();
-		fRewriter= new ASTRewrite(fRoot);
+		fRewriter= new OldASTRewrite(fRoot);
 		return result;
 	}
 
@@ -285,7 +285,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			ICompilationUnit unit= affectedCUs[i];
 			sub.subTask(unit.getElementName());
 			CompilationUnit root= null;
-			ASTRewrite rewriter= null;
+			OldASTRewrite rewriter= null;
 			List descriptions;
 			if (owner.equals(unit)) {
 				root= fRoot;
@@ -293,7 +293,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				descriptions= ownerDescriptions;
 			} else {
 				root= new RefactoringASTParser(AST.LEVEL_2_0).parse(unit, true);
-				rewriter= new ASTRewrite(root);
+				rewriter= new OldASTRewrite(root);
 				descriptions= new ArrayList();
 			}
 			checkCompileErrors(result, root, unit);
@@ -319,7 +319,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 
-	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups) throws CoreException {
+	private void createEdits(ICompilationUnit unit, OldASTRewrite rewriter, List groups) throws CoreException {
 		TextChange change= fChangeManager.get(unit);
 		TextBuffer buffer= TextBuffer.acquire(getFile(unit));
 		try {
@@ -397,7 +397,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 	}
 
-	private List addGetterSetterChanges(CompilationUnit root, ASTRewrite rewriter) throws CoreException {
+	private List addGetterSetterChanges(CompilationUnit root, OldASTRewrite rewriter) throws CoreException {
 		List result= new ArrayList(2);
 		AST ast= root.getAST();
 		FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, ASTNode.FIELD_DECLARATION);
@@ -433,13 +433,13 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 
-	private TextEditGroup makeDeclarationPrivate(ASTRewrite rewriter, FieldDeclaration decl) {
+	private TextEditGroup makeDeclarationPrivate(OldASTRewrite rewriter, FieldDeclaration decl) {
 		AST ast= rewriter.getAST();
 		TextEditGroup description= new TextEditGroup(RefactoringCoreMessages
 			.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
 		
 		if (decl.fragments().size() > 1) {
-			rewriter.markAsRemoved(fFieldDeclaration, description);
+			rewriter.remove(fFieldDeclaration, description);
 			List bodyDeclarations= ASTNodes.getBodyDeclarations(decl.getParent());
 			int index= bodyDeclarations.indexOf(decl);
 			VariableDeclarationFragment newField= (VariableDeclarationFragment)rewriter.createCopy(fFieldDeclaration);
@@ -454,7 +454,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return description;
 	}
 
-	private MethodDeclaration createSetterMethod(AST ast, ASTRewrite rewriter, TextEditGroup description) throws JavaModelException {
+	private MethodDeclaration createSetterMethod(AST ast, OldASTRewrite rewriter, TextEditGroup description) throws JavaModelException {
 		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();
@@ -484,7 +484,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private MethodDeclaration createGetterMethod(AST ast, ASTRewrite rewriter, TextEditGroup description) throws JavaModelException {
+	private MethodDeclaration createGetterMethod(AST ast, OldASTRewrite rewriter, TextEditGroup description) throws JavaModelException {
 		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();

@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 	private static final Class THIS= ASTRewritingExpressionsTest.class;
@@ -85,7 +85,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -103,13 +103,13 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ArrayAccess right= (ArrayAccess) assignment.getRightHandSide();
 			
 			NumberLiteral name= ast.newNumberLiteral("1");
-			rewrite.markAsReplaced(left.getIndex(), name, null);
+			rewrite.replace(left.getIndex(), name, null);
 			
 			ASTNode placeHolder= rewrite.createCopyTarget(left.getIndex());
-			rewrite.markAsReplaced(right.getIndex(), placeHolder, null);
+			rewrite.replace(right.getIndex(), placeHolder, null);
 			
 			SimpleName newName= ast.newSimpleName("o");
-			rewrite.markAsReplaced(right.getArray(), newName, null);
+			rewrite.replace(right.getArray(), newName, null);
 		}
 
 				
@@ -145,7 +145,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -167,11 +167,11 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			PrimitiveType floatType= ast.newPrimitiveType(PrimitiveType.FLOAT); 
 			ArrayType newArrayType= ast.newArrayType(floatType, 2);
 			
-			rewrite.markAsReplaced(arrayType, newArrayType, null);
+			rewrite.replace(arrayType, newArrayType, null);
 		}
 		{	// remove the initializer, add a dimension expression
 			ArrayCreation arrayCreation= (ArrayCreation) args.get(1);
-			rewrite.markAsRemoved(arrayCreation.getInitializer(), null);
+			rewrite.remove(arrayCreation.getInitializer(), null);
 			
 			List dimensions= arrayCreation.dimensions();
 			assertTrue("Number of dimension expressions not 0", dimensions.size() == 0);
@@ -187,12 +187,12 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			PrimitiveType intType= ast.newPrimitiveType(PrimitiveType.INT); 
 			ArrayType newArrayType= ast.newArrayType(intType, 1);
 			
-			rewrite.markAsReplaced(arrayType, newArrayType, null);
+			rewrite.replace(arrayType, newArrayType, null);
 			
 			List dimensions= arrayCreation.dimensions();
 			assertTrue("Number of dimension expressions not 1", dimensions.size() == 1);
 			
-			rewrite.markAsRemoved((ASTNode) dimensions.get(0), null);
+			rewrite.remove((ASTNode) dimensions.get(0), null);
 			
 			ArrayInitializer initializer= ast.newArrayInitializer();
 			List expressions= initializer.expressions();
@@ -219,7 +219,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			PrimitiveType intType= ast.newPrimitiveType(PrimitiveType.INT); 
 			ArrayType newArrayType= ast.newArrayType(intType, 5);
 			
-			rewrite.markAsReplaced(arrayType, newArrayType, null);
+			rewrite.replace(arrayType, newArrayType, null);
 		}
 		{	// replace dimension expression, add a dimension expression
 			ArrayCreation arrayCreation= (ArrayCreation) args.get(5);
@@ -228,7 +228,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			assertTrue("Number of dimension expressions not 1", dimensions.size() == 1);
 
 			NumberLiteral literal1= ast.newNumberLiteral("10");
-			rewrite.markAsReplaced((ASTNode) dimensions.get(0), literal1, null);
+			rewrite.replace((ASTNode) dimensions.get(0), literal1, null);
 			
 			NumberLiteral literal2= ast.newNumberLiteral("11");
 			rewrite.getListRewrite(arrayCreation, ArrayCreation.DIMENSIONS_PROPERTY).insertLast(literal2, null);
@@ -267,7 +267,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -288,8 +288,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			List expressions= initializer.expressions();
 			assertTrue("Number of initializer expressions not 3", expressions.size() == 3);
 			
-			rewrite.markAsRemoved((ASTNode) expressions.get(0), null);
-			rewrite.markAsRemoved((ASTNode) expressions.get(2), null);
+			rewrite.remove((ASTNode) expressions.get(0), null);
+			rewrite.remove((ASTNode) expressions.get(2), null);
 		}
 		{	// insert at second and last position
 			ArrayCreation arrayCreation= (ArrayCreation) args.get(1);
@@ -315,8 +315,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			NumberLiteral literal1= ast.newNumberLiteral("10");
 			NumberLiteral literal2= ast.newNumberLiteral("11");
 			
-			rewrite.markAsReplaced((ASTNode) expressions.get(0), literal1, null);
-			rewrite.markAsReplaced((ASTNode) expressions.get(2), literal2, null);
+			rewrite.replace((ASTNode) expressions.get(0), literal1, null);
+			rewrite.replace((ASTNode) expressions.get(2), literal2, null);
 		}		
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -349,7 +349,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -364,13 +364,13 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			Assignment assignment= (Assignment) stmt.getExpression();
 			
 			SimpleName name= ast.newSimpleName("j");
-			rewrite.markAsReplaced(assignment.getLeftHandSide(), name, null);
+			rewrite.replace(assignment.getLeftHandSide(), name, null);
 			
 			MethodInvocation invocation= ast.newMethodInvocation();
 			invocation.setName(ast.newSimpleName("goo"));
 			invocation.setExpression(ast.newSimpleName("other"));
 			
-			rewrite.markAsReplaced(assignment.getRightHandSide(), invocation, null);
+			rewrite.replace(assignment.getRightHandSide(), invocation, null);
 		}
 		{ // change operator and operator of inner
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);
@@ -411,7 +411,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -427,10 +427,10 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			
 			CastExpression expression= (CastExpression) assignment.getRightHandSide();
 			SimpleType newType= ast.newSimpleType(ast.newSimpleName("SuperE"));
-			rewrite.markAsReplaced(expression.getType(), newType, null);
+			rewrite.replace(expression.getType(), newType, null);
 			
 			SimpleName newExpression= ast.newSimpleName("a");
-			rewrite.markAsReplaced(expression.getExpression(), newExpression, null);
+			rewrite.replace(expression.getExpression(), newExpression, null);
 		}
 		{ // create cast
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(1);
@@ -444,7 +444,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			newCastExpression.setType(ast.newSimpleType(ast.newSimpleName("List")));
 			newCastExpression.setExpression(placeholder);
 			
-			rewrite.markAsReplaced(rightHand, newCastExpression, null);
+			rewrite.replace(rightHand, newCastExpression, null);
 		}	
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -475,7 +475,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -500,7 +500,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			newCastExpression.setType(ast.newSimpleType(ast.newSimpleName("List")));
 			newCastExpression.setExpression(placeholder);
 			
-			rewrite.markAsReplaced(rightHand, newCastExpression, null);
+			rewrite.replace(rightHand, newCastExpression, null);
 		}		
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -532,7 +532,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -554,7 +554,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			newException.setType(ast.newSimpleType(ast.newSimpleName("NullPointerException")));
 			newException.setName(ast.newSimpleName("ex"));
 			
-			rewrite.markAsReplaced(exception, newException, null);
+			rewrite.replace(exception, newException, null);
 		}
 		{ // change body
 			CatchClause clause= (CatchClause) catchClauses.get(1);
@@ -564,7 +564,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ReturnStatement returnStatement= ast.newReturnStatement();
 			newBody.statements().add(returnStatement);
 			
-			rewrite.markAsReplaced(body, newBody, null);
+			rewrite.replace(body, newBody, null);
 		}
 				
 		String preview= evaluateRewrite(cu, rewrite);
@@ -600,7 +600,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -614,10 +614,10 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
 			ClassInstanceCreation creation= (ClassInstanceCreation) stmt.getExpression();
 
-			rewrite.markAsRemoved(creation.getExpression(), null);
+			rewrite.remove(creation.getExpression(), null);
 			
 			SimpleName newName= ast.newSimpleName("NewInner");
-			rewrite.markAsReplaced(creation.getName(), newName, null);
+			rewrite.replace(creation.getName(), newName, null);
 			
 			StringLiteral stringLiteral1= ast.newStringLiteral();
 			stringLiteral1.setLiteralValue("Hello");
@@ -650,9 +650,9 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			List arguments= creation.arguments();
 			assertTrue("Must have 1 argument", arguments.size() == 1);
 			
-			rewrite.markAsRemoved((ASTNode) arguments.get(0), null);
+			rewrite.remove((ASTNode) arguments.get(0), null);
 			
-			rewrite.markAsRemoved(creation.getAnonymousClassDeclaration(), null);
+			rewrite.remove(creation.getAnonymousClassDeclaration(), null);
 		}
 		
 		String preview= evaluateRewrite(cu, rewrite);
@@ -684,7 +684,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -700,17 +700,17 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ConditionalExpression condExpression= (ConditionalExpression) assignment.getRightHandSide();
 			
 			BooleanLiteral literal= ast.newBooleanLiteral(true);
-			rewrite.markAsReplaced(condExpression.getExpression(), literal, null);
+			rewrite.replace(condExpression.getExpression(), literal, null);
 			
 			SimpleName newThenExpre= ast.newSimpleName("x");
-			rewrite.markAsReplaced(condExpression.getThenExpression(), newThenExpre, null);
+			rewrite.replace(condExpression.getThenExpression(), newThenExpre, null);
 			
 			InfixExpression infixExpression= ast.newInfixExpression();
 			infixExpression.setLeftOperand(ast.newNumberLiteral("1"));
 			infixExpression.setRightOperand(ast.newNumberLiteral("2"));
 			infixExpression.setOperator(InfixExpression.Operator.PLUS);
 			
-			rewrite.markAsReplaced(condExpression.getElseExpression(), infixExpression, null);
+			rewrite.replace(condExpression.getElseExpression(), infixExpression, null);
 		}
 		
 		String preview= evaluateRewrite(cu, rewrite);
@@ -738,7 +738,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -756,13 +756,13 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			
 			MethodInvocation invocation= ast.newMethodInvocation();
 			invocation.setName(ast.newSimpleName("xoo"));
-			rewrite.markAsReplaced(leftFieldAccess.getExpression(), invocation, null);
+			rewrite.replace(leftFieldAccess.getExpression(), invocation, null);
 			
 			SimpleName newName= ast.newSimpleName("x");
-			rewrite.markAsReplaced(leftFieldAccess.getName(), newName, null);
+			rewrite.replace(leftFieldAccess.getName(), newName, null);
 
 			SimpleName rightHand= ast.newSimpleName("b");
-			rewrite.markAsReplaced(rightFieldAccess.getExpression(), rightHand, null);
+			rewrite.replace(rightFieldAccess.getExpression(), rightHand, null);
 		}
 		
 		String preview= evaluateRewrite(cu, rewrite);
@@ -792,7 +792,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -808,10 +808,10 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			InfixExpression expr= (InfixExpression) assignment.getRightHandSide();
 			
 			SimpleName leftOp= ast.newSimpleName("k");
-			rewrite.markAsReplaced(expr.getLeftOperand(), leftOp, null);	
+			rewrite.replace(expr.getLeftOperand(), leftOp, null);	
 
 			SimpleName rightOp= ast.newSimpleName("j");
-			rewrite.markAsReplaced(expr.getRightOperand(), rightOp, null);	
+			rewrite.replace(expr.getRightOperand(), rightOp, null);	
 			
 			// change operand
 			rewrite.set(expr, InfixExpression.OPERATOR_PROPERTY, InfixExpression.Operator.MINUS, null);
@@ -825,10 +825,10 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			List extendedOperands= expr.extendedOperands();
 			assertTrue("Number of extendedOperands not 3", extendedOperands.size() == 3);
 			
-			rewrite.markAsRemoved((ASTNode) extendedOperands.get(0), null);
+			rewrite.remove((ASTNode) extendedOperands.get(0), null);
 			
 			SimpleName newOp1= ast.newSimpleName("k");
-			rewrite.markAsReplaced((ASTNode) extendedOperands.get(1), newOp1, null);
+			rewrite.replace((ASTNode) extendedOperands.get(1), newOp1, null);
 			
 			SimpleName newOp2= ast.newSimpleName("n");
 			rewrite.getListRewrite(expr, InfixExpression.EXTENDED_OPERANDS_PROPERTY).insertLast(newOp2, null);
@@ -870,7 +870,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -888,11 +888,11 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			InstanceofExpression expr= (InstanceofExpression) arguments.get(0);
 			
 			SimpleName name= ast.newSimpleName("x");
-			rewrite.markAsReplaced(expr.getLeftOperand(), name, null);
+			rewrite.replace(expr.getLeftOperand(), name, null);
 			
 			Type newCastType= ast.newSimpleType(ast.newSimpleName("List"));
 
-			rewrite.markAsReplaced(expr.getRightOperand(), newCastType, null);
+			rewrite.replace(expr.getRightOperand(), newCastType, null);
 		}
 			
 		String preview= evaluateRewrite(cu, rewrite);
@@ -922,7 +922,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -936,10 +936,10 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
 			MethodInvocation invocation= (MethodInvocation) stmt.getExpression();
 			
-			rewrite.markAsRemoved(invocation.getExpression(), null);
+			rewrite.remove(invocation.getExpression(), null);
 			
 			SimpleName name= ast.newSimpleName("x");
-			rewrite.markAsReplaced(invocation.getName(), name, null);
+			rewrite.replace(invocation.getName(), name, null);
 			
 			ASTNode arg= ast.newNumberLiteral("1");
 			rewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(arg, null);
@@ -955,8 +955,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			rewrite.set(leftInvocation, MethodInvocation.EXPRESSION_PROPERTY, newExpression, null);
 			
 			List args= leftInvocation.arguments();
-			rewrite.markAsRemoved((ASTNode) args.get(0), null);
-			rewrite.markAsRemoved((ASTNode) args.get(1), null);
+			rewrite.remove((ASTNode) args.get(0), null);
+			rewrite.remove((ASTNode) args.get(1), null);
 		}
 		{ // remove expression, add it as parameter
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);
@@ -998,7 +998,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -1025,29 +1025,29 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			//rename args
 			SimpleName newFirstArg= methodDecl.getAST().newSimpleName("yyy");
 			SimpleName newSecondArg= methodDecl.getAST().newSimpleName("bb");
-			rewrite.markAsReplaced(first, newFirstArg, null);
-			rewrite.markAsReplaced(second, newSecondArg, null);
+			rewrite.replace(first, newFirstArg, null);
+			rewrite.replace(second, newSecondArg, null);
 			
 
 			//rename params
 			SimpleName newFirstName= methodDecl.getAST().newSimpleName("yyy");
 			SimpleName newSecondName= methodDecl.getAST().newSimpleName("bb");
-			rewrite.markAsReplaced(firstParam.getName(), newFirstName, null);
-			rewrite.markAsReplaced(secondParam.getName(), newSecondName, null);
+			rewrite.replace(firstParam.getName(), newFirstName, null);
+			rewrite.replace(secondParam.getName(), newSecondName, null);
 			
 			//reoder params
 			ASTNode paramplaceholder1= rewrite.createCopyTarget(firstParam);
 			ASTNode paramplaceholder2= rewrite.createCopyTarget(secondParam);
 			
-			rewrite.markAsReplaced(firstParam, paramplaceholder2, null);
-			rewrite.markAsReplaced(secondParam, paramplaceholder1, null);
+			rewrite.replace(firstParam, paramplaceholder2, null);
+			rewrite.replace(secondParam, paramplaceholder1, null);
 			
 			//reorder args
 			ASTNode placeholder1= rewrite.createCopyTarget(first);
 			ASTNode placeholder2= rewrite.createCopyTarget(second);
 			
-			rewrite.markAsReplaced(first, placeholder2, null);
-			rewrite.markAsReplaced(second, placeholder1, null);
+			rewrite.replace(first, placeholder2, null);
+			rewrite.replace(second, placeholder1, null);
 
 			
 		}
@@ -1077,7 +1077,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -1096,8 +1096,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ASTNode placeholder1= rewrite.createCopyTarget(first);
 			ASTNode placeholder2= rewrite.createCopyTarget(second);
 			
-			rewrite.markAsReplaced(first, placeholder2, null);
-			rewrite.markAsReplaced(second, placeholder1, null);
+			rewrite.replace(first, placeholder2, null);
+			rewrite.replace(second, placeholder1, null);
 			
 			List innerArguments= first.arguments();
 			ASTNode innerFirst= (ASTNode) innerArguments.get(0);
@@ -1106,8 +1106,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ASTNode innerPlaceholder1= rewrite.createCopyTarget(innerFirst);
 			ASTNode innerPlaceholder2= rewrite.createCopyTarget(innerSecond);
 			
-			rewrite.markAsReplaced(innerFirst, innerPlaceholder2, null);
-			rewrite.markAsReplaced(innerSecond, innerPlaceholder1, null);			
+			rewrite.replace(innerFirst, innerPlaceholder2, null);
+			rewrite.replace(innerSecond, innerPlaceholder1, null);			
 			
 			
 			
@@ -1140,7 +1140,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -1159,7 +1159,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression) multiplication.getLeftOperand();
 						
 			SimpleName name= ast.newSimpleName("x");
-			rewrite.markAsReplaced(parenthesizedExpression.getExpression(), name, null);
+			rewrite.replace(parenthesizedExpression.getExpression(), name, null);
 		}
 			
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1188,7 +1188,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -1205,7 +1205,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			PrefixExpression preExpression= (PrefixExpression) assignment.getRightHandSide();
 					
 			NumberLiteral newOperation= ast.newNumberLiteral("10");
-			rewrite.markAsReplaced(preExpression.getOperand(), newOperation, null);
+			rewrite.replace(preExpression.getOperand(), newOperation, null);
 			
 			rewrite.set(preExpression, PrefixExpression.OPERATOR_PROPERTY, PrefixExpression.Operator.COMPLEMENT, null);
 		}
@@ -1235,7 +1235,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -1252,7 +1252,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			PostfixExpression postExpression= (PostfixExpression) assignment.getRightHandSide();
 					
 			NumberLiteral newOperation= ast.newNumberLiteral("10");
-			rewrite.markAsReplaced(postExpression.getOperand(), newOperation, null);
+			rewrite.replace(postExpression.getOperand(), newOperation, null);
 			
 			rewrite.set(postExpression, PostfixExpression.OPERATOR_PROPERTY, PostfixExpression.Operator.INCREMENT, null);
 		}
@@ -1288,7 +1288,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -1312,24 +1312,24 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			SuperConstructorInvocation invocation= (SuperConstructorInvocation) methodDecl.getBody().statements().get(0);
 
 			MethodInvocation expression= (MethodInvocation) invocation.getExpression();
-			rewrite.markAsRemoved(expression, null);
+			rewrite.remove(expression, null);
 			
 			ASTNode placeHolder= rewrite.createCopyTarget((ASTNode) expression.arguments().get(0));
 			
 			ASTNode arg1= (ASTNode) invocation.arguments().get(0);
 			
-			rewrite.markAsReplaced(arg1, placeHolder, null);
+			rewrite.replace(arg1, placeHolder, null);
 		}
 		{ // remove argument, replace expression with part of argument
 			MethodDeclaration methodDecl= (MethodDeclaration) bodyDeclarations.get(2);
 			SuperConstructorInvocation invocation= (SuperConstructorInvocation) methodDecl.getBody().statements().get(0);
 			
 			MethodInvocation arg1= (MethodInvocation) invocation.arguments().get(0);
-			rewrite.markAsRemoved(arg1, null);
+			rewrite.remove(arg1, null);
 			
 			ASTNode placeHolder= rewrite.createCopyTarget((ASTNode) arg1.arguments().get(0));
 			
-			rewrite.markAsReplaced(invocation.getExpression(), placeHolder, null);
+			rewrite.replace(invocation.getExpression(), placeHolder, null);
 		}
 			
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1363,7 +1363,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 			
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -1383,9 +1383,9 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			rewrite.set(leftFieldAccess, SuperFieldAccess.QUALIFIER_PROPERTY, newQualifier, null);
 
 			SimpleName newName= ast.newSimpleName("y");
-			rewrite.markAsReplaced(leftFieldAccess.getName(), newName, null);
+			rewrite.replace(leftFieldAccess.getName(), newName, null);
 
-			rewrite.markAsRemoved(rightFieldAccess.getQualifier(), null);
+			rewrite.remove(rightFieldAccess.getQualifier(), null);
 		}
 		
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1414,7 +1414,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -1440,7 +1440,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			SuperMethodInvocation invocation= (SuperMethodInvocation) statement.getExpression();
 
 			Name qualifier= invocation.getQualifier();
-			rewrite.markAsRemoved(qualifier, null);
+			rewrite.remove(qualifier, null);
 			
 			Name placeHolder= (Name) rewrite.createCopyTarget(qualifier);
 			
@@ -1449,20 +1449,20 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			newFieldAccess.setName(ast.newSimpleName("count"));
 			
 			ASTNode arg1= (ASTNode) invocation.arguments().get(0);
-			rewrite.markAsReplaced(arg1, newFieldAccess, null);
+			rewrite.replace(arg1, newFieldAccess, null);
 		}
 		{ // remove argument, replace qualifier with part argument qualifier
 			ExpressionStatement statement= (ExpressionStatement) statements.get(2);
 			SuperMethodInvocation invocation= (SuperMethodInvocation) statement.getExpression();
 			
 			MethodInvocation arg1= (MethodInvocation) invocation.arguments().get(0);
-			rewrite.markAsRemoved(arg1, null);
+			rewrite.remove(arg1, null);
 			
 			MethodInvocation innerArg= (MethodInvocation) arg1.arguments().get(0);
 			
 			ASTNode placeHolder= rewrite.createCopyTarget(innerArg.getExpression());
 			
-			rewrite.markAsReplaced(invocation.getQualifier(), placeHolder, null);
+			rewrite.replace(invocation.getQualifier(), placeHolder, null);
 		}
 			
 		String preview= evaluateRewrite(cu, rewrite);
@@ -1493,7 +1493,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -1517,7 +1517,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			
 			ThisExpression thisExpression= (ThisExpression) returnStatement.getExpression();
 
-			rewrite.markAsRemoved(thisExpression.getQualifier(), null);
+			rewrite.remove(thisExpression.getQualifier(), null);
 		}
 
 			
@@ -1547,7 +1547,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= createAST(cu);
-		NewASTRewrite rewrite= new NewASTRewrite(astRoot.getAST());
+		ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
 		
 		AST ast= astRoot.getAST();
 		
@@ -1565,7 +1565,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 			Type newType= ast.newPrimitiveType(PrimitiveType.VOID);
 			
-			rewrite.markAsReplaced(typeLiteral.getType(), newType, null);
+			rewrite.replace(typeLiteral.getType(), newType, null);
 		}
 			
 		String preview= evaluateRewrite(cu, rewrite);

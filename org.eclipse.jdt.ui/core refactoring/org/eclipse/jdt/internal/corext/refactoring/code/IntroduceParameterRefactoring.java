@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
@@ -343,14 +343,14 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 		//replace selected expression
 		ASTNode newExpression= ast.newSimpleName(fParameterName);
-		fSource.rewriter.markAsReplaced(fSelectedExpression, newExpression,
+		fSource.rewriter.replace(fSelectedExpression, newExpression,
 				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.replace"))); //$NON-NLS-1$
 		
 		//add parameter
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		param.setName(ast.newSimpleName(fParameterName));
 		String type= fSource.imports.addImport(fSelectedExpression.resolveTypeBinding());
-		param.setType((Type) fSource.rewriter.createPlaceholder(type, ASTRewrite.TYPE));
+		param.setType((Type) fSource.rewriter.createPlaceholder(type, ASTNode.SIMPLE_TYPE));
 		fMethodDeclaration.parameters().add(param);
 		fSource.rewriter.markAsInserted(param,
 				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_parameter"))); //$NON-NLS-1$
