@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -64,9 +66,11 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			binding= decl.resolveBinding();
 			listRewrite= rewrite.getListRewrite(decl, decl.getBodyDeclarationsProperty());
 		}
-		IMethodBinding[] methods= StubUtility2.evalUnimplementedMethods(binding);
+		IMethodBinding[] methods= StubUtility2.getUnimplementedMethods(binding);
 		fMethodsToOverride= methods;
 		
+		IJavaProject project= getCompilationUnit().getJavaProject();
+		boolean annotations= project.getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_5) && project.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true).equals(JavaCore.VERSION_1_5);
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(getCompilationUnit().getJavaProject());
 		if (!settings.createComments || binding.isAnonymous()) {
@@ -74,7 +78,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		}
 		
 		for (int i= 0; i < methods.length; i++) {
-			MethodDeclaration newMethodDecl= StubUtility2.createNewMethodDeclaration(getCompilationUnit(), ast, methods[i], rewrite, getImportRewrite(), binding.getName(), settings);
+			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, getImportRewrite(), ast, methods[i], binding.getName(), settings, annotations);
 			listRewrite.insertLast(newMethodDecl, null);
 		}
 		return rewrite;
