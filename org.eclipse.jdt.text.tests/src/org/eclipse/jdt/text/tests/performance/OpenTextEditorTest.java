@@ -41,8 +41,9 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	
 	public static void setUpWorkspace() throws IOException {
 		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
-		String textPrefix= workspacePath + OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX;
+		String src= workspacePath + OpenEditorTestSetup.PROJECT + ORIG_FILE;
+		String destPrefix= workspacePath + OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX;
 		for (int i= 0; i < N_OF_COPIES; i++)
-			FileTool.copy(new File(ORIG_FILE), new File(textPrefix + i + FILE_SUFFIX));
+			FileTool.copy(new File(src), new File(destPrefix + i + FILE_SUFFIX));
 	}
 }
