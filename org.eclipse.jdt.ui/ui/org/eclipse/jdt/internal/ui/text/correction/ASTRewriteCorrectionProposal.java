@@ -41,14 +41,14 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
 	 */
-	protected void addEdits(IDocument document) throws CoreException {
-		super.addEdits(document);
+	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
+		super.addEdits(document, editRoot);
 		ASTRewrite rewrite= getRewrite();
 		if (rewrite != null) {
 			try {
 				Map options= getCompilationUnit().getJavaProject().getOptions(true);
 				TextEdit edit= rewrite.rewriteAST(document, options);
-				getRootTextEdit().addChild(edit);
+				editRoot.addChild(edit);
 			} catch (RewriteException e) {
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 			}

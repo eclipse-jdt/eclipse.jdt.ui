@@ -106,7 +106,7 @@ public class JavadocTagsSubProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG);
 		
 		return new CUCorrectionProposal(label, cu, 1, image) {
-			protected void addEdits(IDocument document) throws CoreException {
+			protected void addEdits(IDocument document, TextEdit rootEdit) throws CoreException {
 				try {
 					String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
 					int tabWidth= CodeFormatterUtil.getTabWidth();
@@ -115,7 +115,6 @@ public class JavadocTagsSubProcessor {
 					String lineContent= document.get(region.getOffset(), region.getLength());
 					String indentString= Strings.getIndentString(lineContent, tabWidth);
 					String str= Strings.changeIndent(comment, 0, tabWidth, indentString, lineDelimiter);
-					TextEdit rootEdit= getRootTextEdit();
 					InsertEdit edit= new InsertEdit(insertPosition, str);
 					rootEdit.addChild(edit); //$NON-NLS-1$
 					if (comment.charAt(comment.length() - 1) != '\n') {

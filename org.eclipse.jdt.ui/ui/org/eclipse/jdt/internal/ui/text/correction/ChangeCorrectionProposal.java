@@ -89,16 +89,11 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	public String getAdditionalProposalInfo() {
 		StringBuffer buf= new StringBuffer();
 		buf.append("<p>"); //$NON-NLS-1$
-		try {
-			Change change= getChange();
-			if (change != null) {
-				buf.append(change.getName());
-			} else {
-				return null;
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-			buf.append(getDisplayString());
+		Change change= getChange();
+		if (change != null) {
+			buf.append(change.getName());
+		} else {
+			return null;
 		}
 		buf.append("</p>"); //$NON-NLS-1$
 		return buf.toString();
@@ -145,23 +140,15 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 * Gets the change element.
 	 * @return Returns a Change
 	 */
-	public Change getChange() throws CoreException {
+	public final Change getChange() {
 		return fChange;
 	}
 	
 	/**
-	 * Sets the change element.
-	 * @param change the change
-	 */
-	protected void setChange(Change change) {
-		fChange= change;
-	}	
-
-	/**
 	 * Sets the display name.
 	 * @param name The name to set
 	 */
-	public void setDisplayName(String name) {
+	public final void setDisplayName(String name) {
 		fName= name;
 	}
 
@@ -169,7 +156,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 * Gets the relevance.
 	 * @return Returns an int
 	 */
-	public int getRelevance() {
+	public final int getRelevance() {
 		return fRelevance;
 	}
 
@@ -177,7 +164,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 * Sets the relevance.
 	 * @param relevance The relevance to set
 	 */
-	public void setRelevance(int relevance) {
+	public final void setRelevance(int relevance) {
 		fRelevance= relevance;
 	}
 

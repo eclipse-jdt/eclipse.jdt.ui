@@ -104,9 +104,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -126,7 +126,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 		assertEqualString(preview2, expected);
 	}
-	
+
 	public void testMissingParam2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -149,9 +149,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -193,9 +193,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -239,9 +239,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -283,9 +283,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -325,9 +325,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -368,9 +368,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -432,9 +432,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");

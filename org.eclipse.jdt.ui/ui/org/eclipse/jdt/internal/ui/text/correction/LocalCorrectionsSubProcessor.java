@@ -403,7 +403,7 @@ public class LocalCorrectionsSubProcessor {
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addnon-nls.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			CUCorrectionProposal nlsProposal= new CUCorrectionProposal(label, cu, 6, image);
-			nlsProposal.getRootTextEdit().addChild(edit);
+			nlsProposal.getCompilationUnitChange().getEdit().addChild(edit);
 			proposals.add(nlsProposal);
 		}
 	}

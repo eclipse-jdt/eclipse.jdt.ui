@@ -49,7 +49,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	private final ITypeBinding fTypeBinding;
 		
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
-		super(null, cu, null, relevance, null);
+		super("", cu, null, relevance, null); //$NON-NLS-1$
 	
 		fVariableKind= variableKind;
 		fNodeToAssign= node;
@@ -64,7 +64,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	}
 	
 	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, ITypeBinding typeBinding, int relevance) {
-		super(null, cu, null, relevance, null);
+		super("", cu, null, relevance, null); //$NON-NLS-1$
 	
 		fVariableKind= FIELD;
 		fNodeToAssign= parameter;

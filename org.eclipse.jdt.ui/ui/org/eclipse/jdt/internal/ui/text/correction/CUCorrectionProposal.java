@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -54,61 +55,66 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
-	private TextEdit fRootEdit;
 	private ImportRewrite fImportRewrite;
+	private boolean fIsInitialized;
 		
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) {
-		super(name, null, relevance, image);
-		fRootEdit= new MultiTextEdit();
+		super(name, createCompilationUnitChange(name, cu), relevance, image);
 		fCompilationUnit= cu;
 		fImportRewrite= null;
+		fIsInitialized= false;
 	}
 	
 	public CUCorrectionProposal(String name, CompilationUnitChange change, int relevance, Image image) {
 		super(name, change, relevance, image);
 		fCompilationUnit= change.getCompilationUnit();
-	}	
-		
-	private CompilationUnitChange createCompilationUnitChange(String name) throws CoreException {
-		CompilationUnitChange change= new CompilationUnitChange(name, getCompilationUnit());
-		change.setEdit(getRootTextEdit());
+		fIsInitialized= false;
+	}
+	
+	private static Change createCompilationUnitChange(String name, ICompilationUnit cu) {
+		CompilationUnitChange change= new CompilationUnitChange(name, cu);
+		change.setEdit(new MultiTextEdit());
 		change.setSaveMode(TextFileChange.LEAVE_DIRTY);
-		setChange(change);
-		
-		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-		IPath path= getCompilationUnit().getPath();
-		manager.connect(path, null);
-		try {
-			IDocument document= manager.getTextFileBuffer(path).getDocument();
-			addEdits(document);
-			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
-				getRootTextEdit().addChild(fImportRewrite.createEdit(document));
-			}
-		} finally {
-			manager.disconnect(path, null);
-		}
 		return change;
+	}
+		
+	protected void initializeCompilationUnitChange() throws CoreException {
+		if (fIsInitialized) {
+			return;
+		}
+		fIsInitialized= true;
+		
+		TextEdit rootEdit= getCompilationUnitChange().getEdit();
+		if (rootEdit != null) {
+			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+			IPath path= getCompilationUnit().getPath();
+			manager.connect(path, null);
+			try {
+	
+				IDocument document= manager.getTextFileBuffer(path).getDocument();
+				addEdits(document, rootEdit);
+				if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
+					rootEdit.addChild(fImportRewrite.createEdit(document));
+				}
+			} finally {
+				manager.disconnect(path, null);
+			}
+		}
 	}
 	
 	/**
 	 * Called when the <code>CompilationUnitChange</code> is created. Subclasses can override to
-	 * add text edits to the change.
+	 * add text edits to root edit of the change.
 	 * @param document Content of the underlying compilation unit. To be accessed read only.
+	 * @param editRoot The root edit to add all edits to
 	 * @throws CoreException
 	 */
-	protected void addEdits(IDocument document) throws CoreException {
+	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
+		if (false) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, "Implementors can throw an exception", null)); //$NON-NLS-1$
+		}
 	}
 
-	/*
-	 * @see ChangeCorrectionProposal#getChange()
-	 */
-	public Change getChange() throws CoreException {
-		Change change= super.getChange();
-		if (change == null) {
-			return createCompilationUnitChange(getDisplayString());
-		}
-		return change;
-	}
 	
 	// import management
 	
@@ -130,6 +136,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		StringBuffer buf= new StringBuffer();
 		
 		try {
+			initializeCompilationUnitChange();
 			CompilationUnitChange change= getCompilationUnitChange();
 
 			IDocument previewContent= change.getPreviewDocument();
@@ -203,6 +210,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
+	 */
+	protected void performChange(IDocument document, IEditorPart activeEditor) throws CoreException {
+		initializeCompilationUnitChange();
+		super.performChange(document, activeEditor);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
 	 */
 	public void apply(IDocument document) {
@@ -245,15 +260,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * Gets the compilationUnitChange.
 	 * @return Returns a CompilationUnitChange
 	 */
-	public CompilationUnitChange getCompilationUnitChange() throws CoreException {
+	public CompilationUnitChange getCompilationUnitChange() {
 		return (CompilationUnitChange) getChange();
-	}
-
-	/**
-	 * @return Returns the root text edit
-	 */
-	public TextEdit getRootTextEdit() {
-		return fRootEdit;
 	}
 	
 	/**
@@ -263,16 +271,26 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
-
+	
+	/**
+	 * @return Returns the preview of the changed compilation unit
+	 */
+	public String getPreviewContent() throws CoreException {
+		initializeCompilationUnitChange();
+		CompilationUnitChange change= getCompilationUnitChange();
+		return change.getPreviewContent();
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
 		try {
-			CompilationUnitChange change= getCompilationUnitChange();
-			return change.getPreviewContent();
+			return getPreviewContent();
 		} catch (CoreException e) {
 		}
 		return super.toString();
 	}
+
+
 }

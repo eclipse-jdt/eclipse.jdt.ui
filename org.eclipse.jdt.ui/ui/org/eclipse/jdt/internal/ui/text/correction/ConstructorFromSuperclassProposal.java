@@ -44,7 +44,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 	private IMethodBinding fSuperConstructor;
 
 	public ConstructorFromSuperclassProposal(ICompilationUnit cu, TypeDeclaration typeNode, IMethodBinding superConstructor, int relevance) {
-		super(null, cu, null, relevance, null);
+		super("", cu, null, relevance, null); //$NON-NLS-1$
 		fTypeNode= typeNode;
 		fSuperConstructor= superConstructor;
 	}

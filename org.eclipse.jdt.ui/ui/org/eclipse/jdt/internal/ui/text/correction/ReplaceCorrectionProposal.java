@@ -38,11 +38,11 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
 	 */
-	protected void addEdits(IDocument doc) throws CoreException {
-		super.addEdits(doc);
+	protected void addEdits(IDocument doc, TextEdit rootEdit) throws CoreException {
+		super.addEdits(doc, rootEdit);
 
 		TextEdit edit= new ReplaceEdit(fOffset, fLength, fReplacementString);
-		getRootTextEdit().addChild(edit);
+		rootEdit.addChild(edit);
 	}
 	
 }

@@ -46,10 +46,8 @@ public class RenameNodeCompletionProposal extends CUCorrectionProposal {
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
 	 */
-	protected void addEdits(IDocument doc) throws CoreException {
-		super.addEdits(doc);
-		
-		TextEdit root= getRootTextEdit();
+	protected void addEdits(IDocument doc, TextEdit root) throws CoreException {
+		super.addEdits(doc, root);
 		
 		// build a full AST
 		CompilationUnit unit= JavaPlugin.getDefault().getASTProvider().getAST(getCompilationUnit(), true, null);

@@ -109,7 +109,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				assertTrue("duplicated entries", addReturnType);
 				addReturnType= false;		
 		
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 		
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
@@ -126,7 +126,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				doRename= false;
 				
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("import java.util.Vector;\n");				
@@ -138,10 +138,9 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				assertEqualString(preview, buf.toString());
 			}
 		}
-				
-				
 	}
-	
+
+
 	public void testVoidTypeReturnDeclMissing() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -167,7 +166,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				assertTrue("duplicated entries", addReturnType);
 				addReturnType= false;		
 		
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 		
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
@@ -182,7 +181,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				doRename= false;
 				
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
@@ -224,7 +223,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				assertTrue("duplicated entries", addReturnType);
 				addReturnType= false;		
 		
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 		
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
@@ -242,7 +241,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				doRename= false;
 				
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
@@ -281,7 +280,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -324,7 +323,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				assertTrue("duplicated entries", addReturnType);
 				addReturnType= false;		
 		
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 		
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
@@ -339,7 +338,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				doRename= false;
 				
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
@@ -377,7 +376,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				assertTrue("duplicated entries", addReturnType);
 				addReturnType= false;
 
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 		
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
@@ -392,7 +391,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 				doRename= false;
 				
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+				String preview= getPreviewContent(proposal);
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
@@ -425,7 +424,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 			
 		{	
 			ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-			String preview= proposal.getCompilationUnitChange().getPreviewContent();
+			String preview= getPreviewContent(proposal);
 		
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
@@ -440,7 +439,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		}
 		{	
 			ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
-			String preview= proposal.getCompilationUnitChange().getPreviewContent();
+			String preview= getPreviewContent(proposal);
 		
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
@@ -473,7 +472,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 			
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -487,7 +486,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 			
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -519,7 +518,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		
 		{
 			ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-			String preview= proposal.getCompilationUnitChange().getPreviewContent();
+			String preview= getPreviewContent(proposal);
 	
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
@@ -534,7 +533,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		}
 		{
 			ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
-			String preview= proposal.getCompilationUnitChange().getPreviewContent();
+			String preview= getPreviewContent(proposal);
 	
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
@@ -565,7 +564,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -577,7 +576,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -608,7 +607,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -620,7 +619,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -651,7 +650,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -679,7 +678,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -691,7 +690,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -723,7 +722,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -738,7 +737,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -774,7 +773,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -790,7 +789,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 		
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
-		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -824,7 +823,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -856,7 +855,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
-		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");

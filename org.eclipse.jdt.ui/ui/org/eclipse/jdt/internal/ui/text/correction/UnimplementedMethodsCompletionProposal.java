@@ -44,7 +44,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 	private IMethodBinding[] fMethodsToOverride;
 
 	public UnimplementedMethodsCompletionProposal(ICompilationUnit cu, ASTNode typeNode, int relevance) {
-		super(null, cu, null, relevance, null);
+		super("", cu, null, relevance, null); //$NON-NLS-1$
 		setDisplayName(CorrectionMessages.getString("UnimplementedMethodsCompletionProposal.description"));//$NON-NLS-1$
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		
@@ -250,7 +250,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 	 */
 	public String getAdditionalProposalInfo() {
 		try {
-			getCompilationUnitChange(); // force the creation of the rewrite
+			initializeCompilationUnitChange(); // force the creation of the rewrite
 			StringBuffer buf= new StringBuffer();
 			buf.append("<b>"); //$NON-NLS-1$
 			buf.append(CorrectionMessages.getFormattedString("UnimplementedMethodsCompletionProposal.info", String.valueOf(fMethodsToOverride.length))); //$NON-NLS-1$

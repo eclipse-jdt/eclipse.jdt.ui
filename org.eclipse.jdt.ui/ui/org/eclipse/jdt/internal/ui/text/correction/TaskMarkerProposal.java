@@ -51,10 +51,8 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
-	protected void addEdits(IDocument document) throws CoreException {
-		super.addEdits(document);
-		
-		TextEdit rootEdit= getRootTextEdit();
+	protected void addEdits(IDocument document, TextEdit rootEdit) throws CoreException {
+		super.addEdits(document, rootEdit);
 		
 		try {
 			Position pos= getUpdatedPosition(document);

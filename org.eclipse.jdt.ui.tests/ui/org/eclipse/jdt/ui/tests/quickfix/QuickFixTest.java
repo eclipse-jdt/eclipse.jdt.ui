@@ -21,6 +21,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.StringAsserts;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -255,6 +257,10 @@ public class QuickFixTest extends TestCase {
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);
+	}
+	
+	protected String getPreviewContent(CUCorrectionProposal proposal) throws CoreException {
+		return proposal.getPreviewContent();
 	}
 	
 	protected void assertNumberOfProposals(List proposals, int expectedProposals) {
