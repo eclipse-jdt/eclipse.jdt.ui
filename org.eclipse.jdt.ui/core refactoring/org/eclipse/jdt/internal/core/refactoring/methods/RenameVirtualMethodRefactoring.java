@@ -127,8 +127,6 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	
 	private boolean overridesAnotherMethod(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		if (Flags.isPrivate(getMethod().getFlags()))
-			return false;
 		//XXX: use the commented code once this is fixed: 1GCZZS1: ITPJCORE:WINNT - inconsistent search for method declarations
 		//XXX: and delete findMethod
 		
@@ -148,14 +146,11 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 //		}
 //		return false;
 		IMethod found= findInHierarchy(getMethod().getDeclaringType().newSupertypeHierarchy(pm), getMethod());
-		return (found != null
-				&& (Flags.isNative(found.getFlags()) == Flags.isNative(getMethod().getFlags()))
-				&& (Flags.isStatic(found.getFlags()) == Flags.isStatic(getMethod().getFlags()))
-				&& (Flags.isPrivate(found.getFlags()) == Flags.isPrivate(getMethod().getFlags())));	
+		return (found != null && (! Flags.isStatic(found.getFlags())) && (! Flags.isPrivate(found.getFlags())));	
 	}
 	
 	private boolean hierarchyDeclaresSimilarNativeMethod(IProgressMonitor pm) throws JavaModelException{
-		IType[] classes= getMethod().getDeclaringType().newTypeHierarchy(pm).getAllClasses();
+		IType[] classes= getMethod().getDeclaringType().newTypeHierarchy(pm).getAllSubtypes(getMethod().getDeclaringType());
 		return classesDeclareOverridingNativeMethod(classes);
 	}
 
@@ -180,7 +175,6 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	}
 		
 	private boolean classesDeclareOverridingNativeMethod(IType[] classes) throws JavaModelException{
-		boolean isPrivate= Flags.isPrivate(getMethod().getFlags());
 		for (int i= 0; i < classes.length; i++){
 			IMethod[] methods= classes[i].getMethods();
 			for (int j= 0; j < methods.length; j++){
