@@ -124,13 +124,6 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		fFilteredList.setElements(elements);
 	}
 
-/*	
-	protected void setSelectionListElements(List elements) {
-		Assert.isNotNull(fFilteredList);
-		fFilteredList.setElements(elements);
-	}
-*/	
-
 	/**
 	 * Sets the filter text to the given value.
 	 */

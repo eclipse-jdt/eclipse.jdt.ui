@@ -4,19 +4,34 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.text.MessageFormat;//import java.util.ArrayList;//import java.util.Arrays;//import java.util.List;import java.util.ArrayList;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ILabelProvider;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ILabelProvider;
+
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class MultiElementListSelectionDialog extends AbstractElementListSelectionDialog {
 		
 	private Object[][] fElements;
-	
-	private boolean[] fPagesOKStates;
-	
 	private int[][] fSelectedIndices;
 	
+	private boolean[] fPagesOKStates;
+		
 	private int fCurrentPage;
 	private int fNumberOfPages;
 	
@@ -25,7 +40,6 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	private Button fNextButton;
 	
 	private Label fPageInfoLabel;
-	
 	private String fPageInfoMessage= JavaUIMessages.getString("MultiElementListSelectionDialog.pageInfoMessage"); //$NON-NLS-1$;
 	
 	/**
@@ -46,18 +60,6 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		fPageInfoMessage= message;
 	}
 	
-	public int open() {
-		List selection= getInitialSelections();
-		if (selection == null) {
-			setInitialSelections(new Object[fNumberOfPages]);
-			selection= getInitialSelections();
-		}
-			
-		Assert.isTrue(selection.size() == fNumberOfPages);
-		
-		return super.open();
-	}
-	
 	/**
 	 * Sets the elements to be shown in the dialog.
 	 */
@@ -67,69 +69,20 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		fPagesOKStates= new boolean[fNumberOfPages]; // all initialized with false
 		fSelectedIndices= new int[fNumberOfPages][]; // all initialized with null
 		initializeResult(fNumberOfPages);
-		
-		
 	}
-	 
-	/**
-	 * Returns the arrays of selected elements after the dialog was shown
-	 * If cancel was pressed, returns <code>null</code>
-	 * @deprecated Use getResult instead.
-	 */
-	public Object[][] getAllSelectedElements() {
-		Object[] result= getResult();
-		if (result == null || result.length == 0)
-			return null;
-			
-		Object[][] r= new Object[result.length][];
-		for (int i= 0; i < r.length; i++) {
-			List l= (List)result[i];
-			if (l != null)
-				r[i]= l.toArray();
+
+	public int open() {
+		List selection= getInitialSelections();
+		if (selection == null) {
+			setInitialSelections(new String[fNumberOfPages]);
+			selection= getInitialSelections();
 		}
-		return r;
-	}
-
-	/**
-	 * Returns the (single) selected elements after the dialog was shown
-	 * If cancel was pressed, returns null
-	 * @deprecated Use getResult instead.
-	 */	
-	public Object[] getSelectedElements() {
-		Object[] result= getResult();
-		
-		if (result == null || result.length == 0)
-			return null;	 		
-		Object[] res= new Object[result.length];
-		for (int i= 0; i < res.length; i++) {
-			List l= (List)result[i];
-			if (l != null && l.size() > 0) {
-				res[i]= l.get(0);
-			} else {
-				res[i]= null;
-			}
-		}
-		return res;
-	}
-	
-	/**
-	 * Returns a selected element after the dialog was shown
-	 * If cancel was pressed, returns null
-	 * @deprecated Use getResult instead.
-	 */	
-	public Object getSelectedElement() {
-		Object[] result= getResult();
-		if (result == null || result.length == 0)
-			return null;
 			
-		List l= (List)result[0];
-		if (l == null || l.size() == 0)
-			return null;
-		return l.get(0);		
-	}		
-
-	//---- Widget creation -----------------------------------------------------------------
-
+		Assert.isTrue(selection.size() == fNumberOfPages);
+		
+		return super.open();
+	}
+		 
 	/**
 	 * @private
 	 */	
@@ -186,8 +139,6 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		
 		return messageLabel;
 	}
-	
-	//---- User input handling -------------------------------------------------------------
 	
 	/**
 	 * @private
@@ -274,23 +225,12 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		verifyCurrentSelection();
 	}
 	
-	//---- Private Helpers ------------------------------------------------------------
-	
 	private void setPageData() {
-//		setSelectionListElements(Arrays.asList(fElements[fCurrentPage]));
 		setSelectionListElements(fElements[fCurrentPage]);
 
-		String filter;
-		List initialSelections= getInitialSelections();		
-		if (initialSelections == null) {
-			filter = ""; //$NON-NLS-1$
-
-		} else {		
-			filter= (String) initialSelections.get(fCurrentPage);
-
-			if (filter == null)
-				filter= ""; //$NON-NLS-1$
-		}
+		String filter= (String) getInitialSelections().get(fCurrentPage);
+		if (filter == null)
+			filter= ""; //$NON-NLS-1$
 		setFilter(filter);
 			
 		int[] selectedIndex= fSelectedIndices[fCurrentPage];
