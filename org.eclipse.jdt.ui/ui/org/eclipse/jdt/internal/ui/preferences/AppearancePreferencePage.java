@@ -20,8 +20,10 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -110,7 +112,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 		fShowMembersInPackageView= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMembersInPackageView.setDialogFieldListener(listener);
-		fShowMembersInPackageView.setLabelText("S&how members in Packages view"); 
+		fShowMembersInPackageView.setLabelText("S&how members in Packages view");
 
 		fStackBrowsingViewsVertically= new SelectionButtonDialogField(SWT.CHECK);
 		fStackBrowsingViewsVertically.setDialogFieldListener(listener);
@@ -118,7 +120,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 		fCompressPackageNames= new SelectionButtonDialogField(SWT.CHECK);
 		fCompressPackageNames.setDialogFieldListener(listener);
-		fCompressPackageNames.setLabelText("Co&mpress package name segments (except for the last one)"); 
+		fCompressPackageNames.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.pkgNamePatternEnable.label"));
 
 		fPackageNamePattern= new StringDialogField();
 		fPackageNamePattern.setDialogFieldListener(listener);
