@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
- * Action group that adds refactor actions (e.g. Rename..., Move..., etc.)
+ * Action group that adds refactor actions (for example Rename..., Move..., etc)
  * to a context menu and the global menu bar.
  * 
  * <p>
@@ -42,8 +42,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 public class RefactorActionGroup extends ActionGroup {
 	
 	/**
-	 * Pop-up menu: id of the refactor sub menu (value <code>org.eclipse.jdt.ui.
-	 * refactoring.menu</code>).
+	 * Pop-up menu: id of the refactor sub menu (value <code>org.eclipse.jdt.ui.refactoring.menu</code>).
 	 * 
 	 * @since 2.1
 	 */
