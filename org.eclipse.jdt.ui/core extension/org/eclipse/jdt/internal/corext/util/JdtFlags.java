@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -120,6 +121,12 @@ public class JdtFlags {
 		return Modifier.isStatic(methodBinding.getModifiers());
 	}
 
+	public static boolean isStatic(IVariableBinding variableBinding){
+		if (isInterfaceMember(variableBinding))
+			return true;
+		return Modifier.isStatic(variableBinding.getModifiers());
+	}
+
 	public static boolean isStrictfp(IMember member) throws JavaModelException{
 		return Flags.isStrictfp(member.getFlags());
 	}
@@ -152,6 +159,10 @@ public class JdtFlags {
 		return member.getDeclaringType() != null && member.getDeclaringType().isInterface();
 	}
 	
+	private static boolean isInterfaceMember(IVariableBinding variableBinding) {
+		return variableBinding.isField() && variableBinding.getDeclaringClass() != null && variableBinding.getDeclaringClass().isInterface();
+	}
+
 	private static boolean isInterfaceMember(BodyDeclaration bodyDeclaration) {
 		return 	(bodyDeclaration.getParent() instanceof TypeDeclaration) &&
 				((TypeDeclaration)bodyDeclaration.getParent()).isInterface();
