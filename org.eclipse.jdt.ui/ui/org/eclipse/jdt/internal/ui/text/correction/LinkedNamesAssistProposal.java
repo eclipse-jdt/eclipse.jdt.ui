@@ -141,6 +141,9 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
+		if (fSelectedRegion == null) {
+			return null;
+		}
 		return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
 	}
 
