@@ -25,6 +25,35 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 class JavaCompareUtilities {
 	
+	static String getString(ResourceBundle bundle, String key, String dfltValue) {
+		
+		if (bundle != null) {
+			try {
+				return bundle.getString(key);
+			} catch (MissingResourceException x) {
+			}
+		}
+		return dfltValue;
+	}
+	
+	static String getString(ResourceBundle bundle, String key) {
+		return getString(bundle, key, key);
+	}
+	
+	static int getInteger(ResourceBundle bundle, String key, int dfltValue) {
+		
+		if (bundle != null) {
+			try {
+				String s= bundle.getString(key);
+				if (s != null)
+					return Integer.parseInt(s);
+			} catch (NumberFormatException x) {
+			} catch (MissingResourceException x) {
+			}
+		}
+		return dfltValue;
+	}
+
 	static ImageDescriptor getImageDescriptor(int type) {
 		switch (type) {			
 		case IMember.INITIALIZER:

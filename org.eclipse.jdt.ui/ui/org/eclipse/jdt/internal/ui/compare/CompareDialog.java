@@ -21,7 +21,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.compare.*;
-import org.eclipse.compare.internal.*;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
@@ -35,13 +34,11 @@ class CompareDialog extends Dialog {
 		}
 	
 		protected Viewer getViewer(Viewer oldViewer, Object input) {
-			return CompareUIPlugin.findContentViewer(oldViewer, input, this, fCompareConfiguration);	
+			if (input instanceof ICompareInput)
+				return CompareUI.findContentViewer(oldViewer, (ICompareInput)input, this, fCompareConfiguration);
+			return null;
 		}
-		
-//		public void setText(String label) {
-//			super.setText(label);
-//		}
-		
+				
 		public void setImage(Image image) {
 			// don't show icon
 		}
@@ -85,7 +82,7 @@ class CompareDialog extends Dialog {
  	 */
 	protected synchronized Control createDialogArea(Composite parent) {
 		
-		getShell().setText(Utilities.getString(fBundle, "title")); //$NON-NLS-1$
+		getShell().setText(JavaCompareUtilities.getString(fBundle, "title")); //$NON-NLS-1$
 		
 		fContentPane= new ViewerSwitchingPane(parent, SWT.BORDER | SWT.FLAT);
 		fContentPane.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL
@@ -101,8 +98,8 @@ class CompareDialog extends Dialog {
 	 * Returns the size initialized with the constructor.
 	 */
 	protected Point getInitialSize() {
-		Point size= new Point(Utilities.getInteger(fBundle, "width", 0), //$NON-NLS-1$
-					Utilities.getInteger(fBundle, "height", 0)); //$NON-NLS-1$
+		Point size= new Point(JavaCompareUtilities.getInteger(fBundle, "width", 0), //$NON-NLS-1$
+					JavaCompareUtilities.getInteger(fBundle, "height", 0)); //$NON-NLS-1$
 		
 		Shell shell= getParentShell();
 		if (shell != null) {
@@ -123,7 +120,7 @@ class CompareDialog extends Dialog {
 	 * Method declared on Dialog.
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
-		String buttonLabel= Utilities.getString(fBundle, "buttonLabel", IDialogConstants.OK_LABEL); //$NON-NLS-1$
+		String buttonLabel= JavaCompareUtilities.getString(fBundle, "buttonLabel", IDialogConstants.OK_LABEL); //$NON-NLS-1$
 		createButton(parent, IDialogConstants.CANCEL_ID, buttonLabel, false);
 	}
 
