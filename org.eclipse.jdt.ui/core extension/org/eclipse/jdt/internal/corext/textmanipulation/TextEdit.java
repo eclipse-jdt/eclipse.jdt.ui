@@ -221,7 +221,6 @@ public abstract class TextEdit {
 		copier.addCopy(this, result);
 		result.fActiveState= fActiveState;
 		if (fChildren != null) {
-			List list= new ArrayList(fChildren.size());
 			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
 				TextEdit element= (TextEdit)iter.next();
 				result.add(element.copy(copier));

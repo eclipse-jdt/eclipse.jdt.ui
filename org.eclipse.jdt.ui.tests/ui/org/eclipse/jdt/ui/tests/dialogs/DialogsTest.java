@@ -88,7 +88,7 @@ public class DialogsTest extends TestCase {
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
 		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
 
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}
@@ -123,7 +123,7 @@ public class DialogsTest extends TestCase {
 		dialog.setElements(refs);
 		dialog.setInitialSelections(new Object[refs.length]);
 		
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);		
 	
@@ -148,7 +148,7 @@ public class DialogsTest extends TestCase {
 		dialog.setInput(jproject.getJavaModel());
 		dialog.setInitialSelection(initSelection);
 		
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);	
 		JavaProjectHelper.delete(jproject2);
@@ -167,7 +167,7 @@ public class DialogsTest extends TestCase {
 		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$		
 		dialog.setElements(elements);
 		
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);	
 	}
@@ -202,7 +202,7 @@ public class DialogsTest extends TestCase {
 		dialog.setElements(elements);
 		dialog.setInitialSelections(new Object[] {new Integer(7)});
 		
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		Object[] results= dialog.getResult();
 		assertTrue(results.length == 1);

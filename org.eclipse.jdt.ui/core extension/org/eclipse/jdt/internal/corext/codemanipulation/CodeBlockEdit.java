@@ -79,7 +79,6 @@ public final class CodeBlockEdit extends TextEdit {
 	 * @see TextEdit#doPerform
 	 */
 	public final void perform(TextBuffer buffer) throws CoreException {
-		String current= buffer.getContent(fRange.getOffset(), fRange.getLength());
 		buffer.replace(fRange, createText(buffer));
 	}	
 	

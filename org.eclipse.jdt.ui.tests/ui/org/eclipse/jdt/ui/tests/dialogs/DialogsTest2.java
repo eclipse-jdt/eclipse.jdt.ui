@@ -73,7 +73,7 @@ public class DialogsTest2 extends TestCase {
 		dialog.setInitialSelection(initSelection);
 		dialog.setExpandedElements(new Object[] { initSelection, jproject });
 		
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		System.out.println("Result:");
 		Object[] checkedElements= dialog.getResult();

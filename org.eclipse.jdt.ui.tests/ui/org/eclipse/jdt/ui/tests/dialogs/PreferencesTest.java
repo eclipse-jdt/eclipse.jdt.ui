@@ -107,9 +107,9 @@ public class PreferencesTest extends TestCase {
 	
 	public void assertDialog(Dialog dialog, Assert assertTrue) {
 		if (fIsInteractive) {
-			DialogCheck.assertDialog(dialog, this);
+			DialogCheck.assertDialog(dialog);
 		} else {
-			DialogCheck.assertDialogTexts(dialog, this);
+			DialogCheck.assertDialogTexts(dialog);
 		}
 	}
 	

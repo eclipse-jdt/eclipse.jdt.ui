@@ -74,7 +74,7 @@ public class WizardsTest extends TestCase {
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		dialog.create();
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 	}
 	
 	public void testSourceFolderWizard() throws Exception {
@@ -87,7 +87,7 @@ public class WizardsTest extends TestCase {
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		dialog.create();
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}
@@ -102,7 +102,7 @@ public class WizardsTest extends TestCase {
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		dialog.create();
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}
@@ -118,7 +118,7 @@ public class WizardsTest extends TestCase {
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		dialog.create();
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}
@@ -134,7 +134,7 @@ public class WizardsTest extends TestCase {
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		dialog.create();
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}
@@ -149,7 +149,7 @@ public class WizardsTest extends TestCase {
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		dialog.create();
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}
@@ -167,7 +167,7 @@ public class WizardsTest extends TestCase {
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		dialog.create();
-		DialogCheck.assertDialog(dialog, this);
+		DialogCheck.assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}				

@@ -14,15 +14,16 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.tests.refactoring.ExtractMethodTests;
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;public class StructureSelectionActionTests extends RefactoringTest{
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
+
+import org.eclipse.jdt.ui.tests.refactoring.AbstractSelectionTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+public class StructureSelectionActionTests extends RefactoringTest{
 	
 	private static final Class clazz= StructureSelectionActionTests.class;
 	private static final String REFACTORING_PATH= "StructureSelectionAction/";
@@ -61,8 +62,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 	
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception{
 		String source= cu.getSource();
-		int offset= source.indexOf(ExtractMethodTests.SQUARE_BRACKET_OPEN);
-		int end= source.indexOf(ExtractMethodTests.SQUARE_BRACKET_CLOSE);
+		int offset= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_OPEN);
+		int end= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_CLOSE);
 		return new SourceRange(offset, end - offset);
 	}
 
