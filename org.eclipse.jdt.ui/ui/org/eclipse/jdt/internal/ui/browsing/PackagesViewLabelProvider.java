@@ -84,7 +84,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 				return decorateCompoundElement(JavaPluginImages.DESC_OBJS_LOGICAL_PACKAGE, cp);
 			}
 		}
-		return decorateCompoundElement(JavaPluginImages.DESC_OBJS_LOGICAL_PACKAGE, cp); 
+		return decorateCompoundElement(JavaPluginImages.DESC_OBJS_EMPTY_LOGICAL_PACKAGE, cp); 
 	}
 	
 	
