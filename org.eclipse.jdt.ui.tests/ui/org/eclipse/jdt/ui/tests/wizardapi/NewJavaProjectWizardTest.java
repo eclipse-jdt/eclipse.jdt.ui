@@ -22,8 +22,13 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
+
+import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 
 public class NewJavaProjectWizardTest extends TestCase {
 	
@@ -107,6 +112,10 @@ public class NewJavaProjectWizardTest extends TestCase {
 		super.tearDown();
 	}
 	
+	private IPath getJREEntryPath() {
+		return JavaRuntime.getDefaultJREContainerEntry().getPath();
+	}
+	
 	
 	private void assertBasicBuildPath(IProject project, IPath outputLocation, IClasspathEntry[] classpath) {
 		assertNotNull("a", outputLocation);
@@ -120,7 +129,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 			assertEquals("f", outputLocation, project.getFullPath());
 			assertEquals("g", classpath[0].getPath(), project.getFullPath());
 		}
-		assertEquals("h", classpath[1].getPath(), new Path("JRE_LIB"));		
+		assertEquals("h", classpath[1].getPath(), getJREEntryPath());		
 	}
 	
 	public void testBasicSet() throws Exception {
@@ -182,7 +191,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertEquals("d", outputLocation, project.getFolder("dbin").getFullPath());
 		assertEquals("e", classpath[0].getPath(), project.getFolder("dsrc1").getFullPath());
 		assertEquals("f", classpath[1].getPath(), project.getFolder("dsrc2").getFullPath());
-		assertEquals("g", classpath[2].getPath(), new Path("JRE_LIB"));	
+		assertEquals("g", classpath[2].getPath(), getJREEntryPath());	
 	}
 	
 	public void testUserSet() throws Exception {	
