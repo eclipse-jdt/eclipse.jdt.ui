@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -712,7 +713,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 		} else if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			if (grandParent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT){
 				VariableDeclarationStatement vds= (VariableDeclarationStatement)grandParent;
-				if (vds.fragments().size() > 1){
+				if (vds.fragments().size() > 1) {
+					return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
+				}	
+				setSelectionRanges(simpleName);
+			} else if (grandParent.getNodeType() == ASTNode.VARIABLE_DECLARATION_EXPRESSION) {
+				VariableDeclarationExpression vde= (VariableDeclarationExpression)grandParent;
+				if (vde.fragments().size() > 1) {
 					return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
 				}	
 				setSelectionRanges(simpleName);
