@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -183,6 +184,8 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			}
 			// If we don't have a context then we assume that we have a precise iteration.
 			IFile[] files= getPackageContent();
+			if (monitor == null)
+				monitor= new NullProgressMonitor();
 			monitor.beginTask("", files.length + 1); //$NON-NLS-1$
 			visitor.visit(fPack.getCorrespondingResource());
 			monitor.worked(1);
