@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.text.MessageFormat;
@@ -15,12 +25,10 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.jdt.core.IType;
@@ -28,11 +36,12 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class UseSupertypeInputPage extends UserInputWizardPage{
 
@@ -79,7 +88,7 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 		fTableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		fTableLabelProvider= new UseSupertypeLabelProvider(fFileCount);
 		fTableViewer.setLabelProvider(fTableLabelProvider);
-		fTableViewer.setContentProvider(createContentProvider());
+		fTableViewer.setContentProvider(new StaticObjectArrayContentProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection ss= (IStructuredSelection)event.getSelection();
@@ -100,16 +109,6 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 			fTableViewer.setInput(new IType[0]);
 		}
 		fTableViewer.getTable().setSelection(0);
-	}
-	
-	private static IStructuredContentProvider createContentProvider() {
-		return new IStructuredContentProvider(){
-			public void dispose() {}
-			public Object[] getElements(Object inputElement) {
-				return (IType[])inputElement;
-			}
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
-		};
 	}
 	
 	private UseSupertypeWherePossibleRefactoring getUseSupertypeRefactoring(){

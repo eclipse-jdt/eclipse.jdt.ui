@@ -16,21 +16,20 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 
 class ExtractInterfaceInputPage extends TextInputWizardPage {
 
@@ -88,7 +87,7 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 		fTableViewer= CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		fTableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		fTableViewer.setLabelProvider(createLabelProvider());
-		fTableViewer.setContentProvider(createContentProvider());
+		fTableViewer.setContentProvider(new StaticObjectArrayContentProvider());
 		try {
 			fTableViewer.setInput(getExtractInterfaceRefactoring().getExtractableMembers());
 		} catch (JavaModelException e) {
@@ -148,18 +147,6 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 		} catch (JavaModelException e) {
 			return false;
 		}
-	}
-
-	private static IStructuredContentProvider createContentProvider() {
-		return new IStructuredContentProvider(){
-			public void dispose() {
-			}
-			public Object[] getElements(Object inputElement) {
-				return (IMember[])inputElement;
-			}
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-		};
 	}
 
 	private void addReplaceAllCheckbox(Composite result) {

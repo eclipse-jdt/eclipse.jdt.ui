@@ -14,15 +14,12 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -116,7 +113,7 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 		column2.setResizable(true);
 
 		TableViewer viewer= new TableViewer(table);
-		viewer.setContentProvider(createReceiverArrayContentProvider());
+		viewer.setContentProvider(new StaticObjectArrayContentProvider());
 		viewer.setLabelProvider(createReceiverArrayLabelProvider());
 		viewer.setInput(getMoveRefactoring().getPossibleNewReceivers());
 		
@@ -171,18 +168,6 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 						Assert.isTrue(false);
 						return null;
 				}
-			}
-		};
-	}
-	
-	private IContentProvider createReceiverArrayContentProvider() {
-		return new IStructuredContentProvider(){
-			public void dispose() {
-			}
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-			public Object[] getElements(Object inputElement) {
-				return (Object[])inputElement;
 			}
 		};
 	}
