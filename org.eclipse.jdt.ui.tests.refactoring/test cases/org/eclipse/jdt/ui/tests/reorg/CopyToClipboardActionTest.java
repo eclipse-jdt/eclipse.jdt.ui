@@ -183,7 +183,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		IResource[] clipboardResources= getClipboardResources();
 		String clipboardText= getClipboardText();
 		IJavaElement[] clipboardJavaElements= getClipboardJavaElements();
-		TypedSource[] clipboardTypedSources= getClipboardTypedSource();
+		TypedSource[] clipboardTypedSources= getClipboardTypedSources();
 
 		checkNames(resourcesCopied, javaElementsCopied, clipboardText);
 		checkFiles(resourcesCopied, javaElementsCopied, mainTypesCopied, clipboardFiles);
@@ -324,7 +324,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		return resources == null ? new IResource[0]: resources; 
 	}
 
-	private TypedSource[] getClipboardTypedSource() {
+	private TypedSource[] getClipboardTypedSources() {
 		TypedSource[] typedSources= (TypedSource[])fClipboard.getContents(TypedSourceTransfer.getInstance());
 		return typedSources == null ? new TypedSource[0]: typedSources; 
 	}
