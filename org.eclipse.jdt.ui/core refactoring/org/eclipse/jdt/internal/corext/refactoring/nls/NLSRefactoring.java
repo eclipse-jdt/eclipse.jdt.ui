@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -210,11 +211,18 @@ public class NLSRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask(NLSMessages.getString("NLSrefactoring.checking"), 5); //$NON-NLS-1$
+			pm.beginTask(NLSMessages.getString("NLSrefactoring.checking"), 7); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkIfAnythingToDo());
 			if (result.hasFatalError())	
 				return result;
+			pm.worked(1);
+			
+			result.merge(validateModifiesFiles());
+			if (result.hasFatalError())	
+				return result;
+			pm.worked(1);
+			
 			result.merge(checkCodePattern());
 			pm.worked(1);
 			result.merge(checkForDuplicateKeys());
@@ -227,9 +235,26 @@ public class NLSRefactoring extends Refactoring {
 				result.addInfo(NLSMessages.getString("NLSrefactoring.Propfile") + getPropertyFilePath() + NLSMessages.getString("NLSrefactoring.will_be_created")); //$NON-NLS-2$ //$NON-NLS-1$
 			pm.worked(1);	
 			return result;
+		} catch (CoreException e){
+			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
+	}
+
+	private IFile[] getAllFilesToModify() throws CoreException{
+		List files= new ArrayList(2);
+		if (willModifySource())
+			files.add(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
+		
+		if (willModifyPropertyFile() && propertyFileExists())
+			files.add(getPropertyFile());
+			
+		return (IFile[]) files.toArray(new IFile[files.size()]);
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
 	//should stop checking if fatal error
@@ -573,10 +598,8 @@ public class NLSRefactoring extends Refactoring {
 		if (! propertyFileExists())
 			return new CreateTextFileChange(getPropertyFilePath(), createPropertyFileSource());
 			
-		IPath path= getPropertyFilePath();
-		IFile file= (IFile)ResourcesPlugin.getWorkspace().getRoot().findMember(path);
 		String name= NLSMessages.getString("NLSrefactoring.Append_to_property_file") + getPropertyFilePath();
-		TextChange tfc= new TextFileChange(name, file);
+		TextChange tfc= new TextFileChange(name, getPropertyFile());
 		
 		StringBuffer old= new StringBuffer(getOldPropertyFileSource());
 
@@ -592,6 +615,10 @@ public class NLSRefactoring extends Refactoring {
 			}	
 		}	
 		return tfc;
+	}
+
+	private IFile getPropertyFile() throws JavaModelException {
+		return ((IFile)ResourcesPlugin.getWorkspace().getRoot().findMember(getPropertyFilePath()));
 	}
 	
 	private String createPropertyFileSource() throws JavaModelException{
