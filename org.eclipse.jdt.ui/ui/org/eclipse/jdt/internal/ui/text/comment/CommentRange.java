@@ -134,12 +134,9 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Mark the comment range with the occurred tags.
 	 * 
-	 * @param tags
-	 *                   The tags to test for their occurrence
-	 * @param prefx
-	 *                   The prefix which is common to all the tags to test
-	 * @param token
-	 *                   Token belonging to the comment range
+	 * @param tags		the tags to test for their occurrence
+	 * @param prefix	the prefix which is common to all the tags to test
+	 * @param token		the token belonging to the comment range
 	 * @param attribute
 	 *                   Attribute to set if a tag is present
 	 */
@@ -163,17 +160,12 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Marks the comment range with the HTML range tag.
 	 * 
-	 * @param token
-	 *                   Token belonging to the comment range
-	 * @param tag
-	 *                   The HTML tag which confines the HTML range
-	 * @param level
-	 *                   The nesting level of the current HTML range
-	 * @param attribute
-	 *                   Attribute to set if the comment range is in the HTML range
-	 * @param html
-	 *                   <code>true</code> iff the HTML tags in this HTML range
-	 *                   should be marked too, <code>false</code> otherwise
+	 * @param token	the token belonging to the comment range
+	 * @param tag	the HTML tag which confines the HTML range
+	 * @param level	the nesting level of the current HTML range
+	 * @param key	the key of the attribute to set if the comment range is in the HTML range
+	 * @param html	<code>true</code> iff the HTML tags in this HTML range
+	 *					should be marked too, <code>false</code> otherwise
 	 * @return The new nesting level of the HTML range
 	 */
 	protected final int markTagRange(final String token, final String tag, int level, final int key, final boolean html) {

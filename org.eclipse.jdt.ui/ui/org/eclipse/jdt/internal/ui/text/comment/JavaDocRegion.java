@@ -58,7 +58,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	private boolean fSkipFormatting= false;
 
  	/**
- 	 * Creates a new javadoc region.
+ 	 * Creates a new Javadoc region.
  	 * 
 	 * @param document
 	 *                   The document which contains the comment region
@@ -269,13 +269,10 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	/**
 	 * Marks the comment region with the HTML range tag.
 	 * 
-	 * @param tag
-	 *                   The HTML tag which confines the HTML range
-	 * @param attribute
-	 *                   Attribute to set if the comment range is in the HTML range
-	 * @param html
-	 *                   <code>true</code> iff the HTML tags in this HTML range
-	 *                   should be marked too, <code>false</code> otherwise
+	 * @param tags		the HTML tag which confines the HTML range
+	 * @param attribute	the attribute to set if the comment range is in the HTML range
+	 * @param html		<code>true</code> iff the HTML tags in this HTML range
+	 *                  	should be marked too, <code>false</code> otherwise
 	 */
 	protected final void markTagRanges(final String[] tags, final int attribute, final boolean html) {
 		
