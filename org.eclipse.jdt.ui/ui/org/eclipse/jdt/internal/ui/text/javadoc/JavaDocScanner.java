@@ -42,7 +42,7 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 	/**
 	 * A key word detector.
 	 */
-	static class JavaDocWordDetector implements IWordDetector {
+	static class JavaDocKeywordDetector implements IWordDetector {
 
 		/**
 		 * @see IWordDetector#isWordStart
@@ -56,6 +56,27 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 		 */
 		public boolean isWordPart(char c) {
 			return Character.isLetter(c);
+		}
+	};
+	
+	
+	/**
+	 * Detector for HTML comment delimiters.
+	 */
+	static class HTMLCommentDetector implements IWordDetector {
+
+		/**
+		 * @see IWordDetector#isWordStart
+		 */
+		public boolean isWordStart(char c) {
+			return (c == '<' || c == '-');
+		}
+
+		/**
+		 * @see IWordDetector#isWordPart
+		 */
+		public boolean isWordPart(char c) {
+			return (c == '-' || c == '!' || c == '>');
 		}
 	};
 	
@@ -110,6 +131,7 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVADOC_DEFAULT
 	};			
 	
+	
 	public JavaDocScanner(IColorManager manager, IPreferenceStore store) {
 		super(manager, store);
 		initialize();
@@ -138,6 +160,13 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 		list.add(new TagRule(token));
 		
 		
+		// Add rule for HTML comments
+		WordRule wordRule= new WordRule(new HTMLCommentDetector(), token);
+		wordRule.addWord("<!--", token);
+		wordRule.addWord("--!>", token);
+		list.add(wordRule);
+		
+		
 		// Add rule for links.
 		token= getToken(IJavaColorConstants.JAVADOC_LINK);
 		list.add(new SingleLineRule("{@link", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
@@ -149,7 +178,7 @@ public final class JavaDocScanner extends AbstractJavaScanner {
 		
 		// Add word rule for keywords.
 		token= getToken(IJavaColorConstants.JAVADOC_DEFAULT);
-		WordRule wordRule= new WordRule(new JavaDocWordDetector(), token);
+		wordRule= new WordRule(new JavaDocKeywordDetector(), token);
 		
 		token= getToken(IJavaColorConstants.JAVADOC_KEYWORD);
 		for (int i= 0; i < fgKeywords.length; i++)

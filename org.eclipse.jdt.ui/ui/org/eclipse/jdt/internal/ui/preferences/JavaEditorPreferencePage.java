@@ -234,7 +234,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION, true);
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_DELAY, 500);
 		
-		store.setDefault(ContentAssistPreference.AUTOINSERT, false);
+		store.setDefault(ContentAssistPreference.AUTOINSERT, true);
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PROPOSALS_BACKGROUND, new RGB(254, 241, 233));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PROPOSALS_FOREGROUND, new RGB(0, 0, 0));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_BACKGROUND, new RGB(254, 241, 233));
@@ -291,9 +291,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		SelectionListener backgroundSelectionListener= new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {				
 				boolean custom= fBackgroundCustomRadioButton.getSelection();
-				int i= fList.getSelectionIndex();
-				String key= fListModel[i][1];
-				
 				fBackgroundColorButton.setEnabled(custom);
 				fOverlayStore.setValue(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT, !custom);
 			}

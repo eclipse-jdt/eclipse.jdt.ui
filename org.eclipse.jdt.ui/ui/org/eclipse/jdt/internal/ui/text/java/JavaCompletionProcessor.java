@@ -176,8 +176,6 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
 	 */
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
-		IDocument document= viewer.getDocument();
-	
 		int contextInformationPosition= guessContextInformationPosition(viewer, offset);
 
 		Vector results= new Vector();
