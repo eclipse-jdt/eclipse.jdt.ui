@@ -46,9 +46,8 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
-		ASTNode node= InlineMethodRefactoring.getTargetNode(unit, selection[0], selection[1]);
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
-			unit, (MethodInvocation)node,
+			unit, selection[0], selection[1],
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setSaveChanges(true);
 		String out= null;

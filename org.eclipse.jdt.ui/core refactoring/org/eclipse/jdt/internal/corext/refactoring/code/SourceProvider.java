@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -66,10 +67,9 @@ public class SourceProvider {
 		}
 	}
 
-	public SourceProvider(ICompilationUnit unit, MethodDeclaration declaration) throws JavaModelException {
+	public SourceProvider(ICompilationUnit unit, MethodDeclaration declaration) {
 		super();
 		fCUnit= unit;
-		fBuffer= TextBuffer.create(unit.getBuffer().getContents());
 		fDeclaration= declaration;
 		List parameters= fDeclaration.parameters();
 		for (Iterator iter= parameters.iterator(); iter.hasNext();) {
@@ -80,12 +80,13 @@ public class SourceProvider {
 		fRewriter= new ASTRewrite(fDeclaration);
 		fAnalyzer= new SourceAnalyzer(fCUnit, fDeclaration);
 	}
-
-	public RefactoringStatus checkActivation() throws JavaModelException {
+	
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		return fAnalyzer.checkActivation();
 	}
 	
-	public void initialize() {
+	public void initialize() throws JavaModelException {
+		fBuffer= TextBuffer.create(fCUnit.getBuffer().getContents());
 		fAnalyzer.analyzeParameters();
 		if (hasReturnValue()) {
 			ASTNode last= getLastStatement();

@@ -71,12 +71,13 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	 */		
 	protected void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit();
-		ASTNode node= InlineMethodRefactoring.getTargetNode(cu, selection.getOffset(), selection.getLength());
-		if (node == null || node.getNodeType() != ASTNode.METHOD_INVOCATION) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, "No method invocation selected.");
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
+			cu, selection.getOffset(), selection.getLength(),
+			JavaPreferencesSettings.getCodeGenerationSettings());
+		if (refactoring == null) {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, "No method invocation or declaration selected.");
 			return;
 		}
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(cu, (MethodInvocation)node, JavaPreferencesSettings.getCodeGenerationSettings());
 		try {
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {
