@@ -61,7 +61,7 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 		
 		private void checkInvalidate(IResourceDelta delta, IPath path) {
 			int kind= delta.getKind();
-			if (kind == IResourceDelta.REMOVED  || (kind == IResourceDelta.CHANGED && isErrorDelta(delta))) {
+			if (kind == IResourceDelta.REMOVED || kind == IResourceDelta.ADDED || (kind == IResourceDelta.CHANGED && isErrorDelta(delta))) {
 				// invalidate the path and all parent paths
 				while (!path.isEmpty() && !path.isRoot() && !fChangedElements.contains(path)) {
 					fChangedElements.add(path);
