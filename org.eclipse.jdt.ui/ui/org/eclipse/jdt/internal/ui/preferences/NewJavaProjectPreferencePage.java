@@ -70,27 +70,6 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	private static final String CLASSPATH_JRELIBRARY_LIST= PreferenceConstants.NEWPROJECT_JRELIBRARY_LIST;
 
 
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */
-	public static boolean useSrcAndBinFolders() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
-	}
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	public static String getSourceFolderName() {
-		return PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_SRCNAME);
-	}
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	public static String getOutputLocationName() {
-		return PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
-	}
-
 	public static IClasspathEntry[] getDefaultJRELibrary() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		
@@ -400,27 +379,32 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 				return;
 			}
 			IWorkspace workspace= JavaPlugin.getWorkspace();
+			IProject dmy= workspace.getRoot().getProject("project"); //$NON-NLS-1$
+			
 			IStatus status;
+			IPath srcPath= dmy.getFullPath().append(srcName);
 			if (srcName.length() != 0) {
-				status= workspace.validateName(srcName, IResource.FOLDER);
+				status= workspace.validatePath(srcPath.toString(), IResource.FOLDER);
 				if (!status.isOK()) {
 					String message= JavaUIMessages.getFormattedString("NewJavaProjectPreferencePage.folders.error.invalidsrcname", status.getMessage()); //$NON-NLS-1$
 					updateStatus(new StatusInfo(IStatus.ERROR, message));
 					return;
 				}
 			}
-			status= workspace.validateName(binName, IResource.FOLDER);
-			if (!status.isOK()) {
-				String message= JavaUIMessages.getFormattedString("NewJavaProjectPreferencePage.folders.error.invalidbinname", status.getMessage()); //$NON-NLS-1$
-				updateStatus(new StatusInfo(IStatus.ERROR, message));
-				return;
+			IPath binPath= dmy.getFullPath().append(binName);
+			if (binName.length() != 0) {
+				status= workspace.validatePath(binPath.toString(), IResource.FOLDER);
+				if (!status.isOK()) {
+					String message= JavaUIMessages.getFormattedString("NewJavaProjectPreferencePage.folders.error.invalidbinname", status.getMessage()); //$NON-NLS-1$
+					updateStatus(new StatusInfo(IStatus.ERROR, message));
+					return;
+				}
 			}
-			IProject dmy= workspace.getRoot().getProject("dmy"); //$NON-NLS-1$
-			IClasspathEntry entry= JavaCore.newSourceEntry(dmy.getFullPath().append(srcName));
-			IPath outputLocation= dmy.getFullPath().append(binName);
-			status= JavaConventions.validateClasspath(JavaCore.create(dmy), new IClasspathEntry[] { entry }, outputLocation);
+			IClasspathEntry entry= JavaCore.newSourceEntry(srcPath);
+			status= JavaConventions.validateClasspath(JavaCore.create(dmy), new IClasspathEntry[] { entry }, binPath);
 			if (!status.isOK()) {
-				updateStatus(status);
+				String message= JavaUIMessages.getString("NewJavaProjectPreferencePage.folders.error.invalidcp"); //$NON-NLS-1$
+				updateStatus(new StatusInfo(IStatus.ERROR, message));
 				return;
 			}
 		}
