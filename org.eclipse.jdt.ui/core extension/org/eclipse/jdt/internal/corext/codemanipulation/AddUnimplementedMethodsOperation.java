@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 /**
  * Evaluates all unimplemented methods and creates them.
  * If the type is open in an editor, be sure to pass over the types working working copy.
@@ -73,7 +75,7 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 				int indent= StubUtility.getIndentUsed(fType) + 1;
 				
 				for (int i= 0; i < nToImplement; i++) {
-					String formattedContent= StubUtility.codeFormat(toImplement[i], indent, lineDelim) + lineDelim;
+					String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, toImplement[i], indent, null, lineDelim) + lineDelim;	
 					IMethod curr= fType.createMethod(formattedContent, fInsertPosition, true, null);
 					createdMethods.add(curr);
 				}

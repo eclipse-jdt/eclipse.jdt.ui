@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.CopyPlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.MovePlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.StringPlaceholderData;
+import org.eclipse.jdt.internal.corext.dom.ASTRewriteFormatter.NodeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveTargetEdit;
@@ -59,7 +61,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private HashMap fMoveSources;
 	
 	final TextBuffer fTextBuffer;
-	private final ASTRewrite fRewrite;	
+	private final ASTRewrite fRewrite;
+	
+	private final ASTRewriteFormatter fFormatter;
 	
 	/**
 	 * Constructor for ASTChangeAnalyzer.
@@ -72,6 +76,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		fCurrentEdit= rootEdit;
 		fCopySources= new HashMap();
 		fMoveSources= new HashMap();
+		
+		fFormatter= new ASTRewriteFormatter(rewrite);
 	}
 	
 	final ListRewriter getDefaultRewriter() {
@@ -801,10 +807,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 
 	final void doTextInsert(int insertOffset, ASTNode node, int initialIndentLevel, boolean removeLeadingIndent, GroupDescription description) {		
-		
-		ASTWithExistingFlattener flattener= new ASTWithExistingFlattener(fRewrite);
-		node.accept(flattener);
-		String formatted= flattener.getFormattedResult(initialIndentLevel, fTextBuffer.getLineDelimiter());
+		ArrayList markers= new ArrayList();
+		String formatted= fFormatter.getFormattedResult(node, initialIndentLevel, fTextBuffer.getLineDelimiter(), markers);
 
 		int tabWidth= CodeFormatterUtil.getTabWidth();
 		int currPos= 0;
@@ -813,14 +817,15 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				currPos++;
 			}
 		}
-		ASTWithExistingFlattener.NodeMarker[] markers= flattener.getNodeMarkers();
-		for (int i= 0; i < markers.length; i++) {
-			int offset= markers[i].offset;
+		for (int i= 0; i < markers.size(); i++) {
+			NodeMarker curr= (NodeMarker) markers.get(i);
+			
+			int offset= curr.offset;
 			if (offset != currPos) {
 				String insertStr= formatted.substring(currPos, offset);
 				doTextInsert(insertOffset, insertStr, description);
 			}
-			Object data= markers[i].data;
+			Object data= curr.data;
 			if (data instanceof GroupDescription) {
 				TextEdit edit= new RangeMarker(insertOffset, 0);
 				addDescription((GroupDescription) data, edit);
@@ -841,7 +846,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					doTextInsert(insertOffset, str, description);
 				}
 			}
-			currPos= offset + markers[i].length;
+			currPos= offset + curr.length;
 		}
 		if (currPos < formatted.length()) {
 			String insertStr= formatted.substring(currPos);

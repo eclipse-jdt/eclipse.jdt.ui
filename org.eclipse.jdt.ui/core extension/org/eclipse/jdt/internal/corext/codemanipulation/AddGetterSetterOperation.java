@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -216,8 +217,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			}
 			else
 				sibling= getInsertPosition();
-				
-			String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
+			
+			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}
@@ -302,7 +303,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			else
 				sibling= getInsertPosition();			
 			
-			String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
+			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}			

@@ -87,8 +87,8 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		String replacementString= getReplacementString();
 		
-		// construct replacement text
-		StringBuffer buf= new StringBuffer();
+		// construct replacement text: an expression to be formatted
+		StringBuffer buf= new StringBuffer("new A("); //$NON-NLS-1$
 		buf.append(replacementString);
 		
 		if (!replacementString.endsWith(")")) { //$NON-NLS-1$
@@ -98,7 +98,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		if (!createStubs(buf, impStructure)) {
 			return false;
 		}
-		buf.append("}"); //$NON-NLS-1$
+		buf.append('}');
 		
 		// use the code formatter
 		String lineDelim= StubUtility.getLineDelimiterFor(document);
@@ -106,8 +106,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
 		
-		String replacement= StubUtility.codeFormat(buf.toString(), indent, lineDelim);
-		setReplacementString(Strings.trimLeadingTabsAndSpaces(replacement));
+		String replacement= CodeFormatterUtil.format(CodeFormatterUtil.K_EXPRESSION, buf.toString(), indent, null, lineDelim);	
+		int start= replacement.indexOf(')');
+		int end= replacement.lastIndexOf('}');
+	
+		setReplacementString(replacement.substring(start, end + 1));
+		
 		int pos= offset;
 		while (pos < document.getLength() && Character.isWhitespace(document.getChar(pos))) {
 			pos++;

@@ -362,7 +362,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		String firstLine= sourceLines[0];
 		if (!Character.isWhitespace(firstLine.charAt(0)))
 			sourceLines[0]= ""; //$NON-NLS-1$
-		CodeFormatterUtil.removeIndentation(sourceLines);
+		Strings.trimIndentation(sourceLines, CodeFormatterUtil.getTabWidth());
 
 		if (!Character.isWhitespace(firstLine.charAt(0)))
 			sourceLines[0]= firstLine;

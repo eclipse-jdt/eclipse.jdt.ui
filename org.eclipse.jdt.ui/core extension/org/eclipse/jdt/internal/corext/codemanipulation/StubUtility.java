@@ -930,6 +930,9 @@ public class StubUtility {
 		return 0;
 	}
 	
+	/**
+	 * @deprecated Use CodeFormatterUtil.format
+	 */
 	public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
 		return formatter.format(sourceString, initialIndentationLevel, null, lineDelim);

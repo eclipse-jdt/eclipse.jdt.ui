@@ -33,6 +33,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
@@ -110,6 +111,9 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			
 			for (int i= 0; i < fMembers.length; i++) {
 				IMember curr= fMembers[i];
+				int memberStartOffset= curr.getSourceRange().getOffset();
+				
+				
 				String comment= null;
 				switch (curr.getElementType()) {
 					case IJavaElement.TYPE:
@@ -128,15 +132,21 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 					buf.append(" *").append(lineDelim); //$NON-NLS-1$
 					buf.append(" */").append(lineDelim); //$NON-NLS-1$
 					comment= buf.toString();						
+				} else {
+					if (!comment.endsWith(lineDelim)) {
+						comment= comment + lineDelim;
+					}
 				}
-				int indent= StubUtility.getIndentUsed(curr);
-				String formattedComment= StubUtility.codeFormat(comment + lineDelim, indent, lineDelim);
-				int codeStart= 0;
-				while (Strings.isIndentChar(formattedComment.charAt(codeStart))) {
-					codeStart++;
-				}
-				String insertString= formattedComment.substring(codeStart) + formattedComment.substring(0, codeStart);
-				TextRange range= new TextRange(curr.getSourceRange().getOffset(), 0);
+				
+				int tabWidth= CodeFormatterUtil.getTabWidth();
+				
+				String line= buffer.getLineContentOfOffset(memberStartOffset);
+				String indentString= Strings.getIndentString(line, tabWidth);
+				
+				String indentedComment= Strings.changeIndent(comment, 0, tabWidth, indentString, lineDelim);
+
+				String insertString= indentedComment;
+				TextRange range= new TextRange(memberStartOffset, 0);
 				buffer.replace(range, insertString);
 
 				monitor.worked(1);

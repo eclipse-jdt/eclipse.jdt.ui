@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -125,8 +126,8 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 				sibling = existingMethods[0];
 			}
 
-			String formattedContent = StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;
-			IMethod created = fType.createMethod(formattedContent, sibling, true, null);
+			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim) + lineDelim;
+			IMethod created= fType.createMethod(formattedContent, sibling, true, null);
 			fCreatedMethods.add(created);
 
 				

@@ -52,6 +52,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
@@ -1129,7 +1130,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	
 	private void clearCachedValues() {
 		// Fix for bug 29909 contributed by Nikolay Metchev
-		fTabWidth= Integer.parseInt(((String) JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE)));
+		fTabWidth= CodeFormatterUtil.getTabWidth();
         
         IPreferenceStore preferenceStore= getPreferenceStore();
 		fUseSpaces= preferenceStore.getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS);

@@ -14,11 +14,10 @@ import java.util.StringTokenizer;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class JavaPreferencesSettings  {
 	
@@ -30,7 +29,7 @@ public class JavaPreferencesSettings  {
 		res.useKeywordThis= store.getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS);
 		res.importOrder= getImportOrderPreference(store);
 		res.importThreshold= getImportNumberThreshold(store);
-		res.tabWidth= JavaCore.getPlugin().getPluginPreferences().getInt(JavaCore.FORMATTER_TAB_SIZE);
+		res.tabWidth= CodeFormatterUtil.getTabWidth();
 		return res;
 	}
 

@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
@@ -313,8 +314,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
 				
-		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		int tabWidth= preferences.getInt(JavaCore.FORMATTER_TAB_SIZE);
+		int tabWidth= CodeFormatterUtil.getTabWidth();
 		boolean useSpaces= getPreferenceStore().getBoolean(SPACES_FOR_TABS);
 		
 		for (int i= 0; i <= tabWidth; i++) {

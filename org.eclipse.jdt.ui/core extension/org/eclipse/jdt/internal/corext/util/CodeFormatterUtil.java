@@ -10,31 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import org.eclipse.core.runtime.Preferences;
+
+import org.eclipse.jdt.core.CodeFormatter;
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 
-public class CodeFormatterUtil {
 
-	/**
-	 * Returns the indent of the given line.
-	 * @param line the text line
-	 */
-	public static int computeIndent(String line) {
-		return Strings.computeIndent(line, getTabWidth());
-	}
+
+public class CodeFormatterUtil {
 	
-	public static void removeIndentation(String[] lines) {
-		Strings.trimIndentation(lines, getTabWidth());
-	}
-	
-	/**
-	 * Removes any leading indents from the given string.
-	 */
-	public static String trimIndents(String line) {
-		return Strings.trimIndents(line, getTabWidth());
-	}
-	 
+	public static final int K_EXPRESSION = CodeFormatter.K_EXPRESSION;
+	public static final int K_STATEMENTS = CodeFormatter.K_STATEMENTS;
+	public static final int K_CLASS_BODY_DECLARATIONS = CodeFormatter.K_CLASS_BODY_DECLARATIONS;
+	public static final int K_COMPILATION_UNIT = CodeFormatter.K_COMPILATION_UNIT;
+		 
 	/**
 	 * Creates a string that represents the given number of indents.
 	 */
@@ -42,16 +33,21 @@ public class CodeFormatterUtil {
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
 		return formatter.format("", indent, null, ""); //$NON-NLS-1$ //$NON-NLS-2$
 	} 
-	
-	public static String createIndentString(String example) {
-		return createIndentString(computeIndent(example));
+		
+	public static int getTabWidth() {
+		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+		return preferences.getInt(JavaCore.FORMATTER_TAB_SIZE);
 	}
 	
-	public static int getTabWidth() {
-		try {
-			return Integer.parseInt((String)JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE));
-		} catch (NumberFormatException e) {
-			return 4;
-		}
-	}	
+	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator) {
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
+		return formatter.format(string, indentationLevel, positions, lineSeparator);	
+	}
+	
+	public static String format(String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator) {
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
+		return formatter.format(string.substring(start, end), indentationLevel, positions, lineSeparator);			
+	}
+
+	
 }

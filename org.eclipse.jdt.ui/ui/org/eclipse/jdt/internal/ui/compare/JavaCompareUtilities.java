@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.JavaElement;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.*;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -34,16 +35,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 class JavaCompareUtilities {
 	
 	static int getTabSize() {
-		String string= (String) JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE);
-		try {
-			int i= Integer.parseInt(string);
-			if (i >= 0) {
-				return i;
-			}
-		} catch (NumberFormatException e) {
-			// NeedWork
-		}
-		return 4;
+		return CodeFormatterUtil.getTabWidth();
 	}
 		
 	static String getString(ResourceBundle bundle, String key, String dfltValue) {

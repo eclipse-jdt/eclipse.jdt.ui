@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
@@ -165,8 +166,8 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						// add constructors at the beginning
 						sibling= existingMethods[0];
 					}
-						
-					String formattedContent= StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;				
+					
+					String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim) + lineDelim;	
 					IMethod newMethod= fType.createMethod(formattedContent, sibling, true, null);
 					createdMethods.add(newMethod);
 				} finally {
