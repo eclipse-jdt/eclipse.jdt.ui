@@ -75,7 +75,6 @@ class TextMatchFinder {
 			Set results= (Set)matches.get(cu);
 			for (Iterator resultIter= results.iterator(); resultIter.hasNext();){
 				int match= ((Integer)resultIter.next()).intValue();
-				//manager.addReplace(cu, matchName, match, patternLength, newText);
 				manager.get(cu).addTextEdit(matchName, SimpleTextEdit.createReplace(match, patternLength, newText));
 			}
 		}
@@ -155,14 +154,15 @@ class TextMatchFinder {
 		}	
 	}
 	
-	private void addTextMatches(ICompilationUnit cu)throws JavaModelException{
+	private void addTextMatches(ICompilationUnit cu) throws JavaModelException{
 		Set javaDocResults= new HashSet();
 		Set commentResults= new HashSet();
 		Set stringResults= new HashSet();
 		fScanner.scan(cu, javaDocResults, commentResults, stringResults);
-		fJavaDocMatches.put(cu, javaDocResults);
-		fCommentMatches.put(cu, commentResults);
-		fStringMatches.put(cu, stringResults);
+		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+		fJavaDocMatches.put(wc, javaDocResults);
+		fCommentMatches.put(wc, commentResults);
+		fStringMatches.put(wc, stringResults);
 	}	
 }
 
