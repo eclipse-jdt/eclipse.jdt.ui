@@ -204,7 +204,7 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 			String oldName= (String) iterator.next();
 			String newName= getNewName(oldName);
 			if (found.contains(newName) && !doubled.contains(newName)){
-				result.addError(RefactoringCoreMessages.getFormattedString("RenameParametersRefactoring.duplicate_name", newName));//$NON-NLS-1$	
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameParametersRefactoring.duplicate_name", newName));//$NON-NLS-1$	
 				doubled.add(newName);
 			} else {
 				found.add(newName);
