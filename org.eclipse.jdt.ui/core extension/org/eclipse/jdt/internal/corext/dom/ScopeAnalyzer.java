@@ -192,11 +192,23 @@ public class ScopeAnalyzer {
 		ASTNode parent= selector.getParent();
 		switch (parent.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
-				return getBinding(((MethodInvocation) parent).getExpression());
+				MethodInvocation decl= (MethodInvocation) parent;
+				if (selector == decl.getName()) {
+					return getBinding(decl.getExpression());
+				}
+				return null;
 			case ASTNode.QUALIFIED_NAME:
-				return getBinding(((QualifiedName) parent).getQualifier());
+				QualifiedName qualifiedName= (QualifiedName) parent;
+				if (selector == qualifiedName.getName()) {
+					return getBinding(qualifiedName.getQualifier());
+				}
+				return null;
 			case ASTNode.FIELD_ACCESS:
-				return getBinding(((FieldAccess) parent).getExpression());
+				FieldAccess fieldAccess= (FieldAccess) parent;
+				if (selector == fieldAccess.getName()) {
+					return getBinding(fieldAccess.getExpression());
+				}
+				return null;			
 			case ASTNode.SUPER_FIELD_ACCESS:
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				ITypeBinding curr= ASTResolving.getBindingOfParentType(parent);

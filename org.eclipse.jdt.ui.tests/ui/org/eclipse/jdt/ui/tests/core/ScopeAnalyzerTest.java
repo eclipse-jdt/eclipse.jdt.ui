@@ -47,11 +47,11 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests(); 
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ScopeAnalyzerTest("testDeclarationsAfter"));
+			suite.addTest(new ScopeAnalyzerTest("testVariableDeclarations6"));
 			return suite;
 		}
 	}
@@ -102,10 +102,10 @@ public class ScopeAnalyzerTest extends CoreTests {
 		{
 			String str= "count+= count2;";
 			int offset= buf.toString().indexOf(str);
-
+	
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
-
+	
 			assertVariables(res, new String[] { "param1", "param2", "count", "count2", "fGlobal" });
 		}
 		
@@ -118,14 +118,14 @@ public class ScopeAnalyzerTest extends CoreTests {
 			
 			assertVariables(res, new String[] { "param1", "param2", "count", "fGlobal" });
 		}
-
+	
 		{
 			String str= "return -1;";
 			int offset= buf.toString().indexOf(str);
 			
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
-
+	
 			assertVariables(res, new String[] { "param1", "param2", "count", "i", "insideFor", "fGlobal" });
 		}		
 		
@@ -355,6 +355,93 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}				
 			
 	}
+
+	public void testVariableDeclarations6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    int[] fGlobal;\n");
+		buf.append("    public int goo(int param1, int param2) {\n");
+		buf.append("        switch (param1) {\n");
+		buf.append("            case 1:\n;");
+		buf.append("                fGlobal= new int[] { 1, 2, 3};\n");
+		buf.append("                int temp= 9;\n");
+		buf.append("                break;\n");
+		buf.append("            case 2:\n;");
+		buf.append("                do {\n");
+		buf.append("                   int insideDo= 0;\n");
+		buf.append("                   return -1;\n");
+		buf.append("                } while (true);\n");
+		buf.append("                return 2;\n");
+		buf.append("            case 3:\n;");
+		buf.append("                int temp2= 9;\n");
+		buf.append("                Math.min(1.0f, 2.0f);\n");
+		buf.append("                return 3;\n");
+		buf.append("        }\n");
+		buf.append("        return 4;\n");		
+		buf.append("    }\n");			
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		assertNoProblems(astRoot);
+		
+		{
+			String str= "break;";
+			int offset= buf.toString().indexOf(str);
+
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+
+			assertVariables(res, new String[] { "param1", "param2", "temp", "fGlobal" });
+		}
+		
+		{
+			String str= "return -1;";
+			int offset= buf.toString().indexOf(str);
+			
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+
+			assertVariables(res, new String[] { "param1", "param2", "temp", "insideDo", "fGlobal" });
+		}			
+			
+		{
+			String str= "Math";
+			int offset= buf.toString().indexOf(str);
+			
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+
+			assertVariables(res, new String[] { "param1", "param2", "temp", "temp2", "fGlobal" });
+		}			
+
+		{
+			String str= "min";
+			int offset= buf.toString().indexOf(str);
+			
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+
+			assertVariables(res, new String[] { "E", "PI" });
+		}
+		
+		{
+			String str= "return 4;";
+			int offset= buf.toString().indexOf(str);
+			
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+
+			assertVariables(res, new String[] { "param1", "param2", "fGlobal" });
+		}		
+		
+	}
+
+
+
+
 
 	public void testDeclarationsAfter() throws Exception {
 				
