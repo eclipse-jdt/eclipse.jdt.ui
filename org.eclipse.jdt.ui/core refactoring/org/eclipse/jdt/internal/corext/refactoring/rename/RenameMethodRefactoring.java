@@ -167,7 +167,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	 * @see Refactoring#checkActivation
 	 */		
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
-		IMethod orig= (IMethod)WorkingCopyUtil.getOriginal(fMethod);
+		IMethod orig= getOriginalMethod(fMethod);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.deleted", //$NON-NLS-1$
 								fMethod.getCompilationUnit().getElementName());
@@ -179,6 +179,10 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		if (JdtFlags.isNative(fMethod))
 			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.no_native")); //$NON-NLS-1$
 		return result;
+	}
+
+	private static IMethod getOriginalMethod(IMethod method) throws JavaModelException {
+		return (IMethod)WorkingCopyUtil.getOriginal(method);
 	}
 	
 	/* non java-doc
