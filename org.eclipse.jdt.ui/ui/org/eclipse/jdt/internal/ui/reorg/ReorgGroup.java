@@ -2,15 +2,22 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
 package org.eclipse.jdt.internal.ui.reorg;
 
-import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GroupContext;import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
+import org.eclipse.jdt.internal.ui.actions.GroupContext;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 public class ReorgGroup extends ContextMenuGroup {
-
+
 	private static final String GROUP_NAME= IContextMenuConstants.GROUP_REORGANIZE;
-
+
 	private ReorgAction[] fActions;
 		
 	public void fill(IMenuManager manager, GroupContext context) {
