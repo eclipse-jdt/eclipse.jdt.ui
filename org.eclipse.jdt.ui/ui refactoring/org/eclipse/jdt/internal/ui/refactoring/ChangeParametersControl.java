@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -201,8 +202,7 @@ public class ChangeParametersControl extends Composite {
 			fTableViewer.setSelection(new StructuredSelection(fParameterInfos.get(0)));
 			
 		//XXX workaround for bug 24798	
-		if (canEditTableCells() && fTableCursor == null && getTableItemCount() != 0){
-			addTableCursor(getTable());		
+		if (canEditTableCells() && getTableItemCount() != 0) {
 			showTableCursor(true);
 		}	
 	}
@@ -278,11 +278,11 @@ public class ChangeParametersControl extends Composite {
 		// This alows the user to select multiple items in the table.
 		fTableCursor.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
-				if (	e.keyCode == SWT.CTRL || 
-				    	e.keyCode == SWT.SHIFT || 
-				    (e.stateMask & SWT.CONTROL) != 0 || 
-				    (e.stateMask & SWT.SHIFT) != 0) {
-						ChangeParametersControl.this.showTableCursor(false);
+				if (	e.keyCode == SWT.MOD1 || 
+				    	e.keyCode == SWT.MOD2 || 
+				    (e.stateMask & SWT.MOD1) != 0 || 
+				    (e.stateMask & SWT.MOD2) != 0) {
+						setTableCursorVisible(false);
 				}
 			}
 		});
@@ -290,17 +290,17 @@ public class ChangeParametersControl extends Composite {
 		// This signals the end of the multiple selection task.
 		table.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
-				if (e.keyCode == SWT.CONTROL 	&& (e.stateMask & SWT.SHIFT) 	!= 0) return;
-				if (e.keyCode == SWT.SHIFT 	&& (e.stateMask & SWT.CONTROL) 	!= 0) return;
-				if (e.keyCode != SWT.CONTROL 	&& (e.stateMask & SWT.CONTROL) 	!= 0) return;
-				if (e.keyCode != SWT.SHIFT 	&& (e.stateMask & SWT.SHIFT) 	!= 0) return;
+				if (e.keyCode == SWT.MOD1 	&& (e.stateMask & SWT.MOD2) 	!= 0) return;
+				if (e.keyCode == SWT.MOD2 	&& (e.stateMask & SWT.MOD1) 	!= 0) return;
+				if (e.keyCode != SWT.MOD1 	&& (e.stateMask & SWT.MOD1) 	!= 0) return;
+				if (e.keyCode != SWT.MOD2 	&& (e.stateMask & SWT.MOD2) 	!= 0) return;
 				if (table.getSelectionCount() != 1) return;
 				
 				TableItem[] selection = table.getSelection();
 				TableItem row = (selection.length == 0) ? table.getItem(table.getTopIndex()) : selection[0];
 				table.showItem(row);
 				fTableCursor.setSelection(row, 0);
-				ChangeParametersControl.this.showTableCursor(true);
+				setTableCursorVisible(true);
 				fTableCursor.setFocus();
 			}
 		});
@@ -443,8 +443,8 @@ public class ChangeParametersControl extends Composite {
 				int row= getTableItemCount() - 1;
 				getTable().setSelection(row);
 				updateButtonsEnabledState();
-				ChangeParametersControl.this.showTableCursor(true);
-				ChangeParametersControl.this.setSelection(row, 0);
+				showTableCursor(true);
+				setTableCursorSelection(row, 0);
 			}
 		});	
 		return button;
@@ -471,15 +471,17 @@ public class ChangeParametersControl extends Composite {
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
 				int itemCount= getTableItemCount();
-				if (itemCount != 0){
-					if (index < itemCount)
-						getTable().setSelection(index);
-					else	
-						getTable().setSelection(itemCount - 1);
+				if (itemCount != 0) {
+					if (index >= itemCount)
+						index= itemCount - 1;
+					getTable().setSelection(index);
+					setTableCursorSelection(index, 0);
+					showTableCursor(true);
+				} else {
+					showTableCursor(false); 
 				}
 				fListener.parameterListChanged();
 				updateButtonsEnabledState();
-				ChangeParametersControl.this.showTableCursor(false);
 			}
 		});	
 		return button;
@@ -499,32 +501,73 @@ public class ChangeParametersControl extends Composite {
 				if (selection.length == 0)
 					return;
 
-				if (up)
+				int column= getTableCursorColumn();
+				Object element= null;
+				TableItem rowItem= getTableCursorRow();
+				if (rowItem != null) {
+					int r= getTable().indexOf(rowItem);
+					if (r >= 0)
+						element= fTableViewer.getElementAt(r);
+				}
+					
+				if (up) {
 					moveUp(selection);
-				else
+				} else {
 					moveDown(selection);
-
+				}
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
 				fTableViewer.setSelection(savedSelection);
 				fListener.parameterListChanged();
-				
-				ChangeParametersControl.this.showTableCursor(false);
+				Widget item= fTableViewer.testFindItem(element);
+				int row= 0;
+				if (item instanceof TableItem) {
+					row= getTable().indexOf((TableItem)item);
+					if (row < 0)
+						row= 0;
+				}
+				setTableCursorSelection(row, column);
 			}
 		});
 		return button;
 	}
 	
-	private void showTableCursor(boolean show){
-		if (fTableCursor != null)
-			fTableCursor.setVisible(show);
+	private void showTableCursor(boolean show) {
+		if (show) {
+			if (fTableCursor == null || fTableCursor.isDisposed())
+				addTableCursor(fTableViewer.getTable());
+			fTableCursor.setVisible(true);
+		} else {
+			if (fTableCursor != null && !fTableCursor.isDisposed()) {
+				fTableCursor.setVisible(false);
+				fTableCursor.dispose();
+			}
+			fTableCursor= null;
+		}
 	}
 	
-	private void setSelection(int row, int column) {
-		if (fTableCursor != null)
+	private void setTableCursorSelection(int row, int column) {
+		if (fTableCursor != null && !fTableCursor.isDisposed())
 			fTableCursor.setSelection(row, column);
 	}
-
+	
+	private void setTableCursorVisible(boolean visible) {
+		if (fTableCursor != null && !fTableCursor.isDisposed())
+			fTableCursor.setVisible(visible);
+	}
+	
+	private int getTableCursorColumn() {
+		if (fTableCursor != null && !fTableCursor.isDisposed())
+			return fTableCursor.getColumn();
+		return -1;
+	}
+	
+	private TableItem getTableCursorRow() {
+		if (fTableCursor != null && !fTableCursor.isDisposed())
+			return fTableCursor.getRow();
+		return null;
+	}
+	
 	//---- editing -----------------------------------------------------------------------------------------------
 
 	private static IInputValidator createParameterNameValidator(){
