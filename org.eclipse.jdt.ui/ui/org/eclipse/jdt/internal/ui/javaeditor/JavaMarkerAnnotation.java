@@ -57,7 +57,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	public String[] getArguments() {
 		IMarker marker= getMarker();
 		if (marker != null && marker.exists() && isProblem())
-			return CorrectionEngine.getProblemArguments(marker); //$NON-NLS-1$
+			return CorrectionEngine.getProblemArguments(marker);
 		return null;
 	}
 
