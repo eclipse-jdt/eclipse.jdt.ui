@@ -15,8 +15,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	}
 		
 	private void computeRenameTypeRefactoring(){
-		String name= getSimpleCUName();
-		IType type= getCu().getType(name);
+		IType type= getCu().getType(getSimpleCUName());
 		if (type.exists())
 			fRenameTypeRefactoring= new RenameTypeRefactoring(getTextBufferChangeCreator(), type);
 		else
@@ -30,7 +29,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	public void setNewName(String newName) {
 		Assert.isNotNull(newName);
 		fNewName= newName;
-		if (fRenameTypeRefactoring != null)
+		if (willRenameType())
 			fRenameTypeRefactoring.setNewName(removeFileNameExtension(newName));
 	}
 
@@ -40,7 +39,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	public RefactoringStatus checkNewName() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkCompilationUnitName(fNewName));
-		if (fRenameTypeRefactoring != null)
+		if (willRenameType())
 			result.merge(fRenameTypeRefactoring.checkNewName());
 		if (Checks.isAlreadyNamed(getCu(), fNewName))
 			result.addFatalError("The same name chosen");	
@@ -67,7 +66,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getCu()));
-		if (fRenameTypeRefactoring != null)
+		if (willRenameType())
 			result.merge(fRenameTypeRefactoring.checkActivation(pm));
 		return result;
 	}
@@ -76,9 +75,9 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		if (fRenameTypeRefactoring != null){
+		if (willRenameType())
 			return fRenameTypeRefactoring.checkInput(pm);
-		} else{
+		else{
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(Checks.checkCompilationUnitNewName(getCu(), fNewName));
 			return result;
@@ -91,11 +90,16 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		//renaming the file is taken care of in renameTypeRefactoring
-		if (fRenameTypeRefactoring != null)
+		if (willRenameType())
 			return fRenameTypeRefactoring.createChange(pm);
 	
 		CompositeChange composite= new CompositeChange();
 		composite.addChange(new RenameResourceChange(getResource(getCu()), removeFileNameExtension(fNewName)));
 		return composite;	
 	}
+
+	private boolean willRenameType() {
+		return fRenameTypeRefactoring != null;
+	}
+
 }
