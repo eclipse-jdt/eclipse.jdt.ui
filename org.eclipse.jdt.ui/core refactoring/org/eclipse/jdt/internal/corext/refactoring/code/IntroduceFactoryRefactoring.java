@@ -1193,6 +1193,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (factoryType == null)
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("IntroduceFactory.noSuchClass", fullyQualifiedTypeName)); //$NON-NLS-1$
 
+			if (factoryType.isAnnotation())
+				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.cantPutFactoryMethodOnAnnotation")); //$NON-NLS-1$
 			if (factoryType.isInterface())
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.cantPutFactoryMethodOnInterface")); //$NON-NLS-1$
 		} catch (JavaModelException e1) {

@@ -29,7 +29,8 @@ public class ClassFilter extends ViewerFilter {
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IType) {
 			try {
-				return ((IType)element).isInterface();
+				final IType type= (IType)element;
+				return type.isInterface() || type.isEnum();
 			} catch (JavaModelException ex) {
 				return true;
 			}

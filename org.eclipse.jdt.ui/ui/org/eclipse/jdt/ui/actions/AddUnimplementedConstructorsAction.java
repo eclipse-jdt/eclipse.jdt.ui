@@ -384,7 +384,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isAnnotation() && !type.isInterface() && !type.isEnum();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isEnum();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -405,13 +405,13 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		Object[] elements= selection.toArray();
 		if (elements.length == 1 && (elements[0] instanceof IType)) {
 			IType type= (IType) elements[0];
-			if (type.getCompilationUnit() != null && !type.isAnnotation() && !type.isInterface() && !type.isEnum()) {
+			if (type.getCompilationUnit() != null && !type.isInterface() && !type.isEnum()) {
 				return type;
 			}
 		} else if (elements[0] instanceof ICompilationUnit) {
 			ICompilationUnit cu= (ICompilationUnit) elements[0];
 			IType type= cu.findPrimaryType();
-			if (type != null && !type.isAnnotation() && !type.isInterface() && !type.isEnum())
+			if (type != null && !type.isInterface() && !type.isEnum())
 				return type;
 		}
 		return null;

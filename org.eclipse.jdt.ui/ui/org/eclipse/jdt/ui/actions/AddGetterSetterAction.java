@@ -211,9 +211,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			// look if class: not cheap but done by all source generation actions
-			// disable locals until create method is supported by jdt.core (bug 44395)
-			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation() && !type.isLocal();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isLocal();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -645,10 +643,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					}
 					try {
 						final IType declaringType= fld.getDeclaringType();
-						if (declaringType.isInterface() || declaringType.isAnnotation()) {
-							// no setters/getters for interfaces or annotations
+						if (declaringType.isInterface())
 							return null;
-						}
 					} catch (JavaModelException e) {
 						JavaPlugin.log(e);
 						return null;

@@ -107,7 +107,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			final IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isAnnotation() && !type.isInterface();
+			return type.getCompilationUnit() != null && !type.isInterface();
 		}
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
 			return true;
@@ -126,12 +126,12 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		final Object[] elements= selection.toArray();
 		if (elements.length == 1 && (elements[0] instanceof IType)) {
 			final IType type= (IType) elements[0];
-			if (type.getCompilationUnit() != null && !type.isAnnotation() && !type.isInterface()) {
+			if (type.getCompilationUnit() != null && !type.isInterface()) {
 				return type;
 			}
 		} else if (elements[0] instanceof ICompilationUnit) {
 			final IType type= ((ICompilationUnit) elements[0]).findPrimaryType();
-			if (!type.isAnnotation() && !type.isInterface())
+			if (!type.isInterface())
 				return type;
 		}
 		return null;
@@ -170,8 +170,12 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
 					return;
 				}
-				if (type.isInterface() || type.isAnnotation()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
+				if (type.isAnnotation()) {
+					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.annotation_not_applicable")); //$NON-NLS-1$
+					return;
+				}
+				if (type.isInterface()) {
+					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.interface_not_applicable")); //$NON-NLS-1$
 					return;
 				}
 				run(getShell(), type);

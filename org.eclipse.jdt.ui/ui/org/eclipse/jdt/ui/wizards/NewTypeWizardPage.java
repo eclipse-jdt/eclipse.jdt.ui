@@ -1400,8 +1400,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					status.setWarning(NewWizardMessages.getString("NewTypeWizardPage.warning.SuperClassNotExists")); //$NON-NLS-1$
 					return status;
 				} else {
+					if (type.isAnnotation()) {
+						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsAnnotation", sclassName)); //$NON-NLS-1$
+						return status;
+					}
 					if (type.isInterface()) {
-						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsNotClass", sclassName)); //$NON-NLS-1$
+						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsInterface", sclassName)); //$NON-NLS-1$
+						return status;
+					}
+					if (type.isEnum()) {
+						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.SuperClassIsEnum", sclassName)); //$NON-NLS-1$
 						return status;
 					}
 					int flags= type.getFlags();

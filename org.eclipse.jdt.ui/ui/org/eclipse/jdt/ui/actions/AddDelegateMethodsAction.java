@@ -358,9 +358,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			// look if class: not cheap but done by all source generation actions
-			// disable locals until create method is supported by jdt.core (bug 44395)
-			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation();
+			return type.getCompilationUnit() != null && !type.isInterface();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -390,7 +388,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.annotation_not_applicable")); //$NON-NLS-1$
 			return false;
 		} else if (type.isInterface()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.annotation_not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.interface_not_applicable")); //$NON-NLS-1$
 			return false;
 		}
 		return canRunOn(type.getFields());
@@ -417,7 +415,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					}
 					try {
 						final IType type= field.getDeclaringType();
-						if (type.isInterface() || type.isAnnotation()) {
+						if (type.isInterface()) {
 							return null;
 						}
 					} catch (JavaModelException exception) {

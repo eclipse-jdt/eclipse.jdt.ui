@@ -4232,6 +4232,22 @@
       </filter>
       <filter
             targetId="org.eclipse.jdt.ui.TypesView"
+            name="%HideEnum.label"
+            enabled="false"
+            description="%HideEnum.description"
+            class="org.eclipse.jdt.internal.ui.filters.EnumFilter"
+            id="org.eclipse.jdt.ui.TypesView.EnumFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.TypesView"
+            name="%HideAnnotation.label"
+            enabled="false"
+            description="%HideAnnotation.description"
+            class="org.eclipse.jdt.internal.ui.filters.AnnotationFilter"
+            id="org.eclipse.jdt.ui.TypesView.AnnotationFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.TypesView"
             name="%HideClass.label"
             enabled="false"
             description="%HideClass.description"

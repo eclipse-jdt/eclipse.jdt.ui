@@ -17,9 +17,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
- * Filters interfaces.
+ * Filters enums.
  */
-public class InterfaceFilter extends ViewerFilter {
+public class EnumFilter extends ViewerFilter {
 
 	/*
 	 * @see ViewerFilter
@@ -27,8 +27,7 @@ public class InterfaceFilter extends ViewerFilter {
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IType) {
 			try {
-				IType type= (IType) element;
-				return !type.isInterface() || type.isAnnotation();
+				return !((IType) element).isEnum();
 			} catch (JavaModelException ex) {
 				return true;
 			}
