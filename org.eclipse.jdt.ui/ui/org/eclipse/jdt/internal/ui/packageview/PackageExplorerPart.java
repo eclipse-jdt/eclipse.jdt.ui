@@ -104,7 +104,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -490,7 +490,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			submenu.add(new OpenPerspectiveMenu(getSite().getWorkbenchWindow(), resource));
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
 		}
-		OpenTypeHierarchyHelper.addToMenu(getSite().getWorkbenchWindow(), menu, element);
+		OpenTypeHierarchyUtil.addToMenu(getSite().getWorkbenchWindow(), menu, element);
 	}
 	
 	private void addOpenWithMenu(IMenuManager menu, IStructuredSelection selection) {

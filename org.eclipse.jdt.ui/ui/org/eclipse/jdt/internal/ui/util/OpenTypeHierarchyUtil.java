@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.util;import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -22,6 +23,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
@@ -41,11 +43,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
-public class OpenTypeHierarchyHelper {
-
-	private TypeHierarchyViewPart fTypeHierarchy;
-
-	public OpenTypeHierarchyHelper() {
+public class OpenTypeHierarchyUtil {
+	
+	private OpenTypeHierarchyUtil() {
 	}
 
 	public static boolean canOperateOn(ISelection s) {
@@ -67,22 +67,19 @@ public class OpenTypeHierarchyHelper {
 		}
 	}
 	
-	public void open(ISelection selection, IWorkbenchWindow window) {
-		open(convertToTypes(getElement(selection)), window);
+	public static TypeHierarchyViewPart open(ISelection selection, IWorkbenchWindow window) {
+		return open(convertToTypes(getElement(selection)), window);
 	}
 	
-	public void open(IType[] types, IWorkbenchWindow window) {
+	public static TypeHierarchyViewPart open(IType[] types, IWorkbenchWindow window) {
 		IPreferenceStore store= WorkbenchPlugin.getDefault().getPreferenceStore();
 		String perspectiveSetting=
 			store.getString(IWorkbenchPreferenceConstants.OPEN_NEW_PERSPECTIVE);
-		open(types, window, perspectiveSetting);	
+		return open(types, window, perspectiveSetting);	
 	}
 	
-	public void open(IType[] types, IWorkbenchWindow window, String setting) {
-		if (types == null || types.length == 0) {
-			window.getShell().getDisplay().beep();
-			return;
-		}
+	public static TypeHierarchyViewPart open(IType[] types, IWorkbenchWindow window, String setting) {
+		Assert.isTrue(types != null && types.length != 0);
 			
 		IType input= null;
 		if (types.length > 1) {
@@ -91,7 +88,7 @@ public class OpenTypeHierarchyHelper {
 			input= types[0];
 		}
 		if (input == null)
-			return;
+			return null;
 			
 		try {
 			if (JavaBasePreferencePage.openTypeHierarchyInPerspective()) {
@@ -111,38 +108,31 @@ public class OpenTypeHierarchyHelper {
 				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_editor"), //$NON-NLS-1$
 				e.getMessage());
 		}
+		return null;
 	}
 
-	public void selectMember(IMember member) {
-		if (member == null || fTypeHierarchy == null)
-			return;
-		fTypeHierarchy.selectMember(member);	
-	}
-	
-	private void openInViewPart(IWorkbenchWindow window, IType input) {
+	private static TypeHierarchyViewPart openInViewPart(IWorkbenchWindow window, IType input) {
 		IWorkbenchPage page= window.getActivePage();
 		try {
 			// 1GEUMSG: ITPJUI:WINNT - Class hierarchy not shown when fast view
 			openEditor(input);
-			fTypeHierarchy= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
-			fTypeHierarchy.setInput(input);
-		} catch (PartInitException e) {
-			JavaPlugin.log(e);
-			MessageDialog.openError(window.getShell(), 
-				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_view"), e.getMessage()); //$NON-NLS-1$
-		} catch (JavaModelException e) {
+			TypeHierarchyViewPart result= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
+			result.setInput(input);
+			return result;
+		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
 			MessageDialog.openError(window.getShell(), 
 				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_view"), e.getMessage()); //$NON-NLS-1$
-		}		
+		}
+		return null;		
 	}
 	
-	private void openInPerspective(IWorkbenchWindow window, IType input, String setting) throws WorkbenchException, JavaModelException {
+	private static TypeHierarchyViewPart openInPerspective(IWorkbenchWindow window, IType input, String setting) throws WorkbenchException, JavaModelException {
 		IPerspectiveRegistry registry= PlatformUI.getWorkbench().getPerspectiveRegistry();
 		IPerspectiveDescriptor pd= registry.findPerspectiveWithId(JavaUI.ID_HIERARCHYPERSPECTIVE);
 		if (pd == null) {
-			JavaPlugin.getDefault().logErrorMessage("Type Hierarchy perspective not found"); //$NON-NLS-1$
-			return;
+			JavaPlugin.getDefault().logErrorMessage(JavaUIMessages.getString("OpenTypeHierarchyUtil.error.no_perspective")); //$NON-NLS-1$
+			return null;
 		}
 		
 		if (setting.equals(IWorkbenchPreferenceConstants.OPEN_PERSPECTIVE_WINDOW))
@@ -154,16 +144,17 @@ public class OpenTypeHierarchyHelper {
 		else if (setting.equals(IWorkbenchPreferenceConstants.OPEN_PERSPECTIVE_REPLACE))
 			// We can't change the input of a perspective. So fall back an open 
 			// a new one.
-			openPage(window, pd, input);			
+			openPage(window, pd, input);
+		return null;
 	}
 
-	private void openEditor(Object input) throws PartInitException, JavaModelException {
+	private static void openEditor(Object input) throws PartInitException, JavaModelException {
 		IEditorPart part= EditorUtility.openInEditor(input, false);
 		if (input instanceof ISourceReference)
 			EditorUtility.revealInEditor(part, (ISourceReference)input);
 	}
 	
-	private void openWindow(IWorkbenchWindow activeWindow, IPerspectiveDescriptor pd, IType input) throws WorkbenchException, JavaModelException {
+	private static void openWindow(IWorkbenchWindow activeWindow, IPerspectiveDescriptor pd, IType input) throws WorkbenchException, JavaModelException {
 		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -184,7 +175,7 @@ public class OpenTypeHierarchyHelper {
 		openEditor(input);	
 	}
 
-	private void openPage(IWorkbenchWindow window, IPerspectiveDescriptor pd, IType input) throws WorkbenchException, JavaModelException {
+	private static void openPage(IWorkbenchWindow window, IPerspectiveDescriptor pd, IType input) throws WorkbenchException, JavaModelException {
 		IWorkbenchPage page= findPageFor(window, input);
 		if (page != null) {
 			window.setActivePage(page);
@@ -194,7 +185,7 @@ public class OpenTypeHierarchyHelper {
 		}
 	}
 
-	private IWorkbenchPage findPageFor(IWorkbenchWindow window, IType input) {
+	private static IWorkbenchPage findPageFor(IWorkbenchWindow window, IType input) {
 		IWorkbenchPage pages[]= window.getPages();
 		for (int i= 0; i < pages.length; i++) {
 			IWorkbenchPage page= pages[i];
@@ -204,7 +195,7 @@ public class OpenTypeHierarchyHelper {
 		return null;
 	}
 	
-	private IType selectType(IType[] types, Shell shell) {		
+	private static IType selectType(IType[] types, Shell shell) {		
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell,			

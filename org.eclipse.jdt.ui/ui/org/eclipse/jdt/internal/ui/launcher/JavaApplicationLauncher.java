@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.util.Utilities;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
@@ -234,7 +234,7 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 	}
 	
 	private void registerLaunch(final ILaunch launch) {
-		Utilities.getDisplay(null).syncExec(new Runnable() {
+		SWTUtil.getStandardDisplay().syncExec(new Runnable() {
 			public void run() {
 				DebugPlugin.getDefault().getLaunchManager().registerLaunch(launch);
 			}

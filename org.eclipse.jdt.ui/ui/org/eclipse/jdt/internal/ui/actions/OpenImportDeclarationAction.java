@@ -60,25 +60,25 @@ public class OpenImportDeclarationAction extends Action implements IUpdate {
 	}
 	
 	public void run() {
-		ISelection s= fSelectionProvider.getSelection();	
-		if (s instanceof IStructuredSelection) {
-			IStructuredSelection ss= (IStructuredSelection) s;
-			IImportDeclaration declaration= (IImportDeclaration) ss.getFirstElement();
-			try {
-				String containerName;
-				if (declaration.isOnDemand()) {
-					String importName= declaration.getElementName();
-					containerName= importName.substring(0, importName.length() - 2);
-				} else {
-					containerName= declaration.getElementName();
-				}
-				IJavaElement element= JavaModelUtil.findTypeContainer(declaration.getJavaProject(), containerName);
-				EditorUtility.openInEditor(element);
-			} catch (CoreException x) {
-				Shell shell= JavaPlugin.getActiveWorkbenchShell();
-				JavaPlugin.log(x.getStatus());
-				ErrorDialog.openError(shell, JavaUIMessages.getString("OpenImportDeclarationAction.errorTitle"), JavaUIMessages.getString("OpenImportDeclarationAction.errorMessage"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+		if (!canOperateOn())
+			return;
+			
+		IStructuredSelection selection= (IStructuredSelection)fSelectionProvider.getSelection();	
+		IImportDeclaration declaration= (IImportDeclaration)selection.getFirstElement();
+		try {
+			String containerName;
+			if (declaration.isOnDemand()) {
+				String importName= declaration.getElementName();
+				containerName= importName.substring(0, importName.length() - 2);
+			} else {
+				containerName= declaration.getElementName();
 			}
+			IJavaElement element= JavaModelUtil.findTypeContainer(declaration.getJavaProject(), containerName);
+			EditorUtility.openInEditor(element);
+		} catch (CoreException x) {
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			JavaPlugin.log(x.getStatus());
+			ErrorDialog.openError(shell, JavaUIMessages.getString("OpenImportDeclarationAction.errorTitle"), JavaUIMessages.getString("OpenImportDeclarationAction.errorMessage"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 }

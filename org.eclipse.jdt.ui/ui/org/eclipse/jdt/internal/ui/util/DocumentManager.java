@@ -22,9 +22,6 @@ import org.eclipse.jdt.core.JavaModelException;
   
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-/**
- * Helper class to deal with documents and annotations.
- */
 public class DocumentManager implements IDocumentManager {
 	
 	private IFileEditorInput fInput;
@@ -41,13 +38,6 @@ public class DocumentManager implements IDocumentManager {
 		this(getUnderlyingResource(co), JavaPlugin.getDefault().getCompilationUnitDocumentProvider());
 	}
 	
-	private static IFile getUnderlyingResource(ICompilationUnit cu) throws JavaModelException {
-		if (cu.isWorkingCopy()) {
-			cu= (ICompilationUnit) cu.getOriginalElement();
-		}
-		return (IFile) cu.getUnderlyingResource();
-	}	
-	 
 	/**
 	 * Creates a new DocumentManager for the given compilation unit and document provider.
 	 */
@@ -65,9 +55,8 @@ public class DocumentManager implements IDocumentManager {
 		Assert.isNotNull(fDocumentProvider);
 	}
 		
-	/**
-	 * Connects the document to the annotation model. The document is shared via 
-	 * the document provider passed to the constructor.
+	/* (non Javadoc)
+	 * method declared in IDocumentManager.
 	 */
 	public void connect() throws CoreException {
 		if (fConnectCount == 0) {
@@ -79,17 +68,15 @@ public class DocumentManager implements IDocumentManager {
 		fConnectCount++;
 	}
 	
-	/**
-	 * Returns the document managed by this manager. This method returns <code>
-	 * null</code> if the document is disconnected.
+	/* (non Javadoc)
+	 * method declared in IDocumentManager.
 	 */
 	public IDocument getDocument() {
 		return fDocument;
 	}
 	
-	/**
-	 * Disconnects the document managed by this manager from its document
-	 * provider and disconnects the annotation model.
+	/* (non Javadoc)
+	 * method declared in IDocumentManager.
 	 */
 	public void disconnect() {
 		Assert.isTrue(fConnectCount > 0);
@@ -102,8 +89,8 @@ public class DocumentManager implements IDocumentManager {
 		}
 	} 
 	
-	/**
-	 * The client is about to change the document.
+	/* (non Javadoc)
+	 * method declared in IDocumentManager.
 	 */
 	public void aboutToChange() {
 		if (fDocument == null)
@@ -112,8 +99,8 @@ public class DocumentManager implements IDocumentManager {
 		fDocumentProvider.aboutToChange(fInput);
 	}
 	 
-	/**
-	 * Save the document managed by this object.
+	/* (non Javadoc)
+	 * method declared in IDocumentManager.
 	 */
 	public void save(IProgressMonitor pm) throws CoreException {
 		if (fDocument == null)
@@ -122,8 +109,8 @@ public class DocumentManager implements IDocumentManager {
 		fDocumentProvider.saveDocument(pm, fInput, fDocument, false);	
 	}	 
 	
-	/**
-	 * The client has changed the document.
+	/* (non Javadoc)
+	 * method declared in IDocumentManager.
 	 */
 	public void changed() {
 		if (fDocument == null)
@@ -131,4 +118,13 @@ public class DocumentManager implements IDocumentManager {
 			
 		fDocumentProvider.changed(fInput);
 	} 	
+	
+	//---- Helper methods ---------------------------------------------------------------------
+	
+	private static IFile getUnderlyingResource(ICompilationUnit cu) throws JavaModelException {
+		if (cu.isWorkingCopy()) {
+			cu= (ICompilationUnit) cu.getOriginalElement();
+		}
+		return (IFile) cu.getUnderlyingResource();
+	}		
 }

@@ -19,50 +19,49 @@ import org.eclipse.jface.operation.ModalContext;
  * A runnable context that shows the busy cursor instead of a progress
  * monitor. Note, that the UI thread is blocked even if the runnable
  * is executed in a separate thread by passing <code>fork= true</code>
- * to the context's run method. Furthermore the context doesn't provide
+ * to the context's run method. Furthermore this context doesn't provide
  * any UI to cancel the operation.
  */
 public class BusyIndicatorRunnableContext implements IRunnableContext {
 
-	static class ThreadContext extends Thread {
-		IRunnableWithProgress fRunnable;
-		Throwable fThrowable;
+	private static class BusyRunnable implements Runnable {
 		
-		public ThreadContext(IRunnableWithProgress runnable) {
-			this(runnable, "BusyCursorRunnableContext-Thread"); //$NON-NLS-1$
-		}
-		
-		protected ThreadContext(IRunnableWithProgress runnable, String name) {
-			super(name);
-			fRunnable= runnable;
-		}
-		
-		public void run() {
-			try {
-				fRunnable.run(new NullProgressMonitor());
-			} catch (InvocationTargetException e) {
-				fThrowable= e;
-			} catch (InterruptedException e) {
-				fThrowable= e;
-			} catch (ThreadDeath e) {
-				fThrowable= e;
-				throw e;
-			} catch (RuntimeException e) {
-				fThrowable= e;
-			} catch (Error e) {
-				fThrowable= e;
+		private static class ThreadContext extends Thread {
+			IRunnableWithProgress fRunnable;
+			Throwable fThrowable;
+			
+			public ThreadContext(IRunnableWithProgress runnable) {
+				this(runnable, "BusyCursorRunnableContext-Thread"); //$NON-NLS-1$
+			}			
+			protected ThreadContext(IRunnableWithProgress runnable, String name) {
+				super(name);
+				fRunnable= runnable;
+			}
+			public void run() {
+				try {
+					fRunnable.run(new NullProgressMonitor());
+				} catch (InvocationTargetException e) {
+					fThrowable= e;
+				} catch (InterruptedException e) {
+					fThrowable= e;
+				} catch (ThreadDeath e) {
+					fThrowable= e;
+					throw e;
+				} catch (RuntimeException e) {
+					fThrowable= e;
+				} catch (Error e) {
+					fThrowable= e;
+				}
+			}
+			void sync() {
+				try {
+					join();
+				} catch (InterruptedException e) {
+					// ok to ignore exception
+				}
 			}
 		}
 		
-		void sync() {
-			try {
-				join();
-			} catch (InterruptedException e) {
-			}
-		}
-	}
-	
-	static class BusyRunnable implements Runnable {
 		public Throwable fThrowable;
 		private boolean fFork;
 		private IRunnableWithProgress fRunnable;
@@ -79,6 +78,38 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 				fThrowable= e;
 			}
 		}
+		private void internalRun(boolean fork, final IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
+			Thread thread= Thread.currentThread();
+			// Do not spawn another thread if we are already in a modal context
+			// thread or inside a busy context thread.
+			if (thread instanceof ThreadContext || ModalContext.isModalContextThread(thread))
+				fork= false;
+				
+			if (fork) {
+				final ThreadContext t= new ThreadContext(runnable);
+				t.start();
+				t.sync();
+				// Check if the separate thread was terminated by an exception
+				Throwable throwable= t.fThrowable;
+				if (throwable != null) {
+					if (throwable instanceof InvocationTargetException) {
+						throw (InvocationTargetException) throwable;
+					} else if (throwable instanceof InterruptedException) {
+						throw (InterruptedException) throwable;
+					} else if (throwable instanceof OperationCanceledException) {
+						throw new InterruptedException();
+					} else {
+						throw new InvocationTargetException(throwable);
+					}
+				}
+			} else {
+				try {
+					runnable.run(new NullProgressMonitor());
+				} catch (OperationCanceledException e) {
+					throw new InterruptedException();
+				}	
+			}
+		}
 	}
 
 	/* (non-Javadoc)
@@ -93,38 +124,5 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 		} else if (throwable instanceof InterruptedException) {
 			throw (InterruptedException)throwable;
 		}
-	}
-	
-	private static void internalRun(boolean fork, final IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
-		Thread thread= Thread.currentThread();
-		// Do not spawn another thread if we are already in a modal context
-		// thread or inside a busy context thread.
-		if (thread instanceof ThreadContext || ModalContext.isModalContextThread(thread))
-			fork= false;
-			
-		if (fork) {
-			final ThreadContext t= new ThreadContext(runnable);
-			t.start();
-			t.sync();
-			// Check if the separate thread was terminated by an exception
-			Throwable throwable= t.fThrowable;
-			if (throwable != null) {
-				if (throwable instanceof InvocationTargetException) {
-					throw (InvocationTargetException) throwable;
-				} else if (throwable instanceof InterruptedException) {
-					throw (InterruptedException) throwable;
-				} else if (throwable instanceof OperationCanceledException) {
-					throw new InterruptedException();
-				} else {
-					throw new InvocationTargetException(throwable);
-				}
-			}
-		} else {
-			try {
-				runnable.run(new NullProgressMonitor());
-			} catch (OperationCanceledException e) {
-				throw new InterruptedException();
-			}	
-		}
-	}
+	}	
 }

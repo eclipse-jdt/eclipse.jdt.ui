@@ -201,8 +201,8 @@ public class JavaElementLabelProvider extends LabelProvider {
 		disposeJarEntryImages();
 	}
 	
-	public void setErrorTickManager(IErrorTickProvider manager) {
-		fImageLabelProvider.setErrorTickManager(manager);
+	public void setErrorTickManager(IErrorTickProvider provider) {
+		fImageLabelProvider.setErrorTickProvider(provider);
 	}	
 	
 	/*

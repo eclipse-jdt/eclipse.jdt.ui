@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
 /**
@@ -73,6 +74,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private FileDocumentProvider fSnippetDocumentProvider;
 	private JavaTextTools fJavaTextTools;
 	private ProblemMarkerManager fProblemMarkerManager;
+	private ImageDescriptorRegistry fImageDescriptorRegistry;
 	
 	
 	public static JavaPlugin getDefault() {
@@ -151,9 +153,14 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return new Path(getDefault().getDescriptor().getInstallURL().getFile());
 	}
 	
+	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
+		return getDefault().fImageDescriptorRegistry;
+	}
+	
 	public JavaPlugin(IPluginDescriptor descriptor) {
 		super(descriptor);
 		fgJavaPlugin= this;
+		fImageDescriptorRegistry= new ImageDescriptorRegistry();
 	}
 	
 	/* (non - Javadoc)
@@ -184,6 +191,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * Method declared in Plugin
 	 */
 	public void shutdown() throws CoreException {
+		
+		fImageDescriptorRegistry.dispose();
 		
 		super.shutdown();
 		

@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -1055,7 +1055,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			action= getAction("DeleteElement"); //$NON-NLS-1$
 		else if (event.keyCode == SWT.F4) {
 			// Special case since Open Type Hierarchy is no action.
-			(new OpenTypeHierarchyHelper()).open(getSelection(), fEditor.getSite().getWorkbenchWindow());
+			OpenTypeHierarchyUtil.open(getSelection(), fEditor.getSite().getWorkbenchWindow());
 		}
 			
 		if (action != null && action.isEnabled())

@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.Utilities;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -59,7 +59,7 @@ public class RenameJavaElementAction extends Action implements IUpdate {
 	}
 
 	private void beep() {
-		Utilities.getDisplay(null).beep();
+		SWTUtil.getStandardDisplay().beep();
 	}
 
 	private static boolean canActivate(Refactoring ref) throws JavaModelException{

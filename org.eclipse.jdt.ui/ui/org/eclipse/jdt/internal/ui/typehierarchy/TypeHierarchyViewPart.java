@@ -84,7 +84,7 @@ import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
@@ -384,7 +384,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 						Object elem= SelectionUtil.getSingleElement(getCurrentViewer().getSelection());
 						if (elem instanceof IType) {
 							IType[] arr= new IType[] { (IType) elem };
-							new OpenTypeHierarchyHelper().open(arr, getSite().getWorkbenchWindow());			
+							OpenTypeHierarchyUtil.open(arr, getSite().getWorkbenchWindow());			
 						} else {
 							getCurrentViewer().getControl().getDisplay().beep();
 						}
@@ -678,7 +678,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 
 	private void addOpenPerspectiveItem(IMenuManager menu, IStructuredSelection selection) {
-		OpenTypeHierarchyHelper.addToMenu(getSite().getWorkbenchWindow(), menu, selection);
+		OpenTypeHierarchyUtil.addToMenu(getSite().getWorkbenchWindow(), menu, selection);
 	}
 
 	/**

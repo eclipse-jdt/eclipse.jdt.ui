@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.Utilities;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -58,7 +58,7 @@ public abstract class JavaLauncher implements IVMRunner {
 	}
 	
 	protected void showErrorDialog(final String title, final String message, final IStatus error) {
-		Display d= Utilities.getDisplay(null);
+		Display d= SWTUtil.getStandardDisplay();
 		if (d != null) {
 			d.syncExec(new Runnable() {
 				public void run() {
@@ -72,7 +72,7 @@ public abstract class JavaLauncher implements IVMRunner {
 	
 	protected boolean askRetry(final String title, final String message) {
 		final boolean[] result= new boolean[1];
-		Utilities.getDisplay(null).syncExec(new Runnable() {
+		SWTUtil.getStandardDisplay().syncExec(new Runnable() {
 			public void run() {
 				result[0]= (MessageDialog.openConfirm(JavaPlugin.getActiveWorkbenchShell(), title, message));
 			}

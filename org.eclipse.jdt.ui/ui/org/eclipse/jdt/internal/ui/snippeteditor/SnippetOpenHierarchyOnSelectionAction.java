@@ -6,7 +6,8 @@ package org.eclipse.jdt.internal.ui.snippeteditor;
  */
  
 import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.PartInitException;
 
@@ -39,9 +40,9 @@ public class SnippetOpenHierarchyOnSelectionAction extends SnippetOpenOnSelectio
 	protected void open(ISourceReference sourceReference) throws JavaModelException, PartInitException {
 		IType type= getType(sourceReference);
 		if (type != null) {
-			OpenTypeHierarchyHelper helper= new OpenTypeHierarchyHelper();
-			helper.open(new IType[] { type }, fEditor.getSite().getWorkbenchWindow());
-			helper.selectMember(getMember(sourceReference));
+			TypeHierarchyViewPart part= OpenTypeHierarchyUtil.open(new IType[] { type }, fEditor.getSite().getWorkbenchWindow());
+			if (part != null)
+				part.selectMember(getMember(sourceReference));
 		} else {
 			getShell().getDisplay().beep();
 		}

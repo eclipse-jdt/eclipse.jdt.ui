@@ -8,12 +8,12 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -24,39 +24,51 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * Default strategy of the Java plugin for the construction of Java element icons.
  */
 public class JavaImageLabelProvider {
 	
-	static final Point SMALL_SIZE= new Point(16, 16);
-	static final Point BIG_SIZE= new Point(22, 16);
+	private static final Point SMALL_SIZE= new Point(16, 16);
+	private static final Point BIG_SIZE= new Point(22, 16);
+
+	private static ImageDescriptor DESC_OBJ_PROJECT_CLOSED;	
+	private static ImageDescriptor DESC_OBJ_PROJECT;	
+	private static ImageDescriptor DESC_OBJ_FOLDER;
+	{
+		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages(); 
+		DESC_OBJ_PROJECT_CLOSED= images.getImageDescriptor(ISharedImages.IMG_OBJ_PROJECT_CLOSED);
+		DESC_OBJ_PROJECT= 		 images.getImageDescriptor(ISharedImages.IMG_OBJ_PROJECT);
+		DESC_OBJ_FOLDER= 		 images.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
+	}
 	
-	protected int fFlags;
-	protected OverlayIconManager fIconManager; 
+	private int fFlags;
+	private Point fSize;
+	private ImageDescriptorRegistry fRegistry;
+	private IErrorTickProvider fErrorTickProvider;
 		
 	public JavaImageLabelProvider(int flags) {
 		fFlags= flags;
-		JavaElementDescriptorFactory factory= new JavaElementDescriptorFactory();
-		
 		if ((flags & JavaElementLabelProvider.SHOW_SMALL_ICONS) != 0)
-			fIconManager= new OverlayIconManager(factory, SMALL_SIZE);
+			fSize= SMALL_SIZE;
 		else 
-			fIconManager= new OverlayIconManager(factory, BIG_SIZE);
+			fSize= BIG_SIZE;
+		fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	}
 	
-	public void setErrorTickManager(IErrorTickProvider manager) {
-		((JavaElementDescriptorFactory)fIconManager.getDescriptorFactory()).setErrorTickManager(manager);
+	public void setErrorTickProvider(IErrorTickProvider provider) {
+		fErrorTickProvider= provider;
 	}
 	
 	public void turnOn(int flags) {
@@ -65,17 +77,32 @@ public class JavaImageLabelProvider {
 	
 	public void turnOff(int flags) {
 		fFlags &= (~flags);
+	}	
+	
+	/**
+	 * Returns the icon for a given Java elements. The icon depends on the element type
+	 * and element properties. If configured, overlay icons are constructed for
+	 * <code>ISourceReference</code>s. Overlay icon construction is  done by the 
+	 * <code>OverlayIconManager</code>.
+	 */
+	public Image getLabelImage(IJavaElement element) {
+		int flags= showOverlayIcons() ? computeAdornmentFlags(element) : 0;
+		JavaElementImageDescriptor descriptor= new JavaElementImageDescriptor(
+			computeBaseImageDescriptor(element), flags, fSize);
+
+		return fRegistry.get(descriptor);			
 	}
 	
-	
-	protected boolean showOverlayIcons() {
+	private boolean showOverlayIcons() {
 		return (fFlags & JavaElementLabelProvider.SHOW_OVERLAY_ICONS) != 0;
 	}
 	
+	// ---- Computation of base image key -------------------------------------------------
+	
 	/**
-	 * Maps a Java element to an appropriate icon name.
+	 * Maps a Java element to an appropriate base image descriptor.
 	 */
-	protected String getImageName(IJavaElement element) {
+	private ImageDescriptor computeBaseImageDescriptor(IJavaElement element) {
 		try {
 			
 			switch (element.getElementType()) {
@@ -85,26 +112,26 @@ public class JavaImageLabelProvider {
 				case IJavaElement.FIELD: {
 					IMember member= (IMember) element;
 					if (member.getDeclaringType().isInterface())
-						return JavaPluginImages.IMG_MISC_PUBLIC;
+						return JavaPluginImages.DESC_MISC_PUBLIC;
 					
 					int flags= member.getFlags();
 					if (Flags.isPublic(flags))
-						return JavaPluginImages.IMG_MISC_PUBLIC;
+						return JavaPluginImages.DESC_MISC_PUBLIC;
 					if (Flags.isProtected(flags))
-						return JavaPluginImages.IMG_MISC_PROTECTED;
+						return JavaPluginImages.DESC_MISC_PROTECTED;
 					if (Flags.isPrivate(flags))
-						return JavaPluginImages.IMG_MISC_PRIVATE;
+						return JavaPluginImages.DESC_MISC_PRIVATE;
 					
-					return JavaPluginImages.IMG_MISC_DEFAULT;
+					return JavaPluginImages.DESC_MISC_DEFAULT;
 				}
 				case IJavaElement.PACKAGE_DECLARATION:
-					return JavaPluginImages.IMG_OBJS_PACKDECL;
+					return JavaPluginImages.DESC_OBJS_PACKDECL;
 				
 				case IJavaElement.IMPORT_DECLARATION:
-					return JavaPluginImages.IMG_OBJS_IMPDECL;
+					return JavaPluginImages.DESC_OBJS_IMPDECL;
 					
 				case IJavaElement.IMPORT_CONTAINER:
-					return JavaPluginImages.IMG_OBJS_IMPCONT;
+					return JavaPluginImages.DESC_OBJS_IMPCONT;
 				
 				case IJavaElement.TYPE: {
 					IType type= (IType) element;
@@ -112,8 +139,8 @@ public class JavaImageLabelProvider {
 					boolean hasVisibility= Flags.isPublic(flags) || Flags.isPrivate(flags) || Flags.isProtected(flags);
 					
 					if (type.isClass())
-						return hasVisibility ? JavaPluginImages.IMG_OBJS_CLASS : JavaPluginImages.IMG_OBJS_PCLASS;
-					return hasVisibility ? JavaPluginImages.IMG_OBJS_INTERFACE : JavaPluginImages.IMG_OBJS_PINTERFACE;
+						return hasVisibility ? JavaPluginImages.DESC_OBJS_CLASS : JavaPluginImages.DESC_OBJS_PCLASS;
+					return hasVisibility ? JavaPluginImages.DESC_OBJS_INTERFACE : JavaPluginImages.DESC_OBJS_PINTERFACE;
 				}
 
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
@@ -122,19 +149,19 @@ public class JavaImageLabelProvider {
 						IPath attach= root.getSourceAttachmentPath();
 						if (root.isExternal()) {
 							if (attach == null) {
-								return JavaPluginImages.IMG_OBJS_EXTJAR;
+								return JavaPluginImages.DESC_OBJS_EXTJAR;
 							} else {
-								return JavaPluginImages.IMG_OBJS_EXTJAR_WSRC;
+								return JavaPluginImages.DESC_OBJS_EXTJAR_WSRC;
 							}
 						} else {
 							if (attach == null) {
-								return JavaPluginImages.IMG_OBJS_JAR;
+								return JavaPluginImages.DESC_OBJS_JAR;
 							} else {
-								return JavaPluginImages.IMG_OBJS_JAR_WSRC;
+								return JavaPluginImages.DESC_OBJS_JAR_WSRC;
 							}
 						}							
 					} else {
-						return JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT;
+						return JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT;
 					}
 				}
 				case IJavaElement.PACKAGE_FRAGMENT:
@@ -143,14 +170,14 @@ public class JavaImageLabelProvider {
 						// show the folder icon for packages with only non Java resources
 						// fix for: 1G5WN0V 
 						if (!fragment.hasChildren() && (fragment.getNonJavaResources().length >0)) 
-							return ISharedImages.IMG_OBJ_FOLDER;
+							return DESC_OBJ_FOLDER;
 					} catch(JavaModelException e) {
-						return ISharedImages.IMG_OBJ_FOLDER;
+						return DESC_OBJ_FOLDER;
 					}
-					return JavaPluginImages.IMG_OBJS_PACKAGE;
+					return JavaPluginImages.DESC_OBJS_PACKAGE;
 					
 				case IJavaElement.COMPILATION_UNIT:
-					return JavaPluginImages.IMG_OBJS_CUNIT;
+					return JavaPluginImages.DESC_OBJS_CUNIT;
 					
 				case IJavaElement.CLASS_FILE:
 					/* this is too expensive for large packages
@@ -162,75 +189,102 @@ public class JavaImageLabelProvider {
 					} catch(JavaModelException e) {
 						// fall through;
 					}*/
-					return JavaPluginImages.IMG_OBJS_CFILE;
+					return JavaPluginImages.DESC_OBJS_CFILE;
 					
 				case IJavaElement.JAVA_PROJECT: 
 					IJavaProject jp= (IJavaProject)element;
 					if (jp.getProject().isOpen()) {
-						// fix: 1GF6CDH: ITPJUI:ALL - Packages view doesn't show the nature decoration
-						if (showOverlayIcons()) {
-							String imageId= getManagedId(jp);
-							if (imageId != null)
-								return imageId;
+						IProject project= jp.getProject();
+						IWorkbenchAdapter adapter= (IWorkbenchAdapter)project.getAdapter(IWorkbenchAdapter.class);
+						if (adapter != null) {
+							ImageDescriptor result= adapter.getImageDescriptor(project);
+							if (result != null)
+								return result;
 						}
-						// end fix.
-						return ISharedImages.IMG_OBJ_PROJECT;
+						return DESC_OBJ_PROJECT;
 					}
-					return ISharedImages.IMG_OBJ_PROJECT_CLOSED;
+					return DESC_OBJ_PROJECT_CLOSED;
 			}
 			
 			Assert.isTrue(false, JavaUIMessages.getString("JavaImageLabelprovider.assert.wrongImage")); //$NON-NLS-1$
-			return ""; //$NON-NLS-1$
+			return null; //$NON-NLS-1$
 		
-		} catch (CoreException x) {
-			return JavaPluginImages.IMG_OBJS_GHOST;
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			return JavaPluginImages.DESC_OBJS_GHOST;
 		}
 	}
-	// 1GF6CDH: ITPJUI:ALL - Packages view doesn't show the nature decoration
-	public String createBaseImageId(IJavaProject javaProject) throws CoreException {
-		IProject project=javaProject.getProject();
-		String[] natures= project.getDescription().getNatureIds();
-		if (natures.length > 0)
-			return ISharedImages.IMG_OBJ_PROJECT+natures[0];
-		return ISharedImages.IMG_OBJ_PROJECT;
-	}
-	
-	public String getManagedId(IJavaProject javaProject) throws CoreException {
-		String id= createBaseImageId(javaProject);
-		if (fIconManager.isManaged(id))
-			return id;
-		IProject project=javaProject.getProject();
-		IWorkbenchAdapter adapter= (IWorkbenchAdapter)project.getAdapter(IWorkbenchAdapter.class);
-		if (adapter != null) {
-			ImageDescriptor desc= adapter.getImageDescriptor(project);
-			if (desc != null) {
-				fIconManager.manage(id, desc);
-				return id;
-			}
-		}
-		return null;
-	}
-	// end fix.
 
-	/**
-	 * Returns the icon for a given Java elements. The icon depends on the element type
-	 * and element properties. If configured, overlay icons are constructed for
-	 * <code>ISourceReference</code>s. Overlay icon construction is  done by the 
-	 * <code>OverlayIconManager</code>.
-	 */
-	public Image getLabelImage(IJavaElement element) {
-		String icon= getImageName(element);
-				
-		if (showOverlayIcons()) {
-			if (icon != null) {
-				return fIconManager.getIcon(icon, element);
+	// ---- Methods to compute the adornments flags ---------------------------------
+	
+	private int computeAdornmentFlags(IJavaElement element) {
+		
+		int flags= 0;
+
+		if (fErrorTickProvider != null) {
+			int info= fErrorTickProvider.getErrorInfo(element);
+			if ((info & IErrorTickProvider.ERRORTICK_ERROR) != 0) {
+				flags |= JavaElementImageDescriptor.ERROR;
+			} else if ((info & IErrorTickProvider.ERRORTICK_WARNING) != 0) {
+				flags |= JavaElementImageDescriptor.WARNING;
 			}
-		} 
-		Image img= JavaPluginImages.get(icon);
-		if (img == null) {
-			img= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(icon);
 		}
-		return img;
+					
+		if (element instanceof ISourceReference) { 
+			ISourceReference sourceReference= (ISourceReference)element;
+			int modifiers= getModifiers(sourceReference);
+		
+			if (Flags.isAbstract(modifiers) && confirmAbstract((IMember) sourceReference))
+				flags |= JavaElementImageDescriptor.ABSTRACT;
+			if (Flags.isFinal(modifiers))
+				flags |= JavaElementImageDescriptor.FINAL;
+			if (Flags.isSynchronized(modifiers) && confirmSynchronized((IMember) sourceReference))
+				flags |= JavaElementImageDescriptor.SYNCHRONIZED;
+			if (Flags.isStatic(modifiers))
+				flags |= JavaElementImageDescriptor.STATIC;
+				
+			if (sourceReference instanceof IType) {
+				try {
+					if (JavaModelUtil.hasMainMethod((IType)sourceReference))
+						flags |= JavaElementImageDescriptor.RUNNABLE;
+				} catch (JavaModelException e) {
+					// do nothing. Can't compute runnable adornment.
+				}
+			}
+		}
+		return flags;
 	}
 	
+	private boolean confirmAbstract(IMember member) {
+		 // Although all methods of a Java interface are abstract, the abstract 
+		 // icon should not be shown.
+		IType t= member.getDeclaringType();
+		if (t == null && member instanceof IType)
+			t= (IType) member;
+		if (t != null) {
+			try {
+				return !t.isInterface();
+			} catch (JavaModelException x) {
+				// do nothing. Can't compute abstract state.
+			}
+		}
+		return true;
+	}
+	
+	private boolean confirmSynchronized(IMember member) {
+		// Synchronized types are allowed but meaningless.
+		return !(member instanceof IType);
+	}
+	
+	private int getModifiers(ISourceReference sourceReference) {
+		if (sourceReference instanceof IMember) {
+			try {
+				return ((IMember) sourceReference).getFlags();
+			} catch (JavaModelException x) {
+				// do nothing. Can't compute modifier state.
+			}
+		}
+		return 0;
+	}
+
 }

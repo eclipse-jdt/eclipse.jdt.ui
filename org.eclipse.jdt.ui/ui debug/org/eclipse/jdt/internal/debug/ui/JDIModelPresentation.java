@@ -5,30 +5,68 @@
 package org.eclipse.jdt.internal.debug.ui;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.debug.core.*;
-import org.eclipse.debug.core.model.*;
-import org.eclipse.debug.ui.*;
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.debug.core.*;
-import org.eclipse.jdt.internal.ui.*;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.launcher.DebugOverlayDescriptorFactory;
-import org.eclipse.jdt.internal.ui.viewsupport.OverlayIconManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.*;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.debug.core.model.IStackFrame;
+import org.eclipse.debug.core.model.ITerminate;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugModelPresentation;
+import org.eclipse.debug.ui.IDebugUIConstants;
+
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.debug.core.IJavaBreakpoint;
+import org.eclipse.jdt.debug.core.IJavaDebugTarget;
+import org.eclipse.jdt.debug.core.IJavaExceptionBreakpoint;
+import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
+import org.eclipse.jdt.debug.core.IJavaMethodEntryBreakpoint;
+import org.eclipse.jdt.debug.core.IJavaModifiers;
+import org.eclipse.jdt.debug.core.IJavaRunToLineBreakpoint;
+import org.eclipse.jdt.debug.core.IJavaStackFrame;
+import org.eclipse.jdt.debug.core.IJavaThread;
+import org.eclipse.jdt.debug.core.IJavaValue;
+import org.eclipse.jdt.debug.core.IJavaVariable;
+import org.eclipse.jdt.debug.core.IJavaWatchpoint;
+
+import org.eclipse.jdt.internal.ui.IPreferencesConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageDescriptor;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * @see IDebugModelPresentation
@@ -38,8 +76,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	protected HashMap fAttributes= new HashMap(3);
 
 	static final Point BIG_SIZE= new Point(22, 16);
-	protected OverlayIconManager fIconManager= new OverlayIconManager(new DebugOverlayDescriptorFactory(), BIG_SIZE);
-
+	protected ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
+	
 	// Thread label resource String keys
 	private static final String THREAD_PREFIX= "jdi_thread.";
 	private static final String LABEL= THREAD_PREFIX + "label.";
@@ -524,20 +562,44 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 
 	protected Image getVariableImage(IAdaptable element) {
+		JavaElementImageDescriptor descriptor= new JavaElementImageDescriptor(
+			computeBaseImageDescriptor(element), computeAdornmentFlags(element), BIG_SIZE);
+
+		return fRegistry.get(descriptor);			
+	}
+	
+	private ImageDescriptor computeBaseImageDescriptor(IAdaptable element) {
 		IJavaVariable javaVariable= (IJavaVariable) element.getAdapter(IJavaVariable.class);
 		if (javaVariable != null) {
 			try {
 				if (javaVariable.isPublic())
-					return fIconManager.getIcon(JavaPluginImages.IMG_MISC_PUBLIC, element);
+					return JavaPluginImages.DESC_MISC_PUBLIC;
 				if (javaVariable.isProtected())
-					return fIconManager.getIcon(JavaPluginImages.IMG_MISC_PROTECTED, element);
+					return JavaPluginImages.DESC_MISC_PROTECTED;
 				if (javaVariable.isPrivate())
-					return fIconManager.getIcon(JavaPluginImages.IMG_MISC_PRIVATE, element);
+					return JavaPluginImages.DESC_MISC_PRIVATE;
 			} catch (DebugException e) {
 			}
-			return fIconManager.getIcon(JavaPluginImages.IMG_MISC_DEFAULT, element);
 		}
-		return null;
+		return JavaPluginImages.DESC_MISC_DEFAULT;
+	}
+	
+	private int computeAdornmentFlags(IAdaptable element) {
+		int flags= 0;
+		IJavaModifiers javaProperties= (IJavaModifiers)element.getAdapter(IJavaModifiers.class);
+		try {
+			if (javaProperties != null) {
+				if (javaProperties.isFinal()) {
+					flags |= JavaElementImageDescriptor.FINAL;
+				}
+				if (javaProperties.isStatic()) {
+					flags |= JavaElementImageDescriptor.STATIC;
+				}
+			}
+		} catch(DebugException e) {
+			// fall through
+		}
+		return flags;
 	}
 
 	/**

@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.util;
 
 
+import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Control;
@@ -18,55 +19,36 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 
 /**
- * Everything, even the kitchen sink.
+ * Utility class to simplify access to some SWT resources. 
  */
-public class Utilities {
-	
-		/**
-	 * Tries to convert the given object into an <code>IResource</code>. If the 
-	 * object can't be converted into an <code>IResource</code> <code>null</code> 
-	 * is returned.
-	 */
-	public static IResource convertToResource(Object o) {
-		if (o instanceof IResource)
-			return (IResource)o;
-		if (o instanceof IAdaptable)
-			return (IResource)((IAdaptable)o).getAdapter(IResource.class);
-			
-		return null;	
-	}
+public class SWTUtil {
 	
 	/**
-	 * Returns the display of the given shell. If shell is <code>null</code>
-	 * the method checks if there is a display associated with the current
-	 * thread. If not, the default display is returned.
+	 * Returns the standard display to be used. The method first checks, if
+	 * the thread calling this method has an associated disaply. If so, this
+	 * display is returned. Otherwise the method returns the default display.
 	 */
-	public static Display getDisplay(Shell parent) {
+	public static Display getStandardDisplay() {
 		Display display;
-		if (parent == null) {
-			display= Display.getCurrent();
-			if (display == null)
-				display= Display.getDefault();
-		} else {
-			display= parent.getDisplay();
-		}
+		display= Display.getCurrent();
+		if (display == null)
+			display= Display.getDefault();
 		return display;		
 	}
 	
 	/**
 	 * Returns the shell for the given widget. If the widget doesn't represent
 	 * a SWT object that manage a shell, <code>null</code> is returned.
+	 * 
+	 * @return the shell for the given widget
 	 */
 	public static Shell getShell(Widget widget) {
 		if (widget instanceof Control)
 			return ((Control)widget).getShell();
 		if (widget instanceof Caret)
 			return ((Caret)widget).getParent().getShell();
-		// XXX: Not present under Motif
-		/*
 		if (widget instanceof DragSource)
 			return ((DragSource)widget).getControl().getShell();
-		*/	
 		if (widget instanceof DropTarget)
 			return ((DropTarget)widget).getControl().getShell();
 		if (widget instanceof Menu)
