@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
+import java.io.BufferedInputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,11 +21,11 @@ public class JarPackageReader extends Object {
 	protected InputStream fInputStream;
 	
 	/**
-	 * Reads a JarPackageWriter from the underlying stream.
+	 * Reads a Jar Package from the underlying stream.
 	 **/
 	public JarPackageReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);
-		fInputStream= inputStream;
+		fInputStream= new BufferedInputStream(inputStream);
 	}
 	/**
 	 * Hook for possible subclasses
@@ -41,8 +42,7 @@ public class JarPackageReader extends Object {
 		ObjectInputStream objectInput= new ObjectInputStream(fInputStream);
 		jarPackage= (JarPackage)objectInput.readObject();
 		if (jarPackage != null) {
-			// TO PREVENT NPE FOR NOW - MUST BE HANDLED BY READER
-	//		setInitializeFromDialog(false);
+			org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("TO PREVENT NPE FOR NOW - MUST BE HANDLED BY READER");
 			jarPackage.setJarLocation(new Path(""));
 			jarPackage.setDescriptionLocation(new Path(""));
 			jarPackage.setManifestLocation(new Path(""));
