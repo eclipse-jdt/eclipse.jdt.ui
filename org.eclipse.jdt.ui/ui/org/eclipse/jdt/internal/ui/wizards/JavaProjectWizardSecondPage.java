@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -86,17 +87,19 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		final boolean initialize= !(newProjectHandle.equals(fCurrProject) && newProjectLocation.equals(fCurrProjectLocation));
 		
 		final IRunnableWithProgress op= new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					updateProject(initialize, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
-				} 
+				} catch (OperationCanceledException e) {
+					throw new InterruptedException();
+				}
 			}
 		};
 	
 		try {
-			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op));
+			getContainer().run(true, false, new WorkspaceModifyDelegatingOperation(op));
 		} catch (InvocationTargetException e) {
 			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.title"); //$NON-NLS-1$
 			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.message"); //$NON-NLS-1$
@@ -118,6 +121,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		}
 		try {
 			monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.initialize"), 2); //$NON-NLS-1$
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 			
 			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
 			if (initialize) {
@@ -165,6 +171,10 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 
 					outputLocation= projectPath;
 				}
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				
 				init(JavaCore.create(fCurrProject), outputLocation, entries, false);
 			}
 			monitor.worked(1);
