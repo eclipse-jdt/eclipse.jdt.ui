@@ -630,7 +630,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				List list= (List) e.next();
 				int size= list.size();
 				for (int i= 0; i < size; i++)
-					deletions.add(list.get(i));
+					deletions.add(((Object[]) list.get(i))[0]);
 			}
 			
 			match(model, deletions, additions, updates);
