@@ -61,7 +61,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	private static class NoBreakpointAnnotation extends Annotation implements IAnnotationPresentation {
 		
 		public NoBreakpointAnnotation() {
-			super(NO_BREAKPOINT_ANNOTATION, false, "Add a breakpoint");
+			super(NO_BREAKPOINT_ANNOTATION, false, JavaHoverMessages.getString("NoBreakpointAnnotation.addBreakpoint")); //$NON-NLS-1$
 		}
 		
 		/*

@@ -171,7 +171,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			return "\t"; //$NON-NLS-1$
 		
 		if ("li".equals(html)) //$NON-NLS-1$
-			return LINE_DELIM + "\t" + JavaUIMessages.getString("HTML2TextReader.dash"); //$NON-NLS-1$ //$NON-NLS-2$
+			return LINE_DELIM + JavaUIMessages.getString("HTML2TextReader.listItemPrefix"); //$NON-NLS-1$ //$NON-NLS-2$
 					
 		if ("/b".equals(html)) { //$NON-NLS-1$
 			stopBold();
