@@ -20,6 +20,7 @@ public class AllTests {
 		suite.addTest(DeleteTest.suite());
 		suite.addTest(CopyToClipboardActionTest.suite());
 		suite.addTest(CopyTest.suite());
+		suite.addTest(MoveTest.suite());
 		return suite;
 	}
 }
