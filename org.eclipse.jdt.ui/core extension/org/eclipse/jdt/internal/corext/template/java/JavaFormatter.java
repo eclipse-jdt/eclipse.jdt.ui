@@ -90,7 +90,7 @@ public class JavaFormatter implements ITemplateEditor {
 	private boolean isInsideCommentOrString(String string, int offset) {
 
 		IDocument document= new Document(string);
-		JavaPlugin.getDefault().getJavaTextTools().setupDocument(document);
+		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document);
 
 		try {		
 			ITypedRegion partition= document.getPartition(offset);

@@ -246,7 +246,7 @@ class JavaCompareUtilities {
 	static void setupDocument(IDocument document) {
 		JavaTextTools tools= getJavaTextTools();
 		if (tools != null)
-			tools.setupDocument(document);
+			tools.setupJavaDocumentPartitioner(document);
 	}
 
 	/**

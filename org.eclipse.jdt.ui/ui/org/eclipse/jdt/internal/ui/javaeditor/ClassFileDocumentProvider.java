@@ -231,7 +231,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		IDocument document= super.createDocument(element);
 		if (document != null) {
 			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-			tools.setupDocument(document, IJavaPartitions.JAVA_PARTITIONING);
+			tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		}
 		return document;
 	}

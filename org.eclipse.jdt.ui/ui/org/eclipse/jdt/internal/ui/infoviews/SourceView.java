@@ -397,7 +397,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		source= Strings.concatenate(sourceLines, delim);
 
 		IDocument doc= new Document(source);
-		JavaPlugin.getDefault().getJavaTextTools().setupDocument(doc);
+		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc);
 		return doc;
 	}
 
