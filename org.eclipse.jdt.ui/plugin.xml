@@ -230,7 +230,7 @@
       id="org.eclipse.jdt.ui.SnippetEditor"
       icon="icons/full/obj16/jsbook_obj.gif"
       name="Java Snippet Editor"
-      extensions="jsnip, jpage"
+      extensions="jpage"
       class="org.eclipse.jdt.internal.ui.snippeteditor.JavaSnippetEditor"
       contributorClass="org.eclipse.jdt.internal.ui.snippeteditor.SnippetEditorActionContributor">
    </editor>
