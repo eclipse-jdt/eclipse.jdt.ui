@@ -222,8 +222,16 @@ public class QuickFixTest extends TestCase {
 
 	protected final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) {
 		IProblem[] problems= astRoot.getProblems();
-		assertNumberOf("problems", problems.length, nProblems);
-		
+		if (problems.length != nProblems) {
+			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
+			buf.append(nProblems).append(", expected: ").append(nProblems).append('\n');
+			for (int i= 0; i < problems.length; i++) {
+				buf.append(problems[i].getMessage()).append('\n');
+			}
+			assertTrue(buf.toString(), false);
+
+		}
+
 		IProblem curr= problems[0];
 		int offset= curr.getSourceStart();
 		int length= curr.getSourceEnd() + 1 - offset;

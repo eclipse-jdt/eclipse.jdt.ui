@@ -250,7 +250,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			ASTNode node= ASTResolving.findParentType(fNode);
 			if (targetTypeDecl.equals(node)) {
 				modifiers |= Modifier.PRIVATE;
-			} else if (node instanceof AnonymousClassDeclaration) {
+			} else if (node instanceof AnonymousClassDeclaration && ASTNodes.isParent(node, targetTypeDecl)) {
 				modifiers |= Modifier.PROTECTED;
 			} else {
 				modifiers |= Modifier.PUBLIC;
