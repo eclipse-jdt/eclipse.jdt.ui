@@ -34,6 +34,10 @@ public class ErrorTickImageProvider extends JavaElementImageProvider {
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement) obj;
+				if (!element.exists()) {
+					return 0;
+				}
+				
 				int type= element.getElementType();
 				switch (type) {
 					case IJavaElement.JAVA_PROJECT:
@@ -51,12 +55,12 @@ public class ErrorTickImageProvider extends JavaElementImageProvider {
 					case IJavaElement.METHOD:
 					case IJavaElement.FIELD:
 						ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(element, IJavaElement.COMPILATION_UNIT);
-						if (cu != null) {
+						if (cu != null && cu.exists()) {
 							// I assume that only source elements in compilation unit can have markers
 							ISourceRange range= ((ISourceReference)element).getSourceRange();
 							// working copy: look at annotation model
 							if (cu.isWorkingCopy()) {
-								return getErrorTicksFromWorkingCopy(cu, range);
+								return getErrorTicksFromWorkingCopy((ICompilationUnit) cu.getOriginalElement(), range);
 							}
 							return getErrorTicksFromMarkers(cu.getCorrespondingResource(), IResource.DEPTH_ONE, range);
 						}
@@ -104,10 +108,13 @@ public class ErrorTickImageProvider extends JavaElementImageProvider {
 	}
 	
 	
-	private int getErrorTicksFromWorkingCopy(ICompilationUnit workingCopy, ISourceRange range) throws CoreException {
+	private int getErrorTicksFromWorkingCopy(ICompilationUnit original, ISourceRange range) throws CoreException {
 		int info= 0;
+		if (!original.exists()) {
+			return 0;
+		}
 		
-		FileEditorInput editorInput= new FileEditorInput((IFile) workingCopy.getOriginalElement().getUnderlyingResource());
+		FileEditorInput editorInput= new FileEditorInput((IFile) original.getCorrespondingResource());
 		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(editorInput);
 		if (model != null) {
 			Iterator iter= model.getAnnotationIterator();
