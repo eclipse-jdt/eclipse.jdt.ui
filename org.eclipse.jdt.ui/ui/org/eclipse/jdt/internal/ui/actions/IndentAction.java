@@ -32,6 +32,7 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
@@ -100,6 +102,7 @@ public class IndentAction extends TextEditorAction {
 			final int length= selection.getLength();
 			final Position end= new Position(offset + length);
 			final int firstLine, nLines;
+			fCaretOffset= -1;
 			
 			try {
 				document.addPosition(end);
@@ -131,27 +134,22 @@ public class IndentAction extends TextEditorAction {
 						
 						// update caret position: move to new position when indenting just one line
 						// keep selection when indenting multiple
-						int newOffset= fCaretOffset;
-						int newLength= 0;
-						if (nLines > 1) {
+						int newOffset, newLength;
+						if (fIsTabAction) {
+							newOffset= fCaretOffset;
+							newLength= 0;
+						} else if (nLines > 1) {
 							newOffset= offset;
 							newLength= end.getOffset() - offset;
-						}
-						
-						Assert.isTrue(newLength >= 0);
-						Assert.isTrue(newOffset >= 0);
-
-						// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43489
-						if (target != null) {
-							target.endCompoundChange();
-							target.setRedraw(true);
-							target= null;
+						} else {
+							newOffset= fCaretOffset;
+							newLength= 0;
 						}
 						
 						// always reset the selection if anything was replaced
-						// TODO selectAndReveal is too intrusive, plus causes above bug
-						if (hasChanged || newOffset != offset || newLength != length)
-							getTextEditor().selectAndReveal(newOffset, newLength);
+						// but not when we had a singleline nontab invocation
+						if (newOffset != -1 && (hasChanged || newOffset != offset || newLength != length))
+							selectAndReveal(newOffset, newLength);
 						
 						document.removePosition(end);
 					} catch (BadLocationException e) {
@@ -177,6 +175,26 @@ public class IndentAction extends TextEditorAction {
 		}
 	}
 	
+	/**
+	 * Selects the given range on the editor.
+	 * 
+	 * @param newOffset the selection offset
+	 * @param newLength the selection range
+	 */
+	private void selectAndReveal(int newOffset, int newLength) {
+		Assert.isTrue(newOffset >= 0); 
+		Assert.isTrue(newLength >= 0); 
+		ITextEditor editor= getTextEditor();
+		if (editor instanceof JavaEditor) {
+			ISourceViewer viewer= ((JavaEditor)editor).getViewer();
+			if (viewer != null)
+				viewer.setSelectedRange(newOffset, newLength);
+		} else
+			// this is too intrusive, but will never get called anyway
+			getTextEditor().selectAndReveal(newOffset, newLength);
+			
+	}
+
 	/**
 	 * Indents a single line using the java heuristic scanner. Javadoc and multiline comments are 
 	 * indented as specified by the <code>JavaDocAutoIndentStrategy</code>.
@@ -245,10 +263,13 @@ public class IndentAction extends TextEditorAction {
 			document.replace(caret, 0, tab);
 			fCaretOffset= caret + tab.length();
 			return true;
-		}		
+		}
 		
 		// set the caret offset so it can be used when setting the selection
-		fCaretOffset= offset + indent.length();
+		if (caret >= offset && caret <= end)
+			fCaretOffset= offset + indent.length();
+		else
+			fCaretOffset= -1;
 		
 		// only change the document if it is a real change
 		if (!indent.equals(currentIndent)) {
