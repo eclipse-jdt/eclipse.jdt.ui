@@ -16,5 +16,12 @@ public class JavaUIStatus extends Status {
 		super(IStatus.ERROR, JavaPlugin.getPluginId(), code, message, throwable);
 	}
 
+	public JavaUIStatus(int code, String message) {
+		this(code, message, null);
+	}
+
+	public JavaUIStatus(int code) {
+		this(code, ""); //$NON-NLS-1$
+	}
 }
 

@@ -73,11 +73,11 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
@@ -938,7 +938,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	protected IAnnotationModel createCompilationUnitAnnotationModel(Object element) throws CoreException {
 		if ( !(element instanceof IFileEditorInput))
-			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE));
+			throw new CoreException(new JavaUIStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE));
 		
 		IFileEditorInput input= (IFileEditorInput) element;
 		return new CompilationUnitAnnotationModel(input);
