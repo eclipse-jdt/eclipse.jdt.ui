@@ -618,6 +618,13 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	}
 
 	/* 
+	 * Implements method from IJarPackageWizardPage.
+	 */
+	public void finish() {
+		saveWidgetValues();
+	}
+
+	/* 
 	 * Method declared on IWizardPage.
 	 */
 	public void setPreviousPage(IWizardPage page) {

@@ -156,7 +156,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		for (int i= 0; i < getPageCount(); i++) {
 			IWizardPage page= pages[i];
 			if (page instanceof IJarPackageWizardPage)
-				((IJarPackageWizardPage)page).saveWidgetValues();
+				((IJarPackageWizardPage)page).finish();
 		}
 		return true;
 	}

@@ -307,6 +307,14 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		if (getControl() != null)
 			updatePageCompletion();
 	}
+
+	/* 
+	 * Implements method from IJarPackageWizardPage.
+	 */
+	public void finish() {
+		saveWidgetValues();
+	}
+
 	/**
 	 * Creates a new label with a bold font.
 	 *
@@ -325,6 +333,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		label.setLayoutData(data);
 		return label;
 	}
+
 	/**
 	 * Creates a horizontal spacer line that fills the width of its container.
 	 *
@@ -337,6 +346,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		data.verticalAlignment= GridData.BEGINNING;
 		spacer.setLayoutData(data);
 	}
+
 	/**
 	 * Determine if the page is complete and update the page appropriately. 
 	 */
@@ -348,6 +358,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 			setErrorMessage(null);
 		}
 	}
+
 	/**
 	 * Returns the resource for the specified path.
 	 *

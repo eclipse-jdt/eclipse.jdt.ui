@@ -568,6 +568,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		setErrorMessage(null);
 		return true;
 	}
+
 	/* 
 	 * Implements method from IWizardPage.
 	 */
@@ -575,6 +576,13 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		super.setPreviousPage(page);
 		if (getContainer() != null)
 			updatePageCompletion();
+	}
+
+	/* 
+	 * Implements method from IJarPackageWizardPage.
+	 */
+	public void finish() {
+		saveWidgetValues();
 	}
 
 	// ----------- Model handling -----------
@@ -809,9 +817,6 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 	 * @return a new selection dialog
 	 */
 	protected SelectionDialog createPackageDialog(Set packageFragments) {
-		int flags= JavaElementLabelProvider.SHOW_CONTAINER
-					| JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION
-					| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION;
 		List packages= new ArrayList(packageFragments.size());
 		for (Iterator iter= packageFragments.iterator(); iter.hasNext();) {
 			IPackageFragment fragment= (IPackageFragment)iter.next();
@@ -833,7 +838,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 				return !(element instanceof IPackageFragment) && super.hasChildren(element);
 			}
 		};
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getContainer().getShell(), new JavaElementLabelProvider(flags), cp);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getContainer().getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), cp);
 		dialog.setDoubleClickSelects(false);
 		dialog.setInput(JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()));
 		dialog.addFilter(new EmptyInnerPackageFilter());		

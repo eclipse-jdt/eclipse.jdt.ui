@@ -11,8 +11,7 @@ import org.eclipse.jface.wizard.IWizardPage;
  */
 public interface IJarPackageWizardPage extends IWizardPage {
 	/**
-	 * Persists resource specification control settings that are to be restored
-	 * in the next instance of this page.
+	 * Tells the page that the user has pressed finish.
 	 */
-	void saveWidgetValues();
+	void finish();
 }
