@@ -45,6 +45,7 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.IOverviewRuler;
@@ -350,12 +351,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 			
 			switch (event.character) {	
-			case '\b':
-				if (manager.getFirstPosition().length == 0)
+			case '\b': {
+				Position p= manager.getFirstPosition();	
+				if (p.offset == offset && p.length == length)
 					return new ExitFlags(0, false);
 				else
 					return null;
-				
+			}
 			case '\n':
 			case '\r':
 				return new ExitFlags(LinkedPositionUI.COMMIT, true);

@@ -699,7 +699,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
 	 */
 	public void shellDeactivated(ShellEvent event) {
-//	 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+	 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
 	}
 
 	/*
