@@ -14,7 +14,7 @@
 <!-- =========================================================================== -->
 
 
-<requires>
+<requires> 
   <import plugin="org.eclipse.ui"/>
   <import plugin="org.eclipse.core.resources"/>
   <import plugin="org.eclipse.jdt.core"/>
@@ -32,6 +32,8 @@
      <export name = "*"/>
   </library> 
 </runtime>
+
+<extension-point name="JavaElement Filters" id="javaElementFilters"/>
 
 <extension 
 	point="org.eclipse.ui.perspectives">
@@ -680,6 +682,18 @@
 	</filter>
 </extension>
 
+<extension
+	point= "org.eclipse.jdt.ui.javaElementFilters">
+	<filter pattern = ".*">
+	</filter>
+</extension>
+
+<extension
+	point= "org.eclipse.jdt.ui.javaElementFilters">
+	<filter pattern = "*$*.class">
+	</filter>
+</extension>
+
 <extension 
 	point="org.eclipse.ui.exportWizards">
 	<wizard
@@ -690,7 +704,7 @@
 	   <description>Export resources to a JAR file on the local file system</description>
 	   <selection class="org.eclipse.core.resources.IResource"/>
 	</wizard>
-</extension>
+</extension> 
 
 <extension id="snippetSupportLineBreakpoint" point="org.eclipse.core.resources.markers">
 	<super type="org.eclipse.jdt.debug.core.javaLineBreakpoint"/>
