@@ -73,7 +73,6 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.ISearchResultViewEntry;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -91,7 +90,6 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
@@ -104,7 +102,6 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
@@ -113,7 +110,6 @@ import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -588,8 +584,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return false;
 	}
 
+	private boolean isSearchResultView(IWorkbenchPart part) {
+		return SearchUtil.isSearchPlugInActivated() && (part instanceof ISearchResultView);
+	}
+
 	protected boolean needsToProcessSelectionChanged(IWorkbenchPart part, ISelection selection) {
-		if (!fProcessSelectionEvents || part == this || (part instanceof ISearchResultView) || !(selection instanceof IStructuredSelection)){
+		if (!fProcessSelectionEvents || part == this || isSearchResultView(part) || !(selection instanceof IStructuredSelection)){
 			if (part == this)
 				fPreviousSelectionProvider= part;
 			return false;
@@ -915,11 +915,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Iterator iter= ((StructuredSelection)selection).iterator();
 		Object firstElement= iter.next();
 		if (!(firstElement instanceof IJavaElement)) {
-			if (firstElement instanceof ISearchResultViewEntry) {
-				IJavaElement je= SearchUtil.getJavaElement((ISearchResultViewEntry)firstElement);
+			if (SearchUtil.isISearchResultViewEntry(firstElement)) {
+				IJavaElement je= SearchUtil.getJavaElement(firstElement);
 				if (je != null)
 					return je;
-				firstElement= ((ISearchResultViewEntry)firstElement).getResource();
+				firstElement= SearchUtil.getResource(firstElement);
 			}
 			if (firstElement instanceof IAdaptable) {
 				IJavaElement je= (IJavaElement)((IAdaptable)firstElement).getAdapter(IJavaElement.class);

@@ -10,7 +10,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -38,11 +40,10 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.JavaElementTypeComparator;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
-
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -110,13 +111,34 @@ public class SearchUtil extends JavaModelUtil {
 		}
 	}
 
+	public static IJavaElement getJavaElement(Object entry) {
+		if (entry != null && isISearchResultViewEntry(entry))
+			return getJavaElement((ISearchResultViewEntry)entry);
+		return null;
+	}
+
+	public static IResource getResource(Object entry) {
+		if (entry != null && isISearchResultViewEntry(entry))
+			return ((ISearchResultViewEntry)entry).getResource();
+		return null;
+	}
+
 	public static IJavaElement getJavaElement(ISearchResultViewEntry entry) {
 		if (entry != null)
 			return getJavaElement(entry.getSelectedMarker());
 		return null;
 	}
 
+	public static boolean isSearchPlugInActivated() {
+		return Platform.getPluginRegistry().getPluginDescriptor("org.eclipse.search").isPluginActivated(); //$NON-NLS-1$
+	}
+
+	public static boolean isISearchResultViewEntry(Object object) {
+		return object != null && isSearchPlugInActivated() && (object instanceof ISearchResultViewEntry);
+	}
+	
 	private static boolean isBinary(IJavaElement jElement) {
+		
 		if (jElement instanceof IMember)
 			return ((IMember)jElement).isBinary();
 

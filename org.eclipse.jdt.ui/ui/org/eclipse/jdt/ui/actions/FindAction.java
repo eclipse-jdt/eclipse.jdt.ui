@@ -29,7 +29,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -143,8 +142,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 			return getJavaElement((IMarker)o, silent);
 		else if (o instanceof ISelection)
 			return getJavaElement((IStructuredSelection)o, silent);
-		else if (o instanceof ISearchResultViewEntry)
-			return getJavaElement((ISearchResultViewEntry)o, silent);
+		else if (SearchUtil.isISearchResultViewEntry(o))
+			return getJavaElement(SearchUtil.getJavaElement(o), silent);;
 		return null;
 	}
 
@@ -152,12 +151,6 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (selection.size() == 1)
 			// Selection only enabled if one element selected.
 			return getJavaElement(selection.getFirstElement(), silent);
-		return null;
-	}
-
-	private IJavaElement getJavaElement(ISearchResultViewEntry entry, boolean silent) {
-		if (entry != null)
-			return getJavaElement(entry.getSelectedMarker(), silent);
 		return null;
 	}
 
