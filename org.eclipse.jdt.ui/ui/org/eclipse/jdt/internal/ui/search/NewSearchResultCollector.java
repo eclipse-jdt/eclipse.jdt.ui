@@ -19,21 +19,17 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 public class NewSearchResultCollector extends SearchRequestor {
 	private JavaSearchResult fSearch;
-	private boolean fIgnoreImports;
 	private boolean fIgnorePotentials;
 
-	public NewSearchResultCollector(JavaSearchResult search, boolean ignoreImports, boolean ignorePotentials) {
+	public NewSearchResultCollector(JavaSearchResult search, boolean ignorePotentials) {
 		super();
 		fSearch= search;
-		fIgnoreImports= ignoreImports;
 		fIgnorePotentials= ignorePotentials;
 	}
 	
 	public void acceptSearchMatch(SearchMatch match) throws CoreException {
 		IJavaElement enclosingElement= (IJavaElement) match.getElement();
 		if (enclosingElement != null) {
-			if (fIgnoreImports && enclosingElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
-				return;
 			if (fIgnorePotentials && (match.getAccuracy() == SearchMatch.A_INACCURATE))
 				return;
 			boolean isWriteAccess= false;

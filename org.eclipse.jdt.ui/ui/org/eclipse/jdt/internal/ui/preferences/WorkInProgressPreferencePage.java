@@ -44,9 +44,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	private static final String PREFIX= "WorkInProgress."; //$NON-NLS-1$
 	
 	public static final String PREF_FORMATTER= "use_new_formatter"; //$NON-NLS-1$
-	public static final String PREF_BGSEARCH= "search_in_background"; //$NON-NLS-1$
 	public static final String PREF_SEARCH_MENU= "small_search_menu"; //$NON-NLS-1$
-	public static final String PREF_SEARCH_IGNORE_IMPORTS= "search_ignore_imports"; //$NON-NLS-1$
 	
 	private static final String PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW= "org.eclipse.jdt.ui.browserWidgetInJavadocView"; //$NON-NLS-1$
 		// PreferenceConstants.APPEARANCE_BROWSER_WIDGET_IN_JAVADOC_VIEW;
@@ -105,8 +103,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		group.setText(PreferencesMessages.getString(PREFIX + "search")); //$NON-NLS-1$
 		
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
-		addCheckBox(group, PreferencesMessages.getString(PREFIX+"newsearch.option"), PREF_BGSEARCH); //$NON-NLS-1$
-		addCheckBox(group, PreferencesMessages.getString(PREFIX+"search.ignore_imports"), PREF_SEARCH_IGNORE_IMPORTS); //$NON-NLS-1$
 		
 		applyDialogFont(result);
 		return result;
@@ -193,8 +189,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		
 		store.setDefault(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, false);
 		store.setDefault(PREF_SEARCH_MENU, true);
-		store.setDefault(PREF_BGSEARCH, true);
-		store.setDefault(PREF_SEARCH_IGNORE_IMPORTS, false);
 		
 		store.setDefault(PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW, false);
 	}

@@ -31,8 +31,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.SearchParticipantsPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jdt.ui.search.IQueryParticipant;
@@ -45,10 +43,6 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
 
-/**
- * @author Thomas Mäder
- *
- */
 public class JavaSearchQuery implements ISearchQuery {
 	private ISearchResult fResult;
 	private QuerySpecification fPatternData;
@@ -118,10 +112,8 @@ public class JavaSearchQuery implements ISearchQuery {
 			monitor.beginTask(SearchMessages.getString("JavaSearchQuery.task.label"), totalTicks); //$NON-NLS-1$
 			IProgressMonitor mainSearchPM= new SubProgressMonitor(monitor, 1000);
 
-			boolean ignoreImports= (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES);
-			ignoreImports &= PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_SEARCH_IGNORE_IMPORTS);
 			boolean ignorePotentials= SearchPreferencePage.arePotentialMatchesIgnored();
-			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, ignoreImports, ignorePotentials);
+			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, ignorePotentials);
 			
 			SearchPattern pattern;
 			String stringPattern= null;

@@ -301,6 +301,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public static boolean isDebug() {
 		return getDefault().isDebugging();
 	}
+	
+	public static boolean useNewSearch() {
+		return true;
+	}
+
 		
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
 		return getDefault().internalGetImageDescriptorRegistry();

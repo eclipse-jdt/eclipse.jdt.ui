@@ -205,7 +205,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	public boolean performAction() {
 		if (true)
 			return performNewSearch();
-		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_BGSEARCH)) {
+		if (JavaPlugin.useNewSearch()) {
 			return performNewSearch();
 		} else {
 			return performOldSearch();
