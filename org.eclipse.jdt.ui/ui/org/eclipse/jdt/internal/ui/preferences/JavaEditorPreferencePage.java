@@ -77,7 +77,7 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
  */
 public class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
-	private static final String BOLD= "_bold"; //$NON-NLS-1$
+	public static final String BOLD= "_bold"; //$NON-NLS-1$
 	
 	public final OverlayPreferenceStore.OverlayKey[] fKeys= new OverlayPreferenceStore.OverlayKey[] {
 		

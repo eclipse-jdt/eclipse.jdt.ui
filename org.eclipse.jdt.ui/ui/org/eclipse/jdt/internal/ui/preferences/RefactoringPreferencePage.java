@@ -26,15 +26,15 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 
 public class RefactoringPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	private static final String FATAL_SEVERITY= "4"; //$NON-NLS-1$
-	private static final String ERROR_SEVERITY= "3"; //$NON-NLS-1$
-	private static final String WARNING_SEVERITY= "2"; //$NON-NLS-1$
-	private static final String INFO_SEVERITY= "1"; //$NON-NLS-1$
-	private static final String OK_SEVERITY= "0"; //$NON-NLS-1$
+	public static final String FATAL_SEVERITY= "4"; //$NON-NLS-1$
+	public static final String ERROR_SEVERITY= "3"; //$NON-NLS-1$
+	public static final String WARNING_SEVERITY= "2"; //$NON-NLS-1$
+	public static final String INFO_SEVERITY= "1"; //$NON-NLS-1$
+	public static final String OK_SEVERITY= "0"; //$NON-NLS-1$
 		
-	private static final String PREF_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold"; //$NON-NLS-1$
-	private static final String PREF_JAVA_STYLE_GUIDE_CONFORM= "Refactoring.javaStyleGuideConform"; //$NON-NLS-1$
-	private static final String PREF_SAVE_ALL_EDITORS= "Refactoring.savealleditors"; //$NON-NLS-1$
+	public static final String PREF_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold"; //$NON-NLS-1$
+	public static final String PREF_JAVA_STYLE_GUIDE_CONFORM= "Refactoring.javaStyleGuideConform"; //$NON-NLS-1$
+	public static final String PREF_SAVE_ALL_EDITORS= "Refactoring.savealleditors"; //$NON-NLS-1$
 
 
 	public RefactoringPreferencePage() {

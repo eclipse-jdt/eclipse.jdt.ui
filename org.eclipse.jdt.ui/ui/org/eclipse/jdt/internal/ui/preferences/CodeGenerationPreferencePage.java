@@ -34,15 +34,15 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class CodeGenerationPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private static final String PREF_USE_GETTERSETTER_PREFIX= JavaUI.ID_PLUGIN + ".gettersetter.prefix.enable"; //$NON-NLS-1$
-	private static final String PREF_GETTERSETTER_PREFIX= JavaUI.ID_PLUGIN + ".gettersetter.prefix.list"; //$NON-NLS-1$
+	public static final String PREF_USE_GETTERSETTER_PREFIX= JavaUI.ID_PLUGIN + ".gettersetter.prefix.enable"; //$NON-NLS-1$
+	public static final String PREF_GETTERSETTER_PREFIX= JavaUI.ID_PLUGIN + ".gettersetter.prefix.list"; //$NON-NLS-1$
 
-	private static final String PREF_USE_GETTERSETTER_SUFFIX= JavaUI.ID_PLUGIN + ".gettersetter.suffix.enable"; //$NON-NLS-1$
-	private static final String PREF_GETTERSETTER_SUFFIX= JavaUI.ID_PLUGIN + ".gettersetter.suffix.list"; //$NON-NLS-1$
+	public static final String PREF_USE_GETTERSETTER_SUFFIX= JavaUI.ID_PLUGIN + ".gettersetter.suffix.enable"; //$NON-NLS-1$
+	public static final String PREF_GETTERSETTER_SUFFIX= JavaUI.ID_PLUGIN + ".gettersetter.suffix.list"; //$NON-NLS-1$
 
-	private static final String PREF_JAVADOC_STUBS= JavaUI.ID_PLUGIN + ".javadoc"; //$NON-NLS-1$
-	private static final String PREF_NON_JAVADOC_COMMENTS= JavaUI.ID_PLUGIN + ".seecomments"; //$NON-NLS-1$
-	private static final String PREF_FILE_COMMENTS= JavaUI.ID_PLUGIN + ".filecomments"; //$NON-NLS-1$
+	public static final String PREF_JAVADOC_STUBS= JavaUI.ID_PLUGIN + ".javadoc"; //$NON-NLS-1$
+	public static final String PREF_NON_JAVADOC_COMMENTS= JavaUI.ID_PLUGIN + ".seecomments"; //$NON-NLS-1$
+	public static final String PREF_FILE_COMMENTS= JavaUI.ID_PLUGIN + ".filecomments"; //$NON-NLS-1$
 
 
 	public static String[] getGetterStetterPrefixes() {

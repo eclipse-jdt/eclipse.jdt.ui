@@ -40,7 +40,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	private StringButtonDialogField fJavadocSelection;
 	private Composite fComposite;
 
-	private static final String PREF_JAVADOC_COMMAND= "command"; //$NON-NLS-1$
+	public static final String PREF_JAVADOC_COMMAND= "command"; //$NON-NLS-1$
 
 	private class JDocDialogFieldAdapter implements IDialogFieldListener, IStringButtonAdapter {
 		/*
