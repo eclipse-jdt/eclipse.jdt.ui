@@ -22,7 +22,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -31,6 +33,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
@@ -39,6 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -67,7 +71,16 @@ public class ReorgUtils2 {
 
 	public static boolean isInsideCompilationUnit(IJavaElement element) {
 		return 	!(element instanceof ICompilationUnit) && 
-				element.getAncestor(IJavaElement.COMPILATION_UNIT) != null;
+				hasAncestorOfType(element, IJavaElement.COMPILATION_UNIT);
+	}
+	
+	public static boolean isInsideClassFile(IJavaElement element) {
+		return 	!(element instanceof IClassFile) && 
+				hasAncestorOfType(element, IJavaElement.CLASS_FILE);
+	}
+	
+	public static boolean hasAncestorOfType(IJavaElement element, int type){
+		return element.getAncestor(type) != null;
 	}
 	
 	/**
@@ -190,7 +203,7 @@ public class ReorgUtils2 {
 				if (((IMethod)element).isConstructor())
 					return "constructor ''{0}''";
 				else
-					return "method ''{0}''";
+				return "method ''{0}''";
 			case IJavaElement.PACKAGE_DECLARATION:
 				return "package declaration ''{0}''";
 			case IJavaElement.PACKAGE_FRAGMENT:
@@ -321,18 +334,18 @@ public class ReorgUtils2 {
 	}
 	
 	public static IFolder[] getFolders(IResource[] resources) {
-		List result= getResourcesOfType(resources, IResource.FOLDER);
+		Set result= getResourcesOfType(resources, IResource.FOLDER);
 		return (IFolder[]) result.toArray(new IFolder[result.size()]);
 	}
 
 	public static IFile[] getFiles(IResource[] resources) {
-		List result= getResourcesOfType(resources, IResource.FILE);
+		Set result= getResourcesOfType(resources, IResource.FILE);
 		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 		
 	//the result can be cast down to the requested type array
-	public static List getResourcesOfType(IResource[] resources, int typeMask){
-		List result= new ArrayList(resources.length);
+	public static Set getResourcesOfType(IResource[] resources, int typeMask){
+		Set result= new HashSet(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			if (isOfType(resources[i], typeMask))
 				result.add(resources[i]);
@@ -380,6 +393,13 @@ public class ReorgUtils2 {
 		return false;
 	}
 
+	public static boolean hasElementsOfType(IJavaElement[] javaElements, int[] types) {
+		for (int i= 0; i < types.length; i++) {
+			if (hasElementsOfType(javaElements, types[i])) return true;
+		}
+		return false;
+	}
+
 	public static boolean hasElementsOfType(IResource[] resources, int typeMask) {
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
@@ -405,7 +425,7 @@ public class ReorgUtils2 {
 		return (javaElement instanceof IPackageFragmentRoot) &&
 				((IPackageFragmentRoot)javaElement).getKind() == IPackageFragmentRoot.K_SOURCE;
 	}
-
+	
 	public static boolean isClassFolder(IJavaElement javaElement) throws JavaModelException {
 		return (javaElement instanceof IPackageFragmentRoot) &&
 				((IPackageFragmentRoot)javaElement).getKind() == IPackageFragmentRoot.K_BINARY;
@@ -415,17 +435,116 @@ public class ReorgUtils2 {
 		return getCorrespondingPackageFragmentRoot(javaProject) != null;
 	}
 	
-	private static final boolean isPackageFragmentRootCorrespondingToProject(IPackageFragmentRoot root) throws JavaModelException {
+	private static boolean isPackageFragmentRootCorrespondingToProject(IPackageFragmentRoot root) throws JavaModelException {
 		return root.getResource() instanceof IProject;
 	}
 
-	public static final IPackageFragmentRoot getCorrespondingPackageFragmentRoot(IJavaProject p) throws JavaModelException {
+	public static IPackageFragmentRoot getCorrespondingPackageFragmentRoot(IJavaProject p) throws JavaModelException {
 		IPackageFragmentRoot[] roots= p.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
 			if (isPackageFragmentRootCorrespondingToProject(roots[i]))
 				return roots[i];
 		}
 		return null;
+	}
+		
+	public static boolean containsLinkedResources(IResource[] resources){
+		for (int i= 0; i < resources.length; i++) {
+			if (resources[i].isLinked()) return true;
+		}
+		return false;
+	}
+	
+	public static boolean containsLinkedResources(IJavaElement[] javaElements){
+		for (int i= 0; i < javaElements.length; i++) {
+			IResource res= getResource(javaElements[i]);
+			if (res != null && res.isLinked()) return true;
+		}
+		return false;
+	}
+
+	public static boolean canBeDestinationForLinkedResources(IResource resource) {
+		return resource.isAccessible() && resource instanceof IProject;
+	}
+
+	public static boolean canBeDestinationForLinkedResources(IJavaElement javaElement) throws JavaModelException {
+		if (javaElement instanceof IPackageFragmentRoot){
+			return isPackageFragmentRootCorrespondingToProject((IPackageFragmentRoot)javaElement);
+		} else if (javaElement instanceof IJavaProject){
+			return true;//XXX ???
+		} else return false;
+	}
+	
+	public static IPackageFragmentRoot getDestinationAsPackageFragmentRoot(IJavaElement javaElement) throws JavaModelException{
+		if (javaElement instanceof IPackageFragmentRoot)
+			return (IPackageFragmentRoot) javaElement;
+
+		if (javaElement instanceof IPackageFragment){
+			IPackageFragment pack= (IPackageFragment)javaElement;
+			if (pack.getParent() instanceof IPackageFragmentRoot)
+				return (IPackageFragmentRoot) pack.getParent();
+		}
+
+		if (javaElement instanceof IJavaProject)
+			return ReorgUtils2.getCorrespondingPackageFragmentRoot((IJavaProject) javaElement);				
+		return null;
+	}
+
+	public static boolean isParentInWorkspaceOrOnDisk(IPackageFragment pack, IPackageFragmentRoot root){
+		if (pack == null)
+			return false;		
+		IJavaElement packParent= pack.getParent();
+		if (packParent == null)
+			return false;		
+		if (packParent.equals(root))	
+			return true;
+		IResource packageResource= ResourceUtil.getResource(pack);
+		IResource packageRootResource= ResourceUtil.getResource(root);
+		return isParentInWorkspaceOrOnDisk(packageResource, packageRootResource);
+	}
+
+	public static boolean isParentInWorkspaceOrOnDisk(IPackageFragmentRoot root, IJavaProject javaProject){
+		if (root == null)
+			return false;		
+		IJavaElement rootParent= root.getParent();
+		if (rootParent == null)
+			return false;		
+		if (rootParent.equals(root))	
+			return true;
+		IResource packageResource= ResourceUtil.getResource(root);
+		IResource packageRootResource= ResourceUtil.getResource(javaProject);
+		return isParentInWorkspaceOrOnDisk(packageResource, packageRootResource);
+	}
+
+	public static boolean isParentInWorkspaceOrOnDisk(ICompilationUnit cu, IPackageFragment dest){
+		if (cu == null)
+			return false;
+		IJavaElement cuParent= cu.getParent();
+		if (cuParent == null)
+			return false;
+		if (cuParent.equals(dest))	
+			return true;
+		IResource cuResource= ResourceUtil.getResource(cu);
+		IResource packageResource= ResourceUtil.getResource(dest);
+		return isParentInWorkspaceOrOnDisk(cuResource, packageResource);
+	}
+	
+	public static boolean isParentInWorkspaceOrOnDisk(IResource res, IResource maybeParent){
+		if (res == null)
+			return false;
+		return areEqualInWorkspaceOrOnDisk(res.getParent(), maybeParent);
+	}
+	
+	public static boolean areEqualInWorkspaceOrOnDisk(IResource r1, IResource r2){
+		if (r1 == null || r2 == null)
+			return false;
+		if (r1.equals(r2))
+			return true;
+		IPath r1Location= r1.getLocation();
+		IPath r2Location= r2.getLocation();
+		if (r1Location == null || r2Location == null)
+			return false;
+		return r1Location.equals(r2Location);
 	}
 
 }

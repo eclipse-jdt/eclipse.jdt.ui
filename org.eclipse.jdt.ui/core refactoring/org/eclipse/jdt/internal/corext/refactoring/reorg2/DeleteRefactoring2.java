@@ -23,9 +23,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -33,53 +31,27 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFileChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFolderChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 public class DeleteRefactoring2 extends Refactoring{
 	
@@ -252,14 +224,14 @@ public class DeleteRefactoring2 extends Refactoring{
 
 	private void removeElementsWithParentsInSelection() {
 		ParentChecker parentUtil= new ParentChecker(fResources, fJavaElements);
-		parentUtil.removeElementsWithParentsOnList(false);
+		parentUtil.removeElementsWithAncestorsOnList(false);
 		fJavaElements= parentUtil.getJavaElements();
 		fResources= parentUtil.getResources();
 	}
 
 	private void removeJavaElementsChildrenOfJavaElements(){
 		ParentChecker parentUtil= new ParentChecker(fResources, fJavaElements);
-		parentUtil.removeElementsWithParentsOnList(true);
+		parentUtil.removeElementsWithAncestorsOnList(true);
 		fJavaElements= parentUtil.getJavaElements();
 	}
 	
@@ -415,10 +387,10 @@ public class DeleteRefactoring2 extends Refactoring{
 				fJavaElements= new IJavaElement[0];
 				fResources= new IResource[0];
 				throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
-			}
 		}
 	}
-	
+	}
+
 	//----------- empty CUs related method
 	private void addEmptyCusToDelete() throws JavaModelException {
 		Set cusToEmpty= getCusToEmpty();
@@ -444,236 +416,6 @@ public class DeleteRefactoring2 extends Refactoring{
 				return false;
 		}
 		return true;
-	}
-
-	//----static classes
-	private static class DeleteChangeCreator{
-		static IChange createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException{
-			CompositeChange composite= new CompositeChange(){
-				public boolean isUndoable() {
-					return false;
-				}	
-			};
-			for (int i= 0; i < javaElements.length; i++) {
-				IJavaElement element= javaElements[i];
-				if (! ReorgUtils2.isInsideCompilationUnit(element))
-					composite.add(createDeleteChange(element));
-			}
-
-			Map grouped= groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
-			for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
-				ICompilationUnit cu= (ICompilationUnit) iter.next();
-				composite.add(createDeleteChange(cu, (List)grouped.get(cu), manager));
-			}
-
-			for (int i= 0; i < resources.length; i++) {
-				composite.add(createDeleteChange(resources[i]));
-			}
-			return composite;
-		}
-		
-		private static IChange createDeleteChange(IResource resource) {
-			Assert.isTrue(! (resource instanceof IWorkspaceRoot));//cannot be done
-			Assert.isTrue(! (resource instanceof IProject)); //project deletion is handled by the workbench
-			if (resource instanceof IFile)
-				return new DeleteFileChange((IFile)resource);
-			if (resource instanceof IFolder)
-				return new DeleteFolderChange((IFolder)resource);
-			Assert.isTrue(false);//there're no more kinds
-			return null;
-		}
-
-		/*
-		 * List<IJavaElement> javaElements 
-		 */
-		private static IChange createDeleteChange(ICompilationUnit cu, List javaElements, TextChangeManager manager) throws CoreException {
-			CompilationUnit cuNode= AST.parseCompilationUnit(cu, false);
-			ASTRewrite rewrite= new ASTRewrite(cuNode);
-			for (Iterator iter= javaElements.iterator(); iter.hasNext();) {
-				markAsDeleted((IJavaElement) iter.next(), cuNode, rewrite);
-			}
-			propagateFieldDeclarationNodeDeletions(rewrite);			
-			return addTextEditFromRewrite(manager, cu, rewrite);
-		}
-	
-		//TODO use this method in pull up and push down
-		private static void propagateFieldDeclarationNodeDeletions(ASTRewrite rewrite) {
-			Set removedNodes= getRemovedNodes(rewrite);
-			for (Iterator iter= removedNodes.iterator(); iter.hasNext();) {
-				ASTNode node= (ASTNode) iter.next();
-				if (node instanceof VariableDeclarationFragment){
-					if (node.getParent() instanceof FieldDeclaration){
-						FieldDeclaration fd= (FieldDeclaration)node.getParent();
-						if (! rewrite.isRemoved(fd) && removedNodes.containsAll(fd.fragments()))
-							rewrite.markAsRemoved(fd);
-					}
-				}
-			}
-		}
-
-		/*
-		 * return List<ASTNode>
-		 */
-		private static Set getRemovedNodes(final ASTRewrite rewrite) {
-			final Set result= new HashSet();
-			rewrite.getRootNode().accept(new GenericVisitor(){
-				protected boolean visitNode(ASTNode node) {
-					if (rewrite.isRemoved(node))
-						result.add(node);
-					return true;
-				}
-			});
-			return result;
-		}
-
-		private static void markAsDeleted(IJavaElement element, CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException {
-			ASTNode[] declarationNodes= getDeclarationNode(element, cuNode);
-			for (int i= 0; i < declarationNodes.length; i++) {
-				ASTNode node= declarationNodes[i];
-				if (node != null)
-					rewrite.markAsRemoved(node);
-			}
-		}
-
-		private static ASTNode[] getDeclarationNode(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {
-			switch(element.getElementType()){
-				case IJavaElement.FIELD:
-					return new ASTNode[]{ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField)element, cuNode)};
-				case IJavaElement.IMPORT_CONTAINER:
-					return ASTNodeSearchUtil.getImportNodes((IImportContainer)element, cuNode);
-				case IJavaElement.IMPORT_DECLARATION:
-					return new ASTNode[]{ASTNodeSearchUtil.getImportDeclarationNode((IImportDeclaration)element, cuNode)};
-				case IJavaElement.INITIALIZER:
-					return new ASTNode[]{ASTNodeSearchUtil.getInitializerNode((IInitializer)element, cuNode)};
-				case IJavaElement.METHOD:
-					return new ASTNode[]{ASTNodeSearchUtil.getMethodDeclarationNode((IMethod)element, cuNode)};
-				case IJavaElement.PACKAGE_DECLARATION:
-					return new ASTNode[]{ASTNodeSearchUtil.getPackageDeclarationNode((IPackageDeclaration)element, cuNode)};
-				case IJavaElement.TYPE:
-					return new ASTNode[]{ASTNodeSearchUtil.getTypeDeclarationNode((IType)element, cuNode)};
-				default:
-					Assert.isTrue(false);
-					return null;
-			}
-		}
-
-		private static TextChange addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
-			TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
-			TextEdit resultingEdits= new MultiTextEdit();
-			rewrite.rewriteNode(textBuffer, resultingEdits, null);
-
-			TextChange textChange= manager.get(cu);
-			if (textChange instanceof TextFileChange){
-				TextFileChange tfc= (TextFileChange)textChange;
-				tfc.setSave(! cu.isWorkingCopy());
-			}
-			//TODO fix the descriptions
-			String message= "Delete elements from " + cu.getElementName();
-			textChange.addTextEdit(message, resultingEdits);
-			rewrite.removeModifications();
-			return textChange;
-		}
-
-		//List<IJavaElement>
-		private static List getElementsSmallerThanCu(IJavaElement[] javaElements){
-			List result= new ArrayList();
-			for (int i= 0; i < javaElements.length; i++) {
-				IJavaElement element= javaElements[i];
-				if (ReorgUtils2.isInsideCompilationUnit(element))
-					result.add(element);
-			}
-			return result;
-		}
-
-		/* List<IJavaElement> javaElements
-		 * return ICompilationUnit -> List<IJavaElement>
-		 */
-		private static Map groupByCompilationUnit(List javaElements){
-			Map result= new HashMap();
-			for (Iterator iter= javaElements.iterator(); iter.hasNext();) {
-				IJavaElement element= (IJavaElement) iter.next();
-				ICompilationUnit cu= ReorgUtils2.getCompilationUnit(element);
-				if (cu != null){
-					if (! result.containsKey(cu))
-						result.put(cu, new ArrayList(1));
-					((List)result.get(cu)).add(element);
-				}
-			}
-			return result;
-		}
-
-		private static IChange createDeleteChange(IJavaElement javaElement) throws JavaModelException {
-			Assert.isTrue(! ReorgUtils2.isInsideCompilationUnit(javaElement));
-			
-			switch(javaElement.getElementType()){
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-					return createPackageFragmentRootDeleteChange((IPackageFragmentRoot)javaElement);
-
-				case IJavaElement.PACKAGE_FRAGMENT:
-					return createSourceManipulationDeleteChange((IPackageFragment)javaElement);
-
-				case IJavaElement.COMPILATION_UNIT:
-					return createSourceManipulationDeleteChange((ICompilationUnit)javaElement);
-
-				case IJavaElement.CLASS_FILE:
-					//if this assert fails, it means that a precondition is missing
-					Assert.isTrue(((IClassFile)javaElement).getResource() instanceof IFile);
-					return createDeleteChange(((IClassFile)javaElement).getResource());
-
-				case IJavaElement.JAVA_MODEL: //cannot be done
-					Assert.isTrue(false);
-					return null;
-
-				case IJavaElement.JAVA_PROJECT: //handled differently
-					Assert.isTrue(false);
-					return null;
-
-				case IJavaElement.TYPE:
-				case IJavaElement.FIELD:
-				case IJavaElement.METHOD:
-				case IJavaElement.INITIALIZER:
-				case IJavaElement.PACKAGE_DECLARATION:
-				case IJavaElement.IMPORT_CONTAINER:
-				case IJavaElement.IMPORT_DECLARATION:
-					Assert.isTrue(false);//not done here
-				default:
-					Assert.isTrue(false);//there's no more kinds
-					return new NullChange();
-			}
-		}
-
-		private static IChange createSourceManipulationDeleteChange(ISourceManipulation element) {
-			//XXX workaround for bug 31384, in case of linked ISourceManipulation delete the resource
-			if (element instanceof ICompilationUnit || element instanceof IPackageFragment){
-				IResource resource;
-				if (element instanceof ICompilationUnit)
-					resource= ReorgUtils2.getResource((ICompilationUnit)element);
-				else 
-					resource= ((IPackageFragment)element).getResource();
-				if (resource != null && resource.isLinked())
-					return createDeleteChange(resource);
-			}
-			return new DeleteSourceManipulationChange(element);
-		}
-		
-		private static IChange createPackageFragmentRootDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
-			IResource resource= root.getResource();
-			if (resource != null && resource.isLinked()){
-				//XXX using this code is a workaround for jcore bug 31998
-				//jcore cannot handle linked stuff
-				//normally, we should always create DeletePackageFragmentRootChange
-				CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_package_fragment_root"), 2); //$NON-NLS-1$
-		
-				composite.add(new DeleteFromClasspathChange(root));
-				Assert.isTrue(! Checks.isClasspathDelete(root));//checked in preconditions
-				composite.add(createDeleteChange(resource));
-		
-				return composite;
-			} else {
-				Assert.isTrue(! root.isExternal());
-				return new DeletePackageFragmentRootChange(root, null);//TODO remove the query argument 
-			}
-		}
 	}
 
 	private static class DeleteEnablementPolicy implements IReorgEnablementPolicy {
@@ -747,7 +489,7 @@ public class DeleteRefactoring2 extends Refactoring{
 		
 			if (ReorgUtils2.isDeletedFromEditor(element))
 				return false;								
-			
+				
 			//XXX workaround for 38450 Delete: Removing default package removes source folder
 			if (JavaElementUtil.isDefaultPackage(element))
 				return false;
@@ -785,7 +527,7 @@ public class DeleteRefactoring2 extends Refactoring{
 			return (hasReadOnlyResourcesAndSubResources(resources)||
 					  hasReadOnlyResourcesAndSubResources(javaElements));
 		}
-		
+
 		private static boolean hasReadOnlyResourcesAndSubResources(IJavaElement[] javaElements) throws CoreException {
 			for (int i= 0; i < javaElements.length; i++) {
 				if (hasReadOnlyResourcesAndSubResources(javaElements[i]))
@@ -855,7 +597,7 @@ public class DeleteRefactoring2 extends Refactoring{
 			}
 			return false;
 		}
-
+	
 		private static boolean hasReadOnlyResourcesAndSubResources(IResource resource) throws CoreException {
 			if (resource.isLinked()) //we don't want to count these because we never actually delete linked resources
 				return false;

@@ -32,18 +32,34 @@ class ParentChecker {
 	}
 	
 	public boolean haveCommonParent() {
+		return getCommonParent() != null;
+	}
+	
+	public Object getCommonParent(){
 		if (! resourcesHaveCommonParent() || ! javaElementsHaveCommonParent())
-			return false;
-		if (fJavaElements.length == 0 || fResources.length == 0)
-			return true;
+			return null;
+		if (fJavaElements.length == 0){
+			IResource commonResourceParent= getCommonResourceParent();
+			Assert.isNotNull(commonResourceParent);
+			IJavaElement convertedToJava= JavaCore.create(commonResourceParent);
+			if (convertedToJava != null && convertedToJava.exists())
+				return convertedToJava;
+			else
+				return commonResourceParent;
+		}
+		if (fResources.length == 0)
+			return getCommonJavaElementParent();
+			
 		IResource commonResourceParent= getCommonResourceParent();
 		IJavaElement commonJavaElementParent= getCommonJavaElementParent();
 		Assert.isNotNull(commonJavaElementParent);
 		Assert.isNotNull(commonResourceParent);
 		IJavaElement convertedToJava= JavaCore.create(commonResourceParent);
-		return (convertedToJava != null && 
-			convertedToJava.exists() && 
-			commonJavaElementParent.equals(ReorgUtils2.toWorkingCopy(convertedToJava)));
+		if (convertedToJava == null || 
+			! convertedToJava.exists() || 
+			! commonJavaElementParent.equals(ReorgUtils2.toWorkingCopy(convertedToJava)))
+			return null;
+		return commonJavaElementParent;	
 	}
 
 	private IJavaElement getCommonJavaElementParent() {
@@ -87,55 +103,55 @@ class ParentChecker {
 		return fJavaElements;
 	}
 
-	public void removeElementsWithParentsOnList(boolean removeOnlyJavaElements) {
+	public void removeElementsWithAncestorsOnList(boolean removeOnlyJavaElements) {
 		if (! removeOnlyJavaElements){
-			removeResourcesChildrenOfResources();
-			removeResourcesChildrenOfJavaElements();
+			removeResourcesDescendantsOfResources();
+			removeResourcesDescendantsOfJavaElements();
 		}
-		removeJavaElementsChildrenOfJavaElements();
+		removeJavaElementsDescendantsOfJavaElements();
 //		removeJavaElementsChildrenOfResources(); //this case is covered by removeUnconfirmedArchives
 	}
 				
-	private void removeResourcesChildrenOfJavaElements() {
+	private void removeResourcesDescendantsOfJavaElements() {
 		List subResources= new ArrayList(3);
 		for (int i= 0; i < fResources.length; i++) {
 			IResource subResource= fResources[i];
 			for (int j= 0; j < fJavaElements.length; j++) {
 				IJavaElement superElements= fJavaElements[j];
-				if (isChildOf(subResource, superElements))
+				if (isDescendantOf(subResource, superElements))
 					subResources.add(subResource);
 			}
 		}
 		removeFromSetToDelete((IResource[]) subResources.toArray(new IResource[subResources.size()]));
 	}
 
-	private void removeJavaElementsChildrenOfJavaElements() {
+	private void removeJavaElementsDescendantsOfJavaElements() {
 		List subElements= new ArrayList(3);
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement subElement= fJavaElements[i];
 			for (int j= 0; j < fJavaElements.length; j++) {
 				IJavaElement superElement= fJavaElements[j];
-				if (isChildOf(subElement, superElement))
+				if (isDescendantOf(subElement, superElement))
 					subElements.add(subElement);
 			}
 		}
 		removeFromSetToDelete((IJavaElement[]) subElements.toArray(new IJavaElement[subElements.size()]));
 	}
 
-	private void removeResourcesChildrenOfResources() {
+	private void removeResourcesDescendantsOfResources() {
 		List subResources= new ArrayList(3);
 		for (int i= 0; i < fResources.length; i++) {
 			IResource subResource= fResources[i];
 			for (int j= 0; j < fResources.length; j++) {
 				IResource superResource= fResources[j];
-				if (isChildOf(subResource, superResource))
+				if (isDescendantOf(subResource, superResource))
 					subResources.add(subResource);
 			}
 		}
 		removeFromSetToDelete((IResource[]) subResources.toArray(new IResource[subResources.size()]));
 	}
 
-	public static boolean isChildOf(IResource subResource, IJavaElement superElement) {
+	public static boolean isDescendantOf(IResource subResource, IJavaElement superElement) {
 		IResource parent= subResource.getParent();
 		while(parent != null){
 			IJavaElement el= JavaCore.create(parent);
@@ -146,7 +162,7 @@ class ParentChecker {
 		return false;
 	}
 
-	public static boolean isChildOf(IJavaElement subElement, IJavaElement superElement) {
+	public static boolean isDescendantOf(IJavaElement subElement, IJavaElement superElement) {
 		if (subElement.equals(superElement))
 			return false;
 		IJavaElement parent= subElement.getParent();
@@ -158,7 +174,7 @@ class ParentChecker {
 		return false;
 	}
 
-	public static boolean isChildOf(IResource subResource, IResource superResource) {
+	public static boolean isDescendantOf(IResource subResource, IResource superResource) {
 		return ! subResource.equals(superResource) && superResource.getFullPath().isPrefixOf(subResource.getFullPath());
 	}
 

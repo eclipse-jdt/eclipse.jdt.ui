@@ -27,17 +27,30 @@ import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-class ReorgQueries implements IReorgQueries{
+public class ReorgQueries implements IReorgQueries{
 	
 	private final Wizard fWizard;
-	
-	ReorgQueries(Wizard wizard){
+	private final Shell fShell;	
+		
+	public ReorgQueries(Wizard wizard){
 		Assert.isNotNull(wizard);
 		fWizard= wizard;
+		fShell= null;
 	}
-	
+
+	public ReorgQueries(Shell shell){
+		Assert.isNotNull(shell);
+		fWizard= null;
+		fShell= shell;
+	}
+
 	private Shell getShell() {
-		return fWizard.getContainer().getShell();
+		Assert.isTrue(fShell == null || fWizard == null);
+		Assert.isTrue(fShell != null || fWizard != null);
+		if (fWizard != null)
+			return fWizard.getContainer().getShell();
+		else
+			return fShell;
 	}
 	
 	/* (non-Javadoc)

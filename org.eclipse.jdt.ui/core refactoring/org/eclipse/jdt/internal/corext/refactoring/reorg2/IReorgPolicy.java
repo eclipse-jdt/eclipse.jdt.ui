@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -20,10 +19,26 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 
-interface ICopyPolicy extends IReorgEnablementPolicy{
-	public IFile[] getAllModifiedFiles();
+interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdatingRefactoring {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException;
 	public RefactoringStatus setDestination(IResource resource) throws JavaModelException;
 	public RefactoringStatus setDestination(IJavaElement javaElement) throws JavaModelException;
-	public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) throws JavaModelException;
+	public IResource[] getResources();
+	public IJavaElement[] getJavaElements();
+	public IResource getResourceDestination();
+	public IJavaElement getJavaElementDestination();
+
+	public boolean canUpdateReferences();
+	public void setUpdateReferences(boolean update);
+	public boolean getUpdateReferences();
+	public boolean canUpdateQualifiedNames();
+	
+	static interface ICopyPolicy extends IReorgPolicy{
+		public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) throws JavaModelException;
+	}
+	static interface IMovePolicy extends IReorgPolicy{
+		public IChange createChange(IProgressMonitor pm) throws JavaModelException;
+	}
 }
