@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -57,7 +58,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 	private final static int SIZING_SELECTION_WIDGET_HEIGHT= 250;
 	private final static int SIZING_SELECTION_WIDGET_WIDTH= 300;
 	
-	private final static String DIALOG_SETTINGS_FILTER= "ProjectSelectionDialog.fiter_non_specifics"; //$NON-NLS-1$
+	private final static String DIALOG_SETTINGS_SHOW_ALL= "ProjectSelectionDialog.show_all"; //$NON-NLS-1$
 
 	private ViewerFilter fFilter;
 
@@ -122,8 +123,8 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 				updateFilter(((Button) e.widget).getSelection());
 			}
 		});
-		boolean doFilter= JavaPlugin.getDefault().getDialogSettings().getBoolean(DIALOG_SETTINGS_FILTER)
-			&& !fProjectsWithSpecifics.isEmpty();
+		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
+		boolean doFilter= !dialogSettings.getBoolean(DIALOG_SETTINGS_SHOW_ALL) && !fProjectsWithSpecifics.isEmpty();
 		checkbox.setSelection(doFilter);
 		updateFilter(doFilter);
 		
@@ -141,7 +142,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 		} else {
 			fTableViewer.removeFilter(fFilter);
 		}
-		JavaPlugin.getDefault().getDialogSettings().put(DIALOG_SETTINGS_FILTER, selected);
+		JavaPlugin.getDefault().getDialogSettings().put(DIALOG_SETTINGS_SHOW_ALL, !selected);
 	}
 
 	private void doSelectionChanged(Object[] objects) {
