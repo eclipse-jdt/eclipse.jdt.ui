@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +22,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterManager;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -49,6 +49,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.texteditor.ConfigurationElementSorter;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
 import org.eclipse.jdt.core.IBufferFactory;
@@ -370,7 +371,15 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public JavaEditorTextHoverDescriptor[] getJavaEditorTextHoverDescriptors() {
 		if (fJavaEditorTextHoverDescriptors == null) {
 			fJavaEditorTextHoverDescriptors= JavaEditorTextHoverDescriptor.getContributedHovers();
-			Arrays.sort(fJavaEditorTextHoverDescriptors, new JavaEditorTextHoverDescriptorComparator(fJavaEditorTextHoverDescriptors));
+			ConfigurationElementSorter sorter= new ConfigurationElementSorter() {
+				/**
+				 * {@inheritDoc}
+				 */
+				public IConfigurationElement getConfigurationElement(Object object) {
+					return ((JavaEditorTextHoverDescriptor)object).getConfigurationElement();
+				}
+			};
+			sorter.sort(fJavaEditorTextHoverDescriptors);
 		}
 		
 		return fJavaEditorTextHoverDescriptors;
