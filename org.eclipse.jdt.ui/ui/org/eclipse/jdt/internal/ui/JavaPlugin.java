@@ -237,8 +237,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (USE_WORKING_COPY_OWNERS)
 			DefaultWorkingCopyOwner.PRIMARY.factory= getBufferFactory();
 
+		installPreferenceStoreBackwardsCompatibility();
+		
+		AllTypesCache.initialize();
+	}
+	
+	/**
+	 * Installs backwards compatibility for the preference store.
+	 */
+	private void installPreferenceStoreBackwardsCompatibility() {
+
 		/*
-		 * Backward compatibility: propagate the Java editor font from a
+		 * Installs backwards compatibility: propagate the Java editor font from a
 		 * pre-2.1 plug-in to the Platform UI's preference store to preserve
 		 * the Java editor font from a pre-2.1 workspace. This is done only
 		 * once.
@@ -251,7 +261,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		getPreferenceStore().setValue(fontPropagatedKey, true);
 
 		/*
-		 * Backward compatibility: set the Java editor font in this plug-in's
+		 * Backwards compatibility: set the Java editor font in this plug-in's
 		 * preference store to let older versions access it. Since 2.1 the
 		 * Java editor font is managed by the workbench font preference page.
 		 */
@@ -264,10 +274,15 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 		};
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
-		
-		AllTypesCache.initialize();
 	}
-		
+	
+	/**
+	 * Uninstalls backwards compatibility for the preference store.
+	 */
+	private void uninstallPreferenceStoreBackwardsCompatibility() {
+		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
+	}
+
 	/* (non - Javadoc)
 	 * Method declared in AbstractUIPlugin
 	 */
@@ -306,7 +321,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		JavaDocLocations.shutdownJavadocLocations();
 		
-		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
+		uninstallPreferenceStoreBackwardsCompatibility();
 		
 		Refactoring.getUndoManager().shutdown();
 	}
