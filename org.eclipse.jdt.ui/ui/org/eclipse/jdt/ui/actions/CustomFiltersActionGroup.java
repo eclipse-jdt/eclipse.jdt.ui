@@ -18,14 +18,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeSet;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.filters.CustomFiltersDialog;
-import org.eclipse.jdt.internal.ui.filters.FilterDescriptor;
-import org.eclipse.jdt.internal.ui.filters.FilterMessages;
-import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
@@ -34,10 +41,18 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.filters.CustomFiltersDialog;
+import org.eclipse.jdt.internal.ui.filters.FilterDescriptor;
+import org.eclipse.jdt.internal.ui.filters.FilterMessages;
+import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
 
 /**
  * Action group to add the filter action to a view part's toolbar
@@ -60,6 +75,60 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			openDialog();
 		}
 	}
+
+	/**
+	 * Menu contribution item which shows and lets check and uncheck filters.
+	 * 
+	 * @since 3.0
+	 */
+	class FilterActionMenuContributionItem extends ContributionItem {
+
+		private int fId;
+		private boolean fState;
+		private FilterDescriptor fFilterDescriptor;
+		private CustomFiltersActionGroup fActionGroup;
+
+		/**
+		 * Constructor for FilterActionMenuContributionItem.
+		 */
+		public FilterActionMenuContributionItem(int id, CustomFiltersActionGroup actionGroup, FilterDescriptor filterDescriptor, boolean state) {
+			super(getFilterActionMenuItemId(id));
+			Assert.isNotNull(actionGroup);
+			Assert.isNotNull(filterDescriptor);
+			fId= id;
+			fActionGroup= actionGroup;
+			fFilterDescriptor= filterDescriptor;
+			fState= state;
+		}
+
+		/*
+		 * Overrides method from ContributionItem.
+		 */
+		public void fill(Menu menu, int index) {
+			MenuItem mi= new MenuItem(menu, SWT.CHECK, index);
+			mi.setText("&" + fId + " " + fFilterDescriptor.getName());  //$NON-NLS-1$  //$NON-NLS-2$
+			/*
+			 * XXX: Don't set the image - would look bad because other menu items don't provide image
+			 * XXX: Get working set specific image name from XML - would need to cache icons
+			 */
+//			mi.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVA_WORKING_SET));
+			mi.setSelection(fState);
+			mi.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					fState= !fState;
+					fActionGroup.setFilter(fFilterDescriptor, fState);
+				}
+			});
+		}
+	
+		/**
+		 * Overridden to always return true and force dynamic menu building.
+		 */
+		public boolean isDynamic() {
+			return true;
+		}
+	}
+
 	private static final String TAG_CUSTOM_FILTERS = "customFilters"; //$NON-NLS-1$
 	private static final String TAG_USER_DEFINED_PATTERNS_ENABLED= "userDefinedPatternsEnabled"; //$NON-NLS-1$
 	private static final String TAG_USER_DEFINED_PATTERNS= "userDefinedPatterns"; //$NON-NLS-1$
@@ -72,6 +141,9 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	private static final String SEPARATOR= ",";  //$NON-NLS-1$
 
+	private static final int MAX_FILTER_MENU_ENTRIES= 3;
+	private static final String RECENT_FILTERS_GROUP_ID= "recentFilters"; //$NON-NLS-1$
+
 	private IViewPart fPart;
 	private StructuredViewer fViewer;
 
@@ -81,7 +153,33 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private Map fEnabledFilterIds;
 	private boolean fUserDefinedPatternsEnabled;
 	private String[] fUserDefinedPatterns;
-
+	/**
+	 * Recently changed filters stack with oldest on top (i.e. at the end).
+	 *
+	 * @since 3.0
+	 */
+	private Stack fRecentlyChangedFiltersStack; 
+	/**
+	 * Number of filter menu items when the view menu
+	 * was last shown.
+	 * 
+	 * @since 3.0
+	 */
+	private int fLRUMenuCount;
+	/**
+	 * Handle to menu manager to dynamically update
+	 * the last recently used filters.
+	 * 
+	 * @since 3.0
+	 */
+	private IMenuManager fMenuManager;
+	/**
+	 * The menu listener which dynamically updates
+	 * the last recently used filters.
+	 * 
+	 * @since 3.0
+	 */
+	private IMenuListener fMenuListener;
 	
 	/**
 	 * Creates a new <code>CustomFiltersActionGroup</code>.
@@ -94,7 +192,9 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		Assert.isNotNull(viewer);
 		fPart= part;
 		fViewer= viewer;
-		
+
+		fRecentlyChangedFiltersStack= new Stack();
+
 		initializeWithPluginContributions();
 		initializeWithViewDefaults();
 		
@@ -109,6 +209,19 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fillViewMenu(actionBars.getMenuManager());
 	}
 
+	/**
+	 * Sets the enable state of the given filter.
+	 * 
+	 * @param filterDescriptor
+	 * @param state
+	 */
+	private void setFilter(FilterDescriptor filterDescriptor, boolean state) {
+		fEnabledFilterIds.put(filterDescriptor.getId(), new Boolean(state));
+		fRecentlyChangedFiltersStack.pop();
+		fRecentlyChangedFiltersStack.add(0, filterDescriptor);
+		updateViewerFilters(true);
+	}
+	
 	private String[] getEnabledFilterIds() {
 		Set enabledFilterIds= new HashSet(fEnabledFilterIds.size());
 		Iterator iter= fEnabledFilterIds.entrySet().iterator();
@@ -123,6 +236,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 
 	private void setEnabledFilterIds(String[] enabledIds) {
+
+		
 		Iterator iter= fEnabledFilterIds.keySet().iterator();
 		while (iter.hasNext()) {
 			String id= (String)iter.next();
@@ -137,6 +252,28 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		cleanUpPatternDuplicates();
 	}
 
+	/**
+	 * Sets the recently changed filters.
+	 * 
+	 * @since 3.0
+	 */
+	private void setRecentlyChangedFilters(Stack changeHistory) {
+		Stack oldestFirstStack= new Stack();
+		
+		int length= Math.min(changeHistory.size(), MAX_FILTER_MENU_ENTRIES);
+		for (int i= 0; i < length; i++)
+			oldestFirstStack.push(changeHistory.pop());
+		
+		length= Math.min(fRecentlyChangedFiltersStack.size(), MAX_FILTER_MENU_ENTRIES - oldestFirstStack.size());
+		int NEWEST= 0;
+		for (int i= 0; i < length; i++) {
+			Object filter= fRecentlyChangedFiltersStack.remove(NEWEST);
+			if (!oldestFirstStack.contains(filter))
+				oldestFirstStack.push(filter);
+		}
+		fRecentlyChangedFiltersStack= oldestFirstStack;
+	}
+	
 	private boolean areUserDefinedPatternsEnabled() {
 		return fUserDefinedPatternsEnabled;
 	}
@@ -150,13 +287,47 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	private void fillViewMenu(IMenuManager viewMenu) {
 		viewMenu.add(new Separator("filters")); //$NON-NLS-1$
+		viewMenu.add(new GroupMarker(RECENT_FILTERS_GROUP_ID));
 		viewMenu.add(new ShowFilterDialogAction());
+
+		fMenuManager= viewMenu;
+		fMenuListener= new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				removePreviousLRUFilterActions(manager);
+				addLRUFilterActions(manager);
+			}
+		};
+		fMenuManager.addMenuListener(fMenuListener);
 	}
 
-	/* (non-Javadoc)
+	private void removePreviousLRUFilterActions(IMenuManager mm) {
+		for (int i= 0; i < fLRUMenuCount; i++)
+			mm.remove(getFilterActionMenuItemId(i));
+	}
+
+	private String getFilterActionMenuItemId(int id) {
+		return FilterActionMenuContributionItem.class.getName() + "." + id;  //$NON-NLS-1$
+	}
+	
+	private void addLRUFilterActions(IMenuManager mm) {
+		SortedSet sortedFilters= new TreeSet(fRecentlyChangedFiltersStack);
+		FilterDescriptor[] recentlyChangedFilters= (FilterDescriptor[])sortedFilters.toArray(new FilterDescriptor[sortedFilters.size()]);
+		
+		for (int i= 0; i < recentlyChangedFilters.length; i++) {
+			String id= recentlyChangedFilters[i].getId();
+			boolean state= fEnabledFilterIds.containsKey(id) && ((Boolean)fEnabledFilterIds.get(id)).booleanValue();
+			IContributionItem item= new FilterActionMenuContributionItem(i, this, recentlyChangedFilters[i], state);
+			mm.insertBefore(RECENT_FILTERS_GROUP_ID, item);
+		}
+		fLRUMenuCount= recentlyChangedFilters.length;
+	}
+
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void dispose() {
+		if (fMenuManager != null)
+			fMenuManager.removeMenuListener(fMenuListener);
 		super.dispose();
 	}
 	
@@ -423,6 +594,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			setEnabledFilterIds(dialog.getEnabledFilterIds());
 			setUserDefinedPatternsEnabled(dialog.areUserDefinedPatternsEnabled());
 			setUserDefinedPatterns(dialog.getUserDefinedPatterns());
+			setRecentlyChangedFilters(dialog.getFilterDescriptorChangeHistory());
 
 			storeViewDefaults();
 
