@@ -4,7 +4,36 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Map;import java.util.Set;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.Tree;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTableViewer;import org.eclipse.jface.viewers.CheckboxTreeViewer;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ITreeViewerListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeExpansionEvent;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.jface.viewers.ViewerSorter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Tree;
+
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeViewerListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerSorter;
 /**
  *	Combines a CheckboxTreeViewer and CheckboxListViewer.
  *	All viewer selection-driven interactions are handled within this viewer
@@ -63,11 +92,11 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 */
 	public void aboutToOpen() {
 		determineWhiteCheckedDescendents(fRoot);
-		checkNewTreeElements(fTreeContentProvider.getElements(fRoot));
+		checkNewTreeElements(getTreeChildren(fRoot));
 		fCurrentTreeSelection= null;
 
 		//select the first element in the list
-		Object[] elements= fTreeContentProvider.getElements(fRoot);
+		Object[] elements= getTreeChildren(fRoot);
 		Object primary= elements.length > 0 ? elements[0] : null;
 		if (primary != null) {
 			fTreeViewer.setSelection(new StructuredSelection(primary));
@@ -105,7 +134,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	@param treeElement java.lang.Object
 	 */
 	protected boolean areAllChildrenWhiteChecked(Object treeElement) {
-		Object[] children= fTreeContentProvider.getChildren(treeElement);
+		Object[] children= getTreeChildren(treeElement);
 		for (int i= 0; i < children.length; ++i) {
 			if (!fWhiteCheckedTreeItems.contains(children[i]))
 				return false;
@@ -239,7 +268,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 		// if any children of treeElement are still gray-checked then treeElement
 		// must remain gray-checked as well
-		Object[] children= fTreeContentProvider.getChildren(treeElement);
+		Object[] children= getTreeChildren(treeElement);
 		for (int i= 0; i < children.length; ++i) {
 			if (fCheckedStateStore.containsKey(children[i]))
 				return true;
@@ -268,7 +297,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		// always go through all children first since their white-checked
 		// statuses will be needed to determine the white-checked status for
 		// this tree element
-		Object[] children= fTreeContentProvider.getElements(treeElement);
+		Object[] children= getTreeChildren(treeElement);
 		for (int i= 0; i < children.length; ++i)
 			determineWhiteCheckedDescendents(children[i]);
 
@@ -326,7 +355,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	@param treeElement java.lang.Object
 	 */
 	protected int getListItemsSize(Object treeElement) {
-		Object[] elements= fListContentProvider.getElements(treeElement);
+		Object[] elements= getListElements(treeElement);
 		return elements.length;
 	}
 	/**
@@ -542,7 +571,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		}
 
 		if (state) {
-			Object[] listItems= fListContentProvider.getElements(treeElement);
+			Object[] listItems= getListElements(treeElement);
 			List listItemsChecked= new ArrayList();
 			for (int i= 0; i < listItems.length; ++i)
 				listItemsChecked.add(listItems[i]);
@@ -556,7 +585,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		fTreeViewer.setGrayed(treeElement, false);
 
 		// now logically check/uncheck all children as well
-		Object[] children= fTreeContentProvider.getChildren(treeElement);
+		Object[] children= getTreeChildren(treeElement);
 		for (int i= 0; i < children.length; ++i) {
 			setTreeChecked(children[i], state);
 		}
@@ -610,7 +639,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		// already been realized then this won't be necessary
 		if (!fExpandedTreeNodes.contains(item)) {
 			fExpandedTreeNodes.add(item);
-			checkNewTreeElements(fTreeContentProvider.getChildren(item));
+			checkNewTreeElements(getTreeChildren(item));
 		}
 	}
 
@@ -710,5 +739,36 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 				}
 			}
 		});
+	}
+	/**
+	 * Returns the result of running the given elements through the filters.
+	 *
+	 * @param elements the elements to filter
+	 * @return only the elements which all filters accept
+	 */
+	protected Object[] filter(ViewerFilter[] filters, Object[] elements) {
+		if (filters != null) {
+			ArrayList filtered = new ArrayList(elements.length);
+			for (int i = 0; i < elements.length; i++) {
+				boolean add = true;
+				for (int j = 0; j < filters.length; j++) {
+					add = filters[j].select(null, null, elements[i]);
+					if (!add)
+						break;
+				}
+				if (add)
+					filtered.add(elements[i]);
+			}
+			return filtered.toArray();
+		}
+		return elements;
+	}
+
+	private Object[] getTreeChildren(Object element) {
+		return filter(fTreeViewer.getFilters(), fTreeContentProvider.getChildren(element));
+	}
+
+	private Object[] getListElements(Object element) {
+		return filter(fListViewer.getFilters(), fListContentProvider.getElements(element));
 	}
 }
