@@ -48,8 +48,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.core.ClasspathEntry;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
@@ -111,7 +109,7 @@ public class JavaProjectHelper {
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				performDummySearch();
-				jproject.setRawClasspath(new ClasspathEntry[0], jproject.getProject().getFullPath(), null);
+				jproject.setRawClasspath(new IClasspathEntry[0], jproject.getProject().getFullPath(), null);
 				for (int i= 0; i < MAX_RETRY; i++) {
 					try {
 						jproject.getProject().delete(true, true, null);
@@ -287,7 +285,7 @@ public class JavaProjectHelper {
 	/**
 	 * Creates and adds a class folder to the class path.
 	 */			
-	public static IPackageFragmentRoot addClassFolder(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot) throws IOException, CoreException {
+	public static IPackageFragmentRoot addClassFolder(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot) throws CoreException {
 		IProject project= jproject.getProject();
 		IContainer container= null;
 		if (containerName == null || containerName.length() == 0) {
@@ -305,7 +303,7 @@ public class JavaProjectHelper {
 	/**
 	 * @deprecated Use addClassFolderWithImport(IJavaProject, String, IPath, IPath, File) to make sure that the zip file is correctly closed
 	 */			
-	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot, ZipFile zipFile) throws IOException, CoreException, InvocationTargetException {
+	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot, ZipFile zipFile) throws CoreException, InvocationTargetException {
 		IPackageFragmentRoot root= addClassFolder(jproject, containerName, sourceAttachPath, sourceAttachRoot);
 		importFilesFromZip(zipFile, root.getPath(), null);
 		return root;
