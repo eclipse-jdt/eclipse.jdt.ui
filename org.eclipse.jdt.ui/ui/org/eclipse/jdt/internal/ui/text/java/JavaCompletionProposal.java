@@ -26,7 +26,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-//import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -357,11 +357,11 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	}
 	
 	private void repairPresentation(ITextViewer viewer) {
-//		if (fRememberedStyleRange != null && viewer instanceof ITextViewerExtension2) {
-//			// attempts to reduce the redraw area
-//			ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
-//			viewer2.invalidateTextPresentation(fRememberedStyleRange.start, fRememberedStyleRange.length);
-//		} else
+		if (fRememberedStyleRange != null && viewer instanceof ITextViewerExtension2) {
+			// attempts to reduce the redraw area
+			ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
+			viewer2.invalidateTextPresentation(fRememberedStyleRange.start, fRememberedStyleRange.length);
+		} else
 			viewer.invalidateTextPresentation();
 	}
 
