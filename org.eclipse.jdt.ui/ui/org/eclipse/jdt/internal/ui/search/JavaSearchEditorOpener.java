@@ -53,7 +53,7 @@ public class JavaSearchEditorOpener {
 		return EditorUtility.openInEditor(element, false);
 	}
 
-	private IEditorPart showWithReuse(Object element, IWorkbenchPage wbPage) throws JavaModelException {
+	private IEditorPart showWithReuse(Object element, IWorkbenchPage wbPage) throws JavaModelException, PartInitException {
 		IFile file= getFile(element);
 		if (file != null) {
 			String editorID= getEditorID(file);
@@ -82,8 +82,8 @@ public class JavaSearchEditorOpener {
 		return null;
 	}
 
-	private String getEditorID(IFile file) {
-		IEditorDescriptor desc= IDE.getDefaultEditor(file);
+	private String getEditorID(IFile file) throws PartInitException {
+		IEditorDescriptor desc= IDE.getEditorDescriptor(file);
 		if (desc == null)
 			return SearchPlugin.getDefault().getWorkbench().getEditorRegistry().findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID).getId();
 		else

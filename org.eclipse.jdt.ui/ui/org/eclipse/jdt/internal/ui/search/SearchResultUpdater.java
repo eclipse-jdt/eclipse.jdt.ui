@@ -25,10 +25,6 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.Match;
 
-/**
- * @author Thomas Mäder
- *
- */
 public class SearchResultUpdater implements IElementChangedListener, IQueryListener {
 
 	JavaSearchResult fResult;
