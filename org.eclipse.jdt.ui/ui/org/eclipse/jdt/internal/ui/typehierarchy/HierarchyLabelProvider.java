@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 
@@ -45,9 +46,19 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			fBase= base;
 		}
 		protected void drawCompositeImage(int width, int height) {
-			drawImage(fBase.getImageData(), 0, 0);
-			drawImage(JavaPluginImages.DESC_OVR_FOCUS.getImageData(), 0, 0);
+			drawImage(getImageData(fBase), 0, 0);
+			drawImage(getImageData(JavaPluginImages.DESC_OVR_FOCUS), 0, 0);
 		}
+		
+		private ImageData getImageData(ImageDescriptor descriptor) {
+			ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
+			if (data == null) {
+				data= DEFAULT_IMAGE_DATA;
+				JavaPlugin.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
+			}
+			return data;
+		}
+		
 		protected Point getSize() {
 			return JavaElementImageProvider.BIG_SIZE;
 		}

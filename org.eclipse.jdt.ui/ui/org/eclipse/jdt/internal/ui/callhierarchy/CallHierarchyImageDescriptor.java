@@ -18,6 +18,7 @@ import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
@@ -128,20 +129,27 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
      * Method declared in CompositeImageDescriptor
      */
     protected void drawCompositeImage(int width, int height) {
-        ImageData bg;
-        if ((bg= fBaseImage.getImageData()) == null)
-            bg= DEFAULT_IMAGE_DATA;
+        ImageData bg= getImageData(fBaseImage);
             
         drawImage(bg, 0, 0);
         drawTopLeft();
         drawBottomRight();
         drawBottomLeft();
-    }   
+    }  
+    
+	private ImageData getImageData(ImageDescriptor descriptor) {
+		ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
+		if (data == null) {
+			data= DEFAULT_IMAGE_DATA;
+			JavaPlugin.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
+		}
+		return data;
+	}
     
     private void drawTopLeft() {       
         ImageData data= null;
         if ((fFlags & CALLER) != 0) {
-            data= JavaPluginImages.DESC_OVR_CALLER.getImageData();
+            data= getImageData(JavaPluginImages.DESC_OVR_CALLER);
             drawImage(data, 0, 0);
         }
     }       
@@ -151,7 +159,7 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
         int x= size.x;
         ImageData data= null;
         if ((fFlags & CALLEE) != 0) {
-            data= JavaPluginImages.DESC_OVR_CALLEE.getImageData();
+            data= getImageData(JavaPluginImages.DESC_OVR_CALLEE);
             x-= data.width;
             drawImage(data, x, size.y - data.height);
         }
@@ -162,12 +170,12 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
         int x= 0;
         ImageData data= null;
         if ((fFlags & RECURSIVE) != 0) {
-            data= JavaPluginImages.DESC_OVR_RECURSIVE.getImageData();
+            data= getImageData(JavaPluginImages.DESC_OVR_RECURSIVE);
             drawImage(data, x, size.y - data.height);
             x+= data.width;
         }
         if ((fFlags & MAX_LEVEL) != 0) {
-            data= JavaPluginImages.DESC_OVR_MAX_LEVEL.getImageData();
+            data= getImageData(JavaPluginImages.DESC_OVR_MAX_LEVEL);
             drawImage(data, x, size.y - data.height);
             x+= data.width;
         }
