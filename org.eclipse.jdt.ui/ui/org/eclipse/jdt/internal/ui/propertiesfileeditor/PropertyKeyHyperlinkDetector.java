@@ -93,7 +93,6 @@ public class PropertyKeyHyperlinkDetector implements IHyperlinkDetector {
 			// Extract the key from the partition (which contains key and assignment
 			String key= document.get(partition.getOffset(), partition.getLength());
 			
-			// FIXME: fix-up leading line delimiters contained in partition
 			String realKey= key.trim();
 			int delta= key.indexOf(realKey);
 			
