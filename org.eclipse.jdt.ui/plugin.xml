@@ -2159,7 +2159,7 @@
 		name= "%HideNonSharedProjects.label"
 		description= "%HideNonSharedProjects.description"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
-		class= "org.eclipse.jdt.internal.ui.filters.NonSharedFilter"
+		class= "org.eclipse.jdt.internal.ui.filters.NonSharedProjectFilter"
 		enabled= "false">
 	</filter>
 
@@ -2222,7 +2222,7 @@
 		name= "%HideNonSharedProjects.label"
 		description= "%HideNonSharedProjects.description"
 		viewId= "org.eclipse.jdt.ui.ProjectsView"
-		class= "org.eclipse.jdt.internal.ui.filters.NonSharedFilter"
+		class= "org.eclipse.jdt.internal.ui.filters.NonSharedProjectFilter"
 		enabled= "false">
 	</filter>
 

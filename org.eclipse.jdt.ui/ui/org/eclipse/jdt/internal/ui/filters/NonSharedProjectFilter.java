@@ -12,46 +12,36 @@ package org.eclipse.jdt.internal.ui.filters;
 
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.team.core.RepositoryProvider;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 
 /**
- * Filters non-shared resources and Java elements
- * i.e. those controlled by a team provider.
+ * Filters non-shared projects and Java projects
+ * i. e. those not controlled by a team provider.
  * 
  * @since 2.1
  */
-public class NonSharedFilter extends ViewerFilter {
+public class NonSharedProjectFilter extends ViewerFilter {
 
 	/*
 	 * @see ViewerFilter
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-		if (element instanceof IResource)
-			return isSharedProject(((IResource)element).getProject());
+		if (element instanceof IProject)
+			return isSharedProject((IProject)element);
 		
-		IJavaProject jp= null;
-		if (element instanceof IJavaElement) {
-			jp= ((IJavaElement)element).getJavaProject();
-	
-		} else if (element instanceof ClassPathContainer) {
-			ClassPathContainer container= (ClassPathContainer) element;
-			jp= container.getJavaProject();
-		}
-		if (jp == null)
-			return false;
-		return isSharedProject(jp.getProject());
+		if (element instanceof IJavaProject)
+			return isSharedProject(((IJavaProject)element).getProject());
+
+		return false;
 	}
 	
 	private boolean isSharedProject(IProject project) {
-		return RepositoryProvider.getProvider(project) != null;
+		return RepositoryProvider.isShared(project);
 	}
 }
