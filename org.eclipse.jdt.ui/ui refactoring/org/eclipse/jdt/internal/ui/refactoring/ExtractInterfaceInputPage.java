@@ -15,21 +15,26 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class ExtractInterfaceInputPage extends TextInputWizardPage {
 
@@ -86,7 +91,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		
 		fTableViewer= CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		fTableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
-		fTableViewer.setLabelProvider(new JavaElementLabelProvider());
+		fTableViewer.setLabelProvider(createLabelProvider());
 		fTableViewer.setContentProvider(createContentProvider());
 		try {
 			fTableViewer.setInput(getExtractInterfaceRefactoring().getExtractableMembers());
@@ -97,6 +102,16 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		fTableViewer.getControl().setEnabled(anyMembersToExtract());
 
 		createButtonComposite(composite);
+	}
+
+	private ILabelProvider createLabelProvider(){
+		ILabelProvider lprovider= new AppearanceAwareLabelProvider(
+			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
+			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
+			AppearanceAwareLabelProvider.getDecorators(true, new OverrideIndicatorLabelDecorator(null))
+		);
+		
+		return new DecoratingLabelProvider(lprovider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 	}
 
 	private void createButtonComposite(Composite composite) {
