@@ -1,9 +1,21 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -16,10 +28,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -32,14 +42,12 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
@@ -67,92 +75,33 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 class PullUpInputPage1 extends UserInputWizardPage {
 	
 	private static final int ROW_COUNT = 10;
-	private static class MemberActionInfoContentProvider implements IStructuredContentProvider {
-		public void dispose() {
-		}
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
-		public Object[] getElements(Object inputElement) {
-			return (Object[])inputElement;
-		}
-	}
-
 	private class PullUpCellModifier implements ICellModifier {
+		/*
+		 * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object, java.lang.String)
+		 */
 		public Object getValue(Object element, String property) {
-			if (ACTION.equals(property)) {
+			if (ACTION_PROPERTY.equals(property)) {
 				MemberActionInfo mac= (MemberActionInfo)element;
 				return new Integer(mac.getAction());
 			}
 			return null;
 		}
+		/*
+		 * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object, java.lang.String)
+		 */
 		public boolean canModify(Object element, String property) {
-			return ACTION.equals(property);
+			return ACTION_PROPERTY.equals(property);
 		}
+		/*
+		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object, java.lang.String, java.lang.Object)
+		 */
 		public void modify(Object element, String property, Object value) {
-			if (ACTION.equals(property)) {
-				int intValue= ((Integer)value).intValue();
+			if (ACTION_PROPERTY.equals(property)) {
+				int action= ((Integer)value).intValue();
 				MemberActionInfo mac= (MemberActionInfo)((Item)element).getData();
-				mac.setAction(intValue);
-				updateUIElements(null);
+				mac.setAction(action);
+				PullUpInputPage1.this.updateUIElements(null);
 			}
-		}
-	}
-
-	private static class EditMembersDialog extends Dialog{
-				
-		private String[] fAllowedStrings;
-		private int fSelection= -1;
-
-		public EditMembersDialog(Shell parentShell) {
-			super(parentShell);
-		}
-
-		int getSelection(){
-			return fSelection;
-		}
-		
-		protected Control createDialogArea(Composite parent) {
-			getShell().setText("Edit members");
-			
-			Composite composite = (Composite)super.createDialogArea(parent);
-			Composite innerComposite = new Composite(composite, SWT.NONE);
-			innerComposite.setLayoutData(new GridData());
-			GridLayout gl= new GridLayout();
-			gl.numColumns= 2;
-			innerComposite.setLayout(gl);
-			
-			Label label= new Label(innerComposite, SWT.NONE);
-			label.setText("&Mark selected member(s) as:");
-			label.setLayoutData(new GridData());
-
-			final Combo combo= new Combo(innerComposite, SWT.READ_ONLY);
-			for (int i = 0; i < fAllowedStrings.length; i++) {
-				combo.add(fAllowedStrings[i]);
-			}
-			combo.select(0);
-			fSelection= combo.getSelectionIndex();
-			GridData gd= new GridData();
-			gd.widthHint= convertWidthInCharsToPixels(getMaxStringLength());
-			combo.setLayoutData(gd);
-			combo.addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e) {
-					fSelection= combo.getSelectionIndex();
-				}
-			});
-			return composite;
-		}
-		
-		private int getMaxStringLength() {
-			int max= 0;
-			for (int i= 0; i < fAllowedStrings.length; i++) {
-				max= Math.max(max, fAllowedStrings[i].length());
-			}
-			return max;
-		}
-
-		void setAllowedComboChoices(String[] strings){
-			Assert.isTrue(strings.length > 0);
-			fAllowedStrings= strings;
 		}
 	}
 
@@ -259,14 +208,21 @@ class PullUpInputPage1 extends UserInputWizardPage {
 					return null;
 			}
 		}
+		/*
+		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
+		 */
+		public void dispose() {
+			super.dispose();
+			fJavaElementLabelProvider.dispose();
+		}
 	}
 	
 	private static final int MEMBER_COLUMN= 0;
 	private static final int ACTION_COLUMN= 1;
 	
 	public static final String PAGE_NAME= "PullUpMethodsInputPage1"; //$NON-NLS-1$
-	private final static String ACTION= "action"; //$NON-NLS-1$	
-	private final static String MEMBER= "member"; //$NON-NLS-1$	
+	private final static String ACTION_PROPERTY= "action"; //$NON-NLS-1$	
+	private final static String MEMBER_PROPERTY= "member"; //$NON-NLS-1$	
 
 	private TableViewer fTableViewer;
 	private Combo fSuperclassCombo;
@@ -408,20 +364,43 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	private void editSelectedMembers() {
 		ISelection preserved= fTableViewer.getSelection();
 		try{
-			EditMembersDialog dialog= new EditMembersDialog(getShell());
-			dialog.setAllowedComboChoices(getAllowedComboChoicesForSelectedMembers());
+			String shellTitle= "Edit members";
+			String labelText= "&Mark selected member(s) as:";
+			Map stringMapping= createStringMappingForSelectedMembers();
+			String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
+			Arrays.sort(keys);
+			ComboSelectionDialog dialog= new ComboSelectionDialog(getShell(), shellTitle, labelText, keys);
 			dialog.setBlockOnOpen(true);
 			if (dialog.open() == Dialog.CANCEL)
 				return;
-			int selection= dialog.getSelection();
-			MemberActionInfo[] selected= getSelectedMemberActionInfos();
-			for (int i = 0; i < selected.length; i++) {
-				MemberActionInfo info = selected[i];
-				info.setAction(selection);
-			}
+			int action= ((Integer)stringMapping.get(dialog.getSelectedString())).intValue();
+			setInfoAction(getSelectedMemberActionInfos(), action);
 		} finally{
 			updateUIElements(preserved);
 		}
+	}
+
+	private static void setInfoAction(MemberActionInfo[] infos, int action) {
+		for (int i = 0; i < infos.length; i++) {
+			infos[i].setAction(action);
+		}
+	}
+
+	//String -> Integer
+	private Map createStringMappingForSelectedMembers() {
+		Map result= new HashMap();
+		if (canAllowAllChoices()){
+			putToStingMapping(result, MemberActionInfo.ALL_LABELS, MemberActionInfo.NO_ACTION);
+			putToStingMapping(result, MemberActionInfo.ALL_LABELS, MemberActionInfo.PULL_UP_ACTION);
+			putToStingMapping(result, MemberActionInfo.ALL_LABELS, MemberActionInfo.DECLARE_ABSTRACT_ACTION);
+		} else{
+			putToStingMapping(result, MemberActionInfo.LIMITED_LABELS, MemberActionInfo.NO_ACTION);
+			putToStingMapping(result, MemberActionInfo.LIMITED_LABELS, MemberActionInfo.PULL_UP_ACTION);
+		}
+		return result;
+	}
+	private static void putToStingMapping(Map result, String[] actionLabels, int actionIndex){
+		result.put(actionLabels[actionIndex], new Integer(actionIndex));
 	}
 
 	private void updateUIElements(ISelection preserved) {
@@ -434,13 +413,6 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		updateButtonEnablementState(fTableViewer.getSelection());
 	}
 
-	private String[] getAllowedComboChoicesForSelectedMembers() {
-		if (canAllowAllChoices())
-			return MemberActionInfo.ALL_LABELS;
-		else
-			return MemberActionInfo.LIMITED_LABELS;
-	}
-
 	private boolean canAllowAllChoices() {
 		MemberActionInfo[] selected= getSelectedMemberActionInfos();
 		for (int i = 0; i < selected.length; i++) {
@@ -451,16 +423,10 @@ class PullUpInputPage1 extends UserInputWizardPage {
 	}
 
 	private MemberActionInfo[] getSelectedMemberActionInfos() {
-		ISelection sel= fTableViewer.getSelection();
-		if (! (sel instanceof IStructuredSelection))
-			return new MemberActionInfo[0];
-		IStructuredSelection ss= (IStructuredSelection)sel;
-		Object[] selected= ss.toArray();
-		MemberActionInfo[] result= new MemberActionInfo[selected.length];
-		for (int i = 0; i < selected.length; i++) {
-			result[i]= (MemberActionInfo)selected[i];
-		}
-		return result;
+		Assert.isTrue(fTableViewer.getSelection() instanceof IStructuredSelection);
+		IStructuredSelection ss= (IStructuredSelection)fTableViewer.getSelection();
+		List result= ss.toList();
+		return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
 	}
 
 	private void markAdditionalRequiredMembersAsMembersToPullUp() {
@@ -508,7 +474,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		
 		fTableViewer= new TableViewer(table);
 		fTableViewer.setUseHashlookup(true);
-		fTableViewer.setContentProvider(new MemberActionInfoContentProvider());
+		fTableViewer.setContentProvider(new StaticObjectArrayContentProvider());
 		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -570,7 +536,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		
 		ICellModifier cellModifier = new PullUpCellModifier();
 		fTableViewer.setCellModifier(cellModifier);
-		fTableViewer.setColumnProperties(new String[] {MEMBER, ACTION});
+		fTableViewer.setColumnProperties(new String[] {MEMBER_PROPERTY, ACTION_PROPERTY});
 	}
 		
 	private void checkPageCompletionStatus() {
