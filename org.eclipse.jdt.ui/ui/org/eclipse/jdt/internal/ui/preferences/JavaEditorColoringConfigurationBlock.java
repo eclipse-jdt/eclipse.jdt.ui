@@ -507,16 +507,18 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	}
 	
 	/*
-	 * @see DialogPage#dispose()
+	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
 	 */
 	public void dispose() {
-		fColorManager.dispose();
 		uninstallSemanticHighlighting();
+		fColorManager.dispose();
 	}
 
 
 	private void handleSyntaxColorListSelection() {
 		HighlightingColorListItem item= getHighlightingColorListItem();
+		if (item == null)
+			return;
 		RGB rgb= PreferenceConverter.getColor(fStore, item.getColorKey());
 		fSyntaxForegroundColorEditor.setColorValue(rgb);		
 		fBoldCheckBox.setSelection(fStore.getBoolean(item.getBoldKey()));
