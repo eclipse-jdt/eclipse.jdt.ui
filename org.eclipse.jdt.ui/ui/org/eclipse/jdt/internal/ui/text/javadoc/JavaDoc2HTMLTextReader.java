@@ -7,11 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=20644 
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
-
-
-
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -19,11 +17,9 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.SubstitutionTextReader;
-
 
 
 /**
@@ -275,21 +271,41 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		
 		if ("@link".equals(tag) || "@linkplain".equals(tag)) { //$NON-NLS-1$ //$NON-NLS-2$
 			
-			StringTokenizer tokenizer= new StringTokenizer(tagContent);
-			int count= tokenizer.countTokens();
+			char[] contentChars = tagContent.toCharArray();
+			boolean inParentheses = false;
+			int labelStart= 0;
 			
-			if (count == 1)
-				return subsituteQualification(tokenizer.nextToken()); // return  reference part of link
-			
-			if (count == 2) {
-				tokenizer.nextToken(); // skip reference part of link
-				return tokenizer.nextToken(); // return label part of link
+			for (int i = 0; i < contentChars.length; i++) {
+				char nextChar = contentChars[i];
+				
+				// tagContent always has a leading space
+				if (i == 0 && Character.isWhitespace(nextChar)) {
+					labelStart= 1;
+					continue;
+				}
+				
+				if (nextChar == '(') {
+					inParentheses= true;
+					continue;
+				}
+				
+				if (nextChar == ')') {
+					inParentheses= false;
+					continue;
+				}
+				
+				// Stop at first whitespace that is not in parentheses
+				if (!inParentheses && Character.isWhitespace(nextChar)) {
+					labelStart= i+1;
+					break;
+				}
 			}
 			
-			// invalid syntax
+			return subsituteQualification(tagContent.substring(labelStart));
 		}
 		
-		return null;
+		// If something went wrong at least replace the {} with the content
+		return subsituteQualification(tagContent);
 	}
 		
 	/*
@@ -316,7 +332,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			String tag= buffer.toString();
 			
 			buffer.setLength(0);
-			if (c != -1) {
+			if (c != -1 & c!= '}') {
 				buffer.append((char) c);
 				c= getContent(buffer, '}');
 			}

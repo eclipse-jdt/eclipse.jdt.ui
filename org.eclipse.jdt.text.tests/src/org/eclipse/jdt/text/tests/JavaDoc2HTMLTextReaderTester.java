@@ -143,7 +143,37 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 		String expected= "<dl><dt>Parameters:</dt><dd><b>i</b> fred or <code>null</code></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
-
+	
+	public void test13_withText(){
+		String string= "/**\n * This is a {@linkplain Foo#bar(String, int) test link}. End.*/"; //$NON-NLS-1$
+		String expected= " This is a test link. End."; //$NON-NLS-1$
+		verify(string, expected);
+	}
+	
+	public void test13_withoutText(){
+		String string= "/**\n * This is a {@linkplain Foo#bar(String, int)}. End.*/"; //$NON-NLS-1$
+		String expected= " This is a Foo.bar(String, int). End."; //$NON-NLS-1$
+		verify(string, expected);
+	}
+	
+	public void test14_withText(){
+		String string= "/**\n * This is a {@link Foo#bar(String, int) test link}. End.*/"; //$NON-NLS-1$
+		String expected= " This is a test link. End."; //$NON-NLS-1$
+		verify(string, expected);
+	}
+	
+	
+	public void test14_withoutText(){
+		String string= "/**\n * This is a {@link Foo#bar(String, int)}. End.*/"; //$NON-NLS-1$
+		String expected= " This is a Foo.bar(String, int). End."; //$NON-NLS-1$
+		verify(string, expected);
+	}
+	
+	public void test15(){
+		String string= "/**\n * This is a <a href=\"{@docRoot}/test.html\">test link</a>. End.*/"; //$NON-NLS-1$
+		String expected= " This is a <a href=\"/test.html\">test link</a>. End."; //$NON-NLS-1$
+		verify(string, expected);
+	}
 }
 
 class MockBuffer implements IBuffer{
