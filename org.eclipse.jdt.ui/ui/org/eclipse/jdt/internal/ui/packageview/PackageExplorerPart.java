@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
+import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
 import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
@@ -258,7 +259,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
 
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
-					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE;
+					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE | JavaElementLabelProvider.SHOW_PARAMETERS;
 		JavaElementLabelProvider labelProvider = new JavaElementLabelProvider(labelFlags);
 		labelProvider.setErrorTickManager(new MarkerErrorTickProvider());
 		fViewer.setLabelProvider(new DecoratingLabelProvider(labelProvider, null));
@@ -429,9 +430,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		addOpenToMenu(menu, selection);
 		addRefactoring(menu);
-		// TODO should also add add from local history
-		if (selection.size() == 1)
+		if (selection.size() == 1) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fViewer));	
+			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaAddElementFromHistory(null, fViewer));	
+		}
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
 		
 		if (fAddBookmarkAction.canOperateOnSelection())
