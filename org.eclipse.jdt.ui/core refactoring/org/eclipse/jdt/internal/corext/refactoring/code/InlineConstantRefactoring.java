@@ -368,19 +368,8 @@ public class InlineConstantRefactoring extends Refactoring {
 				}
 			}
 
-			private static String parenthesize(String string) {
-				return "(" + string + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-			}
-
 			public static String prepareInitializerForLocation(Expression initializer, ICompilationUnit initializerCU, Expression location, ICompilationUnit locationCU, Set newTypes, RefactoringStatus status) throws JavaModelException {
 				return new InitializerExpressionRelocationPreparer(initializer, initializerCU, location, locationCU, newTypes, status).prepareInitializer();
-			}
-
-			private static boolean shouldParenthesizeSubstitute(Expression substitute, Expression location) {
-				if (substitute instanceof Assignment)// for esthetic reasons
-					return true;
-
-				return ASTNodes.substituteMustBeParenthesized(substitute, location);
 			}
 
 			// ---- End InlineTargetCompilationUnit.InitializerExpressionRelocationPreparer.InitializerTraversal
@@ -406,10 +395,6 @@ public class InlineConstantRefactoring extends Refactoring {
 				fStatus= status;
 			}
 
-			private String getOriginalInitializerString() throws JavaModelException {
-				return fInitializerCU.getBuffer().getText(fInitializer2.getStartPosition(), fInitializer2.getLength());
-			}
-
 			private String prepareInitializer() throws JavaModelException {
 				InitializerTraversal traversal= new InitializerTraversal(fInitializer2, fLocation, fLocationCU, fStatus);
 
@@ -420,16 +405,20 @@ public class InlineConstantRefactoring extends Refactoring {
 				for (int i= 0; i < qualifications.length; i++)
 					fNewTypes.add(qualifications[i].getQualifyingClass());
 
-				String result= new MultiInsertionStringEdit(qualifications).applyTo(getOriginalInitializerString());
+				String originalInitializerString= fInitializerCU.getBuffer().getText(fInitializer2.getStartPosition(), fInitializer2.getLength());
+				String result= new MultiInsertionStringEdit(qualifications).applyTo(originalInitializerString);
 
-				if (shouldParenthesize())
-					result= parenthesize(result);
+				if (shouldParenthesizeSubstitute(fInitializer2, fLocation))
+					result= "(" + result + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 
 				return result;
 			}
+			
+			private static boolean shouldParenthesizeSubstitute(Expression substitute, Expression location) {
+				if (substitute instanceof Assignment)// for esthetic reasons
+					return true;
 
-			private boolean shouldParenthesize() {
-				return shouldParenthesizeSubstitute(fInitializer2, fLocation);
+				return ASTNodes.substituteMustBeParenthesized(substitute, location);
 			}
 		}
 
@@ -600,7 +589,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			return false;
 		}
 
-		private CompilationUnitChange getChange() throws CoreException {
+		public CompilationUnitChange getChange() throws CoreException {
 			for (int i= 0; i < fReferences.length; i++)
 				inlineReference(fReferences[i]);
 			
@@ -906,7 +895,10 @@ public class InlineConstantRefactoring extends Refactoring {
 			return result;
 			
 		} finally {
-			//TODO: clear unneeded references to ASTs?
+			fSelectionCuRewrite= null;
+			fSelectedConstantName= null;
+			fDeclarationCuRewrite= null;
+			fDeclaration= null;
 			pm.done();
 		}
 	}
