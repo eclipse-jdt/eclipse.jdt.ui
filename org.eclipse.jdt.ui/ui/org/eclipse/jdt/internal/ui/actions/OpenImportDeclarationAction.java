@@ -21,8 +21,6 @@ public class OpenImportDeclarationAction extends JavaUIAction implements IUpdate
 	public OpenImportDeclarationAction(ISelectionProvider provider) {
 		super(JavaPlugin.getResourceString(PREFIX + "label"));
 		fSelectionProvider= provider;
-		
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.OPEN_IMPORTDECL_ACTION });	
 	}
 	
 	public void update() {

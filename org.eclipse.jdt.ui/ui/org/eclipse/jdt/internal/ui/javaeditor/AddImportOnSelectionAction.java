@@ -5,36 +5,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.IUpdate;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.JavaUIAction;
-import org.eclipse.jdt.internal.ui.codemanipulation.AddImportsOperation;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.CoreException;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.codemanipulation.AddImportsOperation;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 
 public class AddImportOnSelectionAction extends JavaUIAction implements IUpdate {
 	
@@ -46,6 +17,7 @@ public class AddImportOnSelectionAction extends JavaUIAction implements IUpdate 
 	public AddImportOnSelectionAction(ITextEditor editor) {
 		super(JavaPlugin.getResourceBundle(), ACTION_PREFIX);		
 		fEditor= editor;
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION });			
 	}
 	
 	public AddImportOnSelectionAction() {

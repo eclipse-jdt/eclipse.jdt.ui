@@ -5,38 +5,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.texteditor.IUpdate;
-import org.eclipse.ui.texteditor.ResourceAction;
-
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.model.IDebugElement;
-import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.debug.core.model.IStackFrame;
-import org.eclipse.debug.core.model.IThread;
-import org.eclipse.debug.ui.IDebugUIConstants;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.debug.core.JDIDebugModel;
-
-import org.eclipse.jdt.internal.debug.core.JDIDebugTarget;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.util.ResourceBundle;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.IStatus;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IStackFrame;import org.eclipse.debug.core.model.IThread;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.texteditor.ResourceAction;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.debug.core.JDIDebugTarget;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Action to support run to line (i.e. where the cursor is)
@@ -57,6 +26,7 @@ public class RunToLineAction extends ResourceAction implements IUpdate {
 		fPrefix= prefix;
 		
 		update();
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.RUN_TO_LINE_ACTION });					
 	}
 
 	public void run() {

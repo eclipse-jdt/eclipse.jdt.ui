@@ -4,19 +4,7 @@
  */
 package org.eclipse.jdt.internal.debug.ui;
 
-import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.IPreferencesConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.HelpEvent;
-import org.eclipse.swt.events.HelpListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.SWT;import org.eclipse.swt.events.HelpEvent;import org.eclipse.swt.events.HelpListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.swt.widgets.Widget;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * The main page in a <code>JDIAttachLauncherWizard</code>. 
@@ -81,6 +69,7 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 
 		initializeSettings();
 		setControl(composite);
+		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.JDI_ATTACH_LAUNCHER_WIZARD_PAGE));		
 	}
 
 	/**

@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.cus.MoveCompilationUnitRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.cus.MoveCompilationUnitRefactoring;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class MoveCompilationUnitWizard extends RefactoringWizard {
 
@@ -19,7 +19,7 @@ public class MoveCompilationUnitWizard extends RefactoringWizard {
 	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
 	
 	public MoveCompilationUnitWizard(){
-		super(getInputPageResource(RESOURCEKEY_PREFIX, INPUTPAGE_TITLE_SUFFIX));
+		super(getInputPageResource(RESOURCEKEY_PREFIX, INPUTPAGE_TITLE_SUFFIX), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE);
 	}
 
 	/**

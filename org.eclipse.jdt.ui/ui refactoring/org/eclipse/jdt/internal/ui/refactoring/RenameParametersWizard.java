@@ -3,7 +3,7 @@
  * All Rights Reserved.
  */
 
-package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.RenameInputWizardPage;import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;import org.eclipse.jdt.internal.core.refactoring.methods.RenameParametersRefactoring;
+package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;import org.eclipse.jdt.internal.ui.refactoring.RenameInputWizardPage;import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.core.refactoring.methods.RenameParametersRefactoring;
 
 public class RenameParametersWizard extends RefactoringWizard {
 	
@@ -12,7 +12,7 @@ public class RenameParametersWizard extends RefactoringWizard {
 	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
 	
 	public RenameParametersWizard(){
-		super(getTitle());
+		super(getTitle(), IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE);
 	}
 
 	/**

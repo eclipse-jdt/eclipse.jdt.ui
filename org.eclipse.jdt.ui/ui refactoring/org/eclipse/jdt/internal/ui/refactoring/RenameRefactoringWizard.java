@@ -12,12 +12,15 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	
 	private String fPageMessage;
 	
+	private String fPageContextHelpId;
+	
 	private static final String INPUTPAGE_TITLE_SUFFIX= ".wizard.inputpage.title";
 	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
 	
-	public RenameRefactoringWizard(String resourceKeyPrefix){
-		super(getInputPageResource(resourceKeyPrefix, INPUTPAGE_TITLE_SUFFIX));
+	public RenameRefactoringWizard(String resourceKeyPrefix, String pageContextHelpId, String errorContextHelpId){
+		super(getInputPageResource(resourceKeyPrefix, INPUTPAGE_TITLE_SUFFIX), errorContextHelpId);
 		fPageMessage= getInputPageResource(resourceKeyPrefix, INPUTPAGE_MESSAGE_SUFFIX);
+		fPageContextHelpId= pageContextHelpId;
 	}
 	
 	private static String getInputPageResource(String prefix, String suffix){
@@ -30,7 +33,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	protected void addUserInputPages(){
 		String initialSetting= getRenameRefactoring().getCurrentName();
 		setPageTitle(getPageTitle() + ": "+ initialSetting);
-		RenameInputWizardPage page= new RenameInputWizardPage(true, initialSetting) {
+		RenameInputWizardPage page= new RenameInputWizardPage(fPageContextHelpId, true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}	

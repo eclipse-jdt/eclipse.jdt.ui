@@ -5,27 +5,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-
-import org.eclipse.jdt.internal.ui.IUIConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.JavaUIAction;
-import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation;
+import java.lang.reflect.InvocationTargetException;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportContainer;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation;
 
 public class OrganizeImportsAction extends JavaUIAction {
 	
@@ -37,6 +17,7 @@ public class OrganizeImportsAction extends JavaUIAction {
 	public OrganizeImportsAction(ITextEditor editor) {
 		super(JavaPlugin.getResourceBundle(), ACTION_PREFIX);
 		setContentEditor(editor);
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION });					
 	}
 	
 	public OrganizeImportsAction() {

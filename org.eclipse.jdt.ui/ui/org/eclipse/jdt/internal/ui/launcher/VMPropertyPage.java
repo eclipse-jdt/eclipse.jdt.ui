@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.launching.JavaRuntime;
 
 /*
  * The page for setting java runtime
@@ -27,6 +27,7 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 				setValid(fVMSelector.validateSelection(event.getSelection()));
 			}
 		});
+		WorkbenchHelp.setHelp(ancestor, new DialogPageContextComputer(this, IJavaHelpContextIds.LAUNCH_JRE_PROPERYY_PAGE));			
 		return vmSelector;
 	}
 

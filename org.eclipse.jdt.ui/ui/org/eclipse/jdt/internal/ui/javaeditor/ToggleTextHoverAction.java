@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover;
+import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
@@ -33,6 +33,8 @@ public class ToggleTextHoverAction extends TextEditorAction {
 		
 		fToolTipChecked= getString(bundle, prefix + "tooltip.checked", prefix + "tooltip.checked");
 		fToolTipUnchecked= getString(bundle, prefix + "tooltip.unchecked", prefix + "tooltip.unchecked");
+	
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION });	
 	}
 	
 	private IPreferenceStore getStore() {

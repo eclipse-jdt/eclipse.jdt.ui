@@ -15,7 +15,9 @@ public class RefactoringWizard extends Wizard {
 	private RefactoringStatus fActivationStatus= new RefactoringStatus();
 	private RefactoringStatus fStatus;
 	
-	public RefactoringWizard(String pageTitle) {
+	private String fErrorPageContextHelpId;
+	
+	public RefactoringWizard(String pageTitle, String errorPageContextHelpId) {
 		setNeedsProgressMonitor(true);
 		fPageTitle= pageTitle;
 		setWindowTitle("Refactoring");
@@ -57,7 +59,7 @@ public class RefactoringWizard extends Wizard {
 	 * adds an <code>ErrorWizardPage</code> to the wizard.
 	 */
 	protected void addErrorPage(){
-		addPage(new ErrorWizardPage());
+		addPage(new ErrorWizardPage(fErrorPageContextHelpId));
 	}
 	
 	/**

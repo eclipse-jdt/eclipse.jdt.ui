@@ -8,7 +8,7 @@ import java.util.List;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;
 import org.eclipse.jdt.internal.ui.launcher.LauncherLabelProvider;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -21,7 +21,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.*;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * The main page in a <code>JavaApplicationWizard</code>. Presents the
@@ -153,6 +153,7 @@ public class JavaApplicationWizardPage extends WizardPage {
 		setPageComplete(false);
 		setTitle(DebugUIUtils.getResourceString(PREFIX + "title"));
 		setControl(root);
+		WorkbenchHelp.setHelp(root, new DialogPageContextComputer(this, IJavaHelpContextIds.JAVA_APPLICATION_WIZARD_PAGE));				
 	}
 
 	public void createElementsGroup(Composite root) {
