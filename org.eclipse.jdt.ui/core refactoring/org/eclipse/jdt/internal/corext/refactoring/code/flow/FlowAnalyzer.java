@@ -6,14 +6,12 @@ package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
-import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**

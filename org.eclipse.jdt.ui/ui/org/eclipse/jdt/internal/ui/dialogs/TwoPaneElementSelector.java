@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,8 +23,6 @@ import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
-
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 
 /**
  * A list selection dialog with two panes. Duplicated entries will be folded
