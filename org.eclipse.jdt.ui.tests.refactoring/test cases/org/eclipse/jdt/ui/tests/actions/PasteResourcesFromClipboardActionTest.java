@@ -146,7 +146,8 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	}
 	private static void delete(IFile element) {
 		try {
-			element.delete(true, false, null);
+			if (element != null && element.exists())
+				element.delete(true, false, null);
 		} catch(CoreException e) {
 			//ignore, we must keep going
 		}
@@ -154,8 +155,10 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	
 	private static void delete(IJavaProject project){
 		try {
-			project.setRawClasspath(new ClasspathEntry[0], project.getProject().getFullPath(), null);
-			project.getProject().delete(true, true, null);
+			if (project != null && project.exists()){
+				project.setRawClasspath(new ClasspathEntry[0], project.getProject().getFullPath(), null);
+				project.getProject().delete(true, true, null);
+			}	
 		} catch(CoreException e) {
 			//ignore, we must keep going
 		}
