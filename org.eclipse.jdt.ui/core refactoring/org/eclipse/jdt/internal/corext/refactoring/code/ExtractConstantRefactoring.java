@@ -427,6 +427,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			p.setSource(newCuSource.toCharArray());
 			p.setUnitName(fCu.getElementName());
 			p.setProject(fCu.getJavaProject());
+			p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(fCu));
 			CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
 			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
 			for (int i= 0; i < newProblems.length; i++) {
