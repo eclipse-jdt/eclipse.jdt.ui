@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,7 +52,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	protected IPath fCurrProjectLocation;
 	protected IProject fCurrProject;
 	
-	protected boolean fCanRemoveContent;
+	protected boolean fKeepContent;
 
 	/**
 	 * Constructor for NewProjectCreationWizardPage.
@@ -61,7 +62,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		fFirstPage= mainPage;
 		fCurrProjectLocation= null;
 		fCurrProject= null;
-		fCanRemoveContent= false;
+		fKeepContent= true;
 	}
 	
 	/* (non-Javadoc)
@@ -80,7 +81,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		final IProject newProjectHandle= fFirstPage.getProjectHandle();
 		final IPath newProjectLocation= fFirstPage.getLocationPath();
 		
-		fCanRemoveContent= !fFirstPage.getDetect();
+		fKeepContent= fFirstPage.getDetect();
 		
 		final boolean initialize= !(newProjectHandle.equals(fCurrProject) && newProjectLocation.equals(fCurrProjectLocation));
 		
@@ -205,13 +206,14 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.remove"), 3); //$NON-NLS-1$
 
 				try {
-					fCurrProject.delete(fCanRemoveContent, false, monitor);
+					boolean removeContent= !fKeepContent && fCurrProject.isSynchronized(IResource.DEPTH_INFINITE);
+					fCurrProject.delete(removeContent, false, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} finally {
 					monitor.done();
 					fCurrProject= null;
-					fCanRemoveContent= false;
+					fKeepContent= false;
 				}
 			}
 		};
