@@ -12,12 +12,15 @@ import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -31,26 +34,29 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.debug.internal.ui.TextViewerAction;
 
+import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.ITextListener;
+import org.eclipse.jface.text.TextEvent;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -58,11 +64,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.template.Template;
-import org.eclipse.jdt.internal.ui.text.template.TemplateCollector;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.text.template.TemplateInterpolator;
 import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
-import org.eclipse.jdt.internal.ui.text.template.TemplateVariableDialog;
+import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.text.template.VariableEvaluator;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -71,17 +76,31 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  */
 public class EditTemplateDialog extends StatusDialog {
 
-	// disable content assist
 	private static class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfiguration {
 		SimpleJavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor) {
-			super(tools, editor);			
+			super(tools, editor);
 		}
 		
 		/*
 		 * @see SourceViewerConfiguration#getContentAssistant(ISourceViewer)
 		 */
 		public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
-			return null;
+
+			ContentAssistant assistant= new ContentAssistant();
+			assistant.setContentAssistProcessor(new TemplateVariableProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
+
+			assistant.enableAutoActivation(true);
+			assistant.setAutoActivationDelay(500);
+			assistant.setProposalPopupOrientation(assistant.PROPOSAL_OVERLAY);
+			assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
+			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+			
+			Color background= getColorManager().getColor(new RGB(254, 241, 233));
+			assistant.setContextInformationPopupBackground(background);
+			assistant.setContextSelectorBackground(background);
+			assistant.setProposalSelectorBackground(background);
+			
+			return assistant;
 		}	
 	}
 
@@ -146,9 +165,9 @@ public class EditTemplateDialog extends StatusDialog {
 		super(parent);
 		
 		if (edit)
-			setTitle(TemplateMessages.getString("EditTemplateDialog.title.edit"));
+			setTitle(TemplateMessages.getString("EditTemplateDialog.title.edit")); //$NON-NLS-1$
 		else
-			setTitle(TemplateMessages.getString("EditTemplateDialog.title.new"));
+			setTitle(TemplateMessages.getString("EditTemplateDialog.title.new")); //$NON-NLS-1$
 
 		fTemplate= template;
 	}
@@ -208,7 +227,7 @@ public class EditTemplateDialog extends StatusDialog {
 		fInsertVariableButton.setText(TemplateMessages.getString("EditTemplateDialog.insert.variable")); //$NON-NLS-1$
 		fInsertVariableButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				insertVariable();				
+				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);			
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {}
@@ -218,7 +237,6 @@ public class EditTemplateDialog extends StatusDialog {
 		fNameText.setText(fTemplate.getName());
 		fDescriptionText.setText(fTemplate.getDescription());
 		fContextCombo.select(getIndex(fTemplate.getContext()));
-		fPatternEditor.getDocument().set(fTemplate.getPattern());
 
 		initializeActions();
 
@@ -252,19 +270,8 @@ public class EditTemplateDialog extends StatusDialog {
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(true);
+		viewer.setDocument(new Document(fTemplate.getPattern()));
 		
-		IDocument document= new Document();
-		document.addDocumentListener(new IDocumentListener() {
-			public void documentAboutToBeChanged(DocumentEvent event) {}
-
-			public void documentChanged(DocumentEvent event) {
-				fInterpolator.interpolate(event.getDocument().get(), fVerifier);
-
-				updateButtons();
-			}
-		});
-		viewer.setDocument(document);
-	
 		Font font= JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
 		
@@ -273,18 +280,44 @@ public class EditTemplateDialog extends StatusDialog {
 		data.widthHint= convertWidthInCharsToPixels(60);
 		data.heightHint= convertHeightInCharsToPixels(5);
 		control.setLayoutData(data);
+		
+		viewer.addTextListener(new ITextListener() {
+			public void textChanged(TextEvent event) {
+				fInterpolator.interpolate(event.getDocumentEvent().getDocument().get(), fVerifier);
+				
+				updateUndoAction();
+				updateButtons();
+			}
+		});
 
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {			
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateSelectionDependentActions();
 			}
 		});
+	
+		viewer.getTextWidget().addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {
+				handleKeyPressed(e);
+			}
 
+			public void keyReleased(KeyEvent e) {}
+		});
+		
 		return viewer;
 	}
 
+	private void handleKeyPressed(KeyEvent event) {
+		if ((event.character == ' ') && ((event.stateMask & SWT.CTRL) != 0))
+			fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
+	}
+
 	private void initializeActions() {
-		TextViewerAction action= new TextViewerAction(fPatternEditor, fPatternEditor.CUT);
+		TextViewerAction action= new TextViewerAction(fPatternEditor, fPatternEditor.UNDO);
+		action.setText(TemplateMessages.getString("EditTemplateDialog.undo")); //$NON-NLS-1$
+		fGlobalActions.put(ITextEditorActionConstants.UNDO, action);
+
+		action= new TextViewerAction(fPatternEditor, fPatternEditor.CUT);
 		action.setText(TemplateMessages.getString("EditTemplateDialog.cut")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.CUT, action);
 
@@ -299,7 +332,11 @@ public class EditTemplateDialog extends StatusDialog {
 		action= new TextViewerAction(fPatternEditor, fPatternEditor.SELECT_ALL);
 		action.setText(TemplateMessages.getString("EditTemplateDialog.select.all")); //$NON-NLS-1$
 		fGlobalActions.put(ITextEditorActionConstants.SELECT_ALL, action);
-				
+
+		action= new TextViewerAction(fPatternEditor, fPatternEditor.CONTENTASSIST_PROPOSALS);
+		action.setText(TemplateMessages.getString("EditTemplateDialog.content.assist")); //$NON-NLS-1$
+		fGlobalActions.put("ContentAssistProposal", action); //$NON-NLS-1$
+
 		fSelectionActions.add(ITextEditorActionConstants.CUT);
 		fSelectionActions.add(ITextEditorActionConstants.COPY);
 		fSelectionActions.add(ITextEditorActionConstants.PASTE);
@@ -319,10 +356,17 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private void fillContextMenu(IMenuManager menu) {
-		menu.add((IAction) fGlobalActions.get(ITextEditorActionConstants.CUT));
-		menu.add((IAction) fGlobalActions.get(ITextEditorActionConstants.COPY));
-		menu.add((IAction) fGlobalActions.get(ITextEditorActionConstants.PASTE));
-		menu.add((IAction) fGlobalActions.get(ITextEditorActionConstants.SELECT_ALL));
+		menu.add(new GroupMarker(ITextEditorActionConstants.GROUP_UNDO));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, (IAction) fGlobalActions.get(ITextEditorActionConstants.UNDO));
+		
+		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));		
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.CUT));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.COPY));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.PASTE));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.SELECT_ALL));
+
+		menu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
+		menu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, (IAction) fGlobalActions.get("ContentAssistProposal")); //$NON-NLS-1$
 	}
 
 	protected void updateSelectionDependentActions() {
@@ -331,9 +375,14 @@ public class EditTemplateDialog extends StatusDialog {
 			updateAction((String)iterator.next());		
 	}
 
+	protected void updateUndoAction() {
+		IAction action= (IAction) fGlobalActions.get(ITextEditorActionConstants.UNDO);
+		if (action instanceof IUpdate)
+			((IUpdate) action).update();
+	}
 
 	protected void updateAction(String actionId) {
-		IAction action= (IAction)fGlobalActions.get(actionId);
+		IAction action= (IAction) fGlobalActions.get(actionId);
 		if (action instanceof IUpdate)
 			((IUpdate) action).update();
 	}
@@ -371,21 +420,6 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 
 		updateStatus(status);
-	}
-
-	private void insertVariable() {
-		TemplateVariableDialog dialog= new TemplateVariableDialog(getShell(), TemplateCollector.getVariables());
-
-		if (dialog.open() == Window.OK) {
-			String variable= "${" + dialog.getSelectedName() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-
-			StyledText text= fPatternEditor.getTextWidget();
-			Point selection= text.getSelection();
-			text.replaceTextRange(selection.x, selection.y - selection.x, variable);
-
-			int caretOffset= selection.x + variable.length();
-			text.setSelection(caretOffset, caretOffset);
-		}
 	}
 
 }
