@@ -775,7 +775,7 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 		return newMethod;
 	}
 
-	private static void copyBodyOfPushedDownMethod(ASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
+	private void copyBodyOfPushedDownMethod(ASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
 		Block body= oldMethod.getBody();
 		if (body == null) {
 			newMethod.setBody(null);
@@ -786,7 +786,7 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 			final ASTRewrite rewriter= ASTRewrite.create(body.getAST());
 			final ITrackedNodePosition position= rewriter.track(body);
 			body.accept(new TypeVariableMapper(rewriter, mapping));
-			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, getDeclaringType().getCompilationUnit().getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			String[] lines= Strings.convertIntoLines(content);
 			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
