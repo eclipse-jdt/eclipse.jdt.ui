@@ -204,7 +204,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		if (changedParams || changedExc) {
 			try {
-				int offset= simpleName.getStartPosition() + simpleName.getLength();
+				int offset= methodDecl.getStartPosition(); // simpleName.getStartPosition() + simpleName.getLength();
 				IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), offset);
 				
 				if (changedParams) {
@@ -452,7 +452,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		List interfaces= typeDecl.superInterfaces();
 		if (hasChanges(interfaces)) {
 			int startPos;
-			if (typeDecl.isInterface() || superClass == null) {
+			if (typeDecl.isInterface() || superClass == null || isInserted(superClass)) {
 				startPos= simpleName.getStartPosition() + simpleName.getLength();
 			} else {
 				startPos= superClass.getStartPosition() + superClass.getLength();
@@ -468,7 +468,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				int offset= typeDecl.getStartPosition() + typeDecl.getLength() - 1;
 				if (last == null) {
 					try {
-						int pos= simpleName.getStartPosition() + simpleName.getLength();
+						int pos= typeDecl.getStartPosition(); //simpleName.getStartPosition() + simpleName.getLength();
 						IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), pos);
 						ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameLBRACE);		
 						
@@ -479,7 +479,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 						// ignore
 					}
 				}
-				insertStatement(elem, last, offset, true);
+				insertStatement(elem, last, offset, false);
 			} else {
 				last= elem;
 				if (isReplaced(elem)) {
