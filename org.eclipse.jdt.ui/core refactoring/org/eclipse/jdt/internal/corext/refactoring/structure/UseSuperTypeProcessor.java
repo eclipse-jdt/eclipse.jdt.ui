@@ -57,6 +57,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 /**
  * Refactoring processor to replace type occurrences by a super type.
  */
@@ -198,7 +200,8 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 							}
 						}
 					} catch (CoreException exception) {
-						status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
+						JavaPlugin.log(exception);
+						status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("UseSuperTypeProcessor.internal_error"))); //$NON-NLS-1$
 					}
 				}
 
