@@ -230,8 +230,8 @@ public class IndentAction extends TextEditorAction {
 			String type= partition.getType();
 			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
 				
-				// TODO this is a hack
-				// what I want to do
+				// this is a hack
+				// what I'd want to do
 //				new JavaDocAutoIndentStrategy().indentLineAtOffset(document, offset);
 //				return;
 

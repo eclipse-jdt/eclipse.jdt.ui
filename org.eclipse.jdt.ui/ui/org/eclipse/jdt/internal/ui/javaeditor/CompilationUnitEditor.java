@@ -1147,7 +1147,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	private ListenerList fReconcilingListeners= new ListenerList();
 
 	/**
-	 * Mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
+	 * Mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=66176
 	 * for a description of the problem.
 	 * <p>
 	 * TODO remove once the underlying problem is solved.
@@ -1883,7 +1883,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	/**
-	 * Returns the mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
+	 * Returns the mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=66176
 	 * for a description of the problem.
 	 * <p>
 	 * TODO remove once the underlying problem is solved.

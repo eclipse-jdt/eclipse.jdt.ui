@@ -174,14 +174,8 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		 */
 		public IRegion[] computeProjectionRegions(IDocument document) throws BadLocationException {
 			DocumentCharacterIterator sequence= new DocumentCharacterIterator(document, offset, offset + length);
-			// TODO the commented out sections implement /**content folding which requires UI support for non-entire-line folding
-//			int prefixEnd= findPrefixEnd(sequence);
 			int prefixEnd= 0;
-			int contentStart;
-//			if (prefixEnd == 0)
-//				contentStart= 0; // if there is no prefix, simply fold the first line as always
-//			else
-				contentStart= findFirstContent(sequence, prefixEnd);
+			int contentStart= findFirstContent(sequence, prefixEnd);
 			
 			int firstLine= document.getLineOfOffset(offset + prefixEnd);
 			int captionLine= document.getLineOfOffset(offset + contentStart);

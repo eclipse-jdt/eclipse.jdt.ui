@@ -124,7 +124,6 @@ public final class ExperimentalResultCollector extends ResultCollector {
 	 * <code>false</code> if not. Note that even though code (in a library)
 	 * may be referenced that uses generics, it is still possible that the
 	 * current source does not allow generics.
-	 * TODO move to subclass
 	 * 
 	 * @return <code>true</code> if the generic proposals should be allowed,
 	 *         <code>false</code> if not
