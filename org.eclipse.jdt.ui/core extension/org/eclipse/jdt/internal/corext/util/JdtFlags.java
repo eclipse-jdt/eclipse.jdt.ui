@@ -245,6 +245,13 @@ public class JdtFlags {
 		}
 	}
 	
+	public static int getLowerVisibility(int visibility1, int visibility2) {
+		if (isHigherVisibility(visibility1, visibility2))
+			return visibility2;
+		else
+			return visibility1;
+	}
+	
 	public static int clearAccessModifiers(int flags) {
 		return clearFlag(Modifier.PROTECTED | Modifier.PUBLIC | Modifier.PRIVATE, flags);
 	}

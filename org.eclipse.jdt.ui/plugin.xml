@@ -1097,7 +1097,7 @@
 		<action id="org.eclipse.jdt.ui.actions.ConvertNestedToTop"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.convertNestedToTopAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
 			retarget="true" />
 		
 		<action id="org.eclipse.jdt.ui.actions.ConvertAnonymousToNested"
@@ -1161,7 +1161,7 @@
 		<action id="org.eclipse.jdt.ui.actions.ConvertLocalToField"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
       		label="%Refactoring.convertLocalToFieldAction.label"
-			definitionId="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
 			retarget="true" />
 
 		<action id="org.eclipse.jdt.ui.actions.ExtractConstant"
@@ -2234,7 +2234,7 @@
 	</keyBinding>
 	
 	<command
-		id="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
+		id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
 		category="org.eclipse.jdt.ui.category.refactoring"
 		name= "%ActionDefinition.convertNestedToTopLevel.name"
 		description= "%ActionDefinition.convertNestedToTopLevel.description">
@@ -2242,7 +2242,7 @@
 	<keyBinding
 		string=""
 		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.convert.nested.to.top.level"
+		command="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	
@@ -2393,7 +2393,7 @@
 	</keyBinding>
 	
 	<command
-		id="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
+		id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
 		category="org.eclipse.jdt.ui.category.refactoring"
 		name= "%ActionDefinition.convertLocalToField.name"
 		description= "%ActionDefinition.convertLocalToField.description">
@@ -2401,7 +2401,7 @@
  	<keyBinding
 		string=""
 		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.convert.local.to.field"
+		command="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	
