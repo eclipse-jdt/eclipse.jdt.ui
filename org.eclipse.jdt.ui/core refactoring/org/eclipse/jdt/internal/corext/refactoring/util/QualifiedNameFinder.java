@@ -11,20 +11,18 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
@@ -37,18 +35,20 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 public class QualifiedNameFinder {
 	
-	private class ResultCollector implements ITextSearchResultCollector {
+	private static class ResultCollector implements ITextSearchResultCollector {
 		
 		private String fNewValue;
+		private IProgressMonitor fProgressMonitor;
+		private QualifiedNameSearchResult fResult;	
 		
 		public ResultCollector(String newValue,  IProgressMonitor monitor) {
 			fNewValue= newValue;
 			fProgressMonitor= monitor;
+			fResult= new QualifiedNameSearchResult();
 		}
 		
 		public void aboutToStart() throws CoreException {
@@ -63,12 +63,7 @@ public class QualifiedNameFinder {
 			IJavaElement element= JavaCore.create(file);
 			if (element != null && element.exists())
 				return;
-			TextChange change= (TextChange)fChanges.get(file);
-			if (change == null) {
-				change= new TextFileChange(file.getName(), file);
-				fChanges.put(file, change);
-				fChangesList.add(change);
-			}
+			TextChange change= fResult.getChange(file);
 			change.addTextEdit(RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"), SimpleTextEdit.createReplace(start, length, fNewValue)); //$NON-NLS-1$
 		}
 
@@ -79,23 +74,21 @@ public class QualifiedNameFinder {
 		public IProgressMonitor getProgressMonitor() {
 			return fProgressMonitor;
 		}
+		
+		public QualifiedNameSearchResult getResult() {
+			return fResult;
+		}
 	}
 		
-	private Map fChanges;
-	private List fChangesList;
-	private IProgressMonitor fProgressMonitor;
-	
 	public QualifiedNameFinder() {
-		fChanges= new HashMap();
-		fChangesList= new ArrayList();
 	}
 	
-	public void process(String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) throws JavaModelException {
+	public static QualifiedNameSearchResult process(String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) throws JavaModelException {
 		if (filePatterns == null || filePatterns.length() == 0) {
 			// Eat progress.
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.worked(1);
-			return;
+			return new QualifiedNameSearchResult();
 		}
 		Assert.isNotNull(pattern);
 		Assert.isNotNull(newValue);
@@ -105,15 +98,7 @@ public class QualifiedNameFinder {
 		ResultCollector collector= new ResultCollector(newValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
 		engine.search(ResourcesPlugin.getWorkspace(), pattern, "", createScope(filePatterns, root), collector); //$NON-NLS-1$
-	}
-	
-	public TextChange[] getAllChanges() {
-		return (TextChange[])fChangesList.toArray(new TextChange[fChangesList.size()]);
-	}
-	
-	public IFile[] getAllFiles() {
-		Set keys= fChanges.keySet();
-		return (IFile[])keys.toArray(new IFile[keys.size()]);			
+		return collector.getResult();
 	}
 	
 	private static TextSearchScope createScope(String filePatterns, IProject root) throws JavaModelException {

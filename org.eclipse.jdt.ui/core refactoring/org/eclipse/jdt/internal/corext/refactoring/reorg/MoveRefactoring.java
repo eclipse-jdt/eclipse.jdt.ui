@@ -10,13 +10,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -49,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
+import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -60,7 +62,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	private String fFilePatterns;
 	
 	private TextChangeManager fChangeManager;
-	private QualifiedNameFinder fQualifiedNameFinder;
+	private QualifiedNameSearchResult fQualifiedNameSearchResult;
 	
 	private final CodeGenerationSettings fSettings;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
@@ -70,7 +72,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 		Assert.isNotNull(settings);
 		fSettings= settings;
 		fUpdateReferences= true;
-		fQualifiedNameFinder= new QualifiedNameFinder();
+		fQualifiedNameSearchResult= new QualifiedNameSearchResult();
 		fUpdateClasspathQuery= updateClasspathQuery;
 	}
 		
@@ -266,7 +268,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	private IFile[] getAllFilesToModify() throws CoreException{
 		List result= new ArrayList();
 		result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
-		result.addAll(Arrays.asList(fQualifiedNameFinder.getAllFiles()));
+		result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
 		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 	
@@ -432,7 +434,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 					result.add(change); 
 				}
 				computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
-				result.addAll(fQualifiedNameFinder.getAllChanges());
+				result.addAll(fQualifiedNameSearchResult.getAllChanges());
 				
 				return result;
 			}
@@ -463,7 +465,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 			
 				if (fUpdateQualifiedNames) {
 					computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
-					composite.addAll(fQualifiedNameFinder.getAllChanges());
+					composite.addAll(fQualifiedNameSearchResult.getAllChanges());
 				}
 				
 				IChange fileMove= super.createChange(new SubProgressMonitor(pm, 1));
@@ -563,7 +565,8 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	}
 	
 	private void handleType(IType type, IPackageFragment destination, IProgressMonitor pm) throws JavaModelException {
-		fQualifiedNameFinder.process(type.getFullyQualifiedName(),  destination.getElementName() + "." + type.getTypeQualifiedName(), //$NON-NLS-1$
+		fQualifiedNameSearchResult=
+			QualifiedNameFinder.process(type.getFullyQualifiedName(),  destination.getElementName() + "." + type.getTypeQualifiedName(), //$NON-NLS-1$
 					fFilePatterns, type.getJavaProject().getProject(), pm);
 	}	
 }

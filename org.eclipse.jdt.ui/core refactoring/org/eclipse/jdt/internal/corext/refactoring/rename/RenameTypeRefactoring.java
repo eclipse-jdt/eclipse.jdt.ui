@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
+import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -77,7 +78,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private String fNewName;
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
-	private QualifiedNameFinder fQualifiedNameFinder;
+	private QualifiedNameSearchResult fQualifiedNameSearchResult;
 	
 	private boolean fUpdateReferences;
 	
@@ -628,8 +629,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private IFile[] getAllFilesToModify() throws CoreException{
 		List result= new ArrayList();
 		result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
-		if (fQualifiedNameFinder != null)
-			result.addAll(Arrays.asList(fQualifiedNameFinder.getAllFiles()));
+		if (fQualifiedNameSearchResult != null)
+			result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
 		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 	
@@ -708,8 +709,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			pm.beginTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.creating_change"), 4); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange();
 			builder.addAll(fChangeManager.getAllChanges());
-			if (fQualifiedNameFinder != null)
-				builder.addAll(fQualifiedNameFinder.getAllChanges());
+			if (fQualifiedNameSearchResult != null)
+				builder.addAll(fQualifiedNameSearchResult.getAllChanges());
 			if (willRenameCU())
 				builder.add(new RenameResourceChange(ResourceUtil.getResource(fType), fNewName + ".java")); //$NON-NLS-1$
 			pm.worked(1);	
@@ -814,8 +815,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {
 		IPackageFragment fragment= fType.getPackageFragment();
-		fQualifiedNameFinder= new QualifiedNameFinder();
-		fQualifiedNameFinder.process(fType.getFullyQualifiedName(),  fragment.getElementName() + "." + fNewName, //$NON-NLS-1$
+		fQualifiedNameSearchResult= QualifiedNameFinder.process(fType.getFullyQualifiedName(),  
+			fragment.getElementName() + "." + fNewName, //$NON-NLS-1$
 			fFilePatterns, fType.getJavaProject().getProject(), pm);
 	}	
 }
