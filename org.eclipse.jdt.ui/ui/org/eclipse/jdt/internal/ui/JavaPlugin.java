@@ -5,8 +5,63 @@
 package org.eclipse.jdt.internal.ui;
 
 
-import java.text.MessageFormat;import java.util.ArrayList;import java.util.List;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.GroupMarker;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdapterManager;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IPluginDescriptor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Platform;import org.eclipse.core.runtime.Status;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.editors.text.FileDocumentProvider;import org.eclipse.ui.plugin.AbstractUIPlugin;import org.eclipse.ui.texteditor.IDocumentProvider;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;import org.eclipse.jdt.internal.ui.launcher.VMPreferencePage;import org.eclipse.jdt.internal.ui.packageview.ErrorTickManager;import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.ui.text.JavaTextTools;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageRegistry;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdapterManager;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.editors.text.FileDocumentProvider;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.compiler.ConfigurableOption;
+import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.launcher.VMPreferencePage;
+import org.eclipse.jdt.internal.ui.packageview.ErrorTickManager;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;
+import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
 /**
  * Represents the java plugin. It provides a series of convenience methods such as
  * access to the workbench, keeps track of elements shared by all editors and viewers
@@ -15,7 +70,6 @@ import java.text.MessageFormat;import java.util.ArrayList;import java.util.Lis
 public class JavaPlugin extends AbstractUIPlugin {
 		
 	private static JavaPlugin fgJavaPlugin;
-	private static ResourceBundle fgResourceBundle;
 
 	private CompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
@@ -69,7 +123,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public static String getPluginId() {
 		return getDefault().getDescriptor().getUniqueIdentifier();
 	}
-
+
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
@@ -77,7 +131,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public static void logErrorMessage(String message) {
 		log(new Status(IStatus.ERROR, getPluginId(), IJavaUIStatus.INTERNAL_ERROR, message, null));
 	}
-
+
 	public static void logErrorStatus(String message, IStatus status) {
 		if (status == null) {
 			logErrorMessage(message);
@@ -92,52 +146,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		log(new Status(IStatus.ERROR, getPluginId(), IJavaUIStatus.INTERNAL_ERROR, JavaUIMessages.getString("JavaPlugin.internal_error"), e)); //$NON-NLS-1$
 	}
 	
-	// ---------- resource bundle -------------
-	
-	/**
-	 * Gets a string from the JavaPlugin resource bundle.
-	 * We don't want to crash because of a missing String.
-	 * Returns the key if not found.
-	 * 
-	 * @deprecated Use a dedicated static resource bundle accessor class
-	 */
-	public static String getResourceString(String key) {
-		try {
-			return fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return key;
-		} catch (NullPointerException e) {
-			return "!" + key + "!"; //$NON-NLS-2$ //$NON-NLS-1$
-		}
-			
-	}
-	/**
-	 * Gets a string from the resource bundle and formats it with an argument
-	 * 
-	 * @deprecated Use a dedicated static resource bundle accessor class
-	 */	
-	public static String getFormattedString(String key, String arg) {
-		return MessageFormat.format(getResourceString(key), new String[] { arg });
-	}
-	
-	/**
-	 * Gets a string from the resource bundle and formats it with arguments
-	 * 
-	 * @deprecated Use a dedicated static resource bundle accessor class
-	 */	
-	public static String getFormattedString(String key, String[] args) {
-		return MessageFormat.format(getResourceString(key), args);
-	}
-	
-	/**
-	 * Gets the Java UI resource bundle
-	 * 
-	 * @deprecated Use a dedicated static resource bundle accessor class
-	 */
-	public static ResourceBundle getResourceBundle() {
-		return fgResourceBundle;
-	}	
-			
 	public static boolean isDebug() {
 		return getDefault().isDebugging();
 	}
@@ -153,12 +161,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public JavaPlugin(IPluginDescriptor descriptor) {
 		super(descriptor);
 		fgJavaPlugin= this;
-		try {
-			fgResourceBundle= ResourceBundle.getBundle("org.eclipse.jdt.internal.ui.JavaPluginResources"); //$NON-NLS-1$
-		} catch (MissingResourceException x) {
-			fgResourceBundle= null;
-		}		
-		
 	}
 	
 	/* (non - Javadoc)
@@ -186,7 +188,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	protected ImageRegistry createImageRegistry() {
 		return JavaPluginImages.getImageRegistry();
 	}
-
+
 	/* (non - Javadoc)
 	 * Method declared in Plugin
 	 */
@@ -227,7 +229,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fSnippetDocumentProvider= new SnippetFileDocumentProvider();
 		return fSnippetDocumentProvider;
 	}
-
+
 	public IWorkingCopyManager getWorkingCopyManager() {
 		return getCompilationUnitDocumentProvider();
 	}
@@ -261,7 +263,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		menu.add(new Separator(IContextMenuConstants.GROUP_VIEWER_SETUP));
 		menu.add(new Separator(IContextMenuConstants.GROUP_PROPERTIES));
 	}
-
+
 	/**
 	 * @see AbstractUIPlugin#initializeDefaultPreferences
 	 */
