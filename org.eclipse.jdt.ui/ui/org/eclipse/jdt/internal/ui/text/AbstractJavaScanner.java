@@ -120,7 +120,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 			for (int i= 0; i < fPropertyNamesColor.length; i++) {
 				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i]);
 			}
-			fNeedsLazyColorLoading= true;
+			fNeedsLazyColorLoading= false;
 		}
 	}
 
