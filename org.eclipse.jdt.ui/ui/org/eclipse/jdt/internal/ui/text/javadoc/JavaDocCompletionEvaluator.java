@@ -136,21 +136,20 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			if (newText.endsWith(">")) { //$NON-NLS-1$
 				// for html, search the tag end character
 				return findClosingCharacter(doc, pos, end, '>');
-			} else {
-				char ch= 0;
-				int pos1= pos;
-				while (pos1 < end && Character.isJavaIdentifierPart(ch= doc.getChar(pos1))) {
-					pos1++;
-				}
-				if (pos1 < end) {
-					// for method references, search the closing bracket
-					if ((ch == '(') && newText.endsWith(")")) { //$NON-NLS-1$
-						return findClosingCharacter(doc, pos1, end, ')');
-					} 
-					
-				}
-				return pos1;
 			}
+			char ch= 0;
+			int pos1= pos;
+			while (pos1 < end && Character.isJavaIdentifierPart(ch= doc.getChar(pos1))) {
+				pos1++;
+			}
+			if (pos1 < end) {
+				// for method references, search the closing bracket
+				if ((ch == '(') && newText.endsWith(")")) { //$NON-NLS-1$
+					return findClosingCharacter(doc, pos1, end, ')');
+				} 
+				
+			}
+			return pos1;
 		} catch (BadLocationException e) {
 			// ignore
 		}
@@ -290,13 +289,12 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			}
 			buf.append(')');
 			return buf.toString();
-		} else {
-			return elem.getElementName();
 		}
+		return elem.getElementName();
 	}	
 	
-	/**
-	 * Returns true if case is handeled
+	/*
+	 * Returns true if case is handled
 	 */
 	private boolean addArgumentProposals(String tag, String argument) throws JavaModelException {	
 		IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
@@ -403,7 +401,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		ICompilationUnit preparedCU= createPreparedCU(elem, wordStart, wordEnd);
 		if (preparedCU != null) {
 			try {
-				IJavaElement[] elements= preparedCU.codeSelect(wordStart, wordEnd - wordStart);
+				IJavaElement[] elements= preparedCU.codeSelect(wordEnd, 0);
 				if (elements != null && elements.length == 1 && elements[0] instanceof IType) {
 					IType type= (IType) elements[0];
 					if (preparedCU.equals(type.getCompilationUnit())) {
