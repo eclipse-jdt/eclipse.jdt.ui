@@ -40,6 +40,7 @@ public abstract class StatusDialog extends Dialog {
 	public StatusDialog(Shell parent) {
 		super(parent);
 		fStatusLineAboveButtons= false;
+		fLastStatus= new StatusInfo();
 	}
 	
 	/**
