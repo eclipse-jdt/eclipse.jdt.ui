@@ -66,6 +66,7 @@ public class VariableBlock {
 	
 	private List fSelectedElements;
 	private boolean fAskToBuild;
+	private boolean fInPreferencePage;
 	
 	
 	/**
@@ -74,6 +75,7 @@ public class VariableBlock {
 	public VariableBlock(boolean inPreferencePage, String initSelection) {
 		
 		fSelectedElements= new ArrayList(0);
+		fInPreferencePage= inPreferencePage;
 		fAskToBuild= true;
 		
 		String[] buttonLabels= new String[] { 
@@ -192,6 +194,12 @@ public class VariableBlock {
 		}
 		
 		public void doubleClicked(ListDialogField field) {
+			if (fInPreferencePage) {
+				List selected= field.getSelectedElements();
+				if (canEdit(selected, containsReserved(selected))) {
+					editEntries((CPVariableElement) selected.get(0));
+				}
+			}
 		}			
 			
 		// ---------- IDialogFieldListener --------
@@ -215,14 +223,17 @@ public class VariableBlock {
 			dest.add(objs[i]);
 		}
 	}
-
+	
+	private boolean canEdit(List selected, boolean containsReserved) {
+		return selected.size() == 1 && !containsReserved;
+	}
+		
 	private void doSelectionChanged(DialogField field) {
 		List selected= fVariablesList.getSelectedElements();
-		boolean isSingleSelected= selected.size() == 1;
 		boolean containsReserved= containsReserved(selected);
 		
 		// edit
-		fVariablesList.enableButton(1, isSingleSelected && !containsReserved);
+		fVariablesList.enableButton(1, canEdit(selected, containsReserved));
 		// remove button
 		fVariablesList.enableButton(3, !containsReserved);
 		
