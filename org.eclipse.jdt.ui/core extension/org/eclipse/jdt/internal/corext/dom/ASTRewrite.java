@@ -161,22 +161,6 @@ public final class ASTRewrite extends NewASTRewrite {
 						setInsertBoundToPrevious(node);
 					}
 				}
-			} else if (object instanceof ASTReplace) {
-				processChange(node, node, ((ASTReplace) object).replacingNode, object.description, processedListEvents);
-			} else if (object instanceof ASTRemove) {
-				processChange(node, node, null, object.description, processedListEvents);
-			} else if (object instanceof ASTModify) {
-				ASTNode modifiedNode= ((ASTModify) object).modifiedNode;
-				int[] properties= ASTNodeConstants.getNodeChildProperties(node);
-				for (int i= 0; i < properties.length; i++) {
-					int property= properties[i];
-					if (ASTNodeConstants.isAttributeProperty(property)) {
-						NodeRewriteEvent event= getNodeEvent(node, property, true);
-						Object newChild= ASTNodeConstants.getNodeChild(modifiedNode, property);
-						event.setNewValue(newChild);
-						setDescription(event, object.description);
-					}
-				}
 			}
 		}
 	}
@@ -210,41 +194,10 @@ public final class ASTRewrite extends NewASTRewrite {
 				}
 			} else {
 				insertIndex++;
-				if (object instanceof ASTRemove) {
-					RewriteEvent change= listEvent.removeEntry(curr);
-					setDescription(change, object.description);
-				} else if (object instanceof ASTReplace) {
-					RewriteEvent change= listEvent.replaceEntry(curr, ((ASTReplace) object).replacingNode);
-					setDescription(change, object.description);
-				}
 			}
 		}
-		testSame(modifiedList, listEvent.getChildren());
 	}
 	
-	private void testSame(List list, RewriteEvent[] changes) {
-		Assert.isTrue(list.size() == changes.length);
-		for (int i= 0; i < changes.length; i++) {
-			ASTNode curr= (ASTNode) list.get(i);
-			Assert.isTrue(getChangeKind(curr) == changes[i].getChangeKind());
-		}
-	}
-	
-	private final int getChangeKind(ASTNode node) {
-		ASTChange change= getChangeProperty(node);
-		if (change == null) {
-			return RewriteEvent.UNCHANGED;
-		}
-		if (change instanceof ASTInsert) {
-			return RewriteEvent.INSERTED;
-		} else if (change instanceof ASTReplace) {
-			return RewriteEvent.REPLACED;
-		} else if (change instanceof ASTRemove) {
-			return RewriteEvent.REMOVED;
-		}
-		return RewriteEvent.UNCHANGED;
-	}
-
 	/**
 	 * Removes all modifications applied to the given AST.
 	 */
@@ -317,15 +270,52 @@ public final class ASTRewrite extends NewASTRewrite {
 	}
 	
 	/**
+	 * Marks a node or attribute as removed.  
+	 * @param parent The node's parent node.
+	 * @param childProperty The node's child property in the parent. 
+	 * @param description The group description to collect the generated text edits or <code>null</code> if
+	 * no edits should be collected.
+	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
+	 * not inside the rewriters parent or the property is not a node property.
+	 */
+	public final void markAsRemoved(ASTNode parent, int childProperty, GroupDescription description) {
+		validateIsInsideRoot(parent);
+		validateIsNodeProperty(childProperty);
+		NodeRewriteEvent nodeEvent= getNodeEvent(parent, childProperty, true);
+		nodeEvent.setNewValue(null);
+	}
+
+	/**
+	 * Marks a node in a list as removed.  
+	 * @param parent The parent node of the list.
+	 * @param childProperty The child property of the list. 
+	 * @param nodeToRemove The node to remove.
+	 * @param description The group description to collect the generated text edit's or <code>null</code> if
+	 * no edits should be collected.
+	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
+	 * not inside the rewriters parent, the property is not a list property or the given node is not in the specified list.
+	 */
+	public final void markAsRemoved(ASTNode parent, int childProperty, ASTNode nodeToRemove, GroupDescription description) {
+		validateIsInsideRoot(parent);
+		ListRewriteEvent listEvent= getListEvent(parent, childProperty, true);
+		RewriteEvent res= listEvent.removeEntry(nodeToRemove);
+		if (res == null) {
+			throw new IllegalArgumentException("Node to remove is not member of list"); //$NON-NLS-1$
+		}
+	}
+	
+	/**
 	 * Marks an existing node as removed.
 	 * @param node The node to be marked as removed.
 	 * @param description Description of the change.
 	 */
 	public final void markAsRemoved(ASTNode node, GroupDescription description) {
-		assertIsInside(node);
-		ASTRemove remove= new ASTRemove();
-		remove.description= description;
-		setChangeProperty(node, remove);
+		int property= ASTNodeConstants.getPropertyOfNode(node);
+		if (ASTNodeConstants.isListProperty(property)) {
+			markAsRemoved(node.getParent(), property, node, description);
+		} else {
+			markAsRemoved(node.getParent(), property, description);
+		}
 	}
 
 	/**
@@ -337,6 +327,43 @@ public final class ASTRewrite extends NewASTRewrite {
 	}
 
 	/**
+	 * Marks a node or attribute as replaced.  
+	 * @param parent The node's parent node.
+	 * @param childProperty The node's child property in the parent. 
+	 * @param replacingNode The node that replaces the original node.
+	 * @param description The group description to collect the generated text edits or <code>null</code> if
+	 * no edits should be collected.
+	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
+	 * not inside the rewriters parent or the property is not a node property.
+	 */
+	public final void markAsReplaced(ASTNode parent, int childProperty, Object replacingNode, GroupDescription description) {
+		validateIsInsideRoot(parent);
+		validateIsNodeProperty(childProperty);
+		NodeRewriteEvent nodeEvent= getNodeEvent(parent, childProperty, true);
+		nodeEvent.setNewValue(replacingNode);
+	}
+
+	/**
+	 * Marks a node in a list as replaced.  
+	 * @param parent The parent node of the list.
+	 * @param childProperty The child property of the list. 
+	 * @param nodeToReplace The node to replaced.
+	 * @param replacingNode The node that replaces the original node.
+	 * @param description The group description to collect the generated text edit's or <code>null</code> if
+	 * no edits should be collected.
+	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
+	 * not inside the rewriters parent, the property is not a list property or the given node is not in the specified list.
+	 */
+	public final void markAsReplaced(ASTNode parent, int childProperty, ASTNode nodeToReplace, ASTNode replacingNode, GroupDescription description) {
+		validateIsInsideRoot(parent);
+		ListRewriteEvent listEvent= getListEvent(parent, childProperty, true);
+		RewriteEvent res= listEvent.replaceEntry(nodeToReplace, replacingNode);
+		if (res == null) {
+			throw new IllegalArgumentException("Node to replace is not member of list"); //$NON-NLS-1$
+		}
+	}
+	
+	/**
 	 * Marks an existing node as replace by a new node. The replacing node node must not exist.
 	 * To replace with an existing node (move or copy), create a copy target first and replace with the
 	 * target node. ({@link #createCopy})
@@ -345,13 +372,12 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param description Description of the change. 
 	 */		
 	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, GroupDescription description) {
-		Assert.isTrue(replacingNode != null, "Tries to replace with null (use remove instead)"); //$NON-NLS-1$
-		Assert.isTrue(replacingNode.getStartPosition() == -1, "Tries to replace with existing node"); //$NON-NLS-1$
-		assertIsInside(node);
-		ASTReplace replace= new ASTReplace();	
-		replace.replacingNode= replacingNode;
-		replace.description= description;
-		setChangeProperty(node, replace);
+		int property= ASTNodeConstants.getPropertyOfNode(node);
+		if (ASTNodeConstants.isListProperty(property)) {
+			markAsReplaced(node.getParent(), property, node, replacingNode, description);
+		} else {
+			markAsReplaced(node.getParent(), property, replacingNode, description);
+		}
 	}
 	
 	/**
@@ -364,18 +390,20 @@ public final class ASTRewrite extends NewASTRewrite {
 	public final void markAsReplaced(ASTNode node, ASTNode replacingNode) {
 		markAsReplaced(node, replacingNode, (GroupDescription) null);
 	}
-
+	
 	/**
-	 * Marks the node <code>node</code> as replaced with the nodes provided in <code>
-	 * replacements</code>. The given node must be a member of the passed list <code>
-	 * container</code>.
-	 * 
-	 * @param node the node to be replaced
-	 * @param container the list <code>node</code> is a member of
-	 * @param replacements the replacing nodes
-	 */	
-	public final void markAsReplaced(ASTNode node, List container, ASTNode[] replacements) {
-		markAsReplaced(node, container, replacements, (GroupDescription) null);
+	 * Create a placeholder for a sequence of new statements to be inserted or placed at a single place.
+	 * @param children The target nodes to collapse
+	 * @return A placeholder node that stands for all of the statements 
+	 */
+	
+	public final Block getCollapseTargetPlaceholder(Statement[] children) {
+		Block res= createCollapsePlaceholder();
+		List statements= res.statements();
+		for (int i= 0; i < children.length; i++) {
+			statements.add(children[i]);
+		}
+		return res;
 	}
 
 	/**
@@ -386,40 +414,18 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param description Description of the change. 
 	 */			
 	public final void markAsModified(ASTNode node, ASTNode modifiedNode, GroupDescription description) {
-		Assert.isTrue(node.getClass().equals(modifiedNode.getClass()), "Tries to modify with a node of different type"); //$NON-NLS-1$
-		assertIsInside(node);
-		ASTModify modify= new ASTModify();
-		modify.modifiedNode= modifiedNode;
-		modify.description= description;
-		setChangeProperty(node, modify);
+		int[] properties= ASTNodeConstants.getNodeChildProperties(node);
+		for (int i= 0; i < properties.length; i++) {
+			int property= properties[i];
+			if (ASTNodeConstants.isAttributeProperty(property)) {
+				NodeRewriteEvent event= getNodeEvent(node, property, true);
+				Object newChild= ASTNodeConstants.getNodeChild(modifiedNode, property);
+				event.setNewValue(newChild);
+				setDescription(event, description);
+			}
+		}		
 	}
-
-	/**
-	 * Marks the node <code>node</code> as replaced with the nodes provided in <code>
-	 * replacements</code>. The given node must be a member of the passed list <code>
-	 * container</code>.
-	 * 
-	 * @param node the node to be replaced
-	 * @param container the list <code>node</code> is a member of
-	 * @param replacements the replacing nodes
-	 * @param description the description of the change
-	 */	
-	public final void markAsReplaced(ASTNode node, List container, ASTNode[] replacements, GroupDescription description) {
-		if (replacements == null || replacements.length == 0) {
-			markAsRemoved(node, description);
-			return;
-		}
-		Assert.isNotNull(container, "Replacing a node with a list of nodes requires access to container"); //$NON-NLS-1$
-		int index= container.indexOf(node);
-		Assert.isTrue(index != -1, "Node must be a member of the given list container"); //$NON-NLS-1$
-		markAsReplaced(node, replacements[0], description);
-		for (int i= 1; i < replacements.length; i++) {
-			ASTNode replacement= replacements[i];
-			markAsInserted(replacement, description);
-			container.add(++index, replacement);
-		}
-	}
-
+	
 	/**
 	 * Marks an node as modified. The modifiied node describes changes like changed modifiers,
 	 * or operators: This is only for properties that are not children nodes of type ASTNode.
@@ -437,8 +443,9 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param description
 	 */
 	public final void markAsTracked(ASTNode node, GroupDescription description) {
-		Assert.isTrue(getTrackedNodeData(node) == null, "Node is already marked as tracked"); //$NON-NLS-1$
-
+		if (getTrackedNodeData(node) != null) {
+			throw new IllegalArgumentException("Node is already marked as tracked"); //$NON-NLS-1$
+		}
 		setTrackedNodeData(node, description);
 	}	
 	
@@ -449,7 +456,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @return
 	 */
 	public final ASTNode createCopy(ASTNode node) {
-		assertIsInside(node);
+		validateIsInsideRoot(node);
 		return createCopyPlaceholder(node);
 	}
 	
@@ -461,7 +468,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @return
 	 */
 	public final ASTNode createMove(ASTNode node) {
-		assertIsInside(node);
+		validateIsInsideRoot(node);
 		if (getChangeProperty(node) == null) {
 			markAsRemoved(node);
 		}
@@ -482,8 +489,8 @@ public final class ASTRewrite extends NewASTRewrite {
 		
 		ASTNode firstNode= (ASTNode) list.get(index);
 		ASTNode lastNode= (ASTNode) list.get(index + length - 1);
-		assertIsInside(firstNode);
-		assertIsInside(lastNode);
+		validateIsInsideRoot(firstNode);
+		validateIsInsideRoot(lastNode);
 		
 		Assert.isTrue(lastNode instanceof Statement, "Can only collapse statements"); //$NON-NLS-1$
 		
@@ -525,20 +532,12 @@ public final class ASTRewrite extends NewASTRewrite {
 	public final boolean isInserted(ASTNode node) {
 		return getChangeProperty(node) instanceof ASTInsert;
 	}
-	
-	public final boolean isReplaced(ASTNode node) {
-		return getChangeProperty(node) instanceof ASTReplace;
-	}
-	
-	public final boolean isRemoved(ASTNode node) {
-		return getChangeProperty(node) instanceof ASTRemove;
-	}	
 		
 	
 	public final ASTNode getReplacingNode(ASTNode node) {
-		Object info= getChangeProperty(node);
-		if (info instanceof ASTReplace) {
-			return ((ASTReplace) info).replacingNode;
+		RewriteEvent event= findEventByOriginal(node);
+		if (event != null && event.getChangeKind() == RewriteEvent.REPLACED) {
+			return (ASTNode) event.getNewValue();
 		}
 		return null;
 	}
@@ -551,13 +550,7 @@ public final class ASTRewrite extends NewASTRewrite {
 		return (ASTChange) fChangedProperties.get(node);
 	}
 		
-	private void assertIsInside(ASTNode node) {
-		int endPos= node.getStartPosition() + node.getLength();
-		ASTNode rootNode= getRootNode();
-		if (rootNode.getStartPosition() > node.getStartPosition() || rootNode.getStartPosition() + rootNode.getLength() < endPos) {
-			Assert.isTrue(false, "Node that is changed is not located inside of ASTRewrite root"); //$NON-NLS-1$
-		}
-	}
+
 	private static class ASTChange {
 		public GroupDescription description;
 	}
@@ -566,19 +559,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	private static final class ASTInsert extends ASTChange {
 		public boolean isBoundToPrevious;	
 	}
-	
-	private static final class ASTRemove extends ASTChange {
-	}	
-		
-	private static final class ASTReplace extends ASTChange {
-		public ASTNode replacingNode;
-	}
-	
-	private static final class ASTModify extends ASTChange {
-		public ASTNode modifiedNode;
-	}
-
-	
+			
 	private String getNodeString(ASTNode node) {
 		StringBuffer buf= new StringBuffer();
 		Object object= getPlaceholderData(node);
@@ -599,12 +580,6 @@ public final class ASTRewrite extends NewASTRewrite {
 		}
 		if (change instanceof ASTInsert) {
 			buf.append(" [inserted]"); //$NON-NLS-1$
-		} else if (change instanceof ASTReplace) {
-			buf.append(" [replaced "); //$NON-NLS-1$
-			buf.append(getNodeString(getReplacingNode(node)));
-			buf.append(']');
-		} else if (change instanceof ASTModify) {
-			buf.append(" [modified]"); //$NON-NLS-1$
 		}
 		return buf.toString();
 	}

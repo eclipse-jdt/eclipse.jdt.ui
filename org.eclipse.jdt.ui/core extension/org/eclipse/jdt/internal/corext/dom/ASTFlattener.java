@@ -33,13 +33,6 @@ public class ASTFlattener extends GenericVisitor {
 		// convert to a string, but lose any extra space in the string buffer by copying
 		return new String(fResult.toString());
 	}
-
-	/**
-	 * @deprecated Use CodeFormatterUtil.format(ASTNode, String...) with <code>getResult</code>
-	 */	
-	public String getFormattedResult(int initialIndentationLevel, String lineDelimiter) {
-		return getResult();
-	}
 	
 	/**
 	 * Resets this printer so that it can be used again.
@@ -58,6 +51,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * Appends the text representation of the given modifier flags, followed by a single space.
 	 * 
 	 * @param modifiers the modifiers
+	 * @param buf The <code>StringBuffer</code> to write the result to.
 	 */
 	public static void printModifiers(int modifiers, StringBuffer buf) {
 		if (Modifier.isPublic(modifiers)) {

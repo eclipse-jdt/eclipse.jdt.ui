@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.MultiTextEdit;
@@ -129,6 +128,7 @@ public class NewASTRewrite {
 			EventHolder curr= (EventHolder) fEvents.get(i);
 			if (curr.parent == parent && curr.childProperty == childProperty) {
 				fEvents.set(i, holder);
+				fLastEvent= null;
 				return;
 			}
 		}
@@ -325,7 +325,6 @@ public class NewASTRewrite {
 		return 0;
 	}
 	
-	
 	public final GroupDescription getTrackedNodeData(ASTNode node) {
 		NodeSourceData data= getNodeSourceData(node);
 		if (data != null) {
@@ -414,6 +413,10 @@ public class NewASTRewrite {
 		return createPlaceholder(data, placeHolderType);
 	}	
 	
+	// collapsed nodes: in source: use one node that reprents many to be used as
+	// copy/move source or to replace at once.
+	// in the target: one block node that is not flattened.
+	
 	protected final Block createCollapsePlaceholder() {
 		Block placeHolder= getRootNode().getAST().newBlock();
 		if (fCollapsedNodes == null) {
@@ -421,6 +424,13 @@ public class NewASTRewrite {
 		}
 		fCollapsedNodes.add(placeHolder);
 		return placeHolder;
+	}
+	
+	public final boolean isCollapsed(ASTNode node) {
+		if (fCollapsedNodes != null) {
+			return fCollapsedNodes.contains(node);
+		}
+		return false;	
 	}
 		
 	private final ASTNode createPlaceholder(PlaceholderData data, int nodeType) {
@@ -525,12 +535,7 @@ public class NewASTRewrite {
 		return UNKNOWN;
 	}
 	
-	public final boolean isCollapsed(ASTNode node) {
-		if (fCollapsedNodes != null) {
-			return fCollapsedNodes.contains(node);
-		}
-		return false;	
-	}
+
 	
 	
 	public final Object getPlaceholderData(ASTNode node) {

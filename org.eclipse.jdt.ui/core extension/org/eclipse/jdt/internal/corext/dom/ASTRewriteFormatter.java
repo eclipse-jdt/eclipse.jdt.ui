@@ -20,6 +20,7 @@ import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -68,6 +69,16 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 				fixupLength(trackData, fResult.length());
 			}
 		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.dom.ASTFlattener#visit(org.eclipse.jdt.core.dom.Block)
+		 */
+		public boolean visit(Block node) {
+			if (fRewriter.isCollapsed(node)) {
+				return true;
+			}
+			return super.visit(node);
+		}
 	
 		private NodeMarker addMarker(Object annotation, int startOffset, int length) {
 			NodeMarker marker= new NodeMarker();
@@ -101,15 +112,15 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 		fLineDelimiter= lineDelimiter;
 	}
-	
 
-		
-	
 	/**
 	 * Returns the string accumulated in the visit formatted using the default formatter.
 	 * Updates the existing node's positions.
 	 *
-	 * @return the serialized and formatted code.
+	 * @param node The node to flatten.
+	 * @param initialIndentationLevel The initial indentation level.
+	 * @param resultingMarkers Resulting the updated NodeMarkers.
+	 * @return Retuens the serialized and formatted code.
 	 */	
 	public String getFormattedResult(ASTNode node, int initialIndentationLevel, Collection resultingMarkers) {
 		

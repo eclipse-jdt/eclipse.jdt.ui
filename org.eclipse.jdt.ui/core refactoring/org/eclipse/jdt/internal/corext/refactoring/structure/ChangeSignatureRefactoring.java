@@ -1325,7 +1325,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		String simple= exceptionInfo.getType().getElementName();
 		ASTNode exNode= rewrite.createPlaceholder(simple, ASTRewrite.NAME);
 		exceptionsNodeList.add(exNode);
-		rewrite.markAsInserted(exNode, true);
+		rewrite.markAsInserted(exNode);
 	}
 	
 	private static ASTNode[] getSubNodesOfMethodOccurrenceNode(ASTNode occurrenceNode) {

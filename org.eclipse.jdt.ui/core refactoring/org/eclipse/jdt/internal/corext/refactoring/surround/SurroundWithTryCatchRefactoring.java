@@ -186,8 +186,12 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 						container.add(++index, element);
 					}
 				} else {
-					fRewriter.markAsReplaced(fSelectedNode, container, 
-						(ASTNode[])newStatements.toArray(new ASTNode[newStatements.size()]));
+					if (newStatements.isEmpty()) {
+						fRewriter.markAsRemoved(fSelectedNode);
+					} else {
+						Statement[] collapsedTargetStatements= ((Statement[])newStatements.toArray(new Statement[newStatements.size()]));
+						fRewriter.markAsReplaced(fSelectedNode, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements));
+					}
 				}
 			}
 			
@@ -279,7 +283,6 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		List result= new ArrayList();
 		List fragments= statement.fragments();
 		result.add(fRewriter.createCopy(statement));
-		List container= getStatementsOfSelectedNode();
 		AST ast= getAST();
 		List newAssignments= new ArrayList(2);
 		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
@@ -298,7 +301,12 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				}
 			}
 		}
-		fRewriter.markAsReplaced(statement, container, (ASTNode[])newAssignments.toArray(new ASTNode[newAssignments.size()]));
+		if (newAssignments.isEmpty()) {
+			fRewriter.markAsRemoved(statement);
+		} else {
+			Statement[] collapsedTargetStatements= ((Statement[]) newAssignments.toArray(new Statement[newAssignments.size()]));
+			fRewriter.markAsReplaced(statement, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements));
+		}
 		return result;
 	}
 	
