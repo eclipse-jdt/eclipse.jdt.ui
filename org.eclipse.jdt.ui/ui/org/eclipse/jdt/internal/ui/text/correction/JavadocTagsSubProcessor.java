@@ -32,15 +32,15 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -147,7 +147,7 @@ public class JavadocTagsSubProcessor {
 		MethodDeclaration methodDecl= (MethodDeclaration) declaration;
 		
 		AST ast= javadoc.getAST();
-		ASTRewrite rewrite= new ASTRewrite(ast);
+		ASTRewrite rewrite= ASTRewrite.create(ast);
 		ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 		
 		
@@ -183,7 +183,7 @@ public class JavadocTagsSubProcessor {
 		}		
 		proposals.add(proposal);
 		
-		rewrite= new ASTRewrite(ast);
+		rewrite= ASTRewrite.create(ast);
 		tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 		
 		String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.allmissing.description"); //$NON-NLS-1$

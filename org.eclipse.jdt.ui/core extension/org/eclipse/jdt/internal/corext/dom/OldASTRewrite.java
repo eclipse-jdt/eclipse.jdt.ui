@@ -28,16 +28,22 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.core.dom.rewrite.ListRewriteEvent;
+import org.eclipse.jdt.internal.core.dom.rewrite.NodeRewriteEvent;
+import org.eclipse.jdt.internal.core.dom.rewrite.RewriteEvent;
+import org.eclipse.jdt.internal.core.dom.rewrite.RewriteEventStore;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Original version of the ASTRewrite: Mix of modifying an decribing API.
- * Move the ASTRewrite
+ * Will be removed soon, please adapt to ASTRewrite.
  */
-public final class OldASTRewrite extends ASTRewrite {
+public final class OldASTRewrite extends ASTRewrite { // illegal subclassing
 		
 	private HashMap fChangedProperties;
 
@@ -94,7 +100,7 @@ public final class OldASTRewrite extends ASTRewrite {
 		try {
 			TextEdit res= rewriteAST(textBuffer.getDocument(), null);
 			rootEdit.addChildren(res.removeChildren());
-		} catch (RewriteException e) {
+		} catch (IllegalArgumentException e) {
 			JavaPlugin.log(e);
 		}
 	}
@@ -102,7 +108,7 @@ public final class OldASTRewrite extends ASTRewrite {
 	/**
 	 * New API.
 	 */
-	public TextEdit rewriteAST(IDocument document, Map options) throws RewriteException {
+	public TextEdit rewriteAST(IDocument document, Map options) {
 		convertOldToNewEvents();
 		return super.rewriteAST(document, options);
 	}

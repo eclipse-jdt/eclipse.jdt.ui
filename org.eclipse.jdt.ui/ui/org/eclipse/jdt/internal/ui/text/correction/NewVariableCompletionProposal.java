@@ -22,12 +22,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
-import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 
 public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
@@ -71,7 +71,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration) {
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
 			newDecl.setType(evaluateVariableType(ast));
@@ -125,7 +125,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		} else {
 			return null;
 		}
-		ASTRewrite rewrite= new ASTRewrite(ast);
+		ASTRewrite rewrite= ASTRewrite.create(ast);
 		
 		SimpleName[] names= getAllReferences(body);
 		ASTNode dominant= getDominantNode(names);
@@ -272,7 +272,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		if (newTypeDecl != null) {
 			AST ast= newTypeDecl.getAST();
 			
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(node.getIdentifier()));

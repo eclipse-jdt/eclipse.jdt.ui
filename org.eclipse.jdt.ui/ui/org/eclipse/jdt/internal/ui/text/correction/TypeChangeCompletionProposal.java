@@ -16,9 +16,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
@@ -66,7 +66,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 		}
 		if (declNode != null) {
 			AST ast= declNode.getAST();
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
 			String typeString= getImportRewrite().addImport(fNewType);
 			Type type= ASTNodeFactory.newType(ast, typeString);

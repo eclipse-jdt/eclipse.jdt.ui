@@ -737,4 +737,18 @@ public class ASTNodes {
 	public static int changeVisibility(int modifiers, int visibility) {
 		return (modifiers & CLEAR_VISIBILITY) | visibility;
 	}
+	
+	/**
+	 * Adds flags to the given node and all its decendants.
+	 * @param root The root node
+	 * @param flags The flags to set
+	 */
+	public static void setFlagsToAST(ASTNode root, final int flags) {
+		root.accept(new GenericVisitor() {
+			protected boolean visitNode(ASTNode node) {
+				node.setFlags(node.getFlags() | flags);
+				return true;
+			}
+		});
+	}
 }

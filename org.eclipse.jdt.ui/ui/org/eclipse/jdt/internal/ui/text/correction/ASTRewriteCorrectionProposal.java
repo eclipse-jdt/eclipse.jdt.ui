@@ -23,8 +23,8 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.RewriteException;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
@@ -64,7 +64,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 				Map options= getCompilationUnit().getJavaProject().getOptions(true);
 				TextEdit edit= rewrite.rewriteAST(document, options);
 				editRoot.addChild(edit);
-			} catch (RewriteException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 			}
 		}

@@ -33,10 +33,9 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 /**
   */
@@ -44,17 +43,7 @@ public class ASTRewritingTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
-		suite.addTest(ASTRewritingExpressionsTest.allTests());
-		suite.addTest(ASTRewritingInsertBoundTest.allTests());
-		suite.addTest(ASTRewritingMethodDeclTest.allTests());
-		suite.addTest(ASTRewritingMoveCodeTest.allTests());
-		suite.addTest(ASTRewritingStatementsTest.allTests());
-		suite.addTest(ASTRewritingTrackingTest.allTests());
-		suite.addTest(ASTRewritingTypeDeclTest.allTests());
-		suite.addTest(SourceModifierTest.allTests());
 		suite.addTest(ASTRewritingCollapseTest.allTests());
-		suite.addTest(ASTRewritingJavadocTest.allTests());
-		
 		return new ProjectTestSetup(suite);
 	}
 

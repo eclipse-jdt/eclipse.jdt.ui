@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -36,7 +37,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
@@ -192,7 +192,7 @@ public class UnresolvedElementsSubProcessor {
 			Assignment assignment= (Assignment) node.getParent();
 			if (assignment.getLeftHandSide() == node && assignment.getParent().getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 				ASTNode statement= assignment.getParent();
-				ASTRewrite rewrite= new ASTRewrite(statement.getAST());
+				ASTRewrite rewrite= ASTRewrite.create(statement.getAST());
 				rewrite.remove(statement, null);
 		
 				String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.removestatement.description"); //$NON-NLS-1$
@@ -616,7 +616,7 @@ public class UnresolvedElementsSubProcessor {
 		IMethodBinding res= Bindings.findMethodInHierarchy(castType, accessSelector.getIdentifier(), paramTypes);
 		if (res != null) {
 			AST ast= expression.getAST();
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 			CastExpression newCast= ast.newCastExpression();
 			newCast.setType((Type) ASTNode.copySubtree(ast, expression.getType()));
 			newCast.setExpression((Expression) rewrite.createCopyTarget(accessExpression));
@@ -788,7 +788,7 @@ public class UnresolvedElementsSubProcessor {
 	
 		// remove arguments
 		{
-			ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
+			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 			
 			for (int i= diff - 1; i >= 0; i--) {
 				rewrite.remove((Expression) arguments.get(indexSkipped[i]), null);
@@ -959,7 +959,7 @@ public class UnresolvedElementsSubProcessor {
 				Expression arg1= (Expression) arguments.get(idx1);
 				Expression arg2= (Expression) arguments.get(idx2);
 				
-				ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
+				ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 				rewrite.replace(arg1, rewrite.createCopyTarget(arg2), null);
 				rewrite.replace(arg2, rewrite.createCopyTarget(arg1), null);
 				{
@@ -1052,7 +1052,7 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 		
-		ASTRewrite rewrite= new ASTRewrite(invocationNode.getAST());
+		ASTRewrite rewrite= ASTRewrite.create(invocationNode.getAST());
 		ImportRewrite imports= new ImportRewrite(context.getCompilationUnit());
 		AST ast= invocationNode.getAST();
 		

@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -31,9 +33,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
@@ -71,7 +71,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		if (newTypeDecl != null) {
-			ASTRewrite rewrite= new ASTRewrite(astRoot.getAST());
+			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 			
 			ChildListPropertyDescriptor property= fSenderBinding.isAnonymous() ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
 			List members= (List) newTypeDecl.getStructuralProperty(property);

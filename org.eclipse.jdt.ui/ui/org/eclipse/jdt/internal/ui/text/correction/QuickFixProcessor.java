@@ -55,6 +55,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.TypeMismatch:
 			case IProblem.UnhandledException:
 			case IProblem.UnreachableCatch:
+			case IProblem.InvalidCatchBlockSequence:
 			case IProblem.VoidMethodReturnsValue:
 			case IProblem.ShouldReturnValue:
 			case IProblem.MissingReturnType:
@@ -246,6 +247,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, problem, proposals);
 				break;
 			case IProblem.UnreachableCatch:
+			case IProblem.InvalidCatchBlockSequence:
 				LocalCorrectionsSubProcessor.addUnreachableCatchProposals(context, problem, proposals);
 				break;
 			case IProblem.VoidMethodReturnsValue:

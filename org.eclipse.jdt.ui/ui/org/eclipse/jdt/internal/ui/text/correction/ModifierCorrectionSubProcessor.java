@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -265,7 +265,7 @@ public class ModifierCorrectionSubProcessor {
 		
 		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstractClass) {
 			AST ast= astRoot.getAST();
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
 			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
@@ -289,7 +289,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 		
 		if (!hasNoBody && problem.getProblemId() == IProblem.BodyForAbstractMethod) {
-			ASTRewrite rewrite= new ASTRewrite(decl.getAST());
+			ASTRewrite rewrite= ASTRewrite.create(decl.getAST());
 			rewrite.remove(decl.getBody(), null);
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description"); //$NON-NLS-1$
@@ -325,7 +325,7 @@ public class ModifierCorrectionSubProcessor {
 	
 		{
 			AST ast= astRoot.getAST();
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
 			int newModifiers= decl.getModifiers() & ~Modifier.NATIVE;
 			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
@@ -347,7 +347,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 		
 		if (decl.getBody() != null) {
-			ASTRewrite rewrite= new ASTRewrite(decl.getAST());
+			ASTRewrite rewrite= ASTRewrite.create(decl.getAST());
 			rewrite.remove(decl.getBody(), null);
 			
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description"); //$NON-NLS-1$
@@ -361,7 +361,7 @@ public class ModifierCorrectionSubProcessor {
 	
 	
 	public static ASTRewriteCorrectionProposal getMakeTypeAbstractProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration, int relevance) {
-		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getAST());
+		ASTRewrite rewrite= ASTRewrite.create(typeDeclaration.getAST());
 				
 		int newModifiers= typeDeclaration.getModifiers() | Modifier.ABSTRACT;
 		rewrite.set(typeDeclaration, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
@@ -382,7 +382,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 		MethodDeclaration decl=  (MethodDeclaration) selectedNode;
 		{
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
 			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
 			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);		
@@ -407,7 +407,7 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal);
 		}
 		{
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
 			int newModifiers= decl.getModifiers() | Modifier.ABSTRACT;
 			rewrite.set(decl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);

@@ -17,15 +17,15 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -64,7 +64,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		CompilationUnit astRoot= (CompilationUnit) astParser.createAST(null);
 		
 		AST ast= astRoot.getAST();
-		ASTRewrite rewrite= new ASTRewrite(ast);
+		ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		TypeDeclaration decl= findTypeDeclaration(astRoot.types(), fOldName);
 		if (decl != null) {

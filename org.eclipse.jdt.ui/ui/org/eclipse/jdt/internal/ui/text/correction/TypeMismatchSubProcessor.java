@@ -21,13 +21,13 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -102,7 +102,7 @@ public class TypeMismatchSubProcessor {
 					currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 				}
 	
-				ASTRewrite rewrite= new ASTRewrite(methodDeclaration.getAST());
+				ASTRewrite rewrite= ASTRewrite.create(methodDeclaration.getAST());
 				ImportRewrite imports= new ImportRewrite(cu);
 
 				String returnTypeName= imports.addImport(currBinding);
@@ -231,7 +231,7 @@ public class TypeMismatchSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
 		
-		ASTRewrite rewrite= new ASTRewrite(nodeToCast.getAST());
+		ASTRewrite rewrite= ASTRewrite.create(nodeToCast.getAST());
 		ImportRewrite imports= new ImportRewrite(cu);
 		
 		String label;

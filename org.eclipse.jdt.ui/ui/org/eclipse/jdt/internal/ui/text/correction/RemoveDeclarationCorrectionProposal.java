@@ -16,9 +16,10 @@ import java.util.List;
 import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -104,7 +105,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		ASTRewrite rewrite;
 		if (binding.getKind() != IBinding.VARIABLE) {
 			ASTNode declaration= root.findDeclaringNode(binding);
-			rewrite= new ASTRewrite(root.getAST());
+			rewrite= ASTRewrite.create(root.getAST());
 			rewrite.remove(declaration, null);
 		} else { // variable
 			// needs full AST
@@ -112,7 +113,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
 
-			rewrite= new ASTRewrite(completeRoot.getAST()); 
+			rewrite= ASTRewrite.create(completeRoot.getAST()); 
 			SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
 			for (int i= 0; i < references.length; i++) {
 				removeVariableReferences(rewrite, references[i]);

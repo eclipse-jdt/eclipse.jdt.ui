@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -50,7 +51,7 @@ public class CodeFormatterUtil {
 		
 	public static int getTabWidth() {
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		return preferences.getInt(JavaCore.FORMATTER_TAB_SIZE);
+		return preferences.getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 	}
 
 	// transition code

@@ -21,12 +21,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.NamingConventions;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -85,7 +85,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		Expression expression= ((ExpressionStatement) fNodeToAssign).getExpression();
 		AST ast= fNodeToAssign.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(ast);
+		ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		String varName= suggestLocalVariableNames(fTypeBinding);
 				
@@ -123,7 +123,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		List decls= (List) newTypeDecl.getStructuralProperty(property);
 		
 		AST ast= newTypeDecl.getAST();
-		ASTRewrite rewrite= new ASTRewrite(ast);
+		ASTRewrite rewrite= ASTRewrite.create(ast);
 		
 		BodyDeclaration bodyDecl= ASTResolving.findParentBodyDeclaration(fNodeToAssign);
 		Block body;

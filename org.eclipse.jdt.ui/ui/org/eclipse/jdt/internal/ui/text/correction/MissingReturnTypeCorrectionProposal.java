@@ -15,10 +15,10 @@ import java.util.List;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -53,7 +53,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 		ITypeBinding returnBinding= getReturnTypeBinding();
 		
 		if (fExistingReturn != null) {
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
 			Expression expression= evaluateReturnExpressions(ast, returnBinding, fExistingReturn.getStartPosition());
 			if (expression != null) {
@@ -63,7 +63,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 			}
 			return rewrite;
 		} else {
-			ASTRewrite rewrite= new ASTRewrite(ast);
+			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
 			Block block= fMethodDecl.getBody();
 				
