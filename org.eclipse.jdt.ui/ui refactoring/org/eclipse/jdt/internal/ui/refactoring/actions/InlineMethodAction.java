@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -115,18 +114,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			return;
 		}
 		try {
-			if (fEditor == null){
-				activate(refactoring);
-			} else {
-				IRewriteTarget target= (IRewriteTarget) fEditor.getAdapter(IRewriteTarget.class);
-				try {
-					target.beginCompoundChange();
-					activate(refactoring);
-				} finally {
-					if (target != null)
-						target.endCompoundChange();
-				}
-			}
+			activate(refactoring);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, "Unexpected exception during operation");
 		}

@@ -6,6 +6,8 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -13,9 +15,13 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -141,7 +147,10 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 	
 	private void executeChange(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
 		Assert.isNotNull(fChangeContext);
+		IRewriteTarget[] targets= null;
 		try {
+			targets= getRewriteTargets();
+			beginCompoundChange(targets);
 			// Since we have done precondition checking this check should be fast. No PM.
 			// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 			fChange.aboutToPerform(fChangeContext, new NullProgressMonitor());
@@ -158,11 +167,37 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 			}).run(pm);
 		} finally {
 			fChange.performed();
+			if (targets != null)
+				endCompoundChange(targets);
 		}
 	}
 	
 	private boolean createChange() {
 		return fCreateChangeOperation != null;
+	}
+	
+	private static void beginCompoundChange(IRewriteTarget[] targets) {
+		for (int i= 0; i < targets.length; i++) {
+			targets[i].beginCompoundChange();
+		}
+	}
+	
+	private static void endCompoundChange(IRewriteTarget[] targets) {
+		for (int i= 0; i < targets.length; i++) {
+			targets[i].endCompoundChange();
+		}
+	}
+	
+	private static IRewriteTarget[] getRewriteTargets() {
+		IEditorPart[] editors= JavaPlugin.getInstanciatedEditors();
+		List result= new ArrayList(editors.length);
+		for (int i= 0; i < editors.length; i++) {
+			IRewriteTarget target= (IRewriteTarget)editors[i].getAdapter(IRewriteTarget.class);
+			if (target != null) {
+				result.add(target);
+			}
+		}
+		return (IRewriteTarget[]) result.toArray(new IRewriteTarget[result.size()]);
 	}
 }
 

@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -64,18 +63,11 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	protected void run(ITextSelection selection) {
-		IRewriteTarget target= null;
 		try{
-			target= (IRewriteTarget)fEditor.getAdapter(IRewriteTarget.class);
-			if (target != null)
-				target.beginCompoundChange();
 			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
-		} finally {
-			if (target != null)
-				target.endCompoundChange();
 		}
 	}
 

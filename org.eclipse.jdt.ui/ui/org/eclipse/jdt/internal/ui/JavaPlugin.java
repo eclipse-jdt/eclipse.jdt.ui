@@ -34,6 +34,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -152,6 +153,27 @@ public class JavaPlugin extends AbstractUIPlugin {
 						inputs.add(input);
 						result.add(ep);
 					}
+				}
+			}
+		}
+		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
+	}
+	
+	/**
+	 * Returns an array of all instanciated editors. 
+	 */
+	public static IEditorPart[] getInstanciatedEditors() {
+		List result= new ArrayList(0);
+		IWorkbench workbench= getDefault().getWorkbench();
+		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
+		for (int i= 0; i < windows.length; i++) {
+			IWorkbenchPage[] pages= windows[i].getPages();
+			for (int x= 0; x < pages.length; x++) {
+				IEditorReference[] references= pages[i].getEditorReferences();
+				for (int j= 0; j < references.length; j++) {
+					IEditorPart editor= references[j].getEditor(false);
+					if (editor != null)
+						result.add(editor);
 				}
 			}
 		}

@@ -16,7 +16,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.core.runtime.CoreException;
@@ -92,11 +91,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(getCompilationUnit(), selection, 
 			JavaPreferencesSettings.getCodeGenerationSettings(),
 			new Query(getShell()));
-		IRewriteTarget target= null;
 		try {
-			target= (IRewriteTarget)fEditor.getAdapter(IRewriteTarget.class);
-			if (target != null)
-				target.beginCompoundChange();
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {
 				RefactoringErrorDialogUtil.open(getDialogTitle(), status);
@@ -119,9 +114,6 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// not cancelable
-		} finally {
-			if (target != null)
-				target.endCompoundChange();
 		}
 	}
 

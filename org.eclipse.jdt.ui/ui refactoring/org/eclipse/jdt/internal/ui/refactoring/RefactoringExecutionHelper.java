@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -18,6 +20,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.IRewriteTarget;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +28,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+
+import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -36,10 +41,16 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.refactoring.changes.ChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/**
+ * A helper class to execute a refactoring. The class takes care of pushing the
+ * undo change onto the undo stack and folding editor edits into one editor
+ * undo object.
+ */
 public class RefactoringExecutionHelper {
 
 	private IRefactoring fRefactoring;
@@ -110,7 +121,10 @@ public class RefactoringExecutionHelper {
 		boolean success= false;
 		IUndoManager undoManager= Refactoring.getUndoManager();
 		Operation op= new Operation();
+		IRewriteTarget[] targets= null;
 		try{
+			targets= getRewriteTargets();
+			beginCompoundChange(targets);
 			undoManager.aboutToPerformRefactoring();
 			fExecContext.run(false, false, op);
 			if (op.isExecuted()) {
@@ -132,6 +146,8 @@ public class RefactoringExecutionHelper {
 			fContext.clearPerformedChanges();
 			undoManager.refactoringPerformed(success);
 			saveHelper.triggerBuild();
+			if (targets != null)
+				endCompoundChange(targets);
 		}
 	}
 	
@@ -178,4 +194,28 @@ public class RefactoringExecutionHelper {
 	private void handleUnexpectedException(InvocationTargetException e) {
 		ExceptionHandler.handle(e, RefactoringMessages.getString("RefactoringWizard.refactoring"), RefactoringMessages.getString("RefactoringWizard.unexpected_exception_1")); //$NON-NLS-2$ //$NON-NLS-1$
 	}
+	
+	private static void beginCompoundChange(IRewriteTarget[] targets) {
+		for (int i= 0; i < targets.length; i++) {
+			targets[i].beginCompoundChange();
+		}
+	}
+	
+	private static void endCompoundChange(IRewriteTarget[] targets) {
+		for (int i= 0; i < targets.length; i++) {
+			targets[i].endCompoundChange();
+		}
+	}
+	
+	private static IRewriteTarget[] getRewriteTargets() {
+		IEditorPart[] editors= JavaPlugin.getInstanciatedEditors();
+		List result= new ArrayList(editors.length);
+		for (int i= 0; i < editors.length; i++) {
+			IRewriteTarget target= (IRewriteTarget)editors[i].getAdapter(IRewriteTarget.class);
+			if (target != null) {
+				result.add(target);
+			}
+		}
+		return (IRewriteTarget[]) result.toArray(new IRewriteTarget[result.size()]);
+	}	
 }
