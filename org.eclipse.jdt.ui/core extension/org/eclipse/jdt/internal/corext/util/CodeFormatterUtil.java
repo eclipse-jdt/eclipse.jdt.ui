@@ -40,26 +40,31 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.formatter.DefaultCodeFormatter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
 
 
 public class CodeFormatterUtil {
 	
-	public static boolean OLD_FORMATTER= true;
 	public static boolean OLD_FUNC= true;
 	public static boolean DEBUG= false;
+		
 	
-	private static final String POS_CATEGORY= "myCategory"; //$NON-NLS-1$
-	
-	
+	public static boolean useOldFormatter() {
+		return !PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_FORMATTER);
+	}
+
 	/**
 	 * Creates a string that represents the given number of indents (can be spaces or tabs..)
 	 */
 	public static String createIndentString(int indent) {
-		if (OLD_FORMATTER) {
+		if (useOldFormatter()) {
 			return old_formatter("", indent, null, "", null);  //$NON-NLS-1$//$NON-NLS-2$
 		} else {
 			String str= format(CodeFormatter.K_EXPRESSION, "x", indent, null, "", null); //$NON-NLS-1$ //$NON-NLS-2$
@@ -91,9 +96,6 @@ public class CodeFormatterUtil {
 	 * Old API. Consider to use format2 (TextEdit)
 	 */	
 	public static String format(int kind, String string, int offset, int length, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		if (OLD_FUNC) {
-			return old_formatter(string.substring(offset, offset + length), indentationLevel, positions, lineSeparator, options);
-		}
 		TextEdit edit= format2(kind, string, offset, length, indentationLevel, lineSeparator, options);
 		String formatted= getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
 		return formatted.substring(offset, formatted.length() - (string.length() - (offset + length)));
@@ -103,7 +105,7 @@ public class CodeFormatterUtil {
 	 * Old API. Consider to use format2 (TextEdit)
 	 */	
 	public static String format(ASTNode node, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		if (OLD_FUNC) {
+		if (OLD_FUNC && useOldFormatter()) {
 			return old_formatter(string, indentationLevel, positions, lineSeparator, options);
 		}
 		
@@ -139,7 +141,7 @@ public class CodeFormatterUtil {
 			}
 			return res;
 		}
-		JavaPlugin.logErrorMessage("format returns null-edit"); //$NON-NLS-1$
+		JavaPlugin.logErrorMessage("formatter returned null-edit. string: " + string); //$NON-NLS-1$
 		return string;
 	}
 	
@@ -175,10 +177,10 @@ public class CodeFormatterUtil {
 			throw new IllegalArgumentException("offset or length outside of string. offset: " + offset + ", length: " + length + ", string size: " + string.length());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
 		
-		if (OLD_FORMATTER) {
+		if (useOldFormatter()) {
 			return emulateNewWithOld(string, offset, length, indentationLevel, lineSeparator, options);
 		} else {
-			return null;
+			return new DefaultCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
 			//return ToolFactory.createCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
 		}	
 	}
@@ -438,6 +440,8 @@ public class CodeFormatterUtil {
 		Document doc= new Document(string);
 		try {
 			if (positions != null) {
+				final String POS_CATEGORY= "myCategory"; //$NON-NLS-1$
+				
 				doc.addPositionCategory(POS_CATEGORY);
 				doc.addPositionUpdater(new DefaultPositionUpdater(POS_CATEGORY) {
 					protected boolean notDeleted() {

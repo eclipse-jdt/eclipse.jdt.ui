@@ -46,13 +46,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Preference page for work in progress.
  */
-public class 
-WorkInProgressPreferencePage
-	extends PreferencePage
-	implements IWorkbenchPreferencePage {
+public class WorkInProgressPreferencePage extends PreferencePage	implements IWorkbenchPreferencePage {
 
 	/** prefix for resources */
 	private static final String PREFIX= "WorkInProgress."; //$NON-NLS-1$
+	
+	public final static String PREF_FORMATTER= "use_new_formatter"; //$NON-NLS-1$
 
 	/** 
 	 * All FieldEditors except <code>smartTyping</code>, whose enable state
@@ -273,14 +272,6 @@ WorkInProgressPreferencePage
 		});
 
 
-
-		group= new Group(result, SWT.NONE);
-		group.setLayout(new GridLayout());
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setText(PreferencesMessages.getString(PREFIX + "refactoring")); //$NON-NLS-1$
-		
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "refactoring.participants"), "org.eclipse.jdt.refactoring.participants"); //$NON-NLS-1$ //$NON-NLS-2$
-
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -288,6 +279,14 @@ WorkInProgressPreferencePage
 		
 		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickassist.option"), PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB); //$NON-NLS-1$ //$NON-NLS-2$
 
+		group= new Group(result, SWT.NONE);
+		group.setLayout(new GridLayout());
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setText(PreferencesMessages.getString(PREFIX + "formatter")); //$NON-NLS-1$
+		
+		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "formatter.option"), PREF_FORMATTER); //$NON-NLS-1$
+
+		
 		return result;
 	}
 	
@@ -373,5 +372,7 @@ WorkInProgressPreferencePage
 		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
 		
 		store.setDefault(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB, false);
+		store.setDefault(PREF_FORMATTER, false);
+		
 	}
 }

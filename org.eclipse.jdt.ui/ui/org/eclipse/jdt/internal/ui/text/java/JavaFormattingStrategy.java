@@ -24,11 +24,9 @@ import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 /**
  * Formatting strategy for java source code.
@@ -70,23 +68,18 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 		Assert.isLegal(fPositions.size() > 0);
 
 		final int[] positions= (int[])fPositions.removeFirst();
-		final String indentation= (String)fIndentations.removeFirst();
+		
 		final TypedPosition partition= (TypedPosition)fPartitions.removeFirst();
 
 		final Map preferences= getPreferences();
 		final IDocument document= getViewer().getDocument();
 
 		int indent= 0;
-		if (indentation != null) {
-
-			int width= 4;
-			try {
-				width= Integer.parseInt(preferences.get(JavaCore.FORMATTER_TAB_SIZE).toString());
-			} catch (Exception exception) {
-				// Do nothing
-			}
-			indent= Strings.computeIndent(indentation, width);
-		}
+		// not needed with the new API, but still in discussion..
+		//final String indentation= (String)fIndentations.removeFirst();
+		//if (indentation != null) {
+		//	indent= Strings.computeIndent(indentation, CodeFormatterUtil.getTabWidth());
+		//}
 
 		try {
 			//TODO rewrite using the edit API (CodeFormatterUtil.format2)
