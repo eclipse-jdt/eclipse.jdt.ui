@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -63,7 +64,13 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(getSelectedMembers(selection) != null);
+		try {
+			IMember[] members= getSelectedMembers(selection);
+			setEnabled(members != null && members.length > 0 && JavaModelUtil.isEditable(members[0].getCompilationUnit()));
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			setEnabled(false);
+		}
 	}
 	
 	/* (non-Javadoc)

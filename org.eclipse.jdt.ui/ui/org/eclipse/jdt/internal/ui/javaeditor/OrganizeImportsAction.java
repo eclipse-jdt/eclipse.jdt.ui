@@ -23,13 +23,16 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -60,7 +63,13 @@ public class OrganizeImportsAction extends Action {
 		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
 			List elements= ((IStructuredSelection)selection).toList();
 			if (elements.size() == 1) {
-				return (elements.get(0) instanceof IImportContainer);
+				IJavaElement element= (IJavaElement) elements.get(0);
+				if (element instanceof IImportContainer) {
+					try {
+						return JavaModelUtil.isEditable((ICompilationUnit) element.getParent());
+					} catch(JavaModelException e) {
+					}
+				}
 			}
 		}
 		return false;
@@ -72,7 +81,14 @@ public class OrganizeImportsAction extends Action {
 	public void run() {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
-		if (cu != null) {
+		
+		boolean canBeExecuted= false;
+		try {
+			canBeExecuted= (cu != null && JavaModelUtil.isEditable(cu));
+		} catch (JavaModelException x) {
+		}
+		
+		if (canBeExecuted) {
 			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
 			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();
 			boolean ignoreLowerCaseNames= ImportOrganizePreferencePage.doIgnoreLowerCaseNames();

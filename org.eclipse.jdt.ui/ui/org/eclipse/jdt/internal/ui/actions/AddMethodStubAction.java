@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddMethodStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -177,27 +178,30 @@ public class AddMethodStubAction extends Action {
 	  * Tests if the action can run with given arguments
 	 */
 	public static boolean canActionBeAdded(IType parentType, ISelection selection) {
-		if (parentType == null || parentType.getCompilationUnit() == null ||
-				!(selection instanceof IStructuredSelection) || selection.isEmpty()) {
-			return false;
-		}
-		Object[] elems= ((IStructuredSelection)selection).toArray();
-		int nSelected= elems.length;
-		if (nSelected > 0) {
-			for (int i= 0; i < nSelected; i++) {
-				Object elem= elems[i];
-				if (!(elem instanceof IMethod)) {
-					return false;
-				}
-				IMethod meth= (IMethod)elem;
-				if (meth.getDeclaringType().equals(parentType)) {
-					return false;
-				}
+		try {
+			if (parentType == null || parentType.getCompilationUnit() == null || !JavaModelUtil.isEditable(parentType.getCompilationUnit()) ||
+					!(selection instanceof IStructuredSelection) || selection.isEmpty()) {
+				return false;
 			}
-			return true;
+	
+			Object[] elems= ((IStructuredSelection)selection).toArray();
+			int nSelected= elems.length;
+			if (nSelected > 0) {
+				for (int i= 0; i < nSelected; i++) {
+					Object elem= elems[i];
+					if (!(elem instanceof IMethod)) {
+						return false;
+					}
+					IMethod meth= (IMethod)elem;
+					if (meth.getDeclaringType().equals(parentType)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		} catch(JavaModelException e) {
+			JavaPlugin.log(e);
 		}
 		return false;
 	}
-	
-
 }

@@ -485,6 +485,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
 			new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+			
+		markAsStateDependentAction("ContentAssistProposal", true);
+		markAsStateDependentAction("Comment", true);
+		markAsStateDependentAction("Uncomment", true);
+		markAsStateDependentAction("Format", true);
 	}
 	
 	/*

@@ -226,7 +226,13 @@ public class AddGetterSetterAction extends Action {
 	 * Tests if the acion can be run using the current selection.
 	 */
 	public boolean canActionBeAdded() {
-		return getSelectedFields() != null;
+		try {
+			// all members have same CU
+			IMember[] selected= getSelectedFields();
+			return selected != null && selected.length > 0 && JavaModelUtil.isEditable(selected[0].getCompilationUnit());
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return false;
 	}
-
 }

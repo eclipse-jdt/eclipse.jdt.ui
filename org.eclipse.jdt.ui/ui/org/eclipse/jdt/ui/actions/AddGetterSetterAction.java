@@ -76,7 +76,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(getSelectedFields(selection) != null);
+		try {
+			IMember[] members= getSelectedFields(selection);
+			setEnabled(members != null && members.length > 0 && JavaModelUtil.isEditable(members[0].getCompilationUnit()));
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			setEnabled(false);
+		}
 	}
 	
 	/* (non-Javadoc)

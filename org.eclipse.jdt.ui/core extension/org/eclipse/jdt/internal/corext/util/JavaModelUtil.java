@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.util;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -618,5 +619,21 @@ public class JavaModelUtil {
 		}
 	}
 
-	
+	/**
+	 * Returns whether the given compilation unit can be changed.
+	 * 
+	 * @param cu the cu to be checked
+	 * @return <code>true</code> if the given cu can be changed
+	 */
+	public static boolean isEditable(ICompilationUnit cu) throws JavaModelException {
+		if (cu.isWorkingCopy())
+			cu= (ICompilationUnit) cu.getOriginalElement();
+			
+		if (cu.exists()) {
+			IResource resource= cu.getCorrespondingResource();
+			if (resource != null)
+				return !resource.isReadOnly();
+		}
+		return false;
+	}
 }

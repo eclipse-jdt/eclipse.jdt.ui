@@ -842,6 +842,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingNotInCU")); //$NON-NLS-1$
 				return status;
 			}
+			
+			if (!JavaModelUtil.isEditable(type.getCompilationUnit())) {
+				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingNotEditable")); //$NON-NLS-1$
+				return status;			
+			}
+			
 			fCurrEnclosingType= type;
 			IPackageFragmentRoot enclosingRoot= JavaModelUtil.getPackageFragmentRoot(type);
 			if (!enclosingRoot.equals(root)) {
