@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class DeleteWizard extends RefactoringWizard{
 	
@@ -109,8 +110,12 @@ public class DeleteWizard extends RefactoringWizard{
 					return MessageFormat.format(pattern, new String[]{String.valueOf(numberOfSelectedElements())});
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+				if (JavaModelUtil.filterNotPresentException(e))
+					JavaPlugin.log(e);
 				setPageComplete(false);
+				if (e.isDoesNotExist())
+					return RefactoringMessages.getString("DeleteWizard.12"); //$NON-NLS-1$
 				return RefactoringMessages.getString("DeleteWizard.2"); //$NON-NLS-1$
 			}
 		}
