@@ -25,7 +25,7 @@ import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
 
-class CompareDialog extends Dialog {
+class CompareDialog extends ResizableDialog {
 	
 	class ViewerSwitchingPane extends CompareViewerSwitchingPane {
 		
@@ -44,17 +44,13 @@ class CompareDialog extends Dialog {
 		}
 	}
 	
-	private ResourceBundle fBundle;
 	private CompareViewerSwitchingPane fContentPane;
 	private CompareConfiguration fCompareConfiguration;
 	private ICompareInput fInput;
 	
 	
 	CompareDialog(Shell parent, ResourceBundle bundle) {
-		super(parent);
-		setShellStyle(SWT.CLOSE | SWT.APPLICATION_MODAL | SWT.RESIZE);
-		
-		fBundle= bundle;
+		super(parent, bundle);		
 		
 		fCompareConfiguration= new CompareConfiguration();
 		fCompareConfiguration.setLeftEditable(false);
@@ -92,28 +88,6 @@ class CompareDialog extends Dialog {
 			fContentPane.setInput(fInput);
 			
 		return fContentPane;
-	}
-	
-	/* (non Javadoc)
-	 * Returns the size initialized with the constructor.
-	 */
-	protected Point getInitialSize() {
-		Point size= new Point(JavaCompareUtilities.getInteger(fBundle, "width", 0), //$NON-NLS-1$
-					JavaCompareUtilities.getInteger(fBundle, "height", 0)); //$NON-NLS-1$
-		
-		Shell shell= getParentShell();
-		if (shell != null) {
-			Point parentSize= shell.getSize();
-			if (size.x <= 0)
-				size.x= parentSize.x-300;
-			if (size.y <= 0)
-				size.y= parentSize.y-200;
-		}
-		if (size.x < 700)
-			size.x= 700;
-		if (size.y < 500)
-			size.y= 500;
-		return size;
 	}
 	
 	/* (non-Javadoc)
