@@ -53,7 +53,7 @@ public class RetargetActionIDs {
 	
 	public static String ADD_IMPORT= "org.eclipse.jdt.ui.actions.AddImport"; //$NON-NLS-1$
 	
-	public static String ORGANIZE_IMPORTS= "org.eclipse.jdt.ui.actions.OrganizeInports"; //$NON-NLS-1$
+	public static String ORGANIZE_IMPORTS= "org.eclipse.jdt.ui.actions.OrganizeImports"; //$NON-NLS-1$
 	
 	public static String SURROUND_WITH_TRY_CATCH= "org.eclipse.jdt.ui.actions.SurroundWithTryCatch"; //$NON-NLS-1$
 	

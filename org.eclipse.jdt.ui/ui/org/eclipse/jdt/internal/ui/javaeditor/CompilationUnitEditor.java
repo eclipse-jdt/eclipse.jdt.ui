@@ -89,6 +89,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -552,8 +553,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	protected JavaOutlinePage createOutlinePage() {
 		JavaOutlinePage page= super.createOutlinePage();
-		
-		page.setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
+
 		//page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page)); //$NON-NLS-1$
 		//page.setAction("AddEdition", new JavaAddElementFromHistory(this, page)); //$NON-NLS-1$
 		

@@ -762,7 +762,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			fMenu= null;
 		}
 		
-		fStandardActionGroups.dispose();
 		super.dispose();
 	}
 	
@@ -846,10 +845,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	protected void contextMenuAboutToShow(IMenuManager menu) {
 		
 		JavaPlugin.createStandardGroups(menu);
-
-		if (OrganizeImportsAction.canActionBeAdded(getSelection())) {
-			addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "OrganizeImports"); //$NON-NLS-1$
-		}
 				
 		addAction(menu, IContextMenuConstants.GROUP_OPEN, "OpenImportDeclaration"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowInPackageView"); //$NON-NLS-1$

@@ -42,13 +42,8 @@ public class AllTypesCache {
 		boolean isWorkspaceScope= scope.equals(SearchEngine.createWorkspaceScope());
 				
 		if (fgTypeCache == null) {
-			if (!isWorkspaceScope) {
-				// don't build up the cache, perform a bare search
-				doSearchTypes(scope, kind, monitor, typesFound);
-				return;
-			}
 			ArrayList searchResult= new ArrayList(400);
-			doSearchTypes(scope, IJavaSearchConstants.TYPE, monitor, searchResult);
+			doSearchTypes(SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE, monitor, searchResult);
 			if (monitor != null && monitor.isCanceled()) {
 				return;
 			}
