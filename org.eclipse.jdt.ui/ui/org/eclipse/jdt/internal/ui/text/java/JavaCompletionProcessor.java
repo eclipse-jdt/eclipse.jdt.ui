@@ -7,9 +7,11 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.swt.graphics.Image;
@@ -56,9 +58,53 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		}
 	};
 	
+	private static class ContextInformationWrapper implements IContextInformation, IContextInformationExtension {
+		
+		private final IContextInformation fContextInformation;
+		private int fPosition;
+		
+		public ContextInformationWrapper(IContextInformation contextInformation) {
+			fContextInformation= contextInformation;
+		}
+		
+		/*
+		 * @see IContextInformation#getContextDisplayString()
+		 */
+		public String getContextDisplayString() {
+			return fContextInformation.getContextDisplayString();
+		}
+
+			/*
+		 * @see IContextInformation#getImage()
+		 */
+		public Image getImage() {
+			return fContextInformation.getImage();
+		}
+
+		/*
+		 * @see IContextInformation#getInformationDisplayString()
+		 */
+		public String getInformationDisplayString() {
+			return fContextInformation.getInformationDisplayString();
+		}
+
+		/*
+		 * @see IContextInformationExtension#getContextInformationPosition()
+		 */
+		public int getContextInformationPosition() {
+			return fPosition;
+		}
+		
+		public void setContextInformationPosition(int position) {
+			fPosition= position;	
+		}
+	};
+	
+	
 	private final static String VISIBILITY= "org.eclipse.jdt.core.codeComplete.visibilityCheck";
 	private final static String ENABLED= "enabled";
 	private final static String DISABLED= "disabled";
+	
 	
 	
 	private IEditorPart fEditor;
@@ -172,31 +218,17 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		return fProposalAutoActivationSet;
 	}
 	
-	/**
-	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
-	 */
-	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
-		int contextInformationPosition= guessContextInformationPosition(viewer, offset);
+	private boolean looksLikeMethod(JavaCodeReader reader) throws IOException {
+		int curr= reader.read();
+		while (curr != JavaCodeReader.EOF && Character.isWhitespace((char) curr))
+			curr= reader.read();
+			
+		if (curr == JavaCodeReader.EOF)
+			return false;
 
-		Vector results= new Vector();
-		addContextInformations(viewer, contextInformationPosition, results);
-	
-		return (IContextInformation[]) results.toArray(new IContextInformation[results.size()]);
+		return Character.isJavaIdentifierPart((char) curr) || Character.isJavaIdentifierStart((char) curr);
 	}
 	
-	private void addContextInformations(ITextViewer viewer, int offset, Vector results) {
-		ICompletionProposal[] proposals= computeCompletionProposals(viewer, offset);
-
-		for (int i= 0; i < proposals.length; i++) {
-			IContextInformation contextInformation= proposals[i].getContextInformation();
-			if (contextInformation != null) {
-				ContextInformationWrapper wrapper= new ContextInformationWrapper(contextInformation);
-				wrapper.setContextInformationPosition(offset);
-				results.add(wrapper);				
-			}
-		}		
-	}
-
 	private int guessContextInformationPosition(ITextViewer viewer, int offset) {
 		int contextPosition= offset;
 			
@@ -231,62 +263,41 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		}
 		
 		return contextPosition;
-	}	
+	}		
+	
+	private List addContextInformations(ITextViewer viewer, int offset) {
+		ICompletionProposal[] proposals= computeCompletionProposals(viewer, offset);
 
-	private boolean looksLikeMethod(JavaCodeReader reader) throws IOException {
-		int curr= reader.read();
-		while (curr != JavaCodeReader.EOF && Character.isWhitespace((char) curr))
-			curr= reader.read();
-			
-		if (curr == JavaCodeReader.EOF)
-			return false;
-
-		return Character.isJavaIdentifierPart((char) curr) || Character.isJavaIdentifierStart((char) curr);
+		List result= new ArrayList();
+		for (int i= 0; i < proposals.length; i++) {
+			IContextInformation contextInformation= proposals[i].getContextInformation();
+			if (contextInformation != null) {
+				ContextInformationWrapper wrapper= new ContextInformationWrapper(contextInformation);
+				wrapper.setContextInformationPosition(offset);
+				result.add(wrapper);				
+			}
+		}
+		return result;
 	}
 	
-	private class ContextInformationWrapper implements IContextInformation, IContextInformationExtension {
-		
-		private final IContextInformation fContextInformation;
-		private int fPosition;
-		
-		public ContextInformationWrapper(IContextInformation contextInformation) {
-			fContextInformation= contextInformation;
-		}
-		
-		/*
-		 * @see IContextInformation#getContextDisplayString()
-		 */
-		public String getContextDisplayString() {
-			return fContextInformation.getContextDisplayString();
-		}
-
-			/*
-		 * @see IContextInformation#getImage()
-		 */
-		public Image getImage() {
-			return fContextInformation.getImage();
-		}
-
-		/*
-		 * @see IContextInformation#getInformationDisplayString()
-		 */
-		public String getInformationDisplayString() {
-			return fContextInformation.getInformationDisplayString();
-		}
-
-		/*
-		 * @see IContextInformationExtension#getContextInformationPosition()
-		 */
-		public int getContextInformationPosition() {
-			return fPosition;
-		}
-		
-		public void setContextInformationPosition(int position) {
-			fPosition= position;	
-		}
-
+	/**
+	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
+	 */
+	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
+		int contextInformationPosition= guessContextInformationPosition(viewer, offset);
+		List result= addContextInformations(viewer, contextInformationPosition);
+		return (IContextInformation[]) result.toArray(new IContextInformation[result.size()]);
 	}
-
+	
+	/**
+	 * Order the given proposals.
+	 */
+	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
+		if (fComparator != null)
+			Arrays.sort(proposals, fComparator);
+		return proposals;	
+	}
+	
 	/**
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
@@ -359,14 +370,5 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		 * applies to all proposals and not just those of the compilation unit. 
 		 */
 		return order(results);
-	}
-	
-	/**
-	 * Order the given proposals.
-	 */
-	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
-		if (fComparator != null)
-			Arrays.sort(proposals, fComparator);
-		return proposals;	
 	}
 }

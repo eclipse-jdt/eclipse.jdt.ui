@@ -210,7 +210,8 @@ public class ResultCollector implements ICompletionRequestor {
 		if (hasOpeningBracket && parameterTypeNames.length > 0) {
 			contextInformation= new ProposalContextInformation();
 			contextInformation.setInformationDisplayString(getParameterSignature(parameterTypeNames, parameterNames));		
-			contextInformation.setContextDisplayString(proposal.getDisplayString());			
+			contextInformation.setContextDisplayString(proposal.getDisplayString());
+			contextInformation.setImage(proposal.getImage());		
 			proposal.setContextInformation(contextInformation);
 		}
 	
@@ -402,10 +403,7 @@ public class ResultCollector implements ICompletionRequestor {
 			}
 		}
 
-		Image icon= (descriptor == null)
-			? null
-			: fRegistry.get(descriptor);
-		
+		Image icon= (descriptor == null) ? null : fRegistry.get(descriptor);
 		return new JavaCompletionProposal(completion, start, length, icon, name);
 	}
 		

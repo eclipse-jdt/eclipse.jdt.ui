@@ -138,9 +138,11 @@ public class ContentAssistPreference {
 		
 		c= getColor(store, PARAMETERS_FOREGROUND, manager);
 		assistant.setContextInformationPopupForeground(c);
+		assistant.setContextSelectorForeground(c);
 		
 		c= getColor(store, PARAMETERS_BACKGROUND, manager);
 		assistant.setContextInformationPopupBackground(c);
+		assistant.setContextSelectorBackground(c);
 		
 		enabled= store.getBoolean(AUTOINSERT);
 		assistant.enableAutoInsert(enabled);
@@ -215,9 +217,11 @@ public class ContentAssistPreference {
 		} else if (PARAMETERS_FOREGROUND.equals(p)) {
 			Color c= getColor(store, PARAMETERS_FOREGROUND);
 			assistant.setContextInformationPopupForeground(c);
+			assistant.setContextSelectorForeground(c);
 		} else if (PARAMETERS_BACKGROUND.equals(p)) {
 			Color c= getColor(store, PARAMETERS_BACKGROUND);
 			assistant.setContextInformationPopupBackground(c);
+			assistant.setContextSelectorBackground(c);
 		} else if (AUTOINSERT.equals(p)) {
 			boolean enabled= store.getBoolean(AUTOINSERT);
 			assistant.enableAutoInsert(enabled);
