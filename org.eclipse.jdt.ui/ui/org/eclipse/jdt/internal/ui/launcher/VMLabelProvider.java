@@ -1,6 +1,6 @@
 /* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.swt.graphics.Image;
 
-public class VMLabelProvider implements ITableLabelProvider, ILabelProvider {
+public class VMLabelProvider implements ITableLabelProvider {
 
 	/**
 	 * @see IBaseLabelProvider#removeListener(ILabelProviderListener)
@@ -31,10 +31,8 @@ public class VMLabelProvider implements ITableLabelProvider, ILabelProvider {
 	 * @see ITableLabelProvider#getColumnText(Object, int)
 	 */
 	public String getColumnText(Object element, int columnIndex) {
-		if (element instanceof IVMInstall)
-			return ((IVMInstall)element).getName();
-		if (element instanceof IVMInstallType)
-			return ((IVMInstallType)element).getName();
+		if (element instanceof IVMInstall) {			IVMInstall vm= (IVMInstall)element;			switch(columnIndex) {				case 0: 					return vm.getVMInstallType().getName();				case 1:					return vm.getName();				case 2:					return vm.getInstallLocation().getAbsolutePath();			}
+		}
 		return element.toString();
 	}
 
@@ -43,20 +41,6 @@ public class VMLabelProvider implements ITableLabelProvider, ILabelProvider {
 	 */
 	public Image getColumnImage(Object element, int columnIndex) {
 		return null;
-	}
-
-	/**
-	 * @see ILabelProvider#getText(Object)
-	 */
-	public String getText(Object element) {
-		return getColumnText(element, 0);
-	}
-
-	/**
-	 * @see ILabelProvider#getImage(Object)
-	 */
-	public Image getImage(Object element) {
-		return getColumnImage(element, 0);
 	}
 
 }

@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.util.List;import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableItem;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;
+import java.lang.reflect.InvocationTargetException;import java.util.Iterator;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.swt.widgets.TableItem;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 /*
  * The page for setting the default java runtime preference.
@@ -15,14 +15,15 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	public static final String DEFAULT_VM_LABEL= "launcher.default_vm.label";
 	public static final String PREF_VM= PREFIX+"default_vm";
 
-	private Combo fVMTypeCombo;
-	private Table fVMList;
+	private TableViewer fVMList;
 	private Button fAddButton;
 	private Button fRemoveButton;
 	private Button fEditButton;
 	private Button fDefaultCheckbox;
 	
 	private IVMInstallType[] fVMTypes;
+	
+	private IPath[] fClasspathVariables= new IPath[3];
 
 	public VMPreferencePage() {
 		super();
@@ -38,29 +39,13 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite ancestor) {
+		fVMTypes= JavaRuntime.getVMInstallTypes();
 		noDefaultAndApplyButton();
 		
 		Composite parent= new Composite(ancestor, SWT.NULL);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
-		parent.setLayout(layout);
-		
-		Label l1= new Label(parent, SWT.NULL);
-		l1.setText("VM Type:");
-		l1.setLayoutData(new GridData());
-		
-		fVMTypeCombo= new Combo(parent, SWT.READ_ONLY);
-		fVMTypeCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fVMTypeCombo.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event evt) {
-				vmTypeChanged(fVMTypes[fVMTypeCombo.getSelectionIndex()]);
-			}
-		});
-		
-		
-		// filler label for grid
-		Label l= new Label(parent, SWT.NULL);
-		l.setLayoutData(new GridData());
+		parent.setLayout(layout);		
 		
 		Label l2= new Label(parent, SWT.NULL);
 		l2.setText("VM Instances:");
@@ -68,11 +53,33 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		gd.verticalAlignment= gd.BEGINNING;
 		l2.setLayoutData(gd);
 		
-		fVMList= new Table(parent, SWT.BORDER | SWT.MULTI);
+		fVMList= new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		gd= new GridData(GridData.FILL_BOTH);
-		fVMList.setLayoutData(gd);
-		fVMList.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event evt) {
+		gd.widthHint= convertWidthInCharsToPixels(60);
+		fVMList.getTable().setLayoutData(gd);
+		fVMList.setLabelProvider(new VMLabelProvider());
+		fVMList.setContentProvider(new VMContentProvider());	
+		Table table= fVMList.getTable();
+		
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+		
+		TableLayout tableLayout= new TableLayout();
+		table.setLayout(tableLayout);
+		
+		TableColumn column1= new TableColumn(table, SWT.NULL);
+		column1.setText("VM Install Type");
+		tableLayout.addColumnData(new ColumnWeightData(50));
+	
+		TableColumn column2= new TableColumn(table, SWT.NULL);
+		column2.setText("Name");
+		column2.setWidth(convertWidthInCharsToPixels(30));
+		tableLayout.addColumnData(new ColumnWeightData(50));
+		
+		fVMList.setInput(JavaRuntime.getVMInstallTypes());	
+		
+		fVMList.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent evt) {
 				vmSelectionChanged();
 			}
 		});
@@ -122,7 +129,6 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 			}
 		});
 		
-		initWithVMTypes(fVMTypeCombo);
 		return parent;
 	}
 	
@@ -132,110 +138,48 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 			selectVM(JavaRuntime.getDefaultVMInstall());
 	}
 
-	private void initWithVMTypes(Combo vmTypeCombo) {
-		fVMTypes= JavaRuntime.getVMInstallTypes();
-		for (int i= 0; i < fVMTypes.length; i++) {
-			vmTypeCombo.add(fVMTypes[i].getName());
-		}
-		if (vmTypeCombo.getItemCount() > 0) {
-			vmTypeCombo.select(0);
-			vmTypeChanged(fVMTypes[0]);
-		}
-	}
-	
-	private void vmTypeChanged(IVMInstallType vmType) {
-		fVMList.removeAll();
-		IVMInstall[] vms= vmType.getVMInstalls();
-		for (int i= 0; i < vms.length; i++) {
-			addVMItem(vms[i]);
-		}
-		vmSelectionChanged();
-	}
-	
-	private void addVMItem(IVMInstall vm) {
-		TableItem item= new TableItem(fVMList, SWT.NULL);
-		item.setText(vm.getName());
-		item.setData(vm);
-	}
-
 	protected void updateVMItem(TableItem item, IVMInstall vm) {
 	}
-	
-	private IVMInstallType getVMType() {
-		int selected= fVMTypeCombo.getSelectionIndex();
-		if (selected < 0)
-			return null;
-		return JavaRuntime.getVMInstallTypes()[selected];
-	}
-	
-	// adding
+		
 	private void addVM() {
-		IVMInstallType vmType= getVMType();
-		if (vmType != null)
-			addVM(vmType);
-	}
-	
-	private void addVM(IVMInstallType vmType) {
-		AddVMDialog dialog= new AddVMDialog(getShell(), vmType);
+		AddVMDialog dialog= new AddVMDialog(getShell(), fVMTypes, fVMTypes[0]);
 		dialog.setTitle("Add VM");
-		dialog.setVMName("");
-		dialog.setTimeout(3000);
 		if (dialog.open() != dialog.OK)
 			return;
-		IVMInstall vm= vmType.createVMInstall(createUniqueId(vmType));
-		vm.setInstallLocation(dialog.getInstallLocation());
-		vm.setName(dialog.getVMName());
-		vm.setDebuggerTimeout(dialog.getTimeout());
-		addVMItem(vm);
+		fVMList.refresh();
 	}
 	
-	private String createUniqueId(IVMInstallType vmType) {
-		String id= null;
-		do {
-			id= String.valueOf(System.currentTimeMillis());
-		} while (vmType.findVMInstall(id) != null);
-		return id;
-	}
 	
-	// removing
 	private void removeVMs() {
-		IVMInstallType vmType= getVMType();
-		if (vmType != null)
-			removeVMs(vmType);
-	}
-	
-	private void removeVMs(IVMInstallType vmType) {
-		TableItem[] items= fVMList.getSelection();
-		for (int i= 0; i < items.length; i++) {
-			vmType.disposeVMInstall(((IVMInstall)items[i].getData()).getId());
-			items[i].dispose();
+		IStructuredSelection selection= (IStructuredSelection)fVMList.getSelection();
+		Iterator elements= selection.iterator();
+		while (elements.hasNext()) {
+			IVMInstall vmInstall= (IVMInstall)elements.next();
+			vmInstall.getVMInstallType().disposeVMInstall(vmInstall.getId());
 		}
+		fVMList.refresh();
 	}
 		
 	// editing
 	private void editVM() {
-		TableItem[] selection= fVMList.getSelection();
+		IStructuredSelection selection= (IStructuredSelection)fVMList.getSelection();
 		// assume it's length one, otherwise this will not be called
-		IVMInstall vm= (IVMInstall)selection[0].getData();
-		editVM(selection[0], vm);
+		IVMInstall vm= (IVMInstall)selection.getFirstElement();
+		editVM(vm);
 	}
 	
-	private void editVM(TableItem item, IVMInstall vm) {
-		EditVMDialog dialog= new EditVMDialog(getShell(), vm);
+	private void editVM(IVMInstall vm) {
+		EditVMDialog dialog= new EditVMDialog(getShell(), fVMTypes, vm);
 		dialog.setTitle("Edit VM");
-		dialog.setInstallLocation(vm.getInstallLocation());
-		dialog.setVMName(vm.getName());
-		dialog.setTimeout(vm.getDebuggerTimeout());
 		if (dialog.open() != dialog.OK)
 			return;
-		vm.setInstallLocation(dialog.getInstallLocation());
-		vm.setName(dialog.getVMName());
-		item.setText(vm.getName());
+		fVMList.refresh(vm);
 	}
 
 	public boolean performOk() {
 		try {
 			JavaRuntime.saveVMConfiguration();
+			setClassPathVariables();
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, "VM Configuration", "An exception occurred while saving configuration data");
 		}
@@ -248,18 +192,18 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	}
 
 	private void enableButtons() {
-		fAddButton.setEnabled(getVMType() != null);
-		int selectionCount= fVMList.getSelectionCount();
+		fAddButton.setEnabled(fVMTypes.length > 0);
+		int selectionCount= ((IStructuredSelection)fVMList.getSelection()).size();
 		fEditButton.setEnabled(selectionCount == 1);
-		fDefaultCheckbox.setEnabled(selectionCount == 1);
 		fRemoveButton.setEnabled(selectionCount > 0);
+		updateDefaultVM();
 	}
 	
 	private void setDefaultVM() {
 		if (fDefaultCheckbox.getSelection()) {
-			TableItem[] selection= fVMList.getSelection();
+			IStructuredSelection selection= (IStructuredSelection)fVMList.getSelection();
 			// assume it's length one, otherwise this will not be called
-			IVMInstall vm= (IVMInstall)selection[0].getData();
+			IVMInstall vm= (IVMInstall)selection.getFirstElement();
 			JavaRuntime.setDefaultVMInstall(vm);
 		} else {
 			JavaRuntime.setDefaultVMInstall(null);
@@ -267,38 +211,96 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 	}
 
 	private void updateDefaultVM() {
-		TableItem[] selection= fVMList.getSelection();
-		if (selection.length != 1) {
+		IStructuredSelection selection= (IStructuredSelection)fVMList.getSelection();
+		if (selection.size() != 1) {
 			fDefaultCheckbox.setSelection(false);
+			fDefaultCheckbox.setEnabled(false);
 		
 		} else {			
-			IVMInstall vm= (IVMInstall)selection[0].getData();
-			fDefaultCheckbox.setSelection(vm == JavaRuntime.getDefaultVMInstall());
+			IVMInstall vm= (IVMInstall)selection.getFirstElement();
+			boolean isDefault= vm == JavaRuntime.getDefaultVMInstall();
+			fDefaultCheckbox.setSelection(isDefault);
+			fDefaultCheckbox.setEnabled(!isDefault);
 		}
 	}
 	
 	private void selectVM(IVMInstall vm) {
 		if (vm == null)
 			return;
-		IVMInstallType vmType= vm.getVMInstallType();
-		selectVMType(vmType);
-		TableItem[] items= fVMList.getItems();
-		for (int i= 0; i < items.length; i++) {
-			if (items[i].getData() == vm) {
-				fVMList.setSelection(i);
-				vmSelectionChanged();
-			}
+		fVMList.setSelection(new StructuredSelection(vm));
+		vmSelectionChanged();
+	}
+	
+	private void setClassPathVariables() throws CoreException {
+		IVMInstall vmInstall= JavaRuntime.getDefaultVMInstall();
+		if (vmInstall != null) {
+			LibraryLocation desc= vmInstall.getLibraryLocation();
+			if (desc == null)
+				desc= vmInstall.getVMInstallType().getDefaultLibraryLocation(vmInstall.getInstallLocation());
+			setClassPathVariables(desc);
 		}
 	}
 	
-	private void selectVMType(IVMInstallType vmType) {
-		for (int i= 0; i < fVMTypes.length; i++) {
-			if (fVMTypes[i] == vmType) {
-				fVMTypeCombo.select(i);
-				vmTypeChanged(vmType);
-				return;
-			}
+	private void setClassPathVariables(final LibraryLocation desc) throws CoreException {
+		
+		ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
+		
+		try {
+			dialog.run(true, true, new WorkspaceModifyOperation() {
+				public void execute(IProgressMonitor pm) throws InvocationTargetException{
+					try {
+						doSetClasspathVariables(desc, pm);
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					}
+				}
+			});
+		} catch (InterruptedException e) {
+		} catch (InvocationTargetException e) {
+			throw (CoreException)e.getTargetException();
 		}
+	}
+	
+	private static void doSetClasspathVariables(LibraryLocation desc, IProgressMonitor pm) throws CoreException {
+		IPath oldLibrary= JavaCore.getClasspathVariable(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);
+		IPath oldSource= JavaCore.getClasspathVariable(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
+		IPath oldPkgRoot= JavaCore.getClasspathVariable(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
 
+		IPath library= new Path(desc.getSystemLibrary().getAbsolutePath());
+		IPath source= new Path(desc.getSystemLibrarySource().getAbsolutePath());
+		IPath pkgRoot= desc.getPackageRootPath();
+			if (!library.equals(oldLibrary))
+				JavaCore.setClasspathVariable(ClasspathVariablesPreferencePage.JRELIB_VARIABLE, library, pm);
+			if (!source.equals(oldSource))
+				JavaCore.setClasspathVariable(ClasspathVariablesPreferencePage.JRESRC_VARIABLE, source, pm);
+			if (!pkgRoot.equals(oldPkgRoot))
+				JavaCore.setClasspathVariable(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE, pkgRoot, pm);
+	}
+	
+	public static void initializeVMInstall() throws CoreException {
+		IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall();
+		if (defaultVM == null) {
+			defaultVM= getFirstVMInstall();
+			if (defaultVM != null)
+				JavaRuntime.setDefaultVMInstall(defaultVM);
+		}
+		IVMInstall vmInstall= JavaRuntime.getDefaultVMInstall();
+		if (vmInstall != null) {
+			LibraryLocation desc= vmInstall.getLibraryLocation();
+			if (desc == null)
+				desc= vmInstall.getVMInstallType().getDefaultLibraryLocation(vmInstall.getInstallLocation());
+			doSetClasspathVariables(desc, null);
+		}
+		
+	}
+	
+	private static IVMInstall getFirstVMInstall() {
+		IVMInstallType[] vmTypes= JavaRuntime.getVMInstallTypes();
+		for (int i= 0; i < vmTypes.length; i++) {
+			IVMInstall[] vms= vmTypes[i].getVMInstalls();
+			if (vms.length > 0)
+				return vms[0];
+		}
+		return null;
 	}
 }

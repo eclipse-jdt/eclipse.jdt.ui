@@ -26,10 +26,13 @@ public class JDK12Launcher extends JavaLauncher {
 		}
 		
 		String program= location+File.separator+"bin"+File.separator+"java";
-		File javaw= new File(program+'w');
+		File javawexe= new File(program+"w.exe");
+		File javaw= new File(program+"w");
 		
 		if (javaw.isFile()) 
 			program= javaw.getAbsolutePath();
+		else if (javawexe.isFile())
+			program= javawexe.getAbsolutePath();
 		
 		List arguments= new ArrayList();
 

@@ -64,7 +64,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	// ------------- shared jdk variable
 	
 	
-	public static void initJREVariables() {
+	/*public static void initJREVariables() {
 		try {
 			updateJRELibEntry();
 			updateJRESrcEntry();
@@ -120,6 +120,6 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 			srcRootPath= srcAttachPath[1];
 		}
 		JavaCore.setClasspathVariable(JRESRCROOT_VARIABLE, srcRootPath);		
-	}	
+	}		*/
 
 }

@@ -1,6 +1,6 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.Viewer;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import java.util.ArrayList;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.Viewer;
 
-public class VMContentProvider implements ITreeContentProvider {
+public class VMContentProvider implements IStructuredContentProvider {
 
 	/**
 	 * @see IContentProvider#inputChanged(Viewer, Object, Object)
@@ -19,34 +19,8 @@ public class VMContentProvider implements ITreeContentProvider {
 	 */
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof IVMInstallType[]) {
-			return (IVMInstallType[])inputElement;
-		}
-		return new Object[0];
-	}
-
-	/**
-	 * @see ITreeContentProvider#hasChildren(Object)
-	 */
-	public boolean hasChildren(Object element) {
-		return getChildren(element).length > 0;
-	}
-
-	/**
-	 * @see ITreeContentProvider#getParent(Object)
-	 */
-	public Object getParent(Object element) {
-		if (element instanceof IVMInstall) 
-			return ((IVMInstall)element).getVMInstallType();
-		return null;
-	}
-
-	/**
-	 * @see ITreeContentProvider#getChildren(Object)
-	 */
-	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IVMInstallType) {
-			return ((IVMInstallType)parentElement).getVMInstalls();
-		}	
+			IVMInstallType[] vmTypes= (IVMInstallType[])inputElement;			ArrayList vms= new ArrayList();			for (int i= 0; i < vmTypes.length; i++) {				IVMInstall[] vmInstalls= vmTypes[i].getVMInstalls();				for (int j= 0; j < vmInstalls.length; j++) 					vms.add(vmInstalls[j]);			}
+			IVMInstall[] result= new IVMInstall[vms.size()];			return vms.toArray(result);		}		
 		return new Object[0];
 	}
 

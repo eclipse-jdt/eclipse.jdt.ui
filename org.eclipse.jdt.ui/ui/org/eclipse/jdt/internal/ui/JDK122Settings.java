@@ -31,7 +31,7 @@ public class JDK122Settings implements IRuntimeDefaultPreferences {
 		
 	}
 	public void setDefaultPreferences(IPreferenceStore preferences) {
-		File javaHome= new File (System.getProperty("java.home"));
+/*		File javaHome= new File (System.getProperty("java.home"));
 		File java= new File(javaHome.getParent(), File.separator+"bin"+File.separator+"java");
 		File javaExe= new File(javaHome.getParent(), File.separator+"bin"+File.separator+"java.exe");
 		if (javaExe.isFile() || java.isFile())

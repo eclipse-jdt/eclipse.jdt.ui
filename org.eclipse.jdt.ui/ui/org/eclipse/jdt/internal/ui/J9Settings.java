@@ -16,7 +16,7 @@ public class J9Settings implements IRuntimeDefaultPreferences {
 		return "J9".equals(System.getProperty("java.vm.name"));		
 	}
 	public void setDefaultPreferences(IPreferenceStore preferences) {
-		File javaHome= new File (System.getProperty("java.home"));
+		/*File javaHome= new File (System.getProperty("java.home"));
 		File rtJar= new File(javaHome, "lib"+File.separator+"jclMax"+File.separator+"classes.zip");
 		if (rtJar.exists()) {	
 			preferences.setDefault(JavaBasePreferencePage.PROP_JDK, rtJar.getAbsolutePath());
@@ -33,7 +33,7 @@ public class J9Settings implements IRuntimeDefaultPreferences {
 		
 		org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixMeSoon("removed for testing");
 
-/*		preferences.setDefault(J9PreferencePage.PREF_LOCATION, javaHome.getAbsolutePath());
+		preferences.setDefault(J9PreferencePage.PREF_LOCATION, javaHome.getAbsolutePath());
 		
 		
 		String[] vms= JavaRuntime.getJavaRuntimes();

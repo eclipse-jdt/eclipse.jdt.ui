@@ -294,7 +294,7 @@ public class BuildPathsBlock {
 		}
 		
 		if (fAddJDKToDefault || fClassPathDefault == null) {
-			IPath jdkPath= JavaBasePreferencePage.getJDKPath();
+			/*IPath jdkPath= JavaBasePreferencePage.getJDKPath();
 			if (jdkPath != null) {
 				/*IResource res= fWorkspaceRoot.findMember(jdkPath);
 				CPListElement elem= new CPListElement(IClasspathEntry.CPE_LIBRARY, jdkPath, res);
@@ -307,7 +307,7 @@ public class BuildPathsBlock {
 				IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
 				elem.setSourceAttachment(attachPath, attachRoot);
 				vec.add(elem);
-			}
+			//}
 		}
 		return vec;
 	}

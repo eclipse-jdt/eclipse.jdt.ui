@@ -42,10 +42,13 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 			return null;
 		}
 		String program= location+File.separator+"bin"+File.separator+"java";
-		File javaw= new File(program+'w');
+		File javawexe= new File(program+"w.exe");
+		File javaw= new File(program+"w");
 		
 		if (javaw.isFile()) 
 			program= javaw.getAbsolutePath();
+		else if (javawexe.isFile())
+			program= javawexe.getAbsolutePath();
 
 		Vector arguments= new Vector();
 
