@@ -71,6 +71,9 @@ class FailureTraceView implements IMenuListener {
 		OpenStrategy handler = new OpenStrategy(fTable);
 		handler.addOpenListener(new IOpenEventListener() {
 			public void handleOpen(SelectionEvent e) {
+				if (fTable.getSelectionIndex() == 0 && fFailure.isComparisonFailure()) {
+					(new CompareResultsAction(FailureTraceView.this)).run();
+				}
 				if (fTable.getSelection().length != 0) {
 					Action a = createOpenEditorAction(getSelectedText());
 					if (a != null)
@@ -160,6 +163,7 @@ class FailureTraceView implements IMenuListener {
 	
 	/**
 	 * Shows a TestFailure
+	 * @param failure the failed test
 	 */
 	public void showFailure(TestRunInfo failure) {	
 	    fFailure= failure;
@@ -219,6 +223,7 @@ class FailureTraceView implements IMenuListener {
 	
 	/**
 	 * Shows other information than a stack trace.
+	 * @param text the informational message to be shown
 	 */
 	public void setInformation(String text) {
 		clear();
