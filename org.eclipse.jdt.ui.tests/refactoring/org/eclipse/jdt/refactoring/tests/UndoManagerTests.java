@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.refactoring.Refactoring;
 
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.ui.*;
 
 public class UndoManagerTests extends RefactoringTest {
 	
@@ -22,8 +23,7 @@ public class UndoManagerTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		args= new String[] { UndoManagerTests.class.getName() };
-		TestPluginLauncher.runUI(TestPluginLauncher.getLocationFromProperties(), args);
+		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), UndoManagerTests.class, args);
 	}
 	
 	public static Test suite() {

@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.refactoring.methods.RenameVirtualMethodRefactoring;
 
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.ui.*;
 
 public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
@@ -30,8 +31,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		args= new String[] { RenameVirtualMethodInClassTests.class.getName() };
-		TestPluginLauncher.runUI(TestPluginLauncher.getLocationFromProperties(), args);
+		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameVirtualMethodInClassTests.class, args);
 	}
 	
 	public static Test suite() {

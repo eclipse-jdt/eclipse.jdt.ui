@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.refactoring.methods.RenameStaticMethodRefactoring;
 
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.ui.*;
 
 public class RenameStaticMethodTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "RenameStaticMethod/";
@@ -29,8 +30,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	}
 
 	public static void main(String[] args) {
-		args= new String[] { RenameStaticMethodTests.class.getName() };
-		TestPluginLauncher.runUI(TestPluginLauncher.getLocationFromProperties(), args);
+		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameStaticMethodTests.class, args);
 	}
 	
 	public static Test suite() {

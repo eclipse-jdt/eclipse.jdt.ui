@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.refactoring.fields.RenameNonPrivateFieldRefactoring;
 
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
+import org.eclipse.jdt.testplugin.ui.*;
 
 public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
@@ -24,10 +24,9 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 
 	public static void main(String[] args) {
-		args= new String[] { RenameNonPrivateFieldTests.class.getName() };
-		TestPluginLauncher.runUI(TestPluginLauncher.getLocationFromProperties(), args);
+		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameNonPrivateFieldTests.class, args);
 	}
-	
+		
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
 		suite.addTest(noSetupSuite());

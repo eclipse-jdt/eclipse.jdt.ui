@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.ui.*;
 
 public class RenameTypeTests extends RefactoringTest {
 	
@@ -32,8 +33,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		args= new String[] { RenameTypeTests.class.getName() };
-		TestPluginLauncher.runUI(TestPluginLauncher.getLocationFromProperties(), args);
+		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameTypeTests.class, args);
 	}
 	
 	public static Test suite() {

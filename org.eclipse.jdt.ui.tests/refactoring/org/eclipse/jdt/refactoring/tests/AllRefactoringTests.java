@@ -27,7 +27,6 @@ public class AllRefactoringTests {
 		
 		//--types
 		suite.addTest(RenameTypeTests.noSetupSuite());	
-		suite.addTest(SafeDeleteTypeTests.noSetupSuite());
 		
 		//--packages
 		suite.addTest(RenamePackageTests.noSetupSuite());

@@ -10,12 +10,12 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.ui.*;
 
 public class RenameMethodTests {
 	
 	public static void main(String[] args) {
-		args= new String[] { RenameMethodTests.class.getName() };
-		TestPluginLauncher.runUI(TestPluginLauncher.getLocationFromProperties(), args);
+		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameMethodTests.class, args);
 	}
 
 	public static Test suite() {

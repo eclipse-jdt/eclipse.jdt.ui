@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.refactoring.methods.RenamePrivateMethodRefactoring;
 
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.ui.*;
 
 public class RenamePrivateMethodTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "RenamePrivateMethod/";
@@ -28,8 +29,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	}
 
 	public static void main(String[] args) {
-		args= new String[] { RenamePrivateMethodTests.class.getName() };
-		TestPluginLauncher.runUI(TestPluginLauncher.getLocationFromProperties(), args);
+		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenamePrivateMethodTests.class, args);
 	}
 	
 	public static Test suite() {

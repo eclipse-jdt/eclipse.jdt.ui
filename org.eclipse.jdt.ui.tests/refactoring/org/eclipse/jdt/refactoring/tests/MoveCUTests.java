@@ -5,18 +5,10 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.refactoring.IRefactoring;
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
-import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-
-import org.eclipse.jdt.testplugin.JavaTestSetup;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.refactoring.IRefactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import org.eclipse.jdt.testplugin.*;
+import junit.framework.*;
 
 public class MoveCUTests extends RefactoringTest {
 
@@ -27,8 +19,7 @@ public class MoveCUTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		args= new String[] { MoveCUTests.class.getName() };
-		TestPluginLauncher.runUI(TestPluginLauncher.getLocationFromProperties(), args);
+		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), MoveCUTests.class, args);
 	}
 	
 	public static Test suite() {
