@@ -1,5 +1,6 @@
 package p1;
 
+import p.Inner;
 import p.A.*;
 import p.Inner.*;
 import p.Inner.InnerInner.*;
