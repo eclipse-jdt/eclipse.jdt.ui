@@ -49,7 +49,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.preferences.CHyperLinkText.ILinkListener;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
-import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 /**
  * The page for setting the editor options.
@@ -231,7 +230,6 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 	
 	private Control createTabSection(Composite parent) {
 		TabFolder folder= new TabFolder(parent, SWT.TOP);
-		folder.setLayout(new TabFolderLayout());
 		
 		for (int i= 0; i < fConfigurationBlocks.length; i++) {
 			TabItem item= new TabItem(folder, SWT.NONE);

@@ -57,8 +57,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -82,7 +82,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
-import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -201,7 +200,6 @@ public class BuildPathsBlock {
 		composite.setLayout(layout);
 		
 		TabFolder folder= new TabFolder(composite, SWT.NONE);
-		folder.setLayout(new TabFolderLayout());	
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		TabItem item;

@@ -2088,10 +2088,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 				// prepare condition
-				InfixExpression switchCaseCondition= createSwitchCaseCondition(ast,
-					rewrite,
-					switchStatement,
-					switchCase);
+				InfixExpression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, switchStatement, switchCase);
 				if (currentCondition == null) {
 					currentCondition= switchCaseCondition;
 				} else {
