@@ -23,7 +23,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -92,7 +91,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 	}
 
 
-	private IMarker createMarker(ICompilationUnit cu, int line, int offset, int len) throws CoreException, BadLocationException {
+	private IMarker createMarker(ICompilationUnit cu, int line, int offset, int len) throws CoreException {
 		IFile file= (IFile) cu.getResource();
 		IMarker marker= file.createMarker("org.eclipse.jdt.ui.tests.testmarker");
 		marker.setAttribute(IMarker.LOCATION, cu.getElementName());
