@@ -45,7 +45,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 		fJavaStrategy= new JavaReconcilingStrategy(editor);
 		setReconcilingStrategies(new IReconcilingStrategy[] {
 			fJavaStrategy,
-			new JavaSpellingReconcileStrategy(editor, JavaPlugin.getDefault().getCombinedPreferenceStore())
+			new JavaSpellingReconcileStrategy(editor)
 		});
 	}
 	

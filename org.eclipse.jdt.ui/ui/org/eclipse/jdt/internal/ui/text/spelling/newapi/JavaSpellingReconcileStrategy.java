@@ -11,11 +11,10 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling.newapi;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
-
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -37,6 +36,8 @@ import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.compiler.IProblem;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Reconcile strategy for spell checking comments.
@@ -215,9 +216,6 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	/** The text editor to operate on. */
 	private ITextEditor fEditor;
 
-	/** The preference store to use. */
-	private IPreferenceStore fPreferences;
-
 	/** The document to operate on. */
 	private IDocument fDocument;
 
@@ -234,11 +232,9 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 * Creates a new comment reconcile strategy.
 	 * 
 	 * @param editor the text editor to operate on
-	 * @param store the preference store to get the preferences from
 	 */
-	public JavaSpellingReconcileStrategy(ITextEditor editor, IPreferenceStore store) {
+	public JavaSpellingReconcileStrategy(ITextEditor editor) {
 		fEditor= editor;
-		fPreferences= store;
 		updateProblemRequester();
 	}
 
@@ -270,9 +266,13 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	private IContentType getContentType() {
 		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
 		if (documentProvider instanceof IDocumentProviderExtension4) {
-			IContentDescription desc= ((IDocumentProviderExtension4) documentProvider).getContentDescription(fEditor.getEditorInput());
-			if (desc != null)
-				return desc.getContentType();
+			try {
+				IContentDescription desc= ((IDocumentProviderExtension4) documentProvider).getContentDescription(fEditor.getEditorInput());
+				if (desc != null)
+					return desc.getContentType();
+			} catch (CoreException x) {
+				JavaPlugin.log(x.getStatus());
+			}
 		}
 		return null;
 	}
