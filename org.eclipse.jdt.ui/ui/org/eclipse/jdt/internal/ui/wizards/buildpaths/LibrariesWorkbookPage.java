@@ -97,6 +97,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.setRemoveButtonIndex(8); //$NON-NLS-1$
 	
 		fLibrariesList.enableButton(6, false);
+		
+		fLibrariesList.setViewerSorter(new CPListElementSorter());
 
 	}
 		

@@ -109,6 +109,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.setDialogFieldListener(adapter);
 		fFoldersList.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.label")); //$NON-NLS-1$
 		fFoldersList.setRemoveButtonIndex(removeIndex);
+		
+		fFoldersList.setViewerSorter(new CPListElementSorter());
 				
 		fFolderRadioButton.attachDialogField(fFoldersList);	
 	}
@@ -169,8 +171,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		int buttonBarWidth= SWTUtil.convertWidthInCharsToPixels(24, composite);
 		fFoldersList.setButtonsMinWidth(buttonBarWidth);
-		fFoldersList.getTableViewer().setSorter(new CPListElementSorter());
-		
+	
 		fSWTControl= composite;
 		
 		return composite;

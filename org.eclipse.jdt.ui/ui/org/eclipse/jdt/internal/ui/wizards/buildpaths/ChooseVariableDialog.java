@@ -19,10 +19,10 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;public class Choo
 
 	private VariableBlock fVariableBlock;
 			
-	public ChooseVariableDialog(Shell parent, String lastVariableSelection) {
+	public ChooseVariableDialog(Shell parent, String variableSelection) {
 		super(parent);
 		setTitle(NewWizardMessages.getString("ChooseVariableDialog.variabledialog.title")); //$NON-NLS-1$
-		fVariableBlock= new VariableBlock(this, true, lastVariableSelection);
+		fVariableBlock= new VariableBlock(this, true, variableSelection);
 	}
 			
 	protected Control createDialogArea(Composite parent) {

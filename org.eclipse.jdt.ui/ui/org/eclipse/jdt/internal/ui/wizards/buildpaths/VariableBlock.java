@@ -32,7 +32,7 @@ public class VariableBlock {
 		fVariablesList.setDialogFieldListener(adapter);
 		fVariablesList.setLabelText(NewWizardMessages.getString("VariableBlock.vars.label")); //$NON-NLS-1$
 		fVariablesList.setRemoveButtonIndex(3);		
-		fVariablesList.enableButton(1, false);
+		fVariablesList.enableButton(1, false);				fVariablesList.setViewerSorter(new ViewerSorter() {			public int compare(Viewer viewer, Object e1, Object e2) {				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {					return ((CPVariableElement)e1).getName().compareTo(((CPVariableElement)e2).getName());				}				return super.compare(viewer, e1, e2);			}		});				
 		
 		CPVariableElement initSelectedElement= null;
 		
@@ -42,13 +42,11 @@ public class VariableBlock {
 		ArrayList elements= new ArrayList(entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			String name= entries[i];			CPVariableElement elem;			IPath entryPath= JavaCore.getClasspathVariable(name);			elem= new CPVariableElement(name, entryPath, reserved.contains(name));			elements.add(elem);			if (name.equals(initSelection)) {				initSelectedElement= elem;			}			
-		}
+		}		
 		fVariablesList.setElements(elements);
 		
-		ISelection sel;
 		if (initSelectedElement != null) {
-			sel= new StructuredSelection(initSelectedElement);
-		} else if (entries.length > 0) {			sel= new StructuredSelection(fVariablesList.getElement(0));		} else {			sel= StructuredSelection.EMPTY;		}		fVariablesList.selectElements(sel);	}
+			ISelection sel= new StructuredSelection(initSelectedElement);			fVariablesList.selectElements(sel);		} else {			fVariablesList.selectFirstElement();		}	}
 	
 	private String[] getReservedVariableNames() {
 		return new String[] {
@@ -61,7 +59,7 @@ public class VariableBlock {
 	public Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);		int minimalWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);		int minimalHeight= SWTUtil.convertHeightInCharsToPixels(20, composite);
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, minimalWidth, minimalHeight, 0, 0);	
-		fVariablesList.getTableViewer().setSorter(new ViewerSorter() {			public int compare(Viewer viewer, Object e1, Object e2) {				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {					return ((CPVariableElement)e1).getName().compareTo(((CPVariableElement)e2).getName());				}				return super.compare(viewer, e1, e2);			}		});				fControl= composite;		return composite;
+				fControl= composite;		return composite;
 	}
 	
 	public void addDoubleClickListener(IDoubleClickListener listener) {

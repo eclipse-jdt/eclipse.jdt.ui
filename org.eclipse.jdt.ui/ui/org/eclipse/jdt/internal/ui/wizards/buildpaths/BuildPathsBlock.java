@@ -231,6 +231,7 @@ public class BuildPathsBlock {
 		} else {
 			folder.setSelection(3);
 			fCurrPage= ordpage;
+			fClassPathList.selectFirstElement();
 		}
 
 		WorkbenchHelp.setHelp(composite, new Object[] { IJavaHelpContextIds.BUILD_PATH_BLOCK });				

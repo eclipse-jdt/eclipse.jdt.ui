@@ -51,6 +51,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		fProjectsList.setLabelText(NewWizardMessages.getString("ProjectsWorkbookPage.projects.label")); //$NON-NLS-1$
 		fProjectsList.setCheckAllButtonIndex(0);
 		fProjectsList.setUncheckAllButtonIndex(1);
+		
+		fProjectsList.setViewerSorter(new CPListElementSorter());
 	}
 	
 	public void init(IJavaProject jproject) {
@@ -106,7 +108,6 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		
 		int buttonBarWidth= SWTUtil.convertWidthInCharsToPixels(24, composite);
 		fProjectsList.setButtonsMinWidth(buttonBarWidth);
-		fProjectsList.getTableViewer().setSorter(new CPListElementSorter());	
 				
 		return composite;
 	}

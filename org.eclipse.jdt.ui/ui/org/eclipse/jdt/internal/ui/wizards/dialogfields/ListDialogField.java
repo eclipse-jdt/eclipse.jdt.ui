@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
@@ -49,6 +50,7 @@ public class ListDialogField extends DialogField {
 	protected ILabelProvider fLabelProvider;
 	protected ListViewerAdapter fListViewerAdapter;
 	protected List fElements;
+	protected ViewerSorter fViewerSorter;
 
 	protected String[] fButtonLabels;
 	private Button[] fButtonControls;
@@ -135,6 +137,14 @@ public class ListDialogField extends DialogField {
 		Assert.isTrue(downButtonIndex < fButtonLabels.length);
 		fDownButtonIndex= downButtonIndex;
 	}
+	
+	/**
+	 * Sets the viewerSorter.
+	 * @param viewerSorter The viewerSorter to set
+	 */
+	public void setViewerSorter(ViewerSorter viewerSorter) {
+		fViewerSorter= viewerSorter;
+	}	
 	
 	// ------ adapter communication
 	
@@ -243,6 +253,10 @@ public class ListDialogField extends DialogField {
 			fTableControl.setLayout(tableLayout);
 			
 			fTable.setInput(fParentElement);
+			
+			if (fViewerSorter != null) {
+				fTable.setSorter(fViewerSorter);
+			}
 			
 			fTableControl.setEnabled(isEnabled());
 			if (fSelectionWhenEnabled != null) {
@@ -484,7 +498,7 @@ public class ListDialogField extends DialogField {
 					selected.add(newElement);
 				}
 				fTable.refresh();
-				fTable.setSelection(new StructuredSelection(selected));
+				selectElements(new StructuredSelection(selected));
 			}
 			dialogFieldChanged();
 		} else {
@@ -597,9 +611,28 @@ public class ListDialogField extends DialogField {
 	public void selectElements(ISelection selection) {
 		fSelectionWhenEnabled= selection;
 		if (fTable != null) {
-			fTable.setSelection(selection);
+			fTable.setSelection(selection, true);
 		}
 	}
+	
+	public void selectFirstElement() {
+		Object element= null;
+		if (fViewerSorter != null) {
+			Object[] arr= fElements.toArray(); 
+			fViewerSorter.sort(fTable, arr);
+			if (arr.length > 0) {
+				element= arr[0];
+			}
+		} else {
+			if (fElements.size() > 0) {
+				element= fElements.get(0);
+			}
+		}
+		if (element != null) {
+			selectElements(new StructuredSelection(element));
+		}
+	}
+	
 		
 	public void postSetSelection(final ISelection selection) {
 		if (isOkToUse(fTableControl)) {
@@ -757,4 +790,7 @@ public class ListDialogField extends DialogField {
 			fListAdapter.selectionChanged(this);
 		}
 	}	
+
+
+
 }
