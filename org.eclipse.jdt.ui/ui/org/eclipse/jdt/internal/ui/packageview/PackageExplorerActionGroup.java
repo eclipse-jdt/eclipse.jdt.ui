@@ -98,6 +98,10 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;	
 
+	private int fLastElement;
+	private static final int INIT= 0;
+	private static final int RESOURCE= 1;
+	private static final int REST= 2; 
  	
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
@@ -142,6 +146,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		
 		provider.addSelectionChangedListener(this);
 		update(selection);
+		
+		fLastElement= INIT;
 	}
 
 	public void dispose() {
@@ -170,13 +176,20 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		Object element= selection.getFirstElement();
 		IActionBars actionBars= fPart.getViewSite().getActionBars();
 		if (size == 1 && element instanceof IResource) {
-			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, fRenameResourceAction);
-			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, fMoveResourceAction);
+			if (fLastElement != RESOURCE) {		// fLastAction in a work around for http://bugs.eclipse.org/bugs/show_bug.cgi?id=30508
+				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, fRenameResourceAction);
+				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, fMoveResourceAction);
+				actionBars.updateActionBars();
+				fLastElement= RESOURCE;
+			}
 		} else {
-			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, null);
-			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, null);
+			if (fLastElement != REST) {
+				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, null);
+				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, null);
+				actionBars.updateActionBars();
+				fLastElement= REST;
+			}
 		}
-		actionBars.updateActionBars();
 	}
 
 	//---- Persistent state -----------------------------------------------------------------------
