@@ -760,25 +760,26 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root != null) {
-			IPackageFragment pack= root.getPackageFragment(packName);
-			try {
-				IPath rootPath= root.getPath();
-				IPath outputPath= root.getJavaProject().getOutputLocation();
-				if (rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath)) {
-					// if the bin folder is inside of our root, dont allow to name a package
-					// like the bin folder
-					IPath packagePath= pack.getUnderlyingResource().getFullPath();
-					if (outputPath.isPrefixOf(packagePath)) {
-						status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.ClashOutputLocation")); //$NON-NLS-1$
-						return status;
+			if (root.getJavaProject().exists() && packName.length() > 0) {
+				try {
+					IPath rootPath= root.getPath();
+					IPath outputPath= root.getJavaProject().getOutputLocation();
+					if (rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath)) {
+						// if the bin folder is inside of our root, dont allow to name a package
+						// like the bin folder
+						IPath packagePath= rootPath.append(packName.replace('.', '/'));
+						if (outputPath.isPrefixOf(packagePath)) {
+							status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.ClashOutputLocation")); //$NON-NLS-1$
+							return status;
+						}
 					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+					// let pass			
 				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				// let pass			
 			}
 			
-			fCurrPackage= pack;
+			fCurrPackage= root.getPackageFragment(packName);
 		} else {
 			status.setError(""); //$NON-NLS-1$
 		}
