@@ -1,13 +1,16 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import java.text.Collator;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IField;
@@ -16,11 +19,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Sorts Java elements:
@@ -28,22 +30,24 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 public class JavaElementSorter extends ViewerSorter {
 	
-	private static final int CU_MEMBERS=	0;
-	private static final int INNER_TYPES=	1;
-	private static final int CONSTRUCTORS=	2;
-	private static final int STATIC_INIT= 3;
-	private static final int STATIC_METHODS= 4;
-	private static final int INIT= 5;
-	private static final int METHODS= 6;
-	private static final int STATIC_FIELDS= 7;
-	private static final int FIELDS= 8;
-	private static final int JAVAELEMENTS= 9;
-	private static final int PACKAGEFRAGMENTROOTS= 10;
-	private static final int JAVAPROJECTS= 11;
-	private static final int RESOURCEPACKAGES= 12;
-	private static final int RESOURCEFOLDERS= 13;
-	private static final int RESOURCES= 14;
-	private static final int STORAGE= 15;
+	private static final int PACKAGE_DECL=	1;
+	private static final int IMPORT_CONTAINER=	2;
+	private static final int TYPES= 3;
+	private static final int CONSTRUCTORS=	4;
+	private static final int STATIC_INIT= 5;
+	private static final int STATIC_METHODS= 6;
+	private static final int INIT= 7;
+	private static final int METHODS= 8;
+	private static final int STATIC_FIELDS= 9;
+	private static final int FIELDS= 10;
+	private static final int JAVAELEMENTS= 11;
+	private static final int PACKAGEFRAGMENTROOTS= 12;
+	private static final int PACKAGEFRAGMENT= 13;
+	private static final int JAVAPROJECTS= 14;
+	private static final int RESOURCEPACKAGES= 15;
+	private static final int RESOURCEFOLDERS= 16;
+	private static final int RESOURCES= 17;
+	private static final int STORAGE= 18;
 	
 	private static final int OTHERS= 20;	
 
@@ -96,17 +100,12 @@ public class JavaElementSorter extends ViewerSorter {
 						return Flags.isStatic(flags) ? STATIC_INIT : INIT;
 					}
 					
-					case IJavaElement.TYPE: {
-						if (((IType)element).getDeclaringType() != null) {
-							return INNER_TYPES;
-						} else {
-							return CU_MEMBERS;
-						}
-					}
+					case IJavaElement.TYPE:
+						return TYPES;
 					case IJavaElement.PACKAGE_DECLARATION:
-						return CU_MEMBERS;
+						return PACKAGE_DECL;
 					case IJavaElement.IMPORT_CONTAINER:
-						return CU_MEMBERS;
+						return IMPORT_CONTAINER;
 					case IJavaElement.PACKAGE_FRAGMENT:
 						IPackageFragment pack= (IPackageFragment) je;
 						if (!pack.hasChildren() && pack.getNonJavaResources().length > 0) {
@@ -115,8 +114,7 @@ public class JavaElementSorter extends ViewerSorter {
 						if (pack.getParent().getUnderlyingResource() instanceof IProject) {
 							return PACKAGEFRAGMENTROOTS;
 						}
-						
-						break;
+						return PACKAGEFRAGMENT;
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 						return PACKAGEFRAGMENTROOTS;
 					case IJavaElement.JAVA_PROJECT:
@@ -147,30 +145,26 @@ public class JavaElementSorter extends ViewerSorter {
 		if (cat1 != cat2)
 			return cat1 - cat2;	
 		
+		Collator collator= getCollator();
+		
 		switch (cat1) {
 			case OTHERS:
-				// unknown
-				return 0;
-			case CU_MEMBERS:
-				// do not sort elements in CU or ClassFiles
+				// unknown element type
 				return 0;
 			case PACKAGEFRAGMENTROOTS:
 				int p1= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e1));
 				int p2= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e2));
 				if (p1 == p2) {
-					return ((IJavaElement)e1).getElementName().compareTo(((IJavaElement)e2).getElementName());
+					return collator.compare(((IJavaElement)e1).getElementName(), ((IJavaElement)e2).getElementName());
 				}
 				return p1 - p2;
 			case STORAGE:
-				return ((IStorage)e1).getName().compareToIgnoreCase(((IStorage)e2).getName());
+				return collator.compare(((IStorage)e1).getName(), ((IStorage)e2).getName());
 			case RESOURCES:
 			case RESOURCEFOLDERS:
-				return ((IResource)e1).getName().compareToIgnoreCase(((IResource)e2).getName());
-			case RESOURCEPACKAGES:	
-			case JAVAPROJECTS:
-				return ((IJavaElement)e1).getElementName().compareToIgnoreCase(((IJavaElement)e2).getElementName());
+				return collator.compare(((IResource)e1).getName(), ((IResource)e2).getName());
 			default:
-				return ((IJavaElement)e1).getElementName().compareTo(((IJavaElement)e2).getElementName());
+				return collator.compare(((IJavaElement)e1).getElementName(), ((IJavaElement)e2).getElementName());
 		}
 	}
 			
