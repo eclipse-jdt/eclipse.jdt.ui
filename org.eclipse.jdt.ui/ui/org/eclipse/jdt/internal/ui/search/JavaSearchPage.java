@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 
-	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage";
+	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
 
 	private static java.util.List fgPreviousSearchPatterns= new ArrayList(20);
 
@@ -86,18 +86,18 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	
 	private Button[] fSearchFor;
 	private String[] fSearchForText= {
-		JavaPlugin.getResourceString("SearchPage.searchFor.type"),
-		JavaPlugin.getResourceString("SearchPage.searchFor.method"),
-		JavaPlugin.getResourceString("SearchPage.searchFor.package"),
-		JavaPlugin.getResourceString("SearchPage.searchFor.constructor"),
-		JavaPlugin.getResourceString("SearchPage.searchFor.field") };
+		SearchMessages.getString("SearchPage.searchFor.type"), //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.searchFor.method"), //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.searchFor.package"), //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.searchFor.constructor"), //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.searchFor.field") }; //$NON-NLS-1$
 
 	private Button[] fLimitTo;
 	private String[] fLimitToText= {
-		JavaPlugin.getResourceString("SearchPage.limitTo.declarations"),
-		JavaPlugin.getResourceString("SearchPage.limitTo.implementors"),
-		JavaPlugin.getResourceString("SearchPage.limitTo.references"),
-		JavaPlugin.getResourceString("SearchPage.limitTo.allOccurrences")};
+		SearchMessages.getString("SearchPage.limitTo.declarations"), //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.limitTo.implementors"), //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.limitTo.references"), //$NON-NLS-1$
+		SearchMessages.getString("SearchPage.limitTo.allOccurrences")}; //$NON-NLS-1$
 	
 	private IJavaElement fJavaElement;
 	
@@ -132,7 +132,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		try {
 			getContainer().getRunnableContext().run(true, true, op);
 		} catch (InvocationTargetException ex) {
-			ExceptionHandler.handle(ex, shell, JavaPlugin.getResourceBundle(), "Search.Error.search.");
+			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return false;
 		} catch (InterruptedException ex) {
 			return false;
@@ -145,7 +145,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			if (fLimitTo[i].getSelection())
 				return i;
 		}
-		Assert.isTrue(false, "Should never happen");
+		Assert.isTrue(false, SearchMessages.getString("SearchPage.shouldNeverHappen")); //$NON-NLS-1$
 		return -1;
 	}
 
@@ -163,7 +163,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			if (fSearchFor[i].getSelection())
 				return i;
 		}
-		Assert.isTrue(false, "Should never happen");
+		Assert.isTrue(false, SearchMessages.getString("SearchPage.shouldNeverHappen")); //$NON-NLS-1$
 		return -1;
 	}
 	
@@ -271,7 +271,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 	private Control createExpression(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
-		result.setText(JavaPlugin.getResourceString("SearchPage.expression.label"));
+		result.setText(SearchMessages.getString("SearchPage.expression.label")); //$NON-NLS-1$
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		result.setLayout(layout);
@@ -311,13 +311,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		// Pattern info
 		Label label= new Label(result, SWT.LEFT);
-		label.setText(JavaPlugin.getResourceString("SearchPage.expression.pattern"));
+		label.setText(SearchMessages.getString("SearchPage.expression.pattern")); //$NON-NLS-1$
 		return result;
 	}
 		
 	private Control createSearchFor(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
-		result.setText(JavaPlugin.getResourceString("SearchPage.searchFor.label"));
+		result.setText(SearchMessages.getString("SearchPage.searchFor.label")); //$NON-NLS-1$
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
 		result.setLayout(layout);
@@ -334,7 +334,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	
 	private Control createLimitTo(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
-		result.setText(JavaPlugin.getResourceString("SearchPage.limitTo.label"));
+		result.setText(SearchMessages.getString("SearchPage.limitTo.label")); //$NON-NLS-1$
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		result.setLayout(layout);
@@ -380,7 +380,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 					try {
 						elements= assist.codeSelect(ts.getOffset(), ts.getLength());
 					} catch (JavaModelException ex) {
-						ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.createJavaElement.");
+						ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					}
 					if (elements != null && elements.length > 0) {
 						if (elements.length == 1)
@@ -429,7 +429,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		try {
 			return JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
 		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.createJavaElement.");
+			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
 		}
 	}
@@ -476,7 +476,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			case IJavaElement.COMPILATION_UNIT:
 				ICompilationUnit cu= (ICompilationUnit)element;
 				//fix 1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
-				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf("."));
+				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf(".")); //$NON-NLS-1$
 				IType mainType= cu.getType(mainTypeName);
 				mainTypeName= JavaModelUtility.getTypeQualifiedName(mainType);
 				try {					
@@ -490,7 +490,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 							break;
 					}
 				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.javaElementAccess.");
+					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					break;
 				}
 				searchFor= TYPE;
@@ -502,7 +502,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				try {					
 					mainType= cf.getType();
 				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.javaElementAccess.");
+					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					break;
 				}
 				if (mainType == null)
@@ -528,7 +528,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 					if (method.isConstructor())
 						searchFor= CONSTRUCTOR;
 				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.javaElementAccess.");
+					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					break;
 				}		
 				limitTo= REFERENCES;
@@ -549,9 +549,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			try {
 				text= reader.readLine();
 				if (text == null)
-					text= "";
+					text= ""; //$NON-NLS-1$
 			} catch (IOException ex) {
-				text= "";
+				text= ""; //$NON-NLS-1$
 			}
 			result= new SearchPatternData(TYPE, REFERENCES, text, null);
 		}
@@ -559,7 +559,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 	
 	private SearchPatternData getDefaultInitValues() {
-		return new SearchPatternData(TYPE, REFERENCES, "", null);
+		return new SearchPatternData(TYPE, REFERENCES, "", null); //$NON-NLS-1$
 	}	
 
 	private IJavaElement chooseFromList(java.util.List openChoices) {
@@ -567,8 +567,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			  JavaElementLabelProvider.SHOW_DEFAULT 
 			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider, true, false);
-		dialog.setTitle(JavaPlugin.getResourceString("SearchElementSelectionDialog.title"));
-		dialog.setMessage(JavaPlugin.getResourceString("SearchElementSelectionDialog.message"));
+		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
 		if (dialog.open(openChoices) == dialog.OK)
 			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
 		return null;

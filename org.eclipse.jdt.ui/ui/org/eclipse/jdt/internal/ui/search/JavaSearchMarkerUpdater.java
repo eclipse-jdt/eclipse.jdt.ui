@@ -60,7 +60,7 @@ public class JavaSearchMarkerUpdater implements IMarkerUpdater {
 				// no java search marker
 				return true;
 		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.markerAttributeAccess.");
+			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.markerAttributeAccess.title"), SearchMessages.getString("Search.Error.markerAttributeAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		return false;
 	}

@@ -20,8 +20,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class FindImplementorsAction extends ElementSearchAction {
 
 	public FindImplementorsAction() {
-		super(JavaPlugin.getResourceString("Search.FindImplementorsAction.label"), new Class[] {IType.class});
-		setToolTipText(JavaPlugin.getResourceString("Search.FindImplementorsAction.tooltip"));
+		super(SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {IType.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindImplementorsAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 	}
 
@@ -34,7 +34,7 @@ public class FindImplementorsAction extends ElementSearchAction {
 			try {
 				return ((IType) element).isInterface();
 			} catch (JavaModelException ex) {
-				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.javaElementAccess.");
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
 				return false;
 			}
 		// should not happen: handled by super.canOperateOn

@@ -10,10 +10,6 @@ class GotoMarkerAction extends Action {
 
 	private IEditorPart fEditor;
 
-	public GotoMarkerAction() {
-		super(JavaPlugin.getResourceString("Search.GotoMarkerAction.label"));
-	}
-	
 	public void run() {
 		ISearchResultView view= SearchUI.getSearchResultView();		
 		view.getSelection();
@@ -44,7 +40,7 @@ class GotoMarkerAction extends Action {
 				if (view instanceof IPackagesViewPart)
 					((IPackagesViewPart)view).selectAndReveal(javaElement);
 			} catch (PartInitException ex) {
-				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 		}			
 		else if (!isBinary(javaElement)) {
@@ -78,7 +74,7 @@ class GotoMarkerAction extends Action {
 			try {
 				editor= page.openEditor(input, editorId, false);
 			} catch (PartInitException ex) {
-				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 				return;
 			}
 		} else {
@@ -100,7 +96,7 @@ class GotoMarkerAction extends Action {
 		try {
 			return JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
 		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.createJavaElement.");
+			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
 		}
 	}

@@ -29,7 +29,7 @@ public class JavaSearchPageScoreComputer implements ISearchPageScoreComputer {
 			try {
 				handleId= ((IMarker)element).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
 			} catch (CoreException ex) {
-				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.markerAttributeAccess.");
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.markerAttributeAccess.title"), SearchMessages.getString("Search.Error.markerAttributeAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
 				// handleId is null
 			}
 			if (handleId != null)

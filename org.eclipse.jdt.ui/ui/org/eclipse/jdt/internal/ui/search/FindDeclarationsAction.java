@@ -21,8 +21,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class FindDeclarationsAction extends ElementSearchAction {
 
 	public FindDeclarationsAction() {
-		this(JavaPlugin.getResourceString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class});
-		setToolTipText(JavaPlugin.getResourceString("Search.FindDeclarationAction.tooltip"));
+		this(SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindDeclarationAction.tooltip")); //$NON-NLS-1$
 	}
 
 	public FindDeclarationsAction(String label, Class[] validTypes) {

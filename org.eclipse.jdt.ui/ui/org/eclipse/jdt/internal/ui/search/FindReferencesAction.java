@@ -17,8 +17,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class FindReferencesAction extends ElementSearchAction {
 
 	public FindReferencesAction() {
-		super(JavaPlugin.getResourceString("Search.FindReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class});
-		setToolTipText(JavaPlugin.getResourceString("Search.FindReferencesAction.label"));
+		super(SearchMessages.getString("Search.FindReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindReferencesAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 	}
 

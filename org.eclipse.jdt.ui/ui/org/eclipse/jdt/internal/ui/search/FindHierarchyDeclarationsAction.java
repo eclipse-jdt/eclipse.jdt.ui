@@ -16,8 +16,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class FindHierarchyDeclarationsAction extends FindDeclarationsAction {
 
 	public FindHierarchyDeclarationsAction() {
-		super(JavaPlugin.getResourceString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class, IType.class} );
-		setToolTipText(JavaPlugin.getResourceString("Search.FindHierarchyDeclarationsAction.tooltip"));
+		super(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class, IType.class} ); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
 	}
 	
 	protected IJavaSearchScope getScope(IType type) throws JavaModelException {

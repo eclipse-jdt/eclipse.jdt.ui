@@ -49,7 +49,7 @@ class PrettySignature {
 		if (types.length > 0)
 			buffer.append(Signature.toString(types[0]));
 		for (int i= 1; i < types.length; i++) {
-			buffer.append(", ");
+			buffer.append(", "); //$NON-NLS-1$
 			buffer.append(Signature.toString(types[i]));
 		}
 		

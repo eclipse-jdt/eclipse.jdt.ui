@@ -43,7 +43,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		fLastMarker= null;
 		IJavaElement javaElement= getJavaElement(o);
 		if (javaElement == null)
-			return "";
+			return ""; //$NON-NLS-1$
 		if (javaElement instanceof IImportDeclaration)
 			return fTextProvider.getTextLabel(((IImportDeclaration)javaElement).getParent().getParent());
 		return fTextProvider.getTextLabel((IJavaElement)javaElement);
@@ -70,7 +70,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 			try {
 				fLastJavaElement= JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
 			} catch (CoreException ex) {
-				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.createJavaElement.");
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 				fLastJavaElement= null;
 			}
 			fLastMarker= marker;

@@ -9,7 +9,7 @@ import java.util.HashMap;import org.eclipse.jface.action.IMenuManager;import 
 
 public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 
-	private static final String SPACE_MATCHES= " " + JavaPlugin.getResourceString("SearchResultCollector.matches");
+	private static final String SPACE_MATCHES= " " + SearchMessages.getString("SearchResultCollector.matches"); //$NON-NLS-2$ //$NON-NLS-1$
 	
 	private IProgressMonitor fMonitor;
 	private IContextMenuContributor fContextMenu;
@@ -73,7 +73,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		try {
 			JavaPlugin.getWorkspace().getRoot().deleteMarkers(SearchUI.SEARCH_MARKER, true, IResource.DEPTH_INFINITE);
 		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.deleteMarkers.");
+			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.deleteMarkers.title"), SearchMessages.getString("Search.Error.deleteMarkers.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	 
@@ -103,7 +103,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	 */
 	public void done() {
 		if (!getProgressMonitor().isCanceled())
-			getProgressMonitor().setTaskName(JavaPlugin.getResourceString("SearchResultCollector.done") + ": " + fMatchCount + SPACE_MATCHES + "   ");
+			getProgressMonitor().setTaskName(SearchMessages.getString("SearchResultCollector.done") + ": " + fMatchCount + SPACE_MATCHES + "   "); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 
 		if (fView != null)
 			fView.searchFinished();

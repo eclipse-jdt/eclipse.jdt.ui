@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.search;import java.lang.reflect.InvocationTargetException;import java.util.ResourceBundle;
+package org.eclipse.jdt.internal.ui.search;import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.runtime.CoreException;
 
@@ -31,11 +31,10 @@ public abstract class ElementSearchAction extends JavaElementAction {
 		SearchUI.activateSearchResultView();
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		JavaSearchOperation op= null;
-		ResourceBundle bundle= JavaPlugin.getResourceBundle();
 		try {
 			op= makeOperation(element);
 		} catch (JavaModelException ex) {
-			ExceptionHandler.handle(ex, shell, bundle, "Search.Error.search.");
+			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		IWorkspaceDescription workspaceDesc= JavaPlugin.getWorkspace().getDescription();
@@ -47,13 +46,13 @@ public abstract class ElementSearchAction extends JavaElementAction {
 				JavaPlugin.getWorkspace().setDescription(workspaceDesc);
 			}
 			catch (CoreException ex) {
-				ExceptionHandler.handle(ex, shell, bundle, "Search.Error.setDescription.");
+			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.setDescription.title"), SearchMessages.getString("Search.Error.setDescription.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		try {
 			new ProgressMonitorDialog(shell).run(true, true, op);
 		} catch (InvocationTargetException ex) {
-			ExceptionHandler.handle(ex, shell, bundle, "Search.Error.search.");
+			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch(InterruptedException e) {
 		} finally {
 			if (isAutoBuilding) {
@@ -64,7 +63,7 @@ public abstract class ElementSearchAction extends JavaElementAction {
 					JavaPlugin.getWorkspace().setDescription(workspaceDesc);
 				}
 				catch (CoreException ex) {
-					ExceptionHandler.handle(ex, shell, bundle, "Search.Error.setDescription.");
+					ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.setDescription.title"), SearchMessages.getString("Search.Error.setDescription.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}				
 		}

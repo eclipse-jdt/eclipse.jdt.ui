@@ -31,7 +31,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  * Abstract class for actions that run on IJavaElement.
  */
 public abstract class JavaElementAction extends Action {
-	public static final String PREFIX= "ShowTypeHierarchyAction.";
 	
 	// A dummy which can't be selected in the UI
 	private static final IJavaElement RETURN_WITHOUT_BEEP= JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot());
@@ -87,7 +86,7 @@ public abstract class JavaElementAction extends Action {
 		try {
 			return getJavaElement(JavaCore.create((String) ((IMarker) o).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID)), silent);
 		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.createJavaElement.");
+			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
 		}
 	}
@@ -135,7 +134,7 @@ public abstract class JavaElementAction extends Action {
 			try {
 				elements= assist.codeSelect(ts.getOffset(), ts.getLength());
 			} catch (JavaModelException ex) {
-				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.createJavaElement.");
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
 				return null;
 			}
 			if (elements != null && elements.length > 0) {
@@ -166,8 +165,8 @@ public abstract class JavaElementAction extends Action {
 			  JavaElementLabelProvider.SHOW_DEFAULT 
 			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider, true, false);
-		dialog.setTitle(JavaPlugin.getResourceString("SearchElementSelectionDialog.title"));
-		dialog.setMessage(JavaPlugin.getResourceString("SearchElementSelectionDialog.message"));
+		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
 		if (dialog.open(openChoices) == dialog.OK)
 			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
 		return null;
@@ -187,7 +186,7 @@ public abstract class JavaElementAction extends Action {
 	protected IJavaElement findType(ICompilationUnit cu, boolean silent) {
 		if (silent) {
 			//XXX fix for 1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
-			if (cu.getElementName().indexOf(".") != cu.getElementName().lastIndexOf("."))
+			if (cu.getElementName().indexOf(".") != cu.getElementName().lastIndexOf(".")) //$NON-NLS-2$ //$NON-NLS-1$
 				return null;
 			String mainTypeName= cu.getElementName().substring(0, cu.getElementName().length() - 5);
 			IType mainType= cu.getType(mainTypeName);
@@ -204,7 +203,7 @@ public abstract class JavaElementAction extends Action {
 				}
 			} catch (JavaModelException ex) {
 				// silent mode
-				ExceptionHandler.log(ex, JavaPlugin.getResourceBundle(), "OpenTypeAction.error.open.");
+				ExceptionHandler.log(ex, SearchMessages.getString("OpenTypeAction.error.open.message")); //$NON-NLS-1$
 				return RETURN_WITHOUT_BEEP;
 			}
 			return mainType;
@@ -214,13 +213,13 @@ public abstract class JavaElementAction extends Action {
 			try {
 				types= cu.getAllTypes();
 			} catch (JavaModelException ex) {
-				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "OpenTypeAction.error.open.");
+				ExceptionHandler.handle(ex, SearchMessages.getString("OpenTypeAction.error.open.title"), SearchMessages.getString("OpenTypeAction.error.open.message")); //$NON-NLS-2$ //$NON-NLS-1$
 				return RETURN_WITHOUT_BEEP;
 			}
 			if (types.length == 1)
 				return types[0];
-			String title= JavaPlugin.getResourceString(PREFIX + "selectionDialog.title");
-			String message = JavaPlugin.getResourceString(PREFIX + "selectionDialog.message");
+			String title= SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.title"); //$NON-NLS-1$
+			String message = SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.message"); //$NON-NLS-1$
 			Shell parent= JavaPlugin.getActiveWorkbenchShell();
 			int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
 			ElementListSelectionDialog d= new ElementListSelectionDialog(parent, title, null, new JavaElementLabelProvider(flags), true, false);

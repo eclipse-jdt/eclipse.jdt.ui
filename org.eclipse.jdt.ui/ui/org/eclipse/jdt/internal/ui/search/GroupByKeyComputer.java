@@ -31,7 +31,7 @@ class GroupByKeyComputer implements IGroupByKeyComputer {
 		try {
 			return (String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
 		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.markerAttributeAccess.");
+			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.markerAttributeAccess.title"), SearchMessages.getString("Search.Error.markerAttributeAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
 		}
 	}
@@ -46,7 +46,7 @@ class GroupByKeyComputer implements IGroupByKeyComputer {
 				if (fLastJavaElement != null)
 					handleResource= fLastJavaElement.getCorrespondingResource();
 			} catch (JavaModelException  ex) {
-				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.javaElementAccess.");
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
 				// handleResource= null;
 			}
 			if (fLastJavaElement != null && marker.getResource().equals(handleResource)) {

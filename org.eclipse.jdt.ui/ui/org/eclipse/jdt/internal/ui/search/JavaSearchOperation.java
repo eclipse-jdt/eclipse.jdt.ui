@@ -73,15 +73,15 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 			desc= fStringPattern;
 		switch (fLimitTo) {
 			case IJavaSearchConstants.IMPLEMENTORS:
-				return desc + JavaPlugin.getResourceString("JavaSearchOperation.implementorsPostfix");
+				return desc + SearchMessages.getString("JavaSearchOperation.implementorsPostfix"); //$NON-NLS-1$
 			case IJavaSearchConstants.DECLARATIONS:
-				return desc + JavaPlugin.getResourceString("JavaSearchOperation.declarationsPostfix");
+				return desc + SearchMessages.getString("JavaSearchOperation.declarationsPostfix"); //$NON-NLS-1$
 			case IJavaSearchConstants.REFERENCES:
-				return desc + JavaPlugin.getResourceString("JavaSearchOperation.referencesPostfix");
+				return desc + SearchMessages.getString("JavaSearchOperation.referencesPostfix"); //$NON-NLS-1$
 			case IJavaSearchConstants.ALL_OCCURRENCES:
-				return desc + JavaPlugin.getResourceString("JavaSearchOperation.occurrencesPostfix");
+				return desc + SearchMessages.getString("JavaSearchOperation.occurrencesPostfix"); //$NON-NLS-1$
 			default:
-				return "";
+				return ""; //$NON-NLS-1$
 		}
 	}
 	
