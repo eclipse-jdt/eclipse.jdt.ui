@@ -49,40 +49,48 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewEnumCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 
 /**
  * This proposal is listed in the corrections list for a "type not found" problem.
  * It offers to create a new type by running the class/interface wizard.
- * If selected, this proposal will open a {@link NewClassCreationWizard} or
- * {@link NewInterfaceCreationWizard}.
+ * If selected, this proposal will open a {@link NewClassCreationWizard}, 
+ * {@link NewInterfaceCreationWizard}, {@link NewEnumCreationWizard} or {@link NewAnnotationCreationWizard}.
  * 
  * @see UnresolvedElementsSubProcessor#getTypeProposals(IInvocationContext, IProblemLocation, Collection)
  */
 
 public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal {
 
+	public static final int K_CLASS= 1;
+	public static final int K_INTERFACE= 2;
+	public static final int K_ENUM= 3;
+	public static final int K_ANNOTATION= 4;
+	
 	private Name fNode;
 	private ICompilationUnit fCompilationUnit;
-	private boolean fIsClass;
+	private int fTypeKind;
 	private IJavaElement fTypeContainer; // IType or IPackageFragment
 
 	private boolean fShowDialog;
 
-	public NewCUCompletionUsingWizardProposal(ICompilationUnit cu, Name node, boolean isClass, IJavaElement typeContainer, int severity) {
+	public NewCUCompletionUsingWizardProposal(ICompilationUnit cu, Name node, int typeKind, IJavaElement typeContainer, int severity) {
 		super("", null, severity, null); //$NON-NLS-1$
-
+		
 		fCompilationUnit= cu;
 		fNode= node;
-		fIsClass= isClass;
+		fTypeKind= typeKind;
 		fTypeContainer= typeContainer;
 
 		String containerName= ASTNodes.getQualifier(node);
 		String typeName= ASTNodes.getSimpleNameIdentifier(node);
 		boolean isInnerType= typeContainer instanceof IType;
-		if (isClass) {
+		switch (typeKind) {
+		case K_CLASS:
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS));
 			if (isInnerType) {
 				if (containerName.length() == 0) {
@@ -97,7 +105,8 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createclass.inpackage.description", new String[] { typeName, containerName })); //$NON-NLS-1$
 				}
 			}
-		} else {
+			break;
+		case K_INTERFACE:
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE));
 			if (isInnerType) {
 				if (containerName.length() == 0) {
@@ -112,6 +121,41 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinterface.inpackage.description", new String[] { typeName, containerName })); //$NON-NLS-1$
 				}
 			}
+			break;
+		case K_ENUM:
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ENUM));
+			if (isInnerType) {
+				if (containerName.length() == 0) {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinnerenum.description", typeName)); //$NON-NLS-1$
+				} else {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinnerenum.intype.description", new String[] { typeName, containerName })); //$NON-NLS-1$
+				}
+			} else {
+				if (containerName.length() == 0) {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createenum.description", typeName)); //$NON-NLS-1$
+				} else {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createenum.inpackage.description", new String[] { typeName, containerName })); //$NON-NLS-1$
+				}
+			}
+			break;
+		case K_ANNOTATION:
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ANNOTATION));
+			if (isInnerType) {
+				if (containerName.length() == 0) {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinnerannotation.description", typeName)); //$NON-NLS-1$
+				} else {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinnerannotation.intype.description", new String[] { typeName, containerName })); //$NON-NLS-1$
+				}
+			} else {
+				if (containerName.length() == 0) {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createannotation.description", typeName)); //$NON-NLS-1$
+				} else {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createannotation.inpackage.description", new String[] { typeName, containerName })); //$NON-NLS-1$
+				}
+			}
+			break;
+		default:
+			throw new IllegalArgumentException("Unknown type kind"); //$NON-NLS-1$
 		}
 		fShowDialog= true;
 	}
@@ -144,13 +188,17 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	}
 
 	private NewElementWizard createWizard() {
-		NewElementWizard wizard;
-		if (fIsClass) {
-			wizard= new NewClassCreationWizard();
-		} else {
-			wizard= new NewInterfaceCreationWizard();
+		switch (fTypeKind) {
+			case K_CLASS:
+				return new NewClassCreationWizard();
+			case K_INTERFACE:
+				return new NewInterfaceCreationWizard();
+			case K_ENUM:
+				return new NewEnumCreationWizard();
+			case K_ANNOTATION:
+				return new NewAnnotationCreationWizard();
 		}
-		return wizard;
+		throw new IllegalArgumentException();
 	}
 
 	private NewTypeWizardPage configureWizardPage(NewElementWizard wizard) {
@@ -191,7 +239,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 				type= type.getElementType();
 			}
 			if (type.isTopLevel() || type.isMember()) {
-				if (type.isClass() && fIsClass) {
+				if (type.isClass() && (fTypeKind == K_CLASS)) {
 					page.setSuperClass(Bindings.getFullyQualifiedName(type), true);
 				} else if (type.isInterface()) {
 					List superInterfaces= new ArrayList();
@@ -202,7 +250,11 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		}
 	}
    	
-	private static ITypeBinding getPossibleSuperTypeBinding(ASTNode node) {
+	private ITypeBinding getPossibleSuperTypeBinding(ASTNode node) {
+		 if (fTypeKind == K_ANNOTATION) {
+		 	return null;
+		 }
+		
 		AST ast= node.getAST();
 		ASTNode parent= node.getParent();
 		while (parent instanceof Type) {
@@ -247,10 +299,19 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	 */
 	public String getAdditionalProposalInfo() {
 		StringBuffer buf= new StringBuffer();
-		if (fIsClass) {
-			buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createclass.info")); //$NON-NLS-1$
-		} else {
-			buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createinterface.info")); //$NON-NLS-1$
+		switch (fTypeKind) {
+			case K_CLASS:
+				buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createclass.info")); //$NON-NLS-1$
+				break;
+			case K_INTERFACE:
+				buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createinterface.info")); //$NON-NLS-1$
+				break;
+			case K_ENUM:
+				buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createenum.info")); //$NON-NLS-1$
+				break;
+			case K_ANNOTATION:
+				buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createannotation.info")); //$NON-NLS-1$
+				break;
 		}
 		buf.append("<br>"); //$NON-NLS-1$
 		buf.append("<br>"); //$NON-NLS-1$
@@ -263,16 +324,27 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		buf.append(JavaElementLabels.getElementLabel(fTypeContainer, JavaElementLabels.T_FULLY_QUALIFIED));
 		buf.append("</b><br>"); //$NON-NLS-1$
 		buf.append("public "); //$NON-NLS-1$
-		if (fIsClass) {
-			buf.append("class <b>"); //$NON-NLS-1$
-		} else {
-			buf.append("interface <b>"); //$NON-NLS-1$
+		
+		
+		switch (fTypeKind) {
+			case K_CLASS:
+				buf.append("class <b>"); //$NON-NLS-1$
+				break;
+			case K_INTERFACE:
+				buf.append("interface <b>"); //$NON-NLS-1$
+				break;
+			case K_ENUM:
+				buf.append("enum <b>"); //$NON-NLS-1$
+				break;
+			case K_ANNOTATION:
+				buf.append("@interface <b>"); //$NON-NLS-1$
+				break;
 		}
 		buf.append(ASTNodes.getSimpleNameIdentifier(fNode));
 		
 		ITypeBinding superclass= getPossibleSuperTypeBinding(fNode);
 		if (superclass != null) {
-			if (superclass.isClass() || !fIsClass) {
+			if (superclass.isClass() || (fTypeKind == K_INTERFACE)) {
 				buf.append("</b> extends <b>"); //$NON-NLS-1$
 			} else {
 				buf.append("</b> implements <b>"); //$NON-NLS-1$
@@ -298,13 +370,18 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	public void setShowDialog(boolean showDialog) {
 		fShowDialog= showDialog;
 	}
-
-	/**
-	 * Returns <code>true</code> if is class.
-	 * @return boolean
-	 */
-	public boolean isClass() {
-		return fIsClass;
+	
+	public IType getCreatedType() {
+		String name= ASTNodes.getSimpleNameIdentifier(fNode);
+		if (fTypeContainer instanceof IPackageFragment) {
+			return ((IPackageFragment) fTypeContainer).getCompilationUnit(name + ".java").getType(name); //$NON-NLS-1$
+		}
+		return  ((IType) fTypeContainer).getType(name);
+	}
+	
+	
+	public int getTypeKind() {
+		return fTypeKind;
 	}
 
 }
