@@ -102,7 +102,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.setRemoveButtonIndex(removeIndex);
 		
 		fFoldersList.setViewerSorter(new CPListElementSorter());
-				
+		
+		fFolderRadioButton.setSelection(true);
+		fProjectRadioButton.setSelection(false);
 		fFolderRadioButton.attachDialogField(fFoldersList);	
 	}
 	

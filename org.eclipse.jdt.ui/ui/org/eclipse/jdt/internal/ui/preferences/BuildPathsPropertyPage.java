@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -125,8 +126,15 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	public boolean performOk() {
 		if (fBuildPathsBlock != null) {
 			Shell shell= getControl().getShell();
-			IRunnableWithProgress runnable= fBuildPathsBlock.getRunnable(fBuildPathsBlock.getRemoveOldBinariesQuery(shell));
-
+			IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor)	throws InvocationTargetException, InterruptedException {
+					try {
+						fBuildPathsBlock.configureJavaProject(monitor);
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					} 
+				}
+			};
 			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
 			try {
 				new ProgressMonitorDialog(shell).run(false, true, op);

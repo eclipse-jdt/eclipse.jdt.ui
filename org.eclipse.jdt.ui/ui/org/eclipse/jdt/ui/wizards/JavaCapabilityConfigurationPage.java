@@ -36,7 +36,6 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	
 	private IJavaProject fJavaProject;
 	private BuildPathsBlock fBuildPathsBlock;
-	private boolean fIsNewProject;
 	
 	/**
 	 * Creates a wizard page that can be used in a Java project creation wizard.
@@ -88,7 +87,6 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		}
 		fBuildPathsBlock.init(jproject, defaultOutputLocation, defaultEntries);
 		fJavaProject= jproject;
-		fIsNewProject= jproject.exists();
 	}
 	
 
@@ -116,38 +114,30 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		return fBuildPathsBlock.getRawClassPath();
 	}
 	
+	/**
+	 * Returns the Java project that was passed in <code>init</code> or <code>null</code> if the page has not
+	 * been initialized yet.
+	 */	
+	public IJavaProject getJavaProject() {
+		return fJavaProject;
+	}	
+	
 
 	/**
 	 * Returns the runnable that will create the Java project or <code>null</code> if the page has not been initialized.
-	 * The runnable sets the project's classpath and output location to the values configured in the page.
+	 * The runnable sets the project's classpath and output location to the values configured in the page and
+	 * adds the Java nature if not yet set. It assumes that the project is created and opened.
 	 *
 	 * @return the runnable
 	 */		
 	public IRunnableWithProgress getRunnable() {
-		if (fJavaProject != null) {
+		if (getJavaProject() != null) {
 			return new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
-					}
-					int nSteps= 10;			
-					monitor.beginTask(NewWizardMessages.getString("JavaCapabilityConfigurationPage.op_desc"), nSteps); //$NON-NLS-1$
-					
 					try {
-						IProject project= fJavaProject.getProject();
-						if (!project.hasNature(JavaCore.NATURE_ID)) {
-							addNatureToProject(project, JavaCore.NATURE_ID, new SubProgressMonitor(monitor, 1));
-							nSteps--;
-						}
-														
-						// configure the build paths
-						IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable(null);
-						jrunnable.run(new SubProgressMonitor(monitor, nSteps));
+						configureJavaProject(monitor);
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
-						
-					} finally {
-						monitor.done();
 					}
 				}
 			};
@@ -156,16 +146,23 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	}
 	
 	/**
-	 * Adds a nature to a project
+	 * Adds the Java nature to the project (if not yet set) and configures the build class paths
 	 */
-	private static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
-		IProjectDescription description = proj.getDescription();
-		String[] prevNatures= description.getNatureIds();
-		String[] newNatures= new String[prevNatures.length + 1];
-		System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
-		newNatures[prevNatures.length]= natureId;
-		description.setNatureIds(newNatures);
-		proj.setDescription(description, monitor);
-	}		
-
+	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
+		
+		int nSteps= 5;			
+		monitor.beginTask(NewWizardMessages.getString("JavaCapabilityConfigurationPage.op_desc"), nSteps); //$NON-NLS-1$
+		
+		try {
+			IProject project= getJavaProject().getProject();
+			fBuildPathsBlock.addJavaNature(project, new SubProgressMonitor(monitor, 1));
+			fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 5));
+		} finally {
+			monitor.done();
+		}			
+	}
+	
 }

@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +11,7 @@ import java.util.List;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
@@ -37,7 +38,6 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -527,10 +527,14 @@ public class BuildPathsBlock {
 		
 		List elements= fClassPathList.getElements();
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
+		boolean outputFolderAlsoSourceFolder= false;
 		
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
 			CPListElement currElement= (CPListElement)elements.get(i);
 			entries[i]= currElement.getClasspathEntry();
+			if (currElement.getEntryKind() == IClasspathEntry.CPE_SOURCE && fOutputLocationPath.equals(currElement.getPath())) {
+				outputFolderAlsoSourceFolder= true;
+			}
 		}
 		
 		IStatus status= JavaConventions.validateClasspath(fCurrJProject, entries, path);
@@ -541,7 +545,7 @@ public class BuildPathsBlock {
 		if (res != null && res.exists() && fCurrJProject.exists()) {
 			try {
 				IPath oldOutputLocation= fCurrJProject.getOutputLocation();
-				if (!oldOutputLocation.equals(fOutputLocationPath)) {
+				if (!oldOutputLocation.equals(fOutputLocationPath) && !outputFolderAlsoSourceFolder) {
 					if (((IContainer)res).members().length > 0) {
 						fBuildPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.OutputFolderNotEmpty")); //$NON-NLS-1$
 						return;
@@ -557,36 +561,70 @@ public class BuildPathsBlock {
 	
 	// -------- creation -------------------------------
 	
-	/**
-	 * Creates a runnable that sets the configured build paths.
-	 */
-	public IRunnableWithProgress getRunnable(final IRemoveOldBinariesQuery reorgQuery) {
-		final List classPathEntries= fClassPathList.getElements();
-		final IPath path= getOutputLocation();
-		
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				if (monitor == null) {
-					monitor= new NullProgressMonitor();
-				}				
-				monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc"), 10); //$NON-NLS-1$
-				try {
-					createJavaProject(classPathEntries, path, reorgQuery, monitor);
-				} catch (CoreException e) { 
-					throw new InvocationTargetException(e);			
-				} finally {
-					monitor.done();
+	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
+		// create the project
+		try {
+			if (!project.exists()) {
+				IProjectDescription desc= project.getWorkspace().newProjectDescription(project.getName());
+				if (Platform.getLocation().equals(locationPath)) {
+					locationPath= null;
 				}
+				desc.setLocation(locationPath);
+				project.create(desc, monitor);
+				monitor= null;
 			}
-		};
+			if (!project.isOpen()) {
+				project.open(monitor);
+				monitor= null;
+			}
+		} finally {
+			if (monitor != null) {
+				monitor.done();
+			}
+		}
+	}
+
+	public static void addJavaNature(IProject project, IProgressMonitor monitor) throws CoreException {
+		if (!project.hasNature(JavaCore.NATURE_ID)) {
+			IProjectDescription description = project.getDescription();
+			String[] prevNatures= description.getNatureIds();
+			String[] newNatures= new String[prevNatures.length + 1];
+			System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
+			newNatures[prevNatures.length]= JavaCore.NATURE_ID;
+			description.setNatureIds(newNatures);
+			project.setDescription(description, monitor);
+		}
+	}
+	
+	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}				
+		monitor.beginTask(NewWizardMessages.getString("BuildPathsBlock.operationdesc"), 10); //$NON-NLS-1$
+
+		try {
+			Shell shell= null;
+			if (fSWTWidget != null && !fSWTWidget.getShell().isDisposed()) {
+				shell= fSWTWidget.getShell();
+			}
+			
+			internalConfigureJavaProject(fClassPathList.getElements(), getOutputLocation(), shell, monitor);
+		} finally {
+			monitor.done();
+		}
 	}
 	
 	/**
 	 * Creates the Java project and sets the configured build path and output location.
 	 * If the project already exists only build paths are updated.
 	 */
-	private void createJavaProject(List classPathEntries, IPath outputLocation, IRemoveOldBinariesQuery reorgQuery, IProgressMonitor monitor) throws CoreException, InterruptedException {
+	private void internalConfigureJavaProject(List classPathEntries, IPath outputLocation, Shell shell, IProgressMonitor monitor) throws CoreException, InterruptedException {
 		// 10 monitor steps to go
+		
+		IRemoveOldBinariesQuery reorgQuery= null;
+		if (shell != null) {
+			reorgQuery= getRemoveOldBinariesQuery(shell);
+		}
 
 		// remove old .class files
 		if (reorgQuery != null) {

@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 
@@ -16,8 +15,6 @@ import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
-import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -26,7 +23,7 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 
 	public static final String NEW_PROJECT_WIZARD_ID= "org.eclipse.jdt.ui.wizards.NewProjectCreationWizard"; //$NON-NLS-1$
 		
-	private NewJavaProjectWizardPage fJavaPage;
+	private NewProjectCreationWizardPage fJavaPage;
 	private WizardNewProjectCreationPage fMainPage;
 	private IConfigurationElement fConfigElement;
 
@@ -47,12 +44,10 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 		fMainPage.setTitle(NewWizardMessages.getString("NewProjectCreationWizard.MainPage.title")); //$NON-NLS-1$
 		fMainPage.setDescription(NewWizardMessages.getString("NewProjectCreationWizard.MainPage.description")); //$NON-NLS-1$
 		addPage(fMainPage);
-		IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
-		fJavaPage= new NewJavaProjectWizardPage(root, fMainPage);
+		fJavaPage= new NewProjectCreationWizardPage(fMainPage);
 		addPage(fJavaPage);
 	}		
 	
-
 	/*
 	 * @see Wizard#performFinish
 	 */		
@@ -69,7 +64,7 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 			return false;
 		}
 		BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-		selectAndReveal(fJavaPage.getNewJavaProject().getProject());
+		selectAndReveal(fJavaPage.getJavaProject().getProject());
 		return true;
 	}
 		
@@ -80,4 +75,13 @@ public class NewProjectCreationWizard extends NewElementWizard implements IExecu
 	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
 		fConfigElement= cfig;
 	}
+	
+	/* (non-Javadoc)
+	 * @see IWizard#performCancel()
+	 */
+	public boolean performCancel() {
+		fJavaPage.performCancel();
+		return super.performCancel();
+	}
+
 }
