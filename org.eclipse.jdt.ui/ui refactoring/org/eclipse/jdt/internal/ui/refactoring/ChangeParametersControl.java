@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableCursor;
 import org.eclipse.swt.events.FocusAdapter;
@@ -39,8 +37,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
 
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -56,13 +53,11 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
 /**
  * A special control to edit and reorder method parameters.
@@ -248,7 +243,6 @@ public class ChangeParametersControl extends Composite {
 
 		if (canEditTableCells()){
 			addCellEditors();
-//			addTableCursor(table); //XXX don't create it here  see bug 24798
 		}	
 	}
 
@@ -407,17 +401,20 @@ public class ChangeParametersControl extends Composite {
 					ParameterInfo[] selected= getSelectedItems();
 					Assert.isTrue(selected.length == 1);
 					ParameterInfo parameterInfo= selected[0];
-					String[] keys= { parameterInfo.getOldName()};
-					String message= RefactoringMessages.getFormattedString("ChangeParametersControl.inputdialog.message", keys); //$NON-NLS-1$
-					IInputValidator validator= createParameterNameValidator();
-					InputDialog dialog= new InputDialog(getShell(), RefactoringMessages.getString("ChangeParametersControl.inputDialog.title"), message, parameterInfo.getNewName(), validator); //$NON-NLS-1$
-					if (dialog.open() == InputDialog.CANCEL) {
+					int column= getTableCursorColumn();
+					int row= getTableCursorRow();
+					showTableCursor(false);
+					ParameterEditDialog dialog= new ParameterEditDialog(getShell(), parameterInfo, fCanChangeTypesOfOldParameters);
+					if (dialog.open() == IDialogConstants.CANCEL_ID) {
 						fTableViewer.setSelection(selection);
 						return;
 					}
-					parameterInfo.setNewName(dialog.getValue());
 					fListener.parameterChanged(parameterInfo);
-					fTableViewer.update(parameterInfo, new String[] { PROPERTIES[NEWNAME_PROP] });
+					fTableViewer.update(parameterInfo, PROPERTIES);
+					if (column >= 0 && row >= 0) {
+						showTableCursor(true);
+						setTableCursorSelection(row, column);
+					}
 				} finally {
 					fTableViewer.refresh();
 					fTableViewer.getControl().setFocus();
@@ -503,11 +500,9 @@ public class ChangeParametersControl extends Composite {
 
 				int column= getTableCursorColumn();
 				Object element= null;
-				TableItem rowItem= getTableCursorRow();
-				if (rowItem != null) {
-					int r= getTable().indexOf(rowItem);
-					if (r >= 0)
-						element= fTableViewer.getElementAt(r);
+				int r=  getTableCursorRow();
+				if (r >= 0) {
+					element= fTableViewer.getElementAt(r);
 				}
 					
 				if (up) {
@@ -562,26 +557,15 @@ public class ChangeParametersControl extends Composite {
 		return -1;
 	}
 	
-	private TableItem getTableCursorRow() {
-		if (fTableCursor != null && !fTableCursor.isDisposed())
-			return fTableCursor.getRow();
-		return null;
+	private int getTableCursorRow() {
+		if (fTableCursor != null && !fTableCursor.isDisposed()) {
+			TableItem item= fTableCursor.getRow();
+			return getTable().indexOf(item);
+		}
+		return -1;
 	}
 	
 	//---- editing -----------------------------------------------------------------------------------------------
-
-	private static IInputValidator createParameterNameValidator(){
-		return new IInputValidator(){
-	        public String isValid(String newText) {
-	        	if (newText.equals("")) //$NON-NLS-1$
-	        		return ""; //$NON-NLS-1$
-	        	IStatus status= JavaConventions.validateFieldName(newText);
-	        	if (status.getSeverity() == IStatus.ERROR)
-	        		return status.getMessage();
-	            return null;
-	        }
-		};
-	}
 
 	private void addCellEditors() {
 		final CellEditor editors[]= new CellEditor[PROPERTIES.length];
