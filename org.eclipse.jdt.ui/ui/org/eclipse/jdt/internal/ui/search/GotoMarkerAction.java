@@ -81,18 +81,25 @@ class GotoMarkerAction extends Action {
 			}
 		} else {
 			if (SearchUI.reuseEditor())
-				showWithReuse(marker);
+				showWithReuse(marker, resource, javaElement, wbPage);
 			else
-				showWithoutReuse(marker);
+				showWithoutReuse(marker, javaElement, wbPage);
 		}
 	}
 	
-	private void showWithoutReuse(IMarker marker) {
-		IJavaElement javaElement= getJavaElement(marker);
-		if (javaElement == null || !javaElement.exists()) {
-			beep();
+	private void showWithoutReuse(IMarker marker, IJavaElement javaElement, IWorkbenchPage wbPage) {
+		if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+			// Goto packages view
+			try {
+				IViewPart view= wbPage.showView(JavaUI.ID_PACKAGES);
+				if (view instanceof IPackagesViewPart)
+					((IPackagesViewPart)view).selectAndReveal(javaElement);
+			} catch (PartInitException ex) {
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			}
 			return;
-		}
+		}			
+		
 		IEditorPart editor= null;
 		try {
 			editor= EditorUtility.openInEditor(javaElement, false);
@@ -105,16 +112,7 @@ class GotoMarkerAction extends Action {
 			editor.gotoMarker(marker);
 	}
 	
-	private void showWithReuse(IMarker marker) {
-		IResource resource= marker.getResource();
-		if (resource == null)
-			return;
-		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
-		IJavaElement javaElement= getJavaElement(marker);
-		if (javaElement == null || !javaElement.exists()) {
-			beep();
-			return;
-		}
+	private void showWithReuse(IMarker marker, IResource resource, IJavaElement javaElement, IWorkbenchPage wbPage) {
 		if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			// Goto packages view
 			try {
@@ -127,20 +125,16 @@ class GotoMarkerAction extends Action {
 		}			
 		else if (!isBinary(javaElement)) {
 			if (resource instanceof IFile)
-				showInEditor(marker, new FileEditorInput((IFile)resource), JavaUI.ID_CU_EDITOR);
+				showInEditor(marker, wbPage, new FileEditorInput((IFile)resource), JavaUI.ID_CU_EDITOR);
 		}
 		else {
 			IClassFile cf= getClassFile(javaElement);
 			if (cf != null)
-				showInEditor(marker, new InternalClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR);
+				showInEditor(marker, wbPage, new InternalClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR);
 		}
 	}
 
-	private void showInEditor(IMarker marker, IEditorInput input, String editorId) {
-		IWorkbenchPage page= SearchPlugin.getActivePage();
-		if (page == null)
-			return;
-		
+	private void showInEditor(IMarker marker, IWorkbenchPage page, IEditorInput input, String editorId) {
 		IEditorPart editor= null;
 		IEditorPart[] editorParts= page.getEditors();
 		for (int i= 0; i < editorParts.length; i++) {
