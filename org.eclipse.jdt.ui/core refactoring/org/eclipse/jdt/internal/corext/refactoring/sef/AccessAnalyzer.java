@@ -12,12 +12,16 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTUtil;
 import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -27,28 +31,33 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 class AccessAnalyzer extends ASTVisitor {
 
 	private ICompilationUnit fCUnit;
-	private BindingIdentifier fFieldIdentifier;	
+	private BindingIdentifier fFieldIdentifier;
+	private BindingIdentifier fDeclaringClassIdentifier;	
 	private String fGetter;
 	private String fSetter;
 	private TextChange fChange;
 	private RefactoringStatus fStatus;
 	private boolean fSetterMustReturnValue;
+	private boolean fEncapsulateDeclaringClass;
 
 	private static final String READ_ACCESS= "Encapsulate read access";
 	private static final String WRITE_ACCESS= "Encapsulate write access";
 	private static final String PREFIX_ACCESS= "Encapsulate prefix access";
 	private static final String POSTFIX_ACCESS= "Encapsulate postfix access";
 		
-	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, BindingIdentifier identifier, TextChange change) {
+	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, BindingIdentifier field, BindingIdentifier declaringClass, TextChange change) {
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(unit);
-		Assert.isNotNull(identifier);
+		Assert.isNotNull(field);
+		Assert.isNotNull(declaringClass);
 		Assert.isNotNull(change);
 		fCUnit= unit;
-		fFieldIdentifier= identifier;
+		fFieldIdentifier= field;
+		fDeclaringClassIdentifier= declaringClass;
 		fChange= change;
 		fGetter= refactoring.getGetterName();
 		fSetter= refactoring.getSetterName();
+		fEncapsulateDeclaringClass= refactoring.getEncapsulateDeclaringClass();
 		fStatus= new RefactoringStatus();
 	}
 
@@ -61,7 +70,8 @@ class AccessAnalyzer extends ASTVisitor {
 	}
 	
 	public boolean visit(Assignment node) {
-		if (!fFieldIdentifier.matches(resolveBinding(node.getLeftHandSide())))
+		Expression lhs= node.getLeftHandSide();
+		if (!considerBinding(resolveBinding(lhs), lhs))
 			return true;
 			
 		checkParent(node);
@@ -71,13 +81,14 @@ class AccessAnalyzer extends ASTVisitor {
 	}
 
 	public boolean visit(SimpleName node) {
-		if (fFieldIdentifier.matches(node.resolveBinding()))
+		if (considerBinding(node.resolveBinding(), node))
 			fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, node));
 		return true;
 	}
 	
 	public boolean visit(PrefixExpression node) {
-		if (!fFieldIdentifier.matches(resolveBinding(node.getOperand())))
+		Expression operand= node.getOperand();
+		if (!considerBinding(resolveBinding(operand), operand))
 			return true;
 		
 		PrefixExpression.Operator operator= node.getOperator();	
@@ -90,7 +101,8 @@ class AccessAnalyzer extends ASTVisitor {
 	}
 	
 	public boolean visit(PostfixExpression node) {
-		if (!fFieldIdentifier.matches(resolveBinding(node.getOperand())))
+		Expression operand= node.getOperand();
+		if (!considerBinding(resolveBinding(operand), operand))
 			return true;
 
 		ASTNode parent= node.getParent();
@@ -101,6 +113,22 @@ class AccessAnalyzer extends ASTVisitor {
 		}
 		fChange.addTextEdit(POSTFIX_ACCESS, new EncapsulatePostfixAccess(fGetter, fSetter, node));
 		return false;
+	}
+	
+	private boolean considerBinding(IBinding binding, ASTNode node) {
+		boolean result= fFieldIdentifier.matches(binding);
+		if (!result || fEncapsulateDeclaringClass)
+			return result;
+			
+		if (binding instanceof IVariableBinding) {
+			IVariableBinding fieldBinding= (IVariableBinding)binding;
+			TypeDeclaration type= (TypeDeclaration)ASTUtil.getParent(node, TypeDeclaration.class);
+			if (type != null) {
+				ITypeBinding declaringType= type.resolveBinding();
+				return !fDeclaringClassIdentifier.matches(declaringType);
+			}
+		}
+		return true;
 	}
 	
 	private void checkParent(ASTNode node) {

@@ -21,6 +21,13 @@ public class ASTUtil {
 	private ASTUtil() {
 		// no instance;
 	}
+
+	public static ASTNode getParent(ASTNode node, Class parentClass) {
+		do {
+			node= node.getParent();
+		} while (node != null && !parentClass.isInstance(node));
+		return node;
+	}
 	
 	public static Message[] getMessages(ASTNode node, int flags) {
 		ASTNode root= node.getRoot();

@@ -1,9 +1,9 @@
-public class B {
+public class BBB {
 	public void foo() {
 		int i= 0;
-		B b= new B();
-		B[] bb= new B[10];
-		if (i == 0 && i == 10 && b instanceof B)
+		BBB b= new BBB();
+		BBB[] bb= new BBB[10];
+		if (i == 0 && i == 10 && b instanceof BBB)
 			foo();
 		while(i++ == 10) {
 			foo();

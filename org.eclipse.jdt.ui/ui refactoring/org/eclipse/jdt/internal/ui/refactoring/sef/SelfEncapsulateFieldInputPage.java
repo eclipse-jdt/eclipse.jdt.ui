@@ -12,6 +12,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -69,6 +70,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				processValidation();
 			}
 		});
+		text.setFocus();
 		
 		if (needsModifiers()) {
 			label= new Label(result, SWT.LEFT);
@@ -96,6 +98,18 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			}
 		});
 		layouter.perform(label, combo, 1);
+		
+		final Button checkBox= new Button(result, SWT.CHECK);
+		checkBox.setText("&Encapsulate field accesses in declaring class");
+		checkBox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fRefactoring.setEncapsulateDeclaringClass(checkBox.getSelection());
+			}
+		});
+		checkBox.setSelection(fRefactoring.getEncapsulateDeclaringClass());
+		layouter.perform(checkBox);
+
+		
 		processValidation();
 		
 		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.SEF_WIZARD_PAGE));		

@@ -12,8 +12,8 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 final class EncapsulatePostfixAccess extends SimpleTextEdit {
 	
-	public EncapsulatePostfixAccess(String getter, String setter, PostfixExpression  prefix) {
-		super(prefix.getStartPosition(), prefix.getLength(), setter + "(" + getter + "() " + prefix.getOperator().toString().substring(0, 1) + " 1)");
+	public EncapsulatePostfixAccess(String getter, String setter, PostfixExpression  postfix) {
+		super(postfix.getStartPosition(), postfix.getLength(), setter + "(" + getter + "() " + postfix.getOperator().toString().substring(0, 1) + " 1)");
 	}	
 	
 	private EncapsulatePostfixAccess(TextRange range, String text) {

@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Message;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -37,6 +39,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.dom.ASTUtil;
 import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -64,8 +67,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private String fSetterName;
 	private String fArgName;
 	private boolean fSetterMustReturnValue;
-
 	private int fInsertionIndex;
+	private boolean fEncapsulateDeclaringClass;
+	
 	private List fUsedReadNames;
 	private List fUsedModifyNames;
 	
@@ -79,6 +83,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		NameProposer proposer= new NameProposer(fSettings.fieldPrefixes, fSettings.fieldSuffixes);
 		fGetterName= "get" + proposer.proposeAccessorName(field);
 		fSetterName= "set" + proposer.proposeAccessorName(field);
+		fEncapsulateDeclaringClass= true;
 		fArgName= proposer.proposeArgName(field);
 		checkArgName();
 	}
@@ -111,6 +116,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fInsertionIndex= index;
 	}
 	
+	public void setEncapsulateDeclaringClass(boolean encapsulateDeclaringClass) {
+		fEncapsulateDeclaringClass= encapsulateDeclaringClass;
+	}
+
+	public boolean getEncapsulateDeclaringClass() {
+		return fEncapsulateDeclaringClass;
+	}
+
 	//----activation checking ----------------------------------------------------------
 	
 	/*
@@ -157,19 +170,25 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	public RefactoringStatus checkMethodNames() {
 		RefactoringStatus result= new RefactoringStatus();
-		checkName(result, fGetterName, fUsedReadNames);
-		checkName(result, fSetterName, fUsedModifyNames);
+		IType declaringType= fField.getDeclaringType();
+		checkName(result, fGetterName, fUsedReadNames, declaringType);
+		checkName(result, fSetterName, fUsedModifyNames, declaringType);
 		return result;
 	}
 	
-	private static void checkName(RefactoringStatus status, String name, List usedNames) {
+	private static void checkName(RefactoringStatus status, String name, List usedNames, IType type) {
+		if ("".equals(name)) { //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.getString("Checks.Choose_name")); //$NON-NLS-1$
+			return;
+	    }
 		status.merge(Checks.checkMethodName(name));
 		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
-			String selector= (String)iter.next();
+			IMethodBinding method= (IMethodBinding)iter.next();
+			String selector= method.getName();
 			if (selector.equals(name))
 				status.addFatalError(RefactoringCoreMessages.getFormattedString(
 					"SelfEncapsulateField.method_exists",
-					name));
+					new String[] {Bindings.toString(method), type.getElementName()}));
 		}
 	}	
 	
@@ -195,14 +214,16 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			pm.setTaskName("Analyzing");	
 			IProgressMonitor sub= new SubProgressMonitor(pm, 5);
 			sub.beginTask("", affectedCUs.length);
-			BindingIdentifier bindingIdentifier= new BindingIdentifier(fFieldDeclaration.resolveBinding());
+			BindingIdentifier fieldIdentifier= new BindingIdentifier(fFieldDeclaration.resolveBinding());
+			BindingIdentifier declaringClass= new BindingIdentifier(
+				((TypeDeclaration)ASTUtil.getParent(fFieldDeclaration, TypeDeclaration.class)).resolveBinding());
 			for (int i= 0; i < affectedCUs.length; i++) {
 				ICompilationUnit unit= affectedCUs[i];
 				sub.subTask(unit.getElementName());
 				CompilationUnit root= AST.parseCompilationUnit(unit, true);
 				if (isProcessable(result, root, unit)) {
 					TextChange change= fChangeManager.get(unit);
-					AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, bindingIdentifier, change);
+					AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, change);
 					root.accept(analyzer);
 					result.merge(analyzer.getStatus());
 					if (!fSetterMustReturnValue) 
@@ -274,9 +295,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			IMethodBinding method= methods[i];
 			ITypeBinding[] parameters= methods[i].getParameterTypes();
 			if (parameters == null || parameters.length == 0) {
-				fUsedReadNames.add(new String(method.getName()));
+				fUsedReadNames.add(method);
 			} else if (parameters.length == 1 && parameters[0] == type) {
-				fUsedModifyNames.add(new String(method.getName()));
+				fUsedModifyNames.add(method);
 			} 
 		}
 	}
@@ -299,7 +320,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 							
 		TextChange change= fChangeManager.get(fField.getCompilationUnit());
 		
-		change.addTextEdit("Change visibility to private", new ChangeVisibilityEdit(fField, "private"));
+		if (!Flags.isPrivate(fField.getFlags()))
+			change.addTextEdit("Change visibility to private", new ChangeVisibilityEdit(fField, "private"));
 		
 		String modifiers= createModifiers();
 		String type= Signature.toString(fField.getTypeSignature());

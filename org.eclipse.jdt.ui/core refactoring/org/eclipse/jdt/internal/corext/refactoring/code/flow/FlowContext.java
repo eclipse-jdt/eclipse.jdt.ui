@@ -30,6 +30,8 @@ public class FlowContext {
 	private LocalVariableBinding[] fLocals;
 	private List fExceptionStack;
 	
+	private static final Argument[] EMPTY_ARGUMENTS= new Argument[0];
+	
 	public FlowContext(int start, int length) {
 		fStart= start;
 		fLength= length;
@@ -101,6 +103,8 @@ public class FlowContext {
 	//---- Exception handling --------------------------------------------------------
 	
 	void pushExcptions(Argument[] catchArguments) {
+		if (catchArguments == null)
+			catchArguments= EMPTY_ARGUMENTS;
 		fExceptionStack.add(catchArguments);
 	}
 	

@@ -1,9 +1,9 @@
 public class A {
-	String field;
+	static String value;
 	
 	List l;
 	
 	void foo() {
-		field= "d";
+		value= "d";
 	}
 }
