@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 
 public class NewJavaProjectWizardTest extends TestCase {
 	
@@ -120,7 +120,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertNotNull("b", classpath);
 		assertTrue("c", classpath.length == 2);
 		
-		if (JavaBasePreferencePage.useSrcAndBinFolders()) {
+		if (NewJavaProjectPreferencePage.useSrcAndBinFolders()) {
 			assertEquals("d", outputLocation, project.getFolder("bin").getFullPath());
 			assertEquals("e", classpath[0].getPath(), project.getFolder("src").getFullPath());
 		} else {
