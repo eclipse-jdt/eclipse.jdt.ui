@@ -60,6 +60,7 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 			}
 			fLocals= LocalDeclarationAnalyzer.perform(enclosingNode, getSelection());
 		}
+		super.endVisit(node);
 		if (enclosingNode != null && !getStatus().hasFatalError()) {
 			fExceptions= ExceptionAnalyzer.perform(enclosingNode, getSelection());
 			if (fExceptions == null || fExceptions.length == 0) {
@@ -70,7 +71,6 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 				}
 			}
 		}
-		super.endVisit(node);
 	}
 	
 	public void endVisit(SuperConstructorInvocation node) {
