@@ -3,29 +3,30 @@ package org.eclipse.jdt.internal.core.refactoring.rename;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
+import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.AddToClasspathChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.DeleteFromClasspathChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameSourceFolderChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 
 public class RenameSourceFolderRefactoring	extends Refactoring implements IRenameRefactoring {
 
 	private IPackageFragmentRoot fSourceFolder;
 	private String fNewName;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	
-	public RenameSourceFolderRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragmentRoot sourceFolder){
+	public RenameSourceFolderRefactoring(IPackageFragmentRoot sourceFolder){
 		Assert.isNotNull(sourceFolder); 
-		Assert.isNotNull(changeCreator);
-		fTextBufferChangeCreator= changeCreator;		
 		fSourceFolder= sourceFolder;
 	}
 	
@@ -126,7 +127,11 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			return new RenameSourceFolderChange(fSourceFolder, fNewName);
+			CompositeChange composite= new CompositeChange("Rename source folder", 3);
+			composite.addChange(new AddToClasspathChange(fSourceFolder.getJavaProject(), fNewName));
+			composite.addChange(new RenameSourceFolderChange(fSourceFolder, fNewName));
+			composite.addChange(new DeleteFromClasspathChange(fSourceFolder));
+			return composite;
 		} finally{
 			pm.done();
 		}	
