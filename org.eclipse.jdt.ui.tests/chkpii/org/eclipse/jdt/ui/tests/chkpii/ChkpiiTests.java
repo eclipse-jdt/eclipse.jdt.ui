@@ -87,16 +87,33 @@ public class ChkpiiTests extends TestCase {
 	private boolean testChkpii(int type) {
 		Runtime aRuntime= Runtime.getRuntime();
 		String chkpiiString= getChkpiiString(type);
+		BufferedReader aBufferedReader= null;
+		StringBuffer consoleLog= new StringBuffer();
 		try {
 			Process aProcess= aRuntime.exec(chkpiiString);
-			BufferedReader aBufferedReader= new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
-			while (aBufferedReader.readLine() != null) {
+			aBufferedReader= new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
+			String line= aBufferedReader.readLine();
+			while (line != null) {
+				consoleLog.append(line);
+				consoleLog.append('\n');
+				line= aBufferedReader.readLine();
 			}
 			aProcess.waitFor();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		} catch (InterruptedException e) {
+			return false;
+		} finally {
+			if (aBufferedReader != null)
+				try {
+					aBufferedReader.close();
+				} catch (IOException ex) {
+				}
+		}
+		if (!new File(getOutputFile(type)).exists()) {
+			System.out.println(consoleLog.toString());
+			System.out.flush();
 			return false;
 		}
 		return true;
@@ -250,6 +267,11 @@ public class ChkpiiTests extends TestCase {
 		}
 
 		new File(fLogDirectoryName).mkdirs();
+
+		new File(getOutputFile(PROPERTIES)).delete();
+		new File(getOutputFile(HTML)).delete();
+		new File(getOutputFile(XML)).delete();
+		
 	}
 
 	/*
