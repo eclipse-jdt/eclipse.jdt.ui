@@ -6,6 +6,8 @@ import java.util.Set;
 
 class A{
 
+	public Collection i;	
+
 	public List f(){ 
 		return null;
 	}
@@ -13,6 +15,4 @@ class A{
 	public Set m(){
 		return null;
 	}
-
-	public Collection i;	
 }

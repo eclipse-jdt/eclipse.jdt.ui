@@ -6,6 +6,8 @@ import java.util.Set;
 
 class B extends A{
 
+	public Collection i;
+
 	public Set m() {
 		return null;
 	}
@@ -13,6 +15,4 @@ class B extends A{
 	public List f() {
 		return null;
 	}
-
-	public Collection i;
 }
