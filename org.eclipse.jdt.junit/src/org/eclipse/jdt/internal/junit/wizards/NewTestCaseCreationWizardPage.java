@@ -332,7 +332,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		}
 	}
 
-	private IType chooseClassToTestType() {
+	private IType chooseClassToTestType() {	
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root == null) 
 			return null;
@@ -341,8 +341,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 		
 		IType type= null;
-		try {
-			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES, false, null);
+		try {		
+			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES, false, fClassToTestText.getText());
 			dialog.setTitle(WizardMessages.getString("NewTestClassWizPage.class_to_test.dialog.title")); //$NON-NLS-1$
 			dialog.setMessage(WizardMessages.getString("NewTestClassWizPage.class_to_test.dialog.message")); //$NON-NLS-1$
 			dialog.open();
