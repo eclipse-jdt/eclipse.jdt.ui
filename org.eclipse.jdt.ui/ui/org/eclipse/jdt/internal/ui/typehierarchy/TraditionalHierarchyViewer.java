@@ -136,6 +136,10 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		}
 			
 		private boolean isRootOfInterfaceOrAnonym(ITypeHierarchy hierarchy, IType type) {
+			if (isInScope(type)) {
+				return true;
+			}
+			
 			IType[] subTypes= hierarchy.getSubtypes(type);
 			for (int i= 0; i < subTypes.length; i++) {
 				IType curr= subTypes[i];
@@ -143,7 +147,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 					return true;
 				}
 				if (Flags.isInterface(hierarchy.getCachedFlags(curr))) {
-					if (isInScope(curr) || isRootOfInterfaceOrAnonym(hierarchy, curr)) {
+					if (isRootOfInterfaceOrAnonym(hierarchy, curr)) {
 						return true;
 					}
 				}
@@ -180,8 +184,12 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 						}
 					}
 				} else {
+					boolean isClass= !Flags.isInterface(hierarchy.getCachedFlags(type));
 					for (int i= 0; i < types.length; i++) {
-						res.add(types[i]);
+						IType curr= types[i];
+						if (isClass || isRootOfInterfaceOrAnonym(hierarchy, curr)) {
+							res.add(types[i]);
+						}
 					}
 				}
 			}
