@@ -107,7 +107,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		Table table= new Table(parent, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
-		data.widthHint= convertWidthInCharsToPixels(80);
+		data.widthHint= convertWidthInCharsToPixels(60);
 		data.heightHint= convertHeightInCharsToPixels(10);
 		table.setLayoutData(data);
 				
