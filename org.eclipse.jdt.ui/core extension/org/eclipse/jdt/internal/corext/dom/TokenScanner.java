@@ -12,13 +12,16 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
@@ -28,9 +31,10 @@ public class TokenScanner {
 	
 	public static final int END_OF_FILE= 20001;
 	public static final int LEXICAL_ERROR= 20002;
+	public static final int DOCUMENT_ERROR= 20003;
 	
 	private IScanner fScanner;
-	private TextBuffer fTextBuffer;
+	private IDocument fDocument;
 	private int fEndPosition;
 	
 	/**
@@ -45,22 +49,31 @@ public class TokenScanner {
 	/**
 	 * Creates a TokenScanner
 	 * @param scanner The scanner to be wrapped
-	 * @param textBuffer The textbuffer used for line information if specified
+	 * @param document The document used for line information if specified
 	 */
-	public TokenScanner(IScanner scanner, TextBuffer textBuffer) {
+	public TokenScanner(IScanner scanner, IDocument document) {
 		fScanner= scanner;
 		fEndPosition= fScanner.getSource().length - 1;
+		fDocument= document;
 	}
 	
 	/**
 	 * Creates a TokenScanner
 	 * @param textBuffer The textbuffer to create the scanner on
 	 */
-	public TokenScanner(TextBuffer textBuffer) {
+	public TokenScanner(IDocument document) {
 		fScanner= ToolFactory.createScanner(true, false, false, false);
-		fScanner.setSource(textBuffer.getContent().toCharArray());
-		fTextBuffer= textBuffer;
+		fScanner.setSource(document.get().toCharArray());
+		fDocument= document;
 		fEndPosition= fScanner.getSource().length - 1;
+	}		
+	
+	/**
+	 * Creates a TokenScanner
+	 * @param textBuffer The textbuffer to create the scanner on
+	 */
+	public TokenScanner(TextBuffer textBuffer) {
+		this(textBuffer.getDocument());
 	}		
 	
 	/**
@@ -349,17 +362,25 @@ public class TokenScanner {
 		return res;
 	}
 	
-	private int getLineOfOffset(int offset) {
-		if (fTextBuffer != null) {
-			return fTextBuffer.getLineOfOffset(offset);
+	private int getLineOfOffset(int offset) throws CoreException {
+		if (fDocument != null) {
+			try {
+				return fDocument.getLineOfOffset(offset);
+			} catch (BadLocationException e) {
+				throw new CoreException(JavaUIStatus.createError(DOCUMENT_ERROR, e.getMessage(), e)); //$NON-NLS-1$
+			}
 		}
 		return getScanner().getLineNumber(offset);
 	}
 	
-	private int getLineEnd(int line) {
-		if (fTextBuffer != null) {
-			TextRegion region= fTextBuffer.getLineInformation(line);
-			return region.getOffset() + region.getLength();
+	private int getLineEnd(int line) throws CoreException {
+		if (fDocument != null) {
+			try {
+				IRegion region= fDocument.getLineInformation(line);
+				return region.getOffset() + region.getLength();
+			} catch (BadLocationException e) {
+				throw new CoreException(JavaUIStatus.createError(DOCUMENT_ERROR, e.getMessage(), e)); //$NON-NLS-1$
+			}
 		}
 		return getScanner().getLineEnd(line);
 	}			

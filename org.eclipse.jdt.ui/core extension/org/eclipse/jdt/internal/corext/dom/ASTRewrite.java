@@ -11,19 +11,15 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -77,39 +73,23 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 public final class ASTRewrite extends NewASTRewrite {
 	
-	/** Constant used to create place holder nodes */
-	public static final int UNKNOWN= -1;
-	public static final int BLOCK= 2;
-	public static final int EXPRESSION= 3;
-	public static final int STATEMENT= 4;
-	public static final int SINGLEVAR_DECLARATION= 5;
-	public static final int TYPE= 6;
-	public static final int NAME= 7;
-	public static final int JAVADOC= 8;
-	public static final int VAR_DECLARATION_FRAGMENT= 9;
-	public static final int TYPE_DECLARATION= 10;
-	public static final int FIELD_DECLARATION= 11;
-	public static final int METHOD_DECLARATION= 12;
-	public static final int INITIALIZER= 13;
-	public static final int PACKAGE_DECLARATION= 14;
-	public static final int IMPORT_DECLARATION= 15;
-	
-	/** Constant used to describe the kind of the change */
-	public static final int INSERTED= RewriteEvent.INSERTED;
-	public static final int REMOVED=  RewriteEvent.REMOVED;
-	public static final int REPLACED=  RewriteEvent.REPLACED;
-	public static final int UNCHANGED=  RewriteEvent.UNCHANGED;
-	
-	// properties used on nodes
-	private static final String COMPOUND_CHILDREN= "collapsed"; //$NON-NLS-1$
-	
-	private ASTNode fRootNode;
+	public static final int UNKNOWN= NewASTRewrite.UNKNOWN;
+	public static final int BLOCK= NewASTRewrite.BLOCK;
+	public static final int EXPRESSION= NewASTRewrite.EXPRESSION;
+	public static final int STATEMENT= NewASTRewrite.STATEMENT;
+	public static final int SINGLEVAR_DECLARATION= NewASTRewrite.SINGLEVAR_DECLARATION;
+	public static final int TYPE= NewASTRewrite.TYPE;
+	public static final int NAME= NewASTRewrite.NAME;
+	public static final int JAVADOC= NewASTRewrite.JAVADOC;
+	public static final int VAR_DECLARATION_FRAGMENT= NewASTRewrite.VAR_DECLARATION_FRAGMENT;
+	public static final int TYPE_DECLARATION= NewASTRewrite.TYPE_DECLARATION;
+	public static final int FIELD_DECLARATION= NewASTRewrite.FIELD_DECLARATION;
+	public static final int METHOD_DECLARATION= NewASTRewrite.METHOD_DECLARATION;
+	public static final int INITIALIZER= NewASTRewrite.INITIALIZER;
+	public static final int PACKAGE_DECLARATION= NewASTRewrite.PACKAGE_DECLARATION;
+	public static final int IMPORT_DECLARATION= NewASTRewrite.IMPORT_DECLARATION;
 	
 	private HashMap fChangedProperties;
-	private HashMap fCopyCounts;
-	private HashMap fTrackedNodes;
-	private HashMap fPlaceholderNodes;
-	
 
 	private boolean fHasASTModifications;
 	
@@ -118,29 +98,13 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param node A node which is parent to all modified, changed or tracked nodes.
 	 */
 	public ASTRewrite(ASTNode node) {
-		fRootNode= node;
+		super(node);
 		fChangedProperties= new HashMap();
-		fCopyCounts= null;
-		fMoveSources= null;
-		fTrackedNodes= null;
-		fPlaceholderNodes= null;
+
+
 		fHasASTModifications= false;	
 	}
-	
-	public ASTNode getRootNode() {
-		return fRootNode;
-	}
-	
-	/**
-	 * @deprecated use rewriteNode(TextBuffer, TextEdit)
-	 */
-	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit, Collection resultingGroupDescription) {
-		rewriteNode(textBuffer, rootEdit);
-		if (resultingGroupDescription != null && fGroupDescriptions != null) {
-			resultingGroupDescription.addAll(fGroupDescriptions.values());
-		}
-	}
-	
+		
 	/**
 	 * Perform rewriting: Analyses AST modifications and creates text edits that describe changes to the
 	 * underlying code. Edits do only change code when the corresponding node has changed. New code
@@ -150,8 +114,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 */
 	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit) {
 		convertOldToNewEvents();
-		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, fRootNode.getRoot(), this);
-		fRootNode.accept(visitor); 
+		super.rewriteNode(textBuffer.getDocument(), rootEdit);
 	}
 	
 	/**
@@ -164,6 +127,9 @@ public final class ASTRewrite extends NewASTRewrite {
 			ASTChange object= getChangeProperty(node);
 			if (object instanceof ASTInsert) {
 				processChange(node, null, node, object.description);
+				if (((ASTInsert) object).isBoundToPrevious) {
+					setInsertBoundToPrevious(node);
+				}
 			} else if (object instanceof ASTReplace) {
 				processChange(node, node, ((ASTReplace) object).replacingNode, object.description);
 			} else if (object instanceof ASTRemove) {
@@ -217,6 +183,9 @@ public final class ASTRewrite extends NewASTRewrite {
 				if (object instanceof ASTInsert) {
 					RewriteEvent change= event.insertEntry(insertIndex, curr);
 					setDescription(change, object.description);
+					if (((ASTInsert) object).isBoundToPrevious) {
+						setInsertBoundToPrevious(curr);
+					}
 				} else {
 					insertIndex++;
 					if (object instanceof ASTRemove) {
@@ -240,21 +209,33 @@ public final class ASTRewrite extends NewASTRewrite {
 			Assert.isTrue(getChangeKind(curr) == changes[i].getChangeKind());
 		}
 	}
+	
+	private final int getChangeKind(ASTNode node) {
+		ASTChange change= getChangeProperty(node);
+		if (change == null) {
+			return RewriteEvent.UNCHANGED;
+		}
+		if (change instanceof ASTInsert) {
+			return RewriteEvent.INSERTED;
+		} else if (change instanceof ASTReplace) {
+			return RewriteEvent.REPLACED;
+		} else if (change instanceof ASTRemove) {
+			return RewriteEvent.REMOVED;
+		}
+		return RewriteEvent.UNCHANGED;
+	}
 
 	/**
 	 * Removes all modifications applied to the given AST.
 	 */
 	public final void removeModifications() {
 		if (fHasASTModifications) {
-			fRootNode.accept(new ASTRewriteClear(this));
+			getRootNode().accept(new ASTRewriteClear(this));
 			fHasASTModifications= false;
 		}
 		fChangedProperties.clear();
-		fCopyCounts= null;
-		fMoveSources= null;
-		fPlaceholderNodes= null;
-		fTrackedNodes= null;
-		fGroupDescriptions= null;
+
+		clearRewrite();
 	}
 
 	/**
@@ -267,19 +248,12 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param description Description of the change.
 	 */
 	public final void markAsInserted(ASTNode node, boolean boundToPrevious, GroupDescription description) {
-		Assert.isTrue(getCollapsedNodes(node) == null, "Tries to insert a collapsed node"); //$NON-NLS-1$
+		Assert.isTrue(!isCollapsed(node), "Tries to insert a collapsed node"); //$NON-NLS-1$
 		ASTInsert insert= new ASTInsert();
 		insert.isBoundToPrevious= boundToPrevious;
 		insert.description= description;
 		setChangeProperty(node, insert);
 		fHasASTModifications= true;
-	}
-
-	/**
-	 * @deprecated use markAsInserted(node, boolean, GroupDescription)
-	 */
-	public final void markAsInserted(ASTNode node, boolean boundToPrevious, String description) {
-		markAsInserted(node, boundToPrevious, getGroupDescriptionForName(description));
 	}
 
 	/**
@@ -293,14 +267,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	public final void markAsInserted(ASTNode node, boolean boundToPrevious) {
 		markAsInserted(node, boundToPrevious, (GroupDescription) null);
 	}
-	
-	/**
-	 * @deprecated
-	 */
-	public final void markAsInserted(ASTNode node, String description) {
-		markAsInserted(node, getGroupDescriptionForName(description));
-	}
-		
+			
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
 	 * create a copy target first and insert this target node. ({@link #createCopy})
@@ -326,12 +293,6 @@ public final class ASTRewrite extends NewASTRewrite {
 	
 	public boolean hasASTModifications() {
 		return fHasASTModifications;
-	}
-	/**
-	 * @deprecated Use markAsRemoved(node, GroupDescription)
-	 */
-	public final void markAsRemoved(ASTNode node, String description) {
-		markAsRemoved(node, getGroupDescriptionForName(description));
 	}
 	
 	/**
@@ -373,14 +334,6 @@ public final class ASTRewrite extends NewASTRewrite {
 	}
 	
 	/**
-	 * @deprecated use markAsReplaced(ASTNode, ASTNode, GroupDescription)
-	 */
-	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, String description) {
-		markAsReplaced(node, replacingNode, getGroupDescriptionForName(description));
-	}
-
-
-	/**
 	 * Marks an existing node as replace by a new node. The replacing node node must not exist.
 	 * To replace with an existing node (move or copy), create a copy target first and replace with the
 	 * target node. ({@link #createCopy})
@@ -405,13 +358,6 @@ public final class ASTRewrite extends NewASTRewrite {
 	}
 
 	/**
-	 * @deprecated
-	 */
-	public final void markAsModified(ASTNode node, ASTNode modifiedNode, String description) {
-		markAsModified(node, modifiedNode, getGroupDescriptionForName(description));
-	}
-
-	/**
 	 * Marks an node as modified. The modifiued node describes changes like changed modifiers,
 	 * or operators: This is only for properties that are not children nodes of type ASTNode.
 	 * @param node The node to be marked as modified.
@@ -425,13 +371,6 @@ public final class ASTRewrite extends NewASTRewrite {
 		modify.modifiedNode= modifiedNode;
 		modify.description= description;
 		setChangeProperty(node, modify);
-	}
-
-	/**
-	 * @deprecated use markAsReplaced(ASTNode, List, ASTNode[], GroupDescription)
-	 */
-	public final void markAsReplaced(ASTNode node, List container, ASTNode[] replacements, String description) {
-		markAsReplaced(node, container, replacements, getGroupDescriptionForName(description));
 	}
 
 	/**
@@ -485,18 +424,8 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * to replace at the target position. 
 	 */
 	public final ASTNode createCopy(ASTNode node) {
-		Assert.isTrue(node.getStartPosition() != -1, "Tries to copy a non-existing node"); //$NON-NLS-1$
 		assertIsInside(node);
-		
-		incrementCopyCount(node);
-		
-		int placeHolderType= getPlaceholderType(node);
-		if (placeHolderType == UNKNOWN) {
-			Assert.isTrue(false, "Can not create copy for elements of type " + node.getClass().getName()); //$NON-NLS-1$
-		}
-		CopyPlaceholderData data= new CopyPlaceholderData();
-		data.node= node;
-		return createPlaceholder(data, placeHolderType);
+		return createCopyPlaceholder(node);
 	}
 	
 	/**
@@ -505,23 +434,12 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * override this by marking it as replaced.
 	 */
 	public final ASTNode createMove(ASTNode node) {
-		Assert.isTrue(node.getStartPosition() != -1, "Tries to move a non-existing node"); //$NON-NLS-1$
-		Assert.isTrue(!isMoveSource(node), "Node already marked as moved"); //$NON-NLS-1$
 		assertIsInside(node);
-		int placeHolderType= getPlaceholderType(node);
-		if (placeHolderType == UNKNOWN) {
-			Assert.isTrue(false, "Can not create move for elements of type " + node.getClass().getName()); //$NON-NLS-1$
-		}
-		
-		setAsMoveSource(node);
 		if (getChangeProperty(node) == null) {
 			markAsRemoved(node);
 		}
-		
-		MovePlaceholderData data= new MovePlaceholderData();
-		data.node= node;
-		return createPlaceholder(data, placeHolderType);
-	}	
+		return createMovePlaceholder(node);
+	}
 	
 	/**
 	 * Succeeding nodes in a list are collapsed and represented by a new 'compound' node. The new compound node is inserted in the list
@@ -540,12 +458,9 @@ public final class ASTRewrite extends NewASTRewrite {
 		
 		int startPos= firstNode.getStartPosition();
 		int endPos= lastNode.getStartPosition() + lastNode.getLength();
-		
-		//ArrayList children= new ArrayList(length);
-		
-		Block compoundNode= fRootNode.getAST().newBlock();
+				
+		Block compoundNode= createCollapsePlaceholder();
 		List children= compoundNode.statements();
-		compoundNode.setProperty(COMPOUND_CHILDREN, children);
 		compoundNode.setSourceRange(startPos, endPos - startPos);		
 		
 		for (int i= 0; i < length; i++) {
@@ -558,173 +473,7 @@ public final class ASTRewrite extends NewASTRewrite {
 		
 		return compoundNode;
 	}
-	
-	/**
-	 * Returns the nodes that are collapsed by this compound node. If the node is not a compound node <code>null</code>
-	 * is returned.
-	 */
-	public List getCollapsedNodes(ASTNode compoundNode) {
-		return (List) compoundNode.getProperty(COMPOUND_CHILDREN);
-	}
-	
-	
-	/**
-	 * Creates a target node for a source string to be inserted without being formatted. A target node can
-	 * be inserted or used to replace at the target position.
-	 * @param code String that will be inserted. The string must not have extra indent.
-	 * @param nodeType the type of the place holder. Valid values are <code>METHOD_DECLARATION</code>,
-	 * <code>FIELD_DECLARATION</code>, <code>INITIALIZER</code>,
-	 * <code>TYPE_DECLARATION</code>, <code>BLOCK</code>, <code>STATEMENT</code>,
-	 *  <code>SINGLEVAR_DECLARATION</code>,<code> VAR_DECLARATION_FRAGMENT</code>,
-	 * <code>TYPE</code>, <code>EXPRESSION</code>, <code>NAME</code>
-	 * <code>PACKAGE_DECLARATION</code>, <code>IMPORT_DECLARATION</code> and <code>JAVADOC</code>.
-	 * @return the place holder node
-	 */
-	public final ASTNode createPlaceholder(String code, int nodeType) {
-		StringPlaceholderData data= new StringPlaceholderData();
-		data.code= code;
-		return createPlaceholder(data, nodeType);
-	}
-	
-	private final ASTNode createPlaceholder(PlaceholderData data, int nodeType) {
-		AST ast= fRootNode.getAST();
-		ASTNode placeHolder;
-		switch (nodeType) {
-			case ASTRewrite.NAME:
-				placeHolder= ast.newSimpleName("z"); //$NON-NLS-1$
-				break;
-			case ASTRewrite.EXPRESSION:
-				MethodInvocation expression = ast.newMethodInvocation(); 
-				expression.setName(ast.newSimpleName("z")); //$NON-NLS-1$
-				placeHolder = expression;
-				break;			
-			case ASTRewrite.TYPE:
-				placeHolder= ast.newSimpleType(ast.newSimpleName("X")); //$NON-NLS-1$
-				break;				
-			case ASTRewrite.STATEMENT:
-				placeHolder= ast.newReturnStatement();
-				break;
-			case ASTRewrite.BLOCK:
-				placeHolder= ast.newBlock();
-				break;
-			case ASTRewrite.METHOD_DECLARATION:
-				placeHolder= ast.newMethodDeclaration();
-				break;
-			case ASTRewrite.FIELD_DECLARATION:
-				placeHolder= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-				break;
-			case ASTRewrite.INITIALIZER:
-				placeHolder= ast.newInitializer();
-				break;								
-			case ASTRewrite.SINGLEVAR_DECLARATION:
-				placeHolder= ast.newSingleVariableDeclaration();
-				break;
-			case ASTRewrite.VAR_DECLARATION_FRAGMENT:
-				placeHolder= ast.newVariableDeclarationFragment();
-				break;
-			case ASTRewrite.JAVADOC:
-				placeHolder= ast.newJavadoc();
-				break;				
-			case ASTRewrite.TYPE_DECLARATION:
-				placeHolder= ast.newTypeDeclaration();
-				break;
-			case ASTRewrite.PACKAGE_DECLARATION:
-				placeHolder= ast.newPackageDeclaration();
-				break;
-			case ASTRewrite.IMPORT_DECLARATION:
-				placeHolder= ast.newImportDeclaration();
-				break;
-			default:
-				return null;
-		}
-		setPlaceholderData(placeHolder, data);
-		return placeHolder;
-	}	
-	
-	/**
-	 * Returns the node type that should be used to create a place holder for the given node
-	 * <code>existingNode</code>.
-	 * 
-	 * @param existingNode an existing node for which a place holder is to be created
-	 * @return the node type of a potential place holder
-	 */
-	public static int getPlaceholderType(ASTNode existingNode) {
-		switch (existingNode.getNodeType()) {
-			case ASTNode.SIMPLE_NAME:
-			case ASTNode.QUALIFIED_NAME:
-				return NAME;
-			case ASTNode.SIMPLE_TYPE:
-			case ASTNode.PRIMITIVE_TYPE:
-			case ASTNode.ARRAY_TYPE:
-				return TYPE;				
-			case ASTNode.BLOCK:
-				return BLOCK;
-			case ASTNode.TYPE_DECLARATION:
-				return TYPE_DECLARATION;
-			case ASTNode.METHOD_DECLARATION:
-				return METHOD_DECLARATION;
-			case ASTNode.FIELD_DECLARATION:
-				return FIELD_DECLARATION;
-			case ASTNode.INITIALIZER:
-				return INITIALIZER;
-			case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				return SINGLEVAR_DECLARATION;			
-			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
-				return VAR_DECLARATION_FRAGMENT;
-			case ASTNode.JAVADOC:
-				return JAVADOC;
-			case ASTNode.PACKAGE_DECLARATION:
-				return PACKAGE_DECLARATION;
-			case ASTNode.IMPORT_DECLARATION:
-				return IMPORT_DECLARATION;
-			default:
-				if (existingNode instanceof Expression) {
-					return EXPRESSION;
-				} else if (existingNode instanceof Statement) {
-					// is not Block: special case statement for block
-					return STATEMENT;
-				}
-		}
-		return UNKNOWN;
-	}
-	
-	// to be removed
-	private GroupDescription getGroupDescriptionForName(String name) {
-		if (name == null) {
-			return null;
-		}
-		if (fGroupDescriptions != null) {
-			Iterator iter= fGroupDescriptions.values().iterator();
-			while (iter.hasNext()) {
-				GroupDescription curr= (GroupDescription) iter.next();
-				if (name.equals(curr.getName())) {
-					return curr;
-				}
-			}
-		}
-		return new GroupDescription(name);
-	}
-	
-	
-	public final int getChangeKind(ASTNode node) {
-		ASTChange change= getChangeProperty(node);
-		return getChangeKind(change);
-	}
 		
-	private final int getChangeKind(ASTChange change) {	
-		if (change == null) {
-			return UNCHANGED;
-		}
-		if (change instanceof ASTInsert) {
-			return INSERTED;
-		} else if (change instanceof ASTReplace) {
-			return REPLACED;
-		} else if (change instanceof ASTRemove) {
-			return REMOVED;
-		}
-		return UNCHANGED;
-	}	
-			
 	public final boolean isInserted(ASTNode node) {
 		return getChangeProperty(node) instanceof ASTInsert;
 	}
@@ -736,36 +485,8 @@ public final class ASTRewrite extends NewASTRewrite {
 	public final boolean isRemoved(ASTNode node) {
 		return getChangeProperty(node) instanceof ASTRemove;
 	}	
+		
 	
-	public final boolean isModified(ASTNode node) {
-		return getChangeProperty(node) instanceof ASTModify;
-	}
-	
-	public final boolean isCollapsed(ASTNode node) {
-		return node.getProperty(COMPOUND_CHILDREN) instanceof List;
-	}
-	
-	public final int getCopyCount(ASTNode node) {
-		if (fCopyCounts != null) {
-			Integer n= (Integer) fCopyCounts.get(node);
-			if (n != null) {
-				return n.intValue();
-			}
-		}
-		return 0;
-	}
-	
-
-	
-	
-	public final ASTNode getModifiedNode(ASTNode node) {
-		Object info= getChangeProperty(node);
-		if (info instanceof ASTModify) {
-			return ((ASTModify) info).modifiedNode;
-		}
-		return null;
-	}
-
 	public final ASTNode getReplacingNode(ASTNode node) {
 		Object info= getChangeProperty(node);
 		if (info instanceof ASTReplace) {
@@ -773,60 +494,7 @@ public final class ASTRewrite extends NewASTRewrite {
 		}
 		return null;
 	}
-	
-	public final boolean isInsertBoundToPrevious(ASTNode node) {
-		Object info= getChangeProperty(node);
-		if (info instanceof ASTInsert) {
-			return ((ASTInsert) info).isBoundToPrevious;
-		}
-		return false;
-	}
-	
-	private final void incrementCopyCount(ASTNode node) {
-		int count= getCopyCount(node);
-		if (fCopyCounts == null) {
-			fCopyCounts= new HashMap();
-		}
-		fCopyCounts.put(node, new Integer(count + 1));
-	}
-	
-	public final Object getPlaceholderData(ASTNode node) {
-		if (fPlaceholderNodes != null) {
-			return fPlaceholderNodes.get(node);
-		}
-		return null;	
-	}
-	
-	private void setPlaceholderData(ASTNode node, PlaceholderData data) {
-		if (fPlaceholderNodes == null) {
-			fPlaceholderNodes= new HashMap();
-		}
-		fPlaceholderNodes.put(node, data);		
-	}
-	
-	public final GroupDescription getTrackedNodeData(ASTNode node) {
-		if (fTrackedNodes != null) {
-			return (GroupDescription) fTrackedNodes.get(node);
-		}
-		return null;	
-	}
-	
-	private void setTrackedNodeData(ASTNode node, GroupDescription data) {
-		if (fTrackedNodes == null) {
-			fTrackedNodes= new HashMap();
-		}
-		fTrackedNodes.put(node, data);		
-	}	
-	
-	
-	public final GroupDescription getDescription(ASTNode node) {
-		ASTChange change= getChangeProperty(node);
-		if (change != null) {
-			return change.description;
-		}
-		return null;
-	}
-	
+						
 	private final void setChangeProperty(ASTNode node, ASTChange change) {
 		fChangedProperties.put(node, change);
 	}
@@ -837,7 +505,8 @@ public final class ASTRewrite extends NewASTRewrite {
 		
 	private void assertIsInside(ASTNode node) {
 		int endPos= node.getStartPosition() + node.getLength();
-		if (fRootNode.getStartPosition() > node.getStartPosition() || fRootNode.getStartPosition() + fRootNode.getLength() < endPos) {
+		ASTNode rootNode= getRootNode();
+		if (rootNode.getStartPosition() > node.getStartPosition() || rootNode.getStartPosition() + rootNode.getLength() < endPos) {
 			Assert.isTrue(false, "Node that is changed is not located inside of ASTRewrite root"); //$NON-NLS-1$
 		}
 	}
@@ -860,30 +529,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	private static final class ASTModify extends ASTChange {
 		public ASTNode modifiedNode;
 	}
-	
-	private static class PlaceholderData {
-	}
-	
-	public static final class MovePlaceholderData extends PlaceholderData {
-		public ASTNode node;
-		public String toString() {
-			return "[placeholder move: " + node +"]"; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
-	
-	public static final class CopyPlaceholderData extends PlaceholderData {
-		public ASTNode node;
-		public String toString() {
-			return "[placeholder copy: " + node +"]";  //$NON-NLS-1$//$NON-NLS-2$
-		}
-	}	
-	
-	public static final class StringPlaceholderData extends PlaceholderData {
-		public String code;
-		public String toString() {
-			return "[placeholder string: " + code +"]"; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
+
 	
 	private String getNodeString(ASTNode node) {
 		StringBuffer buf= new StringBuffer();

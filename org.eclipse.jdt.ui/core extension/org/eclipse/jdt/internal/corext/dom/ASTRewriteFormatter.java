@@ -33,23 +33,23 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	private static class ExtendedFlattener extends ASTFlattener {
 
 		private ArrayList fPositions;
-		private ASTRewrite fRewrite;
+		private NewASTRewrite fRewriter;
 
 		
-		public ExtendedFlattener(ASTRewrite rewrite) {
+		public ExtendedFlattener(NewASTRewrite rewrite) {
 			fPositions= new ArrayList();
-			fRewrite= rewrite;
+			fRewriter= rewrite;
 		}
 	
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 		 */
 		public void preVisit(ASTNode node) {
-			Object trackData= fRewrite.getTrackedNodeData(node);
+			Object trackData= fRewriter.getTrackedNodeData(node);
 			if (trackData != null) {
 				addMarker(trackData, fResult.length(), 0);
 			}
-			Object placeholderData= fRewrite.getPlaceholderData(node);
+			Object placeholderData= fRewriter.getPlaceholderData(node);
 			if (placeholderData != null) {
 				addMarker(placeholderData, fResult.length(), 0);
 			}
@@ -59,11 +59,11 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 		 */
 		public void postVisit(ASTNode node) {
-			Object placeholderData= fRewrite.getPlaceholderData(node);
+			Object placeholderData= fRewriter.getPlaceholderData(node);
 			if (placeholderData != null) {
 				fixupLength(placeholderData, fResult.length());
 			}
-			Object trackData= fRewrite.getTrackedNodeData(node);
+			Object trackData= fRewriter.getTrackedNodeData(node);
 			if (trackData != null) {
 				fixupLength(trackData, fResult.length());
 			}
@@ -93,11 +93,10 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}
 	}
 	
-	private ASTRewrite fRewrite;
+	private NewASTRewrite fRewrite;
 	private String fLineDelimiter;
 	
-	public ASTRewriteFormatter(ASTRewrite rewrite, String lineDelimiter) {
-		super();
+	public ASTRewriteFormatter(NewASTRewrite rewrite, String lineDelimiter) {
 		fRewrite= rewrite;
 
 		fLineDelimiter= lineDelimiter;
@@ -220,7 +219,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			Position pos1= new Position(fStart, nodeStart + 1 - fStart);
 			Position pos2= new Position(nodeEnd, 2);
 
-   TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_STATEMENTS, str, indent, lineDelim, null);
+			TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_STATEMENTS, str, indent, lineDelim, null);
 			if (res != null) {
 				str= CodeFormatterUtil.evaluateFormatterEdit(str, res, new Position[] { pos1, pos2 });
 			}
@@ -235,10 +234,10 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	public final static Prefix SPACE= new ConstPrefix(" "); //$NON-NLS-1$
 	public final static Prefix ASSERT_COMMENT= new ConstPrefix(" : "); //$NON-NLS-1$
 	
- public final static Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", "a={" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
- public final static Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ") {" , CodeFormatter.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$ //$NON-NLS-2$
- public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", "} finally {", CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
- public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch(Exception e) {}", "} c" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", "a={" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ") {" , CodeFormatter.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", "} finally {", CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch(Exception e) {}", "} c" , CodeFormatter.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
 
 	public final static BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefixSuffix("if (true)", "else{}", 8); //$NON-NLS-1$ //$NON-NLS-2$
 	public final static BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", 8); //$NON-NLS-1$ //$NON-NLS-2$

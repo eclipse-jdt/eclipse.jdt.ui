@@ -607,13 +607,16 @@ public class ASTNodes {
 	 * Annotates all node that have extended ranges.
 	 */
 	public static void annotateExtraRanges(ASTNode node, TokenScanner scanner) {
-		if (node.getProperty(NODE_RANGE_PROPERTY) != null) {
+		ASTNode astRoot= node.getRoot();
+		
+		// annotate the full cu (preliminary solution until the code goes to jdt.core.
+		if (astRoot.getProperty(NODE_RANGE_PROPERTY) != null) {
 			return;
 		}
 		
-		// no extra ranges for cu node
-		node.setProperty(NODE_RANGE_PROPERTY, new SourceRange(node.getStartPosition(), node.getLength()));
-		doExtraRangesForChildren(node, scanner);
+		// mark the cu with a rnage so we know it's already annotated
+		astRoot.setProperty(NODE_RANGE_PROPERTY, new SourceRange(node.getStartPosition(), node.getLength()));
+		doExtraRangesForChildren(astRoot, scanner);
 	}
 	
 	private static void doExtraRangesForChildren(ASTNode node, TokenScanner scanner) {

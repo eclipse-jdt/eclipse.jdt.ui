@@ -30,8 +30,8 @@ public class ASTRewriteClear extends ASTVisitor {
 			if (fRewrite.isInserted(element)) {
 				list.remove(i);
 			} else {
-				List collapsed= fRewrite.getCollapsedNodes(element);
-				if (collapsed != null) {
+				if (fRewrite.isCollapsed(element)) {
+					List collapsed= ((Block) element).statements();
 					list.remove(i);
 					for (int k= 0; k < collapsed.size(); k++) {
 						Object curr= collapsed.remove(k);

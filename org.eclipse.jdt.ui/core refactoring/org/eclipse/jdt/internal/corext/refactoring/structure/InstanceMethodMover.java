@@ -193,7 +193,7 @@ class InstanceMethodMover {
 			ASTRewrite rewrite= new ASTRewrite(myClassDeclaration);
 			BodyDeclaration newMethodNode= (BodyDeclaration) rewrite.createPlaceholder(newMethodText, ASTRewrite.METHOD_DECLARATION);
 			myClassDeclaration.bodyDeclarations().add(newMethodNode);
-			rewrite.markAsInserted(newMethodNode, RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver")); //$NON-NLS-1$
+			rewrite.markAsInserted(newMethodNode);
 
 			TextBuffer buffer= TextBuffer.create(getReceiverClassCU().getBuffer().getContents());
 			MultiTextEdit edit= new MultiTextEdit();

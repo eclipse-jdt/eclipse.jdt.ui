@@ -321,7 +321,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/* (non-Javadoc)
 	 * Method declared in Refactoring
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) {
 		pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 2); //$NON-NLS-1$
 		pm.subTask(EMPTY);
 		
@@ -371,11 +371,17 @@ public class ExtractMethodRefactoring extends Refactoring {
 				ASTNode target= getTargetNode(selectedNodes);
 				
 				MethodDeclaration mm= createNewMethod(fMethodName, true, target);
-				fRewriter.markAsInserted(mm, RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
+
+				GroupDescription insertDesc= new GroupDescription(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
+				result.addGroupDescription(insertDesc);
+				
+				fRewriter.markAsInserted(mm, insertDesc);
 				List container= ASTNodes.getContainingList(method);
 				container.add(container.indexOf(method) + 1, mm);
 				
-				String description= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName); //$NON-NLS-1$
+				GroupDescription description= new GroupDescription(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName)); //$NON-NLS-1$
+				result.addGroupDescription(description);
+				
 				ASTNode[] callNodes= createCallNodes(null);
 				fRewriter.markAsReplaced(target, callNodes[0], description);
 				if (callNodes.length > 1) {
@@ -384,11 +390,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 					for (int i= 1; i < callNodes.length; i++) {
 						ASTNode node= callNodes[i];
 						container.add(index + i, node);
+
 						fRewriter.markAsInserted(node, description);
 					}
 				}
 				
-				replaceDuplicates();
+				replaceDuplicates(result);
 			
 				if (!fImportRewriter.isEmpty()) {
 					TextEdit edit= fImportRewriter.createEdit(buffer);
@@ -399,11 +406,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 					));
 				}
 				
-				List groups= new ArrayList(2);
+
 				MultiTextEdit changes= new MultiTextEdit();
-				fRewriter.rewriteNode(buffer, changes, groups);
+				fRewriter.rewriteNode(buffer, changes);
 				root.addChild(changes);
-				result.addGroupDescriptions((GroupDescription[])groups.toArray(new GroupDescription[groups.size()]));
 				
 				fRewriter.removeModifications();
 			} finally {
@@ -577,16 +583,19 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return (ASTNode[])result.toArray(new ASTNode[result.size()]);		
 	}
 	
-	private void replaceDuplicates() {
+	private void replaceDuplicates(CompilationUnitChange result) {
 		int numberOf= getNumberOfDuplicates();
 		if (numberOf == 0 || !fReplaceDuplicates)
 			return;
-		String description= null;
+		String label= null;
 		if (numberOf == 1)
-			description= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.single", fMethodName); //$NON-NLS-1$
+			label= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.single", fMethodName); //$NON-NLS-1$
 		else
-			description= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.multi", fMethodName); //$NON-NLS-1$
-			
+			label= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.multi", fMethodName); //$NON-NLS-1$
+		
+		GroupDescription description= new GroupDescription(label);
+		result.addGroupDescription(description);
+		
 		for (int d= 0; d < fDuplicates.length; d++) {
 			SnippetFinder.Match duplicate= fDuplicates[d];
 			if (!duplicate.isMethodBody()) {
