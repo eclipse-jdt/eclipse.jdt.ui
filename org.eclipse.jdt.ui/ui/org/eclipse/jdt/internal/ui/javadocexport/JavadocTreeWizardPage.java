@@ -476,7 +476,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	public String getFileListArgument() {
-		return " @" + createDocletFile();
+		return " @\"" + createDocletFile() + '"';
 	}
 
 	//Returns the path were the doclet file will be created
