@@ -17,7 +17,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
@@ -28,8 +27,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IWorkingCopy;
 
-import org.eclipse.jdt.ui.*;
+import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -129,6 +129,7 @@ public class ProblemTableViewer extends TableViewer {
 	 * @see StructuredViewer#handleInvalidSelection(ISelection, ISelection)
 	 */
 	protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
+		ISelection validNewSelection= getValidSelection(newSelection);
 		if (isShowingWorkingCopies()) {
 			// Convert to and from working copies
 			if (invalidSelection instanceof IStructuredSelection) {
@@ -144,15 +145,47 @@ public class ProblemTableViewer extends TableViewer {
 					}
 				}
 				if (!elementsToSelect.isEmpty()) {
-					List alreadySelected= SelectionUtil.toList(newSelection);
+					List alreadySelected= SelectionUtil.toList(validNewSelection);
 					if (alreadySelected != null && !alreadySelected.isEmpty())
-						elementsToSelect.addAll(SelectionUtil.toList(newSelection));
-					newSelection= new StructuredSelection(elementsToSelect);
-					setSelection(newSelection);
+						elementsToSelect.addAll(SelectionUtil.toList(validNewSelection));
+					validNewSelection= new StructuredSelection(elementsToSelect);
 				}
 			}
 		}
-		super.handleInvalidSelection(invalidSelection, newSelection);
+		if (validNewSelection != newSelection)
+			setSelection(validNewSelection);
+		super.handleInvalidSelection(invalidSelection, validNewSelection);
+	}
+
+	/*
+	 * Returns a selection which does not contain non-existing
+	 * Java elements. If all elements are ok then the original
+	 * selection is returned unchanged.
+	 */
+	private ISelection getValidSelection(ISelection selection) {
+		List selectedElements= SelectionUtil.toList(selection);
+		if (selectedElements == null || selectedElements.isEmpty())
+			return selection;
+
+		boolean selectionChanged= false;
+		List validElementsToSelect= new ArrayList(selectedElements.size());
+		Iterator iter= selectedElements.iterator();
+		while (iter.hasNext()) {
+			Object element= iter.next();
+			if (element instanceof IJavaElement) {
+				IJavaElement je= (IJavaElement)element;
+				if (je != null && je.exists()) 
+					validElementsToSelect.add(je);
+				else
+					selectionChanged= true;
+			} else {
+				validElementsToSelect.add(element);
+			}
+		}
+		if (selectionChanged)
+			return new StructuredSelection(validElementsToSelect);
+		else
+			return selection;
 	}
 
 	/**
@@ -182,7 +215,7 @@ public class ProblemTableViewer extends TableViewer {
 		else
 			return null;
 	}
-
+	
 	/**
 	 * Answers whether this viewer shows working copies or not.
 	 * 

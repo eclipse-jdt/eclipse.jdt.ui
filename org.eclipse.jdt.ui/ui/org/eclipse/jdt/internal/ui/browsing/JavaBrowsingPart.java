@@ -782,7 +782,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			elementToSelect= getSuitableJavaElement(elementToSelect);
 		}
 		
-		if (elementToSelect != null)
+		if (elementToSelect != null && elementToSelect.exists())
 			setSelection(new StructuredSelection(elementToSelect), true);
 		else
 			setSelection(StructuredSelection.EMPTY, true);
