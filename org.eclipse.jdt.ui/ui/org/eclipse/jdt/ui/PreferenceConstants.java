@@ -1281,6 +1281,14 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public static final String EDITOR_SHOW_SEGMENTS= "org.eclipse.jdt.ui.editor.showSegments"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls if browser like links are turned on or off.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String EDITOR_BROWSER_LIKE_LINKS= "browserLikeLinks"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if the Java code assist gets auto activated.
@@ -1765,6 +1773,8 @@ public class PreferenceConstants {
 
 		String ctrl= Action.findModifierString(SWT.CTRL);
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + ctrl); //$NON-NLS-1$
+		
+		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, true);
 
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);	

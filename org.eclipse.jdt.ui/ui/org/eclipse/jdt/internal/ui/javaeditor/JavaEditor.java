@@ -1061,6 +1061,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for compiler task tags */
 	private final static String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
+	/** Preference key for browser like links */
+	private final static String BROWSER_LIKE_LINKS= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS;
 	
 	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
 
@@ -1523,10 +1525,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public void dispose() {
 
-		if (fMouseListener != null) {
-			fMouseListener.uninstall();
-				fMouseListener= null;
-			}
+		if (isBrowserLikeLinks())
+			disableBrowserLikeLinks();
 			
 		if (fEncodingSupport != null) {
 				fEncodingSupport.dispose();
@@ -1624,10 +1624,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);				
 		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
 		
-		if (fMouseListener == null) {
-			fMouseListener= new MouseClickListener();
-			fMouseListener.install();	
-		}
+		if (isBrowserLikeLinks())
+			enableBrowserLikeLinks();
 	}
 	
 	private boolean isTextSelectionEmpty() {
@@ -1691,6 +1689,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (isJavaEditorHoverProperty(property))
 				updateHoverBehavior();
 			
+			if (BROWSER_LIKE_LINKS.equals(property)) {
+				if (isBrowserLikeLinks())
+					enableBrowserLikeLinks();
+				else
+					disableBrowserLikeLinks();
+				return;
+			}
+			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
 		}
@@ -1698,6 +1704,36 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	
 	private boolean isJavaEditorHoverProperty(String property) {
 		return	PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS.equals(property);
+	}
+	
+	/**
+	 * Return whether the browser like links should be enabled
+	 * according to the preference store settings.
+	 * @return <code>true</code> if the browser like links should be enabled
+	 */
+	private boolean isBrowserLikeLinks() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(BROWSER_LIKE_LINKS);
+	}
+	
+	/**
+	 * Enables browser like links.
+	 */
+	private void enableBrowserLikeLinks() {
+		if (fMouseListener == null) {
+			fMouseListener= new MouseClickListener();
+			fMouseListener.install();
+		}
+	}
+	
+	/**
+	 * Disables browser like links.
+	 */
+	private void disableBrowserLikeLinks() {
+		if (fMouseListener != null) {
+			fMouseListener.uninstall();
+			fMouseListener= null;
+		}
 	}
 	
 	/**

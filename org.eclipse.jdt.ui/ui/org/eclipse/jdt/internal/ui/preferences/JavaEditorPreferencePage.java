@@ -203,7 +203,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END),
 	
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS)
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS),
+
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS)
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {
@@ -999,6 +1001,17 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return contentAssistComposite;
 	}
 
+	private Control createNavigationPage(Composite parent) {
+		Composite composite= new Composite(parent, SWT.NULL);
+		GridLayout layout= new GridLayout(); layout.numColumns= 2;
+		composite.setLayout(layout);
+				
+		String text= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinks"); //$NON-NLS-1$
+		addCheckBox(composite, text, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, 0);
+				
+		return composite;
+	}
+
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
@@ -1035,6 +1048,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.hoverTab.title")); //$NON-NLS-1$
 		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(this, fOverlayStore);
 		item.setControl(fJavaEditorHoverConfigurationBlock.createControl(folder));
+		
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.navigationTab.title")); //$NON-NLS-1$
+		item.setControl(createNavigationPage(folder));
 		
 		initialize();
 		
