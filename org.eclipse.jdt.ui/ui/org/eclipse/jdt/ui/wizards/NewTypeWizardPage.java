@@ -48,6 +48,10 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -1522,9 +1526,26 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */		
 	protected String getFileComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doFileComments()) {
-			return getTemplate("filecomment", parentCU, 0); //$NON-NLS-1$
+			String template= getTemplate("filecomment", parentCU, 0); //$NON-NLS-1$
+			if (isValidComment(template)) {
+				return template;
+			}			
 		}
 		return null;
+	}
+	
+	private boolean isValidComment(String template) {
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		scanner.setSource(template.toCharArray());
+		try {
+			int next= scanner.getNextToken();
+			while (next == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || next == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
+				next= scanner.getNextToken();
+			}
+			return next == ITerminalSymbols.TokenNameEOF;
+		} catch (InvalidInputException e) {
+		}
+		return false;
 	}
 	
 	/**
@@ -1537,7 +1558,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doCreateComments()) {
-			return getTemplate("typecomment", parentCU, 0); //$NON-NLS-1$
+			String template= getTemplate("typecomment", parentCU, 0); //$NON-NLS-1$
+			if (isValidComment(template)) {
+				return template;
+			}
 		}
 		return null;
 	}
