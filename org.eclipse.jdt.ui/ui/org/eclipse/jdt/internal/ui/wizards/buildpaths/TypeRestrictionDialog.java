@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -72,14 +68,14 @@ public class TypeRestrictionDialog extends StatusDialog {
 	private ListDialogField fInclusionPatternList;
 	private ListDialogField fExclusionPatternList;
 	private CPListElement fCurrElement;
-	private IProject fCurrProject;
+	//private IProject fCurrProject;
 	
-	private IContainer fCurrSourceFolder;
+	//private IContainer fCurrSourceFolder;
 	
 	private static final int IDX_ADD= 0;
-	private static final int IDX_ADD_MULTIPLE= 1;
-	private static final int IDX_EDIT= 2;
-	private static final int IDX_REMOVE= 4;
+	//private static final int IDX_ADD_MULTIPLE= 1;
+	private static final int IDX_EDIT= 1;
+	private static final int IDX_REMOVE= 3;
 	
 		
 	public TypeRestrictionDialog(Shell parent, CPListElement entryToEdit, boolean focusOnExcluded) {
@@ -90,18 +86,18 @@ public class TypeRestrictionDialog extends StatusDialog {
 
 		setTitle(NewWizardMessages.getString("TypeRestrictionDialog.title")); //$NON-NLS-1$
 
-		fCurrProject= entryToEdit.getJavaProject().getProject();
-		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
-		IResource res= root.findMember(entryToEdit.getPath());
-		if (res instanceof IContainer) {
-			fCurrSourceFolder= (IContainer) res;
-		}	
+		//fCurrProject= entryToEdit.getJavaProject().getProject();
+		//IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
+		//IResource res= root.findMember(entryToEdit.getPath());
+		//if (res instanceof IContainer) {
+		//	fCurrSourceFolder= (IContainer) res;
+		//}	
 		
 		String excLabel= NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.label"); //$NON-NLS-1$
 		ImageDescriptor excDescriptor= JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB;
 		String[] excButtonLabels= new String[] {
 				/* IDX_ADD */ NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.add"), //$NON-NLS-1$
-				/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.add.multiple"), //$NON-NLS-1$
+			//	/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.add.multiple"), //$NON-NLS-1$
 				/* IDX_EDIT */ NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.edit"), //$NON-NLS-1$
 				null,
 				/* IDX_REMOVE */ NewWizardMessages.getString("TypeRestrictionDialog.exclusion.pattern.remove") //$NON-NLS-1$
@@ -112,16 +108,16 @@ public class TypeRestrictionDialog extends StatusDialog {
 		ImageDescriptor incDescriptor= JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB;
 		String[] incButtonLabels= new String[] {
 				/* IDX_ADD */ NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.add"), //$NON-NLS-1$
-				/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.add.multiple"), //$NON-NLS-1$
+			//	/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.add.multiple"), //$NON-NLS-1$
 				/* IDX_EDIT */ NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.edit"), //$NON-NLS-1$
 				null,
 				/* IDX_REMOVE */ NewWizardMessages.getString("TypeRestrictionDialog.inclusion.pattern.remove") //$NON-NLS-1$
 			};	
 		
 		fExclusionPatternList= createListContents(entryToEdit, CPListElement.EXCLUSION, excLabel, excDescriptor, excButtonLabels);
-		fExclusionPatternList.enableButton(IDX_ADD_MULTIPLE, false);
+	//	fExclusionPatternList.enableButton(IDX_ADD_MULTIPLE, false);
 		fInclusionPatternList= createListContents(entryToEdit, CPListElement.INCLUSION, incLabel, incDescriptor, incButtonLabels);
-		fInclusionPatternList.enableButton(IDX_ADD_MULTIPLE, false);
+	//	fInclusionPatternList.enableButton(IDX_ADD_MULTIPLE, false);
 		if (focusOnExcluded) {
 			fExclusionPatternList.postSetFocusOnDialogField(parent.getDisplay());
 		} else {
@@ -147,7 +143,7 @@ public class TypeRestrictionDialog extends StatusDialog {
 		}
 		patternList.setElements(elements);
 		patternList.selectFirstElement();
-		patternList.enableButton(IDX_ADD_MULTIPLE, fCurrSourceFolder != null);
+	//	patternList.enableButton(IDX_ADD_MULTIPLE, fCurrSourceFolder != null);
 		patternList.setViewerSorter(new ViewerSorter());
 		return patternList;
 	}
@@ -186,8 +182,8 @@ public class TypeRestrictionDialog extends StatusDialog {
 			addEntry(field);
 		} else if (index == IDX_EDIT) {
 			editEntry(field);
-		} else if (index == IDX_ADD_MULTIPLE) {
-			addMultipleEntries(field);
+	//	} else if (index == IDX_ADD_MULTIPLE) {
+	//		addMultipleEntries(field);
 		}
 	}
 	
@@ -296,7 +292,7 @@ public class TypeRestrictionDialog extends StatusDialog {
 		super.configureShell(newShell);
 		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.EXCLUSION_PATTERN_DIALOG);
 	}
-	
+	/*
 	private void addMultipleEntries(ListDialogField field) {
 		String title, message;
 		if (isExclusion(field)) {
@@ -314,4 +310,5 @@ public class TypeRestrictionDialog extends StatusDialog {
 			}
 		}
 	}
+	*/
 }

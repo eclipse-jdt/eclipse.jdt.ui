@@ -50,11 +50,11 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class TypeRestrictionEntryDialog extends StatusDialog {
 	
-	private StringButtonDialogField fExclusionPatternDialog;
+	private StringDialogField fExclusionPatternDialog;
 	private StatusInfo fExclusionPatternStatus;
 	
 	private IContainer fCurrSourceFolder;
@@ -97,11 +97,11 @@ public class TypeRestrictionEntryDialog extends StatusDialog {
 		fExclusionPatternStatus= new StatusInfo();
 		
 		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();
-		fExclusionPatternDialog= new StringButtonDialogField(adapter);
+		fExclusionPatternDialog= new StringDialogField();
 		fExclusionPatternDialog.setLabelText(message);
-		fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("TypeRestrictionEntryDialog.pattern.button")); //$NON-NLS-1$
+		//fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("TypeRestrictionEntryDialog.pattern.button")); //$NON-NLS-1$
 		fExclusionPatternDialog.setDialogFieldListener(adapter);
-		fExclusionPatternDialog.enableButton(false /*fCurrSourceFolder != null*/);
+		//fExclusionPatternDialog.enableButton(false /*fCurrSourceFolder != null*/);
 		
 		if (patternToEdit == null) {
 			fExclusionPatternDialog.setText(""); //$NON-NLS-1$
