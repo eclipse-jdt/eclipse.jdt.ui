@@ -15,9 +15,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.Vector;
 
-import java.util.List;
 import junit.extensions.TestDecorator;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -92,7 +91,7 @@ public class RemoteTestRunner implements TestListener {
 	/**
 	 * Queue of rerun requests.
 	 */
-	private List fRerunRequests= new ArrayList(10);
+	private Vector fRerunRequests= new Vector(10);
 	/**
 	 * Reader thread that processes messages from the client.
 	 */
@@ -171,7 +170,7 @@ public class RemoteTestRunner implements TestListener {
 	protected final void defaultInit(String[] args) {
 		for(int i= 0; i < args.length; i++) {
 			if(args[i].toLowerCase().equals("-classnames") || args[i].toLowerCase().equals("-classname")){ //$NON-NLS-1$ //$NON-NLS-2$
-				ArrayList list= new ArrayList();
+				Vector list= new Vector();
 				for (int j= i+1; j < args.length; j++) {
 					if (args[j].startsWith("-")) //$NON-NLS-1$
 						break;
@@ -216,7 +215,7 @@ public class RemoteTestRunner implements TestListener {
 		BufferedReader br= new BufferedReader(new FileReader(new File(testNameFile)));
 		try {
 			String line;
-			ArrayList list= new ArrayList();
+			Vector list= new Vector();
 			while ((line= br.readLine()) != null) {
 				list.add(line);
 			}
