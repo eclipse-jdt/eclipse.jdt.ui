@@ -648,10 +648,6 @@ JavaStructureDiffViewerCreator
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
 			label="%Refactoring.inlineTempAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction"/>
-		<action id="RenameTempAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
-			label="%Refactoring.renameTempAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameTempAction"/>		
 		<action id="ExtractTempAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
 			label="%Refactoring.extractTempAction.label"
