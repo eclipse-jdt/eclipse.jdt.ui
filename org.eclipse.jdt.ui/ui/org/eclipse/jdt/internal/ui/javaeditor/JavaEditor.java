@@ -26,9 +26,12 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
@@ -110,8 +113,12 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.IEncodingSupport;
+
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IViewPart;
@@ -120,9 +127,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AnnotationPreference;
@@ -155,7 +161,9 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -168,6 +176,8 @@ import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -179,13 +189,15 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHi
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
+import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
 
 /**
@@ -257,7 +269,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				synchronizeOutlinePage(element);
 			setSelection(element, false);
 			updateStatusLine();
-			updateOccurrenceAnnotations();
 		}
 	}
 		
@@ -1601,7 +1612,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
 		 */
 		public void shellActivated(ShellEvent e) {
-			updateOccurrenceAnnotations();
+			if (fMarkOccurrenceAnnotations && isActivePart())
+				SelectionListenerWithASTManager.getDefault().forceSelectionChange(JavaEditor.this, (ITextSelection)getSelectionProvider().getSelection());
 		}
 		
 		/*
@@ -1677,11 +1689,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	private Annotation[] fOccurrenceAnnotations= null;
 	/**
-	 * Counts the number of background computation requests.
-	 * @since 3.0
-	 */
-	private volatile int fComputeCount;
-	/**
 	 * Tells whether all occurrences of the element at the
 	 * current caret location are automatically marked in
 	 * this editor.
@@ -1689,16 +1696,12 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	private boolean fMarkOccurrenceAnnotations;
 	/**
-	 * The last element used to highlight its occurrences
-	 * in this editor.
-	 * @since 3.0
-	 */
-	private IBinding fOccurrenceAnnotationsTarget;
-	/**
 	 * The internal shell activation listener for updating occurrences.
 	 * @since 3.0
 	 */
 	private ActivationListener fActivationListener= new ActivationListener();
+	private ISelectionListenerWithAST fPostSelectionListenerWithAST;
+	private Job fOccurrencesFinderJob;
 		
 	/**
 	 * Returns the most narrow java element including the given offset.
@@ -2142,7 +2145,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	public void dispose() {
 		// cancel possible running computation
 		fMarkOccurrenceAnnotations= false;
-		fComputeCount++;
+		uninstallOccurrencesFinder();
 		
 		if (fActivationListener != null) {
 			Shell shell= getEditorSite().getShell();
@@ -2312,10 +2315,13 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			
 			if (PreferenceConstants.EDITOR_MARK_OCCURRENCES.equals(property)) {
 				if (event.getNewValue() instanceof Boolean) {
-					fMarkOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
-					if (!fMarkOccurrenceAnnotations) {
-						fComputeCount++;
-						removeOccurrenceAnnotations();
+					boolean markOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
+					if (markOccurrenceAnnotations != fMarkOccurrenceAnnotations) {
+						fMarkOccurrenceAnnotations= markOccurrenceAnnotations;
+						if (!fMarkOccurrenceAnnotations)
+							uninstallOccurrencesFinder();
+						else
+							installOccurrencesFinder();
 					}
 				}
 			}
@@ -2558,8 +2564,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE))
 			configureInsertMode(OVERWRITE, false);
-		
-		
+
+		if (fMarkOccurrenceAnnotations)
+			installOccurrencesFinder();
+
 		getEditorSite().getShell().addShellListener(fActivationListener);
 	}
 	
@@ -2576,8 +2584,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	public void gotoMarker(IMarker marker) {
 		fLastMarkerTarget= marker;
-		if (!fIsUpdatingAnnotationViews)
-			super.gotoMarker(marker);
+		if (!fIsUpdatingAnnotationViews) {
+			IGotoMarker gotoMarker= (IGotoMarker)getAdapter(IGotoMarker.class);
+			if (gotoMarker !=null)
+				gotoMarker.gotoMarker(marker);
+		}
 	}
 	
 	/**
@@ -2650,119 +2661,77 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * 
 	 * @since 3.0
 	 */
-	class OccurrencesFinder implements Runnable, IDocumentListener {
+	class OccurrencesFinderJob extends Job implements IDocumentListener {
 		
-		private int fCount;
 		private IDocument fDocument;
-		private ITextSelection fSelection;
 		private boolean fCancelled= false;
+		private IProgressMonitor fProgressMonitor;
+		private Position[] fPositions;
 		
-		public OccurrencesFinder(int count, IDocument document, ITextSelection selection) {
-			fCount= count;
+		public OccurrencesFinderJob(IDocument document, Position[] positions) {
+			super("Occurrences Marker"); //$NON-NLS-1$
 			fDocument= document;
-			fSelection= selection;
+			fPositions= positions;
 			fDocument.addDocumentListener(this);
 		}
 		
 		private boolean isCancelled() {
-			return fCount != fComputeCount || fCancelled;
+			return fCancelled || fProgressMonitor.isCanceled();
 		}
 		
 		/*
-		 * @see java.lang.Runnable#run()
+		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
-		public void run() {
+		public IStatus run(IProgressMonitor progressMonitor) {
+			
+			fProgressMonitor= progressMonitor;
 			
 			try {
 				
 				if (isCancelled())
-					return;
-				
-				FindOccurrencesEngine engine= FindOccurrencesEngine.create(getInputJavaElement());
-				if (engine == null)
-					return;
-				
-				List matches= new ArrayList();
-				try {
-					IBinding newTarget= engine.resolveTarget(fSelection.getOffset(), fSelection.getLength());
-
-					if (isCancelled())
-						return;
-					
-					if (newTarget == null)
-						// Use previous element as target 
-						newTarget= fOccurrenceAnnotationsTarget;
-
-//					We no longer execute the code below because we want the 
-//					occurrence annotations be in sync with the code.
-//					Should flickering be a problem we could compare the new 
-//					matchers with the occurrence annotations and only apply
-//					the changes.
-//					if (newTarget == null || fOccurrenceAnnotationsTarget != null && Bindings.equals(fOccurrenceAnnotationsTarget, newTarget)) {
-//						engine.clearTarget();
-//						return;
-//					}
-					
-					fOccurrenceAnnotationsTarget= newTarget;
-					
-					// Find occurrences
-					matches= engine.findOccurrences(fOccurrenceAnnotationsTarget);
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-					return;
-				}
-
-				if (matches == null || matches.isEmpty())
-					return;
-				
-				if (isCancelled())
-					return;
-				
-				if (isCancelled())
-					return;
+					return Status.CANCEL_STATUS;
 				
 				ITextViewer textViewer= getViewer(); 
 				if (textViewer == null)
-					return;
+					return Status.CANCEL_STATUS;
 				
 				IDocument document= textViewer.getDocument();
 				if (document == null)
-					return;
+					return Status.CANCEL_STATUS;
 				
 				IDocumentProvider documentProvider= getDocumentProvider();
 				if (documentProvider == null)
-					return;
-				
+					return Status.CANCEL_STATUS;
+			
 				IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
 				if (annotationModel == null)
-					return;
+					return Status.CANCEL_STATUS;
 				
 				// Add occurrence annotations
-				Map annotationMap= new HashMap(matches.size());
-				for (Iterator each= matches.iterator(); each.hasNext();) {
+				int length= fPositions.length;
+				Map annotationMap= new HashMap(length);
+				for (int i= 0; i < length; i++) {
 					
 					if (isCancelled())
-						return; 
-					
-					ASTNode node= (ASTNode) each.next();
-					if (node == null)
-						continue;
+						return Status.CANCEL_STATUS; 
 					
 					String message;
+					Position position= fPositions[i];
+					
 					// Create & add annotation
 					try {
-						message= document.get(node.getStartPosition(), node.getLength());
+						message= document.get(position.offset, position.length);
 					} catch (BadLocationException ex) {
 						// Skip this match
 						continue;
 					}
 					annotationMap.put(
 							new Annotation("org.eclipse.search.results", false, message),
-							new Position(node.getStartPosition(), node.getLength()));
+							position);
 				}
 				
 				if (isCancelled())
-					return;
+					return Status.CANCEL_STATUS;
 				
 				synchronized (annotationModel) {
 					if (annotationModel instanceof IAnnotationModelExtension) {
@@ -2780,6 +2749,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			} finally {
 				fDocument.removeDocumentListener(this);
 			}
+			return Status.OK_STATUS;
 		}
 
 		/*
@@ -2802,20 +2772,73 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 *
 	 * @since 3.0
 	 */
-	protected void updateOccurrenceAnnotations() {
+	protected void updateOccurrenceAnnotations(ITextSelection selection, CompilationUnit astRoot) {
 
 		if (!fMarkOccurrenceAnnotations)
 			return;
 		
+		if (astRoot == null || selection == null)
+			return;
+		
 		IDocument document= getSourceViewer().getDocument();
-			if (document == null)
-				return;
-				
-		OccurrencesFinder finder= new OccurrencesFinder(++fComputeCount, document, (ITextSelection) getSelectionProvider().getSelection());
-		Thread thread= new Thread(finder, "Occurrences Marker"); //$NON-NLS-1$
-		thread.setDaemon(true);
-		thread.start();
+		if (document == null)
+			return;
+		
+		ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
+		if (!(node instanceof Name))
+			return;
+		
+		IBinding binding= ((Name)node).resolveBinding();
+		if (binding == null)
+			return;
+		
+		if (fOccurrencesFinderJob != null)
+			fOccurrencesFinderJob.cancel();
+
+		// Find the matches && extract positions so we can forget the AST
+		OccurrencesFinder finder = new OccurrencesFinder(binding);
+		astRoot.accept(finder);
+		List matches= finder.getUsages();
+		
+		Position[] positions= new Position[matches.size()];
+		int i= 0;
+		for (Iterator each= matches.iterator(); each.hasNext();) {
+			ASTNode currentNode= (ASTNode)each.next();
+			positions[i++]= new Position(currentNode.getStartPosition(), currentNode.getLength());
+		}
+		
+		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions);
+		fOccurrencesFinderJob.setPriority(Job.DECORATE);
+		fOccurrencesFinderJob.setSystem(true);
+		fOccurrencesFinderJob.schedule();
 	}
+	
+	protected void installOccurrencesFinder() {
+		fMarkOccurrenceAnnotations= true;
+		
+		fPostSelectionListenerWithAST= new ISelectionListenerWithAST() {
+			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
+				updateOccurrenceAnnotations(selection, astRoot);
+			}
+		};
+		SelectionListenerWithASTManager.getDefault().addListener(this, fPostSelectionListenerWithAST);
+	}
+	
+	protected void uninstallOccurrencesFinder() {
+		fMarkOccurrenceAnnotations= false;
+		
+		if (fOccurrencesFinderJob != null) {
+			fOccurrencesFinderJob.cancel();
+			fOccurrencesFinderJob= null;
+		}
+		
+		if (fPostSelectionListenerWithAST != null) {
+			SelectionListenerWithASTManager.getDefault().removeListener(this, fPostSelectionListenerWithAST);
+			fPostSelectionListenerWithAST= null;
+		}
+		
+		removeOccurrenceAnnotations();
+	}	
 	
 	void removeOccurrenceAnnotations() {
 		IDocumentProvider documentProvider= getDocumentProvider();

@@ -80,21 +80,25 @@ public class SelectionListenerWithASTManager {
 		public void fireSelectionChanged(final ITextSelection selection) {
 			if (fCurrentJob != null) {
 				fCurrentJob.cancel();
-				fCurrentJob= null;
 			}
 			
 			fCurrentJob= new Job(JavaUIMessages.getString("SelectionListenerWithASTManager.job.title")) { //$NON-NLS-1$
 				public IStatus run(IProgressMonitor monitor) {
 					synchronized (PartListenerGroup.this) {
-						if (this != fCurrentJob) {
+						if (monitor.isCanceled()) {
+							return Status.CANCEL_STATUS;
+						}
+						calculateASTandInform(selection, monitor);
+						if (monitor.isCanceled()) {
+							return Status.CANCEL_STATUS;
+						} else {
 							return Status.OK_STATUS;
 						}
-						calculateASTandInform(selection);
-						return Status.OK_STATUS;
 					}
 				}
 			};
 			fCurrentJob.setPriority(Job.DECORATE);
+			fCurrentJob.setSystem(true);
 			fCurrentJob.schedule();
 		}
 		
@@ -114,9 +118,9 @@ public class SelectionListenerWithASTManager {
 			return null;
 		}
 		
-		protected void calculateASTandInform(ITextSelection selection) {
+		protected void calculateASTandInform(ITextSelection selection, IProgressMonitor monitor) {
 			CompilationUnit astRoot= computeAST();
-			if (astRoot != null) {
+			if (astRoot != null && !monitor.isCanceled()) {
 				Object[] listeners= fAstListeners.getListeners();
 				for (int i= 0; i < listeners.length; i++) {
 					((ISelectionListenerWithAST) listeners[i]).selectionChanged(fPart, selection, astRoot);
@@ -228,6 +232,4 @@ public class SelectionListenerWithASTManager {
 		if (windowListener != null) {
 			windowListener.selectionChanged(part, selection);
 		}
-	}
-	
-}
+	}}
