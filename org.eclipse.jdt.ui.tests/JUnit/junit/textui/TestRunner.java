@@ -134,7 +134,10 @@ public TestRunner(PrintStream writer) {
 				writer().print(i + ") " + failure.failedTest());
 				Throwable t= failure.thrownException();
 				if (t.getMessage() != null)
-					writer().println(" \"" + StringUtil.truncate(t.getMessage(), 80) + "\"");
+					writer().println(" \"" 
+					//+ StringUtil.truncate(t.getMessage(), 80) 
+					+ t.getMessage()
+					+ "\"");
 				else {
 					writer().println();
 					failure.thrownException().printStackTrace();
