@@ -4,16 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.ISharedImages;
@@ -21,48 +20,42 @@ import org.eclipse.ui.IWorkbench;
 
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 class CPListLabelProvider extends LabelProvider {
 		
 	private String fNewLabel, fClassLabel, fCreateLabel;
-	private Image fJarIcon, fExtJarIcon, fJarWSrcIcon, fExtJarWSrcIcon;
-	private Image fFolderImage, fProjectImage, fVariableImage, fContainerImage;
-	private Image fMissingLibaryImage, fMissingVariableImage;
-	private Image fMissingFolderImage, fMissingProjectImage, fMissingContainerImage;
+	private ImageDescriptor fJarIcon, fExtJarIcon, fJarWSrcIcon, fExtJarWSrcIcon;
+	private ImageDescriptor fFolderImage, fProjectImage, fVariableImage, fContainerImage;
+	
+	private ImageDescriptorRegistry fRegistry;
 	
 	public CPListLabelProvider() {
 		fNewLabel= NewWizardMessages.getString("CPListLabelProvider.new"); //$NON-NLS-1$
 		fClassLabel= NewWizardMessages.getString("CPListLabelProvider.classcontainer"); //$NON-NLS-1$
 		fCreateLabel= NewWizardMessages.getString("CPListLabelProvider.willbecreated"); //$NON-NLS-1$
-		ImageRegistry reg= JavaPlugin.getDefault().getImageRegistry();
+		fRegistry= JavaPlugin.getImageDescriptorRegistry();
 		
-		fJarIcon= reg.get(JavaPluginImages.IMG_OBJS_JAR);
-		fExtJarIcon= reg.get(JavaPluginImages.IMG_OBJS_EXTJAR);
-		fJarWSrcIcon= reg.get(JavaPluginImages.IMG_OBJS_JAR_WSRC);
-		fExtJarWSrcIcon= reg.get(JavaPluginImages.IMG_OBJS_EXTJAR_WSRC);
-		fFolderImage= reg.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT);
-		
-		fVariableImage= reg.get(JavaPluginImages.IMG_OBJS_ENV_VAR);
-		
-		
-		
+		fJarIcon= JavaPluginImages.DESC_OBJS_JAR;
+		fExtJarIcon= JavaPluginImages.DESC_OBJS_EXTJAR;
+		fJarWSrcIcon= JavaPluginImages.DESC_OBJS_JAR_WSRC;
+		fExtJarWSrcIcon= JavaPluginImages.DESC_OBJS_EXTJAR_WSRC;
+		fFolderImage= JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT;
+		fContainerImage= JavaPluginImages.DESC_OBJS_LIBRARY;
+		fVariableImage= JavaPluginImages.DESC_OBJS_ENV_VAR;
+
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
-		fProjectImage= workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT);
-	
-		fMissingLibaryImage= reg.get(JavaPluginImages.IMG_OBJS_MISSING_JAR);
-		fMissingVariableImage= reg.get(JavaPluginImages.IMG_OBJS_MISSING_ENV_VAR);
-		fMissingFolderImage= reg.get(JavaPluginImages.IMG_OBJS_MISSING_PACKFRAG_ROOT);
-		fMissingProjectImage= workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT_CLOSED);
-		
-		fContainerImage= reg.get(JavaPluginImages.IMG_OBJS_LIBRARY);
-		fMissingContainerImage= reg.get(JavaPluginImages.IMG_OBJS_LIBRARY);
+		fProjectImage= workbench.getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_PROJECT);
 	}
 	
 	public String getText(Object element) {
@@ -139,59 +132,49 @@ class CPListLabelProvider extends LabelProvider {
 			}
 		}
 		return super.getText(element);
+	}
+	
+	private ImageDescriptor getBaseImage(CPListElement cpentry) {
+		switch (cpentry.getEntryKind()) {
+			case IClasspathEntry.CPE_SOURCE:
+				return fFolderImage;
+			case IClasspathEntry.CPE_LIBRARY:
+				IResource res= cpentry.getResource();
+				if (res == null) {
+					if (cpentry.getSourceAttachmentPath() == null) {
+						return fExtJarIcon;
+					} else {
+						return fExtJarWSrcIcon;
+					}
+				} else if (res instanceof IFile) {
+					if (cpentry.getSourceAttachmentPath() == null) {
+						return fJarIcon;
+					} else {
+						return fJarWSrcIcon;
+					}
+				} else {
+					return fFolderImage;
+				}
+			case IClasspathEntry.CPE_PROJECT:
+				return fProjectImage;
+			case IClasspathEntry.CPE_VARIABLE:
+				return fVariableImage;
+			case IClasspathEntry.CPE_CONTAINER:
+				return fContainerImage;
+			default:
+				return null;
+		}
 	}			
-			
+		
 	public Image getImage(Object element) {
 		if (element instanceof CPListElement) {
-			CPListElement cpentry= (CPListElement)element;
-			switch (cpentry.getEntryKind()) {
-				case IClasspathEntry.CPE_SOURCE:
-					if (!cpentry.isMissing()) {
-						return fFolderImage;
-					} else {
-						return fMissingFolderImage;
-					}
-				case IClasspathEntry.CPE_LIBRARY:
-					if (!cpentry.isMissing()) {
-						IResource res= cpentry.getResource();
-						if (res == null) {
-							if (cpentry.getSourceAttachmentPath() == null) {
-								return fExtJarIcon;
-							} else {
-								return fExtJarWSrcIcon;
-							}
-						} else if (res instanceof IFile) {
-							if (cpentry.getSourceAttachmentPath() == null) {
-								return fJarIcon;
-							} else {
-								return fJarWSrcIcon;
-							}
-						} else {
-							return fFolderImage;
-						}
-					} else {
-						return fMissingLibaryImage;
-					}
-				case IClasspathEntry.CPE_PROJECT:
-					if (!cpentry.isMissing()) {
-						return fProjectImage;
-					} else {
-						return fMissingProjectImage;
-					}				
-				case IClasspathEntry.CPE_VARIABLE:
-					if (!cpentry.isMissing()) {
-						return fVariableImage;
-					} else {
-						return fMissingVariableImage;
-					}
-				case IClasspathEntry.CPE_CONTAINER:
-					if (!cpentry.isMissing()) {
-						return fContainerImage;
-					} else {
-						return fMissingContainerImage;
-					}					
-				default:
-					// pass						
+			CPListElement cpentry= (CPListElement) element;
+			ImageDescriptor imageDescriptor= getBaseImage(cpentry);
+			if (imageDescriptor != null) {
+				if (cpentry.isMissing()) {
+					imageDescriptor= new JavaElementImageDescriptor(imageDescriptor, JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);
+				}
+				return fRegistry.get(imageDescriptor);
 			}
 		}
 		return null;

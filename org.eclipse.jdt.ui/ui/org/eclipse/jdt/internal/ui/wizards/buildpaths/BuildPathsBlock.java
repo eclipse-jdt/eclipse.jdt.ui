@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -327,12 +328,11 @@ public class BuildPathsBlock {
 			switch (curr.getEntryKind()) {
 				case IClasspathEntry.CPE_CONTAINER:
 					res= null;
-					//try {
-					//	isMissing= (JavaCore.getClasspathContainer(path, fCurrJProject) == null);
-					//} catch (JavaModelException e) {
+					try {
+						isMissing= (JavaCore.getClasspathContainer(path, fCurrJProject) == null);
+					} catch (JavaModelException e) {
 						isMissing= true;
-					//}
-					isMissing= false;
+					}
 					break;
 				case IClasspathEntry.CPE_VARIABLE:
 					IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
@@ -494,7 +494,8 @@ public class BuildPathsBlock {
 		
 		List elements= fClassPathList.getElements();
 	
-		boolean entryMissing= false;
+		CPListElement entryMissing= null;
+		int nEntriesMissing= 0;
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
@@ -509,11 +510,20 @@ public class BuildPathsBlock {
 			}
 
 			entries[i]= currElement.getClasspathEntry();
-			entryMissing= entryMissing || currElement.isMissing();			
+			if (currElement.isMissing()) {
+				nEntriesMissing++;
+				if (entryMissing == null) {
+					entryMissing= currElement;
+				}
+			}
 		}
 				
-		if (entryMissing) {
-			fClassPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.EntryMissing")); //$NON-NLS-1$
+		if (nEntriesMissing > 0) {
+			if (nEntriesMissing == 1) {
+				fClassPathStatus.setWarning(NewWizardMessages.getFormattedString("BuildPathsBlock.warning.EntryMissing", entryMissing.getPath().toString())); //$NON-NLS-1$
+			} else {
+				fClassPathStatus.setWarning(NewWizardMessages.getFormattedString("BuildPathsBlock.warning.EntriesMissing", String.valueOf(nEntriesMissing))); //$NON-NLS-1$
+			}
 		}
 				
 		if (fCurrJProject.hasClasspathCycle(entries)) {
