@@ -465,7 +465,7 @@ public class PackagesView extends JavaBrowsingPart{
 		private int fState;
 
 		public LayoutAction(String text, int state) {
-			super(text);
+			super(text, IAction.AS_RADIO_BUTTON);
 			fState= state;
 			if (state == PackagesView.LIST_VIEW_STATE)
 				WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LAYOUT_FLAT_ACTION);
