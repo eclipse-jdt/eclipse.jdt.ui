@@ -136,6 +136,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			
 			int start= getReplaceOffset();
 			int end= getReplaceEndOffset();
+			end= Math.max(end, offset);
 			
 			// insert template string
 			IDocument document= viewer.getDocument();
@@ -413,9 +414,8 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		try {
 			int replaceOffset= getReplaceOffset();
-			int replaceEndOffset= getReplaceEndOffset();
-			if (replaceEndOffset >= offset) {
-				String content= document.get(replaceOffset, replaceEndOffset - replaceOffset);
+			if (offset >= replaceOffset) {
+				String content= document.get(replaceOffset, offset - replaceOffset);
 				return fTemplate.getName().startsWith(content);
 			}
 		} catch (BadLocationException e) {
