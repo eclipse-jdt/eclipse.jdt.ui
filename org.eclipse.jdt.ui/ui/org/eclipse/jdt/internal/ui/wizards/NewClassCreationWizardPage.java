@@ -234,6 +234,7 @@ public class NewClassCreationWizardPage extends TypePage {
 				StubUtility.evalUnimplementedMethods(type, hierarchy, newMethods, imports);
 			}
 		}
+		monitor.done();
 		String[] res= new String[newMethods.size()];
 		newMethods.toArray(res);
 		return res;

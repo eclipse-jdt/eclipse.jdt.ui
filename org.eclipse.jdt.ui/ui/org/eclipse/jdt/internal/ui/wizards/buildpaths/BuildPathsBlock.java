@@ -5,76 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.Widget;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.ViewerFilter;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.model.WorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.omg.CORBA.UNKNOWN;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.IStatusInfoChangeListener;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
-import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
+import java.lang.reflect.InvocationTargetException;import java.text.MessageFormat;import java.util.ArrayList;import java.util.List;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.TabFolder;import org.eclipse.swt.widgets.TabItem;import org.eclipse.swt.widgets.Widget;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.ISharedImages;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusInfoChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;import org.eclipse.jdt.internal.ui.util.CoreUtility;import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 public class BuildPathsBlock {
 	
@@ -530,38 +461,41 @@ public class BuildPathsBlock {
 		
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
-				monitor.beginTask(getResourceString(OPERATION_DESC), IProgressMonitor.UNKNOWN);
+				monitor.beginTask(getResourceString(OPERATION_DESC), 10);
 				try {
 					setJavaProjectProperties(classPathEntries, path, monitor);
 				} catch (CoreException e) { 
 					throw new InvocationTargetException(e);
-				} 				
+				} finally {
+					monitor.done();
+				}
 			}
 		};
 	}		
 		
 	private void setJavaProjectProperties(List classPathEntries, IPath buildPath, IProgressMonitor monitor) throws CoreException {
-		
 		if (!fCurrProject.exists()) {
-			fCurrProject.create(monitor);
+			fCurrProject.create(null);
 		}
 		
 		if (!fCurrProject.isOpen()) {
-			fCurrProject.open(monitor);
-		}		
+			fCurrProject.open(null);
+		}
 		
 		// create java nature
 		if (!fCurrProject.hasNature(JavaCore.NATURE_ID)) {
-			CoreUtility.addNatureToProject(fCurrProject, JavaCore.NATURE_ID, monitor);
+			CoreUtility.addNatureToProject(fCurrProject, JavaCore.NATURE_ID, null);
 		}
+		monitor.worked(1);
 		
 		// create and set the output path first
 		if (!fWorkspaceRoot.exists(buildPath)) {
 			IFolder folder= fWorkspaceRoot.getFolder(buildPath);
-			CoreUtility.createFolder(folder, true, true, monitor);
-		}		
+			CoreUtility.createFolder(folder, true, true, null);			
+		}
+		monitor.worked(1);
 		
-		fCurrJProject.setOutputLocation(buildPath, monitor);
+		fCurrJProject.setOutputLocation(buildPath, new SubProgressMonitor(monitor, 3));
 		
 		int nEntries= classPathEntries.size();
 		IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
@@ -571,12 +505,13 @@ public class BuildPathsBlock {
 			CPListElement entry= ((CPListElement)classPathEntries.get(i));
 			IResource res= entry.getResource();
 			if ((res instanceof IFolder) && !res.exists()) {
-				CoreUtility.createFolder((IFolder)res, true, true, monitor);
+				CoreUtility.createFolder((IFolder)res, true, true, null);
 			}
 			classpath[i]= entry.getClasspathEntry();
-		}		
+		}	
+		monitor.worked(1);
 		
-		fCurrJProject.setClasspath(classpath, monitor);
+		fCurrJProject.setClasspath(classpath, new SubProgressMonitor(monitor, 3));
 
 		// attach source for libraries
 		for (int i= 0; i < nEntries; i++) {
@@ -586,11 +521,12 @@ public class BuildPathsBlock {
 				if (root != null && root.isArchive()) {
 					IPath sourcePath= entry.getSourceAttachmentPath();
 					IPath sourcePrefix= entry.getSourceAttachmentRootPath();
-					root.attachSource(sourcePath, sourcePrefix, monitor);
+					root.attachSource(sourcePath, sourcePrefix, null);
 					JavaDocAccess.setJavaDocLocation(root, entry.getJavaDocLocation());
 				}
 			}
 		}
+		monitor.worked(1);
 	}	
 	
 	

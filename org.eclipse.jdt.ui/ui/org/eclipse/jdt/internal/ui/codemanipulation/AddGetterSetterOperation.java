@@ -72,8 +72,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 	 */
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
-			String desc= JavaPlugin.getResourceString(OP_DESC);
-			monitor.beginTask(desc, 2);
+			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 2);
 			
 			String fieldName= fField.getElementName();
 			String accessorName= evalAccessorName(fieldName);
@@ -101,7 +100,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 				buf.append(' '); buf.append(getterName);
 				buf.append("() {\n\t\treturn "); buf.append(fieldName); buf.append(";\n\t}\n\n");
 				
-				fCreatedGetter= parentType.createMethod(buf.toString(), null, true, monitor);
+				fCreatedGetter= parentType.createMethod(buf.toString(), null, true, null);
 			}
 			
 			monitor.worked(1);
@@ -129,7 +128,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 				}
 				buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n\t}\n\n");
 				
-				fCreatedSetter= parentType.createMethod(buf.toString(), null, true, monitor);
+				fCreatedSetter= parentType.createMethod(buf.toString(), null, true, null);
 			}
 			
 			monitor.worked(1);

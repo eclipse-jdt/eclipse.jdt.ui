@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -40,10 +40,9 @@ public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
 
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
-			String desc= JavaPlugin.getResourceString(OP_DESC);
-			monitor.beginTask(desc, 3);
+			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 3);
 			
-			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(monitor);
+			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			monitor.worked(1);
 			
 			ArrayList toImplement= new ArrayList();
@@ -56,12 +55,13 @@ public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
 			IMethod lastMethod= null;
 			for (int i= 0; i < nToImplement; i++) {
 				String content= (String) toImplement.get(i);
-				lastMethod= fType.createMethod(content, lastMethod, true, monitor);
+				lastMethod= fType.createMethod(content, lastMethod, true, null);
 				createdMethods.add(lastMethod);
 			}
 			monitor.worked(1);
 			
-			imports.create(fDoSave, monitor);
+			imports.create(fDoSave, null);
+			monitor.worked(1);
 
 			fCreatedMethods= new IMethod[createdMethods.size()];
 			createdMethods.toArray(fCreatedMethods);

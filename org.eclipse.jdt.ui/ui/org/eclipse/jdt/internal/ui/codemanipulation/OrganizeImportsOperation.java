@@ -5,38 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-import org.eclipse.jface.viewers.ILabelProvider;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-
-import org.eclipse.jdt.internal.compiler.IProblem;
-import org.eclipse.jdt.internal.compiler.IProblemFactory;
-import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;
-import org.eclipse.jdt.internal.compiler.SourceElementParser;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
-import org.eclipse.jdt.internal.ui.util.TypeRef;
-import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
+import java.util.ArrayList;import java.util.List;import java.util.Locale;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.internal.compiler.IProblem;import org.eclipse.jdt.internal.compiler.IProblemFactory;import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;import org.eclipse.jdt.internal.compiler.SourceElementParser;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
 
 
 public class OrganizeImportsOperation extends WorkspaceModifyOperation {
@@ -76,7 +45,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask("Organize Imports", 3);
+			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 3);
 			
 			String[] references= findTypeReferences(fCompilationUnit);
 			if (references == null) {
@@ -99,10 +68,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 					oldDemandImports.add(packName);
 				} else {
 					oldSingleImports.add(curr.getElementName());
-				}
-				// wait for solution
-				//curr.delete(false, monitor);
-				
+				}			
 			}
 			oldDemandImports.add("");
 			oldDemandImports.add("java.lang");
@@ -117,7 +83,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 			
 			ArrayList openChoices= new ArrayList();
 			
-			TypeRefProcessor processor= new TypeRefProcessor(oldSingleImports, oldDemandImports, impStructure, monitor);
+			TypeRefProcessor processor= new TypeRefProcessor(oldSingleImports, oldDemandImports, impStructure, new SubProgressMonitor(monitor, 1));
 			for (int i= 0; i < references.length; i++) {
 				TypeRef[] ret= processor.process(references[i]);
 				if (ret != null) {
@@ -136,8 +102,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 				}
 			}
 						
-			fCreatedImports= impStructure.create(fDoSave, monitor);
-			monitor.worked(1);
+			fCreatedImports= impStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}

@@ -5,61 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.viewers.LabelProvider;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-
-import org.eclipse.jdt.internal.compiler.ConfigurableOption;
-import org.eclipse.jdt.internal.compiler.env.IConstants;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IBuffer;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.compiler.env.IConstants;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
 public abstract class TypePage extends ContainerPackagePage {
 	
@@ -93,6 +39,8 @@ public abstract class TypePage extends ContainerPackagePage {
 
 	private final static String SUPERCLASS_DIALOG= PAGE_NAME + ".SuperClassDialog";
 	private final static String INTERFACES_DIALOG= PAGE_NAME + ".InterfacesDialog";
+	
+	private final static String OPERATION_DESC= PAGE_NAME + ".operationdesc";
 	
 	private class InterfacesListLabelProvider extends LabelProvider {
 		
@@ -601,7 +549,11 @@ public abstract class TypePage extends ContainerPackagePage {
 
 	
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
+		monitor.beginTask(getResourceString(OPERATION_DESC), 10);
+		
 		IPackageFragment pack= createPackage(monitor);
+		monitor.worked(1);
+		
 		String clName= fTypeNameDialogField.getText();
 		
 		boolean isInnerClass= isEnclosingTypeSelected();
@@ -617,7 +569,7 @@ public abstract class TypePage extends ContainerPackagePage {
 			imports= new ImportsStructure(parentCU, prefOrder, threshold);
 			
 			String content= createTypeBody(imports, indent);
-			createdType= parentCU.createType(content, null, true, monitor);
+			createdType= parentCU.createType(content, null, true, new SubProgressMonitor(monitor, 5));
 		} else {
 			IType enclosingType= getEnclosingType();
 			
@@ -633,13 +585,13 @@ public abstract class TypePage extends ContainerPackagePage {
 			
 			indent= StubUtility.getIndentUsed(enclosingType, 4) + 1;
 			String content= createTypeBody(imports, indent);
-			createdType= enclosingType.createType(content, null, true, monitor);
+			createdType= enclosingType.createType(content, null, true, new SubProgressMonitor(monitor, 1));
 		}
 		
 		// add imports for superclass/interfaces, so the type can be parsed correctly
-		imports.create(!isInnerClass, monitor);
+		imports.create(!isInnerClass, new SubProgressMonitor(monitor, 1));
 		
-		String[] methods= evalMethods(createdType, indent + 1, imports, monitor);
+		String[] methods= evalMethods(createdType, indent + 1, imports, new SubProgressMonitor(monitor, 1));
 		if (methods.length > 0) {
 			IMethod lastCreated= null;
 			for (int i= 0; i < methods.length; i++) {
@@ -648,7 +600,7 @@ public abstract class TypePage extends ContainerPackagePage {
 			}		
 			
 			// add imports
-			imports.create(!isInnerClass, monitor);
+			imports.create(!isInnerClass, new SubProgressMonitor(monitor, 1));
 		}
 		
 		ConfigurableOption[] options= JavaPlugin.getDefault().getCodeFormatterOptions();
@@ -659,7 +611,7 @@ public abstract class TypePage extends ContainerPackagePage {
 		buf.replace(range.getOffset(), range.getLength(), formattedContent);
 		
 		fCreatedType= createdType;
-		
+		monitor.done();
 	}	
 			
 	public IType getNewType() {

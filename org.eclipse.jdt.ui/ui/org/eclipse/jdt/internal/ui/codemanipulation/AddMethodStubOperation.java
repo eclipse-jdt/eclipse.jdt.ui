@@ -41,8 +41,7 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
-			String desc= JavaPlugin.getResourceString(OP_DESC);
-			monitor.beginTask(desc, fInheritedMethods.length + 1);
+			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), fInheritedMethods.length + 1);
 			
 			IMethod[] existingMethods= fType.getMethods();
 			ArrayList createdMethods= new ArrayList();
@@ -51,14 +50,15 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 			for (int i= 0; i < fInheritedMethods.length; i++) {
 				IMethod inheritedMethod= fInheritedMethods[i];
 				String content= StubUtility.genStub(fType, inheritedMethod, imports);
-				IMethod newMethod= fType.createMethod(content, null, true, monitor);
+				IMethod newMethod= fType.createMethod(content, null, true, null);
 				createdMethods.add(newMethod);
 				monitor.worked(1);
 			}
 			
 			int nCreated= createdMethods.size();
 			if (nCreated > 0) {
-				imports.create(fDoSave, monitor);
+				imports.create(fDoSave, null);
+				monitor.worked(1);
 				fCreatedMethods= new IMethod[nCreated];
 				createdMethods.toArray(fCreatedMethods);
 			}

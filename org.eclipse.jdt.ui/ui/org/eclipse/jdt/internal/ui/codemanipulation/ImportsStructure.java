@@ -4,26 +4,8 @@
  * (c) Copyright IBM Corp 1999, 2000
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
-import java.util.ArrayList;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.internal.ui.util.DocumentManager;
+import java.util.ArrayList;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportContainer;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IPackageDeclaration;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.ui.util.DocumentManager;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 public class ImportsStructure {
 	
@@ -225,12 +207,13 @@ public class ImportsStructure {
 		docManager.connect();
 		ArrayList created= new ArrayList();
 		try {
-			performCreate(created, docManager.getDocument(), monitor);
+			performCreate(created, docManager.getDocument());
 			if (save) {
-				docManager.save(monitor);
-			}	 
+				docManager.save(null);
+			}	
 		} finally {
 			docManager.disconnect();
+			monitor.done();
 		}
 		IImportDeclaration[] result= new IImportDeclaration[created.size()];
 		created.toArray(result);
@@ -248,7 +231,7 @@ public class ImportsStructure {
 	}
 	
 	
-	private void performCreate(ArrayList created, IDocument doc, IProgressMonitor monitor) throws JavaModelException {
+	private void performCreate(ArrayList created, IDocument doc) throws JavaModelException {
 		int importsStart, importsLen;
 
 		String[] lineDelims= doc.getLegalLineDelimiters();

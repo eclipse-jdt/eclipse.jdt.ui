@@ -50,9 +50,7 @@ public class AddImportsOperation extends WorkspaceModifyOperation {
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
 			int nImports= fImports.length;
-			
-			String desc= JavaPlugin.getResourceString(OP_DESC);
-			monitor.beginTask(desc, 3);
+			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 2);
 			
 			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit);
 			
@@ -68,7 +66,7 @@ public class AddImportsOperation extends WorkspaceModifyOperation {
 				}
 			}
 			monitor.worked(1);
-			fAddedImports= impStructure.create(fDoSave, monitor);
+			fAddedImports= impStructure.create(fDoSave, null);
 			monitor.worked(1);
 		} finally {
 			monitor.done();

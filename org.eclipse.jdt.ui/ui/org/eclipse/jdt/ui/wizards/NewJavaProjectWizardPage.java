@@ -5,26 +5,7 @@ package org.eclipse.jdt.ui.wizards;
  * (c) Copyright IBM Corp 1999, 2000
  */
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.wizard.WizardPage;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.IStatusInfoChangeListener;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IProjectDescription;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Platform;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusInfoChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
 /**
  * Standard wizard page for creating new Java projects. This page can be used in 
@@ -36,6 +17,8 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 public class NewJavaProjectWizardPage extends WizardPage {
 	
 	private static final String PAGE_NAME= "NewJavaProjectWizardPage";
+	
+	private static final String OP_DESC= PAGE_NAME + ".op_desc";
 
 	private WizardNewProjectCreationPage fMainPage;
 	private IPath fCurrProjectPath;
@@ -43,6 +26,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	private BuildPathsBlock fBuildPathsBlock;
 
 	private StatusInfo fCurrStatus;
+	
 	
 	/**
 	 * Creates a Java project wizard creation page.
@@ -116,6 +100,14 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	protected IProject getProjectHandle() {
 		return fMainPage.getProjectHandle();
 	}
+	
+	/**
+	 * Gets the project location path from the main page
+	 * Overwrite this method if you do not have a main page
+	 */
+	protected IPath getLocationPath() {
+		return fMainPage.getLocationPath();
+	}	
 
 	/**
 	 * Returns the Java project handle corresponding to the project defined in
@@ -159,8 +151,39 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 * @return the runnable
 	 */		
 	public IRunnableWithProgress getRunnable() {
-		fBuildPathsBlock.init(getProjectHandle(), false);
-		return fBuildPathsBlock.getRunnable();
+		return new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 10);
+				int workLeft= 10;
+				
+				// create the project
+				IWorkspace workspace= ResourcesPlugin.getWorkspace();
+				IProject project= getProjectHandle();
+				try {
+					if (!project.exists()) {
+						IProjectDescription desc= workspace.newProjectDescription(project.getName());
+						IPath locationPath= getLocationPath();
+						if (Platform.getLocation().equals(locationPath)) {
+							locationPath= null;
+						}
+						desc.setLocation(locationPath);
+						project.create(desc, new SubProgressMonitor(monitor, 1));
+						workLeft--;
+					}
+					if (!project.isOpen()) {
+						project.open(new SubProgressMonitor(monitor, 1));
+						workLeft--;
+					}
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				}
+				// create the java project
+				fBuildPathsBlock.init(project, false);
+				IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
+				jrunnable.run(new SubProgressMonitor(monitor, workLeft));
+				monitor.done();
+			}
+		};	
 	}
 	
 	/* (non-Javadoc)
