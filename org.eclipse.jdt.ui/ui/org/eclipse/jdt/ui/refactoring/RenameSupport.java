@@ -79,7 +79,7 @@ public class RenameSupport {
 		if (fPreCheckStatus.hasFatalError())
 			return fPreCheckStatus.getFirstEntry(RefactoringStatus.FATAL).asStatus();
 		else
-			return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null);
+			return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 	}
 
 	/**

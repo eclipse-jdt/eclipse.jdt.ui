@@ -26,8 +26,8 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider {
 
 	private static final boolean USE_LIGHTWEIGHT= false;
 	
-	private static final String PROBLEM_DECORATOR_ID= "org.eclipse.jdt.ui.problem.decorator";
-	private static final String OVERRIDE_DECORATOR_ID= "org.eclipse.jdt.ui.override.decorator";
+	private static final String PROBLEM_DECORATOR_ID= "org.eclipse.jdt.ui.problem.decorator"; //$NON-NLS-1$
+	private static final String OVERRIDE_DECORATOR_ID= "org.eclipse.jdt.ui.override.decorator"; //$NON-NLS-1$
 	
 	private boolean fUseErrorTick;
 	private boolean fUseOverride;

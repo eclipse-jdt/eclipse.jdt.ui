@@ -107,7 +107,7 @@ public class JavaElementImageProvider {
 			return getJavaImageDescriptor((IJavaElement) element, flags);
 		} else if (element instanceof IFile) {
 			IFile file= (IFile) element;
-			if ("java".equals(file.getFileExtension())) {
+			if ("java".equals(file.getFileExtension())) { //$NON-NLS-1$
 				return getCUResourceImageDescriptor(file, flags); // image for a CU not on the build path
 			}
 			return getWorkbenchImageDescriptor(file, flags);

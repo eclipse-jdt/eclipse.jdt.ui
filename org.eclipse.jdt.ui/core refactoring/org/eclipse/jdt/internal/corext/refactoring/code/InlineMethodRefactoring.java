@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -78,8 +79,6 @@ public class InlineMethodRefactoring extends Refactoring {
 	private boolean fDeleteSource;
 	private int fCurrentMode;
 	
-	private static final String SOURCE= "source";
-
 	private InlineMethodRefactoring(ICompilationUnit unit, ASTNode node, CodeGenerationSettings settings) {
 		Assert.isNotNull(unit);
 		Assert.isNotNull(node);
@@ -118,7 +117,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	
 	public String getName() {
-		return "Inline Method Refactoring";
+		return RefactoringCoreMessages.getString("InlineMethodRefactoring.name"); //$NON-NLS-1$
 	}
 	
 	public void setSaveChanges(boolean save) {
@@ -162,7 +161,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
 		RefactoringStatus result= new RefactoringStatus();
 		fSourceProvider.initialize();
@@ -172,10 +171,10 @@ public class InlineMethodRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 		IProgressMonitor sub= new SubProgressMonitor(pm, 1);
-		sub.beginTask("", units.length * 3);
+		sub.beginTask("", units.length * 3); //$NON-NLS-1$
 		for (int c= 0; c < units.length; c++) {
 			ICompilationUnit unit= units[c];
-			sub.subTask("Processing" + unit.getElementName());
+			sub.subTask(RefactoringCoreMessages.getFormattedString("InlineMethodRefactoring.processing",  unit.getElementName())); //$NON-NLS-1$
 			CallInliner inliner= null;
 			try {
 				boolean added= false;
@@ -201,7 +200,7 @@ public class InlineMethodRefactoring extends Refactoring {
 								added= true;
 								TextEdit edit= inliner.perform();
 								change.addGroupDescription( 
-									new GroupDescription("Inline invocation", new TextEdit[] { edit }));
+									new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"), new TextEdit[] { edit })); //$NON-NLS-1$
 								root.add(edit);
 							}
 						} else {
@@ -230,7 +229,7 @@ public class InlineMethodRefactoring extends Refactoring {
 				TextChange change= fChangeManager.get(fSourceProvider.getCompilationUnit());
 				TextEdit delete= fSourceProvider.getDeleteEdit();
 				GroupDescription description= new GroupDescription(
-					"Delete method declaration", new TextEdit[] { delete });
+					RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.delete"), new TextEdit[] { delete }); //$NON-NLS-1$
 				TextEdit root= change.getEdit();
 				if (root != null) {
 					root.add(delete);
@@ -242,7 +241,7 @@ public class InlineMethodRefactoring extends Refactoring {
 				throw new JavaModelException(e);
 			}
 		}
-		return new CompositeChange("Inline Call", fChangeManager.getAllChanges());
+		return new CompositeChange(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inlineCall"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 	}
 	
 	private static SourceProvider resolveSourceProvider(RefactoringStatus status, ICompilationUnit unit, MethodInvocation invocation) throws JavaModelException {
@@ -256,7 +255,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		if (method != null) {
 			ICompilationUnit source= method.getCompilationUnit();
 			if (source == null) {
-				status.addFatalError("Can't inline method since it is declared in a class file");
+				status.addFatalError(RefactoringCoreMessages.getString("InlineMethodRefactoring.error.classFile")); //$NON-NLS-1$
 				return null;
 			}
 			if (!source.isWorkingCopy()) {
@@ -276,7 +275,7 @@ public class InlineMethodRefactoring extends Refactoring {
 				return new SourceProvider(source, declaration);
 			}
 		}
-		status.addFatalError("Unable to resolve corresponding method declaration.");
+		status.addFatalError(RefactoringCoreMessages.getString("InlineMethodRefactoring.error.noMethodDeclaration")); //$NON-NLS-1$
 		return null;
 	}
 	

@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
@@ -119,7 +120,7 @@ public class CallInliner {
 		Expression exp= fInvocation.getExpression();
 		if (exp != null && exp.resolveTypeBinding() == null) {
 			result.addFatalError(
-				"Can't determine receiver's type.",
+				RefactoringCoreMessages.getString("CallInliner.receiver_type"), //$NON-NLS-1$
 				JavaSourceContext.create(fCUnit, exp));
 			return result;
 		}
@@ -135,14 +136,14 @@ public class CallInliner {
 		if (nodeType == ASTNode.EXPRESSION_STATEMENT) {
 			if (fSourceProvider.isExecutionFlowInterrupted()) {
 				result.addFatalError(
-					"Can't inline call. Return statement in method declaration interrupts execution flow.", 
+					RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
 					JavaSourceContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()));
 				return result;	
 			}
 		} else if (nodeType == ASTNode.METHOD_INVOCATION) {
 			if (!(isValidParent(fTargetNode.getParent()) || fSourceProvider.getNumberOfStatements() == 1)) {
 				result.addFatalError(
-					"Can only inline simple functions (consisting of a return statement) or functions used in an assignment.",
+					RefactoringCoreMessages.getString("CallInliner.simple_functions"), //$NON-NLS-1$
 					JavaSourceContext.create(fCUnit, fInvocation));
 				return result;
 			}
@@ -161,7 +162,7 @@ public class CallInliner {
 				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform((Initializer)fBodyDeclaration);
 				break;
 			default:
-				Assert.isTrue(false, "Should not happen");			
+				Assert.isTrue(false, "Should not happen");			 //$NON-NLS-1$
 		}
 		return result;
 	}
@@ -237,14 +238,14 @@ public class CallInliner {
 				// local.
 				locals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
-					fInvocationScope.createName("r"), 
+					fInvocationScope.createName("r"),  //$NON-NLS-1$
 					(Expression)fRewriter.createCopy(receiver)));
 				return;
 			case 1:
 				context.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
 				return;
 			default:
-				String local= fInvocationScope.createName("r");
+				String local= fInvocationScope.createName("r"); //$NON-NLS-1$
 				locals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
 					local, 
@@ -334,13 +335,13 @@ public class CallInliner {
 			if (type.isArray()) {
 				StringBuffer buffer= new StringBuffer(typeName);
 				for (int i= 0; i < type.getDimensions(); i++) {
-					buffer.append("[]");
+					buffer.append("[]"); //$NON-NLS-1$
 				}
 				typeName= buffer.toString();
 			}
 		}
 		VariableDeclarationStatement decl= (VariableDeclarationStatement)ASTNodeFactory.newStatement(
-			fInvocation.getAST(), typeName + " " + name + ";");
+			fInvocation.getAST(), typeName + " " + name + ";"); //$NON-NLS-1$ //$NON-NLS-2$
 		((VariableDeclarationFragment)decl.fragments().get(0)).setInitializer(initializer);
 		return decl;
 	}
