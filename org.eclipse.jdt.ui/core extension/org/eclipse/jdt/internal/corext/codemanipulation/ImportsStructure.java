@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -448,12 +449,16 @@ public class ImportsStructure implements IImportsStructure {
 			ISourceRange importSourceRange= container.getSourceRange();
 			int startPos= importSourceRange.getOffset();
 			int endPos= startPos + importSourceRange.getLength();
-			int nextLine= textBuffer.getLineOfOffset(endPos) + 1;
-			if (nextLine < textBuffer.getNumberOfLines()) {
-				int stopPos= textBuffer.getLineInformation(nextLine).getOffset();
-				// read to beginning of next character or beginning of next line
-				while (endPos < stopPos && Character.isWhitespace(textBuffer.getChar(endPos))) {
-					endPos++;
+			if (!Strings.isLineDelimiterChar(textBuffer.getChar(endPos - 1))) {
+				// if not already after a new line, go to beginning of next line
+				// (if last char in new line -> import ends with a comment, see 10557)
+				int nextLine= textBuffer.getLineOfOffset(endPos) + 1;
+				if (nextLine < textBuffer.getNumberOfLines()) {
+					int stopPos= textBuffer.getLineInformation(nextLine).getOffset();
+					// read to beginning of next character or beginning of next line
+					while (endPos < stopPos && Character.isWhitespace(textBuffer.getChar(endPos))) {
+						endPos++;
+					}
 				}
 			}
 			return new TextRange(startPos, endPos - startPos);

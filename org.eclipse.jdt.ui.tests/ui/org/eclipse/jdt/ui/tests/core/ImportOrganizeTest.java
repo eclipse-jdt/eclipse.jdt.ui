@@ -38,7 +38,7 @@ public class ImportOrganizeTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -517,7 +517,7 @@ public class ImportOrganizeTest extends TestCase {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
-	private boolean BUG_10557= true;
+	private boolean BUG_10557= false;
 	
 	public void testCommentAfterImport() throws Exception {
 		if (BUG_10557) {
