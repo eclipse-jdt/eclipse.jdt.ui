@@ -3,6 +3,7 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.corext.refactoring.rename;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -57,6 +59,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private IField fField;
 	private String fNewName;
 	private SearchResultGroup[] fReferences;
+	private TextChangeManager fChangeManager;
 	private boolean fUpdateReferences;
 	
 	private boolean fUpdateJavaDoc;
@@ -291,7 +294,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 */	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 8); //$NON-NLS-1$
+			pm.beginTask("", 13); //$NON-NLS-1$
 			pm.subTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(Checks.checkIfCuBroken(fField));
@@ -304,11 +307,14 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			result.merge(checkNestedHierarchy(fField.getDeclaringType()));
 			pm.worked(1);
 			
-			if (! fUpdateReferences)
-				return result;
-				
-			result.merge(Checks.checkAffectedResourcesAvailability(getReferences(new SubProgressMonitor(pm, 3))));
-			result.merge(analyzeAffectedCompilationUnits());
+			fReferences= null;
+			if (fUpdateReferences)
+				fReferences= getReferences(new SubProgressMonitor(pm, 3));
+			else
+				pm.worked(3);
+			
+			if (fUpdateReferences)
+				result.merge(analyzeAffectedCompilationUnits());
 				
 			if (getGetter() != null && fRenameGetter){
 				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getGetter(), getNewGetterName()));
@@ -320,8 +326,16 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 				result.merge(Checks.checkIfConstructorName(getSetter(), getNewSetterName(), fField.getDeclaringType().getElementName()));
 			}	
 			
-			result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));	
+			if (fUpdateReferences)
+				result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));
+			else
+				pm.worked(1);
+			
+			fChangeManager= createTextChangeManager(new SubProgressMonitor(pm, 5));
+			result.merge(validateModifiesFiles());
 			return result;
+		} catch (CoreException e){	
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}
@@ -569,6 +583,14 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return result;
 	}
 	
+	private IFile[] getAllFilesToModify() throws JavaModelException{
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
+	}
+	
 	private ISearchPattern createSearchPattern(){
 		return SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES);
 	}
@@ -579,8 +601,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws JavaModelException{
 		pm.subTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.searching"));	 //$NON-NLS-1$
-		fReferences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6), createRefactoringScope(), createSearchPattern());
-		return fReferences;
+		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6), createRefactoringScope(), createSearchPattern());
 	}
 	
 	// ---------- Changes -----------------
@@ -589,30 +610,32 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 * IRefactoring#createChange
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		return new CompositeChange("Rename Field", createTextChangeManager(pm).getAllChanges());
+		try{
+			return new CompositeChange("Rename Field", fChangeManager.getAllChanges());
+		} finally{
+			pm.done();
+		}	
 	}
 	
-	private TextChangeManager createTextChangeManager(IProgressMonitor pm) throws JavaModelException {
+	private TextChangeManager createTextChangeManager(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.creating_change"), 3); //$NON-NLS-1$
-			
+				
 			TextChangeManager manager= new TextChangeManager();
-	
+		
 			addOccurrences(new SubProgressMonitor(pm, 1), manager);
-	
+		
 			if (getRenameGetter())
 				addGetterOccurrences(new SubProgressMonitor(pm, 1), manager);
 			else
 				pm.worked(1);
-					
+						
 			if (getSetter() != null && fRenameSetter)
 				addSetterOccurrences(new SubProgressMonitor(pm, 1), manager);
 			else
 				pm.worked(1);
-				
-			return manager;	
-		} catch (CoreException e){
-			throw new JavaModelException(e);
+					
+			return manager;
 		} finally{
 			pm.done();
 		}
