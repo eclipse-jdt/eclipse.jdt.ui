@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
@@ -594,6 +595,12 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							ISourceRange rng= getSourceRange(e);
 							int start= rng.getOffset();
 							int end= start + rng.getLength() - 1;
+							int nameOffset= Integer.MAX_VALUE;
+							if (e instanceof IField) {
+								ISourceRange nameRange= ((IField) e).getNameRange();
+								if (nameRange != null)
+									nameOffset= nameRange.getOffset();
+							}
 							
 							Item last= null;
 							item= null;
@@ -612,17 +619,40 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 								try {
 									rng= getSourceRange(r);
 
-									boolean fieldsOnSameLine= r.getElementType() == IJavaElement.FIELD && e.getElementType() == IJavaElement.FIELD
-																	&& rng.getOffset() == start && rng.getLength() == end - start + 1;
+									// multi-field declarations always start at 
+									// the same offset. They also have the same
+									// end offset if the field sequence is terminated
+									// with a semicolon. If not, the source range
+									// ends behind the identifier / initializer
+									// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=51851
+									boolean multiFieldDeclaration= 
+										r.getElementType() == IJavaElement.FIELD 
+											&& e.getElementType() == IJavaElement.FIELD
+											&& rng.getOffset() == start;
+
+									// elements are inserted by occurrence
+									// however, multi-field declarations have
+									// equal source ranges offsets, therefore we
+									// compare name-range offsets.
+									boolean multiFieldOrderBefore= false;
+									if (multiFieldDeclaration) {
+										if (r instanceof IField) {
+											ISourceRange nameRange= ((IField) r).getNameRange();
+											if (nameRange != null) {
+												if (nameRange.getOffset() > nameOffset)
+													multiFieldOrderBefore= true;
+											}
+										}
+									}
 									
-									if (!fieldsOnSameLine && overlaps(rng, start, end)) {
+									if (!multiFieldDeclaration && overlaps(rng, start, end)) {
 										
 										// be tolerant if the delta is not correct, or if 
 										// the tree has been updated other than by a delta
 										reuseTreeItem(item, e);
 										continue go2;
 										
-									} else if (rng.getOffset() > start) {
+									} else if (multiFieldOrderBefore || rng.getOffset() > start) {
 										
 										if (last != null && deletions.contains(last)) {
 											// reuse item
