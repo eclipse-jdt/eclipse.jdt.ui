@@ -675,7 +675,6 @@ public class LinkedUIControl {
 		if (doc == null)
 			return;
 
-		// if we are a tabstop, we are the last one -> MAX_VALUE
 		fExitPosition= new LinkedPosition(doc, offset, length, sequence);
 		doc.addPosition(fExitPosition); // gets removed in leave()
 		if (sequence != LinkedPositionGroup.NO_STOP)
@@ -760,7 +759,7 @@ public class LinkedUIControl {
 		// undo
 		ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
 		IRewriteTarget target= extension.getRewriteTarget();
-		if (fFramePosition != null)
+		if (fFramePosition != null && fFramePosition != fExitPosition)
 			target.endCompoundChange();
 	
 		redraw();
@@ -957,7 +956,7 @@ public class LinkedUIControl {
 		if (fExitPosition != null)
 			fExitPosition.getDocument().removePosition(fExitPosition);
 
-		if ((flags & ILinkedListener.UPDATE_CARET) != 0 && fExitPosition != null && fFramePosition != fExitPosition)
+		if ((flags & ILinkedListener.UPDATE_CARET) != 0 && fExitPosition != null && fFramePosition != fExitPosition && !fExitPosition.isDeleted())
 			switchPosition(fExitPosition, true, false);
 
 		for (int i= 0; i < fTargets.length; i++) {

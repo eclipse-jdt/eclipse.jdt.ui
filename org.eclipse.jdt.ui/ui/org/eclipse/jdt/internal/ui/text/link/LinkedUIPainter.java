@@ -314,6 +314,7 @@ class LinkedUIPainter implements PaintListener {
 		setSlaveColor(null);
 		setTargetColor(null);
 		setMasterPosition(null);
+		setExitPosition(null);
 		setTargetPositions(new Position[0]);
 		fViewer= null;
 	}
@@ -373,6 +374,7 @@ class LinkedUIPainter implements PaintListener {
 			return;
 
 		fMasterPainter.draw(event, fMasterPosition, fMasterColor);
+		
 		if (fSlavePositions != null)
 			for (Iterator it= fSlavePositions.iterator(); it.hasNext();) {
 				Position p= (Position) it.next();
@@ -385,7 +387,7 @@ class LinkedUIPainter implements PaintListener {
 				fTargetPainter.draw(event, p, fTargetColor);
 			}
 		
-		if (fExitPosition != null)
+		if (fExitPosition != null && !fExitPosition.isDeleted())
 			fExitPainter.draw(event, fExitPosition, fExitColor);
 	}
 
