@@ -231,7 +231,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BACKGROUND_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR));
 
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, PreferenceConstants.EDITOR_TAB_WIDTH));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH));
 		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_BOLD));
@@ -600,7 +600,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		appearanceComposite.setLayout(layout);
 
 		String label= PreferencesMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
-		addTextField(appearanceComposite, label, PreferenceConstants.EDITOR_TAB_WIDTH, 3, 0, true);
+		addTextField(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 3, 0, true);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
 		addTextField(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 3, 0, true);

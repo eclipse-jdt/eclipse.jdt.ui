@@ -47,6 +47,7 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -92,6 +93,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Preference key used to look up display tab width.
 	 * 
 	 * @since 2.0
+	 * @deprecated As of 3.0 replaced by {@link ExtendedTextEditorPreferenceConstants#EDITOR_TAB_WIDTH}
 	 */
 	public final static String PREFERENCE_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
 
@@ -378,7 +380,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		return getPreferenceStore().getInt(PREFERENCE_TAB_WIDTH);
+		if (getPreferenceStore().contains(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH))
+			return getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
+		else
+			// backwards compatibility code
+			return getPreferenceStore().getInt(PREFERENCE_TAB_WIDTH);
 	}
 
 	/*

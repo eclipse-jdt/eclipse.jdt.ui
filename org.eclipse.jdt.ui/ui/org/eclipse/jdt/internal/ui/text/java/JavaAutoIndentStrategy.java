@@ -27,6 +27,7 @@ import org.eclipse.jface.text.rules.DefaultPartitioner;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.ToolFactory;
@@ -825,7 +826,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @return the number of spaces displayed for a tabulator in the editor
 	 */
 	private static int getVisualTabLengthPreference() {
-		return JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+		return JavaPlugin.getDefault().getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
 	}
 
 	private static int getPeerPosition(IDocument document, DocumentCommand command) {

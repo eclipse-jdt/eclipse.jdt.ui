@@ -633,7 +633,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 */
 	private static int calculateDisplayedWidth(String string) {
 
-		final int tabWidth= getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH); 
+		final int tabWidth= getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH); 
 		
 		int column= 0;
 		for (int i= 0; i < string.length(); i++)

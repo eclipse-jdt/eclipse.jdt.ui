@@ -2301,16 +2301,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				
 			String property= event.getProperty();	
 			
-			if (PreferenceConstants.EDITOR_TAB_WIDTH.equals(property)) {
-				Object value= event.getNewValue();
-				if (value instanceof Integer) {
-					sourceViewer.getTextWidget().setTabs(((Integer) value).intValue());
-				} else if (value instanceof String) {
-					sourceViewer.getTextWidget().setTabs(Integer.parseInt((String) value));
-				}
-				return;
-			}
-			
 			if (isJavaEditorHoverProperty(property))
 				updateHoverBehavior();
 			

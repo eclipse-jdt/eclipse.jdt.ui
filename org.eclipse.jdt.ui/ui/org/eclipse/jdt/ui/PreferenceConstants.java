@@ -686,6 +686,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Int</code>: positive int value specifying the number of
 	 * spaces per tab.
 	 * </p>
+	 * @deprecated As of 3.0 replaced by {@link ExtendedTextEditorPreferenceConstants#EDITOR_TAB_WIDTH}
 	 */
 	public final static String EDITOR_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
 

@@ -17,10 +17,10 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -1108,7 +1108,7 @@ public class JavaIndenter {
 			else
 				// if the formatter uses tabs to mark indentations, use the visual setting from the editor 
 				// to get nicely aligned indentations
-				tabLen= plugin.getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+				tabLen= plugin.getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
 		else
 			tabLen= 4; // sensible default for testing
 

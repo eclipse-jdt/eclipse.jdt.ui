@@ -50,6 +50,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ConfigurationElementSorter;
+import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
 import org.eclipse.jdt.core.IBufferFactory;
@@ -105,11 +106,17 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private JavaElementAdapterFactory fJavaElementAdapterFactory;
 	private MarkerAdapterFactory fMarkerAdapterFactory;
 	private EditorInputAdapterFactory fEditorInputAdapterFactory;
-	private ResourceAdapterFactory fResourceAdapterFactory;
+	private ResourceAdapterFactory fResourceAdapterFactory; 
 	private LogicalPackageAdapterFactory fLogicalPackageAdapterFactory;
 	
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 	private IPropertyChangeListener fFontPropertyChangeListener;
+	/**
+	 * Property change listener on this plugin's preference store.
+	 * 
+	 * @since 3.0
+	 */
+	private IPropertyChangeListener fPropertyChangeListener;
 	
 	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
 	
@@ -274,6 +281,35 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 		};
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
+		
+		/*
+		 * Backwards compatibility: propagate the Java editor tab width from a
+		 * pre-3.0 plug-in to the new preference key. This is done only once.
+		 */
+		final String oldTabWidthKey= PreferenceConstants.EDITOR_TAB_WIDTH;
+		final String newTabWidthKey= ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH;
+		String tabWidthPropagatedKey= "tabWidthPropagated"; //$NON-NLS-1$
+		if (getPreferenceStore().contains(oldTabWidthKey) && !getPreferenceStore().isDefault(oldTabWidthKey)) {
+			if (!getPreferenceStore().getBoolean(tabWidthPropagatedKey))
+				getPreferenceStore().setValue(newTabWidthKey, getPreferenceStore().getInt(oldTabWidthKey));
+		}
+		getPreferenceStore().setValue(tabWidthPropagatedKey, true);
+
+		/*
+		 * Backwards compatibility: set the Java editor tab width in this plug-in's
+		 * preference store with the old key to let older versions access it.
+		 * Since 3.0 the tab width is managed by the extended texteditor and
+		 * uses a new key.
+		 */
+		getPreferenceStore().putValue(oldTabWidthKey, getPreferenceStore().getString(newTabWidthKey));
+
+		fPropertyChangeListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (newTabWidthKey.equals(event.getProperty()))
+					getPreferenceStore().putValue(oldTabWidthKey, getPreferenceStore().getString(newTabWidthKey));
+			}
+		};
+		getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
 	
 	/**
@@ -281,6 +317,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	private void uninstallPreferenceStoreBackwardsCompatibility() {
 		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
+		getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 	}
 
 	/* (non - Javadoc)
