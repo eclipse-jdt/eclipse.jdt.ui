@@ -2167,6 +2167,14 @@
 		class= "org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
 		enabled= "false">
 	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.NonJavaProjectFilter"
+		name= "%HideNonJavaProjects.label"
+		description= "%HideNonJavaProjects.description"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.NonJavaProjectsFilter"
+		enabled= "false">
+	</filter>
 
 	<!-- Types view -->
 	<filter

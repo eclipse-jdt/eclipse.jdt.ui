@@ -195,7 +195,7 @@ public class SearchUsagesInFileAction extends Action {
 		boolean enabled= false;
 		if (getClassFile() != null || SelectionConverter.getInputAsCompilationUnit(fEditor) != null)
 			enabled= true;
-		setEnabled(enabled);
+		setEnabled(enabled); 
 	}
 		
 	/* (non-JavaDoc)

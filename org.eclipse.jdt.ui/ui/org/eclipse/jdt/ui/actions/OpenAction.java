@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -51,7 +52,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
- * </p>
+ * </p> 
  * 
  * @since 2.0
  */
@@ -104,7 +105,7 @@ public class OpenAction extends SelectionDispatchAction {
 			Object element= (Object)iter.next();
 			if (element instanceof ISourceReference)
 				continue;
-			if (element instanceof IResource)
+			if (element instanceof IFile)
 				continue;
 			if (element instanceof IStorage)
 				continue;

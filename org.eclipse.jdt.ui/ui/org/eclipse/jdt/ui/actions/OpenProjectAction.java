@@ -115,7 +115,7 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 				ActionMessages.getString("OpenProjectAction.error.message")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 		}
-		showWarningDialog(nonJavaProjects);
+		//showWarningDialog(nonJavaProjects);
 	}
 	
 	private IWorkspaceRunnable createRunnable(final Object[] projects, final List nonJavaProjects) {

@@ -432,7 +432,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (input instanceof IWorkspace) { 
 			return JavaCore.create(((IWorkspace)input).getRoot());
 		} else if (input instanceof IContainer) {
-			return JavaCore.create((IContainer)input);
+			IJavaElement element= JavaCore.create((IContainer)input);
+			if (element != null && element.exists())
+				return element;
+			return input;
 		}
 		//1GERPRT: ITPJUI:ALL - Packages View is empty when shown in Type Hierarchy Perspective
 		// we can't handle the input

@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -34,6 +33,7 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  
@@ -287,7 +287,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return concatenate(list.toArray(), project.getNonJavaResources());
 	}
 
-	private Object[] getJavaProjects(IJavaModel jm) throws JavaModelException {
+	protected Object[] getJavaProjects(IJavaModel jm) throws JavaModelException {
 		return jm.getJavaProjects();
 	}
 	
