@@ -35,13 +35,21 @@ public class ImportEditManager {
 		fImportEdits.put(cu, edit);	
 		return edit;
 	}
+
+	public void addImportTo(String fullyQualifiedName, ICompilationUnit cu){
+		getImportEdit(cu).addImport(fullyQualifiedName);
+	}
 	
 	public void addImportTo(IType type, ICompilationUnit cu){
-		getImportEdit(cu).addImport(JavaModelUtil.getFullyQualifiedName(type));
+		addImportTo(JavaModelUtil.getFullyQualifiedName(type), cu);
 	}
 	
 	public void removeImportTo(IType type, ICompilationUnit cu){
-		getImportEdit(cu).removeImport(JavaModelUtil.getFullyQualifiedName(type));
+		removeImportTo(JavaModelUtil.getFullyQualifiedName(type), cu);
+	}
+	
+	public void removeImportTo(String fullyQualifiedName, ICompilationUnit cu){
+		getImportEdit(cu).removeImport(fullyQualifiedName);
 	}
 	
 	public void fill(TextChangeManager manager) throws CoreException{
