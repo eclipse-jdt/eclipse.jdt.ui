@@ -33,16 +33,7 @@ public class RefactoringSearchEngine{
 	//no instances
 	private RefactoringSearchEngine(){
 	}
-	
-	/**
-	 * Performs searching for a given <code>SearchPattern</code> and returns the number of matches found.
-	 */
-	public static int countingSearch(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
-		SimpleCountingCollector collector= new SimpleCountingCollector(pm);
-		search(pm, scope, pattern, collector);	
-		return collector.found();
-	}
-	
+		
 	private static void search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern, IJavaSearchResultCollector collector) throws JavaModelException {
 		if (pattern == null)
 			return;

@@ -21,17 +21,14 @@ import org.eclipse.jdt.core.refactoring.Refactoring;
 import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;
 import org.eclipse.jdt.core.refactoring.fields.RenameNonPrivateFieldRefactoring;
 import org.eclipse.jdt.core.refactoring.fields.RenamePrivateFieldRefactoring;
-import org.eclipse.jdt.core.refactoring.fields.SafeDeletePrivateFieldRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameMethodInInterfaceRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenamePrivateMethodRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameStaticMethodRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameVirtualMethodRefactoring;
-import org.eclipse.jdt.core.refactoring.methods.SafeDeleteMethodRefactoring;
 import org.eclipse.jdt.core.refactoring.packages.RenamePackageRefactoring;
 import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.core.refactoring.types.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.core.refactoring.types.RenameTypeRefactoring;
-import org.eclipse.jdt.core.refactoring.types.SafeDeleteTypeRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
@@ -161,19 +158,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 		};
 	}
-	
-	private AbstractOpenRefactoringWizardAction createSafeDeleteMethodAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
-		String label= RefactoringResources.getResourceString("Refactoring.SafeDelete.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
-			protected Wizard createWizard() { 
-				return new RefactoringWizard("Refactoring.SafeDelete");
-			}
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new SafeDeleteMethodRefactoring(changeCreator, (IMethod)obj);
-			}
-		};
-	}	
-	
+		
 	// -------------------- type refactorings ----------------------
 	
 	private AbstractOpenRefactoringWizardAction createRenameTypeAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
@@ -187,19 +172,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 		};
 	}
-		
-	private AbstractOpenRefactoringWizardAction createSafeDeleteTypeAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
-		String label= RefactoringResources.getResourceString("Refactoring.SafeDelete.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IType.class) {
-			protected Wizard createWizard() { 
-				return new RefactoringWizard("Refactoring.SafeDelete"); 
-			}
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new SafeDeleteTypeRefactoring(changeCreator, (IType)obj);
-			}
-		};
-	}
-	
+			
 	private AbstractOpenRefactoringWizardAction createExtractInterfaceAction(ISelectionProvider provider) {	
 		String label= RefactoringResources.getResourceString("Refactoring.ExtractInterface.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IType.class) {
@@ -251,19 +224,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 		};
 	}
-	
-	private AbstractOpenRefactoringWizardAction createSafeDeletePrivateFieldAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
-		String label= RefactoringResources.getResourceString("Refactoring.SafeDelete.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IField.class) {
-			protected Wizard createWizard() { 
-				return new RefactoringWizard("Refactoring.SafeDelete"); 
-			}
-			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new SafeDeletePrivateFieldRefactoring(changeCreator, (IField)obj);
-			}
-		};
-	}
-	
+		
 	// --------- compilation unit refactorings  --------------------
 	private AbstractOpenRefactoringWizardAction createMoveCompilationUnitAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
 		String label= RefactoringResources.getResourceString("Refactoring.MoveCompilationUnit.label");
