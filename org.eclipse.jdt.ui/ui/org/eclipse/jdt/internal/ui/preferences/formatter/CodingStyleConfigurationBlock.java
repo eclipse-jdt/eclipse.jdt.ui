@@ -26,7 +26,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 
@@ -135,7 +134,8 @@ public class CodingStyleConfigurationBlock {
 
 		public void update(Observable o, Object arg) {
 			final boolean state= ((ProfileManager)o).getSelected() instanceof CustomProfile;
-			fEditButton.setEnabled(state);
+			fEditButton.setText(state ? FormatterMessages.getString("CodingStyleConfigurationBlock.edit_button.desc")  //$NON-NLS-1$
+			    : FormatterMessages.getString("CodingStyleConfigurationBlock.show_button.desc")); //$NON-NLS-1$
 			fDeleteButton.setEnabled(state);
 			fSaveButton.setEnabled(state);
 			fRenameButton.setEnabled(state);
@@ -287,7 +287,7 @@ public class CodingStyleConfigurationBlock {
 	/**
 	 * Some Java source code used for preview.
 	 */
-	private final static String fPreview=
+	private final static String PREVIEW=
 		"/**\n* " + //$NON-NLS-1$
 		FormatterMessages.getString("CodingStyleConfigurationBlock.preview.title") + //$NON-NLS-1$
 		"\n*/\n\n" + //$NON-NLS-1$
@@ -334,7 +334,7 @@ public class CodingStyleConfigurationBlock {
 	/**
 	 * The JavaPreview.
 	 */
-	protected final JavaPreview fJavaPreview;
+	protected CompilationUnitPreview fJavaPreview;
 	private PixelConverter fPixConv;
 
 	
@@ -362,8 +362,6 @@ public class CodingStyleConfigurationBlock {
 		}
 		
 		fProfileManager= new ProfileManager(profiles);
-		fJavaPreview= new JavaPreview(fProfileManager.getSelected().getSettings());
-		fJavaPreview.setPreviewText(fPreview);
 
 		new StoreUpdater();
 	}
@@ -378,7 +376,6 @@ public class CodingStyleConfigurationBlock {
 		fPixConv = new PixelConverter(parent);
 		fComposite = createComposite(parent, numColumns, false);
 
-		createLabel(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.select_profile.text"), numColumns); //$NON-NLS-1$
 		fProfileCombo= createProfileCombo(fComposite, numColumns - 3, fPixConv.convertWidthInCharsToPixels(20));
 		fEditButton= createButton(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.edit_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
 		fRenameButton= createButton(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.rename_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
@@ -454,14 +451,15 @@ public class CodingStyleConfigurationBlock {
 	}
 	
 	private void configurePreview(Composite composite, int numColumns) {
+		fJavaPreview= new CompilationUnitPreview(fProfileManager.getSelected().getSettings(), composite);
+		fJavaPreview.setPreviewText(PREVIEW);
+	    
 		final GridData gd = new GridData(GridData.FILL_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan = numColumns;
 		gd.verticalSpan= 7;
 		gd.widthHint = 0;
 		gd.heightHint = 0;
-		final Control control= fJavaPreview.createContents(composite);
-		control.setLayoutData(gd);
-		
+		fJavaPreview.getControl().setLayoutData(gd);
 	}
 
 	protected IPreferenceStore doGetPreferenceStore() {

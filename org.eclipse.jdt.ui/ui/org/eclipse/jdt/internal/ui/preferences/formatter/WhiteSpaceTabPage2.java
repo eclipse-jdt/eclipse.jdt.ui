@@ -1,0 +1,465 @@
+/***************************v****************************************************
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.ui.preferences.formatter;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.ui.internal.dialogs.ContainerCheckedTreeViewer;
+import org.eclipse.ui.part.PageBook;
+
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.formatter.WhiteSpaceOptions.InnerNode;
+import org.eclipse.jdt.internal.ui.preferences.formatter.WhiteSpaceOptions.Node;
+import org.eclipse.jdt.internal.ui.preferences.formatter.WhiteSpaceOptions.OptionNode;
+
+
+public class WhiteSpaceTabPage2 extends ModifyDialogTabPage {
+	
+	
+	private final class SyntaxComponent implements ISelectionChangedListener, ICheckStateListener, IDoubleClickListener {
+
+	    private final String PREF_NODE_KEY= JavaUI.ID_PLUGIN + "formatter_page.white_space_tab_page.node"; //$NON-NLS-1$
+	    
+	    private final ArrayList fIndexedNodeList;
+		private final ArrayList fTree;
+		
+		private ContainerCheckedTreeViewer fTreeViewer;
+		private Composite fComposite;
+		
+	    private Node fLastSelected= null;
+
+	    public SyntaxComponent() {
+	        fIndexedNodeList= new ArrayList();
+			fTree= WhiteSpaceOptions.createAltTree(fWorkingValues);
+			WhiteSpaceOptions.makeIndexForNodes(fTree, fIndexedNodeList);
+		}
+	    
+		public void createContents(final int numColumns, final Composite parent) {
+			fComposite= new Composite(parent, SWT.NONE);
+			fComposite.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, SWT.DEFAULT));
+			fComposite.setLayout(createGridLayout(numColumns, false));
+		    
+            createLabel(numColumns, fComposite, FormatterMessages.getString("WhiteSpaceTabPage.insert_space")); //$NON-NLS-1$
+            
+	        fTreeViewer= new ContainerCheckedTreeViewer(fComposite, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
+			fTreeViewer.setContentProvider(new ITreeContentProvider() {
+				public Object[] getElements(Object inputElement) {
+					return ((Collection)inputElement).toArray();
+				}
+				public Object[] getChildren(Object parentElement) {
+					return ((Node)parentElement).getChildren().toArray();
+				}
+				public Object getParent(Object element) {
+				    return ((Node)element).getParent(); 
+				}
+				public boolean hasChildren(Object element) {
+					return ((Node)element).hasChildren();
+				}
+				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
+				public void dispose() {}
+			});
+			fTreeViewer.setLabelProvider(new LabelProvider());
+			fTreeViewer.getControl().setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 0));
+			fDefaultFocusManager.add(fTreeViewer.getControl());
+	    }
+		
+		public void initialize() {
+			fTreeViewer.addCheckStateListener(this);
+			fTreeViewer.addSelectionChangedListener(this);
+			fTreeViewer.addDoubleClickListener(this);
+		    fTreeViewer.setInput(fTree);
+		    restoreSelection();
+		    refreshState();
+		}
+		
+		public void refreshState() {
+		    final ArrayList checked= new ArrayList(100);
+		    for (Iterator iter= fTree.iterator(); iter.hasNext();)
+		        ((Node) iter.next()).getCheckedLeafs(checked);
+		    fTreeViewer.setGrayedElements(new Object[0]);
+		    fTreeViewer.setCheckedElements(checked.toArray());
+		    fPreview.clear();
+		    fPreview.addAll(fLastSelected.getSnippets());
+		    doUpdatePreview();
+		}
+
+		public void selectionChanged(SelectionChangedEvent event) {
+		    final IStructuredSelection selection= (IStructuredSelection)event.getSelection();
+		    if (selection.isEmpty())
+		        return;
+		    final Node node= (Node)selection.getFirstElement();
+		    if (node == fLastSelected)
+		        return;
+		    fDialogSettings.put(PREF_NODE_KEY, node.index);
+		    fPreview.clear();
+		    fPreview.addAll(node.getSnippets());
+		    doUpdatePreview();
+		    fLastSelected= node;
+		}
+
+		public void checkStateChanged(CheckStateChangedEvent event) {
+			final Node node= (Node)event.getElement();
+			node.setChecked(event.getChecked());
+			fPreview.update();
+		}
+
+		public void restoreSelection() {
+			int index;
+			try {
+				index= fDialogSettings.getInt(PREF_NODE_KEY);
+			} catch (NumberFormatException ex) {
+				index= -1;
+			}
+			if (index < 0 || index > fIndexedNodeList.size() - 1) {
+				index= 0;
+			}
+			final Node node= (Node)fIndexedNodeList.get(index);
+			if (node != null) {
+			    fTreeViewer.expandToLevel(node, 0);
+			    fTreeViewer.setSelection(new StructuredSelection(new Node [] {node}));
+			    fLastSelected= node;
+			}
+		}
+
+        public void doubleClick(DoubleClickEvent event) {
+            final ISelection selection= event.getSelection();
+            if (selection instanceof IStructuredSelection) {
+                final Node node= (Node)((IStructuredSelection)selection).getFirstElement();
+                fTreeViewer.setExpandedState(node, !fTreeViewer.getExpandedState(node));
+            }
+        }
+        
+        public Control getControl() {
+            return fComposite;
+        }
+	}
+	
+	
+	
+	private final class JavaElementComponent implements ISelectionChangedListener, ICheckStateListener {
+	    
+	    private final String PREF_INNER_INDEX= JavaUI.ID_PLUGIN + "formatter_page.white_space.java_view.inner"; //$NON-NLS-1$ 
+		private final String PREF_OPTION_INDEX= JavaUI.ID_PLUGIN + "formatter_page.white_space.java_view.option"; //$NON-NLS-1$
+		
+	    private final ArrayList fIndexedNodeList;
+	    private final ArrayList fTree;
+	    
+	    private InnerNode fLastSelected;
+	    
+	    private TreeViewer fInnerViewer;
+	    private CheckboxTableViewer fOptionsViewer;
+	    
+	    private Composite fComposite;
+	    
+	    public JavaElementComponent() {
+			fIndexedNodeList= new ArrayList();
+			fTree= WhiteSpaceOptions.createTreeByJavaElement(fWorkingValues);
+			WhiteSpaceOptions.makeIndexForNodes(fTree, fIndexedNodeList);
+	    }
+
+	    public void createContents(int numColumns, Composite parent) {
+			
+			fComposite= new Composite(parent, SWT.NONE);
+			fComposite.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, SWT.DEFAULT));
+			fComposite.setLayout(createGridLayout(numColumns, false));
+			
+            createLabel(numColumns, fComposite, FormatterMessages.getString("WhiteSpaceTabPage.insert_space")); //$NON-NLS-1$
+			
+			final SashForm sashForm= new SashForm(fComposite, SWT.VERTICAL);
+			sashForm.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH, SWT.DEFAULT));
+			
+			fInnerViewer= new TreeViewer(sashForm, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
+
+			fInnerViewer.setContentProvider(new ITreeContentProvider() {
+				public Object[] getElements(Object inputElement) {
+					return ((Collection)inputElement).toArray();
+				}
+				public Object[] getChildren(Object parentElement) {
+				    final List children= ((Node)parentElement).getChildren();
+				    final ArrayList innerChildren= new ArrayList();
+				    for (final Iterator iter= children.iterator(); iter.hasNext();) {
+                        final Object o= iter.next();
+                        if (o instanceof InnerNode) innerChildren.add(o);
+                    }
+				    return innerChildren.toArray();
+				}
+				public Object getParent(Object element) {
+				    if (element instanceof InnerNode)
+				        return ((InnerNode)element).getParent();
+				    return null;
+				}
+				public boolean hasChildren(Object element) {
+				    final List children= ((Node)element).getChildren();
+				    for (final Iterator iter= children.iterator(); iter.hasNext();)
+                        if (iter.next() instanceof InnerNode) return true;
+				    return false;
+				}
+				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
+				public void dispose() {}
+			});
+			
+			fInnerViewer.setLabelProvider(new LabelProvider());
+			
+			final GridData innerGd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 0);
+			innerGd.heightHint= fPixelConverter.convertHeightInCharsToPixels(3);
+			fInnerViewer.getControl().setLayoutData(innerGd);
+			
+			fOptionsViewer= CheckboxTableViewer.newCheckList(sashForm, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
+			fOptionsViewer.setContentProvider(new ArrayContentProvider());
+			fOptionsViewer.setLabelProvider(new LabelProvider());
+			
+			final GridData optionsGd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 0);
+			optionsGd.heightHint= fPixelConverter.convertHeightInCharsToPixels(3);
+			fOptionsViewer.getControl().setLayoutData(optionsGd);
+	        
+			fDefaultFocusManager.add(fInnerViewer.getControl());
+	        fDefaultFocusManager.add(fOptionsViewer.getControl());
+			
+			fInnerViewer.setInput(fTree);
+		}
+	    
+	    public void refreshState() {
+	        innerViewerChanged(fLastSelected);	        
+	    }
+	    
+	    public void initialize() {
+	        fInnerViewer.addSelectionChangedListener(this);
+	        fOptionsViewer.addSelectionChangedListener(this);
+	        fOptionsViewer.addCheckStateListener(this);
+	        restoreSelections();
+	        refreshState();
+	    }
+	    
+	    private void restoreSelections() {
+	        Node node;
+	        final int innerIndex= getValidatedIndex(PREF_INNER_INDEX);
+			node= (Node)fIndexedNodeList.get(innerIndex);
+			if (node instanceof InnerNode) {
+			    fInnerViewer.expandToLevel(node, 0);
+			    fInnerViewer.setSelection(new StructuredSelection(new Object[] {node}));
+			    fLastSelected= (InnerNode)node;
+			}
+			
+	        final int optionIndex= getValidatedIndex(PREF_OPTION_INDEX);
+			node= (Node)fIndexedNodeList.get(optionIndex);
+			if (node instanceof OptionNode) {
+			    fOptionsViewer.setSelection(new StructuredSelection(new Object[] {node}));
+			}
+
+	    }
+	    
+	    private int getValidatedIndex(String key) {
+			int index;
+			try {
+				index= fDialogSettings.getInt(key);
+			} catch (NumberFormatException ex) {
+				index= 0;
+			}
+			if (index < 0 || index > fIndexedNodeList.size() - 1) {
+				index= 0; 
+			}
+			return index;
+	    }
+	    
+	    public Control getControl() {
+	        return fComposite;
+	    }
+
+        public void selectionChanged(SelectionChangedEvent event) {
+            final IStructuredSelection selection= (IStructuredSelection)event.getSelection();
+
+            if (selection.isEmpty() || !(selection.getFirstElement() instanceof Node))
+                return;
+
+            final Node selected= (Node)selection.getFirstElement();
+
+            if (selected == null || selected == fLastSelected) 
+			    return;
+            
+            
+            if (event.getSource() == fInnerViewer && selected instanceof InnerNode) {
+                fLastSelected= (InnerNode)selected;
+                fDialogSettings.put(PREF_INNER_INDEX, selected.index);
+                innerViewerChanged((InnerNode)selected);
+            }
+            else if (event.getSource() == fOptionsViewer && selected instanceof OptionNode)
+                fDialogSettings.put(PREF_OPTION_INDEX, selected.index);
+        }
+	
+        private void innerViewerChanged(InnerNode selectedNode) {
+            
+			final List children= selectedNode.getChildren();
+			
+			final ArrayList optionsChildren= new ArrayList();
+			for (final Iterator iter= children.iterator(); iter.hasNext();) {
+			    final Object o= iter.next();
+			    if (o instanceof OptionNode) optionsChildren.add(o);
+			}
+			
+			fOptionsViewer.setInput(optionsChildren.toArray());
+			
+			for (final Iterator iter= optionsChildren.iterator(); iter.hasNext();) {
+			    final OptionNode child= (OptionNode)iter.next();
+                    fOptionsViewer.setChecked(child, child.getChecked());
+			}
+			
+			fPreview.clear();
+			fPreview.addAll(selectedNode.getSnippets());
+			doUpdatePreview();
+        }
+        
+        public void checkStateChanged(CheckStateChangedEvent event) {
+			final OptionNode option= (OptionNode)event.getElement();
+			if (option != null)
+			    option.setChecked(event.getChecked());
+			doUpdatePreview();
+        }
+	}
+	
+	
+
+	/**
+	 * This component switches between the two view and is responsible for delegating
+	 * the appropriate update requests.
+	 */
+	private final class SwitchComponent extends SelectionAdapter {
+	    private final String PREF_VIEW_KEY= JavaUI.ID_PLUGIN + "formatter_page.white_space_tab_page.view"; //$NON-NLS-1$
+	    
+	    private ToolItem fSyntaxItem, fJavaItem;
+	    private PageBook fPageBook;
+	    private final SyntaxComponent fSyntaxComponent;
+	    private final JavaElementComponent fJavaElementComponent;
+	    
+	    public SwitchComponent() {
+	        fSyntaxComponent= new SyntaxComponent();
+	        fJavaElementComponent= new JavaElementComponent();
+	    }
+	    
+        public void widgetSelected(SelectionEvent e) {
+            if (e.widget == fJavaItem) {
+    		    fDialogSettings.put(PREF_VIEW_KEY, false);
+    		    fJavaElementComponent.refreshState();
+                fPageBook.showPage(fJavaElementComponent.getControl());
+            }
+            else if (e.widget == fSyntaxItem) { 
+    		    fDialogSettings.put(PREF_VIEW_KEY, true);
+    		    fSyntaxComponent.refreshState();
+                fPageBook.showPage(fSyntaxComponent.getControl());
+            }
+        }
+
+        public void createContents(int numColumns, Composite parent) {
+
+    		
+    		fPageBook= new PageBook(parent, SWT.NONE);
+    		fPageBook.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH, 0));
+    		
+    		fJavaElementComponent.createContents(numColumns, fPageBook);		
+    		fSyntaxComponent.createContents(numColumns, fPageBook);
+
+    		final ToolBar toolBar= new ToolBar(parent, SWT.NONE);
+    		toolBar.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, 0));
+    		
+    		fJavaItem= new ToolItem(toolBar, SWT.RADIO);
+    		fJavaItem.setText(FormatterMessages.getString("WhiteSpaceTabPage.sort_by_java_element")); //$NON-NLS-1$
+
+    		fSyntaxItem= new ToolItem(toolBar, SWT.RADIO);
+    		fSyntaxItem.setText(FormatterMessages.getString("WhiteSpaceTabPage.sort_by_syntax_element")); //$NON-NLS-1$
+        }
+        
+        public void initialize() {
+            fJavaItem.addSelectionListener(this);
+    	    fSyntaxItem.addSelectionListener(this);
+    	    fJavaElementComponent.initialize();
+    	    fSyntaxComponent.initialize();
+    	    restoreSelection();
+        }
+
+        private void restoreSelection() {
+            final boolean selectSyntax= fDialogSettings.getBoolean(PREF_VIEW_KEY);
+            if (selectSyntax) {
+                fSyntaxItem.setSelection(true);
+                fPageBook.showPage(fSyntaxComponent.getControl());
+			} else {
+			    fJavaItem.setSelection(true);
+			    fPageBook.showPage(fJavaElementComponent.getControl());
+			}
+        }
+	}
+	
+
+	
+	
+	private final SwitchComponent fSwitchComponent;
+	protected final IDialogSettings fDialogSettings; 
+
+	protected SnippetPreview fPreview;
+
+
+	/**
+	 * Create a new white space dialog page.
+	 */
+	public WhiteSpaceTabPage2(ModifyDialog modifyDialog, Map workingValues) {
+		super(modifyDialog, workingValues);
+		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
+		fSwitchComponent= new SwitchComponent();
+	}
+
+	protected void doCreatePreferences(Composite composite, int numColumns) {
+		fSwitchComponent.createContents(numColumns, composite);
+	}
+
+	protected void initializePage() {
+        fSwitchComponent.initialize();
+	}
+	
+    protected JavaPreview doCreateJavaPreview(Composite parent) {
+        fPreview= new SnippetPreview(fWorkingValues, parent);
+        return fPreview;
+    }
+
+    protected void doUpdatePreview() {
+        fPreview.update();
+    }
+}

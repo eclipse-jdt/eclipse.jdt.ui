@@ -605,6 +605,8 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 	
 	protected TreeViewer fCategoriesViewer;
 	protected CheckboxTableViewer fOptionsViewer;
+	protected CompilationUnitPreview fJavaPreview;
+	
 
 
 	/**
@@ -620,7 +622,6 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 	 * Create the categories three
 	 */
 	private static List createCategoriesTree() {
-		
 
 		fDeclarationsCategory.children.add(fClassCategory);
 		fDeclarationsCategory.children.add(fFieldCategory);
@@ -659,15 +660,10 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 	}
 	
 
-	protected Composite doCreatePreferences(Composite parent) {
-		
-		final int numColumns= 3;
+	protected void doCreatePreferences(Composite composite, int numColumns) {
 		
 		GridData gd;
 
-		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(numColumns, false));
-		
 		createLabel(numColumns, composite, FormatterMessages.getString("WhiteSpaceTabPage.category.label.text")); //$NON-NLS-1$
 		
 		fCategoriesViewer= new TreeViewer(composite, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
@@ -688,7 +684,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		
 		fCategoriesViewer.setLabelProvider(new LabelProvider());
 		
-		gd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
+		gd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 0);
 		gd.heightHint= fPixelConverter.convertHeightInCharsToPixels(3);
 		fCategoriesViewer.getControl().setLayoutData(gd);
 		
@@ -698,20 +694,19 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		fOptionsViewer.setContentProvider(new ArrayContentProvider());
 		fOptionsViewer.setLabelProvider(new LabelProvider());
 		
-		gd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
+		gd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 0);
 		gd.heightHint= fPixelConverter.convertHeightInCharsToPixels(3);
 		fOptionsViewer.getControl().setLayoutData(gd);
 		
 		fCategoriesViewer.setInput(fCategories);
 		fCategoriesViewer.expandAll();
-		
-
-		initializeControls();
-		
-		return composite;
 	}
 	
-	private void initializeControls() {
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#initializePage()
+     */
+    protected void initializePage() {
 		// add listeners
 		fCategoriesViewer.addSelectionChangedListener(fCategoryListener);
 		fOptionsViewer.addSelectionChangedListener(fOptionListener);
@@ -724,7 +719,22 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		// install focus manager
 		fDefaultFocusManager.add(fCategoriesViewer.getControl());
 		fDefaultFocusManager.add(fOptionsViewer.getControl());
-	}
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
+     */
+    protected JavaPreview doCreateJavaPreview(Composite parent) {
+        fJavaPreview= new CompilationUnitPreview(fWorkingValues, parent);
+        return fJavaPreview;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
+     */
+    protected void doUpdatePreview() {
+        fJavaPreview.update();
+    }
 }
 
 

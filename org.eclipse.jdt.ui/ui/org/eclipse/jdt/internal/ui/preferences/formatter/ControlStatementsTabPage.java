@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
-	private final static String fPreview=
+	private final static String PREVIEW=
 	createPreviewHeader(FormatterMessages.getString("ControlStatementsTabPage.preview.header")) + //$NON-NLS-1$
 	"class Example {" +	//$NON-NLS-1$	
 	"  void bar() {" +	//$NON-NLS-1$
@@ -61,35 +61,29 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	    JavaCore.INSERT
 	}; 
 	
-
-	private final static int NUM_COLUMNS= 4; 
-	
-	
+	private CompilationUnitPreview fPreview;
 	
 	protected CheckboxPreference fThenStatementPref, fSimpleIfPref;
 
 	
 	public ControlStatementsTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);
-		fJavaPreview.setPreviewText(fPreview);
 	}
 
-	protected Composite doCreatePreferences(Composite parent) {
-		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
+	protected void doCreatePreferences(Composite composite, int numColumns) {
 		
-		final Group generalGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("ControlStatementsTabPage.general_group.title")); //$NON-NLS-1$
-		createOption(generalGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_in_control_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_CONTROL_STATEMENTS, NOTINSERT_INSERT); //$NON-NLS-1$
+		final Group generalGroup= createGroup(numColumns, composite, FormatterMessages.getString("ControlStatementsTabPage.general_group.title")); //$NON-NLS-1$
+		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_in_control_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_CONTROL_STATEMENTS, NOTINSERT_INSERT); //$NON-NLS-1$
 		
-		final Group ifElseGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.title")); //$NON-NLS-1$
-		fThenStatementPref= createOption(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_then_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_THEN_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
+		final Group ifElseGroup= createGroup(numColumns, composite, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.title")); //$NON-NLS-1$
+		fThenStatementPref= createOption(ifElseGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_then_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_THEN_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
 		
 		Label l= new Label(ifElseGroup, SWT.NONE);
 		GridData gd= new GridData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);
 		l.setLayoutData(gd);
 		
-		fSimpleIfPref= createOption(ifElseGroup, NUM_COLUMNS - 1, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_simple_if_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_IF_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
+		fSimpleIfPref= createOption(ifElseGroup, numColumns - 1, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_simple_if_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_IF_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
 		
 		fThenStatementPref.addObserver( new Observer() {
 			public void update(Observable o, Object arg) {
@@ -100,14 +94,31 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 		
 		fSimpleIfPref.setEnabled(!fThenStatementPref.getChecked());
 		
-		createOption(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_if_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF, FALSE_TRUE); //$NON-NLS-1$
-		createCheckboxPref(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_guardian_clause_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
-		
-		return composite;
+		createOption(ifElseGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
+		createCheckboxPref(ifElseGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_if_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF, FALSE_TRUE); //$NON-NLS-1$
+		createCheckboxPref(ifElseGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_guardian_clause_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
 	}
 	
-	private CheckboxPreference createOption(Composite composite, int span, String name, String key, String [] values) {
+	protected void initializePage() {
+	    fPreview.setPreviewText(PREVIEW);
+	}
+
+	/* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
+     */
+    protected JavaPreview doCreateJavaPreview(Composite parent) {
+        fPreview= new CompilationUnitPreview(fWorkingValues, parent);
+        return fPreview;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
+     */
+    protected void doUpdatePreview() {
+        fPreview.update();
+    }
+
+    private CheckboxPreference createOption(Composite composite, int span, String name, String key, String [] values) {
 		return createCheckboxPref(composite, span, name, key, values);
 	}
 }

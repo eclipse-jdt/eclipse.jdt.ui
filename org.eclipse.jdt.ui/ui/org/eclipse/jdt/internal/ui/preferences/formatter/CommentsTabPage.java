@@ -17,12 +17,10 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -54,7 +52,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		    }
 
 			for (final Iterator iter = fSlaves.iterator(); iter.hasNext();) {
-			    Object obj= iter.next();
+			    final Object obj= iter.next();
 			    if (obj instanceof Preference) {
 			        ((Preference)obj).setEnabled(enabled);
 			    } else if (obj instanceof Control) {
@@ -65,10 +63,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	}
 	
 	
-	private final static int NUM_COLUMNS= 4;
-	
-
-	private final static String fPreview=
+	private final static String PREVIEW=
 		createPreviewHeader("An example for comment formatting. This example is meant to illustrate the various possiblilities offered by <i>Eclipse</i> in order to format comments.") +	//$NON-NLS-1$
 		"package mypackage;\n" + //$NON-NLS-1$
 		"/**\n" + //$NON-NLS-1$
@@ -91,54 +86,34 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		" */" + //$NON-NLS-1$
 		" int foo(int a, int b);" + //$NON-NLS-1$
 		"}"; //$NON-NLS-1$
+	
+	private CompilationUnitPreview fPreview;
 
 	public CommentsTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);
-		fJavaPreview.setPreviewText(fPreview);
 	}
 
-	public void doUpdatePreview() {
-	    super.doUpdatePreview();
-	}
-	
-	protected Composite doCreatePreferences(Composite parent) {
+	protected void doCreatePreferences(Composite composite, int numColumns) {
 	    
-		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
-		
 		// global group
-		final Group globalGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.global_group.title")); //$NON-NLS-1$
-		final CheckboxPreference global= createPref(globalGroup, FormatterMessages.getString("CommentsTabPage.global_group.enable_comment_formatting"), PreferenceConstants.FORMATTER_COMMENT_FORMAT); //$NON-NLS-1$
-		
-		// format group
-		final Group formatGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.format_group.title")); //$NON-NLS-1$
-		final CheckboxPreference header= createPref(formatGroup, FormatterMessages.getString("CommentsTabPage.format_group.format_header"), PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER); //$NON-NLS-1$
-		final CheckboxPreference html= createPref(formatGroup, FormatterMessages.getString("CommentsTabPage.format_group.format_html"), PreferenceConstants.FORMATTER_COMMENT_FORMATHTML); //$NON-NLS-1$
-		final CheckboxPreference code= createPref(formatGroup, FormatterMessages.getString("CommentsTabPage.format_group.format_code_snippets"), PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE); //$NON-NLS-1$
+		final Group globalGroup= createGroup(numColumns, composite, FormatterMessages.getString("CommentsTabPage.group1.title")); //$NON-NLS-1$
+		final CheckboxPreference global= createPref(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.enable_comment_formatting"), PreferenceConstants.FORMATTER_COMMENT_FORMAT); //$NON-NLS-1$
+		final CheckboxPreference header= createPref(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.format_header"), PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER); //$NON-NLS-1$
+		final CheckboxPreference html= createPref(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.format_html"), PreferenceConstants.FORMATTER_COMMENT_FORMATHTML); //$NON-NLS-1$
+		final CheckboxPreference code= createPref(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.format_code_snippets"), PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE); //$NON-NLS-1$
 
 		// blank lines group
-		final Group blankLinesGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.blank_lines_group.title")); //$NON-NLS-1$
-		final CheckboxPreference blankComments= createPref(blankLinesGroup, FormatterMessages.getString("CommentsTabPage.blank_lines_group.clear_blank_lines"), PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES); //$NON-NLS-1$
-		final CheckboxPreference blankJavadoc= createPref(blankLinesGroup, FormatterMessages.getString("CommentsTabPage.blank_lines_group.blank_line_before_javadoc_tags"), PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS); //$NON-NLS-1$
-
-		// indentation group
-		final Group indentationGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.indentation_group.title")); //$NON-NLS-1$
-		final CheckboxPreference indentJavadoc= createPref(indentationGroup, FormatterMessages.getString("CommentsTabPage.indentation_group.indent_javadoc_tags"), PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS); //$NON-NLS-1$
+		final Group settingsGroup= createGroup(numColumns, composite, FormatterMessages.getString("CommentsTabPage.group2.title")); //$NON-NLS-1$
+		final CheckboxPreference blankComments= createPref(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.clear_blank_lines"), PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES); //$NON-NLS-1$
+		final CheckboxPreference blankJavadoc= createPref(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.blank_line_before_javadoc_tags"), PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS); //$NON-NLS-1$
+		final CheckboxPreference indentJavadoc= createPref(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.indent_javadoc_tags"), PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS); //$NON-NLS-1$
 		
-		Label l= new Label(indentationGroup, SWT.NONE);
-		GridData gd= new GridData();
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);
-		l.setLayoutData(gd);
+		final CheckboxPreference indentDesc= createCheckboxPref(settingsGroup, numColumns , FormatterMessages.getString("CommentsTabPage.indent_description_after_param"), PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, FALSE_TRUE); //$NON-NLS-1$
+		((GridData)indentDesc.getControl().getLayoutData()).horizontalIndent= fPixelConverter.convertWidthInCharsToPixels(4);
+		final CheckboxPreference nlParam= createPref(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.new_line_after_param_tags"), PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER); //$NON-NLS-1$
 		
-		final CheckboxPreference indentDesc= createCheckboxPref(indentationGroup, NUM_COLUMNS - 1, FormatterMessages.getString("CommentsTabPage.indentation_group.indent_description_after_param"), PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, FALSE_TRUE); //$NON-NLS-1$
-
-		// new lines group
-		final Group newLinesGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.new_lines_group.title")); //$NON-NLS-1$
-		final CheckboxPreference nlParam= createPref(newLinesGroup, FormatterMessages.getString("CommentsTabPage.new_lines_group.new_line_after_param_tags"), PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER); //$NON-NLS-1$
-		
-		// line width group
-		final Group lineWidthGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.line_width_group.title")); //$NON-NLS-1$
-		final NumberPreference lineWidth= createNumberPref(lineWidthGroup, NUM_COLUMNS, FormatterMessages.getString("CommentsTabPage.line_width_group.line_width"), PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 0, Integer.MAX_VALUE); //$NON-NLS-1$
+		final Group widthGroup= createGroup(numColumns, composite, FormatterMessages.getString("CommentsTabPage.group3.title")); //$NON-NLS-1$
+		final NumberPreference lineWidth= createNumberPref(widthGroup, numColumns, FormatterMessages.getString("CommentsTabPage.line_width"), PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 0, 9999); //$NON-NLS-1$
 
 		Collection masters, slaves;
 
@@ -146,11 +121,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		masters.add(global);
 		
 		slaves= new ArrayList();
-		slaves.add(formatGroup);
-		slaves.add(blankLinesGroup);
-		slaves.add(indentationGroup);
-		slaves.add(newLinesGroup);
-		slaves.add(lineWidthGroup);
+		slaves.add(settingsGroup);
 		slaves.add(header);
 		slaves.add(html);
 		slaves.add(code);
@@ -170,11 +141,28 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		slaves.add(indentDesc);
 		
 		new Controller(masters, slaves);
-		
-		return composite;
 	}
 	
-	private CheckboxPreference createPref(Composite composite, String text, String key) {
-		return createCheckboxPref(composite, NUM_COLUMNS, text, key, FALSE_TRUE);
+	protected void initializePage() {
+		fPreview.setPreviewText(PREVIEW);
+	}
+	
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
+     */
+    protected JavaPreview doCreateJavaPreview(Composite parent) {
+        fPreview= new CompilationUnitPreview(fWorkingValues, parent);
+        return fPreview;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
+     */
+    protected void doUpdatePreview() {
+        fPreview.update();
+    }
+	
+	private CheckboxPreference createPref(Composite composite, int numColumns, String text, String key) {
+		return createCheckboxPref(composite, numColumns, text, key, FALSE_TRUE);
 	}
 }

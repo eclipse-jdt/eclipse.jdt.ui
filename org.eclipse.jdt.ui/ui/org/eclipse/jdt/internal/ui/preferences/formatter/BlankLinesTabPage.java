@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.Map;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
@@ -21,7 +20,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class BlankLinesTabPage extends ModifyDialogTabPage {
 
-	private final static String fPreview=
+	private final static String PREVIEW=
 	createPreviewHeader(FormatterMessages.getString("BlankLinesTabPage.preview.header")) + //$NON-NLS-1$
 	"package foo.bar.baz;" + //$NON-NLS-1$
 	"import java.util.List;\n" + //$NON-NLS-1$
@@ -54,8 +53,8 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	private final static int MIN_NUMBER_LINES= 0;
 	private final static int MAX_NUMBER_LINES= 99;
 	
-	private final static int NUM_COLUMNS= 4;
-	
+
+	private CompilationUnitPreview fPreview;
 	
 	/**
 	 * Create a new BlankLinesTabPage.
@@ -64,46 +63,57 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	 */
 	public BlankLinesTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);
-		fJavaPreview.setPreviewText(fPreview);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.codeformatter.ModifyDialogTabPage#doCreatePreferences(org.eclipse.swt.widgets.Composite)
-	 */
-	protected Composite doCreatePreferences(Composite parent) {
+	protected void doCreatePreferences(Composite composite, int numColumns) {
 				
-		Group group;
-		
-		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
-		
-		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.compilation_unit.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.compilation_unit.option.before_package", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.compilation_unit.option.after_package", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.compilation_unit.option.before_import", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.compilation_unit.option.after_import", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.compilation_unit.option.between_type_declarations", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_TYPE_DECLARATIONS); //$NON-NLS-1$
+	    Group group;
+	    
+		group= createGroup(numColumns, composite, FormatterMessages.getString("BlankLinesTabPage.compilation_unit.group.title")); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.compilation_unit.option.before_package", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.compilation_unit.option.after_package", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.compilation_unit.option.before_import", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.compilation_unit.option.after_import", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.compilation_unit.option.between_type_declarations", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_TYPE_DECLARATIONS); //$NON-NLS-1$
 		
 		
-		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.class.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_first_decl", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_decls_of_same_kind", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_member_class_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_field_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_method_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.class.option.at_beginning_of_method_body", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY); //$NON-NLS-1$
+		group= createGroup(numColumns, composite, FormatterMessages.getString("BlankLinesTabPage.class.group.title")); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.class.option.before_first_decl", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.class.option.before_decls_of_same_kind", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.class.option.before_member_class_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.class.option.before_field_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.class.option.before_method_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.class.option.at_beginning_of_method_body", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY); //$NON-NLS-1$
 
-		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.blank_lines.group.title")); //$NON-NLS-1$
-		createBlankLineTextField(group, "BlankLinesTabPage.blank_lines.option.empty_lines_to_preserve", DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE); //$NON-NLS-1$
-		return composite;
+		group= createGroup(numColumns, composite, FormatterMessages.getString("BlankLinesTabPage.blank_lines.group.title")); //$NON-NLS-1$
+		createBlankLineTextField(group, numColumns, "BlankLinesTabPage.blank_lines.option.empty_lines_to_preserve", DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE); //$NON-NLS-1$
+	}
+	
+	protected void initializePage() {
+	    fPreview.setPreviewText(PREVIEW);
 	}
 	
 	/**
 	 * A helper method to create a number preference for blank lines.
 	 */
-	protected void createBlankLineTextField(Composite composite, String messagesKey, String key) {
-		createNumberPref(composite, NUM_COLUMNS, FormatterMessages.getString(messagesKey), key, MIN_NUMBER_LINES, MAX_NUMBER_LINES);
+	protected void createBlankLineTextField(Composite composite, int numColumns, String messagesKey, String key) {
+		createNumberPref(composite, numColumns, FormatterMessages.getString(messagesKey), key, MIN_NUMBER_LINES, MAX_NUMBER_LINES);
 	}
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
+     */
+    protected JavaPreview doCreateJavaPreview(Composite parent) {
+        fPreview= new CompilationUnitPreview(fWorkingValues, parent);
+        return fPreview;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
+     */
+    protected void doUpdatePreview() {
+        fPreview.update();
+    }
 }
 
 

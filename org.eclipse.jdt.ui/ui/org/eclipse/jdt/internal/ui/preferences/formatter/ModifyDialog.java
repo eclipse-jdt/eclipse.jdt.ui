@@ -35,6 +35,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.BuiltInProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class ModifyDialog extends StatusDialog {
@@ -62,7 +63,7 @@ public class ModifyDialog extends StatusDialog {
 	private final Profile fProfile;
 	private final Map fWorkingValues;
 	
-	private final IStatus fOkStatus;
+	private final IStatus fStandardStatus;
 	
 	protected final List fTabPages;
 	
@@ -73,11 +74,17 @@ public class ModifyDialog extends StatusDialog {
 		super(parentShell);
 		fNewProfile= newProfile;
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX );
+		
 		fProfile= profile;
+		if (fProfile instanceof BuiltInProfile) {
+		    fStandardStatus= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, FormatterMessages.getString("ModifyDialog.dialog.show.warning.builtin"), null); //$NON-NLS-1$
+		    fTitle= FormatterMessages.getFormattedString("ModifyDialog.dialog.show.title", profile.getName()); //$NON-NLS-1$
+		} else {
+		    fStandardStatus= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+		    fTitle= FormatterMessages.getFormattedString("ModifyDialog.dialog.title", profile.getName()); //$NON-NLS-1$
+		}
 		fWorkingValues= new HashMap(fProfile.getSettings());
-		fOkStatus= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
-		updateStatus(fOkStatus);
-		fTitle= FormatterMessages.getFormattedString("ModifyDialog.dialog.title", profile.getName()); //$NON-NLS-1$
+		updateStatus(fStandardStatus);
 		setStatusLineAboveButtons(false);
 		fTabPages= new ArrayList();
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();	
@@ -114,7 +121,7 @@ public class ModifyDialog extends StatusDialog {
 
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.indentation.title"), new IndentationTabPage(this, fWorkingValues)); //$NON-NLS-1$
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.braces.title"), new BracesTabPage(this, fWorkingValues)); //$NON-NLS-1$
-		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.whitespace.title"), new WhiteSpaceTabPage(this, fWorkingValues)); //$NON-NLS-1$
+		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.whitespace.title"), new WhiteSpaceTabPage2(this, fWorkingValues)); //$NON-NLS-1$
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.blank_lines.title"), new BlankLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.new_lines.title"), new NewLinesTabPage(this, fWorkingValues)); //$NON-NLS-1$
 		addTabPage(fTabFolder, FormatterMessages.getString("ModifyDialog.tabpage.control_statements.title"), new ControlStatementsTabPage(this, fWorkingValues)); //$NON-NLS-1$
@@ -128,6 +135,7 @@ public class ModifyDialog extends StatusDialog {
 			public void widgetSelected(SelectionEvent e) {
 				final TabItem tabItem= (TabItem)e.item;
 				final ModifyDialogTabPage page= (ModifyDialogTabPage)tabItem.getData();
+//				page.fSashForm.setWeights();
 				fDialogSettings.put(DS_KEY_LAST_FOCUS, fTabPages.indexOf(page));
 				page.makeVisible();
 			}
@@ -136,7 +144,7 @@ public class ModifyDialog extends StatusDialog {
 	}
 	
 	public void updateStatus(IStatus status) {
-	    super.updateStatus(status != null ? status : fOkStatus);
+	    super.updateStatus(status != null ? status : fStandardStatus);
 	}
 
     protected void constrainShellSize() {

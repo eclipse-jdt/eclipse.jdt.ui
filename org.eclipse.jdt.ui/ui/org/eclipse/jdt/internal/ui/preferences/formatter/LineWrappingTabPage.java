@@ -33,6 +33,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -68,7 +71,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		public Category(String key, String previewText, String name) {
 			this.key= key;
 			this.name= name;
-			this.previewText= previewText != null ? createPreviewHeader(name) + previewText : null;
+			this.previewText= previewText != null ? createPreviewHeader(name) + previewText : null; //$NON-NLS-1$
 			children= new ArrayList();
 		}
 		
@@ -85,7 +88,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	private final static String PREF_CATEGORY_INDEX= JavaUI.ID_PLUGIN + "formatter_page.line_wrapping_tab_page.last_category_index"; //$NON-NLS-1$ 
 	
 	
-	private final class CategoryListener implements ISelectionChangedListener {
+	private final class CategoryListener implements ISelectionChangedListener, IDoubleClickListener {
 		
 		private final List fCategoriesList;
 		
@@ -123,12 +126,8 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 			} else {
 				fOptionsGroup.setText(""); //$NON-NLS-1$
 			}
-			fJavaPreview.setPreviewText(category.previewText);
+			fPreview.setPreviewText(category.previewText);
 
-
-
-			doUpdatePreview();
-			
 			final String value= (String)fWorkingValues.get(category.key);
 			final boolean enabled= value != null;
 			fOptionsGroup.setVisible(enabled);
@@ -168,6 +167,14 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 			final Category category= (Category)fCategoriesList.get(index);
 			fCategoriesViewer.setSelection(new StructuredSelection(new Category[] {category}));
 		}
+
+        public void doubleClick(DoubleClickEvent event) {
+            final ISelection selection= event.getSelection();
+            if (selection instanceof IStructuredSelection) {
+                final Category node= (Category)((IStructuredSelection)selection).getFirstElement();
+                fCategoriesViewer.setExpandedState(node, !fCategoriesViewer.getExpandedState(node));
+            }
+        }
 	}
 	
 	protected final static String[] INDENT_NAMES = {
@@ -316,6 +323,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	protected Combo fIndentStyleCombo;
 	protected Button fForceSplit;
 
+	protected CompilationUnitPreview fPreview;
 
 	protected Group fOptionsGroup;
 
@@ -407,29 +415,15 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		return root;
 	}
 	
-	protected Composite doCreatePreferences(Composite parent) {
+	protected void doCreatePreferences(Composite composite, int numColumns) {
 	
-		final int numColumns= 3;
-		
-		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(numColumns, false));
+		final Group lineWidthGroup= createGroup(numColumns, composite, FormatterMessages.getString("LineWrappingTabPage.width_indent")); //$NON-NLS-1$
 
-		final Group lineWidthGroup= new Group(composite, SWT.NONE);
-		lineWidthGroup.setLayout(createGridLayout(numColumns, true));
-		lineWidthGroup.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL));
-		lineWidthGroup.setText(FormatterMessages.getString("LineWrappingTabPage.width_indent")); //$NON-NLS-1$
-		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.max_line_width"), DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, Integer.MAX_VALUE); //$NON-NLS-1$
+		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.max_line_width"), DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, 9999); //$NON-NLS-1$
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.default_indent_wrapped"), DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, 9999); //$NON-NLS-1$
-		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.default_indent_array"), DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, 0, Integer.MAX_VALUE); //$NON-NLS-1$ 
+		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.default_indent_array"), DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, 0, 9999); //$NON-NLS-1$ 
 		
-		final Group categoryGroup= new Group(composite, SWT.NONE);
-		categoryGroup.setLayout(createGridLayout(numColumns, true));
-		categoryGroup.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH));
-		categoryGroup.setText(FormatterMessages.getString("LineWrappingTabPage.line_wrapping_group")); //$NON-NLS-1$
-
-		createLabel(numColumns, categoryGroup, FormatterMessages.getString("LineWrappingTabPage.category.label.text")); //$NON-NLS-1$
-		
-		fCategoriesViewer= new TreeViewer(categoryGroup, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
+		fCategoriesViewer= new TreeViewer(composite /*categoryGroup*/, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
 		fCategoriesViewer.setContentProvider(new ITreeContentProvider() {
 			public Object[] getElements(Object inputElement) {
 				return ((Collection)inputElement).toArray();
@@ -449,13 +443,10 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		
 		fCategoriesViewer.setExpandedElements(fCategories.toArray());
 
-		final GridData gd= createGridData(numColumns, GridData.FILL_BOTH);
+		final GridData gd= createGridData(numColumns, GridData.FILL_BOTH, 0);
 		fCategoriesViewer.getControl().setLayoutData(gd);
 
-		fOptionsGroup = new Group(categoryGroup, SWT.NONE);
-		fOptionsGroup.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL));
-		fOptionsGroup.setLayout(createGridLayout(numColumns, true));
-
+		fOptionsGroup = createGroup(numColumns, composite, "");  //$NON-NLS-1$
 		
 		// label "Select split style:"
 		createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.wrapping_policy.label.text")); //$NON-NLS-1$
@@ -463,7 +454,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		// combo SplitStyleCombo
 		fWrappingStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
 		fWrappingStyleCombo.setItems(WRAPPING_NAMES);
-		fWrappingStyleCombo.setLayoutData(createGridData(numColumns ));
+		fWrappingStyleCombo.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
 		
 		// label "Select indentation style:"
 		fIndentStyleLabel= createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.indentation_policy.label.text")); //$NON-NLS-1$
@@ -471,33 +462,21 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		// combo SplitStyleCombo
 		fIndentStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
 		fIndentStyleCombo.setItems(INDENT_NAMES);
-		fIndentStyleCombo.setLayoutData(createGridData(numColumns));
+		fIndentStyleCombo.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
 		
 		// button "Force split"
 		fForceSplit= new Button(fOptionsGroup, SWT.CHECK);
-		fForceSplit.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL));
+		fForceSplit.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
 		fForceSplit.setText(FormatterMessages.getString("LineWrappingTabPage.force_split.checkbox.text")); //$NON-NLS-1$
-		
-		return composite;
 	}
 	
 		
-	protected Composite doCreatePreview(Composite parent) {
-		final int numColumns= 2;
+	protected Composite doCreatePreviewPane(Composite composite, int numColumns) {
 		
-		final Composite composite= new Composite(parent, SWT.NONE);
-
-		composite.setLayout(createGridLayout(numColumns, false));
-
-		final Composite preview= super.doCreatePreview(composite);
-		preview.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH));
+		super.doCreatePreviewPane(composite, numColumns);
 		
-		final Composite lineWidthComposite= new Composite(composite, SWT.NONE);
-		lineWidthComposite.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING));
-		lineWidthComposite.setLayout(createGridLayout(2, false));
-
-		final NumberPreference previewLineWidth= new NumberPreference(lineWidthComposite, 2, fPreviewPreferences, LINE_SPLIT,
-			0, Integer.MAX_VALUE, FormatterMessages.getString("LineWrappingTabPage.line_width_for_preview.label.text")); //$NON-NLS-1$
+		final NumberPreference previewLineWidth= new NumberPreference(composite, numColumns / 2, fPreviewPreferences, LINE_SPLIT,
+		    0, 9999, FormatterMessages.getString("LineWrappingTabPage.line_width_for_preview.label.text")); //$NON-NLS-1$
 		fDefaultFocusManager.add(previewLineWidth);
 		previewLineWidth.addObserver(fUpdater);
 		previewLineWidth.addObserver(new Observer() {
@@ -506,14 +485,24 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 			}
 		});
 		
-		initializeControls();
-		
 		return composite;
 	}
 	
-	private void initializeControls() {
+	
+	
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
+     */
+    protected JavaPreview doCreateJavaPreview(Composite parent) {
+        fPreview= new CompilationUnitPreview(fWorkingValues, parent);
+        return fPreview;
+    }
+
+	
+	protected void initializePage() {
 		
 		fCategoriesViewer.addSelectionChangedListener(fCategoryListener);
+		fCategoriesViewer.addDoubleClickListener(fCategoryListener);
 		
 		fForceSplit.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -542,7 +531,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	protected void doUpdatePreview() {
 		final Object normalSetting= fWorkingValues.get(LINE_SPLIT);
 		fWorkingValues.put(LINE_SPLIT, fPreviewPreferences.get(LINE_SPLIT));
-		super.doUpdatePreview();
+		fPreview.update();
 		fWorkingValues.put(LINE_SPLIT, normalSetting);
 	}
 

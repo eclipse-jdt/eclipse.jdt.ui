@@ -12,15 +12,11 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.Map;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -30,13 +26,7 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.MarginPainter;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.formatter.FormattingContextProperties;
-import org.eclipse.jface.text.formatter.IContentFormatter;
-import org.eclipse.jface.text.formatter.IContentFormatterExtension2;
-import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -48,85 +38,71 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 
-public class JavaPreview {
+public abstract class JavaPreview {
+    
 	
-	
-	private class JavaSourcePreviewerUpdater {
-		
-		public JavaSourcePreviewerUpdater(final SourceViewer viewer, final JavaTextTools javaTextTools) {
-			Assert.isNotNull(viewer);
-			Assert.isNotNull(javaTextTools);
-			final IPropertyChangeListener fontChangeListener= new IPropertyChangeListener() {
-				/*
-				 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
-				 */
-				public void propertyChange(PropertyChangeEvent event) {
-					if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
-						Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
-						viewer.getTextWidget().setFont(font);
-						if (fMarginPainter != null) {
-							fMarginPainter.initialize();
-						}
+	private final class JavaSourcePreviewerUpdater {
+	    
+	    final IPropertyChangeListener fontListener= new IPropertyChangeListener() {
+	        public void propertyChange(PropertyChangeEvent event) {
+	            if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
+					final Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
+					fSourceViewer.getTextWidget().setFont(font);
+					if (fMarginPainter != null) {
+						fMarginPainter.initialize();
 					}
 				}
-			};
-			final IPreferenceStore preferenceStore= javaTextTools.getPreferenceStore();
-			final IPropertyChangeListener propertyChangeListener= new IPropertyChangeListener() {
-				/*
-				 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
-				 */
-				public void propertyChange(PropertyChangeEvent event) {
-					if (javaTextTools.affectsBehavior(event))
-						viewer.invalidateTextPresentation();
-				}
-			};
-			viewer.getTextWidget().addDisposeListener(new DisposeListener() {
-				/*
-				 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
-				 */
+			}
+		};
+		
+	    final IPropertyChangeListener propertyListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (fTextTools.affectsBehavior(event))
+					fSourceViewer.invalidateTextPresentation();
+			}
+		};
+		
+		
+		public JavaSourcePreviewerUpdater() {
+			
+		    JFaceResources.getFontRegistry().addListener(fontListener);
+			fTextTools.getPreferenceStore().addPropertyChangeListener(propertyListener);
+			
+			fSourceViewer.getTextWidget().addDisposeListener(new DisposeListener() {
 				public void widgetDisposed(DisposeEvent e) {
-					preferenceStore.removePropertyChangeListener(propertyChangeListener);
-					JFaceResources.getFontRegistry().removeListener(fontChangeListener);
+					JFaceResources.getFontRegistry().removeListener(fontListener);
+					fTextTools.getPreferenceStore().removePropertyChangeListener(propertyListener);
 				}
 			});
-			JFaceResources.getFontRegistry().addListener(fontChangeListener);
-			preferenceStore.addPropertyChangeListener(propertyChangeListener);
 		}
 	}
 	
+	protected final JavaSourceViewerConfiguration fViewerConfiguration;
+	protected final Document fPreviewDocument;
+	protected final JavaTextTools fTextTools;
+	protected final SourceViewer fSourceViewer;
 	
-	private final JavaTextTools fTextTools;
-	private final JavaSourceViewerConfiguration fViewerConfiguration;
-	private final Document fPreviewDocument;
-
-	private SourceViewer fSourceViewer;
-	protected MarginPainter fMarginPainter;
+	protected final MarginPainter fMarginPainter;
+	
 	protected Map fWorkingValues;
-	private String fPreviewText;
-	
+
+	private int fTabSize= 0;
 	
 	/**
 	 * Create a new Java preview
 	 */
 	
-	public JavaPreview(Map workingValues) {
+	public JavaPreview(Map workingValues, Composite parent) {
 		fTextTools= JavaPlugin.getDefault().getJavaTextTools();
 		fViewerConfiguration= new JavaSourceViewerConfiguration( fTextTools, null, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewDocument= new Document();
 		fWorkingValues= workingValues;
 		fTextTools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);	
-	}
-
-	public Control createContents(Composite parent) {
-		if (fSourceViewer != null) 
-			return null;
 		
 		fSourceViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		fSourceViewer.configure(fViewerConfiguration);
@@ -138,76 +114,52 @@ public class JavaPreview {
 		fMarginPainter.setMarginRulerColor(fTextTools.getColorManager().getColor(rgb));
 		fSourceViewer.addPainter(fMarginPainter);
 		
-		new JavaSourcePreviewerUpdater(fSourceViewer, fTextTools);
+		new JavaSourcePreviewerUpdater();
 		fSourceViewer.setDocument(fPreviewDocument);
-		update();
-		return fSourceViewer.getControl();
+	}
+	
+	public Control getControl() {
+	    return fSourceViewer.getControl();
 	}
 	
 	
 	public void update() {
-		if (fWorkingValues == null || fSourceViewer == null)
-			return;
-
-		final StyledText text = fSourceViewer.getTextWidget();
-		final int top0= fSourceViewer.getTopIndex();
-		final int range0= text.getLineCount() - (fSourceViewer.getBottomIndex()- fSourceViewer.getTopIndex());
-		
-		if (fMarginPainter != null) {
-			try {
-				final String value= (String)fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT);
-				int lineWidth= Integer.parseInt(value);
-				fMarginPainter.setMarginRulerColumn(lineWidth);
-			} catch (NumberFormatException e) {}
-		}
-
-		
-		if (fPreviewText == null) {
-			fPreviewDocument.set(""); //$NON-NLS-1$
-			fSourceViewer.getControl().setEnabled(false);
-			return;
+		if (fWorkingValues == null) {
+		    fPreviewDocument.set(""); //$NON-NLS-1$
+		    return;
 		}
 		
-		if (!fSourceViewer.getControl().getEnabled())
-			fSourceViewer.getControl().setEnabled(true);
+		// update the print margin
+		final String value= (String)fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT);
+		final int lineWidth= getPositiveIntValue(value, 0);
+		fMarginPainter.setMarginRulerColumn(lineWidth);
 		
+		// update the tab size
+		final int tabSize= getPositiveIntValue((String) fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE), 0);
+		if (tabSize != fTabSize) fSourceViewer.getTextWidget().setTabs(tabSize);
+		fTabSize= tabSize;
 		
-		fSourceViewer.setRedraw(false);
-		fSourceViewer.getTextWidget().setTabs(getPositiveIntValue((String) fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE), 0));
+		final StyledText widget= (StyledText)fSourceViewer.getControl();
+		final int height= widget.getClientArea().height;
+		final int top0= widget.getTopPixel();
 		
+		final int totalPixels0= widget.getLineCount() * widget.getLineHeight();
+		final int topPixelRange0= totalPixels0 > height ? totalPixels0 - height : 0;
 		
-		final Point selection = fSourceViewer.getSelectedRange();		
+		widget.setRedraw(false);
+		doFormatPreview();
+		fSourceViewer.setSelection(null);
+		
+		final int totalPixels1= widget.getLineCount() * widget.getLineHeight();
+		final int topPixelRange1= totalPixels1 > height ? totalPixels1 - height : 0;
 
-		fPreviewDocument.set(fPreviewText);
-		final IFormattingContext context = new CommentFormattingContext();
-		try {
-			final IContentFormatter formatter =	fViewerConfiguration.getContentFormatter(fSourceViewer);
-			if (formatter instanceof IContentFormatterExtension2) {
-				final IContentFormatterExtension2 extension = (IContentFormatterExtension2) formatter;
-				context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, fWorkingValues);
-				context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(true));
-				try {
-					extension.format(fPreviewDocument, context);
-				} catch (Exception e) {
-					final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
-						FormatterMessages.getString("JavaPreview.formatter_exception"), e); //$NON-NLS-1$
-					JavaPlugin.log(status);
-				}
-			} else
-				formatter.format(fPreviewDocument, new Region(0, fPreviewDocument.getLength()));
-		} finally {
-			fSourceViewer.setSelectedRange(selection.x, selection.y);
-			context.dispose();
-			int range1 = text.getLineCount() - (fSourceViewer.getBottomIndex() - fSourceViewer.getTopIndex());
-			fSourceViewer.setRedraw(true);
-			
-			/** 
-			 * TODO: This doesn't work when it is called while redraw is disabled, so it is here. 
-			 * But this causes some flickering. Any hints?
-			 */
-			fSourceViewer.setTopIndex((int)Math.round((top0 * range1) / (double)range0));
-		}
+		final int top1= topPixelRange0 > 0 ? (int)(topPixelRange1 * top0 / (double)topPixelRange0) : 0;
+		widget.setTopPixel(top1);
+		widget.setRedraw(true);
 	}
+	
+	protected abstract void doFormatPreview();
+
 	
 	private static int getPositiveIntValue(String string, int defaultValue) {
 	    try {
@@ -229,15 +181,5 @@ public class JavaPreview {
 	
 	public final void setWorkingValues(Map workingValues) {
 		fWorkingValues= workingValues;
-	}
-
-	
-	public final String getPreviewText() {
-		return fPreviewText;
-	}
-
-	
-	public final void setPreviewText(String previewText) {
-		fPreviewText= previewText;
 	}
 }
