@@ -41,6 +41,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.ui.reorg.TypedSource;
+import org.eclipse.jdt.internal.ui.reorg.TypedSourceTransfer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -140,8 +142,9 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			IResource[] resourcesForClipboard= ReorgUtils2.union(fResources, ReorgUtils2.getResources(cusOfMainTypes));
 			IJavaElement[] javaElementsForClipboard= ReorgUtils2.union(fJavaElements, cusOfMainTypes);
 			
+			TypedSource[] typedSources= TypedSource.createTypeSources(javaElementsForClipboard);
 			String[] fileNames= (String[]) fileNameList.toArray(new String[fileNameList.size()]);
-			copyToClipboard(resourcesForClipboard, fileNames, namesBuf.toString(), javaElementsForClipboard);
+			copyToClipboard(resourcesForClipboard, fileNames, namesBuf.toString(), javaElementsForClipboard, typedSources);
 		}
 
 		private void processResources(List fileNameList, StringBuffer namesBuf) {
@@ -184,19 +187,19 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				fileNameList.add(location.toOSString());			
 		}
 		
-		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements){
+		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements, TypedSource[] typedSources){
 			try{
-				fClipboard.setContents( createDataArray(resources, javaElements, fileNames, names),
-										createDataTypeArray(resources, javaElements, fileNames));
+				fClipboard.setContents( createDataArray(resources, javaElements, fileNames, names, typedSources),
+										createDataTypeArray(resources, javaElements, fileNames, typedSources));
 			} catch (SWTError e) {
 				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 					throw e;
 				if (MessageDialog.openQuestion(fShell, "Problem Copying to Clipboard", "There was a problem when accessing the system clipboard. Retry?"))
-					copyToClipboard(resources, fileNames, names, javaElements);
+					copyToClipboard(resources, fileNames, names, javaElements, typedSources);
 			}
 		}
 		
-		private static Transfer[] createDataTypeArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames) {
+		private static Transfer[] createDataTypeArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames, TypedSource[] typedSources) {
 			List result= new ArrayList(4);
 			if (resources.length != 0)
 				result.add(ResourceTransfer.getInstance());
@@ -204,11 +207,13 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				result.add(JavaElementTransfer.getInstance());
 			if (fileNames.length != 0)
 				result.add(FileTransfer.getInstance());
+			if (typedSources.length != 0)
+				result.add(TypedSourceTransfer.getInstance());
 			result.add(TextTransfer.getInstance());			
 			return (Transfer[]) result.toArray(new Transfer[result.size()]);
 		}
 
-		private static Object[] createDataArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames, String names) {
+		private static Object[] createDataArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames, String names, TypedSource[] typedSources) {
 			List result= new ArrayList(4);
 			if (resources.length != 0)
 				result.add(resources);
@@ -216,6 +221,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				result.add(javaElements);
 			if (fileNames.length != 0)
 				result.add(fileNames);
+			if (typedSources.length != 0)
+				result.add(typedSources);
 			result.add(names);
 			return result.toArray();
 		}
