@@ -46,7 +46,7 @@ public class ExcludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ExcludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.EXCLUDE);
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude"), IClasspathInformationProvider.EXCLUDE); //$NON-NLS-1$
     }
     
     /**

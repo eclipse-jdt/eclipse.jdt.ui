@@ -49,7 +49,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public AddToClasspathOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.ADD_TO_BP);
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP"), IClasspathInformationProvider.ADD_TO_BP); //$NON-NLS-1$
     }
     
     /**

@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 
 public class NewProjectWizardTest extends TestCase {
 	
@@ -1077,7 +1078,7 @@ public class NewProjectWizardTest extends TestCase {
     
     public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQueryInternal(IPath desiredOutputLocation) throws JavaModelException{
         return new ClasspathModifierQueries.IOutputFolderQuery(desiredOutputLocation) {
-            public boolean doQuery(boolean b, IJavaProject project) {
+            public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                 return true;
             }
 

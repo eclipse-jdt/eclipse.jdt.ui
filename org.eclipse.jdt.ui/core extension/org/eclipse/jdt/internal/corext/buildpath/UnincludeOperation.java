@@ -46,7 +46,7 @@ public class UnincludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public UnincludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.UNINCLUDE);
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Uninclude"), IClasspathInformationProvider.UNINCLUDE); //$NON-NLS-1$
     }
     
     /**

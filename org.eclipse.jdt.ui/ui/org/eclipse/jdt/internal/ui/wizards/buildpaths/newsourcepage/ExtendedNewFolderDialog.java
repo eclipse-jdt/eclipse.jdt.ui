@@ -55,6 +55,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
+import org.eclipse.ui.internal.ide.dialogs.PathVariableSelectionDialog;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -189,6 +190,11 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             
             SelectionButtonDialogField variables= new SelectionButtonDialogField(SWT.PUSH);
             variables.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.variables.desc")); //$NON-NLS-1$
+            variables.setDialogFieldListener(new IDialogFieldListener() {
+                public void dialogFieldChanged(DialogField field) {
+                    handleVariablesButtonPressed();
+                }
+            });
             fLinkToButton.attachDialogFields(new DialogField[] {fLinkLocation, variables});
             fLinkToButton.setDialogFieldListener(this);
 			
@@ -249,6 +255,25 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
 				JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
 			}
 		}
+        
+        /**
+         * Opens a path variable selection dialog
+         */
+        private void handleVariablesButtonPressed() {
+            int variableTypes = IResource.FOLDER;
+
+            // allow selecting file and folder variables when creating a 
+            // linked file
+            /*if (type == IResource.FILE)
+                variableTypes |= IResource.FILE;*/
+
+            PathVariableSelectionDialog dialog = new PathVariableSelectionDialog(getShell(), variableTypes);
+            if (dialog.open() == IDialogConstants.OK_ID) {
+                String[] variableNames = (String[]) dialog.getResult();
+                if (variableNames != null && variableNames.length == 1)
+                    fLinkLocation.setText(variableNames[0]);
+            }
+        }
         
         public void dialogFieldChanged(DialogField field) {
             fireEvent();
@@ -358,26 +383,21 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         }
         
         /**
-         * Checks whether the folder name and link location are valid.
-         * Disable the OK button if the folder name and link location are valid.
-         * a message that indicates the problem otherwise.
+         * Checks whether the link location is valid.
+         * Disable the OK button if the location is not valid valid and display
+         * a message that indicates the problem, otherwise enable the OK button.
          */
         private void validateLinkedResource(String text) {
-            boolean valid = validateLocation(text);
+            IFolder linkHandle = createFolderHandle(text);
+            IStatus status = validateLinkLocation(linkHandle);
 
-            if (valid) {
-                IFolder linkHandle = createFolderHandle(text);
-                IStatus status = validateLinkLocation(linkHandle);
-
-                if (status.getSeverity() != IStatus.ERROR)
-                    getOkButton().setEnabled(true);
-                else
-                    getOkButton().setEnabled(false);
-
-                if (status.isOK() == false)
-                    updateStatus(status);
-            } else
+            if (status.getSeverity() != IStatus.ERROR)
+                getOkButton().setEnabled(true);
+            else
                 getOkButton().setEnabled(false);
+
+            if (status.isOK() == false)
+                updateStatus(status);
         }
         
         private boolean validateLocation(String text) {

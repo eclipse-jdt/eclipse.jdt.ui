@@ -47,7 +47,7 @@ public class IncludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public IncludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.INCLUDE);
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Include"), IClasspathInformationProvider.INCLUDE); //$NON-NLS-1$
     }
     
     /**

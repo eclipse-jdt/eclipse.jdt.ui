@@ -45,7 +45,7 @@ public class ResetOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ResetOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.RESET);
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset"), IClasspathInformationProvider.RESET); //$NON-NLS-1$
     }
     
     /**

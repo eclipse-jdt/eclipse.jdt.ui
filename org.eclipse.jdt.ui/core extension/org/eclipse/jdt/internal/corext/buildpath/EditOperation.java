@@ -51,7 +51,7 @@ public class EditOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public EditOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.EDIT);
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit"), IClasspathInformationProvider.EDIT); //$NON-NLS-1$
     }
     
     /**

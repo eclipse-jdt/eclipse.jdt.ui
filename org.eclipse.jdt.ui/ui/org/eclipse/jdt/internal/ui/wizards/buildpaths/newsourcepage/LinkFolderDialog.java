@@ -48,11 +48,11 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
+import org.eclipse.ui.internal.ide.dialogs.PathVariableSelectionDialog;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -71,22 +71,16 @@ public class LinkFolderDialog extends SelectionStatusDialog {
         }
         
         private void createControls(Composite parent) {
-            int numColumns= 4;
-            Composite composite= new Composite(parent, SWT.NONE);
-            composite.setLayout(new GridLayout());
-            GridData data= new GridData(GridData.FILL_HORIZONTAL);
-            data.horizontalSpan = numColumns;
-            PixelConverter converter= new PixelConverter(parent);
-            data.horizontalIndent= converter.convertWidthInCharsToPixels(1);
-            data.verticalSpan= 0;
-            composite.setLayoutData(data);
-            Label label= new Label(composite, SWT.NONE);
-            label.setText(NewWizardMessages.getString("LinkFolderDialog.folderNameGroup.label")); //$NON-NLS-1$
+            int numColumns= 4;      
             fNameDialogField= new StringDialogField();
-            fNameDialogField.doFillIntoGrid(parent, 2);
+            fNameDialogField.setLabelText(NewWizardMessages.getString("LinkFolderDialog.folderNameGroup.label")); //$NON-NLS-1$
+            fNameDialogField.doFillIntoGrid(parent, numColumns - 1);
             LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
-            DialogField.createEmptySpace(parent);
-            DialogField.createEmptySpace(parent);
+
+            GridData data= (GridData)fNameDialogField.getLabelControl(null).getLayoutData();
+            data.horizontalSpan= numColumns;
+            data.grabExcessHorizontalSpace= true;
+            
             fNameDialogField.setDialogFieldListener(this);
         }
         
@@ -126,23 +120,23 @@ public class LinkFolderDialog extends SelectionStatusDialog {
             final int numColumns= 4;
             
             fLinkLocation= new StringButtonDialogField(this);
-            Composite composite= new Composite(parent, SWT.NONE);
-            composite.setLayout(new GridLayout());
-            GridData data= new GridData(GridData.FILL_HORIZONTAL);
-            data.horizontalSpan = numColumns;
-            PixelConverter converter= new PixelConverter(parent);
-            data.horizontalIndent= converter.convertWidthInCharsToPixels(1);
-            composite.setLayoutData(data);
-            Label label= new Label(composite, SWT.NONE);
-            label.setText(NewWizardMessages.getString("LinkFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
-
+            
+            fLinkLocation.setLabelText(NewWizardMessages.getString("LinkFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
             fLinkLocation.setButtonLabel(NewWizardMessages.getString("LinkFolderDialog.dependenciesGroup.browseButton.desc")); //$NON-NLS-1$
             fLinkLocation.setDialogFieldListener(this);
             
             SelectionButtonDialogField variables= new SelectionButtonDialogField(SWT.PUSH);
             variables.setLabelText(NewWizardMessages.getString("LinkFolderDialog.dependenciesGroup.variables.desc")); //$NON-NLS-1$
+            variables.setDialogFieldListener(new IDialogFieldListener() {
+                public void dialogFieldChanged(DialogField field) {
+                    handleVariablesButtonPressed();
+                }
+            });
             
-            fLinkLocation.doFillIntoGrid(parent, numColumns - 1);
+            fLinkLocation.doFillIntoGrid(parent, numColumns);
+            GridData data= (GridData)fLinkLocation.getLabelControl(null).getLayoutData();
+            data.horizontalSpan= numColumns;
+            data.grabExcessHorizontalSpace= true;
             LayoutUtil.setHorizontalGrabbing(fLinkLocation.getTextControl(null));
             
             variables.doFillIntoGrid(parent, 1);
@@ -176,6 +170,27 @@ public class LinkFolderDialog extends SelectionStatusDialog {
                 fLinkLocation.setText(selectedDirectory);
                 fFolderNameField.setText(selectedDirectory.substring(selectedDirectory.lastIndexOf('\\') + 1));
                 JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
+            }
+        }
+        
+        /**
+         * Opens a path variable selection dialog
+         */
+        private void handleVariablesButtonPressed() {
+            int variableTypes = IResource.FOLDER;
+
+            // allow selecting file and folder variables when creating a 
+            // linked file
+            /*if (type == IResource.FILE)
+                variableTypes |= IResource.FILE;*/
+
+            PathVariableSelectionDialog dialog = new PathVariableSelectionDialog(getShell(), variableTypes);
+            if (dialog.open() == IDialogConstants.OK_ID) {
+                String[] variableNames = (String[]) dialog.getResult();
+                if (variableNames != null && variableNames.length == 1) {
+                    fLinkLocation.setText(variableNames[0]);
+                    fFolderNameField.setText(variableNames[0]);
+                }
             }
         }
         
@@ -276,37 +291,21 @@ public class LinkFolderDialog extends SelectionStatusDialog {
         }
         
         /**
-         * Checks whether the folder name and link location are valid.
-         * Disable the OK button if the folder name and link location are valid.
-         * a message that indicates the problem otherwise.
+         * Checks whether the link location is valid.
+         * Disable the OK button if the location is not valid valid and display
+         * a message that indicates the problem, otherwise enable the OK button.
          */
         private void validateLinkedResource(String text) {
-            boolean valid = validateLocation(text);
+            IFolder linkHandle = createFolderHandle(text);
+            IStatus status = validateLinkLocation(linkHandle);
 
-            if (valid) {
-                IFolder linkHandle = createFolderHandle(text);
-                IStatus status = validateLinkLocation(linkHandle);
-
-                if (status.getSeverity() != IStatus.ERROR)
-                    getOkButton().setEnabled(true);
-                else
-                    getOkButton().setEnabled(false);
-
-                if (status.isOK() == false)
-                    updateStatus(status);
-            } else
+            if (status.getSeverity() != IStatus.ERROR)
+                getOkButton().setEnabled(true);
+            else
                 getOkButton().setEnabled(false);
-        }
-        
-        private boolean validateLocation(String text) {
-            IPath path = new Path(text);
-            if (!path.toFile().exists()) {
-                updateStatus(IStatus.ERROR, NewWizardMessages.getFormattedString(
-                        "NewFolderDialog.notExists", new Object[] { text })); //$NON-NLS-1$
-                return false;
-            }
-            updateStatus(IStatus.OK, "");  //$NON-NLS-1$
-            return true;
+
+            if (status.isOK() == false)
+                updateStatus(status);
         }
         
         /**
@@ -392,23 +391,18 @@ public class LinkFolderDialog extends SelectionStatusDialog {
     /* (non-Javadoc)
      * Method declared on Dialog.
      */
-    protected Control createDialogArea(Composite parent) {        
+    protected Control createDialogArea(Composite parent) {
+        int numOfColumns= 4;
         Composite composite = new Composite(parent, SWT.NONE);
-        GridLayout layout = new GridLayout();
+        GridLayout layout = new GridLayout(numOfColumns, false);
         composite.setLayout(layout);
         GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
+        gridData.minimumWidth= 430;
         composite.setLayoutData(gridData);
         
         Label label= new Label(composite, SWT.NONE);
-        label.setText(NewWizardMessages.getFormattedString("NewFolderDialog.createIn", container.getFullPath().makeRelative().toString())); //$NON-NLS-1$
-        
-        composite = new Composite(composite, SWT.NONE);
-        layout = new GridLayout();
-        layout.numColumns = 4;
-        composite.setLayout(layout);
-        gridData= new GridData(GridData.FILL_HORIZONTAL);
-        gridData.minimumWidth= 430;
-        composite.setLayoutData(gridData);
+        label.setText(NewWizardMessages.getFormattedString("LinkFolderDialog.createIn", container.getFullPath().makeRelative().toString())); //$NON-NLS-1$
+        DialogField.createEmptySpace(composite, numOfColumns);
         
         fDependenciesGroup= new LinkFields(composite);
         fFolderNameField= new FolderNameField(composite);

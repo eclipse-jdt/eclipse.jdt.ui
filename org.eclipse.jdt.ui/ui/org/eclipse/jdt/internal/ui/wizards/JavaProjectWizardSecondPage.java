@@ -133,12 +133,11 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			
-            File file= new File(fCurrProjectLocation.append(".classpath").toString()); //$NON-NLS-1$
+            File file= new File(fCurrProjectLocation.append(fCurrProject.getName()).append(".classpath").toString()); //$NON-NLS-1$
             if (!file.exists())
                 removeClasspathFile= true;
-            file= new File(fCurrProjectLocation.append(".project").toString()); //$NON-NLS-1$
-            if (!file.exists()) //$NON-NLS-1$
+            file= new File(fCurrProjectLocation.append(fCurrProject.getName()).append(".project").toString()); //$NON-NLS-1$
+            if (!file.exists())
                 removeProjectFile= true;
 			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
 				

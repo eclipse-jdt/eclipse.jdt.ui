@@ -200,7 +200,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                 try {
                     context.run(false, false, action.getOperation());
                 } catch (InvocationTargetException err) {
-                    ExceptionHandler.handle(err, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), err.getMessage()); //$NON-NLS-1$
+                    ExceptionHandler.handle(err, getShell(), NewWizardMessages.getFormattedString("HintTextGroup.Exception.Title", action.getName()), err.getMessage()); //$NON-NLS-1$
                 } catch (InterruptedException err) {
                     // Cancel pressed
                 }
@@ -248,7 +248,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      */
     public void handleResult(List resultElements, CoreException exception, int actionType) {
         if (exception != null) {
-            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), exception.getLocalizedMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.getFormattedString("HintTextGroup.Exception.Title.refresh", fActionGroup.getAction(actionType).getName()), exception.getLocalizedMessage()); //$NON-NLS-1$
             return;
         }
         
@@ -290,7 +290,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                 fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
             }
         } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.Exception.Title.refresh"), e.getLocalizedMessage()); //$NON-NLS-1$
         }
     }
     
@@ -362,7 +362,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                 fPackageExplorer.setSelection(result);
             setOutputLocationFieldText(getOldOutputLocation());
         } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.Exception.Title.refresh"), e.getLocalizedMessage()); //$NON-NLS-1$
         }
     }
     
@@ -382,7 +382,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                 fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
             }
         } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.Exception.Title.refresh"), e.getLocalizedMessage()); //$NON-NLS-1$
         }
     }
     
@@ -456,7 +456,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                     fNewFolders.add(element);
             }
         } catch (JavaModelException exception) {
-            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), exception.getMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.getString("HintTextGroup.Exception.Title.output"), exception.getMessage()); //$NON-NLS-1$
         }
     }
     
@@ -616,8 +616,8 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
                 return true;
         }
         if (actions.length == 2) {
-            int idReset= Integer.parseInt(actions[0].getId());
-            int idLink= Integer.parseInt(actions[1].getId());
+            int idLink= Integer.parseInt(actions[0].getId());
+            int idReset= Integer.parseInt(actions[1].getId());
             if (idReset == IClasspathInformationProvider.RESET_ALL && 
                 idLink == IClasspathInformationProvider.CREATE_LINK)
                 return true;

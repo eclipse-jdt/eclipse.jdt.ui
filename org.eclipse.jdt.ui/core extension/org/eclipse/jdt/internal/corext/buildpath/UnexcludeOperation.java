@@ -48,7 +48,7 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public UnexcludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.UNEXCLUDE);
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude"), IClasspathInformationProvider.UNEXCLUDE); //$NON-NLS-1$
     }
     
     /**

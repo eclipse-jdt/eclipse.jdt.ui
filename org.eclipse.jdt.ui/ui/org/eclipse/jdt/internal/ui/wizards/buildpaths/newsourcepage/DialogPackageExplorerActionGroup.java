@@ -202,7 +202,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 IClasspathInformationProvider.CREATE_LINK);
         op= new ResetAllOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset")), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.UndoAll")), //$NON-NLS-1$
                 IClasspathInformationProvider.RESET_ALL);
     }
 
@@ -219,7 +219,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * 
      * @see IClasspathInformationProvider
      */
-    private ClasspathModifierAction getAction(int type) {
+    public ClasspathModifierAction getAction(int type) {
         return fActions[type];
     }
     
@@ -597,7 +597,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @param menu the menu to be filled up with actions
      */
     public void fillContextMenu(IMenuManager menu) {        
-        for (int i= 0; i < fActions.length; i++) {
+        for (int i= 0; i < fContextSensitiveActions; i++) {
             IAction action= getAction(i);
             if (action.isEnabled())
                 menu.add(action);

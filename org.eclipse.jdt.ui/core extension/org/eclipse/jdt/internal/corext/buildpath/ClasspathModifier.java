@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock.IRemoveOld
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -174,10 +175,9 @@ public class ClasspathModifier {
                 IPath outputLocation= project.getOutputLocation();
                 IPath projPath= project.getProject().getFullPath();
                 List existingEntries= getExistingEntries(project);
-                
                 if (!(elements.size() == 1 && elements.get(0) instanceof IJavaProject) && //if only the project should be added, then the query does not need to be executed 
                         (outputLocation.equals(projPath) || query.getDesiredOutputLocation().segmentCount() == 1)) {
-                    if (query.doQuery(false, project)) {
+                    if (query.doQuery(false, getValidator(elements, project), project)) {
                         project.setOutputLocation(query.getOutputLocation(), null);
                         // remove the project
                         if (query.removeProjectFromClasspath()) {
@@ -201,9 +201,9 @@ public class ClasspathModifier {
                     Object element= elements.get(i);
                     CPListElement entry;
                     if (element instanceof IFolder)
-                        entry= addToClasspath((IFolder)element, existingEntries, newEntries, project, query, monitor);
+                        entry= addToClasspath((IFolder)element, existingEntries, newEntries, project, monitor);
                     else
-                        entry= addToClasspath((IJavaElement)element, existingEntries, newEntries, project, query, monitor);
+                        entry= addToClasspath((IJavaElement)element, existingEntries, newEntries, project, monitor);
                     newEntries.add(entry);
                 }
                 
@@ -245,7 +245,6 @@ public class ClasspathModifier {
      * <code>IJavaProject</code> that have been added to the build path
      * @throws CoreException 
      * @throws OperationCanceledException 
-     * @see ClasspathModifierQueries.IOutputFolderQuery
      */
     protected List removeFromClasspath(List elements, IJavaProject project, IProgressMonitor monitor) throws CoreException {
         if (monitor == null)
@@ -266,8 +265,7 @@ public class ClasspathModifier {
                 }
             }
             
-            IClasspathEntry[] entries= convert(existingEntries);
-            project.setRawClasspath(entries, project.getOutputLocation(), new SubProgressMonitor(monitor, 1));
+            updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 1));
             fireEvent(existingEntries);
             return resultElements;
         } finally {
@@ -534,7 +532,7 @@ public class ClasspathModifier {
         if (query.doQuery(element)) {
             IOutputFolderQuery outputFolderQuery= query.getOutputFolderQuery(query.getOutputLocation());
             if (outputFolderQuery.getDesiredOutputLocation().segmentCount() == 1) {
-                if (!outputFolderQuery.doQuery(true, project))
+                if (!outputFolderQuery.doQuery(true, getTrueValidator(), project))
                     return null;
                 project.setOutputLocation(outputFolderQuery.getOutputLocation(), null);
                 if (outputFolderQuery.removeProjectFromClasspath()) {
@@ -938,15 +936,12 @@ public class ClasspathModifier {
      * 
      * @param folder a folder to be added to the build path
      * @param project the Java project
-     * @param query for information about whether the project should be removed as
-     * source folder and the build folder should be updated
      * @param monitor progress monitor, can be <code>null</code> 
      * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
      * @throws CoreException 
      * @throws OperationCanceledException 
-     * @see IOutputFolderQuery
      */
-    private CPListElement addToClasspath(IFolder folder, List existingEntries, List newEntries, IJavaProject project, IOutputFolderQuery query, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
+    private CPListElement addToClasspath(IFolder folder, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
@@ -964,15 +959,12 @@ public class ClasspathModifier {
      * 
      * @param javaElement element to be added to the build path
      * @param project the Java project
-     * @param query for information about whether the project should be removed as
-     * source folder and update build folder
      * @param monitor progress monitor, can be <code>null</code> 
      * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
      * @throws CoreException 
      * @throws OperationCanceledException 
-     * @see ClasspathModifierQueries.IOutputFolderQuery
      */
-    private CPListElement addToClasspath(IJavaElement javaElement, List existingEntries, List newEntries, IJavaProject project, IOutputFolderQuery query, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+    private CPListElement addToClasspath(IJavaElement javaElement, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
@@ -1685,5 +1677,98 @@ public class ClasspathModifier {
     private void fireEvent(List newEntries) {
         if (fListener != null)
             fListener.classpathEntryChanged(newEntries);
+    }
+    
+    private OutputFolderValidator getTrueValidator() throws JavaModelException {
+        return new OutputFolderValidator(null, null) {
+            public boolean validate(IPath outputLocation) {
+                return true;
+            }
+        };
+    }
+    
+    private OutputFolderValidator getValidator(final List newElements, final IJavaProject project) throws JavaModelException {
+        return new OutputFolderValidator(newElements, project) {
+
+            public boolean validate(IPath outputLocation) {
+                for(int i= 0; i < newElements.size(); i++) {
+                    if (isInvalid(newElements.get(i), outputLocation))
+                        return false;
+                }
+                
+                for(int i= 0; i < fEntries.length; i++) {
+                    if (isInvalid(fEntries[i], outputLocation))
+                        return false;
+                }
+                return true;
+            }
+            
+            /**
+             * Check if the output location for the given object is valid
+             * 
+             * @param object the object to retrieve its path from and compare it 
+             * to the output location
+             * @param outputLocation the output location
+             * @return <code>true</code> if the output location is invalid, that is, 
+             * if it is a subfolder of the provided object.
+             */
+            private boolean isInvalid(Object object, IPath outputLocation) {
+                IPath path= null;
+                if (object instanceof IFolder)
+                    path= getFolderPath(object);
+                else if (object instanceof IJavaElement)
+                    path= getJavaElementPath(object);
+                else if (object instanceof IClasspathEntry)
+                    path= getCPEntryPath(object);
+                return isSubFolderOf(path, outputLocation);
+            }
+            
+            /**
+             * Get an <code>IFolder</code>'s path
+             * 
+             * @param element an element which is of type <code>IFolder</code>
+             * @return the path of the folder
+             */
+            private IPath getFolderPath(Object element) {
+                return ((IFolder)element).getFullPath();
+            }
+            
+            /**
+             * Get an <code>IJavaElement</code>'s path
+             * 
+             * @param element an element which is of type <code>IJavaElement</code>
+             * @return the path of the Java element
+             */
+            private IPath getJavaElementPath(Object element) {
+                return ((IJavaElement)element).getPath();
+            }
+            
+            /**
+             * Get an <code>IClasspathEntry</code>'s path
+             * 
+             * @param entry an element which is of type <code>IClasspathEntry</code>
+             * @return the path of the classpath entry
+             */
+            private IPath getCPEntryPath(Object entry) {
+                return ((IClasspathEntry)entry).getPath();
+            }
+            
+            /**
+             * 
+             * @param path1 the first path
+             * @param path2 the second path
+             * @return <code>true</code> if path1 is a subfolder of 
+             * path2, <code>false</code> otherwise
+             */
+            private boolean isSubFolderOf(IPath path1, IPath path2) {
+                if (path2 == null) {
+                    if (path1 == null)
+                        return true;
+                    return false;
+                }
+                return path2.matchingFirstSegments(path1) == path2.segmentCount();
+            }
+            
+        };
     }
 }

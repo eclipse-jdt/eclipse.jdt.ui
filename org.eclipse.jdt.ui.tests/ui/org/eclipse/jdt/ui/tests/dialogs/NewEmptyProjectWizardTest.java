@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 
 public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     private IPath defaultOutputFolder;
@@ -740,7 +741,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
             public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) {
                 return new ClasspathModifierQueries.IOutputFolderQuery(null) {
 
-                    public boolean doQuery(boolean b, IJavaProject project) {
+                    public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                         return false;
                     }
 
@@ -842,7 +843,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
             public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) {
                 return new ClasspathModifierQueries.IOutputFolderQuery(null) {
 
-                    public boolean doQuery(boolean b, IJavaProject project) {
+                    public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                         // cancel the operation
                         return false;
                     }
@@ -1224,7 +1225,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     
     protected ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQueryToKeepProjAsRoot() throws JavaModelException {
         return new ClasspathModifierQueries.IOutputFolderQuery(defaultOutputFolder) {
-            public boolean doQuery(boolean b, IJavaProject project) {
+            public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                 return true;
             }
 

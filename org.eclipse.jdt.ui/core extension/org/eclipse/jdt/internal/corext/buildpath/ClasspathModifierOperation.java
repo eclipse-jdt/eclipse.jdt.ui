@@ -30,6 +30,10 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
     protected IClasspathInformationProvider fInformationProvider;
     protected CoreException fException;
     private int fType;
+    /**
+     * A human readable name for this operation
+     */
+    private String fName; 
     
     /**
      * Constructor
@@ -38,16 +42,18 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
      * changes on classpath entries or <code>null</code> if no such notification is 
      * necessary.
      * @param informationProvider a provider to offer information to the operation
+     * @param name a human readable name for this operation
      * @param type the type of the operation, that is a constant of <code>
      * IClasspathInformationProvider</code>
      * 
      * @see IClasspathInformationProvider
      * @see ClasspathModifier
      */
-    public ClasspathModifierOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider, int type) {
+    public ClasspathModifierOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider, String name, int type) {
         super(listener);
         fInformationProvider= informationProvider;
         fException= null;
+        fName= name;
         fType= type;
     }
     
@@ -116,4 +122,8 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
      * @return a string describing the operation.
      */
     public abstract String getDescription(int type);
+    
+    public String getName() {
+        return fName;
+    }
 }

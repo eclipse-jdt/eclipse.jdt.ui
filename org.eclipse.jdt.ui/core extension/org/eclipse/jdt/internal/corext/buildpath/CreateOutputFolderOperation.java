@@ -43,7 +43,7 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public CreateOutputFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.CREATE_OUTPUT);
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateOutput"), IClasspathInformationProvider.CREATE_OUTPUT); //$NON-NLS-1$
     }
     
     /**

@@ -133,7 +133,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                 fPackageExplorer.showOutputFolders(false);
             }
         } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("NewSourceContainerWorkbookPage.JavaModelException.Title"), e.getMessage()); //$NON-NLS-1$
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.init"), e.getMessage()); //$NON-NLS-1$
             fUseFolderOutputs.setSelection(false);
         }
     }
@@ -160,7 +160,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                 fProjectContent= getDocument(projectFile.getFullPath());
         } catch (CoreException e) {
             ExceptionHandler.handle(e, getShell(), 
-                    NewWizardMessages.getString("NewSourceContainerWorkbookPage.CoreException.Title"),  //$NON-NLS-1$
+                    NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.saveFile"),  //$NON-NLS-1$
                     e.getMessage());
         }
     }
@@ -188,7 +188,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
             file.create(new ByteArrayInputStream(document.get().getBytes()), true, null);
         } catch (CoreException e) {
             ExceptionHandler.handle(e, getShell(), 
-                    NewWizardMessages.getString("NewSourceContainerWorkbookPage.CoreException.Title"),  //$NON-NLS-1$
+                    NewWizardMessages.getFormattedString("NewSourceContainerWorkbookPage.Exception.restoreFile", file.getName()),  //$NON-NLS-1$
                     e.getMessage());
         }
     }
@@ -262,12 +262,12 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
             public void dialogFieldChanged(DialogField field) {
                 Button button= ((SelectionButtonDialogField)field).getSelectionButton(null);
                 if (button.getSelection()) {
+                    ResetAllOutputFoldersOperation op= new ResetAllOutputFoldersOperation(NewSourceContainerWorkbookPage.this, fHintTextGroup);
                     try {
-                        ResetAllOutputFoldersOperation op= new ResetAllOutputFoldersOperation(NewSourceContainerWorkbookPage.this, fHintTextGroup);
                         op.run(null);
                     } catch (InvocationTargetException e) {
                         ExceptionHandler.handle(e, getShell(),
-                                NewWizardMessages.getString("NewSourceContainerWorkbookPage.JavaModelException.Title"), e.getMessage()); //$NON-NLS-1$
+                                NewWizardMessages.getFormattedString("NewSourceContainerWorkbookPage.Exception.Title", op.getName()), e.getMessage()); //$NON-NLS-1$
                     }
                 }
             }
@@ -282,7 +282,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                     actionGroup.refresh(new DialogExplorerActionContext(list, fHintTextGroup.getJavaProject()));
                 } catch (JavaModelException e) {
                     ExceptionHandler.handle(e, getShell(),
-                            NewWizardMessages.getString("NewSourceContainerWorkbookPage.JavaModelException.Title"), e.getMessage()); //$NON-NLS-1$
+                            NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.refresh"), e.getMessage()); //$NON-NLS-1$
                 }
             }
 

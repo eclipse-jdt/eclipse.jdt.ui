@@ -126,4 +126,13 @@ public class ClasspathModifierAction extends Action {
     public String getId() {
         return fOperation.getId();
     }
+    
+    /**
+     * Get the action's name.
+     * 
+     * @return a human readable name for the operation/action executed
+     */
+    public String getName() {
+        return fOperation.getName();
+    }
 }

@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -24,6 +25,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -42,6 +44,43 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.OutputLocationDialog;
  * the predefined queries.
  */
 public class ClasspathModifierQueries {
+    
+    /**
+     * A validator for the output location that can be 
+     * used to find out whether the entred location can be 
+     * used for an output folder or not.
+     */
+    public static abstract class OutputFolderValidator {
+        protected IClasspathEntry[] fEntries;
+        protected List fElements;
+        
+        /**
+         * Create a output folder validator.
+         * 
+         * @param newElements a list of elements that will be added 
+         * to the buildpath. The list's items can be of type:
+         * <li><code>IJavaProject</code></li>
+         * <li><code>IPackageFragment</code></li>
+         * <li><code>IFolder</code></li>
+         * @param project the Java project
+         * @throws JavaModelException
+         */
+        public OutputFolderValidator(List newElements, IJavaProject project) throws JavaModelException {
+            fEntries= project.getRawClasspath();
+            fElements= newElements;
+        }
+        
+        /**
+         * The path of the output location to be validated. The path 
+         * should contain the full path within the project, for example: 
+         * /ProjectXY/folderA/outputLocation.
+         * 
+         * @param outputLocation the output location for the project
+         * @return <code>true</code> if the output location is valid, 
+         * <code>false</code> otherwise.
+         */
+        public abstract boolean validate(IPath outputLocation);
+    }
     
     /**
      * Query that processes the request of 
@@ -156,13 +195,14 @@ public class ClasspathModifierQueries {
          * @param editingOutputFolder <code>true</code> if currently an output folder is changed, 
          * <code>false</code> otherwise. This information can be usefull to generate an appropriate 
          * message to ask the user for an action.
+         * @param validator a validator to find out whether the chosen output location is valid or not
          * @param project the Java project
          * @return <code>true</code> if the execution was successfull (e.g. not aborted) and 
          * the caller should execute additional steps as setting the output location for the project or (optionally) 
          * removing the project from the classpath, <code>false</code> otherwise.
          * @throws JavaModelException if the output location of the project could not be retrieved
          */
-        public abstract boolean doQuery(final boolean editingOutputFolder, final IJavaProject project) throws JavaModelException;
+        public abstract boolean doQuery(final boolean editingOutputFolder, final OutputFolderValidator validator, final IJavaProject project) throws JavaModelException;
         
     }
     
@@ -313,7 +353,7 @@ public class ClasspathModifierQueries {
         return new IOutputFolderQuery(outputLocation) {
             private final IPath[] fOutputLocation= new IPath[1];
             private boolean removeProject;
-            public boolean doQuery(final boolean editingOutputFolder, final IJavaProject project) throws JavaModelException {
+            public boolean doQuery(final boolean editingOutputFolder,  final OutputFolderValidator validator, final IJavaProject project) throws JavaModelException {
                 final boolean[] result= new boolean[1];
                 removeProject= false;
                 fOutputLocation[0]= project.getOutputLocation();
@@ -329,10 +369,12 @@ public class ClasspathModifierQueries {
                         if (fDesiredOutputLocation.segmentCount() == 1) {
                             String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
                             newOutputFolder= fDesiredOutputLocation.append(outputFolderName);
+                            newOutputFolder= getValidPath(newOutputFolder, validator);
                             message= NewWizardMessages.getFormattedString("ClasspathModifier.ChangeOutputLocationDialog.project.outputLocation", newOutputFolder); //$NON-NLS-1$
                             dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.OK_LABEL}, 0);
                         } else {
                             newOutputFolder= fDesiredOutputLocation;
+                            newOutputFolder= getValidPath(newOutputFolder, validator);
                             if (editingOutputFolder && newOutputFolder != null) {
                                 fOutputLocation[0]= newOutputFolder;
                                 result[0]= true;
@@ -342,6 +384,7 @@ public class ClasspathModifierQueries {
                             removeProject= true;
                             dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
                         }
+                        
                         int code= dialog.open();
                         boolean ok= code == IDialogConstants.OK_ID;
                         if (ok) {
@@ -361,6 +404,16 @@ public class ClasspathModifierQueries {
             
             public boolean removeProjectFromClasspath() {
                 return removeProject;
+            }
+            
+            private IPath getValidPath(IPath newOutputFolder, OutputFolderValidator validator) {
+                int i= 1;
+                IPath path= newOutputFolder;
+                while (!validator.validate(path)) {
+                    path= new Path(newOutputFolder.toString() + i);
+                    i++;
+                }
+                return path;
             }
         };
     }

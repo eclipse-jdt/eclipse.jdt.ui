@@ -48,7 +48,7 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public RemoveFromClasspathOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, IClasspathInformationProvider.REMOVE_FROM_BP);
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP"), IClasspathInformationProvider.REMOVE_FROM_BP); //$NON-NLS-1$
     }
     
     /**
