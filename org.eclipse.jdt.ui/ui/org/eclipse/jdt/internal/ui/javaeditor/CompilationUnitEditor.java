@@ -565,7 +565,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);		
 		
-		addActionIfEnabled(menu, ITextEditorActionConstants.GROUP_EDIT,  ITextEditorActionConstants.REVERT_TO_SAVED);
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
 				
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
@@ -574,22 +573,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fContextMenuGroup.setContext(null);
 	}
 	
-	private void addActionIfEnabled(IMenuManager menu, String group, String actionId) {
-	 	IAction action= getAction(actionId);
-	 	if (action != null) {
-	 		if (action instanceof IUpdate)
-	 			((IUpdate) action).update();
-	 		
-	 		if (!action.isEnabled())	
-	 			return;
-	 		IMenuManager subMenu= menu.findMenuUsingPath(group);
-	 		if (subMenu != null)
-	 			subMenu.add(action);
-	 		else
-	 			menu.appendToGroup(group, action);
-	 	}
-	}
-	 
 	/*
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
