@@ -57,7 +57,7 @@ public class ReorgCorrectionsSubProcessor {
 			
 			String newCUName= args[1] + ".java"; //$NON-NLS-1$
 			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
-			if (!newCU.exists()) {
+			if (!newCU.exists() && !cu.getResource().isLinked()) {
 				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
 	
 				// rename cu
