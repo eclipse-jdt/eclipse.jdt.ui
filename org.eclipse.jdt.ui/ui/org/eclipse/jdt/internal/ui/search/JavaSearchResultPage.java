@@ -59,6 +59,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	private static final String KEY_SORTING= "org.eclipse.jdt.search.resultpage.sorting"; //$NON-NLS-1$
 	private static final String KEY_FILTERS= "org.eclipse.jdt.search.resultpage.filters"; //$NON-NLS-1$
 	
+	private static final String GROUP_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
 	
 	private NewSearchViewActionGroup fActionGroup;
 	private JavaSearchContentProvider fContentProvider;
@@ -200,10 +201,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 		
 	private void addGroupActions(IToolBarManager mgr) {
-		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fGroupProjectAction);
-		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fGroupPackageAction);
-		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fGroupFileAction);
-		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fGroupTypeAction);
+		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, new Separator(GROUP_GROUPING));
+		mgr.appendToGroup(GROUP_GROUPING, fGroupProjectAction);
+		mgr.appendToGroup(GROUP_GROUPING, fGroupPackageAction);
+		mgr.appendToGroup(GROUP_GROUPING, fGroupFileAction);
+		mgr.appendToGroup(GROUP_GROUPING, fGroupTypeAction);
 		
 		updateGroupingActions();
 	}
