@@ -42,6 +42,9 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+/**
+ * @deprecated Use file buffers instead
+ */
 /* package */ class TextBufferFactory {
 
 	private IDocumentProvider fDocumentProvider;

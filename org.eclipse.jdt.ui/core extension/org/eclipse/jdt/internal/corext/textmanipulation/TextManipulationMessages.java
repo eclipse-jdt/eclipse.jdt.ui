@@ -14,6 +14,9 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+/**
+ * @deprecated
+ */
 public class TextManipulationMessages {
 
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.corext.textmanipulation.Messages"; //$NON-NLS-1$

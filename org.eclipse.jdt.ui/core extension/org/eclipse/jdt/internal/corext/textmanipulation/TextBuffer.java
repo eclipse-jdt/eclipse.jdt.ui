@@ -35,9 +35,14 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * An implementation of a <code>TextBuffer</code> that is based on <code>ITextSelection</code>
  * and <code>IDocument</code>.
+ * 
+ * @deprecated Use file buffers instead
  */
 public class TextBuffer {
-
+	
+	/**
+	 * @deprecated Use file buffers instead
+	 */
 	private static class DocumentRegion extends TextRegion {
 		IRegion fRegion;
 		public DocumentRegion(IRegion region) {
@@ -51,6 +56,9 @@ public class TextBuffer {
 		}
 	}
 	
+	/**
+	 * @deprecated Use file buffers instead
+	 */
 	public class Block {
 		public String content;
 		public int offsetDelta;

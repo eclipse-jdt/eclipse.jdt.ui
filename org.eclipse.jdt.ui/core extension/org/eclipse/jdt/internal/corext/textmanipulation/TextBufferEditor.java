@@ -27,6 +27,9 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+/**
+ * @deprecated Use file buffers instead
+ */
 public class TextBufferEditor extends TextEditProcessor {
 
 	private TextBuffer fBuffer;
