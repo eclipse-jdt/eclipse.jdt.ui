@@ -332,6 +332,25 @@ public class StubUtility {
 		buf.append(')');
 		return buf.toString();
 	}	
+
+	/**
+	 * Returns the comment for a given method using the comment code templates.
+	 * <code>null</code> is returned if the template is empty.
+	 * @param method The method for which the comment is
+	 * @param overridden The method will be overridden by the created method or
+	 * <code>null</code> for non-overriding methods
+	 * @return String Returns the constructed comment or <code>null</code> if
+	 * the comment code template is empty. The string uses \\n as line delimiter
+	 * (formatting required)
+	 * @throws CoreException
+	 */
+	public static String getMethodComment(IMethod method, IMethod overridden) throws CoreException {
+		String retType= method.isConstructor() ? null : method.getReturnType();
+		
+		return getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
+			method.getElementName(), method.getParameterNames(), method.getExceptionTypes(), retType, overridden);
+	}
+
 	
 	/**
 	 * Returns the comment for a method using the comment code templates.

@@ -52,18 +52,14 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	}		
 	
 	private String createMethodComment(IMethod meth) throws CoreException {
-		ICompilationUnit cu= meth.getCompilationUnit();
 		IType declaringType= meth.getDeclaringType();
-		String methName= meth.getElementName();
 		
-		String returnType= null;
 		IMethod overridden= null;
 		if (!meth.isConstructor()) {
 			ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
-			overridden= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, methName, meth.getParameterTypes(), false);
-			returnType= meth.getReturnType();
+			overridden= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, meth.getElementName(), meth.getParameterTypes(), false);
 		}
-		return StubUtility.getMethodComment(cu, declaringType.getElementName(), methName, meth.getParameterNames(), meth.getExceptionTypes(), returnType, overridden);
+		return StubUtility.getMethodComment(meth, overridden);
 	}
 	
 	private String createFieldComment(IField field) throws JavaModelException {
