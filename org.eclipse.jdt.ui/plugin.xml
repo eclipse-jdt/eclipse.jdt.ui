@@ -817,21 +817,13 @@ JavaStructureDiffViewerCreator
 		visible="false"
 		description="%JavaActionSet.description">
 
-      	<menu
-            id="navigate"
-            label="%NavigateMenu.label"
-            path="edit">
-         	<separator name="openGroup"/>
-         	<separator name="openTypeGroup"/>
-      	</menu>
-
 		<action id="openTypeInHierarchy"
-			menubarPath="navigate/openTypeGroup"
+			menubarPath="navigate/open.ext2"
 			label="%OpenTypeInHierarchyAction.label"
 			tooltip="%OpenTypeInHierarchyAction.tooltip"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeInHierarchyAction"/>
 		<action id="openType"
-			menubarPath="navigate/openTypeGroup"
+			menubarPath="navigate/open.ext2"
 			toolbarPath="Normal/Search"			
 			label="%OpenTypeAction.label"
 			tooltip="%OpenTypeAction.tooltip"
@@ -852,20 +844,13 @@ JavaStructureDiffViewerCreator
         description= "%OpenActionSet.description"
 		visible="false">
 
-      	<menu
-            id="navigate"
-            label="%NavigateMenu.label"
-            path="edit">
-         	<separator name="openGroup"/>
-      	</menu>
-      	
 		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
-      		menubarPath="navigate/openGroup"
+      		menubarPath="navigate/open.ext"
       		label="%OpenTypeHierarchyAction.label"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.Open"
-      		menubarPath="navigate/openGroup"
+      		menubarPath="navigate/open.ext"
       		label="%OpenAction.label"
 			tooltip="%OpenAction.tooltip"
 			description="%OpenAction.description"
@@ -902,50 +887,28 @@ JavaStructureDiffViewerCreator
 		<!-- Navigate Menu                                                               -->
 		<!-- =========================================================================== -->
 			
-      	<menu
-            id="navigate"
-            label="%NavigateMenu.label"
-            path="edit">
-         	<separator name="openGroup"/>
-         	<separator name="openTypeGroup"/>
-         	<separator name="showGroup"/>
-         	<separator name="problemGroup"/>
-      	</menu>
-      	
 		<action id="org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"
-      		menubarPath="navigate/openGroup"
+      		menubarPath="navigate/open.ext"
       		label="%OpenExternalJavadocAction.label"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.OpenSuperImplementation"
-      		menubarPath="navigate/openGroup"
+      		menubarPath="navigate/open.ext"
       		label="%OpenSuperImplementationAction.label"
 			tooltip="%OpenSuperImplementationAction.tooltip"
 			description="%OpenSuperImplementationAction.description"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ShowInNaviagtorView"
-      		menubarPath="navigate/showGroup"
+      		menubarPath="navigate/show.ext"
       		label="%ShowInNavigatorViewAction.label"
       		tooltip="%ShowInNavigatorViewAction.tooltip"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ShowInPackagesView"
-      		menubarPath="navigate/showGroup"
+      		menubarPath="navigate/show.ext"
       		label="%ShowInPackageViewAction.label"
       		tooltip="%ShowInPackageViewAction.tooltip"
-			retarget="true" />
-			
-		<action id="org.eclipse.jdt.ui.actions.PreviousProblem"
-      		menubarPath="navigate/problemGroup"
-      		label="%ShowPreviousProblemAction.label"
-      		icon="icons/full/ctool16/prev_error_nav.gif"
-			retarget="true" />
-			
-		<action id="org.eclipse.jdt.ui.actions.NextProblem"
-      		menubarPath="navigate/problemGroup"
-      		label="%ShowNextProblemAction.label"
-      		icon="icons/full/ctool16/next_error_nav.gif"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.GoToPackage"

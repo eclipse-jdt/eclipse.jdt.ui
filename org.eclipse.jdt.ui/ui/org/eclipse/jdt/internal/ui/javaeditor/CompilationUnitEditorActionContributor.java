@@ -149,12 +149,12 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
-		a= new RetargetToolbarAction(b, "PreviousError.", JdtActionConstants.SHOW_PREVIOUS_PROBLEM, false); //$NON-NLS-1$
+		a= new RetargetToolbarAction(b, "PreviousError.", ITextEditorActionConstants.PREVIOUS, false); //$NON-NLS-1$
 		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
-		a= new RetargetToolbarAction(b, "NextError.", JdtActionConstants.SHOW_NEXT_PROBLEM, false); //$NON-NLS-1$
+		a= new RetargetToolbarAction(b, "NextError.", ITextEditorActionConstants.NEXT, false); //$NON-NLS-1$
 		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);

@@ -766,8 +766,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		// register global actions
 		IActionBars bars= site.getActionBars();
 		
-		bars.setGlobalActionHandler(JdtActionConstants.SHOW_PREVIOUS_PROBLEM, fPreviousError);
-		bars.setGlobalActionHandler(JdtActionConstants.SHOW_NEXT_PROBLEM, fNextError);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousError);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavadoc);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);

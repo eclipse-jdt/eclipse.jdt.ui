@@ -21,11 +21,6 @@ public class JdtActionConstants {
 	// Navigate menu
 	
 	/**
-	 * Context menu: name of navigate sub menu (value <code>"navigate"</code>).
-	 */
-	public static final String NAVIGATE_MENU= "navigate";	//$NON-NLS-1$
-
-	/**
 	 * Navigate menu: name of standard Goto Type global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.GoToType"</code>).
 	 */
@@ -72,19 +67,6 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ShowInNaviagtorView"</code>).
 	 */
 	public static final String SHOW_IN_NAVIGATOR_VIEW= "org.eclipse.jdt.ui.actions.ShowInNaviagtorView"; //$NON-NLS-1$
-
-	/**
-	 * Navigate menu: name of standard Show Next Problem global action
-	 * (value <code>"org.eclipse.jdt.ui.actions.NextProblem"</code>).
-	 */
-	public static final String SHOW_NEXT_PROBLEM= "org.eclipse.jdt.ui.actions.NextProblem"; //$NON-NLS-1$
-	
-	/**
-	 * Navigate menu: name of standard Show Previous Problem global action
-	 * (value <code>"org.eclipse.jdt.ui.actions.PreviousProblem"</code>).
-	 */
-	public static final String SHOW_PREVIOUS_PROBLEM= "org.eclipse.jdt.ui.actions.PreviousProblem";	 //$NON-NLS-1$
-
 
 	// Edit menu
 
