@@ -214,7 +214,7 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 		int flags= IJavaElementSearchConstants.CONSIDER_BINARIES |
 					IJavaElementSearchConstants.CONSIDER_CLASSES |
 					IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS;
-		List result= TypeCache.findTypes(searchEngine, flags, new ProgressMonitorDialog(getShell()), searchEngine.createWorkspaceScope());
+		List result= TypeCache.findTypes(searchEngine, flags, new ProgressMonitorDialog(getShell()), SearchEngine.createWorkspaceScope());
 		fTypeList.setElements(result, false);
 		fTypeList.setFilter("*Exception*", true);
 		fTypeListInitialized= true;
