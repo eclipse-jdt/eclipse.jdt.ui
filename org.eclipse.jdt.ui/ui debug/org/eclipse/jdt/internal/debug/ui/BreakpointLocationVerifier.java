@@ -34,7 +34,11 @@ public class BreakpointLocationVerifier {
 				token= scanner.getNextToken();
 
 				while (token != TerminalSymbols.TokenNameEOF) {
-					if (token == TerminalSymbols.TokenNamebreak || token == TerminalSymbols.TokenNamecontinue || token == TerminalSymbols.TokenNameIdentifier || token == TerminalSymbols.TokenNamereturn) {
+					if (token == TerminalSymbols.TokenNamebreak ||
+						token == TerminalSymbols.TokenNamecontinue ||
+						token == TerminalSymbols.TokenNameIdentifier ||
+						token == TerminalSymbols.TokenNamereturn ||
+						token == TerminalSymbols.TokenNamethis) {
 						found= true;
 						break;
 					} else {

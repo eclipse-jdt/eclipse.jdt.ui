@@ -6,32 +6,7 @@ package org.eclipse.jdt.internal.debug.ui;
  * (c) Copyright IBM Corp 2001
  */
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
-import org.eclipse.debug.core.model.IStackFrame;
-import org.eclipse.debug.core.model.ITerminate;
-import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.debug.ui.IDebugModelPresentation;
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.debug.core.*;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.launcher.DebugOverlayDescriptorFactory;
-import org.eclipse.jdt.internal.ui.viewsupport.OverlayIconManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorInput;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.text.MessageFormat;import java.util.*;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.debug.core.*;import org.eclipse.debug.core.model.IStackFrame;import org.eclipse.debug.core.model.ITerminate;import org.eclipse.debug.ui.*;import org.eclipse.jdt.core.*;import org.eclipse.jdt.debug.core.*;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.launcher.DebugOverlayDescriptorFactory;import org.eclipse.jdt.internal.ui.viewsupport.OverlayIconManager;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.graphics.Point;import org.eclipse.ui.IEditorInput;
 
 /**
  * @see IDebugModelPresentation
@@ -41,7 +16,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	protected static final String DISPLAY_HEX_VALUES= "org.eclipse.jdt.ui.displayHexValues";
 	protected HashMap fAttributes= new HashMap(3);
 
-	protected OverlayIconManager fIconManager= new OverlayIconManager(new DebugOverlayDescriptorFactory());
+	static final Point BIG_SIZE= new Point(22, 16);
+	protected OverlayIconManager fIconManager= new OverlayIconManager(new DebugOverlayDescriptorFactory(), BIG_SIZE);
 
 	// Thread label resource String keys
 	private static final String THREAD_PREFIX= "jdi_thread.";
