@@ -35,6 +35,12 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	}
 		
 	private void computeRenameTypeRefactoring(){
+		//fix for:1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
+		if (getSimpleCUName().indexOf(".") != -1){
+			fRenameTypeRefactoring= null;
+			fWillRenameType= false;
+			return;
+		}
 		IType type= getCu().getType(getSimpleCUName());
 		if (type.exists())
 			fRenameTypeRefactoring= new RenameTypeRefactoring(getTextBufferChangeCreator(), type);

@@ -47,6 +47,12 @@ public class Checks {
 	 *  name is not a valid java type name.
 	 */
 	public static RefactoringStatus checkTypeName(String name) {
+		//fix for: 1GF5Z0Z: ITPJUI:WINNT - assertion failed after renameType refactoring
+		if (name.indexOf(".") != -1){
+			RefactoringStatus result= new RefactoringStatus();
+			result.addFatalError("Type name must not contain a dot (.)");
+			return result;
+		}
 		return checkName(name, JavaConventions.validateJavaTypeName(name));
 	}
 
@@ -70,6 +76,12 @@ public class Checks {
 	 *  name is not a valid java package name.
 	 */
 	public static RefactoringStatus checkCompilationUnitName(String name) {
+		//XXX fix for1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
+		if (name.indexOf(".") != name.lastIndexOf(".")){
+			RefactoringStatus result= new RefactoringStatus();
+			result.addFatalError("Compilation unit name must not contain two dots (.)");
+			return result;
+		}
 		return checkName(name, JavaConventions.validateCompilationUnitName(name));
 	}
 	
