@@ -352,6 +352,36 @@ public class Checks {
 		}
 	}
 	
+	/**
+	 * Finds a method in a type
+	 * This searches for a method with the same name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * @return The first found method or null, if nothing found
+	 */
+	public static IMethod findMethod(String name, int parameterCount, boolean isConstructor, IType type) throws JavaModelException {
+		return findMethod(name, parameterCount, isConstructor, type.getMethods());
+	}
+	
+	/**
+	 * Finds a method in a type
+	 * This searches for a method with the same name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * @return The first found method or null, if nothing found
+	 */
+	public static IMethod findMethod(IMethod method, IType type) throws JavaModelException {
+		return findMethod(method.getElementName(), method.getParameterTypes().length, method.isConstructor(), type.getMethods());
+	}
+	
+	/**
+	 * Finds a method in an array of methods
+	 * This searches for a method with the same name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done
+	 * @return The first found method or null, if nothing found
+	 */
+	public static IMethod findMethod(IMethod method, IMethod[] methods) throws JavaModelException {
+		return findMethod(method.getElementName(), method.getParameterTypes().length, method.isConstructor(), methods);
+	}
+	
 	public static IMethod findMethod(String name, int parameters, boolean isConstructor, IMethod[] methods) throws JavaModelException {	
 		for (int i= methods.length-1; i >= 0; i--) {
 			IMethod curr= methods[i];
