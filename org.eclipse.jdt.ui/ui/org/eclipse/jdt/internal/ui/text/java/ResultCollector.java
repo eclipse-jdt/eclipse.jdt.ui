@@ -296,8 +296,10 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 	 * @see ICodeCompletionRequestor#acceptMethodDeclaration
 	 */
 	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		StringBuffer displayString= getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName);
-	
+		StringBuffer displayString= getMethodDisplayString(null, name, parameterTypeNames, parameterNames, returnTypeName);
+		displayString.append(" - "); //$NON-NLS-1$
+		displayString.append(JavaTextMessages.getFormattedString("ResultCollector.overridingmethod", new String(declaringTypeName))); //$NON-NLS-1$
+		
 		StringBuffer typeName= new StringBuffer();
 		if (declaringTypePackageName.length > 0) {
 			typeName.append(declaringTypePackageName);
