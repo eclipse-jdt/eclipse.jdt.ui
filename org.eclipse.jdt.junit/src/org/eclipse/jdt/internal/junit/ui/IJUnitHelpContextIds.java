@@ -28,7 +28,8 @@ public interface IJUnitHelpContextIds {
 	
 	// view parts
 	public static final String RESULTS_VIEW= PREFIX + "results_view_context"; //$NON-NLS-1$
-
+	public static final String RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION= PREFIX + "results_view_toggle_call_mode_action_context"; //$NON-NLS-1$
+	
 	// Preference/Property pages
 	public static final String JUNIT_PREFERENCE_PAGE= PREFIX + "junit_preference_page_context"; //$NON-NLS-1$
 

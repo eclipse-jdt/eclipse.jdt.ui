@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Julien Ruaux: jruaux@octo.com see bug 25324 Ability to know when tests are finished [junit]
  *     Vincent Massol: vmassol@octo.com 25324 Ability to know when tests are finished [junit]
+ *     Sebastian Davids: sdavids@gmx.de 35762 JUnit View wasting a lot of screen space [JUnit]
  ******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -28,7 +29,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
@@ -38,10 +38,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -102,7 +102,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 * Whether the output scrolls and reveals tests as they are executed.
 	 */
 	private boolean fAutoScroll = true;
-
+	/**
+	 * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
+	 * or <code>VIEW_ORIENTATION_VERTICAL</code>.
+	 */
+	private int fCurrentOrientation;
 	/**
 	 * Map storing TestInfos for each executed test keyed by
 	 * the test name.
@@ -152,6 +156,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 */
 	private Action fRerunLastTestAction;
 	private ScrollLockAction fScrollLockAction;
+	private ToggleOrientationAction[] fToggleOrientationActions;
 	
 	/**
 	 * The client side of the remote test runner
@@ -168,7 +173,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	static final String TAG_PAGE= "page"; //$NON-NLS-1$
 	static final String TAG_RATIO= "ratio"; //$NON-NLS-1$
 	static final String TAG_TRACEFILTER= "tracefilter"; //$NON-NLS-1$
+	static final String VIEWORIENTATION= "orientation"; //$NON-NLS-1$
 
+	//orientations
+	static final int VIEW_ORIENTATION_VERTICAL= 0;
+	static final int VIEW_ORIENTATION_HORIZONTAL= 1;
+	
 	private IMemento fMemento;	
 
 	Image fOriginalViewImage;
@@ -180,6 +190,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	
 	private Action fNextAction;
 	private Action fPreviousAction;
+	private Composite fCounterComposite;
+	private Composite fParent;
 	
 	private class StopAction extends Action {
 		public StopAction() {
@@ -209,6 +221,37 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		}
 	}
 	
+	private class ToggleOrientationAction extends Action {
+		private final int fOrientation;
+		
+		public ToggleOrientationAction(TestRunnerViewPart v, int orientation) {
+			super("", AS_RADIO_BUTTON); //$NON-NLS-1$
+			if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL) {
+				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.horizontal.label")); //$NON-NLS-1$
+				setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/th_horizontal.gif")); //$NON-NLS-1$
+				setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/th_horizontal.gif")); //$NON-NLS-1$
+				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$				
+			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL) {
+				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.vertical.label")); //$NON-NLS-1$
+				setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/th_vertical.gif")); //$NON-NLS-1$
+				setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/th_vertical.gif")); //$NON-NLS-1$
+				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$				
+			}
+			fOrientation= orientation;
+			WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION);
+		}
+		
+		public int getOrientation() {
+			return fOrientation;
+		}
+		
+		public void run() {
+			if (fCurrentOrientation == fOrientation)
+				return;
+			setOrientation(fOrientation);
+		}		
+	}
+	
 	/**
 	 * Listen for for modifications to Java elements
 	 */
@@ -235,15 +278,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 					}
 					break;
 				case IJavaElement.COMPILATION_UNIT:
-					ICompilationUnit unit= (ICompilationUnit)delta.getElement();
-					// If we change a working copy we do nothing
-					if (unit.isWorkingCopy()) {
-						// Don't examine children of a working copy but keep processing siblings.
+					// if we have changed a primary working copy (e.g created, removed, ...)
+					// then we do nothing.
+					if ((details & IJavaElementDelta.F_PRIMARY_WORKING_COPY) != 0) 
 						return true;
-					} else {
-						codeHasChanged();
-						return false;
-					}
+					codeHasChanged();
+					return false;
+					
 				case IJavaElement.CLASS_FILE:
 					// Don't examine children of a class file but keep on examining siblings.
 					return true;
@@ -279,6 +320,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		Integer ratio= memento.getInteger(TAG_RATIO);
 		if (ratio != null) 
 			fSashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue()} );
+		Integer orientation= memento.getInteger(VIEWORIENTATION);
+		if (orientation != null)
+			setOrientation(orientation.intValue());
 	}
 	
 	/**
@@ -855,7 +899,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
     		fActiveRunView.setFocus();
     }
 
-    public void createPartControl(Composite parent) {		
+    public void createPartControl(Composite parent) {	
+    	fParent= parent;
 		fClipboard= new Clipboard(parent.getDisplay());
 
 		GridLayout gridLayout= new GridLayout();
@@ -865,8 +910,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 		configureToolBar();
 		
-		Composite counterPanel= createProgressCountPanel(parent);
-		counterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		fCounterComposite= createProgressCountPanel(parent);
+		fCounterComposite.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		SashForm sashForm= createSashForm(parent);
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 		IActionBars actionBars= getViewSite().getActionBars();
@@ -898,13 +943,19 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		int weigths[]= fSashForm.getWeights();
 		int ratio= (weigths[0] * 1000) / (weigths[0] + weigths[1]);
 		memento.putInteger(TAG_RATIO, ratio);
+		memento.putInteger(VIEWORIENTATION, fCurrentOrientation);
 	}
 	
 	private void configureToolBar() {
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
+		IMenuManager viewMenu = actionBars.getMenuManager();
 		fRerunLastTestAction= new RerunLastAction();
 		fScrollLockAction= new ScrollLockAction(this);
+		fToggleOrientationActions =
+			new ToggleOrientationAction[] {
+				new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
+				new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL)};
 		fNextAction= new ShowNextFailureAction(this);
 		fPreviousAction= new ShowPreviousFailureAction(this);
 		fNextAction.setEnabled(false);
@@ -918,6 +969,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		toolBar.add(new Separator());
 		toolBar.add(fRerunLastTestAction);
 		toolBar.add(fScrollLockAction);
+
+		for (int i = 0; i < fToggleOrientationActions.length; ++i)
+			viewMenu.add(fToggleOrientationActions[i]);
+		
 		fScrollLockAction.setChecked(!fAutoScroll);
 
 		actionBars.updateActionBars();
@@ -948,13 +1003,16 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 	private Composite createProgressCountPanel(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout());
-		fProgressBar = new JUnitProgressBar(composite);
-		fProgressBar.setLayoutData(
-			new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		GridLayout layout= new GridLayout();
+		composite.setLayout(layout);
+		setCounterColumns(layout); 
+		
 		fCounterPanel = new CounterPanel(composite);
 		fCounterPanel.setLayoutData(
 			new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		fProgressBar = new JUnitProgressBar(composite);
+		fProgressBar.setLayoutData(
+				new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		return composite;
 	}
 
@@ -1078,5 +1136,25 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				JUnitMessages.getString("TestRunnerViewPart.cannotrerurn.message") //$NON-NLS-1$
 			); 
 		}
+	}
+	
+	private void setOrientation(int orientation) {
+		if ((fSashForm == null) || fSashForm.isDisposed())
+			return;
+		boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
+		fSashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
+		for (int i = 0; i < fToggleOrientationActions.length; ++i)
+			fToggleOrientationActions[i].setChecked(orientation == fToggleOrientationActions[i].getOrientation());
+		fCurrentOrientation = orientation;
+		GridLayout layout= (GridLayout) fCounterComposite.getLayout();
+		setCounterColumns(layout); 
+		fParent.layout();
+	}
+
+	private void setCounterColumns(GridLayout layout) {
+		if (fCurrentOrientation == VIEW_ORIENTATION_HORIZONTAL)
+			layout.numColumns= 2; 
+		else
+			layout.numColumns= 1;
 	}
 }
