@@ -93,7 +93,7 @@ abstract class FieldFilter extends MatchFilter {
 
 class WriteFilter extends FieldFilter {
 	public boolean filters(JavaElementMatch match) {
-		return match.isWriteAccess();
+		return match.isWriteAccess() && !match.isReadAccess();
 	}
 	public String getName() {
 		return SearchMessages.getString("MatchFilter.WriteFilter.name"); //$NON-NLS-1$
@@ -113,7 +113,7 @@ class WriteFilter extends FieldFilter {
 
 class ReadFilter extends FieldFilter {
 	public boolean filters(JavaElementMatch match) {
-		return match.isReadAccess();
+		return match.isReadAccess() && !match.isWriteAccess();
 	}
 	public String getName() {
 		return SearchMessages.getString("MatchFilter.ReadFilter.name"); //$NON-NLS-1$
