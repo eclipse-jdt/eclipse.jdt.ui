@@ -19,6 +19,7 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.ExportResourcesAction;
 import org.eclipse.ui.actions.ImportResourcesAction;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
@@ -48,7 +49,10 @@ public class ImportActionGroup extends ActionGroup {
 	public ImportActionGroup(IViewPart part) {
 		IWorkbench workbench = part.getSite().getWorkbenchWindow().getWorkbench();
 		fImportAction= new ImportResourcesAction(workbench);
+		JavaPluginImages.setToolImageDescriptors(fImportAction, "import_wiz.gif"); //$NON-NLS-1$
+		
 		fExportAction= new ExportResourcesAction(workbench);			
+		JavaPluginImages.setToolImageDescriptors(fExportAction, "export_wiz.gif"); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)

@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -71,6 +72,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.getString("RefreshAction.label")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("RefreshAction.toolTip")); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.REFRESH_ACTION);
 	}
 	
