@@ -186,6 +186,9 @@
     <factory id ="org.eclipse.jdt.ui.ClassFileEditorInputFactory"
       class="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInputFactory">
 	</factory>
+    <factory id ="org.eclipse.jdt.ui.PersistableJavaElementFactory"
+      class="org.eclipse.jdt.internal.ui.PersistableJavaElementFactory">
+	</factory>
 </extension>
 
 <extension
