@@ -11,8 +11,9 @@
 package org.eclipse.jdt.internal.ui.infoviews;
 
 import java.io.Reader;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -22,7 +23,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.util.Assert;
@@ -31,7 +31,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.Document;
@@ -41,20 +41,17 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
-
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
-
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
@@ -69,12 +66,17 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class JavadocView extends AbstractInfoView {
 
+	private static final String PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW= "org.eclipse.jdt.ui.browserWidgetInJavadocView"; //$NON-NLS-1$
+	// PreferenceConstants.APPEARANCE_BROWSER_WIDGET_IN_JAVADOC_VIEW;
+
 	/** Flags used to render a label in the text widget. */
 	private static final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 
-	/** The styled text widget. */
+	/** The HTML widget. */
+	private Browser fBrowser;
+	/** The text widget. */
 	private StyledText fText;
 	/** The information presenter. */
 	private DefaultInformationControl.IInformationPresenter fPresenter;
@@ -83,25 +85,32 @@ public class JavadocView extends AbstractInfoView {
 	/** The select all action */
 	private SelectAllAction fSelectAllAction;
 
+
+
+	private boolean fIsUsingBrowserWidget;
+
 	/**
 	 * The Javadoc view's select all action.
 	 */
 	private static class SelectAllAction extends Action {
 
-		/** The styled text widget. */
-		private StyledText fStyledText;
+		/** The control. */
+		private Control fControl;
 		/** The selection provider. */
 		private SelectionProvider fSelectionProvider;
 
 		/**
 		 * Creates the action.
+		 * 
+		 * @param control the widget
+		 * @param selectionProvider the selection provider
 		 */
-		public SelectAllAction(StyledText styledText, SelectionProvider selectionProvider) {
+		public SelectAllAction(Control control, SelectionProvider selectionProvider) {
 			super("selectAll"); //$NON-NLS-1$
 
-			Assert.isNotNull(styledText);
+			Assert.isNotNull(control);
 			Assert.isNotNull(selectionProvider);
-			fStyledText= styledText;
+			fControl= control;
 			fSelectionProvider= selectionProvider;
 
 			setText(InfoViewMessages.getString("SelectAllAction.label")); //$NON-NLS-1$
@@ -115,8 +124,13 @@ public class JavadocView extends AbstractInfoView {
 		 * Selects all in the view.
 		 */
 		public void run() {
-			fStyledText.selectAll();
-			fSelectionProvider.fireSelectionChanged();
+			if (fControl instanceof StyledText)
+		        ((StyledText)fControl).selectAll();
+			else {
+				// FIXME, see
+//				((Browser)fControl).selectAll();
+				fSelectionProvider.fireSelectionChanged();
+			}
 		}
 	}
 
@@ -127,23 +141,31 @@ public class JavadocView extends AbstractInfoView {
 
 		/** The selection changed listeners. */
 		private ListenerList fListeners= new ListenerList();
-		/** The styled text widget. */
-		private StyledText fStyledText;
+		/** The widget. */
+		private Control fControl;
 
 		/**
 		 * Creates a new selection provider.
 		 * 
-		 * @param styledText	the styled text widget
+		 * @param control	the widget
 		 */
-		public SelectionProvider(StyledText styledText) {
-			Assert.isNotNull(styledText);
-			fStyledText= styledText;
-			
-			fStyledText.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					fireSelectionChanged();
-				}
-			});
+		public SelectionProvider(Control control) {
+		    Assert.isNotNull(control);
+			fControl= control;
+			if (fControl instanceof StyledText) {
+			    ((StyledText)fControl).addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+					    fireSelectionChanged();
+					}
+			    });
+			} else {
+				// FIXME, see bug
+//				((Browser)fControl).addSelectionListener(new SelectionAdapter() {
+//					public void widgetSelected(SelectionEvent e) {
+//						fireSelectionChanged();
+//					}
+//				});
+			}
 		}
 		
 		/**
@@ -168,8 +190,13 @@ public class JavadocView extends AbstractInfoView {
 		 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
 		 */
 		public ISelection getSelection() {
-			IDocument document= new Document(fStyledText.getSelectionText());
-			return new TextSelection(document, 0, document.getLength());
+			if (fControl instanceof StyledText) {
+				IDocument document= new Document(((StyledText)fControl).getSelectionText());
+				return new TextSelection(document, 0, document.getLength());
+			} else {
+				// FIXME, see bug
+				return StructuredSelection.EMPTY;
+			}
 		}
 
 		/*
@@ -191,19 +218,38 @@ public class JavadocView extends AbstractInfoView {
 	 * @see AbstractInfoView#internalCreatePartControl(Composite)
 	 */
 	protected void internalCreatePartControl(Composite parent) {
-		fText= new StyledText(parent, SWT.V_SCROLL | SWT.H_SCROLL);
-		fText.setEditable(false);
-		fPresenter= new HTMLTextPresenter(false);
-		getViewSite().setSelectionProvider(new SelectionProvider(fText));
+		fIsUsingBrowserWidget= JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW);
 		
-		fText.addControlListener(new ControlAdapter() {
-			/*
-			 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
-			 */
-			public void controlResized(ControlEvent e) {
-				setInput(fText.getText());
+		if (fIsUsingBrowserWidget) {
+			try {
+				fBrowser= new Browser(parent, SWT.NONE);
+			} catch (SWTError er) {
+				/* The Browser widget throws an SWTError if it fails to
+				 * instantiate properly. Application code should catch
+				 * this SWTError and disable any feature requiring the
+				 * Browser widget.
+				 * Platform requirements for the SWT Browser widget are available
+				 * from the SWT FAQ web site. 
+				 */
+				fIsUsingBrowserWidget= false;
 			}
-		});
+		}
+		if (!fIsUsingBrowserWidget) {
+			fText= new StyledText(parent, SWT.V_SCROLL | SWT.H_SCROLL);
+			fText.setEditable(false);
+			fPresenter= new HTMLTextPresenter(false);
+			
+			fText.addControlListener(new ControlAdapter() {
+				/*
+				 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
+				 */
+				public void controlResized(ControlEvent e) {
+					setInput(fText.getText());
+				}
+			});
+		}
+		
+		getViewSite().setSelectionProvider(new SelectionProvider(getControl()));
 	}
 	
 	/*
@@ -211,21 +257,21 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void createActions() {
 		super.createActions();
-		fSelectAllAction= new SelectAllAction(fText, (SelectionProvider)getSelectionProvider());
+		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider)getSelectionProvider());
 	}
 
 	/*
  	 * @see AbstractInfoView#setForeground(Color)
  	 */
 	protected void setForeground(Color color) {
-		fText.setForeground(color);
+		getControl().setForeground(color);
 	}
 
 	/*
 	 * @see AbstractInfoView#setBackground(Color)
 	 */
 	protected void setBackground(Color color) {
-		fText.setBackground(color);
+		getControl().setBackground(color);
 	}
 
 	/*
@@ -233,20 +279,21 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void internalDispose() {
 		fText= null;
+		fBrowser= null;
 	}
 
 	/*
 	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
 	 */
 	public void setFocus() {
-		fText.setFocus();
+		getControl().setFocus();
 	}
 
 	/*
 	 * @see AbstractInfoView#computeInput(Object)
 	 */
 	protected Object computeInput(Object input) {
-		if (fText == null || ! (input instanceof IJavaElement))
+		if (getControl() == null || ! (input instanceof IJavaElement))
 			return null;
 
 		IJavaElement je= (IJavaElement)input;
@@ -269,17 +316,21 @@ public class JavadocView extends AbstractInfoView {
 	protected void setInput(Object input) {
 		String javadocHtml= (String)input;
 		
-		fPresentation.clear();
-		Rectangle size=  fText.getClientArea();
-		
-		try {
-			javadocHtml= fPresenter.updatePresentation(getSite().getShell().getDisplay(), javadocHtml, fPresentation, size.width, size.height);
-		} catch (IllegalArgumentException ex) {
-			// the javadoc might no longer be valid
-			return;
+		if (fIsUsingBrowserWidget) {
+			fBrowser.setText(javadocHtml);
+		} else {
+			fPresentation.clear();
+			Rectangle size=  fText.getClientArea();
+			
+			try {
+				javadocHtml= fPresenter.updatePresentation(getSite().getShell().getDisplay(), javadocHtml, fPresentation, size.width, size.height);
+			} catch (IllegalArgumentException ex) {
+				// the javadoc might no longer be valid
+				return;
+			}
+			fText.setText(javadocHtml);
+			TextPresentation.applyTextPresentation(fPresentation, fText);
 		}
-		fText.setText(javadocHtml);
-		TextPresentation.applyTextPresentation(fPresentation, fText);
 	}
 
 	/**
@@ -390,7 +441,7 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
+		actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), fSelectAllAction);
 		
 	}
 
@@ -398,6 +449,9 @@ public class JavadocView extends AbstractInfoView {
 	 * @see AbstractInfoView#getControl()
 	 */
 	protected Control getControl() {
-		return fText;
+		if (fIsUsingBrowserWidget)
+			return fBrowser;
+		else
+			return fText;
 	}
 }

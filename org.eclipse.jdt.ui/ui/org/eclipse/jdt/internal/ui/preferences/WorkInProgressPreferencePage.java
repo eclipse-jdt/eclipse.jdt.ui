@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -25,20 +24,16 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
-
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.quickdiff.QuickDiff;
 import org.eclipse.ui.texteditor.quickdiff.ReferenceProviderDescriptor;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -49,10 +44,13 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	/** prefix for resources */
 	private static final String PREFIX= "WorkInProgress."; //$NON-NLS-1$
 	
-	public final static String PREF_FORMATTER= "use_new_formatter"; //$NON-NLS-1$
-	public final static String PREF_BGSEARCH= "search_in_background"; //$NON-NLS-1$
-	public final static String PREF_SEARCH_MENU= "small_search_menu"; //$NON-NLS-1$
-	public final static String PREF_SEARCH_IGNORE_IMPORTS= "search_ignore_imports"; //$NON-NLS-1$
+	public static final String PREF_FORMATTER= "use_new_formatter"; //$NON-NLS-1$
+	public static final String PREF_BGSEARCH= "search_in_background"; //$NON-NLS-1$
+	public static final String PREF_SEARCH_MENU= "small_search_menu"; //$NON-NLS-1$
+	public static final String PREF_SEARCH_IGNORE_IMPORTS= "search_ignore_imports"; //$NON-NLS-1$
+	
+	private static final String PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW= "org.eclipse.jdt.ui.browserWidgetInJavadocView"; //$NON-NLS-1$
+		// PreferenceConstants.APPEARANCE_BROWSER_WIDGET_IN_JAVADOC_VIEW;
 	
 	private List fCheckBoxes;
 	private List fRadioButtons;
@@ -137,6 +135,8 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		layout.verticalSpacing= convertVerticalDLUsToPixels(10);
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		result.setLayout(layout);
+
+		addCheckBox(result, PreferencesMessages.getString(PREFIX + "browserWidgetInJavadocView"), PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW); //$NON-NLS-1$
 		
 		Group group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
@@ -269,7 +269,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		group.setText(PreferencesMessages.getString(PREFIX + "search")); //$NON-NLS-1$
 		
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
-		// addCheckBox(group, PreferencesMessages.getString(PREFIX+"newsearch.option"), PREF_BGSEARCH); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.getString(PREFIX+"newsearch.option"), PREF_BGSEARCH); //$NON-NLS-1$
 		addCheckBox(group, PreferencesMessages.getString(PREFIX+"search.ignore_imports"), PREF_SEARCH_IGNORE_IMPORTS); //$NON-NLS-1$
 		
 		applyDialogFont(result);
@@ -360,5 +360,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		store.setDefault(PREF_SEARCH_MENU, true);
 		store.setDefault(PREF_BGSEARCH, true);
 		store.setDefault(PREF_SEARCH_IGNORE_IMPORTS, false);
+		
+		store.setDefault(PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW, false);
 	}
 }
