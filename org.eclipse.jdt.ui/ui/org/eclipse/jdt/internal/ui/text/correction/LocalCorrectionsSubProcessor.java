@@ -23,6 +23,8 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.ui.ISharedImages;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -757,6 +759,25 @@ public class LocalCorrectionsSubProcessor {
 			String typeName= typeDecl.getName().getIdentifier();
 			String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.classtointerface.description", typeName); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image); //$NON-NLS-1$
+			proposals.add(proposal);
+		}
+	}
+
+	public static void getUnreachableCodeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		CompilationUnit root= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (selectedNode == null) {
+			return;
+		}
+		if (selectedNode instanceof ExpressionStatement) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (selectedNode instanceof Statement) {
+			ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
+			rewrite.remove(selectedNode, null);
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunreachablecode.description"); //$NON-NLS-1$
+			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image); //$NON-NLS-1$
 			proposals.add(proposal);
 		}
