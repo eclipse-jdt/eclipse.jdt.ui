@@ -13,7 +13,6 @@
     <classpathentry kind="src" path="/org.eclipse.jdt.ui"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
     <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
-    <classpathentry kind="lib" path="startup.jar"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.debug.ui"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
