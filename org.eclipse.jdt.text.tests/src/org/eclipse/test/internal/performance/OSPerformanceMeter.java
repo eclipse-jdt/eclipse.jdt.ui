@@ -51,7 +51,7 @@ public class OSPerformanceMeter extends PerformanceMeter {
 	}
 	
 	private String getLogFile(String scenario) {
-		String logFile= "timer-" + scenario + ".xml";
+		String logFile= "timer.xml-" + scenario;
 		String ctrl= System.getProperty(LoadValueConstants.ENV_PERF_CTRL);
 		if (ctrl == null)
 			return logFile;
