@@ -1,6 +1,6 @@
-package invalidSelection;
+package validSelection;
 
-public class A_test092 {
+public class A_test092_ {
 	public void foo() {
 		while (true)
 			/*]*/break/*[*/;

@@ -1,6 +1,6 @@
-package invalidSelection;
+package validSelection;
 
-public class A_test145 {
+public class A_test145_ {
 	boolean flag;
 	public boolean foo() {
 		/*]*/do {

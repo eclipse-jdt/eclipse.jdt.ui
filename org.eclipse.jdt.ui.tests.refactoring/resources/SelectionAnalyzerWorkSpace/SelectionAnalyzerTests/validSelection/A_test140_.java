@@ -1,6 +1,6 @@
-package invalidSelection;
+package validSelection;
 
-public class A_test140 {
+public class A_test140_ {
 	public boolean flag;
 	public int foo() {
 		int i= 10;

@@ -1,6 +1,6 @@
-package invalidSelection;
+package validSelection;
 
-public class A_test144 {
+public class A_test144_ {
 	public boolean foo() {
 		/*]*/try {
 		} catch (Exception e) {

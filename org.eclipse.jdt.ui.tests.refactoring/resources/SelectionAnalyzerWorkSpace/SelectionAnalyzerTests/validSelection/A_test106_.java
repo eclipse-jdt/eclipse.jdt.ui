@@ -1,6 +1,6 @@
-package invalidSelection;
+package validSelection;
 
-public class A_test106 {
+public class A_test106_ {
 	public void foo() {
 		try {
 			foo();

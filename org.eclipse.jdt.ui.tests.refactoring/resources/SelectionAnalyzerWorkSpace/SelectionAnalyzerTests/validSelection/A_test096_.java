@@ -1,6 +1,6 @@
-package invalidSelection;
+package validSelection;
 
-public class A_test096 {
+public class A_test096_ {
 	public void foo() {
 		int i= 10;
 		switch(i) {

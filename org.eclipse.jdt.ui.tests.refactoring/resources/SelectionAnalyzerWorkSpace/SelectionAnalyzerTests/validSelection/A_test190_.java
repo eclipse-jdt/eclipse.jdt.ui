@@ -1,6 +1,6 @@
-package invalidSelection;
+package validSelection;
 
-public class A_test190 {
+public class A_test190_ {
 	public int foo() {
 		int i= 10;
 		/*]*/switch(i) {

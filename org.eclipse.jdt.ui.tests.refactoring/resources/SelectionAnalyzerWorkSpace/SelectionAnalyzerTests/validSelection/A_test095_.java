@@ -1,6 +1,6 @@
-package invalidSelection;
+package validSelection;
 
-public class A_test095 {
+public class A_test095_ {
 	public void foo() {
 		do
 			/*]*/continue/*[*/;

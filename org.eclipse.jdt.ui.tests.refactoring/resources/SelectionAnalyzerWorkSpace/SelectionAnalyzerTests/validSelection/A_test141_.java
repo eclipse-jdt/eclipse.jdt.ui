@@ -1,6 +1,6 @@
-package invalidSelection;
+package validSelection;
 
-public class A_test141 {
+public class A_test141_ {
 	private boolean flag;
 	public int foo() {
 		/*]*/while(flag)
