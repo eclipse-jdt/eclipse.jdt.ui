@@ -23,6 +23,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -93,6 +94,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		//TODO: check selection: no binaries
+		pm.done();
 		return new RefactoringStatus();
 	}
 
@@ -100,12 +102,14 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		pm.beginTask(RefactoringCoreMessages.getString("AugmentRawContainerClientsRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
+		pm.beginTask("", 1); //$NON-NLS-1$
+		pm.setTaskName(RefactoringCoreMessages.getString("AugmentRawContainerClientsRefactoring.checking_preconditions"));
 		try {
 			RefactoringStatus result= check15();
 			fAnalyzer= new AugmentRawContainerClientsAnalyzer(fElements);
-			fAnalyzer.analyzeContainerReferences(pm, result);
+			fAnalyzer.analyzeContainerReferences(new SubProgressMonitor(pm, 1), result);
 			
+			pm.setTaskName("Computing changes...");
 			HashMap declarationsToUpdate= fAnalyzer.getDeclarationsToUpdate();
 			fChangeManager= new TextChangeManager();
 			rewriteDeclarations(declarationsToUpdate);
@@ -166,6 +170,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 //	}
 
 	private void rewriteDeclarations(HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ declarationsToUpdate) throws CoreException {
+		//TODO: use CompilationUnitRewrite
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		Set entrySet= declarationsToUpdate.entrySet();
 		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {

@@ -610,7 +610,7 @@ public class AugmentRawContainerClientsTCModel {
 		//TODO: other top level types?
 	}
 
-	public void makeCastVariable(CastExpression castExpression, CollectionElementVariable2 expressionCv) {
+	public void makeCastVariable(CastExpression castExpression, TypeConstraintVariable2 expressionCv) {
 		ITypeBinding typeBinding= castExpression.resolveTypeBinding();
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(castExpression);
 		CompilationUnitRange range= new CompilationUnitRange(cu, castExpression);
@@ -623,6 +623,9 @@ public class AugmentRawContainerClientsTCModel {
 	}
 	
 	public CollectionElementVariable2 getElementVariable(ConstraintVariable2 constraintVariable) {
+		//TODO: null check should be done on client side!
+		if (constraintVariable == null)
+			return null;
 		return (CollectionElementVariable2) constraintVariable.getData(COLLECTION_ELEMENT);
 	}
 

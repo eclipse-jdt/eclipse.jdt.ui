@@ -589,12 +589,14 @@ public class Bindings {
 		if (candidate.isArray() || candidate.isPrimitive()) {
 			return false;
 		}
+		type= type.getErasure();
+		candidate= candidate.getErasure();
 		if (Bindings.equals(candidate, type)) {
 			return true;
 		}
 		ITypeBinding superClass= candidate.getSuperclass();
 		if (superClass != null) {
-			if (isSuperType(type, superClass)) {
+			if (isSuperType(type, superClass.getErasure())) {
 				return true;
 			}
 		}
@@ -602,7 +604,7 @@ public class Bindings {
 		if (type.isInterface()) {
 			ITypeBinding[] superInterfaces= candidate.getInterfaces();
 			for (int i= 0; i < superInterfaces.length; i++) {
-				if (isSuperType(type, superInterfaces[i])) {
+				if (isSuperType(type, superInterfaces[i].getErasure())) {
 					return true;
 				}			
 			}

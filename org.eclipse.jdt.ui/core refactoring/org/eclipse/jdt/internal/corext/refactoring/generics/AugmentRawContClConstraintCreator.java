@@ -137,18 +137,21 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	}
 	
 	public void endVisit(CastExpression node) {
-		Expression expression= node.getExpression();
-		ConstraintVariable2 expressionCv= getConstraintVariable(expression);
-		if (! (expressionCv instanceof CollectionElementVariable2))
-			return;
-		
-		fTCModel.makeCastVariable(node, (CollectionElementVariable2) expressionCv);
+//		if (! (expressionCv instanceof CollectionElementVariable2))
+//			return; //TODO: returns too early when dealing with nested collections.
+//		fTCModel.makeCastVariable(node, (CollectionElementVariable2) expressionCv);
 		
 		Type type= node.getType();
 		ConstraintVariable2 typeCv= getConstraintVariable(type);
 		
 		//TODO: can this be loosened when we remove casts?
 		setConstraintVariable(node, typeCv);
+		
+		Expression expression= node.getExpression();
+		ConstraintVariable2 expressionCv= getConstraintVariable(expression);
+		if (! (expressionCv instanceof TypeConstraintVariable2))
+			return;
+		fTCModel.makeCastVariable(node, (TypeConstraintVariable2) expressionCv);
 		
 		boolean eitherIsIntf= type.resolveBinding().isInterface() || expression.resolveTypeBinding().isInterface();
 		if (eitherIsIntf)
@@ -243,6 +246,8 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 				continue;
 			ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(methodBinding, i);
 			ConstraintVariable2 argumentCv= getConstraintVariable((ASTNode) arguments.get(i));
+			if (argumentCv == null)
+				continue;
 			CollectionElementVariable2 parameterElementCv= fTCModel.makeElementVariable(parameterTypeCv);
 			CollectionElementVariable2 argumentElementCv= fTCModel.getElementVariable(argumentCv);
 			// Elem[param] =^= Elem[arg]
