@@ -10,50 +10,39 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javadocexport;
 
-import java.util.Iterator;
-
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 public class CreateJavadocActionDelegate implements IObjectActionDelegate {
 
 	private ISelection fCurrentSelection;
+	private Shell fCurrentShell;
 
 	/*
 	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
 	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+		fCurrentShell= targetPart.getSite().getShell();
 	}
 
 	/*
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
-
 		if (fCurrentSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) fCurrentSelection;
-			Iterator iter= structuredSelection.iterator();
-			if (iter.hasNext()) {
-				Object res= iter.next();
-				if (res instanceof IFile) {
-					IFile file= (IFile) res;
-					JavadocWizard wizard= new JavadocWizard(file);
-
-					wizard.init(JavaPlugin.getActiveWorkbenchWindow().getWorkbench(),structuredSelection);
-					WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
-					dialog.create();
-					//					dialog.getShell().setText(WorkbenchMessages.getString("CreateFileAction.title")); //$NON-NLS-1$
-					dialog.open();
-				}
+			Object first= structuredSelection.getFirstElement();
+			if (first instanceof IFile) {
+				JavadocWizard wizard= new JavadocWizard((IFile) first);
+				JavadocWizard.openJavadocWizard(wizard, fCurrentShell, structuredSelection);
 			}
 		}
 	}
