@@ -232,8 +232,8 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 
 	public void test20() throws Exception{
-		printTestDisabledMessage("regression test for bug 37570");
-//		helper1(4, 25, 4, 25, true, "Inner", Modifier.PRIVATE);
+//		printTestDisabledMessage("regression test for bug 37570");
+		helper1(4, 25, 4, 25, true, "Inner", Modifier.PRIVATE);
 	}
 
 }
