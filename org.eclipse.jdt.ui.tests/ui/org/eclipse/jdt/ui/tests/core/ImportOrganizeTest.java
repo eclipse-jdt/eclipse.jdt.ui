@@ -952,11 +952,22 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.io.RandomAccessFile;\n");
-		buf.append("\n");
-		buf.append("import pack0.List1;\n");
+					
+		String vm= System.getProperty("java.version");
+		if (vm != null && vm.startsWith("1.4")) {
+			buf.append("import java.io.File;\n");
+			buf.append("import java.io.IOException;\n");
+			buf.append("import java.io.RandomAccessFile;\n");
+			buf.append("\n");
+			buf.append("import pack0.List1;\n");
+		}
+		else {
+			buf.append("import pack0.List1;\n");
+			buf.append("\n");
+			buf.append("import java.io.File;\n");
+			buf.append("import java.io.IOException;\n");
+			buf.append("import java.io.RandomAccessFile;\n");
+		}
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    File f;\n");
