@@ -222,6 +222,19 @@ public class PullUpRefactoring extends Refactoring {
 		}
 		return result;		
 	}
+	
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
+			RefactoringStatus result= new RefactoringStatus();
+						
+			result.merge(checkAllElements());
+			if (result.hasFatalError())
+				return result;
+			
+			if (! haveCommonDeclaringType())
+				return RefactoringStatus.createFatalErrorStatus("All selected elements must be declared in the same type.");			
+
+			return new RefactoringStatus();
+	}
 		
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
@@ -231,23 +244,14 @@ public class PullUpRefactoring extends Refactoring {
 			pm.beginTask("", 3);
 			RefactoringStatus result= new RefactoringStatus();
 						
-			result.merge(checkAllElements());
-			pm.worked(1);
-			if (result.hasFatalError())
-				return result;
-			
-			if (! haveCommonDeclaringType())
-				return RefactoringStatus.createFatalErrorStatus("All selected elements must be declared in the same type.");			
-			pm.worked(1);
-
-			result.merge(checkDeclaringType());
+			result.merge(checkDeclaringType(new SubProgressMonitor(pm, 1)));
 			pm.worked(1);
 			if (result.hasFatalError())
 				return result;			
 
-			if (getSuperType(new NullProgressMonitor()) == null)
+			if (getSuperType(new SubProgressMonitor(pm, 1)) == null)
 				return RefactoringStatus.createFatalErrorStatus("Pull up not allowed.");
-			if (getSuperType(new NullProgressMonitor()).isBinary())
+			if (getSuperType(new SubProgressMonitor(pm, 1)).isBinary())
 				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subtypes of binary types.");
 
 			fElementsToPullUp= getOriginals(fElementsToPullUp);
@@ -351,7 +355,8 @@ public class PullUpRefactoring extends Refactoring {
 		return null;	
 	}
 	
-	private RefactoringStatus checkDeclaringType() throws JavaModelException {
+	private RefactoringStatus checkDeclaringType(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 3);
 		IType declaringType= getDeclaringType();
 				
 		if (declaringType.isInterface()) //for now
@@ -366,13 +371,13 @@ public class PullUpRefactoring extends Refactoring {
 		if (declaringType.isReadOnly())
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in read-only types.");	
 	
-		if (getSuperType(new NullProgressMonitor()) == null)	
+		if (getSuperType(new SubProgressMonitor(pm, 1)) == null)	
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in this type.");	
 			
-		if (getSuperType(new NullProgressMonitor()).isBinary())
+		if (getSuperType(new SubProgressMonitor(pm, 1)).isBinary())
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subclasses of binary types.");	
 
-		if (getSuperType(new NullProgressMonitor()).isReadOnly())
+		if (getSuperType(new SubProgressMonitor(pm, 1)).isReadOnly())
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subclasses of read-only types.");	
 		
 		return null;

@@ -95,7 +95,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 				return new PullUpRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings());
 			}
 			boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
-				return ((PullUpRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+				return ((PullUpRefactoring)refactoring).checkPreactivation().isOK();
 			}
 			protected boolean canOperateOnMultiSelection(){
 				return true;
