@@ -181,8 +181,11 @@ public class LocalCorrectionsSubProcessor {
 			label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castType); //$NON-NLS-1$
 			
 			Expression expressionCopy= (Expression) rewrite.createCopy(nodeToCast);
-			if (nodeToCast.getNodeType() == ASTNode.INFIX_EXPRESSION) {
-				// infix has weaker precedence than cast
+			int nodeType= nodeToCast.getNodeType();
+			
+			if (nodeType == ASTNode.INFIX_EXPRESSION || nodeType == ASTNode.CONDITIONAL_EXPRESSION 
+				|| nodeType == ASTNode.ASSIGNMENT || nodeType == ASTNode.INSTANCEOF_EXPRESSION) {
+				// nodes have weaker precedence than cast
 				ParenthesizedExpression parenthesizedExpression= astRoot.getAST().newParenthesizedExpression();
 				parenthesizedExpression.setExpression(expressionCopy);
 				expressionCopy= parenthesizedExpression;
