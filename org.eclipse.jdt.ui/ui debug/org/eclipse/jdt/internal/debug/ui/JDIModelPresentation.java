@@ -28,6 +28,7 @@ import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.IValueDetailListener;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
@@ -204,10 +205,24 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 	
 	/**
+	 * @see IDebugModelPresentation#computeDetail(IValue, IValueDetailListener)
+	 */
+	public void computeDetail(IValue value, IValueDetailListener listener) {
+		IJavaThread thread = getEvaluationThread((IJavaDebugTarget)value.getDebugTarget());
+		try {
+			DefaultJavaValueDetailProvider detailProvider = new DefaultJavaValueDetailProvider();
+			detailProvider.computeDetail(value, thread, listener);
+		} catch (DebugException de) {
+			DebugUIUtils.logError(de);
+		}
+	}
+	
+	/**
 	 * Returns the "toString" of the given value
 	 * 
 	 * @see IDebugModelPresentation#getDetail(IValue)
 	 */
+	/*
 	public String getDetail(IValue v) {
 		if (v instanceof IJavaValue) {
 			// get a thread for an evaluation
@@ -224,6 +239,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		}
 		return null;
 	}
+	*/
 	
 	/**
 	 * Returns a thread from the specified VM that can be
@@ -262,6 +278,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	 * @return the result of sending 'toString', as a String
 	 * @exception DebugException if thrown by a model element
 	 */
+	/*
 	protected synchronized String evaluateToString(final IJavaValue value, final IJavaThread thread) throws DebugException {
 		if (value == null) {
 			return "null";
@@ -309,6 +326,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		
 		return "Error: timeout evaluating #toString()";
 	}
+	*/
 			
 	/**
 	 * @see IDebugModelPresentation#getText(Object)
@@ -1205,5 +1223,124 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			}
 		}
 	}
+
+	interface IValueDetailProvider {
+		public void computeDetail(IValue value, IThread thread, IValueDetailListener listener) throws DebugException;
+	}
+	
+	class DefaultJavaValueDetailProvider implements IValueDetailProvider,
+													  ITimeoutListener {		
+		private StringBuffer fResultBuffer;
+		private boolean fTimedOut = false;
+		private Thread fDetailThread;
+		private Timer fTimer;
+		private IValue fValue;
+		private IValueDetailListener fListener;
+		private static final int EVAL_TIMEOUT = 3000;
+		
+		public DefaultJavaValueDetailProvider() {
+			fResultBuffer = new StringBuffer(50);
+			fTimer = new Timer();
+		}
+		
+		public void timeout() {
+			fTimedOut = true;
+			fResultBuffer.append("<timeout>");
+			notifyListener();
+			fTimer.dispose();
+		}
+		
+		private void notifyListener() {
+			fListener.detailComputed(fValue, fResultBuffer.toString());
+		}
+		
+		public void computeDetail(IValue value, final IThread thread, IValueDetailListener listener) throws DebugException {
+			fValue = value;
+			fListener = listener;
+			Runnable detailRunnable = new Runnable() {	
+				public void run() {		
+					fTimer.start(DefaultJavaValueDetailProvider.this, EVAL_TIMEOUT);
+					
+					if (fValue == null) {
+						fResultBuffer.append("null");
+					} else if (thread instanceof IJavaThread) {
+						IJavaThread javaThread = (IJavaThread) thread;
+						if (javaThread.isSuspended()) {
+							if (fValue instanceof IJavaObject) {
+								appendObjectDetail((IJavaObject)fValue, javaThread);
+							} else if (fValue instanceof IJavaArray) {
+								appendArrayDetail((IJavaArray)fValue, javaThread);
+							} else {
+								appendJDIValueString(fValue);															
+							}
+						} else {
+							appendJDIValueString(fValue);							
+						}
+					} else {
+						appendJDIValueString(fValue);
+					}
+					
+					if (!fTimedOut) {
+						notifyListener();
+						fTimer.dispose();
+					}
+				}
+			};
+			
+			fDetailThread = new Thread(detailRunnable);
+			fDetailThread.start();
+		}
+		
+		protected void appendJDIValueString(IValue value) {
+			try {
+				String result= value.getValueString();
+				fResultBuffer.append(result);
+			} catch (DebugException de) {
+				DebugUIUtils.logError(de);
+				fResultBuffer.append("<error>");
+			}
+		}
+		
+		protected void appendObjectDetail(IJavaObject objectValue, IJavaThread thread) {			
+			try {
+				IJavaValue toStringValue = objectValue.sendMessage(JDIModelPresentation.fgToString, JDIModelPresentation.fgToStringSignature, null, thread, false);
+				if (toStringValue == null) {
+					fResultBuffer.append("<unknown>");
+				} else {
+					appendJDIValueString(toStringValue);
+				}
+			} catch (DebugException de) {
+				DebugUIUtils.logError(de);
+				fResultBuffer.append("<error>");
+			}
+		}
+
+		protected void appendArrayDetail(IJavaArray arrayValue, IJavaThread thread) {
+			fResultBuffer.append('[');
+			IJavaValue[] arrayValues;
+			try {
+				arrayValues = arrayValue.getValues();
+			} catch (DebugException de) {
+				DebugUIUtils.logError(de);
+				fResultBuffer.append("<error>");
+				return;
+			}
+			for (int i = 0; i < arrayValues.length; i++) {
+				IJavaValue value = arrayValues[i];
+				if (value instanceof IJavaObject) {
+					appendObjectDetail((IJavaObject)value, thread);
+				} else if (value instanceof IJavaArray) {
+					appendArrayDetail((IJavaArray)value, thread);
+				} else {
+					appendJDIValueString(value);
+				}
+				if (i < arrayValues.length - 1) {
+					fResultBuffer.append(',');
+					fResultBuffer.append(' ');
+				}
+			}
+			fResultBuffer.append(']');
+		}
+	}	
 
 }
