@@ -424,7 +424,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 	}
 	
 	protected void handleSelectionEndsIn(AstNode node) {
-		invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.ends_middle_of_statement")); //$NON-NLS-1$
+		invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.doesNotCover")); //$NON-NLS-1$
 		super.handleSelectionEndsIn(node);
 	}
 		

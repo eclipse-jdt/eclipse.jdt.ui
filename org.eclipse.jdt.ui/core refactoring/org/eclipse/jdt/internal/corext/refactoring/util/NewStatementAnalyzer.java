@@ -43,7 +43,7 @@ public class NewStatementAnalyzer extends NewSelectionAnalyzer{
 		int pos= fBuffer.indexOfStatementCharacter(fSelection.start);
 		AstNode node= getFirstSelectedNode();
 		if (ASTUtil.getSourceStart(node) != pos) {
-			invalidSelection("Selection starts in the middle of a statement.");
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.doesNotCover"));
 			return;
 		}	
 		

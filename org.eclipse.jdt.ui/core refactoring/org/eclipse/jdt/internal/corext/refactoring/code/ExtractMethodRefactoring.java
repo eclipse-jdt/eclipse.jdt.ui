@@ -124,7 +124,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 		Assert.isNotNull(settings);
 		fCUnit= cu;
 		fImportEdit= new ImportEdit(cu, settings);
-		fVisibility= "protected"; //$NON-NLS-1$
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
@@ -166,6 +165,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 			((CompilationUnit)fCUnit).accept(createVisitor());
 			
 			fAnalyzer.checkActivation(result);
+			if (!result.hasFatalError() && fVisibility == null) {
+				int modifiers= fAnalyzer.getEnclosingMethod().modifiers;
+				String visibility= "";
+				if ((modifiers & AstNode.AccPublic) != 0)
+					visibility= "public";
+				else if ((modifiers & AstNode.AccProtected) != 0)
+					visibility= "protected";
+				else if ((modifiers &AstNode.AccPrivate) != 0)
+					visibility= "private";
+				setVisibility(visibility);
+				
+			}
 			return result;
 		} finally {
 			pm.worked(1);
@@ -201,10 +212,19 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * Sets the visibility of the new method.
 	 * 
 	 * @param visibility the visibility of the new method. Valid values are
-	 *  "public", "protected", "default", and "private"
+	 *  "public", "protected", "", and "private"
 	 */
 	public void setVisibility(String visibility) {
 		fVisibility= visibility;
+	}
+	
+	/**
+	 * Returns the visibility of the new method.
+	 * 
+	 * @return the visibility of the new method
+	 */
+	public String getVisibility() {
+		return fVisibility;
 	}
 	
 	/**

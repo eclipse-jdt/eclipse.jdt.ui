@@ -278,7 +278,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 			handleSelectionCoveredByNode(node);
 			return true;
 		} else if (fSelection.endsIn(start, end)) {
-			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.ends_middle_of_statement")); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.doesNotCover")); //$NON-NLS-1$
 			return false;
 		}
 		// There is a possibility that the user has selected trailing semicolons that don't belong
