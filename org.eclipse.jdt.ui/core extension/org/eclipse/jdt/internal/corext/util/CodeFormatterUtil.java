@@ -48,15 +48,47 @@ public class CodeFormatterUtil {
 	}
 	
 	/**
-	 * Creates a string that represents the given number of indents (can be spaces or tabs..)
-	 * @param indent The number of indents to generate
-	 * @param project The project where the source is used, used for project specific options or <code>null</code> if
-	 * the project is unknown and the workspace default should be used
-	 * @return The indent string
+	 * Creates a string that represents the given number of indentation units.
+	 * The returned string can contain tabs and/or spaces depending on the core
+	 * formatter preferences.
+	 * 
+	 * @param indentationUnits the number of indentation units to generate
+	 * @param project the project from which to get the formatter settings,
+	 *        <code>null</code> if the workspace default should be used
+	 * @return the indent string
 	 */
-	public static String createIndentString(int indent, IJavaProject project) {
-		String str= format(CodeFormatter.K_EXPRESSION, "x", indent, null, "", project); //$NON-NLS-1$ //$NON-NLS-2$
-		return str.substring(0, str.indexOf('x'));
+	public static String createIndentString(int indentationUnits, IJavaProject project) {
+		final String tabChar= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
+		final int tabs, spaces;
+		if (JavaCore.SPACE.equals(tabChar)) {
+			tabs= 0;
+			spaces= indentationUnits * getIndentWidth(project);
+		} else if (JavaCore.TAB.equals(tabChar)) {
+			// indentWidth == tabWidth
+			tabs= indentationUnits;
+			spaces= 0;
+		} else if (DefaultCodeFormatterConstants.MIXED.equals(tabChar)){
+			int tabWidth= getTabWidth(project);
+			int spaceEquivalents= indentationUnits * getIndentWidth(project);
+			if (tabWidth > 0) {
+				tabs= spaceEquivalents / tabWidth;
+				spaces= spaceEquivalents % tabWidth;
+			} else {
+				tabs= 0;
+				spaces= spaceEquivalents;
+			}
+		} else {
+			// new indent type not yet handled
+			Assert.isTrue(false);
+			return null;
+		}
+		
+		StringBuffer buffer= new StringBuffer(tabs + spaces);
+		for(int i= 0; i < tabs; i++)
+			buffer.append('\t');
+		for(int i= 0; i < spaces; i++)
+			buffer.append(' ');
+		return buffer.toString();
 	} 
 	
 	/**
