@@ -356,7 +356,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		l1.setLayoutData(new GridData());
 		fTranslateLabel= new Label(labelComposite, SWT.NONE);
 		GridData gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gdata.widthHint= 100;
+		gdata.widthHint= 60;
 		fTranslateLabel.setLayoutData(gdata);
 		
 		Label l2= new Label(labelComposite, SWT.NONE);
@@ -364,7 +364,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		l2.setLayoutData(new GridData());
 		fNoTranslateLabel= new Label(labelComposite, SWT.NONE);
 		gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gdata.widthHint= 100;
+		gdata.widthHint= 60;
 		fNoTranslateLabel.setLayoutData(gdata);
 
 		Label l3= new Label(labelComposite, SWT.NONE);
@@ -372,7 +372,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		l3.setLayoutData(new GridData());
 		fSkipLabel= new Label(labelComposite, SWT.NONE);
 		gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gdata.widthHint= 100;
+		gdata.widthHint= 60;
 		fSkipLabel.setLayoutData(gdata);
 		
 		updateLabels();
