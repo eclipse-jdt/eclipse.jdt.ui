@@ -257,7 +257,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
-	}
+		}
 		
 		JavaSearchResultCollector collector= new JavaSearchResultCollector();
 		JavaSearchOperation op= null;
