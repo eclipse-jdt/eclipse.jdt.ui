@@ -462,20 +462,21 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		super.createActions();
 
-		setAction("CorrectionAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
-
-		
+		setAction("CorrectionAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$		
 		setAction("ContentAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION));			 //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("AddImportOnSelection", new AddImportOnSelectionAction(this));		 //$NON-NLS-1$
 		setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
-		
 		setAction("Comment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("Uncomment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("Format", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT)); //$NON-NLS-1$ //$NON-NLS-2$
-				
 		setAction("SurroundWithTryCatch", new SurroundWithTryCatchAction(this)); //$NON-NLS-1$
 
+		markAsStateDependentAction("ContentAssistProposal", true);
+		markAsStateDependentAction("Comment", true);
+		markAsStateDependentAction("Uncomment", true);
+		markAsStateDependentAction("Format", true);
+		
 		fSelectionHistory= new SelectionHistory(this);
 		setAction(StructureSelectionAction.ENCLOSING, new StructureSelectEnclosingAction(this, fSelectionHistory));
 		setAction(StructureSelectionAction.NEXT, new StructureSelectNextAction(this, fSelectionHistory));
@@ -489,7 +490,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			new OpenViewActionGroup(this), 
 			new ShowActionGroup(this), 
 			new GenerateActionGroup(this),
-			new RefactorActionGroup(this)});
+			new RefactorActionGroup(this)});		
 	}
 	
 	/*

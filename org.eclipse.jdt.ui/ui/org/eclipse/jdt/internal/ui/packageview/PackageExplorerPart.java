@@ -662,7 +662,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 
 	protected void saveExpansionState(IMemento memento) {
-		Object expandedElements[]= fViewer.getExpandedElements();
+		Object expandedElements[]= fViewer.getVisibleExpandedElements();
 		if (expandedElements.length > 0) {
 			IMemento expandedMem= memento.createChild(TAG_EXPANDED);
 			for (int i= 0; i < expandedElements.length; i++) {
