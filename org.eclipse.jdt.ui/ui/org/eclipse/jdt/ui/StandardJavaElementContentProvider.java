@@ -352,13 +352,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	protected Object skipProjectPackageFragmentRoot(IPackageFragmentRoot root) {
-		try {
-			if (isProjectPackageFragmentRoot(root))
-				return root.getParent(); 
-			return root;
-		} catch(JavaModelException e) {
-			return root;
-		}
+		if (isProjectPackageFragmentRoot(root))
+			return root.getParent(); 
+		return root;
 	}
 	
 	/**
@@ -367,7 +363,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	protected boolean isPackageFragmentEmpty(IJavaElement element) throws JavaModelException {
 		if (element instanceof IPackageFragment) {
 			IPackageFragment fragment= (IPackageFragment)element;
-			if (fragment.exists() || !(fragment.hasChildren() || fragment.getNonJavaResources().length > 0) && fragment.hasSubpackages()) 
+			if (fragment.exists() && !(fragment.hasChildren() || fragment.getNonJavaResources().length > 0) && fragment.hasSubpackages()) 
 				return true;
 		}
 		return false;
@@ -376,7 +372,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
-	protected boolean isProjectPackageFragmentRoot(IPackageFragmentRoot root) throws JavaModelException {
+	protected boolean isProjectPackageFragmentRoot(IPackageFragmentRoot root) {
 		IResource resource= root.getResource();
 		return (resource instanceof IProject);
 	}
