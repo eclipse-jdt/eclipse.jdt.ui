@@ -10,15 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -29,6 +34,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	public static final String ID= "org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage"; //$NON-NLS-1$
 
 	private VariableBlock fVariableBlock;
+	private String fStoredSettings;
 	
 	/**
 	 * Constructor for ClasspathVariablesPreferencePage
@@ -36,6 +42,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	public ClasspathVariablesPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		fVariableBlock= new VariableBlock(true, null);
+		fStoredSettings= null;
 		
 		// title only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("ClasspathVariablesPreferencePage.title")); //$NON-NLS-1$
@@ -87,12 +94,38 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
+		// check if the stored settings have changed
 		if (visible) {
-			fVariableBlock.refresh();
+			if (fStoredSettings != null && !fStoredSettings.equals(getCurrentSettings())) {
+				fVariableBlock.refresh(null);
+			}
+		} else {
+			if (fVariableBlock.hasChanges()) {
+				String title= PreferencesMessages.getString("ClasspathVariablesPreferencePage.savechanges.title"); //$NON-NLS-1$
+				String message= PreferencesMessages.getString("ClasspathVariablesPreferencePage.savechanges.message"); //$NON-NLS-1$			
+				if (MessageDialog.openQuestion(getShell(), title, message)) {
+					performOk();
+				}
+				fVariableBlock.setChanges(false); // forget
+			}
+			fStoredSettings= getCurrentSettings();
 		}
-		
-		
 		super.setVisible(visible);
+	}
+	
+	private String getCurrentSettings() {
+		StringBuffer buf= new StringBuffer();
+		String[] names= JavaCore.getClasspathVariableNames();
+		for (int i= 0; i < names.length; i++) {
+			String curr= names[i];
+			buf.append(curr).append('\0');
+			IPath val= JavaCore.getClasspathVariable(curr);
+			if (val != null) {
+				buf.append(val.toString());
+			}
+			buf.append('\0');
+		}
+		return buf.toString();
 	}
 
 }

@@ -63,6 +63,7 @@ public class VariableBlock {
 	
 	private ListDialogField fVariablesList;
 	private Control fControl;
+	private boolean fHasChanges;
 	
 	private List fSelectedElements;
 	private boolean fAskToBuild;
@@ -103,41 +104,17 @@ public class VariableBlock {
 				return super.compare(viewer, e1, e2);
 			}
 		});
-		
-		
-		
-		CPVariableElement initSelectedElement= null;
-		
-		String[] reservedName= getReservedVariableNames();
-		ArrayList reserved= new ArrayList(reservedName.length);
-		addAll(reservedName, reserved);
-				
-		String[] entries= JavaCore.getClasspathVariableNames();
-		ArrayList elements= new ArrayList(entries.length);
-		for (int i= 0; i < entries.length; i++) {
-			String name= entries[i];
-			CPVariableElement elem;
-			IPath entryPath= JavaCore.getClasspathVariable(name);
-			if (entryPath != null) {
-				elem= new CPVariableElement(name, entryPath, reserved.contains(name));
-				elements.add(elem);
-				if (name.equals(initSelection)) {
-					initSelectedElement= elem;
-				}
-			} else {				
-				JavaPlugin.logErrorMessage("VariableBlock: Classpath variable with null value: " + name); //$NON-NLS-1$
-			}
-		}
-		
-		fVariablesList.setElements(elements);
-		
-		if (initSelectedElement != null) {
-			ISelection sel= new StructuredSelection(initSelectedElement);
-			fVariablesList.selectElements(sel);
-		} else {
-			fVariablesList.selectFirstElement();
-		}
+		refresh(initSelection);
 	}
+	
+	public boolean hasChanges() {
+		return fHasChanges;
+	}
+	
+	public void setChanges(boolean hasChanges) {
+		fHasChanges= hasChanges;
+	}
+	
 	
 	private String[] getReservedVariableNames() {
 		return new String[] {
@@ -250,10 +227,15 @@ public class VariableBlock {
 		if (entry == null) {
 			fVariablesList.addElement(newEntry);
 			entry= newEntry;
+			fHasChanges= true;
 		} else {
-			entry.setName(newEntry.getName());
-			entry.setPath(newEntry.getPath());
-			fVariablesList.refresh();
+			boolean hasChanges= !(entry.getName().equals(newEntry.getName()) && entry.getPath().equals(newEntry.getPath()));
+			if (hasChanges) {
+				fHasChanges= true;
+				entry.setName(newEntry.getName());
+				entry.setPath(newEntry.getPath());
+				fVariablesList.refresh();
+			}
 		}
 		fVariablesList.selectElements(new StructuredSelection(entry));
 	}
@@ -271,6 +253,7 @@ public class VariableBlock {
 			elem.setReserved(true);
 			fVariablesList.addElement(elem);
 		}
+		fHasChanges= true;
 	}
 
 	public boolean performOk() {
@@ -407,18 +390,40 @@ public class VariableBlock {
 	/**
 	 * 
 	 */
-	public void refresh() {
-		int nElements= fVariablesList.getSize();
-		for (int i= 0; i < nElements; i++) {
-			CPVariableElement curr= (CPVariableElement) fVariablesList.getElement(i);
-			IPath entryPath= JavaCore.getClasspathVariable(curr.getName());
-			if (entryPath != null) {			
-				curr.setPath(entryPath);
-			} else {
-				curr.setPath(Path.EMPTY);
+	public void refresh(String initSelection) {
+		CPVariableElement initSelectedElement= null;
+		
+		String[] reservedName= getReservedVariableNames();
+		ArrayList reserved= new ArrayList(reservedName.length);
+		addAll(reservedName, reserved);
+				
+		String[] entries= JavaCore.getClasspathVariableNames();
+		ArrayList elements= new ArrayList(entries.length);
+		for (int i= 0; i < entries.length; i++) {
+			String name= entries[i];
+			CPVariableElement elem;
+			IPath entryPath= JavaCore.getClasspathVariable(name);
+			if (entryPath != null) {
+				elem= new CPVariableElement(name, entryPath, reserved.contains(name));
+				elements.add(elem);
+				if (name.equals(initSelection)) {
+					initSelectedElement= elem;
+				}
+			} else {				
+				JavaPlugin.logErrorMessage("VariableBlock: Classpath variable with null value: " + name); //$NON-NLS-1$
 			}
 		}
-		fVariablesList.refresh();
+		
+		fVariablesList.setElements(elements);
+		
+		if (initSelectedElement != null) {
+			ISelection sel= new StructuredSelection(initSelectedElement);
+			fVariablesList.selectElements(sel);
+		} else {
+			fVariablesList.selectFirstElement();
+		}
+		
+		fHasChanges= false;
 	}
 
 }
