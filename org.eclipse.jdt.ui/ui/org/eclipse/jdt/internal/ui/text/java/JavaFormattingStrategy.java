@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -60,8 +61,16 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 			try {
 				
 				final TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
-				if (edit != null)
+				if (edit != null) {
+					Map partitioners= null;
+					if (edit.getChildrenSize() > 20)
+						partitioners= TextUtilities.removeDocumentPartitioners(document);
+					
 					edit.apply(document);
+					
+					if (partitioners != null)
+						TextUtilities.addDocumentPartitioners(document, partitioners);
+				}
 				
 			} catch (MalformedTreeException exception) {
 				JavaPlugin.log(exception);
