@@ -134,6 +134,7 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 
 		if (previous != null) {
 
+			// Blank line before <pre> tag
 			if (previous.hasAttribute(COMMENT_IMMUTABLE | COMMENT_SEPARATOR) && !next.hasAttribute(COMMENT_CODE) && !successor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;
 
@@ -143,8 +144,13 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 //			// remove any asterisk borders inside code sections
 //			else if (previous.hasAttribute(COMMENT_CODE) && next.hasAttribute(COMMENT_CODE))
 //				return getDelimiter();
+			
+			// Blank line after </pre> tag
+			else if (next.hasAttribute(COMMENT_IMMUTABLE | COMMENT_SEPARATOR) && !successor.hasAttribute(COMMENT_BLANKLINE) && !predecessor.hasAttribute(COMMENT_BLANKLINE))
+				return delimiter + delimiter;
 
-			else if ((next.hasAttribute(COMMENT_IMMUTABLE | COMMENT_SEPARATOR) || ((fSeparateRoots || !isClearLines()) && previous.hasAttribute(COMMENT_PARAGRAPH))) && !successor.hasAttribute(COMMENT_BLANKLINE) && !predecessor.hasAttribute(COMMENT_BLANKLINE))
+			// Add blank line before first root/parameter tag, if "Blank line before Javadoc tags"
+			else if (fSeparateRoots && previous.hasAttribute(COMMENT_PARAGRAPH) && !successor.hasAttribute(COMMENT_BLANKLINE) && !predecessor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;
 
 			else if (fIndentRoots && !predecessor.hasAttribute(COMMENT_ROOT) && !predecessor.hasAttribute(COMMENT_PARAMETER) && !predecessor.hasAttribute(COMMENT_BLANKLINE))
@@ -206,7 +212,7 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 	}
 
 	/**
-	 * Marks the comment range with its html tag attributes.
+	 * Marks the comment range with its HTML tag attributes.
 	 * 
 	 * @param range
 	 *                   The comment range to mark
@@ -239,7 +245,6 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 
 		String token= null;
 		CommentRange range= null;
-		CommentRange blank= null;
 
 		for (final ListIterator iterator= getRanges().listIterator(); iterator.hasNext();) {
 
@@ -252,17 +257,6 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 
 				markJavadocTag(range, token);
 				if (!paragraph && (range.hasAttribute(COMMENT_ROOT) || range.hasAttribute(COMMENT_PARAMETER))) {
-
-					iterator.previous();
-					while (iterator.hasPrevious()) {
-
-						blank= (CommentRange)iterator.previous();
-						if (blank.hasAttribute(COMMENT_BLANKLINE))
-							iterator.remove();
-						else
-							break;
-					}
-
 					range.setAttribute(COMMENT_PARAGRAPH);
 					paragraph= true;
 				}
