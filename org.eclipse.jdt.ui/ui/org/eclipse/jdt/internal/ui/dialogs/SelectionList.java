@@ -127,6 +127,12 @@ public class SelectionList extends Composite {
 	}
 	
 	/**
+	 * Removes a selection change listener to this widget.
+	 */
+	public void removeSelectionListener(SelectionListener listener) {
+		fList.removeSelectionListener(listener);
+	}
+	/**
 	 * Sets the filter pattern. Current only prefix filter pattern are supported.
 	 */
 	public void setFilter(String pattern, boolean refilter) {

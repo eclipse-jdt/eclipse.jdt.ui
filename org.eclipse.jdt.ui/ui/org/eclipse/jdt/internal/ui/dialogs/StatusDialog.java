@@ -97,7 +97,7 @@ public abstract class StatusDialog extends Dialog {
 	protected Control createButtonBar(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
+		layout.numColumns= 1;
 		layout.marginHeight= 0;
 		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		composite.setLayout(layout);

@@ -59,7 +59,7 @@ public class AllTypesSearchEngine extends SearchEngine {
 	}
 	
 	public void searchTypes(List typesFound, IJavaSearchScope scope, int style, IProgressMonitor pm) {
-		Assert.isTrue((style | IJavaElementSearchConstants.CONSIDER_TYPES) == IJavaElementSearchConstants.CONSIDER_TYPES);
+		Assert.isTrue((style & IJavaElementSearchConstants.CONSIDER_TYPES) != 0);
 				
 		int kind= IJavaSearchConstants.INTERFACE;
 		if ((style & IJavaElementSearchConstants.CONSIDER_INTERFACES) != 0 && (style & IJavaElementSearchConstants.CONSIDER_CLASSES) != 0) 

@@ -95,7 +95,7 @@ public class J9DebugLauncher extends J9Launcher {
 			try {
 				VirtualMachine vm= connector.attach(map);
 				setTimeout(vm);
-				IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(vm, renderDebugTarget(config.getClassToLaunch(), port), process1, true);
+				IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(vm, renderDebugTarget(config.getClassToLaunch(), port), process1, true, false);
 				return new VMRunnerResult(debugTarget, new IProcess[] { process1, process2 });
 			} catch (IOException e) {
 				String title= JavaLaunchUtils.getResourceString(ERROR_CONNECT+"title");
