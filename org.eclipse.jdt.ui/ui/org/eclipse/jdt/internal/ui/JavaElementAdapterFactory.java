@@ -20,6 +20,7 @@ import org.eclipse.ui.views.tasklist.ITaskListResourceAdapter;
 import org.eclipse.search.ui.ISearchPageScoreComputer;
 
 import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -79,6 +80,20 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 	}
 	
 	private IResource getResource(IJavaElement element) {
+		/*
+		 * Map a type to the corresponding CU.
+		 */
+		if (element instanceof IType) {
+			IType type= (IType)element;
+			IJavaElement parent= type.getParent();
+			if (parent instanceof ICompilationUnit) {
+				ICompilationUnit cu= (ICompilationUnit)parent;
+				if (cu.isWorkingCopy())
+					element= cu.getOriginalElement();
+				else 
+					element= cu;
+			}
+		}
 		try {
 			return element.getCorrespondingResource();
 		} catch (JavaModelException e) {
