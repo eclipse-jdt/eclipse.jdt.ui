@@ -1329,8 +1329,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("public class DD {\n");
 		buf.append("\n");		
 		buf.append("    private void foo(){\n");
-		buf.append("     // missing bracket\n");
-		buf.append("\n");
+		buf.append("\n"); // missing closing bracket
 		buf.append("    /*\n");
 		buf.append("     *\n");
 		buf.append("     */\n");
