@@ -1,4 +1,4 @@
-<project name="org.eclipse.search" default="export" basedir="..">
+<project name="org.eclipse.jdt.ui.examples.projects" default="export" basedir="..">
 	<target name="init">
 		<tstamp/>
 		<property name="destdir" value="../../plugin-export" />
