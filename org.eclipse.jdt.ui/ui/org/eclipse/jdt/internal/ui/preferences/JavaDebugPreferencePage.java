@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.debug.core.JDIDebugPlugin;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IPreferencesConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -98,21 +98,29 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 	private StepFilterContentProvider fStepFilterContentProvider;
 	
 	public class StepFilterContentProvider implements IStructuredContentProvider {
-		private JDIDebugPlugin fPlugin;
 		private CheckboxTableViewer fViewer;
 		private List fActive;
 		private List fInactive;
 		
 		public StepFilterContentProvider() {
-			fPlugin = JDIDebugPlugin.getDefault();
-			fActive = new ArrayList(fPlugin.getActiveStepFilters());
-			fInactive = new ArrayList(fPlugin.getInactiveStepFilters());
+			fActive = new ArrayList(JDIDebugModel.getActiveStepFilters());
+			fInactive = new ArrayList(JDIDebugModel.getInactiveStepFilters());
+		}
+		
+		public void setDefaults() {
+			fViewer.remove(fActive.toArray());
+			fViewer.remove(fInactive.toArray());
+			fActive = JDIDebugModel.getDefaultActiveStepFilterList();
+			fInactive = JDIDebugModel.getDefaultInactiveStepFilterList();
+			fViewer.add(fActive.toArray());
+			fViewer.add(fInactive.toArray());
+			initializeCheckedState();
 		}
 		
 		public void saveFilters() {
-			fPlugin.setUseStepFilters(fUseFiltersCheckbox.getSelection());
-			fPlugin.setActiveStepFilters(fActive);
-			fPlugin.setInactiveStepFilters(fInactive);
+			JDIDebugModel.setUseStepFilters(fUseFiltersCheckbox.getSelection());
+			JDIDebugModel.setActiveStepFilters(fActive);
+			JDIDebugModel.setInactiveStepFilters(fInactive);
 		}
 		
 		public void addActiveFilter(String filter) {
@@ -189,7 +197,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 	public JavaDebugPreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(getString(DESCRIPTION)); //$NON-NLS-1$
+		//setDescription(getString(DESCRIPTION)); //$NON-NLS-1$
 	}
 	
 	/**
@@ -219,6 +227,8 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		
 		createPrimitiveDisplayPreferences(composite);
 		
+		createSpace(composite);
+		
 		createStepFilterPreferences(composite);
 		
 		setValues();
@@ -230,20 +240,20 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 	 * Create the primitive display preferences composite widget
 	 */
 	private void createPrimitiveDisplayPreferences(Composite parent) {
-		Group group= createGroup(parent, 1, getString(PRIMITIVE_PREFS));	
+		Composite comp= createLabelledComposite(parent, 1, getString(PRIMITIVE_PREFS));	
 		
-		fHexButton= createCheckButton(group, getString(HEX));
-		fCharButton= createCheckButton(group, getString(CHAR));
-		fUnsignedButton= createCheckButton(group, getString(UNSIGNED));
+		fHexButton= createCheckButton(comp, getString(HEX));
+		fCharButton= createCheckButton(comp, getString(CHAR));
+		fUnsignedButton= createCheckButton(comp, getString(UNSIGNED));
 	}
 	
 	/**
 	 * Create a group to contain the step filter related widgetry
 	 */
 	private void createStepFilterPreferences(Composite parent) {
-		Group group = createGroup(parent, 1, "Step filters");
+		Composite comp = createLabelledComposite(parent, 1, "Step filters");
 		
-		Composite container = new Composite(group, SWT.NONE);
+		Composite container = new Composite(comp, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 2;
 		layout.marginHeight = 0;
@@ -252,6 +262,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		
 		fUseFiltersCheckbox = new Button(container, SWT.CHECK);
 		fUseFiltersCheckbox.setText("Use &step filters");
+		fUseFiltersCheckbox.setToolTipText("Toggle whether step filters are used at all");
 		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 2;
 		fUseFiltersCheckbox.setLayoutData(gd);	
@@ -274,6 +285,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		
 		fAddFilterButton = new Button(container, SWT.PUSH);
 		fAddFilterButton.setText("Add &Filter");
+		fAddFilterButton.setToolTipText("Add the text as a step filter");
 		gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fAddFilterButton.setLayoutData(gd);
 		fAddFilterButton.addSelectionListener(new SelectionListener() {
@@ -304,7 +316,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		fFilterViewer.setContentProvider(fStepFilterContentProvider);
 		fFilterViewer.setLabelProvider(new StepFilterLabelProvider());
 		fFilterViewer.setSorter(new WorkbenchViewerSorter());
-		fFilterViewer.setInput(JDIDebugPlugin.getDefault());
+		fFilterViewer.setInput(JDIDebugModel.getAllStepFilters());
 		fStepFilterContentProvider.initializeCheckedState();
 		gd = new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
 		gd.heightHint = 300;
@@ -338,7 +350,8 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		buttonContainer.setLayout(buttonLayout);
 		
 		fAddPackageButton = new Button(buttonContainer, SWT.PUSH);
-		fAddPackageButton.setText("Add &package");
+		fAddPackageButton.setText("Add &package...");
+		fAddPackageButton.setToolTipText("Choose a package and add it to step filters");
 		gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fAddPackageButton.setLayoutData(gd);
 		fAddPackageButton.addSelectionListener(new SelectionListener() {
@@ -350,7 +363,8 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		});
 		
 		fAddTypeButton = new Button(buttonContainer, SWT.PUSH);
-		fAddTypeButton.setText("Add &type");
+		fAddTypeButton.setText("Add &type...");
+		fAddTypeButton.setToolTipText("Choose a java type and add it to step filters");
 		gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fAddTypeButton.setLayoutData(gd);
 		fAddTypeButton.addSelectionListener(new SelectionListener() {
@@ -363,6 +377,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		
 		fRemoveFilterButton = new Button(buttonContainer, SWT.PUSH);
 		fRemoveFilterButton.setText("&Remove");
+		fRemoveFilterButton.setToolTipText("Remove all selected step filters");
 		gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fRemoveFilterButton.setLayoutData(gd);
 		fRemoveFilterButton.addSelectionListener(new SelectionListener() {
@@ -374,7 +389,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		});
 		fRemoveFilterButton.setEnabled(false);
 		
-		boolean enabled = JDIDebugPlugin.getDefault().useStepFilters();
+		boolean enabled = JDIDebugModel.useStepFilters();
 		fUseFiltersCheckbox.setSelection(enabled);
 		toggleStepFilterWidgetsEnabled(enabled);
 	}
@@ -389,6 +404,8 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		fFilterText.setEnabled(enabled);
 		if (!enabled) {
 			fRemoveFilterButton.setEnabled(enabled);
+		} else if (!fFilterViewer.getSelection().isEmpty()) {
+			fRemoveFilterButton.setEnabled(true);
 		}
 	}
 	
@@ -522,11 +539,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		fCharButton.setSelection(store.getDefaultBoolean(SHOW_CHARS));
 		fUnsignedButton.setSelection(store.getDefaultBoolean(SHOW_UNSIGNED));
 		
-		setDefaultStepFilterValues();			
-	}
-	
-	private void setDefaultStepFilterValues() {
-		
+		fStepFilterContentProvider.setDefaults();
 	}
 	
 	/**
@@ -546,31 +559,50 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 	}
 	
 	/**
-	 * Creates group control and sets the default layout data.
+	 * Creates composite control and sets the default layout data.
 	 *
-	 * @param parent  the parent of the new group
-	 * @param numColumns  the number of columns for the new group
-	 * @param label  the label for the new group
-	 * @return the newly-created coposite
+	 * @param parent  the parent of the new composite
+	 * @param numColumns  the number of columns for the new composite
+	 * @param labelText  the text label of the new composite
+	 * @return the newly-created composite
 	 */
-	private Group createGroup(Composite parent, int numColumns, String label) {
-		Group group = new Group(parent, SWT.SHADOW_NONE);
-		group.setText(label);
-
+	private Composite createLabelledComposite(Composite parent, int numColumns, String labelText) {
+		Composite comp = new Composite(parent, SWT.NONE);
+		
 		//GridLayout
 		GridLayout layout = new GridLayout();
 		layout.numColumns = numColumns;
-		group.setLayout(layout);
+		comp.setLayout(layout);
 
 		//GridData
-		GridData data = new GridData();
-		data.verticalAlignment = GridData.FILL;
-		data.horizontalAlignment = GridData.FILL;
-		group.setLayoutData(data);
+		GridData gd= new GridData();
+		gd.verticalAlignment = GridData.FILL;
+		gd.horizontalAlignment = GridData.FILL;
+		comp.setLayoutData(gd);
 		
-		return group;
+		//Label
+		Label label = new Label(comp, SWT.NONE);
+		label.setText(labelText);
+		gd = new GridData();
+		gd.horizontalSpan = numColumns;
+		label.setLayoutData(gd);
+
+		return comp;
 	}
 	
+	/**
+	 * Create a vertical space to separate groups of controls.
+	 */
+	private void createSpace(Composite parent) {
+		Label vfiller = new Label(parent, SWT.LEFT);
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = GridData.BEGINNING;
+		gridData.grabExcessHorizontalSpace = false;
+		gridData.verticalAlignment = GridData.CENTER;
+		gridData.grabExcessVerticalSpace = false;
+		vfiller.setLayoutData(gridData);
+	}
+
 	/**
 	 * @see Listener#handleEvent(Event)
 	 */
