@@ -48,6 +48,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactor
 
 abstract class TargetProvider {
 
+	public abstract void initialize();
+
 	public abstract ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm)  throws JavaModelException;
 	
 	public abstract BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm);
@@ -92,18 +94,22 @@ abstract class TargetProvider {
 		private ICompilationUnit fCUnit;
 		private MethodInvocation fInvocation;
 		private SourceProvider fSourceProvider;
+		private boolean fIterated;
 		public SingleCallTargetProvider(ICompilationUnit cu, MethodInvocation invocation) {
 			Assert.isNotNull(cu);
 			Assert.isNotNull(invocation);
 			fCUnit= cu;
 			fInvocation= invocation;
 		}
+		public void initialize() {
+			fIterated= false;
+		}
 		public ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm) {
 			return new ICompilationUnit[] { fCUnit };
 		}
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
 			Assert.isTrue(unit == fCUnit);
-			if (fInvocation == null)
+			if (fIterated)
 				return new BodyDeclaration[0];
 			fastDone(pm);
 			return new BodyDeclaration[] { 
@@ -113,12 +119,10 @@ abstract class TargetProvider {
 	
 		public MethodInvocation[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			fastDone(pm);
-			if (fInvocation != null) {
-				MethodInvocation[] result= new MethodInvocation[] { fInvocation };
-				fInvocation= null;
-				return result;
-			}
-			return null;
+			if (fIterated)
+				return null;
+			fIterated= true;
+			return new MethodInvocation[] { fInvocation };
 		}
 		public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 			fastDone(pm);
@@ -220,11 +224,13 @@ abstract class TargetProvider {
 			fCUnit= unit;
 			fDeclaration= declaration;
 		}
-		public ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm) {
+		public void initialize() {
 			InvocationFinder finder= new InvocationFinder(fDeclaration.resolveBinding());
 			ASTNode type= ASTNodes.getParent(fDeclaration, ASTNode.TYPE_DECLARATION);
 			type.accept(finder);
 			fBodies= finder.result;
+		}
+		public ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm) {
 			fastDone(pm);
 			return new ICompilationUnit[] { fCUnit };
 		}
@@ -263,6 +269,9 @@ abstract class TargetProvider {
 			Assert.isNotNull(method);
 			fCUnit= unit;
 			fMethod= method;
+		}
+		public void initialize() {
+			// do nothing.
 		}
 		public ICompilationUnit[] getAffectedCompilationUnits(IProgressMonitor pm)  throws JavaModelException {
 			IMethod method= Binding2JavaModel.find(fMethod.resolveBinding(), fCUnit.getJavaProject());

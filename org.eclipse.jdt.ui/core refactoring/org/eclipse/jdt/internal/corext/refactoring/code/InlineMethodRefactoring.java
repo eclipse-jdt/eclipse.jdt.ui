@@ -158,6 +158,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		fChangeManager= new TextChangeManager();
 		RefactoringStatus result= new RefactoringStatus();
 		fSourceProvider.initialize();
+		fTargetProvider.initialize();
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(new SubProgressMonitor(pm, 1));
 		IProgressMonitor sub= new SubProgressMonitor(pm, 1);
 		sub.beginTask("", units.length * 3);
