@@ -376,7 +376,15 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		
 		fPrefixField= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fPrefixField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fPrefixField.setText(DEFAULT_KEY_PREFIX);
+		fPrefixField.setText(guessPrefix());
+		fPrefixField.selectAll();
+	}
+
+	private String guessPrefix() {
+		String cuName= getCu().getElementName();
+		if (cuName.endsWith(".java")) //$NON-NLS-1$
+			return cuName.substring(0, cuName.length() - ".java".length()) + "."; //$NON-NLS-2$ //$NON-NLS-1$
+		return DEFAULT_KEY_PREFIX;	
 	}
 	
 	private void createLabels(Composite parent){
