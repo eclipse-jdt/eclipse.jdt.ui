@@ -78,8 +78,8 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 	}
 
 	public void testNew1() throws Exception{
-		printTestDisabledMessage("bug 23597 ");
-//		validatePassingTest("A", new String[]{"A"}, "java.lang.Object");
+//		printTestDisabledMessage("bug 23597 ");
+		validatePassingTest("A", new String[]{"A"}, "java.lang.Object");
 	}
 
 	public void testNew2() throws Exception{
@@ -156,8 +156,8 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 	}
 
 	public void testNew20() throws Exception{
-		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=23829");
-//		validatePassingTest("A", new String[]{"A"}, "p.B");
+//		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=23829");
+		validatePassingTest("A", new String[]{"A"}, "p.B");
 	}
 
 	public void testNew21() throws Exception{
@@ -204,6 +204,11 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
 	public void testNew31() throws Exception{
 //		printTestDisabledMessage("bug 24278");
+		validatePassingTest("A", new String[]{"A"}, "p.B");
+	}
+
+	public void testNew32() throws Exception{
+//		printTestDisabledMessage();
 		validatePassingTest("A", new String[]{"A"}, "p.B");
 	}
 
@@ -296,8 +301,8 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
 	}
 	public void test28() throws Exception{
-		printTestDisabledMessage("bug 22883");
-//		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
+//		printTestDisabledMessage("bug 22883");
+		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
 	}
 	public void test29() throws Exception{
 		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
