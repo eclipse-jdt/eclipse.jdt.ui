@@ -52,7 +52,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -1972,7 +1972,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
-		buf.append("        int r = ((Object) s).hashCode();\n");
+		buf.append("        String r = ((String) s);\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
@@ -1989,7 +1989,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
-		buf.append("        int r = s.hashCode();\n");
+		buf.append("        String r = s;\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
