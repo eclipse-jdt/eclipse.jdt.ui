@@ -96,7 +96,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static boolean reconcileJavaViews() {
 		//XXX: this is needed in order to keep the old preference (to be removed after 2.0)
 		String update= JavaPlugin.getDefault().getPreferenceStore().getString(UPDATE_JAVA_VIEWS);
-		if (! "".equals(update))
+		if (! "".equals(update)) //$NON-NLS-1$
 			return UPDATE_WHILE_EDITING.equals(update);
 		else 
 			return JavaPlugin.getDefault().getPreferenceStore().getBoolean(RECONCILE_JAVA_VIEWS);

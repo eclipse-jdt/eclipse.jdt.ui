@@ -56,7 +56,7 @@ public class CheckedTreeSelectionDialog extends SelectionStatusDialog {
 	private ViewerSorter fSorter;
 	private String fEmptyListMessage= WorkbenchMessages.getString("CheckedTreeSelectionDialog.nothing_available"); //$NON-NLS-1$	
 	
-	private IStatus fCurrStatus= new Status(IStatus.OK, PlatformUI.PLUGIN_ID, 0, "", null); //$NON-NLS$
+	private IStatus fCurrStatus= new Status(IStatus.OK, PlatformUI.PLUGIN_ID, 0, "", null);  //$NON-NLS-1$
 	private List fFilters;
 	private Object fInput;		
 	private boolean fIsEmpty;
@@ -173,7 +173,7 @@ public class CheckedTreeSelectionDialog extends SelectionStatusDialog {
 				fCurrStatus= fValidator.validate(fViewer.getCheckedElements());
 				updateStatus(fCurrStatus);
 			} else if (!fCurrStatus.isOK()) {
-				fCurrStatus= new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK, "", null);
+				fCurrStatus= new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK, "", null); //$NON-NLS-1$
 			}
 		} else {
 			fCurrStatus= new Status(IStatus.ERROR, PlatformUI.PLUGIN_ID, IStatus.OK, fEmptyListMessage, null);

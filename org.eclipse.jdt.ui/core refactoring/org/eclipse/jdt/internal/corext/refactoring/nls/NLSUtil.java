@@ -27,7 +27,7 @@ public class NLSUtil {
 			StringBuffer buffer= new StringBuffer();
 			char[] part= new char[2048];
 			int read= 0;
-			reader= new BufferedReader(new InputStreamReader(is, "8859_1"));
+			reader= new BufferedReader(new InputStreamReader(is, "8859_1")); //$NON-NLS-1$
 
 			while ((read= reader.read(part)) != -1)
 				buffer.append(part, 0, read);

@@ -201,7 +201,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		List notDeletedCus= new ArrayList();
 		notDeletedCus.addAll(Arrays.asList(cusToDelete));	
 		
-        pm.beginTask("", cusToDelete.length);
+        pm.beginTask("", cusToDelete.length); //$NON-NLS-1$
 		for (int i= 0; i < cusToDelete.length; i++) {
 			if (isReadOnly(cusToDelete[i]) && (! isOkToDeleteReadOnly(cusToDelete[i])))
 				continue;

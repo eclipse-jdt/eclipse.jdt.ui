@@ -864,7 +864,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			
 		IDocumentProvider provider= getDocumentProvider();
 		if (provider.isDeleted(input) && original != null) {
-			String message= JavaEditorMessages.getFormattedString("CompilationUnitEditor.warning.save.delete", new Object[] { original.getName() });
+			String message= JavaEditorMessages.getFormattedString("CompilationUnitEditor.warning.save.delete", new Object[] { original.getName() }); //$NON-NLS-1$
 			dialog.setMessage(message, IMessageProvider.WARNING);
 		}
 			
@@ -1432,7 +1432,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	protected boolean canHandleMove(IEditorInput originalElement, IEditorInput movedElement) {
 		
-		String oldExtension= "";
+		String oldExtension= ""; //$NON-NLS-1$
 		if (originalElement instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput) originalElement).getFile();
 			if (file != null) {
@@ -1442,7 +1442,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 		}
 		
-		String newExtension= "";
+		String newExtension= ""; //$NON-NLS-1$
 		if (movedElement instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput) movedElement).getFile();
 			if (file != null)
