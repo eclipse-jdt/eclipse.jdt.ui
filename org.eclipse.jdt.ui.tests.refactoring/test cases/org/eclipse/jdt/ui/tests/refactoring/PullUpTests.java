@@ -101,12 +101,16 @@ public class PullUpTests extends RefactoringTest {
 			IField[] fields= TestUtil.getFields(type, fieldNames);
 			IMethod[] methods= TestUtil.getMethods(type, methodNames, methodSignatures);
 
-			PullUpRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
+			IMember[] members= TestUtil.merge(methods, fields);
+			PullUpRefactoring ref= createRefactoring(members);
 			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 			setSuperclassAsTargetClass(ref);
 
-			List  required= Arrays.asList(ref.getRequiredPullableMembers(new NullProgressMonitor()));
+			List  additionalRequired= Arrays.asList(ref.getAdditionalRequiredMembersToPullUp(new NullProgressMonitor()));
+			List required= new ArrayList();
+			required.addAll(additionalRequired);
+			required.addAll(Arrays.asList(members));
 			IField[] expectedFields= TestUtil.getFields(type, expectedFieldNames);
 			IMethod[] expectedMethods= TestUtil.getMethods(type, expectedMethodNames, expectedMethodSignatures);
 			List expected= Arrays.asList(TestUtil.merge(expectedFields, expectedMethods));

@@ -468,7 +468,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					try {
-						markAsMembersToPullUp(getPullUpRefactoring().getRequiredPullableMembers(pm));						
+						markAsMembersToPullUp(getPullUpRefactoring().getAdditionalRequiredMembersToPullUp(pm));						
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
 					} finally {
