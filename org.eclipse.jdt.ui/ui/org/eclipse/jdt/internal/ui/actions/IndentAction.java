@@ -253,8 +253,9 @@ public class IndentAction extends TextEditorAction {
 			} else if (!fIsTabAction && startingPartition.getOffset() == offset && startingPartition.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
 				
 				// line comment starting at position 0 -> indent inside
+				int max= document.getLength() - offset;
 				int slashes= 2;
-				while (slashes < document.getLength() - 1 && document.get(offset + slashes, 2).equals("//")) //$NON-NLS-1$
+				while (slashes < max - 1 && document.get(offset + slashes, 2).equals("//")) //$NON-NLS-1$
 					slashes+= 2;
 				
 				wsStart= offset + slashes;
