@@ -5,9 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jface.wizard.IWizardPage;
-
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
 /**
  * An abstract wizard page that can be used to implement user input pages for 
@@ -61,24 +59,38 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 	protected boolean performFinish() {
 		RefactoringWizard wizard= getRefactoringWizard();
 		int threshold= RefactoringPreferences.getCheckPassedSeverity();
+		RefactoringStatus activationStatus= wizard.getActivationStatus();
+		RefactoringStatus inputStatus= null;
+		RefactoringStatus status= new RefactoringStatus();
+		Refactoring refactoring= getRefactoring();
+		IChange change;
+		boolean result= false;
 		
-		CreateChangeOperation create= new CreateChangeOperation(getRefactoring(), CreateChangeOperation.CHECK_INPUT); 
-		create.setCheckPassedSeverity(threshold);
+		if (activationStatus != null && activationStatus.getSeverity() > threshold) {
+			inputStatus= wizard.checkInput();
+		} else {
+			CreateChangeOperation create= new CreateChangeOperation(refactoring, CreateChangeOperation.CHECK_INPUT); 
+			create.setCheckPassedSeverity(threshold);
+			
+			PerformChangeOperation perform= new PerformChangeOperation(create);
+			perform.setCheckPassedSeverity(threshold);
+			
+			result= wizard.performFinish(perform);
+			if (!result)
+				return false;
+			inputStatus= create.getStatus();
+		}
 		
-		PerformChangeOperation perform= new PerformChangeOperation(create);
-		perform.setCheckPassedSeverity(threshold);
+		status.merge(activationStatus);
+		status.merge(inputStatus);
 		
-		boolean result= wizard.performFinish(perform);
-		if (!result)
-			return false;
-		RefactoringStatus status= create.getStatus();
 		if (status.getSeverity() > threshold) {
 			wizard.setStatus(status);
-			wizard.setChange(perform.getChange());
 			IWizardPage nextPage= wizard.getPage(ErrorWizardPage.PAGE_NAME);
 			wizard.getContainer().showPage(nextPage);
 			return false;
 		}
-		return true;	
+		
+		return result;	
 	}		
 }

@@ -118,11 +118,10 @@ public class RefactoringWizard extends Wizard {
 	
 	/**
 	 * Sets the refactoring status.
+	 * 
+	 * @param status the refactoring status to set.
 	 */
 	public void setStatus(RefactoringStatus status) {
-		if (status != fActivationStatus)
-			status.merge(fActivationStatus);
-			
 		ErrorWizardPage page= (ErrorWizardPage)getPage(ErrorWizardPage.PAGE_NAME);
 		if (page != null)
 			page.setStatus(status);
@@ -135,7 +134,46 @@ public class RefactoringWizard extends Wizard {
 	public RefactoringStatus getStatus() {
 		return fStatus;
 	} 
+	
+	/**
+	 * Sets the refactoring status returned from input checking. Any previously 
+	 * computed activation status is merged into the given status before it is set 
+	 * to the error page.
+	 * 
+	 * @param status the input status to set.
+	 * @see #checkActivationOnOpen()
+	 * @see #getActivationStatus()
+	 */
+	public void setInputStatus(RefactoringStatus status) {
+		RefactoringStatus newStatus= new RefactoringStatus();
+		if (fActivationStatus != null)
+			newStatus.merge(fActivationStatus);
+		newStatus.merge(status);	
+		setStatus(newStatus);			
+	}
+	
+	/**
+	 * Sets the refactoring status returned from activation checking.
+	 * 
+	 * @param status the activation status to be set.
+	 */
+	public void setActivationStatus(RefactoringStatus status) {
+		fActivationStatus= status;
+		setStatus(status);
+	}
 		
+	/**
+	 * Returns the activation status computed during the start up off this
+	 * wizard. This methdod returns <code>null</code> if no activation
+	 * checking has been performed during startup.
+	 * 
+	 * @return the activation status computed during startup.
+	 * @see #checkActivationOnOpen()
+	 */
+	public RefactoringStatus getActivationStatus() {
+		return fActivationStatus;
+	}
+	
 	/**
 	 * Returns the default page title used for this refactoring.
 	 */
@@ -181,8 +219,9 @@ public class RefactoringWizard extends Wizard {
 	//---- Change management -------------------------------------------------------------
 
 	/**
-	 * Creates a new change object for the refactoring. Methods returns <code>
+	 * Creates a new change object for the refactoring. Method returns <code>
 	 * null</code> if the change cannot be created.
+	 * 
 	 * @param style the conditions to check before creating the change.
 	 * @param checkPassedSeverity the severity belwo which the conditions check
 	 *  is treated as passed.
@@ -212,7 +251,7 @@ public class RefactoringWizard extends Wizard {
 			} else {
 				status= op.getStatus();
 			}
-			setStatus(status);
+			setStatus(status, style);
 		}
 		IChange change= op.getChange();	
 		return change;
@@ -240,6 +279,10 @@ public class RefactoringWizard extends Wizard {
 
 	//---- Condition checking ------------------------------------------------------------
 
+	public RefactoringStatus checkInput() {
+		return internalCheckCondition(getContainer(), CheckConditionsOperation.INPUT);
+	}
+	
 	/**
 	 * Checks the condition for the given style.
 	 * @param style the conditions to check.
@@ -270,10 +313,27 @@ public class RefactoringWizard extends Wizard {
 		} else {
 			status= op.getStatus();
 		}
-		setStatus(status);
+		setStatus(status, style);
 		return status;	
 	}
 	
+	/**
+	 * Sets the status according to the given style flag.
+	 * 
+	 * @param status the refactoring status to set.
+	 * @param style a flag indicating if the status is a activation, input checking, or
+	 *  precondition checking status.
+	 * @see CheckConditionsOperation
+	 */
+	protected void setStatus(RefactoringStatus status, int style) {
+		if ((style & CheckConditionsOperation.PRECONDITIONS) == CheckConditionsOperation.PRECONDITIONS)
+			setStatus(status);
+		else if ((style & CheckConditionsOperation.ACTIVATION) == CheckConditionsOperation.ACTIVATION)
+			setActivationStatus(status);
+		else if ((style & CheckConditionsOperation.INPUT) == CheckConditionsOperation.INPUT)
+			setInputStatus(status);
+	}
+
 	//---- Save open editors -------------------------------------------------------------
 	
 	/**
@@ -305,13 +365,12 @@ public class RefactoringWizard extends Wizard {
 	 */
 	public void addPages() {
 		if (checkActivationOnOpen()) {
-			fActivationStatus= internalCheckCondition(
-				new BusyIndicatorRunnableContext(),
-				CheckConditionsOperation.ACTIVATION);
+			internalCheckCondition(new BusyIndicatorRunnableContext(), CheckConditionsOperation.ACTIVATION);
 		}
 		if (fActivationStatus.hasFatalError()) {
 			addErrorPage();
-			setStatus(fActivationStatus);	
+			// Set the status since we added the error page
+			setStatus(getStatus());	
 		} else { 
 			addUserInputPages();
 			addErrorPage();

@@ -73,13 +73,27 @@ import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 	public void visitCatchArguments(Argument[] arguments, BlockScope scope, int mode) {
 		for (int i= 0; i < arguments.length; i++) {
 			Argument argument= arguments[i];
-			TypeBinding typeBinding= argument.type.binding;
+			TypeBinding catchTypeBinding= argument.type.binding;
 			if (mode == StatementAnalyzer.SELECTED) {
-				fCurrentExceptions.remove(typeBinding); 
+				List exceptions= new ArrayList(fCurrentExceptions);
+				for (Iterator iter= exceptions.iterator(); iter.hasNext(); ) {
+					ReferenceBinding throwTypeBinding= (ReferenceBinding)iter.next();
+					if (catches(catchTypeBinding, throwTypeBinding))
+						fCurrentExceptions.remove(throwTypeBinding);
+				}
 			} else {
-				fTypeNames.put(typeBinding, argument.type);
+				fTypeNames.put(catchTypeBinding, argument.type);
 			}
 		}
+	}
+	
+	private boolean catches(TypeBinding catchTypeBinding, ReferenceBinding throwTypeBinding) {
+		while(throwTypeBinding != null) {
+			if (throwTypeBinding == catchTypeBinding)
+				return true;
+			throwTypeBinding= throwTypeBinding.superclass();	
+		}
+		return false;
 	}
 	
 	public void visitEndTryStatement(TryStatement statement, BlockScope scope, int mode) {
