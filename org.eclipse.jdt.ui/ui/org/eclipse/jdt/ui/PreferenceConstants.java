@@ -2176,6 +2176,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_SOURCE}
 	 */	
 	public final static String FORMATTER_COMMENT_FORMATSOURCE= "comment_format_source_code"; //$NON-NLS-1$
 	
@@ -2187,6 +2188,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION}
 	 */	
 	public final static String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= "comment_indent_parameter_description"; //$NON-NLS-1$
 
@@ -2198,6 +2200,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HEADER}
 	 */	
 	public final static String FORMATTER_COMMENT_FORMATHEADER= "comment_format_header"; //$NON-NLS-1$
 
@@ -2209,6 +2212,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_ROOT_TAGS}
 	 */	
 	public final static String FORMATTER_COMMENT_INDENTROOTTAGS= "comment_indent_root_tags"; //$NON-NLS-1$
 	
@@ -2220,6 +2224,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT}
 	 */	
 	public final static String FORMATTER_COMMENT_FORMAT= "comment_format_comments"; //$NON-NLS-1$
 
@@ -2231,6 +2236,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER}
 	 */	
 	public final static String FORMATTER_COMMENT_NEWLINEFORPARAMETER= "comment_new_line_for_parameter"; //$NON-NLS-1$
 
@@ -2242,6 +2248,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS}
 	 */	
 	public final static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "comment_separate_root_tags"; //$NON-NLS-1$
 
@@ -2252,6 +2259,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES}
 	 */	
 	public final static String FORMATTER_COMMENT_CLEARBLANKLINES= "comment_clear_blank_lines"; //$NON-NLS-1$
 
@@ -2262,6 +2270,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_LINE_LENGTH}
 	 */	
 	public final static String FORMATTER_COMMENT_LINELENGTH= "comment_line_length"; //$NON-NLS-1$
 
@@ -2272,6 +2281,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HTML}
 	 */	
 	public final static String FORMATTER_COMMENT_FORMATHTML= "comment_format_html"; //$NON-NLS-1$
 
