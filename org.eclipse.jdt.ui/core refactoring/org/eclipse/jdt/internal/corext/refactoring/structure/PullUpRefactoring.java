@@ -510,10 +510,10 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private Map getMatchingMembersMappingFromTypeAndAllSubtypes(ITypeHierarchy hierarchy, IType type, boolean includeMethodsToDeclareAbstract) throws JavaModelException {
 		Map result= new HashMap(); //IMember -> Set of IMembers (of the same type as key)
-		result.putAll(getMatchingMembersMapping(hierarchy, type));
+		result.putAll(getMatchingMembersMapping(type));
 		IType[]  subTypes= hierarchy.getAllSubtypes(type);
 		for (int i = 0; i < subTypes.length; i++) {
-			mergeSets(result, getMatchingMembersMapping(hierarchy, subTypes[i]));
+			mergeSets(result, getMatchingMembersMapping(subTypes[i]));
 		}
 		if (includeMethodsToDeclareAbstract)
 			return result;
@@ -558,7 +558,7 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	private Map getMatchingMembersMapping(ITypeHierarchy hierarchy, IType analyzedType) throws JavaModelException {
+	private Map getMatchingMembersMapping(IType analyzedType) throws JavaModelException {
 		Map result= new HashMap();//IMember -> Set of IMembers (of the same type as key)
 		IMember[] members= getMembersToBeCreatedInTargetClass();
 		for (int i = 0; i < members.length; i++) {
@@ -1483,18 +1483,18 @@ public class PullUpRefactoring extends Refactoring {
 		pm.beginTask("", fMembersToPullUp.length); //$NON-NLS-1$
 		for (int i = fMembersToPullUp.length - 1; i >= 0; i--) { //backwards - to preserve method order
 			if (fMembersToPullUp[i] instanceof IField)
-				copyFieldToTargetClass((IField)fMembersToPullUp[i], new SubProgressMonitor(pm, 1));
+				copyFieldToTargetClass((IField)fMembersToPullUp[i]);
 			else if (fMembersToPullUp[i] instanceof IMethod)
 				copyMethodToTargetClass((IMethod)fMembersToPullUp[i], new SubProgressMonitor(pm, 1));
 			else if (fMembersToPullUp[i] instanceof IType)
-				copyTypeToTargetClass((IType)fMembersToPullUp[i], new SubProgressMonitor(pm, 1));
+				copyTypeToTargetClass((IType)fMembersToPullUp[i]);
 			else 
 				Assert.isTrue(false);
 		}
 		pm.done();
 	}
 	
-	private void copyTypeToTargetClass(IType type, SubProgressMonitor monitor) throws JavaModelException {
+	private void copyTypeToTargetClass(IType type) throws JavaModelException {
 		ASTRewrite rewrite= fRewriteManager.getRewrite(getTargetCu());
 		TypeDeclaration targetClass= getTypeDeclarationNode(getTargetClass());
 		BodyDeclaration newType= createNewTypeDeclarationNode(type, rewrite);
@@ -1604,7 +1604,7 @@ public class PullUpRefactoring extends Refactoring {
 		newDeclaration.setJavadoc(newJavadoc);
 	}
 		
-	private void copyFieldToTargetClass(IField field, IProgressMonitor pm) throws JavaModelException {
+	private void copyFieldToTargetClass(IField field) throws JavaModelException {
 		ASTRewrite rewrite= fRewriteManager.getRewrite(getTargetCu());
 		TypeDeclaration targetClass= getTypeDeclarationNode(getTargetClass());
 		FieldDeclaration newField= createNewFieldDeclarationNode(field, rewrite);

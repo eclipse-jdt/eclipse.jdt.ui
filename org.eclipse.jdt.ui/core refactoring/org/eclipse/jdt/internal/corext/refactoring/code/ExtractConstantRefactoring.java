@@ -257,10 +257,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus checkExpressionBinding() throws JavaModelException {
-		return checkExpressionFragmentIsRValue(getSelectedExpression());
+		return checkExpressionFragmentIsRValue();
 	}
 	
-	private RefactoringStatus checkExpressionFragmentIsRValue(IExpressionFragment ex) 
+	private RefactoringStatus checkExpressionFragmentIsRValue() 
 		throws JavaModelException
 	{
 		/* Moved this functionality to Checks, to allow sharing with

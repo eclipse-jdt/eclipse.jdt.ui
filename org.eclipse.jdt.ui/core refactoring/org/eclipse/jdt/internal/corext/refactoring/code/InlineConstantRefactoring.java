@@ -557,7 +557,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			if(refactoring.getReplaceAllReferences())
 				return findTargetsForAllReferences(refactoring, pm);
 			else
-				return new InlineTargetCompilationUnit[] { getTargetForOnlySelectedReference(refactoring, pm) };
+				return new InlineTargetCompilationUnit[] { getTargetForOnlySelectedReference(refactoring) };
 		}
 		
 		private static InlineTargetCompilationUnit[] findTargetsForAllReferences(InlineConstantRefactoring refactoring, IProgressMonitor pm) throws JavaModelException {
@@ -573,7 +573,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			return result;
 		}
 		
-		private static InlineTargetCompilationUnit getTargetForOnlySelectedReference(InlineConstantRefactoring refactoring, IProgressMonitor pm) throws JavaModelException {
+		private static InlineTargetCompilationUnit getTargetForOnlySelectedReference(InlineConstantRefactoring refactoring) throws JavaModelException {
 			Assert.isTrue(!refactoring.isDeclarationSelected());
 			return new InlineTargetCompilationUnit(refactoring.getSelectionCompilationUnit(), refactoring.getConstantNameNode(), refactoring.getInitializer(), refactoring.getDeclaringCompilationUnit(), refactoring.getCodeGenSettings());
 		}

@@ -319,14 +319,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	newType.setModifiers(createModifiersForNestedClass());
     	newType.setName(getAST().newSimpleName(fClassName));
     	setSuperType(newType);
-    	removeInitializationFromDeclaredFields(rewrite, newType);
+    	removeInitializationFromDeclaredFields(rewrite);
         copyBodyDeclarationsToNestedClass(rewrite, newType);
         createFieldsForAccessedLocals(rewrite, newType);
 	    createNewConstructorIfNeeded(rewrite, newType);
         return newType;
     }
     
-    private void removeInitializationFromDeclaredFields(ASTRewrite rewrite, TypeDeclaration newType) {
+    private void removeInitializationFromDeclaredFields(ASTRewrite rewrite) {
 		 for (Iterator iter= getFieldsToInitializeInConstructor().iterator(); iter.hasNext();) {
             VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
             Assert.isNotNull(fragment.getInitializer());
@@ -417,7 +417,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         
     	newConstructor.setBody(constructorBody);
     	
-		addExceptionsToNewConstructor(newConstructor, rewrite);
+		addExceptionsToNewConstructor(newConstructor);
     	rewrite.markAsInserted(newConstructor);
     	int index= 1 + usedLocals.length + findIndexOfLastField(fAnonymousInnerClassNode.bodyDeclarations());
         newType.bodyDeclarations().add(index, newConstructor);
@@ -500,7 +500,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         return true;
     }
     
-    private void addExceptionsToNewConstructor(MethodDeclaration newConstructor, ASTRewrite rewrite) {
+    private void addExceptionsToNewConstructor(MethodDeclaration newConstructor) {
     	IMethodBinding constructorBinding= getSuperConstructorBinding();
     	if (constructorBinding == null)
     		return;

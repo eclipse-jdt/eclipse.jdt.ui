@@ -217,11 +217,11 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus checkExpressionBinding() throws JavaModelException{
-		return checkExpressionFragmentIsRValue(getSelectedExpression());
+		return checkExpressionFragmentIsRValue();
 	}
 	
 	// !! Same as in ExtractConstantRefactoring
-	private RefactoringStatus checkExpressionFragmentIsRValue(IExpressionFragment ex) 
+	private RefactoringStatus checkExpressionFragmentIsRValue() 
 		throws JavaModelException
 	{
 		switch(Checks.checkExpressionIsRValue(getSelectedExpression().getAssociatedExpression())) {
