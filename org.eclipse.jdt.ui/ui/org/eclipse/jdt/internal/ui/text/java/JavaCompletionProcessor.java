@@ -113,14 +113,12 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}				
 		
-		ICompletionProposal[] exactTemplateResults= fTemplateEngine.getExactResults();
-		ICompletionProposal[] notExactTemplateResults= fTemplateEngine.getNotExactResults();
+		ICompletionProposal[] templateResults= fTemplateEngine.getResults();
 
 		// concatenate arrays
-		ICompletionProposal[] total= new ICompletionProposal[results.length + exactTemplateResults.length + notExactTemplateResults.length];
-		System.arraycopy(exactTemplateResults, 0, total, 0, exactTemplateResults.length);
-		System.arraycopy(results, 0, total, exactTemplateResults.length, results.length);
-		System.arraycopy(notExactTemplateResults, 0, total, exactTemplateResults.length + results.length, notExactTemplateResults.length);
+		ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length ];
+		System.arraycopy(templateResults, 0, total, 0, templateResults.length);
+		System.arraycopy(results, 0, total, templateResults.length, results.length);
 		
 		return total;
 	}

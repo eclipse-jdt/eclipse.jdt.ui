@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -29,7 +30,9 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -140,6 +143,12 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});
 		
+		fTableViewer.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent e) {
+				edit();
+			}
+		});
+		
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent e) {
 				selectionChanged1();
@@ -178,6 +187,17 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});
 
+		fRemoveButton= new Button(buttons, SWT.PUSH);
+		fRemoveButton.setLayoutData(getButtonGridData(fRemoveButton));
+		fRemoveButton.setText(TemplateMessages.getString("TemplatePreferencePage.remove")); //$NON-NLS-1$
+		fRemoveButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				remove();
+			}
+		});
+				
+		createSpacer(buttons);
+
 		fImportButton= new Button(buttons, SWT.PUSH);
 		fImportButton.setLayoutData(getButtonGridData(fImportButton));
 		fImportButton.setText(TemplateMessages.getString("TemplatePreferencePage.import")); //$NON-NLS-1$
@@ -205,14 +225,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});		
 
-		fRemoveButton= new Button(buttons, SWT.PUSH);
-		fRemoveButton.setLayoutData(getButtonGridData(fRemoveButton));
-		fRemoveButton.setText(TemplateMessages.getString("TemplatePreferencePage.remove")); //$NON-NLS-1$
-		fRemoveButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				remove();
-			}
-		});
+		createSpacer(buttons);
 		
 		fEnableAllButton= new Button(buttons, SWT.PUSH);
 		fEnableAllButton.setLayoutData(getButtonGridData(fEnableAllButton));
@@ -233,16 +246,20 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		});
 
 		fPatternViewer= createViewer(parent);
+		
+		createSpacer(parent);
 
 		fFormatButton= new Button(parent, SWT.CHECK);
 		fFormatButton.setText(TemplateMessages.getString("TemplatePreferencePage.use.code.formatter")); //$NON-NLS-1$
 
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		fFormatButton.setSelection(prefs.getBoolean(PREF_FORMAT_TEMPLATES));
-		
+		// initialize fields		
 		fTableViewer.setInput(TemplateSet.getInstance());		
 		fTableViewer.setAllChecked(false);
 		fTableViewer.setCheckedElements(getEnabledTemplates());		
+
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		fFormatButton.setSelection(prefs.getBoolean(PREF_FORMAT_TEMPLATES));
+
 		updateButtons();
 
 		// XXX
@@ -279,6 +296,15 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		control.setLayoutData(data);
 		
 		return viewer;
+	}
+	
+	public void createSpacer(Composite parent) {
+		Label spacer= new Label(parent, SWT.NONE);
+		GridData data= new GridData();
+		data.horizontalAlignment= GridData.FILL;
+		data.verticalAlignment= GridData.BEGINNING;
+		data.heightHint= 4;		
+		spacer.setLayoutData(data);
 	}
 	
 	private static GridData getButtonGridData(Button button) {
@@ -328,8 +354,16 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 
 	private void edit() {
 		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
-		Template template= (Template) selection.getFirstElement();
 
+		Object[] objects= selection.toArray();		
+		if ((objects == null) || (objects.length != 1))
+			return;
+		
+		Template template= (Template) selection.getFirstElement();
+		edit(template);
+	}
+
+	private void edit(Template template) {
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, true);
 		if (dialog.open() == dialog.OK) {
 			fTableViewer.refresh(template);
@@ -337,7 +371,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			fTableViewer.setSelection(new StructuredSelection(template));			
 		}
 	}
-	
+		
 	private void import_() {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setText(TemplateMessages.getString("TemplatePreferencePage.import.title")); //$NON-NLS-1$

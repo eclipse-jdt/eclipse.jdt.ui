@@ -32,8 +32,7 @@ public class TemplateEngine {
 	
 	private ITextViewer fViewer;
 	
-	private ArrayList fExactProposals= new ArrayList();
-	private ArrayList fNotExactProposals= new ArrayList();
+	private ArrayList fProposals= new ArrayList();
 
 	public TemplateEngine(String partitionType) {
 		Assert.isNotNull(partitionType);
@@ -45,22 +44,14 @@ public class TemplateEngine {
 	 */
 	public void reset(ITextViewer viewer) {
 		fViewer= viewer;
-		fExactProposals.clear();
-		fNotExactProposals.clear();		
+		fProposals.clear();
 	}
 
 	/**
-	 * Returns an array of templates matching exactly.
+	 * Returns the array of matching templates.
 	 */
-	public ICompletionProposal[] getExactResults() {
-		return (ICompletionProposal[]) fExactProposals.toArray(new ICompletionProposal[fExactProposals.size()]);
-	}
-	
-	/**
-	 * Returns an array of templates matching not exactly.
-	 */
-	public ICompletionProposal[] getNotExactResults() {
-		return (ICompletionProposal[]) fNotExactProposals.toArray(new ICompletionProposal[fNotExactProposals.size()]);
+	public ICompletionProposal[] getResults() {
+		return (ICompletionProposal[]) fProposals.toArray(new ICompletionProposal[fProposals.size()]);
 	}
 
 	/**
@@ -106,12 +97,7 @@ public class TemplateEngine {
 
 		for (int i= 0; i != templates.length; i++) {
 			TemplateProposal proposal= new TemplateProposal(templates[i], arguments, context);
-
-			if (templates[i].getName().equals(key)) {
-				fExactProposals.add(proposal);
-			} else {
-				fNotExactProposals.add(proposal);
-			}
+			fProposals.add(proposal);
 		}
 	}
 
