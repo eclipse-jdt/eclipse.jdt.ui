@@ -148,19 +148,19 @@ public class JavaElementLabelsTest extends CoreTests {
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Local"));
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED);
-		assertEqualString(lab, "org.test.Outer.foo(..).Local");
+		assertEqualString(lab, "org.test.Outer.foo(...).Local");
 
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_CONTAINER_QUALIFIED);
-		assertEqualString(lab, "Outer.foo(..).Local");
+		assertEqualString(lab, "Outer.foo(...).Local");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_POST_QUALIFIED);
-		assertEqualString(lab, "Local - org.test.Outer.foo(..)");
+		assertEqualString(lab, "Local - org.test.Outer.foo(...)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH);
-		assertEqualString(lab, "org.test.Outer.foo(..).Local - TestSetupProject/src");
+		assertEqualString(lab, "org.test.Outer.foo(...).Local - TestSetupProject/src");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH);
-		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(..).Local");
+		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(...).Local");
 	}
 	
 	public void testTypeLabelAnonymous() throws Exception {
@@ -182,19 +182,19 @@ public class JavaElementLabelsTest extends CoreTests {
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Object"));
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED);
-		assertEqualString(lab, "org.test.Outer.foo(..).new Object() {..}");
+		assertEqualString(lab, "org.test.Outer.foo(...).new Object() {...}");
 
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_CONTAINER_QUALIFIED);
-		assertEqualString(lab, "Outer.foo(..).new Object() {..}");
+		assertEqualString(lab, "Outer.foo(...).new Object() {...}");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_POST_QUALIFIED);
-		assertEqualString(lab, "new Object() {..} - org.test.Outer.foo(..)");
+		assertEqualString(lab, "new Object() {...} - org.test.Outer.foo(...)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH);
-		assertEqualString(lab, "org.test.Outer.foo(..).new Object() {..} - TestSetupProject/src");
+		assertEqualString(lab, "org.test.Outer.foo(...).new Object() {...} - TestSetupProject/src");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH);
-		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(..).new Object() {..}");
+		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(...).new Object() {...}");
 	}
 	
 	public void testTypeLabelAnonymousInAnonymous() throws Exception {
@@ -220,19 +220,19 @@ public class JavaElementLabelsTest extends CoreTests {
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Serializable"));
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED);
-		assertEqualString(lab, "org.test.Outer.foo(..).new Object() {..}.xoo().new Serializable() {..}");
+		assertEqualString(lab, "org.test.Outer.foo(...).new Object() {...}.xoo().new Serializable() {...}");
 
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_CONTAINER_QUALIFIED);
-		assertEqualString(lab, "Outer.foo(..).new Object() {..}.xoo().new Serializable() {..}");
+		assertEqualString(lab, "Outer.foo(...).new Object() {...}.xoo().new Serializable() {...}");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_POST_QUALIFIED);
-		assertEqualString(lab, "new Serializable() {..} - org.test.Outer.foo(..).new Object() {..}.xoo()");
+		assertEqualString(lab, "new Serializable() {...} - org.test.Outer.foo(...).new Object() {...}.xoo()");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH);
-		assertEqualString(lab, "org.test.Outer.foo(..).new Object() {..}.xoo().new Serializable() {..} - TestSetupProject/src");
+		assertEqualString(lab, "org.test.Outer.foo(...).new Object() {...}.xoo().new Serializable() {...} - TestSetupProject/src");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH);
-		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(..).new Object() {..}.xoo().new Serializable() {..}");
+		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(...).new Object() {...}.xoo().new Serializable() {...}");
 	}
 	
 	public void testTypeLabelAnonymousInFieldInitializer() throws Exception {
@@ -252,19 +252,19 @@ public class JavaElementLabelsTest extends CoreTests {
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Thread"));
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED);
-		assertEqualString(lab, "org.test.Outer.o.new Thread() {..}");
+		assertEqualString(lab, "org.test.Outer.o.new Thread() {...}");
 
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_CONTAINER_QUALIFIED);
-		assertEqualString(lab, "Outer.o.new Thread() {..}");
+		assertEqualString(lab, "Outer.o.new Thread() {...}");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_POST_QUALIFIED);
-		assertEqualString(lab, "new Thread() {..} - org.test.Outer.o");
+		assertEqualString(lab, "new Thread() {...} - org.test.Outer.o");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH);
-		assertEqualString(lab, "org.test.Outer.o.new Thread() {..} - TestSetupProject/src");
+		assertEqualString(lab, "org.test.Outer.o.new Thread() {...} - TestSetupProject/src");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH);
-		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.o.new Thread() {..}");
+		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.o.new Thread() {...}");
 	}
 	
 	public void testTypeLabelAnonymousInInitializer() throws Exception {
@@ -286,19 +286,19 @@ public class JavaElementLabelsTest extends CoreTests {
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Object"));
 		String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED);
-		assertEqualString(lab, "org.test.Outer.{...}.new Object() {..}");
+		assertEqualString(lab, "org.test.Outer.{...}.new Object() {...}");
 
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_CONTAINER_QUALIFIED);
-		assertEqualString(lab, "Outer.{...}.new Object() {..}");
+		assertEqualString(lab, "Outer.{...}.new Object() {...}");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_POST_QUALIFIED);
-		assertEqualString(lab, "new Object() {..} - org.test.Outer.{...}");
+		assertEqualString(lab, "new Object() {...} - org.test.Outer.{...}");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH);
-		assertEqualString(lab, "org.test.Outer.{...}.new Object() {..} - TestSetupProject/src");
+		assertEqualString(lab, "org.test.Outer.{...}.new Object() {...} - TestSetupProject/src");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH);
-		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.{...}.new Object() {..}");
+		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.{...}.new Object() {...}");
 	}
 			
 	

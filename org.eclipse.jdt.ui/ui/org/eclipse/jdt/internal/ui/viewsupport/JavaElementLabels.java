@@ -453,7 +453,7 @@ public class JavaElementLabels {
 				}
 			} else {
 				if (method.getParameterTypes().length > 0) {
-					buf.append(".."); //$NON-NLS-1$
+					buf.append("..."); //$NON-NLS-1$
 				}
 			}
 			buf.append(')');
@@ -596,7 +596,7 @@ public class JavaElementLabels {
 		if (typeName.length() == 0) { // anonymous
 			try {
 				if (type.isEnum()) {
-					typeName= "{..}";  //$NON-NLS-1$
+					typeName= "{...}";  //$NON-NLS-1$
 				} else {
 					String superclassName= Signature.getSimpleName(type.getSuperclassName());
 					typeName= JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , superclassName); //$NON-NLS-1$
