@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.formatter.DefaultCodeFormatter;
+import org.eclipse.jdt.internal.formatter.FormattingPreferences;
 
 
 
@@ -41,8 +43,8 @@ public class CodeFormatterUtil {
 		if (OLD_FORMATTER) {
 			return old_format("", indent, null, "", null);  //$NON-NLS-1$//$NON-NLS-2$
 		} else {
-			//TODO
-			return ""; //$NON-NLS-1$
+			String str= new_format(K_EXPRESSION, "x", indent, null, "", null); //$NON-NLS-1$ //$NON-NLS-2$
+			return str.substring(0, str.indexOf('x'));
 		}
 	} 
 		
@@ -51,25 +53,15 @@ public class CodeFormatterUtil {
 		return preferences.getInt(JavaCore.FORMATTER_TAB_SIZE);
 	}
 
-	/**
-	 * @deprecated use format(kind, string, indentationLevel, positions, lineSeparator, null);
-	 */
-	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator) {
-		return format(kind, string, indentationLevel, positions, lineSeparator, null);
-	}
-
 	// facade API to allow switching between old and new code formatter
 	
 	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		if (OLD_FORMATTER) {
 			return old_format(string, indentationLevel, positions, lineSeparator, options);
 		} else {
-			//TODO
-			return string;
+			return new_format(kind, string, indentationLevel, positions, lineSeparator, options);
 		}	
 	}
-		
-
 
 	public static String format(String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		return format(K_COMPILATION_UNIT, string, start, end, indentationLevel, positions, lineSeparator, options);
@@ -79,10 +71,10 @@ public class CodeFormatterUtil {
 	
 	public static String format(int kind, String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		if (OLD_FORMATTER) {
-			return emulateFormatSubstring(string, start, end, indentationLevel, positions, lineSeparator, options);
+			return emulateFormatSubstring(kind, string, start, end, indentationLevel, positions, lineSeparator, options);
 		} else {
-			//TODO
-			return string;
+			//DefaultCodeFormatter.format(String,int,int,int,int[],String) not implemented yet: returns null
+			return emulateFormatSubstring(kind, string, start, end, indentationLevel, positions, lineSeparator, options);
 		}
 	}
 	
@@ -91,12 +83,21 @@ public class CodeFormatterUtil {
 	private static String old_format(String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(options);
 		return formatter.format(string, indentationLevel, positions, lineSeparator);
-	}	
+	}
 	
+	private static String new_format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+		FormattingPreferences preferences= FormattingPreferences.getDefault();
+		if (options == null) {
+			options= JavaCore.getOptions();
+		}
+		convertOldOptionsToPreferences(options, preferences);
+		return new DefaultCodeFormatter(preferences).format(kind, string, indentationLevel, positions, lineSeparator, options);
+	}
+		
 	/*
 	 * emulate the fomat substring with the old formatter
 	 */ 
-	private static String emulateFormatSubstring(String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+	private static String emulateFormatSubstring(int kind, String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		int inclEnd= end - 1;
 		
 		// sort 'start' and 'end' into the existing position array
@@ -123,7 +124,12 @@ public class CodeFormatterUtil {
 			}
 		}
 		
-		String formatted= old_format(string, indentationLevel, newPositions, lineSeparator, options);
+		String formatted;
+		if (OLD_FORMATTER) {
+			formatted= old_format(string, indentationLevel, newPositions, lineSeparator, options);
+		} else {
+			formatted= new_format(kind, string, indentationLevel, newPositions, lineSeparator, options);
+		}
 		
 		int newStartPos= newPositions[startIndex];
 		int newEndPos= newPositions[endIndex] + 1; // incl. end 
@@ -219,6 +225,118 @@ public class CodeFormatterUtil {
 		}
 	}	
 	
+	//copied from CodeFormatterVisitor
+	private static void convertOldOptionsToPreferences(Map oldOptions, FormattingPreferences formattingPreferences) {
+		if (oldOptions == null) {
+			return;
+		}
+		Object[] entries = oldOptions.entrySet().toArray();
+		
+		for (int i = 0, max = entries.length; i < max; i++){
+			Map.Entry entry = (Map.Entry)entries[i];
+			if (!(entry.getKey() instanceof String)) continue;
+			if (!(entry.getValue() instanceof String)) continue;
+			String optionID = (String) entry.getKey();
+			String optionValue = (String) entry.getValue();
+			
+			if(optionID.equals(JavaCore.FORMATTER_NEWLINE_OPENING_BRACE)){
+				if (optionValue.equals(JavaCore.INSERT)){
+					formattingPreferences.anonymous_type_declaration_brace_position = FormattingPreferences.NEXT_LINE;
+					formattingPreferences.type_declaration_brace_position = FormattingPreferences.NEXT_LINE;
+					formattingPreferences.method_declaration_brace_position = FormattingPreferences.NEXT_LINE;
+					formattingPreferences.block_brace_position = FormattingPreferences.NEXT_LINE;
+					formattingPreferences.switch_brace_position = FormattingPreferences.NEXT_LINE;
+				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
+					formattingPreferences.anonymous_type_declaration_brace_position = FormattingPreferences.END_OF_LINE;
+					formattingPreferences.type_declaration_brace_position = FormattingPreferences.END_OF_LINE;
+					formattingPreferences.method_declaration_brace_position = FormattingPreferences.END_OF_LINE;
+					formattingPreferences.block_brace_position = FormattingPreferences.END_OF_LINE;
+					formattingPreferences.switch_brace_position = FormattingPreferences.END_OF_LINE;
+				}
+				continue;
+			}
+			if(optionID.equals(JavaCore.FORMATTER_NEWLINE_CONTROL)) {
+				if (optionValue.equals(JavaCore.INSERT)){
+					formattingPreferences.insert_new_line_in_control_statements = true;
+				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
+					formattingPreferences.insert_new_line_in_control_statements = false;
+				}
+				continue;
+			}
+			if(optionID.equals(JavaCore.FORMATTER_CLEAR_BLANK_LINES)) {
+				if (optionValue.equals(JavaCore.CLEAR_ALL)){
+					formattingPreferences.number_of_empty_lines_to_preserve = 0;
+				} else if (optionValue.equals(JavaCore.PRESERVE_ONE)){
+					formattingPreferences.number_of_empty_lines_to_preserve = 1;
+				}
+				continue;
+			}
+			if(optionID.equals(JavaCore.FORMATTER_NEWLINE_ELSE_IF)){
+				if (optionValue.equals(JavaCore.INSERT)){
+					formattingPreferences.compact_else_if = false;
+				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
+					formattingPreferences.compact_else_if = true;
+				}
+				continue;
+			}
+			if(optionID.equals(JavaCore.FORMATTER_NEWLINE_EMPTY_BLOCK)){
+				if (optionValue.equals(JavaCore.INSERT)){
+					formattingPreferences.insert_new_line_in_empty_anonymous_type_declaration = true;
+					formattingPreferences.insert_new_line_in_empty_type_declaration = true;
+					formattingPreferences.insert_new_line_in_empty_method_body = true;
+					formattingPreferences.insert_new_line_in_empty_block = true;
+				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
+					formattingPreferences.insert_new_line_in_empty_anonymous_type_declaration = false;
+					formattingPreferences.insert_new_line_in_empty_type_declaration = false;
+					formattingPreferences.insert_new_line_in_empty_method_body = false;
+					formattingPreferences.insert_new_line_in_empty_block = false;
+				}
+				continue;
+			}
+			if(optionID.equals(JavaCore.FORMATTER_LINE_SPLIT)){
+				try {
+					int val = Integer.parseInt(optionValue);
+					if (val >= 0) {
+						formattingPreferences.page_width = val;
+					}
+				} catch(NumberFormatException e){
+				}
+			}
+			if(optionID.equals(JavaCore.FORMATTER_COMPACT_ASSIGNMENT)){
+				if (optionValue.equals(JavaCore.COMPACT)){
+					formattingPreferences.insert_space_before_assignment_operators = false;
+				} else if (optionValue.equals(JavaCore.NORMAL)){
+					formattingPreferences.insert_space_before_assignment_operators = true;
+				}
+				continue;
+			}
+			if(optionID.equals(JavaCore.FORMATTER_TAB_CHAR)){
+				if (optionValue.equals(JavaCore.TAB)){
+					formattingPreferences.use_tab = true;
+				} else if (optionValue.equals(JavaCore.SPACE)){
+					formattingPreferences.use_tab = false;
+				}
+				continue;
+			}
+			if(optionID.equals(JavaCore.FORMATTER_TAB_SIZE)){
+				try {
+					int val = Integer.parseInt(optionValue);
+					if (val > 0) {
+						formattingPreferences.tab_size = val;
+					}
+				} catch(NumberFormatException e){
+				}
+			}
+			if(optionID.equals(JavaCore.FORMATTER_SPACE_CASTEXPRESSION)){
+				if (optionValue.equals(JavaCore.INSERT)){
+					formattingPreferences.insert_space_after_closing_paren_in_cast = true;
+				} else if (optionValue.equals(JavaCore.DO_NOT_INSERT)){
+					formattingPreferences.insert_space_after_closing_paren_in_cast = false;
+				}
+				continue;
+			}		
+		}		
+	}
 
 	
 }
