@@ -968,7 +968,7 @@ public class CompilerConfigurationBlock {
 	public void performDefaults() {
 		fWorkingValues= JavaCore.getDefaultOptions();
 		fWorkingValues.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance());
-		fWorkingValues.put(PREF_COMPILER_TASK_TAGS, "todo");
+		fWorkingValues.put(PREF_COMPILER_TASK_TAGS, "TODO");
 		fWorkingValues.put(PREF_COMPILER_TASK_PRIORITIES, PRIORITY_NORMAL);
 		updateControls();
 		validateSettings(null, null);
