@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -77,9 +75,7 @@ public class Implementors {
                     }
                 }
             } catch (JavaModelException e) {
-                JavaPlugin.getDefault().getLog().log(new Status(IStatus.ERROR,
-                        JavaPlugin.getPluginId(), IStatus.ERROR,
-                        "Error searching for implementors", e));
+                JavaPlugin.log(e);
             }
         }
 
