@@ -10,6 +10,9 @@
  */
 package org.eclipse.jdt.internal.ui.filters;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -31,6 +34,14 @@ public class NonJavaElementFilter  extends ViewerFilter {
 	 * @return Returns true if element should be included in filtered set
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-		return (element instanceof IJavaElement);
+		if (element instanceof IJavaElement)
+			return true;
+		
+		if (element instanceof IResource) {
+			IProject project= ((IResource)element).getProject(); 
+			return project == null || !project.isOpen();
+		}
+			
+		return true;
 	}
 }

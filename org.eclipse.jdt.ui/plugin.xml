@@ -2176,6 +2176,14 @@
 		class= "org.eclipse.jdt.internal.ui.filters.NonSharedProjectFilter"
 		enabled= "false">
 	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.ClosedProjectsFilter"
+		name= "%HideClosedProjects.label"
+		description= "%HideClosedProjects.description"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.ClosedProjectFilter"
+		enabled= "false">
+	</filter>
 
 	<!-- Types view -->
 	<filter

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2002 IBM Corp. and others..
+ * Copyright (c) 2000, 2003 IBM Corp. and others..
  * All rights reserved.   This program and the accompanying materials
  * are made available under the terms of the Common Public License v0.5
  * which accompanies this distribution, and is available at
@@ -19,19 +19,19 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jdt.core.IJavaProject;
 
 /**
- * Filters non-java projects
+ * Filters closed projects
  */
-public class NonJavaProjectsFilter extends ViewerFilter {
+public class ClosedProjectFilter extends ViewerFilter {
 
 	/*
 	 * @see ViewerFilter
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-		if (element instanceof IJavaProject)
-			return true;
-		else if (element instanceof IProject)
-			return !((IProject)element).isOpen();
-
-		return true; 
+		if (element instanceof IProject)
+			return ((IProject)element).isOpen();
+		else if  (element instanceof IJavaProject)
+			return ((IJavaProject)element).isOpen();
+		
+		return true;
 	}
 }
