@@ -173,6 +173,8 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 			types.add(methods[i].getDeclaringType());
 		}
 		Object[] typesArrays= types.toArray();
+		ViewerSorter sorter= new OverrideMethodSorter(typeHierarchy);
+		sorter.sort(null, typesArrays);
 		
 		HashSet expanded= new HashSet(defaultSelected.length); 
 		for (int i= 0; i < defaultSelected.length; i++) {
@@ -193,7 +195,7 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		dialog.setInitialSelections(defaultSelected);
 		dialog.setExpandedElements(expanded.toArray());
 		dialog.setContainerMode(true);
-		dialog.setSorter(new OverrideMethodSorter(typeHierarchy));
+		dialog.setSorter(sorter);
 		dialog.setSize(60, 25);
 		dialog.setInput(this); // input does not matter
 		if (dialog.open() == dialog.OK) {
