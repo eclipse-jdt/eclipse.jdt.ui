@@ -12,39 +12,76 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
+
+import org.eclipse.ui.texteditor.MarkerAnnotation;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Event sent out by changes of the compilation unit annotation model.
  */
 public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 	
-	private boolean fIncludesMarkerAnnotationChanges;
+	private boolean fIncludesProblemMarkerAnnotations;
 	private IResource fUnderlyingResource;
-	
 	
 	/**
 	 * Constructor for CompilationUnitAnnotationModelEvent.
 	 * @param model
 	 * @param underlyingResource The annotation model's underlying resource 
-	 * @param includesMarkerAnnotationChanges
 	 */
-	public CompilationUnitAnnotationModelEvent(IAnnotationModel model, IResource underlyingResource, boolean includesMarkerAnnotationChanges) {
+	public CompilationUnitAnnotationModelEvent(IAnnotationModel model, IResource underlyingResource) {
 		super(model);
-		fIncludesMarkerAnnotationChanges= includesMarkerAnnotationChanges;
 		fUnderlyingResource= underlyingResource;
+		fIncludesProblemMarkerAnnotations= false;
+	}
+	
+	private void testIfProblemMarker(Annotation annotation) {
+		if (fIncludesProblemMarkerAnnotations) {
+			return;
+		}
+		if (annotation instanceof JavaMarkerAnnotation) {
+			fIncludesProblemMarkerAnnotations= ((JavaMarkerAnnotation) annotation).isProblem();
+		} else if (annotation instanceof MarkerAnnotation) {
+			try {
+				IMarker marker= ((MarkerAnnotation) annotation).getMarker();
+				if (!marker.exists() || marker.isSubtypeOf(IMarker.PROBLEM)) {
+					fIncludesProblemMarkerAnnotations= true;
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+		}	
 	}
 	
 	/**
-	 * Returns whether the change included marker annotations.
+	 * Report an added annotation
+	 */
+	public void annotationAdded(Annotation annotation) {
+		testIfProblemMarker(annotation);
+	}
+
+	/**
+	 * Report an remove annotation
+	 */
+	public void annotationRemoved(Annotation annotation) {
+		testIfProblemMarker(annotation);
+	}
+		
+	/**
+	 * Returns whether the change included problem marker annotations.
 	 * 
 	 * @return <code>true</code> if the change included marker annotations
 	 */
-	public boolean includesMarkerAnnotationChanges() {
-		return fIncludesMarkerAnnotationChanges;
+	public boolean includesProblemMarkerAnnotationChanges() {
+		return fIncludesProblemMarkerAnnotations;
 	}
 	
 	/**
