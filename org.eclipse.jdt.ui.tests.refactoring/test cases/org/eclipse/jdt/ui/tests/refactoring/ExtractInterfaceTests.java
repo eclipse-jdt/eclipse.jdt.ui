@@ -622,6 +622,13 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
 	}
 
+	public void testInterface6() throws Exception{
+		String[] methodNames= {"foo0", "foo1", "foo2", "foo3"};
+		String[][] signatures= {new String[0], new String[0], new String[0], new String[0]};
+		String[] fieldNames= null;
+		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
+	}
+
 //disabled - can extract interface from interface
 //	public void testFail0() throws Exception{
 //		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
