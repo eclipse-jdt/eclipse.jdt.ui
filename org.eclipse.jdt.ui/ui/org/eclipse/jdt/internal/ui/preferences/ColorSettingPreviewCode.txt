@@ -4,12 +4,14 @@
  * @author author
  */
 public class ClassName extends SuperClass {
+	private static final int CONSTANT= 0;
 	/* This comment may span multiple lines. */
-	private int integer= 0;
+	private static int staticField= 0;
 	// This comment may span only this line
-	private String string= "zero";
+	private String field= "zero";
 	// TASK: refactor
-	public int foo() {
+	public int foo(int parameter) {
+		int local= 42*parameter;
 		return bar() + 24;
 	}
 }

@@ -55,7 +55,17 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -63,6 +73,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.model.WorkbenchViewerSorter;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
@@ -78,6 +89,10 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedRange;
 import org.eclipse.jdt.internal.ui.text.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
@@ -87,6 +102,121 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
  * The page for setting the editor options.
  */
 public class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+	
+	/**
+	 * Item in the highlighting color list.
+	 * 
+	 * @since 3.0
+	 */
+	private class HighlightingColorListItem {
+		/** Display name */
+		private String fDisplayName;
+		/** Color preference key */
+		private String fColorKey;
+		/** Bold preference key */
+		private String fBoldKey;
+		/** Item color */
+		private Color fItemColor;
+		
+		/**
+		 * Initialize the item with the given values.
+		 * 
+		 * @param displayName the display name
+		 * @param colorKey the color preference key
+		 * @param boldKey the bold preference key
+		 * @param itemColor the item color
+		 */
+		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, Color itemColor) {
+			fDisplayName= displayName;
+			fColorKey= colorKey;
+			fBoldKey= boldKey;
+			fItemColor= itemColor;
+		}
+		
+		/**
+		 * @return the bold preference key
+		 */
+		public String getBoldKey() {
+			return fBoldKey;
+		}
+		
+		/**
+		 * @return the color preference key
+		 */
+		public String getColorKey() {
+			return fColorKey;
+		}
+		
+		/**
+		 * @return the display name
+		 */
+		public String getDisplayName() {
+			return fDisplayName;
+		}
+		
+		/**
+		 * @return the item color
+		 */
+		public Color getItemColor() {
+			return fItemColor;
+		}
+	}
+	
+	/**
+	 * Color list label provider.
+	 * 
+	 * @since 3.0
+	 */
+	private class ColorListLabelProvider extends LabelProvider implements IColorProvider {
+
+		/*
+		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
+		 */
+		public String getText(Object element) {
+			return ((HighlightingColorListItem)element).getDisplayName();
+		}
+		
+		/*
+		 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+		 */
+		public Color getForeground(Object element) {
+			return ((HighlightingColorListItem)element).getItemColor();
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+		 */
+		public Color getBackground(Object element) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Color list content provider.
+	 * 
+	 * @since 3.0
+	 */
+	private class ColorListContentProvider implements IStructuredContentProvider {
+
+		/*
+		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
+		 */
+		public Object[] getElements(Object inputElement) {
+			return ((java.util.List)inputElement).toArray();
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+		 */
+		public void dispose() {
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+		 */
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		}
+	}
 	
 	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;	
@@ -169,7 +299,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}
 	};
 	
-	private List fSyntaxColorList;
 	private List fAppearanceColorList;
 	private List fContentAssistColorList;
 	private ColorEditor fSyntaxForegroundColorEditor;
@@ -210,12 +339,49 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private ArrayList fMasterSlaveListeners= new ArrayList();
 
 	/**
+	 * Highlighting color list
+	 * @since 3.0
+	 */
+	private final java.util.List fHighlightingColorList= new ArrayList();
+	/**
+	 * Highlighting color list viewer
+	 * @since 3.0
+	 */
+	private TableViewer fHighlightingColorListViewer;
+
+	/**
+	 * Color of Semantic Highlighting items in color list (RGB)
+	 * @since 3.0
+	 */
+	private static final int[] SEMANTIC_HIGHLIGHTING_ITEM_COLOR= new int[] { 0, 0, 0x80 };
+	/**
+	 * Semantic Highlighting color list
+	 * @since 3.0
+	 */
+	private java.util.List fSemanticHighlightingColorList= new ArrayList();
+	/**
+	 * Semantic highlighting manager
+	 * @since 3.0
+	 */
+	private SemanticHighlightingManager fSemanticHighlightingManager;
+	/**
+	 * Semantic highlighting check-box
+	 * @since 3.0
+	 */
+	private Button fSemanticHighlightingEnabled;
+	
+	/**
 	 * Creates a new preference page.
 	 */
 	public JavaEditorPreferencePage() {
 		setDescription(PreferencesMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 
+		Color itemColor= JavaPlugin.getDefault().getJavaTextTools().getColorManager().getColor(new RGB(SEMANTIC_HIGHLIGHTING_ITEM_COLOR[0], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[1], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[2]));
+		SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
+		for (int i= 0, n= semanticHighlightings.length; i < n; i++)
+			fSemanticHighlightingColorList.add(new HighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), itemColor));
+		
 		MarkerAnnotationPreferences markerAnnotationPreferences= new MarkerAnnotationPreferences();
 		fKeys= createOverlayStoreKeys(markerAnnotationPreferences);
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), fKeys);
@@ -355,6 +521,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_CHARACTER_MODE));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER));
 
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED));
+		for (int i= 0, n= fSemanticHighlightingColorList.size(); i < n; i++) {
+			HighlightingColorListItem item= (HighlightingColorListItem) fSemanticHighlightingColorList.get(i);
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getBoldKey()));
+		}
+		
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
 		return keys;
@@ -374,12 +547,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
 	}
 
-	private void handleSyntaxColorListSelection() {	
-		int i= fSyntaxColorList.getSelectionIndex();
-		String key= fSyntaxColorListModel[i][1];
-		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
+	private void handleSyntaxColorListSelection() {
+		HighlightingColorListItem item= getHighlightingColorListItem();
+		RGB rgb= PreferenceConverter.getColor(fOverlayStore, item.getColorKey());
 		fSyntaxForegroundColorEditor.setColorValue(rgb);		
-		fBoldCheckBox.setSelection(fOverlayStore.getBoolean(key + BOLD));
+		fBoldCheckBox.setSelection(fOverlayStore.getBoolean(item.getBoldKey()));
 	}
 
 	private void handleAppearanceColorListSelection() {	
@@ -440,6 +612,35 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
 		fBackgroundColorButton= fBackgroundColorEditor.getButton();
 
+		fSemanticHighlightingEnabled= addCheckBox(colorComposite, PreferencesMessages.getString("JavaEditorPreferencePage.semanticHighlighting.option"), PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0); //$NON-NLS-1$
+		fSemanticHighlightingEnabled.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				fHighlightingColorListViewer.getControl().setRedraw(false);
+				if (fSemanticHighlightingEnabled.getSelection()) {
+					fHighlightingColorList.addAll(fSemanticHighlightingColorList);
+					fHighlightingColorListViewer.add(fSemanticHighlightingColorList.toArray());
+				} else {
+					int fullSize= fHighlightingColorList.size();
+					fHighlightingColorList.removeAll(fSemanticHighlightingColorList);
+					HighlightingColorListItem item= getHighlightingColorListItem();
+					if (!fHighlightingColorList.contains(item)) {
+						int i= 0;
+						while (item != fHighlightingColorListViewer.getElementAt(i))
+							i++;
+						while (!fHighlightingColorList.contains(fHighlightingColorListViewer.getElementAt(i)) && i < fullSize)
+							i++;
+						while (!fHighlightingColorList.contains(fHighlightingColorListViewer.getElementAt(i)) && i >= 0)
+							i--;
+						// Assume non-empty list
+						fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(i)));
+					}
+					fHighlightingColorListViewer.remove(fSemanticHighlightingColorList.toArray());
+				}
+				fHighlightingColorListViewer.getControl().setRedraw(true);
+				fHighlightingColorListViewer.reveal(getHighlightingColorListItem());
+			}
+		});		
+		
 		Label label= new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.foreground")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -453,10 +654,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		editorComposite.setLayoutData(gd);		
 
-		fSyntaxColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		fHighlightingColorListViewer= new TableViewer(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		fHighlightingColorListViewer.setLabelProvider(new ColorListLabelProvider());
+		fHighlightingColorListViewer.setContentProvider(new ColorListContentProvider());
+		fHighlightingColorListViewer.setSorter(new WorkbenchViewerSorter());
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= convertHeightInCharsToPixels(5);
-		fSyntaxColorList.setLayoutData(gd);
+		fHighlightingColorListViewer.getControl().setLayoutData(gd);
 						
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
 		layout= new GridLayout();
@@ -496,11 +700,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		previewer.setLayoutData(gd);
 
 		
-		fSyntaxColorList.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			public void widgetSelected(SelectionEvent e) {
+		fHighlightingColorListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
 				handleSyntaxColorListSelection();
 			}
 		});
@@ -510,10 +711,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				// do nothing
 			}
 			public void widgetSelected(SelectionEvent e) {
-				int i= fSyntaxColorList.getSelectionIndex();
-				String key= fSyntaxColorListModel[i][1];
-				
-				PreferenceConverter.setValue(fOverlayStore, key, fSyntaxForegroundColorEditor.getColorValue());
+				HighlightingColorListItem item= getHighlightingColorListItem();
+				PreferenceConverter.setValue(fOverlayStore, item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
 			}
 		});
 
@@ -531,9 +730,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				// do nothing
 			}
 			public void widgetSelected(SelectionEvent e) {
-				int i= fSyntaxColorList.getSelectionIndex();
-				String key= fSyntaxColorListModel[i][1];
-				fOverlayStore.setValue(key + BOLD, fBoldCheckBox.getSelection());
+				HighlightingColorListItem item= getHighlightingColorListItem();
+				fOverlayStore.setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
 			}
 		});
 				
@@ -557,6 +755,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewViewer.setDocument(document);
 
+		installSemanticHighlighting();
+		
 		return fPreviewViewer.getControl();
 	}
 	
@@ -1149,16 +1349,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		initializeFields();
 		
-		for (int i= 0; i < fSyntaxColorListModel.length; i++)
-			fSyntaxColorList.add(fSyntaxColorListModel[i][0]);
-		fSyntaxColorList.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (fSyntaxColorList != null && !fSyntaxColorList.isDisposed()) {
-					fSyntaxColorList.select(0);
-					handleSyntaxColorListSelection();
-				}
-			}
-		});
+		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
+			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, null));
+		if (fSemanticHighlightingEnabled.getSelection())
+			fHighlightingColorList.addAll(fSemanticHighlightingColorList);
+		fHighlightingColorListViewer.setInput(fHighlightingColorList);
+		fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(0)));
 		
 		for (int i= 0; i < fAppearanceColorListModel.length; i++)
 			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
@@ -1320,6 +1516,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	public void dispose() {
 		
+		uninstallSemanticHighlighting();
+		
 		fFoldingConfigurationBlock.dispose();
 		
 		if (fOverlayStore != null) {
@@ -1460,4 +1658,77 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		StatusUtil.applyToStatusLine(this, status);
 	}
 	
+	/**
+	 * Install Semantic Highlighting on the previewer
+	 * 
+	 * @since 3.0
+	 */
+	private void installSemanticHighlighting() {
+		if (fSemanticHighlightingManager == null) {
+			fSemanticHighlightingManager= new SemanticHighlightingManager();
+			fSemanticHighlightingManager.install(fPreviewViewer, JavaPlugin.getDefault().getJavaTextTools().getColorManager(), fOverlayStore, createPreviewerRanges());
+		}
+	}
+	
+	/**
+	 * Uninstall Semantic Highlighting from the previewer
+	 * 
+	 * @since 3.0
+	 */
+	private void uninstallSemanticHighlighting() {
+		if (fSemanticHighlightingManager != null) {
+			fSemanticHighlightingManager.uninstall();
+			fSemanticHighlightingManager= null;
+		}
+	}
+
+	/**
+	 * Create the hard coded previewer ranges
+	 * 
+	 * @return the hard coded previewer ranges
+	 * @since 3.0
+	 */
+	private SemanticHighlightingManager.HighlightedRange[] createPreviewerRanges() {
+		return new SemanticHighlightingManager.HighlightedRange[] {
+			createHighlightedRange(6, 26, 8, SemanticHighlightings.STATIC_FINAL_FIELD),
+			createHighlightedRange(8, 20, 11, SemanticHighlightings.STATIC_FIELD),
+			createHighlightedRange(10, 16, 5, SemanticHighlightings.FIELD),
+			createHighlightedRange(12, 12, 3, SemanticHighlightings.METHOD_DECLARATION_NAME),
+			createHighlightedRange(12, 20, 9, SemanticHighlightings.PARAMETER_VARIABLE),
+			createHighlightedRange(13, 6, 5, SemanticHighlightings.LOCAL_VARIABLE),
+			createHighlightedRange(13, 16, 9, SemanticHighlightings.PARAMETER_VARIABLE),
+		};
+	}
+
+	/**
+	 * Create a highlighted range on the previewers document with the given line, column, length and key.
+	 * 
+	 * @param line the line
+	 * @param column the column
+	 * @param length the length
+	 * @param key the key
+	 * @return the highlighted range
+	 * @since 3.0
+	 */
+	private HighlightedRange createHighlightedRange(int line, int column, int length, String key) {
+		try {
+			IDocument document= fPreviewViewer.getDocument();
+			int offset= document.getLineOffset(line) + column;
+			return new HighlightedRange(offset, length, key);
+		} catch (BadLocationException x) {
+			JavaPlugin.log(x);
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the current highlighting color list item.
+	 * 
+	 * @return the current highlighting color list item
+	 * @since 3.0
+	 */
+	private HighlightingColorListItem getHighlightingColorListItem() {
+		IStructuredSelection selection= (IStructuredSelection) fHighlightingColorListViewer.getSelection();
+		return (HighlightingColorListItem) selection.getFirstElement();
+	}
 }

@@ -4237,12 +4237,6 @@
             class="org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage"
             id="org.eclipse.jdt.ui.preferences.WorkInProgressPreferencePage">
       </page>
-      <page
-            name="%semanticHighlighting.name"
-            category= "org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.SemanticHighlightingPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.SemanticHighlightingPreferencePage">
-      </page>
    </extension>
 <!-- add the quick diff context menu -->
    <extension

@@ -33,9 +33,39 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 public class SemanticHighlightings {
 
 	/**
+	 * A named preference part that controls the highlighting of static final fields.
+	 */
+	public static final String STATIC_FINAL_FIELD="staticFinalField"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of static fields.
+	 */
+	public static final String STATIC_FIELD="staticField"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of fields.
+	 */
+	public static final String FIELD="field"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of static final fields.
+	 */
+	public static final String METHOD_DECLARATION_NAME="methodDeclarationName"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of local variables.
+	 */
+	public static final String LOCAL_VARIABLE="localVariable"; //$NON-NLS-1$
+
+	/**
+	 * A named preference part that controls the highlighting of parameter variables.
+	 */
+	public static final String PARAMETER_VARIABLE="parameterVariable"; //$NON-NLS-1$
+
+	/**
 	 * Semantic highlightings
 	 */
-	private static SemanticHighlighting[] sfSemanticHighlightings;
+	private static SemanticHighlighting[] fgSemanticHighlightings;
 
 	/** Semantic message key prefix */
 	private static final String PREFIX= "SemanticHighlighting."; //$NON-NLS-1$
@@ -45,16 +75,11 @@ public class SemanticHighlightings {
 	 */
 	private static class StaticFinalFieldHighlighting extends SemanticHighlighting {
 		
-		/**
-		 * A named preference part that controls the highlighting of static final fields.
-		 */
-		public static final String EDITOR_STATIC_FINAL_FIELD="staticFinalField"; //$NON-NLS-1$
-		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
 		public String getPreferenceKey() {
-			return EDITOR_STATIC_FINAL_FIELD;
+			return STATIC_FINAL_FIELD;
 		}
 
 		/*
@@ -92,16 +117,11 @@ public class SemanticHighlightings {
 	 */
 	private static class StaticFieldHighlighting extends SemanticHighlighting {
 		
-		/**
-		 * A named preference part that controls the highlighting of static fields.
-		 */
-		public static final String EDITOR_STATIC_FIELD="staticField"; //$NON-NLS-1$
-		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
 		public String getPreferenceKey() {
-			return EDITOR_STATIC_FIELD;
+			return STATIC_FIELD;
 		}
 
 		/*
@@ -139,16 +159,11 @@ public class SemanticHighlightings {
 	 */
 	private static class FieldHighlighting extends SemanticHighlighting {
 		
-		/**
-		 * A named preference part that controls the highlighting of fields.
-		 */
-		public static final String EDITOR_FIELD="field"; //$NON-NLS-1$
-		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
 		public String getPreferenceKey() {
-			return EDITOR_FIELD;
+			return FIELD;
 		}
 
 		/*
@@ -186,16 +201,11 @@ public class SemanticHighlightings {
 	 */
 	private static class MethodDeclarationNameHighlighting extends SemanticHighlighting {
 		
-		/**
-		 * A named preference part that controls the highlighting of static final fields.
-		 */
-		public static final String EDITOR_METHOD_DECLARATION_NAME="methodDeclarationName"; //$NON-NLS-1$
-		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
 		public String getPreferenceKey() {
-			return EDITOR_METHOD_DECLARATION_NAME;
+			return METHOD_DECLARATION_NAME;
 		}
 
 		/*
@@ -234,16 +244,11 @@ public class SemanticHighlightings {
 	 */
 	private static class LocalVariableHighlighting extends SemanticHighlighting {
 		
-		/**
-		 * A named preference part that controls the highlighting of local variables.
-		 */
-		private static final String EDITOR_LOCAL_VARIABLE="localVariable"; //$NON-NLS-1$
-
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
 		public String getPreferenceKey() {
-			return EDITOR_LOCAL_VARIABLE;
+			return LOCAL_VARIABLE;
 		}
 
 		/*
@@ -285,16 +290,11 @@ public class SemanticHighlightings {
 	 */
 	private static class ParameterVariableHighlighting extends SemanticHighlighting {
 		
-		/**
-		 * A named preference part that controls the highlighting of parameter variables.
-		 */
-		private static final String EDITOR_PARAMETER_VARIABLE="parameterVariable"; //$NON-NLS-1$
-
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
 		public String getPreferenceKey() {
-			return EDITOR_PARAMETER_VARIABLE;
+			return PARAMETER_VARIABLE;
 		}
 
 		/*
@@ -356,8 +356,8 @@ public class SemanticHighlightings {
 	 * @return The semantic highlightings, the order defines the precedence of matches, the first match wins.
 	 */
 	public static SemanticHighlighting[] getSemanticHighlightings() {
-		if (sfSemanticHighlightings == null)
-			sfSemanticHighlightings= new SemanticHighlighting[] {
+		if (fgSemanticHighlightings == null)
+			fgSemanticHighlightings= new SemanticHighlighting[] {
 				new StaticFinalFieldHighlighting(),
 				new StaticFieldHighlighting(),
 				new FieldHighlighting(),
@@ -365,7 +365,7 @@ public class SemanticHighlightings {
 				new LocalVariableHighlighting(),
 				new ParameterVariableHighlighting(),
 			};
-		return sfSemanticHighlightings;
+		return fgSemanticHighlightings;
 	}
 	
 	/**
