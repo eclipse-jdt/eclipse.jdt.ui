@@ -62,20 +62,6 @@ All Rights Reserved.
 	${cursor}
 }
 
-return ${name};</template><template name="toarray" description="convert collection to array" context="java" enabled="true">(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template><template name="filecomment" description="file comment used by the class and interface wizards" context="java" enabled="true">/*
- * Created on ${date}
- *
- * To change this generated comment edit the template variable &quot;filecomment&quot;:
- * Window&gt;Preferences&gt;Java&gt;Templates.
- * To enable and disable the creation of file comments go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation.
- */</template><template name="typecomment" description="type comment used by the class and interface wizards" context="java" enabled="true">/**
- * @author ${user}
- *
- * To change this generated comment edit the template variable &quot;typecomment&quot;:
- * Window&gt;Preferences&gt;Java&gt;Templates.
- * To enable and disable the creation of type comments go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation.
- */</template><template name="stdout" description="print to standard out" context="java" enabled="true">System.out.println(${word_selection}${cursor});</template><template name="stderr" description="print to standard error" context="java" enabled="true">System.err.println(${word_selection}${cursor});</template><template name="&lt;code&gt;" description="&lt;code&gt;&lt;/code&gt;" context="javadoc" enabled="true">&lt;code&gt;${word_selection}${cursor}&lt;/code&gt;</template><template name="&lt;code&gt;" description="&lt;code&gt;null&lt;/code&gt;" context="javadoc" enabled="true">&lt;code&gt;null&lt;/code&gt;</template><template name="&lt;pre&gt;" description="&lt;pre&gt;&lt;/pre&gt;" context="javadoc" enabled="true">&lt;pre&gt;${word_selection}${cursor}&lt;/pre&gt;</template><template name="&lt;b&gt;" description="&lt;b&gt;&lt;/b&gt;" context="javadoc" enabled="true">&lt;b&gt;${word_selection}${cursor}&lt;/b&gt;</template><template name="&lt;i&gt;" description="&lt;i&gt;&lt;/i&gt;" context="javadoc" enabled="true">&lt;i&gt;${word_selection}${cursor}&lt;/i&gt;</template><template name="@author" description="author name" context="javadoc" enabled="true">@author ${user}</template><template name="while" description="while loop with condition" context="java" enabled="true">while (${condition}) {
+return ${name};</template><template name="toarray" description="convert collection to array" context="java" enabled="true">(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template><template name="stdout" description="print to standard out" context="java" enabled="true">System.out.println(${word_selection}${cursor});</template><template name="stderr" description="print to standard error" context="java" enabled="true">System.err.println(${word_selection}${cursor});</template><template name="&lt;code&gt;" description="&lt;code&gt;&lt;/code&gt;" context="javadoc" enabled="true">&lt;code&gt;${word_selection}${cursor}&lt;/code&gt;</template><template name="&lt;code&gt;" description="&lt;code&gt;null&lt;/code&gt;" context="javadoc" enabled="true">&lt;code&gt;null&lt;/code&gt;</template><template name="&lt;pre&gt;" description="&lt;pre&gt;&lt;/pre&gt;" context="javadoc" enabled="true">&lt;pre&gt;${word_selection}${cursor}&lt;/pre&gt;</template><template name="&lt;b&gt;" description="&lt;b&gt;&lt;/b&gt;" context="javadoc" enabled="true">&lt;b&gt;${word_selection}${cursor}&lt;/b&gt;</template><template name="&lt;i&gt;" description="&lt;i&gt;&lt;/i&gt;" context="javadoc" enabled="true">&lt;i&gt;${word_selection}${cursor}&lt;/i&gt;</template><template name="@author" description="author name" context="javadoc" enabled="true">@author ${user}</template><template name="while" description="while loop with condition" context="java" enabled="true">while (${condition}) {
 	${line_selection}${cursor}
 }</template></templates>

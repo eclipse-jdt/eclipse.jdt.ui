@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 
@@ -25,8 +26,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
+import org.eclipse.jdt.internal.corext.template.Templates;
+import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public abstract class NewElementWizard extends Wizard implements INewWizard {
@@ -90,8 +94,21 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 			return false;
 		}
 		return true;
-	}	
+	}
 	
+	protected void warnAboutTypeCommentDeprecation() {
+		String key= IUIConstants.DIALOGSTORE_TYPECOMMENT_DEPRECATED;
+		if (OptionalMessageDialog.isDialogEnabled(key)) {
+			Templates templates= Templates.getInstance();
+			boolean isOldWorkspace= templates.getTemplates("filecomment").length > 0 && templates.getTemplates("typecomment").length > 0; //$NON-NLS-1$ //$NON-NLS-2$
+			if (!isOldWorkspace) {
+				OptionalMessageDialog.setDialogEnabled(key, false);
+			}
+			String title= NewWizardMessages.getString("NewElementWizard.typecomment.deprecated.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getString("NewElementWizard.typecomment.deprecated.message"); //$NON-NLS-1$
+			OptionalMessageDialog.open(key, getShell(), title, OptionalMessageDialog.getDefaultImage(), message, OptionalMessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0);
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)

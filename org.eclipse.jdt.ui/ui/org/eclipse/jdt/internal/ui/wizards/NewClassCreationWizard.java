@@ -50,5 +50,14 @@ public class NewClassCreationWizard extends NewElementWizard {
 			selectAndReveal(resource);
 			openResource((IFile) resource);
 		}	
-	}	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
+	 */
+	public boolean performFinish() {
+		warnAboutTypeCommentDeprecation();
+		return super.performFinish();
+	}
+
 }

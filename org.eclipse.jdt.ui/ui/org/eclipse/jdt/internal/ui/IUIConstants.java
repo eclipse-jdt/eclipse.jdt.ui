@@ -18,5 +18,6 @@ public interface IUIConstants {
 	public static final String DIALOGSTORE_LASTJARATTACH= JavaUI.ID_PLUGIN + ".lastjarattach"; //$NON-NLS-1$
 	public static final String DIALOGSTORE_LASTVARIABLE= JavaUI.ID_PLUGIN + ".lastvariable";	 //$NON-NLS-1$
 	
+	public static final String DIALOGSTORE_TYPECOMMENT_DEPRECATED= JavaUI.ID_PLUGIN + ".typecomment.deprecated";	 //$NON-NLS-1$
 	
 }

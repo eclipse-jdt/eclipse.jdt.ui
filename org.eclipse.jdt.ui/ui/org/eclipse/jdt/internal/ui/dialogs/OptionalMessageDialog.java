@@ -73,7 +73,7 @@ public class OptionalMessageDialog extends MessageDialog {
 		fHideDialogCheckBox.setText(CHECKBOX_TEXT);
 		fHideDialogCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				storeSetting(((Button)e.widget).getSelection());
+				setDialogEnabled(fId, !((Button)e.widget).getSelection());
 			}
 		});
 		return fHideDialogCheckBox;
@@ -97,16 +97,16 @@ public class OptionalMessageDialog extends MessageDialog {
 	/**
 	 * Answers whether the optional dialog is enabled i.e. should be shown.
 	 */
-	static boolean isDialogEnabled(String key) {
+	public static boolean isDialogEnabled(String key) {
 		IDialogSettings settings= getDialogSettings();
 		return !settings.getBoolean(key);
 	}
 	
 	/**
-	 * Stores the current configuration in the dialog store.
+	 * Sets whether the optional dialog is enabled i.e. should be shown.
 	 */
-	private void storeSetting(boolean hideDialog) {
+	public static void setDialogEnabled(String key, boolean isEnabled) {
 		IDialogSettings settings= getDialogSettings();
-		settings.put(fId, hideDialog);
+		settings.put(key, !isEnabled);
 	}
 }
