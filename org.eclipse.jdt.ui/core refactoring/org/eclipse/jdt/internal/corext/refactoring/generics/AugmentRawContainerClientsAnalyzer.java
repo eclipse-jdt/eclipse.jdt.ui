@@ -24,7 +24,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -66,8 +70,13 @@ public class AugmentRawContainerClientsAnalyzer {
 		IType[] containerTypes= genericContainers.getContainerTypes();
 		
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(containerTypes, IJavaSearchConstants.REFERENCES);
-		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
+		//TODO: Add container methods (from ContainerMethods)?
+		// -> still misses calls of kind myObj.takeList(myObj.getList()) in CU that doesn't import List
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(fElements, IJavaSearchScope.SOURCES);
+		
+//		analyzeInCompilerLoop(project, searchScope, pattern, new SubProgressMonitor(pm, 9), result);
+		
+		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
 		SearchRequestor requestor= new SearchRequestor() {
 			IResource fLastResource;
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
@@ -83,12 +92,19 @@ public class AugmentRawContainerClientsAnalyzer {
 					return;
 				if (fProcessedCus.contains(cu))
 					return; // already processed
-				analyzeCU(cu);
+				
+				//analyzeCU(cu);
+				AugmentRawContClConstraintCreator unitCollector= new AugmentRawContClConstraintCreator(fTypeConstraintFactory);
+				CompilationUnit unitAST= new RefactoringASTParser(AST.JLS3).parse(cu, true);
+				unitAST.accept(unitCollector);
+				ITypeConstraint2[] unitConstraints= fTypeConstraintFactory.getNewTypeConstraints();
+				//TODO: add required methods/cus to "toscan" list
+				fProcessedCus.add(cu);
 			}
 		};
 		new SearchEngine().search(pattern, participants, searchScope, requestor, new SubProgressMonitor(pm, 9));
-		fTypeConstraintFactory.newCu();
 		
+		fTypeConstraintFactory.newCu();
 		AugmentRawContClConstraintsSolver solver= new AugmentRawContClConstraintsSolver(fTypeConstraintFactory);
 		solver.solveConstraints();
 		fDeclarationsToUpdate= solver.getDeclarationsToUpdate();
@@ -96,81 +112,36 @@ public class AugmentRawContainerClientsAnalyzer {
 		solver= null; //free caches
 	}
 
+	private void analyzeInCompilerLoop(IJavaProject project, IJavaSearchScope searchScope, SearchPattern pattern, IProgressMonitor pm, RefactoringStatus result) throws JavaModelException {
+		pm.beginTask("", 2); //$NON-NLS-1$
+		final ICompilationUnit[] cus= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, searchScope, new SubProgressMonitor(pm, 1), result);
+		//TODO: creation of bindings in ContainerMethods should be in loop! 
+		final AugmentRawContClConstraintCreator unitCollector= new AugmentRawContClConstraintCreator(fTypeConstraintFactory);
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+		parser.setResolveBindings(true);
+		parser.setProject(project);
+		parser.createASTs(new ASTRequestor() {
 
-	protected void analyzeCU(ICompilationUnit cu) {
-		AugmentRawContClConstraintCreator unitCollector= new AugmentRawContClConstraintCreator(fTypeConstraintFactory);
-		CompilationUnit unitAST= new RefactoringASTParser(AST.JLS3).parse(cu, true);
-		unitAST.accept(unitCollector);
-		ITypeConstraint2[] unitConstraints= fTypeConstraintFactory.getNewTypeConstraints();
-		//TODO: add required methods/cus to "toscan" list
-		
-		fProcessedCus.add(cu);
-		
-		
-// -------------- from unitGranularityConstraintCollection(): -------------
-		
-//		GenericizeConstraintCreator gcc= new GenericizeConstraintCreator(gvf, fProject);
-//		Collection/*<ITypeConstraint>*/ constraints= new HashSet();
-//		GenericizeVariableFactory gvf= new GenericizeVariableFactory(fProject);
-//		fCUsScanned= new HashSet();
-//		
-//		Set cUsToScan= new HashSet();
-//
-//		fContextMapper= new CallSiteToTargetMapper() { // The trivial mapping
-//			public Iterator/*<MethodContextPair>*/ mapCallSiteToTargets(IContext callingCtxt, CompilationUnitRange callSite) {
-//				Set results= new HashSet();
-//				results.add(new MethodContextPair(null, callingCtxt));
-//				return results.iterator();
-//			}
-//		};
-//		gcc.setMapper(fContextMapper);
-//
-//		fMethodsToScan= new HashSet();
-//		fMethodsScanned= new HashSet();
-//		for(int i= 0; i < fCUs.length; i++)
-//			cUsToScan.add(fCUs[i]);
-//		do {
-//			long cuCollectionStart= System.currentTimeMillis();
-//
-//			// Scan a compilation unit from cUsToScan.
-//			ICompilationUnit unit= (ICompilationUnit) cUsToScan.iterator().next();
-//			ConstraintCollector unitCollector= new ConstraintCollector(gcc);
-//			CompilationUnit unitAST= ASTCreator.createAST(unit, null);
-//
-////			if (DEBUG_COLLECTION)
-//				System.out.println("[" + cUsToScan.size() + "] Scanning " + unit.getParent().getElementName() + "." + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//									unit.getElementName() + " for constraints."); //$NON-NLS-1$
-//
-//			cUsToScan.remove(unit);
-//			fCUsScanned.add(unit);
-//			unitAST.accept(unitCollector);
-//
-//			if (DEBUG_COLLECTION)
-//				System.out.println("Scanning " + unit.getParent().getElementName() + "." + //$NON-NLS-1$ //$NON-NLS-2$
-//									unit.getElementName() + " done."); //$NON-NLS-1$
-//
-//			ITypeConstraint[] unitConstraints= unitCollector.getConstraints();
-//
-//			constraints.addAll(Arrays.asList(unitConstraints));
-//
-//			fStatistics.fConstraintGenTime += (System.currentTimeMillis() - cuCollectionStart);
-//
-//			// Now add any compilation units whose analysis is required by
-//			// references made in the type constraints we just got.
-//			if (DEBUG_COLLECTION) System.out.println("  Adding referenced CU's to scan list..."); //$NON-NLS-1$
-//
-//			long callGraphStart= System.currentTimeMillis();
-//
-//			addReferencedCUs(unitConstraints, cUsToScan);
-//			addUnitsCallingMethods(cUsToScan);
-//
-//			fStatistics.fTotalCallGraphTime += (System.currentTimeMillis() - callGraphStart);
-//
-//			if (DEBUG_COLLECTION) System.out.println("  Done adding referenced CU's to scan list."); //$NON-NLS-1$
-//		} while(cUsToScan.size() > 0);
-		
+			public void acceptAST(ASTNode node) {
+				CompilationUnit unitAST= (CompilationUnit) node;
+				//TODO: Hack only works for single CU:
+				ICompilationUnit cu= cus[0]; unitAST.setProperty(RefactoringASTParser.SOURCE_PROPERTY, cu);
+				unitAST.accept(unitCollector);
+//				ITypeConstraint2[] unitConstraints= fTypeConstraintFactory.getNewTypeConstraints();
+				//TODO: add required methods/cus to "toscan" list
+				fProcessedCus.add(cu);
+
+			}
+
+			public ICompilationUnit[] getSources() {
+				//TODO: Hack only works for single CU:
+				return new ICompilationUnit[] { cus[0] };
+			}
+		}, new SubProgressMonitor(pm, 1));
+		pm.done();
 	}
-	
+
 	public HashMap getDeclarationsToUpdate() {
 		return fDeclarationsToUpdate;
 	}
