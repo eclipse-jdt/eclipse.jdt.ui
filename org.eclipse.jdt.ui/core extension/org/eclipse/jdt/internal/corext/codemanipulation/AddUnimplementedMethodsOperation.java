@@ -28,8 +28,12 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.ltk.core.refactoring.Change;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -43,10 +47,12 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -60,8 +66,20 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	/** Should annotations be generated? */
 	private final boolean fAnnotations;
 
+	/** Should the resulting edit be applied? */
+	private final boolean fApply;
+
+	/** The qualified names of the generated imports */
+	private final List fCreatedImports= new ArrayList();
+
 	/** The method binding keys for which a method was generated */
-	private final List fCreated= new ArrayList();
+	private final List fCreatedMethods= new ArrayList();
+
+	/** The resulting text edit */
+	private TextEdit fEdit= null;
+
+	/** Should the import edits be applied? */
+	private final boolean fImports;
 
 	/** The insertion point, or <code>null</code> */
 	private final IJavaElement fInsert;
@@ -87,10 +105,14 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	 * @param settings the code generation settings to use
 	 * @param annotations <code>true</code> if annotations should be generated,
 	 *        <code>false</code> otherwise
+	 * @param imports <code>true</code> if the import edits should be applied,
+	 *        <code>false</code> otherwise
+	 * @param apply <code>true</code> if the resulting edit should be applied,
+	 *        <code>false</code> otherwise
 	 * @param save <code>true</code> if the changed compilation unit should be saved,
 	 *        <code>false</code> otherwise
 	 */
-	public AddUnimplementedMethodsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean annotations, final boolean save) {
+	public AddUnimplementedMethodsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean annotations, final boolean imports, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(keys);
 		Assert.isNotNull(settings);
@@ -100,6 +122,19 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 		fSettings= settings;
 		fAnnotations= annotations;
 		fSave= save;
+		fApply= apply;
+		fImports= imports;
+	}
+
+	/**
+	 * Returns the qualified names of the generated imports.
+	 * 
+	 * @return the generated imports
+	 */
+	public final String[] getCreatedImports() {
+		final String[] imports= new String[fCreatedImports.size()];
+		fCreatedImports.toArray(imports);
+		return imports;
 	}
 
 	/**
@@ -108,9 +143,18 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	 * @return the method binding keys
 	 */
 	public final String[] getCreatedMethods() {
-		final String[] keys= new String[fCreated.size()];
-		fCreated.toArray(keys);
+		final String[] keys= new String[fCreatedMethods.size()];
+		fCreatedMethods.toArray(keys);
 		return keys;
+	}
+
+	/**
+	 * Returns the resulting text edit.
+	 * 
+	 * @return the resulting edit
+	 */
+	public final TextEdit getResultingEdit() {
+		return fEdit;
 	}
 
 	/**
@@ -131,12 +175,13 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
-			fCreated.clear();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
+			fCreatedMethods.clear();
+			final ICompilationUnit unit= fType.getCompilationUnit();
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit);
 			ITypeBinding binding= null;
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
-				final ClassInstanceCreation creation= ASTNodeSearchUtil.getClassInstanceCreationNode(fType, rewrite.getRoot());
+				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
 				if (creation != null) {
 					binding= creation.resolveTypeBinding();
 					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
@@ -144,7 +189,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 						rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 				}
 			} else {
-				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fType, rewrite.getRoot());
+				final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), AbstractTypeDeclaration.class);
 				if (declaration != null) {
 					binding= declaration.resolveBinding();
 					rewriter= rewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
@@ -153,11 +198,20 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			if (binding != null && rewriter != null) {
 				final IMethodBinding[] bindings= StubUtility2.getOverridableMethods(binding, false);
 				if (bindings != null && bindings.length > 0) {
+					ITextFileBuffer buffer= null;
+					IDocument document= null;
 					try {
-						final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());
+						if (!JavaModelUtil.isPrimary(unit))
+							document= new Document(unit.getBuffer().getContents());
+						else {
+							buffer= RefactoringFileBuffers.acquire(unit);
+							document= buffer.getDocument();
+						}
 						ASTNode insertion= null;
 						if (fInsert instanceof IMethod)
-							insertion= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) fInsert, rewrite.getRoot());
+							insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+						ImportRewrite imports= rewrite.getImportRewrite();
+						imports.setCreatedImportCollector(fCreatedImports);
 						String key= null;
 						MethodDeclaration stub= null;
 						for (int index= 0; index < fKeys.length; index++) {
@@ -166,9 +220,9 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 								break;
 							for (int offset= 0; offset < bindings.length; offset++) {
 								if (bindings[offset].getKey().equals(key)) {
-									stub= StubUtility2.createImplementationStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), rewrite.getAST(), bindings[offset], binding.getName(), fSettings, fAnnotations);
+									stub= StubUtility2.createImplementationStub(rewrite.getCu(), rewrite.getASTRewrite(), imports, rewrite.getAST(), bindings[offset], binding.getName(), fSettings, fAnnotations);
 									if (stub != null) {
-										fCreated.add(key);
+										fCreatedMethods.add(key);
 										if (insertion != null)
 											rewriter.insertBefore(stub, insertion, null);
 										else
@@ -178,22 +232,31 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 								}
 							}
 						}
+						if (!fImports)
+							rewrite.clearImportRewrites();
 						final Change result= rewrite.createChange();
 						if (result instanceof CompilationUnitChange) {
 							final CompilationUnitChange change= (CompilationUnitChange) result;
 							final TextEdit edit= change.getEdit();
 							if (edit != null) {
 								try {
-									edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
-									if (fSave)
-										buffer.commit(new SubProgressMonitor(monitor, 1), true);
+									fEdit= edit;
+									if (fApply)
+										edit.apply(document, TextEdit.UPDATE_REGIONS);
+									if (fSave) {
+										if (buffer != null)
+											buffer.commit(new SubProgressMonitor(monitor, 1), true);
+										else
+											unit.getBuffer().setContents(document.get());
+									}
 								} catch (Exception exception) {
 									throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
 								}
 							}
 						}
 					} finally {
-						RefactoringFileBuffers.release(fType.getCompilationUnit());
+						if (buffer != null)
+							RefactoringFileBuffers.release(unit);
 					}
 				}
 			}

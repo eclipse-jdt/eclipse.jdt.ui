@@ -28,8 +28,12 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.ltk.core.refactoring.Change;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -40,13 +44,16 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -57,8 +64,20 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable {
 
+	/** Should the resulting edit be applied? */
+	private final boolean fApply;
+
+	/** The qualified names of the generated imports */
+	private final List fCreatedImports= new ArrayList();
+
 	/** The method binding keys for which a constructor was generated */
-	private final List fCreated= new ArrayList();
+	private final List fCreatedMethods= new ArrayList();
+
+	/** The resulting text edit */
+	private TextEdit fEdit= null;
+
+	/** Should the import edits be applied? */
+	private final boolean fImports;
 
 	/** The insertion point, or <code>null</code> */
 	private final IJavaElement fInsert;
@@ -79,7 +98,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	private final IType fType;
 
 	/** The visibility flags of the new constructor */
-	private int fVisibility= 0;
+	private int fVisibility= Modifier.PUBLIC;
 
 	/**
 	 * Creates a new add unimplemented constructors operation.
@@ -88,10 +107,14 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * @param insert the insertion point, or <code>null</code>
 	 * @param keys the method binding keys to implement
 	 * @param settings the code generation settings to use
+	 * @param imports <code>true</code> if the import edits should be applied,
+	 *        <code>false</code> otherwise
+	 * @param apply <code>true</code> if the resulting edit should be applied,
+	 *        <code>false</code> otherwise
 	 * @param save <code>true</code> if the changed compilation unit should be saved,
 	 *        <code>false</code> otherwise
 	 */
-	public AddUnimplementedConstructorsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean save) {
+	public AddUnimplementedConstructorsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean imports, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(keys);
 		Assert.isNotNull(settings);
@@ -100,6 +123,8 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 		fKeys= keys;
 		fSettings= settings;
 		fSave= save;
+		fApply= apply;
+		fImports= imports;
 	}
 
 	/**
@@ -108,9 +133,29 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * @return the method binding keys
 	 */
 	public final String[] getCreatedConstructors() {
-		final String[] keys= new String[fCreated.size()];
-		fCreated.toArray(keys);
+		final String[] keys= new String[fCreatedMethods.size()];
+		fCreatedMethods.toArray(keys);
 		return keys;
+	}
+
+	/**
+	 * Returns the qualified names of the generated imports.
+	 * 
+	 * @return the generated imports
+	 */
+	public final String[] getCreatedImports() {
+		final String[] imports= new String[fCreatedImports.size()];
+		fCreatedImports.toArray(imports);
+		return imports;
+	}
+
+	/**
+	 * Returns the resulting text edit.
+	 * 
+	 * @return the resulting text edit
+	 */
+	public final TextEdit getResultingEdit() {
+		return fEdit;
 	}
 
 	/**
@@ -122,10 +167,20 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
+	/**
+	 * Returns the visibility of the constructors.
+	 * 
+	 * @return the visibility
+	 */
 	public final int getVisibility() {
 		return fVisibility;
 	}
 
+	/**
+	 * Returns whether the super call should be omitted.
+	 * 
+	 * @return <code>true</code> to omit the super call, <code>false</code> otherwise
+	 */
 	public final boolean isOmitSuper() {
 		return fOmitSuper;
 	}
@@ -139,12 +194,13 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
-			fCreated.clear();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
+			fCreatedMethods.clear();
+			final ICompilationUnit unit= fType.getCompilationUnit();
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit);
 			ITypeBinding binding= null;
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
-				final ClassInstanceCreation creation= ASTNodeSearchUtil.getClassInstanceCreationNode(fType, rewrite.getRoot());
+				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
 				if (creation != null) {
 					binding= creation.resolveTypeBinding();
 					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
@@ -152,7 +208,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 						rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 				}
 			} else {
-				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fType, rewrite.getRoot());
+				final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), AbstractTypeDeclaration.class);
 				if (declaration != null) {
 					binding= declaration.resolveBinding();
 					rewriter= rewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
@@ -161,11 +217,20 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 			if (binding != null && rewriter != null) {
 				final IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(binding);
 				if (bindings != null && bindings.length > 0) {
+					ITextFileBuffer buffer= null;
+					IDocument document= null;
 					try {
-						final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());
+						if (!JavaModelUtil.isPrimary(unit))
+							document= new Document(unit.getBuffer().getContents());
+						else {
+							buffer= RefactoringFileBuffers.acquire(unit);
+							document= buffer.getDocument();
+						}
 						ASTNode insertion= null;
 						if (fInsert instanceof IMethod)
-							insertion= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) fInsert, rewrite.getRoot());
+							insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+						ImportRewrite imports= rewrite.getImportRewrite();
+						imports.setCreatedImportCollector(fCreatedImports);
 						String key= null;
 						MethodDeclaration stub= null;
 						for (int index= 0; index < fKeys.length; index++) {
@@ -174,9 +239,9 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 								break;
 							for (int offset= 0; offset < bindings.length; offset++) {
 								if (bindings[offset].getKey().equals(key)) {
-									stub= StubUtility2.createConstructorStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), rewrite.getAST(), bindings[offset], binding.getName(), fVisibility, fOmitSuper, fSettings);
+									stub= StubUtility2.createConstructorStub(rewrite.getCu(), rewrite.getASTRewrite(), imports, rewrite.getAST(), bindings[offset], binding.getName(), fVisibility, fOmitSuper, fSettings);
 									if (stub != null) {
-										fCreated.add(key);
+										fCreatedMethods.add(key);
 										if (insertion != null)
 											rewriter.insertBefore(stub, insertion, null);
 										else
@@ -186,22 +251,31 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 								}
 							}
 						}
+						if (!fImports)
+							rewrite.clearImportRewrites();
 						final Change result= rewrite.createChange();
 						if (result instanceof CompilationUnitChange) {
 							final CompilationUnitChange change= (CompilationUnitChange) result;
 							final TextEdit edit= change.getEdit();
 							if (edit != null) {
 								try {
-									edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
-									if (fSave)
-										buffer.commit(new SubProgressMonitor(monitor, 1), true);
+									fEdit= edit;
+									if (fApply)
+										edit.apply(document, TextEdit.UPDATE_REGIONS);
+									if (fSave) {
+										if (buffer != null)
+											buffer.commit(new SubProgressMonitor(monitor, 1), true);
+										else
+											unit.getBuffer().setContents(document.get());
+									}
 								} catch (Exception exception) {
 									throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
 								}
 							}
 						}
 					} finally {
-						RefactoringFileBuffers.release(fType.getCompilationUnit());
+						if (buffer != null)
+							RefactoringFileBuffers.release(unit);
 					}
 				}
 			}
@@ -210,10 +284,21 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 		}
 	}
 
+	/**
+	 * Determines whether the super call should be omitted.
+	 * 
+	 * @param omit <code>true</code> to omit the super call, <code>false</code>
+	 *        otherwise
+	 */
 	public final void setOmitSuper(final boolean omit) {
 		fOmitSuper= omit;
 	}
 
+	/**
+	 * Determines the visibility of the constructors.
+	 * 
+	 * @param visibility the visibility
+	 */
 	public final void setVisibility(final int visibility) {
 		fVisibility= visibility;
 	}

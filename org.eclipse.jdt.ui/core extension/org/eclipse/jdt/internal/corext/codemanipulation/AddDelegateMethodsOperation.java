@@ -28,8 +28,12 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.ltk.core.refactoring.Change;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -43,10 +47,12 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -57,8 +63,14 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
+	/** Should the resulting edit be applied? */
+	private boolean fApply= true;
+
 	/** The method binding keys for which a method was generated */
 	private final List fCreated= new ArrayList();
+
+	/** The resulting text edit */
+	private TextEdit fEdit= null;
 
 	/** The insertion point, or <code>null</code> */
 	private final IJavaElement fInsert;
@@ -82,10 +94,12 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	 * @param insert the insertion point, or <code>null</code>
 	 * @param keys the method binding keys to implement
 	 * @param settings the code generation settings to use
+	 * @param apply <code>true</code> if the resulting edit should be applied,
+	 *               <code>false</code> otherwise
 	 * @param save <code>true</code> if the changed compilation unit should be saved,
-	 *        <code>false</code> otherwise
+	 *               <code>false</code> otherwise
 	 */
-	public AddDelegateMethodsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean save) {
+	public AddDelegateMethodsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(keys);
 		Assert.isNotNull(settings);
@@ -94,6 +108,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 		fKeys= keys;
 		fSettings= settings;
 		fSave= save;
+		fApply= apply;
 	}
 
 	/**
@@ -105,6 +120,10 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 		final String[] keys= new String[fCreated.size()];
 		fCreated.toArray(keys);
 		return keys;
+	}
+
+	public final TextEdit getResultingEdit() {
+		return fEdit;
 	}
 
 	/**
@@ -126,11 +145,12 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(CodeGenerationMessages.getString("AddDelegateMethodsOperation.monitor.message")); //$NON-NLS-1$
 			fCreated.clear();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
+			final ICompilationUnit unit= fType.getCompilationUnit();
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit);
 			ITypeBinding binding= null;
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
-				final ClassInstanceCreation creation= ASTNodeSearchUtil.getClassInstanceCreationNode(fType, rewrite.getRoot());
+				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
 				if (creation != null) {
 					binding= creation.resolveTypeBinding();
 					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
@@ -138,7 +158,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 						rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 				}
 			} else {
-				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fType, rewrite.getRoot());
+				final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), AbstractTypeDeclaration.class);
 				if (declaration != null) {
 					binding= declaration.resolveBinding();
 					rewriter= rewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
@@ -147,11 +167,18 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			if (binding != null && rewriter != null) {
 				final IBinding[][] bindings= StubUtility2.getDelegatableMethods(binding);
 				if (bindings != null && bindings.length > 0) {
+					ITextFileBuffer buffer= null;
+					IDocument document= null;
 					try {
-						final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());
+						if (!JavaModelUtil.isPrimary(unit))
+							document= new Document(unit.getBuffer().getContents());
+						else {
+							buffer= RefactoringFileBuffers.acquire(unit);
+							document= buffer.getDocument();
+						}
 						ASTNode insertion= null;
 						if (fInsert instanceof IMethod)
-							insertion= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) fInsert, rewrite.getRoot());
+							insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
 						String key= null;
 						MethodDeclaration stub= null;
 						for (int index= 0; index < fKeys.length; index++) {
@@ -178,16 +205,23 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 							final TextEdit edit= change.getEdit();
 							if (edit != null) {
 								try {
-									edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
-									if (fSave)
-										buffer.commit(new SubProgressMonitor(monitor, 1), true);
+									fEdit= edit;
+									if (fApply)
+										edit.apply(document, TextEdit.UPDATE_REGIONS);
+									if (fSave) {
+										if (buffer != null)
+											buffer.commit(new SubProgressMonitor(monitor, 1), true);
+										else
+											unit.getBuffer().setContents(document.get());
+									}
 								} catch (Exception exception) {
 									throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
 								}
 							}
 						}
 					} finally {
-						RefactoringFileBuffers.release(fType.getCompilationUnit());
+						if (buffer != null)
+							RefactoringFileBuffers.release(unit);
 					}
 				}
 			}
@@ -195,4 +229,5 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			monitor.done();
 		}
 	}
+
 }
