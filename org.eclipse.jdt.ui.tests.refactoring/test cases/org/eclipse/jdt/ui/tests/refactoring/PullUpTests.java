@@ -84,7 +84,6 @@ public class PullUpTests extends RefactoringTest {
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
 			SourceCompareUtil.compare(actual, expected);
-	//		assertEquals("incorrect modification", expected, actual);
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -156,7 +155,7 @@ public class PullUpTests extends RefactoringTest {
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
-			assertEquals("incorrect modification", expected, actual);
+			SourceCompareUtil.compare(actual, expected);
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -283,8 +282,7 @@ public class PullUpTests extends RefactoringTest {
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
-			//assertEquals("incorrect lengths", expected.length(), actual.length());
-			assertEquals("incorrect modification", expected, actual);
+			SourceCompareUtil.compare(actual, expected);
 		} finally{
 			performDummySearch();
 			cu.delete(false, null);
@@ -368,7 +366,6 @@ public class PullUpTests extends RefactoringTest {
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 			setSuperclassAsTargetClass(ref);
 
@@ -377,8 +374,8 @@ public class PullUpTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("precondition was supposed to pass", null, result);
 			
-			assertEquals("incorrect modification in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());		
-			assertEquals("incorrect modification in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());		
+			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("A")), cuA.getSource());
+			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("B")), cuB.getSource());
 		} finally{
 			performDummySearch();
 			cuA.delete(false, null);
@@ -397,7 +394,6 @@ public class PullUpTests extends RefactoringTest {
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 			setSuperclassAsTargetClass(ref);
 
@@ -406,8 +402,8 @@ public class PullUpTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("precondition was supposed to pass", null, result);
 			
-			assertEquals("incorrect modification in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
-			assertEquals("incorrect modification in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());		
+			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("A")), cuA.getSource());
+			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("B")), cuB.getSource());
 		} finally{
 			performDummySearch();
 			cuA.delete(false, null);
@@ -451,7 +447,6 @@ public class PullUpTests extends RefactoringTest {
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 			setSuperclassAsTargetClass(ref);
 			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
@@ -459,8 +454,8 @@ public class PullUpTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("precondition was supposed to pass", null, result);
 			
-			assertEquals("incorrect modification in A", getFileContents(getOutputTestFileName("A")), cuA.getSource());		
-			assertEquals("incorrect modification in B", getFileContents(getOutputTestFileName("B")), cuB.getSource());		
+			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("A")), cuA.getSource());
+			SourceCompareUtil.compare(getFileContents(getOutputTestFileName("B")), cuB.getSource());
 		} finally{
 			performDummySearch();
 			cuA.delete(false, null);
