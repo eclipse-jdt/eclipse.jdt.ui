@@ -59,7 +59,11 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	private int fBold= 0;
 	private int fStartOffset= -1;
 	
-	
+	/**
+	 * Transforms the html text from the reader to formatter text.
+	 * @param presentation If not <code>null</code>, formmatings will be applied to 
+	 * the presentation.
+	*/
 	public HTML2TextReader(Reader reader, TextPresentation presentation) {
 		super(reader);
 		fTextPresentation= presentation;
@@ -81,7 +85,9 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	protected void stopBold() {
 		-- fBold;
 		if (fBold == 0) {
-			fTextPresentation.addStyleRange(new StyleRange(fStartOffset, fCounter - fStartOffset, null, null, SWT.BOLD));
+			if (fTextPresentation != null) {
+				fTextPresentation.addStyleRange(new StyleRange(fStartOffset, fCounter - fStartOffset, null, null, SWT.BOLD));
+			}
 			fStartOffset= -1;
 		}
 	}
