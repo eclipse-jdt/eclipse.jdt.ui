@@ -214,8 +214,15 @@ public class UnresolvedElementsSubProcessor {
 
 	private static void addNewFieldProposals(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding, ITypeBinding declaringTypeBinding, SimpleName simpleName, boolean isWriteAccess, Collection proposals) throws JavaModelException {
 		// new variables
-		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
-		ITypeBinding senderBinding= binding != null ? binding : declaringTypeBinding;
+		ICompilationUnit targetCU;
+		ITypeBinding senderBinding;
+		if (binding != null) {
+			senderBinding= binding;
+			targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
+		} else { // binding is null for accesses without qualifier
+			senderBinding= declaringTypeBinding;
+			targetCU= cu;
+		}
 		
 		if (!senderBinding.isFromSource() || targetCU == null || !JavaModelUtil.isEditable(targetCU)) {
 			return;
@@ -724,7 +731,7 @@ public class UnresolvedElementsSubProcessor {
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, binding, 5, image));
 				
 				if (binding.isAnonymous() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(binding, methodName, null) == null) { // no covering method
-					ASTNode anonymDecl= astRoot.findDeclaringNode(binding);
+					ASTNode anonymDecl= astRoot.findDeclaringNode(binding.getGenericType());
 					if (anonymDecl != null) {
 						binding= Bindings.getBindingOfParentType(anonymDecl.getParent());
 						if (!binding.isAnonymous()) {

@@ -75,7 +75,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), invocation.getName().getIdentifier(), invocation.arguments());
 				if (bindings.length > 0) {
 					ITypeBinding first= getCastFavorite(bindings, fNodeToCast.resolveTypeBinding());
-
+					
 					Type newTypeNode= getImportRewrite().addImport(first, ast);
 					addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); //$NON-NLS-1$
 					for (int i= 0; i < bindings.length; i++) {
@@ -97,7 +97,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 		ITypeBinding favourite= suggestedCasts[0];
 		for (int i = 0; i < suggestedCasts.length; i++) {
 			ITypeBinding curr= suggestedCasts[i];
-			if (TypeRules.canCast(nodeToCastBinding, curr)) {
+			if (TypeRules.canCast(curr, nodeToCastBinding)) {
 				return curr;
 			}
 			if (curr.isInterface()) {

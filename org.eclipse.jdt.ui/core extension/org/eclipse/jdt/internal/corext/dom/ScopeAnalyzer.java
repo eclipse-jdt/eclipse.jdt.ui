@@ -275,10 +275,9 @@ public class ScopeAnalyzer {
 			ITypeBinding binding= getQualifier(selector);
 			if (binding == null) {
 				addLocalDeclarations(selector, flags);
-				binding= parentTypeBinding;
-			}
-			if (binding != null) {
-				addTypeDeclarations(binding, flags);
+				addTypeDeclarations(parentTypeBinding, flags);
+			} else {
+				addInherited(binding, flags);
 			}
 			
 			if (hasFlag(CHECK_VISIBILITY, flags)) {

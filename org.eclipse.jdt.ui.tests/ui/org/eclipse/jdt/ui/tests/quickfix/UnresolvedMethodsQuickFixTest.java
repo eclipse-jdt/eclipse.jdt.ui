@@ -593,6 +593,185 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 	}
 	
+	public void testMethodInGenericType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class X<A> {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Y<A> {\n");
+		buf.append("    public boolean goo(X<A> a);\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Y.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Y<Object> y;\n");
+		buf.append("    void foo(X<String> x) {\n");
+		buf.append("        boolean i= x.goo(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class X<A> {\n");
+		buf.append("\n");
+		buf.append("    public boolean goo(X<String> x) {\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");				
+		buf.append("}\n");
+		String expected1= buf.toString();	
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Y<Object> y;\n");
+		buf.append("    void foo(X<String> x) {\n");
+		buf.append("        boolean i= ((Y<Object>) x).goo(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();		
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
+	}
+	
+	public void testMethodInGenericTypeSameCU() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+				
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class X<A> {\n");
+		buf.append("    }\n");
+		buf.append("    int foo(X<String> x) {\n");
+		buf.append("        return x.goo(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class X<A> {\n");
+		buf.append("\n");
+		buf.append("        public int goo(X<String> x) {\n");
+		buf.append("            return 0;\n");
+		buf.append("        }\n");	
+		buf.append("    }\n");
+		buf.append("    int foo(X<String> x) {\n");
+		buf.append("        return x.goo(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();	
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class X<A> {\n");
+		buf.append("    }\n");
+		buf.append("    int foo(X<String> x) {\n");
+		buf.append("        return ((Object) x).goo(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();		
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
+	}
+
+	
+	public void testMethodInRawType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class X<A> {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Y<A> {\n");
+		buf.append("    public boolean goo(X<A> a);\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Y.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Y<Object> y;\n");
+		buf.append("    void foo(X x) {\n");
+		buf.append("        boolean i= x.goo(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class X<A> {\n");
+		buf.append("\n");
+		buf.append("    public boolean goo(X x) {\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");				
+		buf.append("}\n");
+		String expected1= buf.toString();	
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Y<Object> y;\n");
+		buf.append("    void foo(X x) {\n");
+		buf.append("        boolean i= ((Y<Object>) x).goo(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();		
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
+	}
+
+	
 	public void testMethodInAnonymous1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

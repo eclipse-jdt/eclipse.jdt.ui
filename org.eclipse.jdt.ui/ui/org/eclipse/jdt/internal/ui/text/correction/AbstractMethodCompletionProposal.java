@@ -53,9 +53,12 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 	}
 			
 	protected ASTRewrite getRewrite() throws CoreException {
-		
+		ITypeBinding sender= fSenderBinding;
+		if (sender.isParameterizedType() || sender.isRawType()) {
+			sender= sender.getGenericType();
+		}
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
-		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
+		ASTNode typeDecl= astRoot.findDeclaringNode(sender);
 		ASTNode newTypeDecl= null;
 		boolean isInDifferentCU;
 		if (typeDecl != null) {
@@ -67,7 +70,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			astRoot= (CompilationUnit) astParser.createAST(null);
-			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
+			newTypeDecl= astRoot.findDeclaringNode(sender.getKey());
 		}
 		if (newTypeDecl != null) {
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());

@@ -750,6 +750,7 @@ public class Bindings {
 			typeBinding= typeBinding.getDeclaringClass();
 		}
 		if (typeBinding != null) {
+			typeBinding= typeBinding.getGenericType();
 			IPackageBinding pack= typeBinding.getPackage();
 			String packageName= pack.isUnnamed() ? "" : pack.getName(); //$NON-NLS-1$
 			IType type= project.findType(packageName, typeBinding.getName());

@@ -385,6 +385,9 @@ public class ASTResolving {
 				if (!fVisitedBindings.add(node.getKey())) {
 					return true;
 				}
+				if (node.isGenericType()) {
+					return true; // only look at  parametrized types
+				}
 				IMethodBinding[] methods= node.getDeclaredMethods();
 				for (int i= 0; i < methods.length; i++) {
 					IMethodBinding meth= methods[i];
@@ -559,14 +562,20 @@ public class ASTResolving {
 	}
 	
 	public static ICompilationUnit findCompilationUnitForBinding(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding) throws JavaModelException {
-		if (binding != null && binding.isFromSource() && astRoot.findDeclaringNode(binding) == null) {
+		if (binding == null || !binding.isFromSource() || binding.isTypeVariable() || binding.isWildcardType()) {
+			return null;
+		}
+		ASTNode node= astRoot.findDeclaringNode(binding.getGenericType());
+		if (node == null) {
 			ICompilationUnit targetCU= Bindings.findCompilationUnit(binding, cu.getJavaProject());
 			if (targetCU != null) {
 				return targetCU;
 			}
 			return null;
+		} else if (node instanceof AbstractTypeDeclaration || node instanceof AnonymousClassDeclaration) {
+			return cu;
 		}
-		return cu;
+		return null;
 	}
 	
 	
