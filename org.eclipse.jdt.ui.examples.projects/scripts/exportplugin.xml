@@ -1,4 +1,4 @@
-<project name="org.eclipse.search" default="export" basedir=".">
+<project name="org.eclipse.search" default="export" basedir="..">
 	<target name="init">
 		<tstamp/>
 		<property name="destdir" value="../../plugin-export" />
@@ -24,12 +24,14 @@
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
 		</copy>
-				<copy todir="${dest}/archive">
+			<copy todir="${dest}/archive">
 			<fileset dir="archive" />
 		</copy>
-				<copy todir="${dest}/doc-html">
+			<copy todir="${dest}/doc-html">
 			<fileset dir="doc-html" />
 		</copy>
-		
+		<zip zipfile="${dest}/jdtexamplessrc.zip">
+		    <fileset dir="Eclipse Java UI Examples" />
+  		</zip>				
 	</target>
 </project>

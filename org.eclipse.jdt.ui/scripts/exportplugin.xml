@@ -1,5 +1,5 @@
 <!-- build script to create a plugin from org.eclipse.jdt.ui -->
-<project name="org.eclipse.jdt.ui" default="export" basedir=".">
+<project name="org.eclipse.jdt.ui" default="export" basedir="..">
 	<target name="init">
 		<tstamp/>
 		<property name="destdir" value="../../plugin-export" />
@@ -26,23 +26,11 @@
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
 		</copy>
-		<mkdir dir="TMP" />
-		<copy todir="TMP">
-			<fileset dir="Eclipse Java UI" />
-		</copy>
-		<copy todir="TMP">
-			<fileset dir="Eclipse Java Core Refactoring" />
-		</copy>
-		<copy todir="TMP">
-			<fileset dir="Eclipse Java UI Debug" />
-		</copy>
-		<copy todir="TMP">
-			<fileset dir="Eclipse Java UI Refactoring" />
-		</copy>
-		<zip 
-			zipfile="${dest}/jdtsrc.zip"
-			basedir="TMP"
-		/>
-		<delete dir="TMP"/>
+		<zip zipfile="${dest}/jdtsrc.zip">
+		    <fileset dir="Eclipse Java Core Refactoring" />
+		    <fileset dir="Eclipse Java UI Refactoring" />
+		    <fileset dir="Eclipse Java UI Debug" />
+		    <fileset dir="Eclipse Java UI" />
+  		</zip>		
 	</target>
 </project>
