@@ -45,8 +45,8 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 		super.setUp();
 		fClipboard= new Clipboard(Display.getDefault());
 		fCuA= createCUfromTestFile(getPackageP(), CU_A_NAME);
-		fCuB= createCUfromTestFile(getPackageP(), CU_B_NAME);
 		assertTrue("A.java does not exist", fCuA.exists());
+		fCuB= createCUfromTestFile(getPackageP(), CU_B_NAME);
 		assertTrue("B.java does not exist", fCuB.exists());
 	}
 	
@@ -124,6 +124,18 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 		SourceReferenceTestUtil.paste(new ISourceReference[]{container}, fClipboard);
 
 		check();
+	}
+
+	public void test4() throws Exception{
+		printTestDisabledMessage("test for bug 20151");
+//		Object elem0= fCuA.getType("A").getMethod("f", new String[0]);
+//				
+//		SourceReferenceTestUtil.copy(new Object[]{elem0}, fClipboard);
+//		
+//		Object dest= fCuA.getType("A").getMethod("f1", new String[0]);
+//		SourceReferenceTestUtil.paste(new Object[]{dest}, fClipboard);
+//
+//		check();
 	}
 	
 }
