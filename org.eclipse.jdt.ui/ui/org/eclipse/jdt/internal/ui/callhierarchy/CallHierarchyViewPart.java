@@ -66,7 +66,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
@@ -103,11 +102,9 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     public static final String CALLERS_VIEW_ID = "org.eclipse.jdt.callhierarchy.view"; //$NON-NLS-1$
     private static final String DIALOGSTORE_VIEWORIENTATION = "CallHierarchyViewPart.orientation"; //$NON-NLS-1$
     private static final String DIALOGSTORE_CALL_MODE = "CallHierarchyViewPart.call_mode"; //$NON-NLS-1$
-    private static final String DIALOGSTORE_JAVA_LABEL_FORMAT = "CallHierarchyViewPart.java_label_format"; //$NON-NLS-1$
     private static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
     private static final String TAG_CALL_MODE = "call_mode"; //$NON-NLS-1$
     private static final String TAG_IMPLEMENTORS_MODE = "implementors_mode"; //$NON-NLS-1$
-    private static final String TAG_JAVA_LABEL_FORMAT = "java_label_format"; //$NON-NLS-1$
     private static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
     static final int VIEW_ORIENTATION_VERTICAL = 0;
     static final int VIEW_ORIENTATION_HORIZONTAL = 1;
@@ -116,12 +113,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     static final int CALL_MODE_CALLEES = 1;
     static final int IMPLEMENTORS_ENABLED = 0;
     static final int IMPLEMENTORS_DISABLED = 1;
-    static final int JAVA_LABEL_FORMAT_DEFAULT = JavaElementLabelProvider.SHOW_DEFAULT;
-    static final int JAVA_LABEL_FORMAT_SHORT = JavaElementLabelProvider.SHOW_BASICS;
-    static final int JAVA_LABEL_FORMAT_LONG = JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
-        JavaElementLabelProvider.SHOW_PARAMETERS |
-        JavaElementLabelProvider.SHOW_RETURN_TYPE |
-        JavaElementLabelProvider.SHOW_POST_QUALIFIED;
     static final String GROUP_SEARCH_SCOPE = "MENU_SEARCH_SCOPE"; //$NON-NLS-1$
     static final String ID_CALL_HIERARCHY = "org.eclipse.jdt.ui.CallHierarchy"; //$NON-NLS-1$
     private static final String GROUP_FOCUS = "group.focus"; //$NON-NLS-1$
@@ -132,7 +123,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private IDialogSettings fDialogSettings;
     private int fCurrentOrientation;
     private int fCurrentCallMode;
-    private int fCurrentJavaLabelFormat;
     private int fCurrentImplementorsMode;
     private MethodWrapper fCalleeRoot;
     private MethodWrapper fCallerRoot;
@@ -147,7 +137,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private ToggleOrientationAction[] fToggleOrientationActions;
     private ToggleCallModeAction[] fToggleCallModeActions;
     private ToggleImplementorsAction[] fToggleImplementorsActions;
-    private ToggleJavaLabelFormatAction[] fToggleJavaLabelFormatActions;
     private CallHierarchyFiltersActionGroup fFiltersActionGroup;
     private HistoryDropDownAction fHistoryDropDownAction;
     private RefreshAction fRefreshAction;
@@ -285,23 +274,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         }
     }
 
-    /**
-     * called from ToggleCallModeAction.
-     * @param orientation CALL_MODE_CALLERS or CALL_MODE_CALLEES
-     */
-    void setJavaLabelFormat(int format) {
-        if (fCurrentJavaLabelFormat != format) {
-            for (int i = 0; i < fToggleJavaLabelFormatActions.length; i++) {
-                fToggleJavaLabelFormatActions[i].setChecked(format == fToggleJavaLabelFormatActions[i].getFormat());
-            }
-
-            fCurrentJavaLabelFormat = format;
-            fDialogSettings.put(DIALOGSTORE_JAVA_LABEL_FORMAT, format);
-
-            fCallHierarchyViewer.setJavaLabelFormat(fCurrentJavaLabelFormat);
-        }
-    }
-
     public IJavaSearchScope getSearchScope() {
         return fSearchScopeActions.getSearchScope();
     }
@@ -372,7 +344,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         initOrientation();
         initCallMode();
         initImplementorsMode();
-        initJavaLabelFormat();
 
         if (fMemento != null) {
             restoreState(fMemento);
@@ -423,12 +394,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
         if (implementorsMode != null) {
             setImplementorsMode(implementorsMode.intValue());
-        }
-
-        Integer javaLabelFormat = memento.getInteger(TAG_JAVA_LABEL_FORMAT);
-
-        if (javaLabelFormat != null) {
-            setJavaLabelFormat(javaLabelFormat.intValue());
         }
 
         Integer ratio = memento.getInteger(TAG_RATIO);
@@ -492,26 +457,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         setOrientation(orientation);
     }
 
-    private void initJavaLabelFormat() {
-        int format;
-
-        try {
-            format = fDialogSettings.getInt(DIALOGSTORE_JAVA_LABEL_FORMAT);
-
-            if (format > 0) {
-                format = JAVA_LABEL_FORMAT_DEFAULT;
-            }
-        } catch (NumberFormatException e) {
-            format = JAVA_LABEL_FORMAT_DEFAULT;
-        }
-
-        // force the update
-        fCurrentJavaLabelFormat = -1;
-
-        // will fill the main tool bar
-        setJavaLabelFormat(format);
-    }
-
     private void fillViewMenu() {
         IActionBars actionBars = getViewSite().getActionBars();
         IMenuManager viewMenu = actionBars.getMenuManager();
@@ -530,12 +475,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 //
 //        viewMenu.add(new Separator());
         
-        for (int i = 0; i < fToggleJavaLabelFormatActions.length; i++) {
-            viewMenu.add(fToggleJavaLabelFormatActions[i]);
-        }
-
-        viewMenu.add(new Separator());
-
         for (int i = 0; i < fToggleOrientationActions.length; i++) {
             viewMenu.add(fToggleOrientationActions[i]);
         }
@@ -643,7 +582,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         memento.putInteger(TAG_CALL_MODE, fCurrentCallMode);
         memento.putInteger(TAG_IMPLEMENTORS_MODE, fCurrentImplementorsMode);
         memento.putInteger(TAG_ORIENTATION, fCurrentOrientation);
-        memento.putInteger(TAG_JAVA_LABEL_FORMAT, fCurrentJavaLabelFormat);
 
         int[] weigths = fHierarchyLocationSplitter.getWeights();
         int ratio = (weigths[0] * 1000) / (weigths[0] + weigths[1]);
@@ -922,11 +860,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         fToggleImplementorsActions = new ToggleImplementorsAction[] {
                 new ToggleImplementorsAction(this, IMPLEMENTORS_ENABLED),
                 new ToggleImplementorsAction(this, IMPLEMENTORS_DISABLED)
-            };
-        fToggleJavaLabelFormatActions = new ToggleJavaLabelFormatAction[] {
-                new ToggleJavaLabelFormatAction(this, JAVA_LABEL_FORMAT_DEFAULT),
-                new ToggleJavaLabelFormatAction(this, JAVA_LABEL_FORMAT_SHORT),
-                new ToggleJavaLabelFormatAction(this, JAVA_LABEL_FORMAT_LONG)
             };
 
         fActionGroups = new CompositeActionGroup(new ActionGroup[] {

@@ -15,28 +15,40 @@ import java.util.Collection;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ILabelDecorator;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
-class CallHierarchyLabelProvider extends LabelProvider {
-    private JavaElementLabelProvider fJavaElementLabelProvider = new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS);
+class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
+    private static final int TEXTFLAGS= DEFAULT_TEXTFLAGS | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED;
+    private static final int IMAGEFLAGS= DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS;
 
+    private ILabelDecorator fDecorator;
+    
+    CallHierarchyLabelProvider() {
+        super(TEXTFLAGS, IMAGEFLAGS);
+        fDecorator= new CallHierarchyLabelDecorator();
+    }
     /**
      * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
      */
     public Image getImage(Object element) {
+        Image result= null;
         if (element instanceof MethodWrapper) {
             MethodWrapper methodWrapper = (MethodWrapper) element;
 
             if (methodWrapper.getMember() != null) {
-                return fJavaElementLabelProvider.getImage(methodWrapper.getMember());
+                result= fDecorator.decorateImage(super.getImage(methodWrapper.getMember()), methodWrapper);
             }
+        } else {
+            result= super.getImage(element);
         }
-
-        return super.getImage(element);
+        
+        return result;
     }
 
     /*
@@ -51,34 +63,13 @@ class CallHierarchyLabelProvider extends LabelProvider {
             } else {
                 return CallHierarchyMessages.getString("CallHierarchyLabelProvider.root"); //$NON-NLS-1$
             }
-        } else if (element == TreeTermination.MAX_CALL_DEPTH_NODE) {
-            return CallHierarchyMessages.getString("CallHierarchyLabelProvider.maxLevelReached"); //$NON-NLS-1$
-        } else if (element == TreeTermination.RECURSION_NODE) {
-            return CallHierarchyMessages.getString("CallHierarchyLabelProvider.recursion"); //$NON-NLS-1$
         }
 
         return CallHierarchyMessages.getString("CallHierarchyLabelProvider.noMethodSelected"); //$NON-NLS-1$
     }
 
-    /**
-     * @see org.eclipse.jface.viewers.LabelProvider#dispose()
-     */
-    public void dispose() {
-        super.dispose();
-
-        disposeJavaLabelProvider();
-    }
-
-    /**
-     * Updates the Java label provider with the new settings.
-     */
-    void setJavaLabelFormat(int format) {
-        fJavaElementLabelProvider.turnOff(Integer.MAX_VALUE);
-        fJavaElementLabelProvider.turnOn(format);
-    }
-
     private String getElementLabel(MethodWrapper methodWrapper) {
-        String label = fJavaElementLabelProvider.getText(methodWrapper.getMember());
+        String label = super.getText(methodWrapper.getMember());
 
         Collection callLocations = methodWrapper.getMethodCall().getCallLocations();
 
@@ -87,12 +78,5 @@ class CallHierarchyLabelProvider extends LabelProvider {
         }
 
         return label;
-    }
-
-    private void disposeJavaLabelProvider() {
-        if (fJavaElementLabelProvider != null) {
-            fJavaElementLabelProvider.dispose();
-            fJavaElementLabelProvider= null;
-        }
     }
 }

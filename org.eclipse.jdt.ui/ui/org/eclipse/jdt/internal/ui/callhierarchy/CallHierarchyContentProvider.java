@@ -38,30 +38,18 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         } else if (parentElement instanceof MethodWrapper) {
             MethodWrapper methodWrapper = ((MethodWrapper) parentElement);
 
-            if (!isMaxCallDepthExceeded(methodWrapper)) {
-                if (isRecursive(methodWrapper)) {
-                    return TreeTermination.RECURSION_NODE.getObjectArray();
-                }
-                return methodWrapper.getCalls();
+            if (shouldStopTraversion(methodWrapper)) {
+                return EMPTY_ARRAY;
             } else {
-                return TreeTermination.MAX_CALL_DEPTH_NODE.getObjectArray();
+                return methodWrapper.getCalls();
             }
         }
 
         return EMPTY_ARRAY;
     }
 
-    /**
-     * Determines whether the call is recursive
-     * @param methodWrapper
-     * @return
-     */
-    private boolean isRecursive(MethodWrapper methodWrapper) {
-        return methodWrapper.isRecursive();
-    }
-
-    private boolean isMaxCallDepthExceeded(MethodWrapper methodWrapper) {
-        return methodWrapper.getLevel() > CallHierarchyUI.getDefault().getMaxCallDepth();
+    private boolean shouldStopTraversion(MethodWrapper methodWrapper) {
+        return (methodWrapper.getLevel() > CallHierarchyUI.getDefault().getMaxCallDepth()) || methodWrapper.isRecursive();
     }
 
     /**
@@ -91,12 +79,18 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
      */
     public boolean hasChildren(Object element) {
-        if (element == TreeRoot.EMPTY_ROOT || element == TreeTermination.MAX_CALL_DEPTH_NODE || element == TreeTermination.RECURSION_NODE) {
+        if (element == TreeRoot.EMPTY_ROOT) {
             return false;
         }
         // Only methods can have subelements, so there's no need to fool the user into believing that there is more
         if (element instanceof MethodWrapper) {
-            return ((MethodWrapper)element).getMember().getElementType() == IJavaElement.METHOD;
+            MethodWrapper methodWrapper= (MethodWrapper) element;
+            if (methodWrapper.getMember().getElementType() != IJavaElement.METHOD) {
+                return false;
+            }
+            if (shouldStopTraversion(methodWrapper)) {
+                return false;
+            }
         }
 
         return true;

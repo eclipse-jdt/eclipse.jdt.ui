@@ -47,6 +47,7 @@ class CallHierarchyViewer extends TreeViewer {
 
         getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
         setUseHashlookup(true);
+        setAutoExpandLevel(2);
         setContentProvider(new CallHierarchyContentProvider());
         setLabelProvider(new CallHierarchyLabelProvider());
 
@@ -68,7 +69,6 @@ class CallHierarchyViewer extends TreeViewer {
     void setMethodWrapper(MethodWrapper wrapper) {
         setInput(getTreeRoot(wrapper));
 
-        expandToLevel(2);
         getTree().setFocus();
         getTree().setSelection(new TreeItem[] { getTree().getItems()[0] });
     }
@@ -106,11 +106,6 @@ class CallHierarchyViewer extends TreeViewer {
         TreeRoot dummyRoot = new TreeRoot(root);
 
         return dummyRoot;
-    }
-
-    void setJavaLabelFormat(int format) {
-        ((CallHierarchyLabelProvider) getLabelProvider()).setJavaLabelFormat(format);
-        refresh();
     }
 
     /**
