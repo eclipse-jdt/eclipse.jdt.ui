@@ -427,7 +427,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			int length= region.getLength();
 			StyleRange oldStyleRange= text.getStyleRangeAtOffset(offset);
 			Color foregroundColor= fColor;
-			Color backgroundColor= oldStyleRange.background;
+			Color backgroundColor= oldStyleRange == null ? text.getBackground() : oldStyleRange.background;
 			StyleRange styleRange= new StyleRange(offset, length, foregroundColor, backgroundColor);
 			text.setStyleRange(styleRange);
 
