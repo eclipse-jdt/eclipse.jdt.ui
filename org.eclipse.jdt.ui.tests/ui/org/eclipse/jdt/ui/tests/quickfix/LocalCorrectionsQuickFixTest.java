@@ -1187,7 +1187,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        try {\n");
 		buf.append("            try {\n");
 		buf.append("                E.goo();\n");
-		buf.append("            } catch (ParseException e1) {\n");
+		buf.append("            } catch (ParseException e) {\n");
 		buf.append("            }\n");		
 		buf.append("        } catch (IOException e) {\n");
 		buf.append("        }\n");
