@@ -35,7 +35,7 @@ public abstract class Indexer extends InternalIndexer {
 	 * Indexes the given document, adding the document name and the word references 
 	 * to this document to the given <code>Index</code>.
 	 */
-	public abstract void index(Document document, IPath indexPath) throws IOException;
+	public abstract void index(Document document) throws IOException;
 	
 	/**
 	 * Trigger an indexing action at earliest convenience (in background). When the corresponding action is performed, the
@@ -62,5 +62,15 @@ public abstract class Indexer extends InternalIndexer {
 
 	public static void removeFolder(IPath folderPath,SearchParticipant participant, Object indexJobFamily, IProgressMonitor monitor) {
 		IndexManager.getIndexManager().indexRemoveFolder(participant, folderPath, indexJobFamily, monitor);
+	}
+
+	/**
+	 * Allow to manually set the target index output (when combining various indexers)
+	 */
+	public IPath getTargetIndex() {
+		return super.getTargetIndex();
+	}
+	public void setTargetIndex(IPath indexPath) {
+		super.setTargetIndex(indexPath);
 	}
 }

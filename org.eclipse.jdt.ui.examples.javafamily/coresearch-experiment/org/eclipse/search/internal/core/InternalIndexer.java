@@ -28,12 +28,12 @@ public class InternalIndexer {
 	 * <code>shouldIndex()</code> first to determine whether this indexer handles 
 	 * the given type of file, and only call this method if so. 
 	 */
-	public void index(Document document, Index targetIndex) throws IOException {
+	public void index(Document document, IPath indexPath) throws IOException {
 		try {
-			this.index = targetIndex;
+			this.setTargetIndex(indexPath);
 			index(document);
 		} finally {
-			this.index = null;
+			this.setTargetIndex(null);
 		}
 	}
 
@@ -51,4 +51,19 @@ public class InternalIndexer {
 	public void addEntry(char[] category, char[] key, IPath documentPath) throws IOException {
 		this.index.addEntry(category, key, documentPath);
 	}	
+
+	/**
+	 * Allow to manually set the target index output (when combining various indexers)
+	 */
+	public IPath getTargetIndex() {
+		return this.index.getLocation();
+	}
+	public void setTargetIndex(IPath indexPath) {
+		if (indexPath == null) {
+			this.index = null;
+		} else {
+			IndexManager indexManager = IndexManager.getIndexManager();
+			this.index = indexManager.getIndex(indexPath,  true /*reuse index file*/, true /*create if none*/);		
+		}
+	}
 }
