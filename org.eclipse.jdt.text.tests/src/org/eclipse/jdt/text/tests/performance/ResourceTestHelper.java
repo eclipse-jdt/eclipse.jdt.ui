@@ -73,7 +73,7 @@ public class ResourceTestHelper {
 	}
 	
 
-	public static void replicate(String src, String destPrefix, String destSuffix, int n, String srcName, String destName) throws IOException, CoreException {
+	public static void replicate(String src, String destPrefix, String destSuffix, int n, String srcName, String destNamePrefix) throws IOException, CoreException {
 		
 		StringBuffer s= read(src);
 		
@@ -81,7 +81,7 @@ public class ResourceTestHelper {
 		
 		for (int j= 0; j < n; j++) {
 			StringBuffer c= new StringBuffer(s.toString());
-			replacePositions(c, srcName.length(), destName + j, positions);
+			replacePositions(c, srcName.length(), destNamePrefix + j, positions);
 			write(destPrefix + j + destSuffix, c.toString());
 		}
 	}
