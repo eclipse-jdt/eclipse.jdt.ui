@@ -407,9 +407,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				else
 					modifyConstructors(declaration, rewrite);
 				addInheritedTypeQualifications(declaration, targetRewrite, qualifierGroup);
-				addEnclosingInstanceTypeParameters(parameters, declaration, rewrite);
 				addEnclosingInstanceDeclaration(declaration, rewrite);
 			}
+			addEnclosingInstanceTypeParameters(parameters, declaration, rewrite);
 			modifyAccessToEnclosingInstance(targetRewrite, declaration, status);
 			final ITypeBinding binding= declaration.resolveBinding();
 			if (binding != null) {
