@@ -52,11 +52,11 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new UnresolvedMethodsQuickFixTest("testParameterMismatchMoreArguments4"));
+			suite.addTest(new UnresolvedMethodsQuickFixTest("testClassInstanceCreation2"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -2037,6 +2037,59 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
+	
+	public void testClassInstanceCreation2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        A a= new A(\"test\");\n");
+		buf.append("    }\n");
+		buf.append("    class A {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        A a= new A(\"test\");\n");
+		buf.append("    }\n");
+		buf.append("    class A {\n");
+		buf.append("\n");
+		buf.append("        public A(String string) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();	
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        A a= new A();\n");
+		buf.append("    }\n");
+		buf.append("    class A {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
+
 	
 	public void testClassInstanceCreationMoreArguments() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

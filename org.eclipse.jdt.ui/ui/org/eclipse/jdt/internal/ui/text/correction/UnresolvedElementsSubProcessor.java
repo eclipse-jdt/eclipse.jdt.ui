@@ -815,7 +815,7 @@ public class UnresolvedElementsSubProcessor {
 		if (targetCU != null) {
 			boolean isDifferentCU= !cu.equals(targetCU);
 			
-			if (isDifferentCU && isImplicitConstructor(methodBinding, targetCU)) {
+			if (isImplicitConstructor(methodBinding, targetCU)) {
 				return;
 			}
 			
