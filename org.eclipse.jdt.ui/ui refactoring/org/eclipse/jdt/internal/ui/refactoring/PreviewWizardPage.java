@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -35,6 +36,7 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.compare.CompareUI;
 
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -143,6 +145,9 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	
 	private IChange fChange;		
 	private ChangeElement fCurrentSelection;
+	private PageBook fPageContainer;
+	private Control fStandardPage;
+	private Control fNullPage;
 	private ChangeElementTreeViewer fTreeViewer;
 	private PageBook fPreviewContainer;
 	private IPreviewViewer fCurrentPreviewViewer;
@@ -320,15 +325,22 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
+		fPageContainer= new PageBook(parent, SWT.NONE);
+		fStandardPage= createStandardPreviewPage(fPageContainer);
+		fNullPage= createNullPage(fPageContainer);
+		setControl(fPageContainer);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.REFACTORING_PREVIEW_WIZARD_PAGE);
+	}
+
+	private Composite createStandardPreviewPage(Composite parent) {
 		// XXX The composite is needed to limit the width of the SashForm. See http://bugs.eclipse.org/bugs/show_bug.cgi?id=6854
 		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0; layout.marginWidth= 0;
 		result.setLayout(layout);
 		
-		
 		SashForm sashForm= new SashForm(result, SWT.VERTICAL);
-
+		
 		ViewerPane pane= new ViewerPane(sashForm, SWT.BORDER | SWT.FLAT);
 		pane.setText(RefactoringMessages.getString("PreviewWizardPage.changes")); //$NON-NLS-1$
 		ToolBarManager tbm= pane.getToolBarManager();
@@ -353,9 +365,19 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(80);
 		sashForm.setLayoutData(gd);
-		
-		setControl(result);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.REFACTORING_PREVIEW_WIZARD_PAGE);
+		return result;
+	}
+	
+	private Control createNullPage(Composite parent) {
+		Composite result= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginWidth = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+		layout.marginHeight = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+		result.setLayout(layout);
+		Label label= new Label(result, SWT.CENTER);
+		label.setText("The refactoring doesn't change any source code.");
+		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		return result;
 	}
 	
 	/* (Non-JavaDoc)
@@ -363,26 +385,32 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 */
 	public void setVisible(boolean visible) {
 		fCurrentSelection= null;
-		ChangeElement treeViewerInput= (ChangeElement)fTreeViewer.getInput();
-		if (visible && treeViewerInput != null) {
-			IStructuredSelection selection= (IStructuredSelection)fTreeViewer.getSelection();
-			if (selection.isEmpty()) {
-				ITreeContentProvider provider= (ITreeContentProvider)fTreeViewer.getContentProvider();
-				Object[] elements= provider.getElements(treeViewerInput);
-				if (elements != null && elements.length > 0) {
-					Object element= elements[0];
-					if (getRefactoringWizard().getExpandFirstNode()) {
-						Object[] subElements= provider.getElements(element);
-						if (subElements != null && subElements.length > 0) {
-							fTreeViewer.expandToLevel(element, 999);
+		if (hasChanges()) {
+			fPageContainer.showPage(fStandardPage);
+			ChangeElement treeViewerInput= (ChangeElement)fTreeViewer.getInput();
+			if (visible && treeViewerInput != null) {
+				IStructuredSelection selection= (IStructuredSelection)fTreeViewer.getSelection();
+				if (selection.isEmpty()) {
+					ITreeContentProvider provider= (ITreeContentProvider)fTreeViewer.getContentProvider();
+					Object[] elements= provider.getElements(treeViewerInput);
+					if (elements != null && elements.length > 0) {
+						Object element= elements[0];
+						if (getRefactoringWizard().getExpandFirstNode()) {
+							Object[] subElements= provider.getElements(element);
+							if (subElements != null && subElements.length > 0) {
+								fTreeViewer.expandToLevel(element, 999);
+							}
 						}
+						fTreeViewer.setSelection(new StructuredSelection(element));
 					}
-					fTreeViewer.setSelection(new StructuredSelection(element));
 				}
 			}
+			super.setVisible(visible);
+			fTreeViewer.getControl().setFocus();
+		} else {
+			fPageContainer.showPage(fNullPage);
+			super.setVisible(visible);
 		}
-		super.setVisible(visible);
-		fTreeViewer.getControl().setFocus();
 	}
 	
 	private void setTreeViewerInput() {
@@ -472,5 +500,17 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Returns <code>true</code> if the preview page will show any changes when
+	 * it becomes visibile. Otherwise <code>false</code> is returned.
+	 */
+	public boolean hasChanges() {
+		if (fChange == null)
+			return false;
+		if (fChange instanceof ICompositeChange)
+			return ((ICompositeChange)fChange).getChildren().length > 0;
+		return true;
 	}
 }

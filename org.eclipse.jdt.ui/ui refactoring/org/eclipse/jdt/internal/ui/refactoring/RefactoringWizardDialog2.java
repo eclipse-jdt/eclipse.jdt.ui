@@ -402,9 +402,11 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 		if (PreviewWizardPage.PAGE_NAME.equals(pageName)) {
 			fCurrentPage.createControl(fPageContainer);
 			makeVisible(fCurrentPage);
-			resize();
 			updateButtons();
-			getButton(PREVIEW_ID).setVisible(false);
+			if (((PreviewWizardPage)fCurrentPage).hasChanges())
+				resize();
+			else
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
 		} else {
 			fCurrentPage= current;
 		}
@@ -501,7 +503,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	
 	protected void createButtonsForButtonBar(Composite parent) {
 		if (! (fCurrentPage instanceof PreviewWizardPage)) {
-			Button preview= createButton(parent, PREVIEW_ID, "Previe&w", false);
+			Button preview= createButton(parent, PREVIEW_ID, "Previe&w >>", false);
 			preview.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					previewPressed((Button)e.widget);
