@@ -240,10 +240,8 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 									ActionMessages.getString("ModifyParameterAction.problem.title"),  //$NON-NLS-1$
 									ActionMessages.getString("ModifyParameterAction.problem.message")); //$NON-NLS-1$
 							}
-							return;
 						}
-					} else {
-						super.activate(refactoring, parent, save);
+						return;
 					}
 				}
 				super.activate(refactoring, parent, save);
