@@ -477,8 +477,16 @@ public class JavaContext extends CompilationUnitContext {
 			
 			IJavaProject project= cu.getJavaProject();
 			String typeName= var.typeName;
-			String baseTypeName= typeName.substring(0, typeName.lastIndexOf('['));
-
+			int dim= -1; // we expect at least one array
+			int lastIndex= typeName.length();
+			int bracket= typeName.lastIndexOf('[');
+			while (bracket != -1) {
+				lastIndex= bracket;
+				dim++;
+				bracket= typeName.lastIndexOf('[', bracket - 1);
+			}
+			typeName= typeName.substring(0, lastIndex);
+			
 			String indexName= getIndex();
 			String[] excludedNames= completion.getLocalVariableNames();
 			if (indexName != null) {
@@ -486,7 +494,7 @@ public class JavaContext extends CompilationUnitContext {
 				excludedNamesList.add(indexName);
 				excludedNames= (String[])excludedNamesList.toArray(new String[excludedNamesList.size()]);
 			}
-			String[] proposals= NamingConventions.suggestLocalVariableNames(project, var.typePackageName, baseTypeName, 0, excludedNames);
+			String[] proposals= NamingConventions.suggestLocalVariableNames(project, var.typePackageName, typeName, dim, excludedNames);
 			
 			ret[i]= proposals;
 		}
