@@ -41,6 +41,8 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 		
 		private IPreferenceStatusMonitor fMonitor;
 		
+		private IStatus fStatus;
+		
 		public StatusChangeListenerAdapter(IPreferenceStatusMonitor monitor) {
 			super();
 			fMonitor= monitor;
@@ -50,11 +52,18 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 		 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
 		 */
 		public void statusChanged(IStatus status) {
+			fStatus= status;
 			fMonitor.statusChanged(status);
+		}
+		
+		public IStatus getStatus() {
+			return fStatus;
 		}
 	}
 
 	private SpellingConfigurationBlock fBlock= new SpellingConfigurationBlock(new NullStatusChangeListener(), null);
+	
+	private SpellingPreferenceBlock.StatusChangeListenerAdapter fStatusMonitor;
 	
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#createControl(org.eclipse.swt.widgets.Composite)
@@ -67,14 +76,15 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#initialize(org.eclipse.ui.texteditor.spelling.IPreferenceStatusMonitor)
 	 */
 	public void initialize(IPreferenceStatusMonitor statusMonitor) {
-		fBlock.fContext= new StatusChangeListenerAdapter(statusMonitor);
+		fStatusMonitor= new StatusChangeListenerAdapter(statusMonitor);
+		fBlock.fContext= fStatusMonitor;
 	}
 
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#canPerformOk()
 	 */
 	public boolean canPerformOk() {
-		return true;
+		return fStatusMonitor == null || fStatusMonitor.getStatus() == null || !fStatusMonitor.getStatus().matches(IStatus.ERROR);
 	}
 
 	/*
