@@ -289,6 +289,14 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		return super.performOk(enabled);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performApply(boolean)
+	 */
+	public boolean performApply(boolean enabled) {
+		packTodoTasks();
+		return super.performApply(enabled);
+	}
+	
 	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		String title= PreferencesMessages.getString("TodoTaskConfigurationBlock.needsbuild.title"); //$NON-NLS-1$
