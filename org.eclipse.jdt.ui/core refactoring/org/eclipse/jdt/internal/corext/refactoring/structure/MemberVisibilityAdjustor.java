@@ -101,7 +101,6 @@ public final class MemberVisibilityAdjustor {
 		public IncomingMemberVisibilityAdjustment(final IMember member, final ModifierKeyword keyword, final RefactoringStatus status) {
 			Assert.isNotNull(member);
 			Assert.isTrue(!(member instanceof IInitializer));
-			Assert.isTrue(!member.isBinary() && !member.isReadOnly());
 			Assert.isTrue(isVisibilityKeyword(keyword));
 			fMember= member;
 			fKeyword= keyword;
@@ -546,11 +545,10 @@ public final class MemberVisibilityAdjustor {
 	 */
 	private void adjustIncomingVisibility(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(member);
-		Assert.isTrue(!member.isBinary() && !member.isReadOnly());
 		Assert.isNotNull(monitor);
-		final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferencing, monitor);
-		if (hasLowerVisibility(member.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(member, threshold))
-			fAdjustments.put(member, new IncomingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(getMessage(member), new String[] { getLabel(member), getLabel(threshold)}), JavaStatusContext.create(member), null, RefactoringStatusEntry.NO_CODE, null)));
+		final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferenced, monitor);
+		if (hasLowerVisibility(fReferenced.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(fReferenced, threshold))
+			fAdjustments.put(fReferenced, new IncomingMemberVisibilityAdjustment(fReferenced, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(getMessage(fReferenced), new String[] { getLabel(fReferenced), getLabel(threshold)}), JavaStatusContext.create(fReferenced), null, RefactoringStatusEntry.NO_CODE, null)));
 	}
 
 	/**
@@ -608,7 +606,7 @@ public final class MemberVisibilityAdjustor {
 			IMember member= (IMember) element;
 			if (member instanceof IInitializer)
 				member= member.getDeclaringType();
-			if (member != null && !member.isBinary() && !member.isReadOnly())
+			if (member != null)
 				adjustIncomingVisibility(member, monitor);
 		}
 	}
@@ -710,7 +708,7 @@ public final class MemberVisibilityAdjustor {
 		Assert.isNotNull(template);
 		boolean adjust= true;
 		final IType declaring= member.getDeclaringType();
-		if (declaring != null && JavaModelUtil.isInterfaceOrAnnotation(declaring))
+		if (declaring != null && (JavaModelUtil.isInterfaceOrAnnotation(declaring) || declaring.equals(fReferenced)))
 			adjust= false;
 		if (adjust && hasLowerVisibility((List) declaration.getStructuralProperty(declaration.getModifiersProperty()), threshold) && needsVisibilityAdjustment(member, threshold))
 			fAdjustments.put(member, new OutgoingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(template, new String[] { BindingLabels.getFullyQualified(binding), getLabel(threshold)}), JavaStatusContext.create(rewrite.getCu(), declaration), null, RefactoringStatusEntry.NO_CODE, null)));
@@ -832,9 +830,123 @@ public final class MemberVisibilityAdjustor {
 	 * @return the visibility keyword corresponding to the threshold, or <code>null</code> for default visibility
 	 * @throws JavaModelException if the java elements could not be accessed
 	 */
-	private ModifierKeyword computeIncomingVisibilityThreshold(final IMember referencing, final IJavaElement referenced, final IProgressMonitor monitor) throws JavaModelException {
-		Assert.isTrue(referenced instanceof ICompilationUnit || referenced instanceof IType || referenced instanceof IPackageFragment);
-		return computeOutgoingVisibilityThreshold(referenced, referencing instanceof IInitializer ? referencing.getDeclaringType() : referencing, monitor);
+	private ModifierKeyword computeIncomingVisibilityThreshold(final IMember referencing, final IMember referenced, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isTrue(!(referencing instanceof IInitializer));
+		Assert.isTrue(!(referenced instanceof IInitializer));
+		Assert.isNotNull(monitor);
+		ModifierKeyword keyword= ModifierKeyword.PUBLIC_KEYWORD;
+		try {
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("MemberVisibilityAdjustor.checking")); //$NON-NLS-1$
+			final int referencingType= referencing.getElementType();
+			final int referencedType= referenced.getElementType();
+			switch (referencedType) {
+				case IJavaElement.TYPE: {
+					final IType typeReferenced= (IType) referenced;
+					final ICompilationUnit referencedUnit= typeReferenced.getCompilationUnit();
+					switch (referencingType) {
+						case IJavaElement.TYPE: {
+							keyword= thresholdTypeToType((IType) referencing, typeReferenced, monitor);
+							break;
+						}
+						case IJavaElement.FIELD: {
+							final IField field= (IField) referencing;
+							if (typeReferenced.equals(field.getDeclaringType()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (referencedUnit != null && referencedUnit.equals(field.getCompilationUnit()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (typeReferenced.getPackageFragment().equals(field.getDeclaringType().getPackageFragment()))
+								keyword= null;
+							break;
+						}
+						case IJavaElement.METHOD: {
+							final IMethod method= (IMethod) referencing;
+							if (typeReferenced.equals(method.getDeclaringType()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (referencedUnit != null && referencedUnit.equals(method.getCompilationUnit()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (typeReferenced.getPackageFragment().equals(method.getDeclaringType().getPackageFragment()))
+								keyword= null;
+							break;
+						}
+						default:
+							Assert.isTrue(false);
+					}
+					break;
+				}
+				case IJavaElement.FIELD: {
+					final IField fieldReferenced= (IField) referenced;
+					final ICompilationUnit referencedUnit= fieldReferenced.getCompilationUnit();
+					switch (referencingType) {
+						case IJavaElement.TYPE: {
+							keyword= thresholdTypeToField((IType) referencing, fieldReferenced, monitor);
+							break;
+						}
+						case IJavaElement.FIELD: {
+							final IField field= (IField) referencing;
+							if (fieldReferenced.getDeclaringType().equals(field.getDeclaringType()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (referencedUnit != null && referencedUnit.equals(field.getCompilationUnit()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (fieldReferenced.getDeclaringType().getPackageFragment().equals(field.getDeclaringType().getPackageFragment()))
+								keyword= null;
+							break;
+						}
+						case IJavaElement.METHOD: {
+							final IMethod method= (IMethod) referencing;
+							if (fieldReferenced.getDeclaringType().equals(method.getDeclaringType()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (referencedUnit != null && referencedUnit.equals(method.getCompilationUnit()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (fieldReferenced.getDeclaringType().getPackageFragment().equals(method.getDeclaringType().getPackageFragment()))
+								keyword= null;
+							break;
+						}
+						default:
+							Assert.isTrue(false);
+					}
+					break;
+				}
+				case IJavaElement.METHOD: {
+					final IMethod methodReferenced= (IMethod) referenced;
+					final ICompilationUnit referencedUnit= methodReferenced.getCompilationUnit();
+					switch (referencingType) {
+						case IJavaElement.TYPE: {
+							keyword= thresholdTypeToMethod((IType) referencing, methodReferenced, monitor);
+							break;
+						}
+						case IJavaElement.FIELD: {
+							final IField field= (IField) referencing;
+							if (methodReferenced.getDeclaringType().equals(field.getDeclaringType()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (referencedUnit != null && referencedUnit.equals(field.getCompilationUnit()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (methodReferenced.getDeclaringType().getPackageFragment().equals(field.getDeclaringType().getPackageFragment()))
+								keyword= null;
+							break;
+						}
+						case IJavaElement.METHOD: {
+							final IMethod method= (IMethod) referencing;
+							if (methodReferenced.getDeclaringType().equals(method.getDeclaringType()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (referencedUnit != null && referencedUnit.equals(method.getCompilationUnit()))
+								keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							else if (methodReferenced.getDeclaringType().getPackageFragment().equals(method.getDeclaringType().getPackageFragment()))
+								keyword= null;
+							break;
+						}
+						default:
+							Assert.isTrue(false);
+					}
+					break;
+				}
+				default:
+					Assert.isTrue(false);
+			}
+		} finally {
+			monitor.done();
+		}
+		return keyword;
 	}
 
 	/**
@@ -870,30 +982,7 @@ public final class MemberVisibilityAdjustor {
 							break;
 						}
 						case IJavaElement.TYPE: {
-							final IType type= (IType) referencing;
-							final ICompilationUnit referencedUnit= typeReferenced.getCompilationUnit();
-							if (type.equals(typeReferenced.getDeclaringType()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else {
-								final ITypeHierarchy hierarchy= getTypeHierarchy(type, new SubProgressMonitor(monitor, 1));
-								final IType[] types= hierarchy.getSupertypes(type);
-								IType superType= null;
-								for (int index= 0; index < types.length; index++) {
-									superType= types[index];
-									if (superType.equals(typeReferenced)) {
-										keyword= null;
-										return keyword;
-									}
-								}
-							}
-							final ICompilationUnit typeUnit= type.getCompilationUnit();
-							if (referencedUnit != null && referencedUnit.equals(typeUnit)) {
-								if (typeReferenced.getDeclaringType() != null)
-									keyword= null;
-								else
-									keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							} else if (referencedUnit != null && typeUnit != null && referencedUnit.getParent().equals(typeUnit.getParent()))
-								keyword= null;
+							keyword= thresholdTypeToType((IType) referencing, typeReferenced, monitor);
 							break;
 						}
 						case IJavaElement.PACKAGE_FRAGMENT: {
@@ -920,26 +1009,7 @@ public final class MemberVisibilityAdjustor {
 							break;
 						}
 						case IJavaElement.TYPE: {
-							final IType type= (IType) referencing;
-							if (fieldReferenced.getDeclaringType().equals(type))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else {
-								final ITypeHierarchy hierarchy= getTypeHierarchy(type, new SubProgressMonitor(monitor, 1));
-								final IType[] types= hierarchy.getSupertypes(type);
-								IType superType= null;
-								for (int index= 0; index < types.length; index++) {
-									superType= types[index];
-									if (superType.equals(fieldReferenced.getDeclaringType())) {
-										keyword= ModifierKeyword.PROTECTED_KEYWORD;
-										return keyword;
-									}
-								}
-							}
-							final ICompilationUnit typeUnit= type.getCompilationUnit();
-							if (referencedUnit != null && referencedUnit.equals(typeUnit))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && typeUnit != null && referencedUnit.getParent().equals(typeUnit.getParent()))
-								keyword= null;
+							keyword= thresholdTypeToField((IType) referencing, fieldReferenced, monitor);
 							break;
 						}
 						case IJavaElement.PACKAGE_FRAGMENT: {
@@ -966,29 +1036,7 @@ public final class MemberVisibilityAdjustor {
 							break;
 						}
 						case IJavaElement.TYPE: {
-							final IType type= (IType) referencing;
-							if (methodReferenced.getDeclaringType().equals(type))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else {
-								final ITypeHierarchy hierarchy= getTypeHierarchy(type, new SubProgressMonitor(monitor, 1));
-								final IType[] types= hierarchy.getSupertypes(type);
-								IType superType= null;
-								for (int index= 0; index < types.length; index++) {
-									superType= types[index];
-									if (superType.equals(methodReferenced.getDeclaringType())) {
-										keyword= ModifierKeyword.PROTECTED_KEYWORD;
-										return keyword;
-									}
-								}
-							}
-							final ICompilationUnit typeUnit= type.getCompilationUnit();
-							if (referencedUnit != null && referencedUnit.equals(typeUnit)) {
-								if (methodReferenced.getDeclaringType().getDeclaringType() != null)
-									keyword= null;
-								else
-									keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							} else if (referencedUnit != null && referencedUnit.getParent().equals(typeUnit.getParent()))
-								keyword= null;
+							keyword= thresholdTypeToMethod((IType) referencing, methodReferenced, monitor);
 							break;
 						}
 						case IJavaElement.PACKAGE_FRAGMENT: {
@@ -1256,5 +1304,122 @@ public final class MemberVisibilityAdjustor {
 	public final void setVisibilitySeverity(final int severity) {
 		Assert.isTrue(isStatusSeverity(severity));
 		fVisibilitySeverity= severity;
+	}
+
+	/**
+	 * Returns the visibility threshold from a type to a field.
+	 * 
+	 * @param referencing the referencing type
+	 * @param referenced the referenced field
+	 * @param monitor the progress monitor to use
+	 * @return the visibility keyword corresponding to the threshold, or <code>null</code> for default visibility
+	 * @throws JavaModelException if the java elements could not be accessed
+	 */
+	private ModifierKeyword thresholdTypeToField(final IType referencing, final IField referenced, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(referencing);
+		Assert.isNotNull(referenced);
+		Assert.isNotNull(monitor);
+		ModifierKeyword keyword= ModifierKeyword.PUBLIC_KEYWORD;
+		final ICompilationUnit referencedUnit= referenced.getCompilationUnit();
+		if (referenced.getDeclaringType().equals(referencing))
+			keyword= ModifierKeyword.PRIVATE_KEYWORD;
+		else {
+			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
+			final IType[] types= hierarchy.getSupertypes(referencing);
+			IType superType= null;
+			for (int index= 0; index < types.length; index++) {
+				superType= types[index];
+				if (superType.equals(referenced.getDeclaringType())) {
+					keyword= ModifierKeyword.PROTECTED_KEYWORD;
+					return keyword;
+				}
+			}
+		}
+		final ICompilationUnit typeUnit= referencing.getCompilationUnit();
+		if (referencedUnit != null && referencedUnit.equals(typeUnit))
+			keyword= ModifierKeyword.PRIVATE_KEYWORD;
+		else if (referencedUnit != null && typeUnit != null && referencedUnit.getParent().equals(typeUnit.getParent()))
+			keyword= null;
+		return keyword;
+	}
+
+	/**
+	 * Returns the visibility threshold from a type to a method.
+	 * 
+	 * @param referencing the referencing type
+	 * @param referenced the referenced method
+	 * @param monitor the progress monitor to use
+	 * @return the visibility keyword corresponding to the threshold, or <code>null</code> for default visibility
+	 * @throws JavaModelException if the java elements could not be accessed
+	 */
+	private ModifierKeyword thresholdTypeToMethod(final IType referencing, final IMethod referenced, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(referencing);
+		Assert.isNotNull(referenced);
+		Assert.isNotNull(monitor);
+		final ICompilationUnit referencedUnit= referenced.getCompilationUnit();
+		ModifierKeyword keyword= null;
+		if (referenced.getDeclaringType().equals(referencing))
+			keyword= ModifierKeyword.PRIVATE_KEYWORD;
+		else {
+			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
+			final IType[] types= hierarchy.getSupertypes(referencing);
+			IType superType= null;
+			for (int index= 0; index < types.length; index++) {
+				superType= types[index];
+				if (superType.equals(referenced.getDeclaringType())) {
+					keyword= ModifierKeyword.PROTECTED_KEYWORD;
+					return keyword;
+				}
+			}
+		}
+		final ICompilationUnit typeUnit= referencing.getCompilationUnit();
+		if (referencedUnit != null && referencedUnit.equals(typeUnit)) {
+			if (referenced.getDeclaringType().getDeclaringType() != null)
+				keyword= null;
+			else
+				keyword= ModifierKeyword.PRIVATE_KEYWORD;
+		} else if (referencedUnit != null && referencedUnit.getParent().equals(typeUnit.getParent()))
+			keyword= null;
+		return keyword;
+	}
+
+	/**
+	 * Returns the visibility threshold from a type to another type.
+	 * 
+	 * @param referencing the referencing type
+	 * @param referenced the referenced type
+	 * @param monitor the progress monitor to use
+	 * @return the visibility keyword corresponding to the threshold, or <code>null</code> for default visibility
+	 * @throws JavaModelException if the java elements could not be accessed
+	 */
+	private ModifierKeyword thresholdTypeToType(final IType referencing, final IType referenced, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(referencing);
+		Assert.isNotNull(referenced);
+		Assert.isNotNull(monitor);
+		ModifierKeyword keyword= ModifierKeyword.PUBLIC_KEYWORD;
+		final ICompilationUnit referencedUnit= referenced.getCompilationUnit();
+		if (referencing.equals(referenced.getDeclaringType()))
+			keyword= ModifierKeyword.PRIVATE_KEYWORD;
+		else {
+			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
+			final IType[] types= hierarchy.getSupertypes(referencing);
+			IType superType= null;
+			for (int index= 0; index < types.length; index++) {
+				superType= types[index];
+				if (superType.equals(referenced)) {
+					keyword= null;
+					return keyword;
+				}
+			}
+		}
+		final ICompilationUnit typeUnit= referencing.getCompilationUnit();
+		if (referencedUnit != null && referencedUnit.equals(typeUnit)) {
+			if (referenced.getDeclaringType() != null)
+				keyword= null;
+			else
+				keyword= ModifierKeyword.PRIVATE_KEYWORD;
+		} else if (referencedUnit != null && typeUnit != null && referencedUnit.getParent().equals(typeUnit.getParent()))
+			keyword= null;
+		return keyword;
 	}
 }
