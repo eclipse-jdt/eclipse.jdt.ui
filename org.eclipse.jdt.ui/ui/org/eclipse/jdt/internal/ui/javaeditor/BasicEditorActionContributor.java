@@ -68,12 +68,9 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		
 		super.contributeToMenu(menu);
 		
-		IMenuManager conversionMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_FILE + "/conversion"); //$NON-NLS-1$
-		if (conversionMenu != null)
-			conversionMenu.insertAfter("encoding", fChangeEncodingAction); //$NON-NLS-1$
-		
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
+			editMenu.add(fChangeEncodingAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetContentAssist);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);			
