@@ -81,24 +81,30 @@ public class NewNameQueries implements INewNameQueries {
 		return name.substring(0, name.length() - ".java".length()); //$NON-NLS-1$
 	}
 
-	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu) {
+	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) {
 		String[] keys= {removeTrailingJava(cu.getElementName())};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createCompilationUnitNameValidator(cu), message, removeTrailingJava(cu.getElementName()), getShell());
+		return createStaticQuery(createCompilationUnitNameValidator(cu), message, initialSuggestedName, getShell());
 	}
 
 
-	public INewNameQuery createNewResourceNameQuery(IResource res) {
+	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) {
 		String[] keys= {res.getName()};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createResourceNameValidator(res), message, res.getName(), getShell());
+		return createStaticQuery(createResourceNameValidator(res), message, initialSuggestedName, getShell());
 	}
 
 
-	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack) {
+	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) {
 		String[] keys= {pack.getElementName()};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createPackageNameValidator(pack), message, pack.getElementName(), getShell());
+		return createStaticQuery(createPackageNameValidator(pack), message, initialSuggestedName, getShell());
+	}
+
+	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
+		String[] keys= {root.getElementName()};
+		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
+		return createStaticQuery(createPackageFragmentRootNameValidator(root), message, initialSuggestedName, getShell());
 	}
 
 
@@ -176,6 +182,15 @@ public class NewNameQueries implements INewNameQueries {
 	}
 
 
+	private static IInputValidator createPackageFragmentRootNameValidator(final IPackageFragmentRoot root) {
+		return new IInputValidator() {
+			IInputValidator resourceNameValidator= createResourceNameValidator(root.getResource());
+			public String isValid(String newText) {
+				return resourceNameValidator.isValid(newText);
+			}
+		};
+	}
+	
 	private static IInputValidator createPackageNameValidator(final IPackageFragment pack) {
 		IInputValidator validator= new IInputValidator(){
 			public String isValid(String newText) {
