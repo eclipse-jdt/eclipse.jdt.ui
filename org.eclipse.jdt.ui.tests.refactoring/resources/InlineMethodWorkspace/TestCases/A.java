@@ -1,11 +1,22 @@
 public class A {
-	class Inner {
-		public void bar() {
-			foo();
+	void m(C c){
+		c.m(this);
+		class X {
+			void foo() {
+				foo();
+			}
 		}
 	}
-	public void foo() {
-		B b= new B();
-		b.foo();
+}
+class C {
+	void m(A a){
+		//method
+	}
+}
+class Client{
+	void f(){
+		A a= null;
+		C c= null;
+		a.m(c);
 	}
 }
