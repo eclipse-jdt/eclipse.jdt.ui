@@ -187,7 +187,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			for (int j= 0; j < methods.length; j++){
 				if ((!methods[j].equals(getMethod()))
 					&& (JdtFlags.isNative(methods[j]))
-					&& (null != Checks.findMethod(getMethod(), new IMethod[]{methods[j]})))
+					&& (null != Checks.findSimilarMethod(getMethod(), new IMethod[]{methods[j]})))
 						return true;
 			}
 		}
