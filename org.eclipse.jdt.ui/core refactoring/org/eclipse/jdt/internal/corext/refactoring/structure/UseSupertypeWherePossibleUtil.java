@@ -84,7 +84,6 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -1033,7 +1032,7 @@ class UseSupertypeWherePossibleUtil {
 			return false;
 		IMethod method;
 		if (fSuperTypeToUse != null) //XXX	
-			method= Binding2JavaModel.findIncludingSupertypes((IMethodBinding)miBinding, fSuperTypeToUse, pm);
+			method= findIncludingSupertypes((IMethodBinding)miBinding, fSuperTypeToUse, pm);
 		else
 			method= Bindings.findMethod((IMethodBinding)miBinding, fInputClass);
 		if (method == null)
@@ -1046,6 +1045,19 @@ class UseSupertypeWherePossibleUtil {
 		return false;	
 	}
 	
+	private static IMethod findIncludingSupertypes(IMethodBinding method, IType type, IProgressMonitor pm) throws JavaModelException {
+		IMethod inThisType= Bindings.findMethod(method, type);
+		if (inThisType != null)
+			return inThisType;
+		IType[] superTypes= JavaModelUtil.getAllSuperTypes(type, pm);
+		for (int i= 0; i < superTypes.length; i++) {
+			IMethod m= Bindings.findMethod(method, superTypes[i]);
+			if (m != null)
+				return m;
+		}
+		return null;
+	}
+
 	private CompilationUnit getAST(ICompilationUnit cu){
 		return fASTMappingManager.getAST(cu);
 	}
