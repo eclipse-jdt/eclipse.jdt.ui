@@ -4,35 +4,26 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.MultiStatus;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIException;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.actions.DeleteResourceAction;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.*;
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /** 
  * Action for deleting elements in a delete target.
@@ -66,8 +57,8 @@ class JdtDeleteResourceAction extends ReorgAction {
 		try{
 			MultiStatus status= ReorgAction.perform(refactoring);
 			if (!status.isOK()) {
-				JavaUIException t= new JavaUIException(status);
-				ExceptionHandler.handle(t, "Delete", "Unexpected exception. See log for details.");
+				JavaPlugin.log(status);
+				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), "Delete", "Unexpected exception. See log for details.", status);
 			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, "Delete", "Unexpected exception. See log for details.");

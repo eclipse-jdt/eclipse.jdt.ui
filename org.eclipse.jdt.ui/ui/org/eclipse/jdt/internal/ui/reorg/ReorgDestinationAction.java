@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -52,7 +52,6 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
@@ -147,9 +146,8 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		MultiStatus status= perform(refactoring);
 		if (status.isOK()) 
 			return;
-		ExceptionHandler.handle(new JavaUIException(status), 
-													getActionName(), 
-													"An error occurred while reorganizing resources");
+		JavaPlugin.log(status);
+		ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), getActionName(), "An error occurred while reorganizing resources", status);
 	}	
 		
 	private static boolean ensureSaved(List elements, String actionName) {
