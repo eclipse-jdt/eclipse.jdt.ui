@@ -17,6 +17,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private Button fDefaultButton;
 	private SourceViewer fPreviewViewer;
 	private boolean fEraseStatusMessage;
+	private String fErrorMessage;
 		
 	private ConfigurableOption[] fNewOptions;
 		
@@ -25,6 +26,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private static IPreferenceStore fgPreferenceStore;
 
 	private static final int INDENTATION_LEVEL = 0;
+	private static final int TEXT_LIMIT=3;
 	
 	private final int TAB_CHECK_OPTION_ID=9;
 	private final int TAB_TEXT_OPTION_ID=10;
@@ -35,33 +37,43 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		{
 			public void modifyText(ModifyEvent e)
 			{
-			String errorMessage = null;
-			int newValue=0;
-			Text src= (Text) e.widget;
-			if (fTextOptions == null) return;
-			for (int i=0; i < fTextOptions.length; i++)
+				if (fTextOptions == null) return; 
+				Integer newValue = new Integer(0);
+				Text source = (Text)e.widget;
+				if (checkAllTextInputs(source))
+				{
+					ConfigurableOption option= retrieveOption(source);
+					option.setValueIndex(parseTextInput(source.getText()));
+					updatePreview(fNewOptions);
+				}
+		}
+	};
+	
+	private boolean checkAllTextInputs(Text source)
+	{
+		boolean valueOK = false;
+		fErrorMessage = null;
+		for (int i=0; i < fTextOptions.length; i++)
 			{
 				int val=0;
+				Text next = fTextOptions[i];
+				String text= next.getText();
 				try 
 				{
-					val = parseTextInput(fTextOptions[i].getText());
-					if (src == fTextOptions[i])
-						newValue = val;
-				} catch (NumberFormatException nex) {
-					errorMessage = new String("Error: " + fTextOptions[i].getText() + " is not valid number");
+					val = parseTextInput(text);
+					if (next == source)
+						valueOK = true;
+				} catch (NumberFormatException nx) {
+					if (text.equals(""))
+						fErrorMessage = new String("Empty Input");
+					else
+						fErrorMessage = new String(text + " is not a valid Input");
 				}	
 			}
-			setErrorMessage(errorMessage);
-			if (errorMessage != null)
-			{
-				return;
-			}
-			ConfigurableOption option= retrieveOption(src);
-			option.setValueIndex(newValue);
-			updatePreview(fNewOptions);
-		}
-		};
-		
+			setErrorMessage(fErrorMessage);
+			return valueOK;
+	}	
+	
 	private SelectionListener fButtonListener = new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
@@ -116,10 +128,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return OptionCategories;
 	}
 
-	/**
-	* Sorts categories in descending order
-	*/
-	 
+	
 	private static String[] sortCategories(Hashtable OptionCategories) {
 		ArrayList SortedOptionCategories= new ArrayList(OptionCategories.size());
 		Enumeration categories= OptionCategories.keys();
@@ -135,9 +144,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return (String[]) SortedOptionCategories.toArray(new String[1]);
 	}
 
-	/**
-	* Finds center of a sorted category array
-	*/
+	
 	
 	private static int findCategoryCenter(String[] SortedOptionCategories, Hashtable OptionCategories)
 	{
@@ -207,9 +214,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return btxt.toString();
 	}	
 
-	/**
-	* Choose one of the Simple, Category, OptimizedCategory or Custom Layouts
-	*/ 
 	
 	public Control createContents(Composite parent) {		
 		fMainPanel= new Composite(parent, SWT.NONE);
@@ -239,6 +243,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			fTextOptions[i].setText(String.valueOf(defaultValue));
 			option.setValueIndex(defaultValue);
 		}
+		updateTabWidgetDependency();
 		updatePreview(fNewOptions);
 	}
 
@@ -278,7 +283,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		panel.setLayoutData(gd);
 		panel.setLayout(gl);
 
-		// panel1
+		
 		Composite panel1= new Composite(panel, SWT.NONE);
 		GridLayout gl1= new GridLayout();
 		gl1.numColumns= 1;
@@ -293,7 +298,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		for (int i=0; i < categoryMiddle; i++)
 			createSingleCategory(panel1, (ConfigurableOption[])OptionCategories.get(SortedOptionCategories[i]), textOptions, checkOptions, SortedOptionCategories[i]);
 
-		//panel 2
+		
 		Composite panel2= new Composite(panel, SWT.NONE);
 		GridLayout gl2= new GridLayout();
 		gl2.numColumns= 1;
@@ -368,10 +373,11 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		flabel.setText(name);
 		flabel.setToolTipText(description);
 		Text text= new Text(pan, SWT.BORDER | SWT.SINGLE);
+		text.setTextLimit(TEXT_LIMIT);
 		text.setToolTipText(description);
 		text.setData("OPTION", option);
 		GridData gd= new GridData();
-		gd.widthHint= 25;
+		gd.widthHint= 20;
 		gd.horizontalAlignment= GridData.BEGINNING;
 		text.setLayoutData(gd);
 		text.addModifyListener(con); 
@@ -394,9 +400,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		gd.verticalAlignment= GridData.FILL;
 		gd.horizontalSpan=1;
 		gd.heightHint= 250;
-		//gd.widthHint= 400;
 		control.setLayoutData(gd);
-//		fPreviewViewer.setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
 		updatePreview(fNewOptions);
 	}
 
@@ -442,7 +446,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		{
 			if (retrieveOption(fTextOptions[i]).getID() == TAB_TEXT_OPTION_ID)
 			{
-				fTextOptions[i].setText(String.valueOf(retrieveOption(fTextOptions[i]).getDefaultValueIndex()));
 				fTextOptions[i].setEnabled(!value);
 				break;
 			}
@@ -454,7 +457,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		public void widgetSelected(SelectionEvent e) {
 			Button src= (Button) e.widget;
 			ConfigurableOption option=  retrieveOption(src);
-			int value = (src.getSelection() == true) ? 0: 1; // Dependant on CodeFormatter logic
+			int value = (src.getSelection() == true) ? 0: 1; // See CodeFormatter logic
 			option.setValueIndex(value);
 			if (option.getID() == TAB_CHECK_OPTION_ID)
 			{
@@ -464,25 +467,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		}
 	};
 
-	
-	
-/** 
-* For  testing
-*/
-	public static void main(String[] args) throws IOException {
-		Display display= new Display();
-		Shell shell= new Shell(display);
-		shell.setLayout(new RowLayout());
-		//CodeFormatterPreferencePage demo= new CodeFormatterPreferencePage();
-		//demo.createContents(shell);
-		shell.pack();
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
-		display.dispose();
-	}
 
 }
 
