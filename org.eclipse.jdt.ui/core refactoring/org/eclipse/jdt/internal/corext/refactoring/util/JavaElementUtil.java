@@ -1,6 +1,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -108,6 +110,15 @@ public class JavaElementUtil {
 		return (type.getCompilationUnit().getTypes().length == 1);
 	}
 
-	
+	public static IMethod[] getAllConstructors(IType type) throws JavaModelException {
+		List result= new ArrayList();
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			IMethod iMethod= methods[i];
+			if (iMethod.isConstructor())
+				result.add(iMethod);
+		}
+		return (IMethod[]) result.toArray(new IMethod[result.size()]);
+	}
 	
 }
