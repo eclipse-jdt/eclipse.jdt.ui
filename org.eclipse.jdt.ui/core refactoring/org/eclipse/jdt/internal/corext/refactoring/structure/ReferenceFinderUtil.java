@@ -125,14 +125,20 @@ public class ReferenceFinderUtil {
 		if (methodDeclaration == null)
 			return new HashSet(0);
 		Set result= new HashSet();	
-		result.add(methodDeclaration.getReturnType().resolveBinding());
+		ITypeBinding binding = methodDeclaration.getReturnType().resolveBinding();
+		if (binding != null)
+			result.add(binding);
 				
 		for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
-			result.add(((SingleVariableDeclaration) iter.next()).getType().resolveBinding()); 
+			binding = ((SingleVariableDeclaration)iter.next()).getType().resolveBinding();
+			if (binding != null)
+				result.add(binding); 
 		}
 			
 		for (Iterator iter= methodDeclaration.thrownExceptions().iterator(); iter.hasNext();) {
-			result.add(((Name) iter.next()).resolveTypeBinding());
+			binding = ((Name)iter.next()).resolveTypeBinding();
+			if (binding != null)
+				result.add(binding);
 		}
 		return result;
 	}
