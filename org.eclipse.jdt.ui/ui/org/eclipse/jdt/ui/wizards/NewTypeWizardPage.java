@@ -1401,7 +1401,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			
 			// add imports for superclass/interfaces, so types can be resolved correctly
-			imports.create(false, new SubProgressMonitor(monitor, 1));
+			boolean needsSave= !imports.getCompilationUnit().isWorkingCopy();
+			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
 	
 			ICompilationUnit cu= createdType.getCompilationUnit();	
 			synchronized(cu) {
@@ -1410,7 +1411,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			createTypeMembers(createdType, new ImportsManager(imports), new SubProgressMonitor(monitor, 1));
 	
 			// add imports
-			imports.create(false, new SubProgressMonitor(monitor, 1));
+			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
 			
 			synchronized(cu) {
 				cu.reconcile();
@@ -1428,6 +1429,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				}
 				cu.commit(false, new SubProgressMonitor(monitor, 1));
 			} else {
+				if (needsSave) {
+					buf.save(null, false);
+				}
 				monitor.worked(1);
 			}
 			fCreatedType= createdType;
