@@ -397,7 +397,8 @@ public final class ASTProvider {
 	private void markAsUnmodifiable(CompilationUnit root) {
 		root.accept(new GenericVisitor() {
 			protected boolean visitNode(ASTNode node) {
-				node.setFlags(ASTNode.PROTECT);
+				int flags= node.getFlags();
+				node.setFlags(flags | ASTNode.PROTECT);
 				return true;
 			}
 		});
