@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
@@ -241,9 +242,24 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	 * @see ICodeCompletionRequestor#acceptMethodDeclaration
 	 */
 	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		// XXX: To be revised
-		JavaCompletionProposal proposal= createMethodDeclarationCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
+		StringBuffer displayString= getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName);
+	
+		StringBuffer typeName= new StringBuffer();
+		if (declaringTypePackageName.length > 0) {
+			typeName.append(declaringTypePackageName);
+			typeName.append('.');
+		}
+		typeName.append(declaringTypeName);
+		
+		String[] paramTypes= new String[parameterTypeNames.length];
+		for (int i= 0; i < parameterTypeNames.length; i++) {
+			paramTypes[i]= Signature.createTypeSignature(parameterTypeNames[i], true);
+		}
 
+		JavaCompletionProposal proposal= new MethodStubCompletionProposal(fJavaProject, fCompilationUnit, typeName.toString(), new String(name), paramTypes, start, getLength(start, end), displayString.toString(), new String(completionName));
+		proposal.setImage(fRegistry.get(getMemberDescriptor(modifiers)));
+		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
+		proposal.setRelevance(relevance);
 		fMethods.add(proposal);
 	}
 	
@@ -315,11 +331,6 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString(), relevance);
 	}
 
-	protected JavaCompletionProposal createMethodDeclarationCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		ImageDescriptor descriptor= getMemberDescriptor(modifiers);
-		StringBuffer nameBuffer= getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName);
-		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString(), relevance);
-	}
 
 	protected JavaCompletionProposal createAnonymousTypeCompletion(char[] declaringTypePackageName, char[] declaringTypeName, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int start, int end, int relevance) {
 		StringBuffer declTypeBuf= new StringBuffer();
@@ -394,6 +405,11 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	}
 	
 	protected JavaCompletionProposal createCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name, int relevance) {
+		Image icon= (descriptor == null) ? null : fRegistry.get(descriptor);
+		return new JavaCompletionProposal(completion, start, getLength(start, end), icon, name, relevance);
+	}
+
+	private int getLength(int start, int end) {
 		int length;
 		if (fUserReplacementLength == -1) {
 			length= fPreventEating ? fCodeAssistOffset - start : end - start;
@@ -404,9 +420,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 				length+= fCodeAssistOffset - start;
 			}
 		}
-
-		Image icon= (descriptor == null) ? null : fRegistry.get(descriptor);
-		return new JavaCompletionProposal(completion, start, length, icon, name, relevance);
+		return length;
 	}
 	
 	/**
