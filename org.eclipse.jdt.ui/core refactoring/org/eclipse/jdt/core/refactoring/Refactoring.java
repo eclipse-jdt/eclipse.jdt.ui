@@ -68,6 +68,7 @@ public abstract class Refactoring implements IRefactoring {
 	/**
 	 * Checks if this refactoring can be activated.
 	 * Typically, this is used in the ui to check if a corresponding menu entry should be shown.
+	 * Must not return <code>null</code>.
 	 */ 
 	public abstract RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException;
 
@@ -77,6 +78,7 @@ public abstract class Refactoring implements IRefactoring {
 	 * Typically, this is used in the ui after the user has pressed 'next' on the last user input page.
 	 * This method is always called after <code>checkActivation</code> and only if the status returned by
 	 * <code>checkActivation</code> <code>isOK</code>.
+	 * Must not return <code>null</code>.
 	 * @see #checkActivation
 	 * @see RefactoringStatus#isOK
 	 */ 		
