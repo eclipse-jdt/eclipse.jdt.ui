@@ -227,10 +227,11 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	private void previous() {
 		redrawRegion();
 		
-		fFramePosition= fManager.getPreviousPosition(fFramePosition.getOffset());
-		if (fFramePosition == null) {
+		Position position= fManager.getPreviousPosition(fFramePosition.getOffset());
+		if (position == null) {
 			fViewer.getTextWidget().getDisplay().beep();
 		} else {
+			fFramePosition= position;
 			selectRegion();
 			redrawRegion();
 		}				
