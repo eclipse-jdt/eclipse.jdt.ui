@@ -47,7 +47,7 @@ public class AddUnimplementedConstructorsAction extends Action {
 		setToolTipText(JavaUIMessages.getString("AddUnimplementedConstructorsAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION });
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION });
 		
 	}
 
