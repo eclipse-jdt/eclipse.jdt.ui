@@ -176,7 +176,7 @@ public class GoToNextPreviousMemberAction extends Action {
 			while (token != ITerminalSymbols.TokenNameEOF && token != ITerminalSymbols.TokenNameLBRACE)
 				token= scanner.getNextToken();
 			if (token == ITerminalSymbols.TokenNameLBRACE)
-				return iInitializer.getSourceRange().getOffset() + scanner.getCurrentTokenStartPosition() + scanner.getCurrentTokenSource().length;
+				return iInitializer.getSourceRange().getOffset() + scanner.getCurrentTokenStartPosition() + scanner.getRawTokenSource().length;
 			return iInitializer.getSourceRange().getOffset();
 		} catch (InvalidInputException e) {
 			return iInitializer.getSourceRange().getOffset();
