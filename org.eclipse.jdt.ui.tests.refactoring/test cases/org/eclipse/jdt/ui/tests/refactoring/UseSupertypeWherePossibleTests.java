@@ -19,7 +19,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -65,14 +66,15 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 	private void validatePassingTest(String className, String[] cuNames, String superTypeFullName, boolean updateInstanceOf) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 				
-		UseSupertypeWherePossibleRefactoring ref= UseSupertypeWherePossibleRefactoring.create(clas);
-		ref.setUseSupertypeInInstanceOf(updateInstanceOf);
+		UseSuperTypeRefactoring ref= UseSuperTypeRefactoring.create(clas);
+		UseSuperTypeProcessor processor= ref.getUseSuperTypeProcessor();
+		processor.setInstanceOf(updateInstanceOf);
 			
 		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
 		for (int i= 0; i < cuNames.length; i++) {
 			cus[i]= createCUfromTestFile(clas.getPackageFragment(), cuNames[i]);			
 		}
-		ref.setSuperTypeToUse(JavaModelUtil.findType(clas.getJavaProject(), superTypeFullName));
+		processor.setSuperType(JavaModelUtil.findType(clas.getJavaProject(), superTypeFullName));
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 
 		for (int i= 0; i < cus.length; i++) {
@@ -325,8 +327,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
 	}
 	public void test21() throws Exception{
-		//disable for exceptions
-//		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
+		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
 	}
 	public void test22() throws Exception{
 		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
