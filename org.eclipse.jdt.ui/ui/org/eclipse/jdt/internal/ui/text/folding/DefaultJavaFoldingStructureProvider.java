@@ -122,6 +122,15 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		}
 	}
 	
+	private static final class Tuple {
+		JavaProjectionAnnotation annotation;
+		Position position;
+		Tuple(JavaProjectionAnnotation annotation, Position position) {
+			this.annotation= annotation;
+			this.position= position;
+		}
+	}
+	
 	private class ElementChangedListener implements IElementChangedListener {
 		
 		/*
@@ -594,32 +603,36 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			
 			Iterator e= updated.keySet().iterator();
 			while (e.hasNext()) {
-				JavaProjectionAnnotation annotation= (JavaProjectionAnnotation) e.next();
-				IJavaElement element= annotation.getElement();
-				Position position= (Position) updated.get(annotation);
+				JavaProjectionAnnotation newAnnotation= (JavaProjectionAnnotation) e.next();
+				IJavaElement element= newAnnotation.getElement();
+				Position newPosition= (Position) updated.get(newAnnotation);
 				
 				List annotations= (List) previous.get(element);
 				if (annotations == null) {
 					
-					additions.put(annotation, position);
+					additions.put(newAnnotation, newPosition);
 					
 				} else {
 					Iterator x= annotations.iterator();
+					boolean matched= false;
 					while (x.hasNext()) {
-						Object[] annotationPosition= (Object[]) x.next();
-						JavaProjectionAnnotation a= (JavaProjectionAnnotation) annotationPosition[0];
-						Position p= (Position) annotationPosition[1];
-						if (annotation.isComment() == a.isComment()) {
-							if (p != null && (!position.equals(p) || a.getCaptionOffset() != annotation.getCaptionOffset())) {
-								p.setOffset(position.getOffset());
-								p.setLength(position.getLength());
-								annotation.setCaptionOffset(a.getCaptionOffset());
-								updates.add(a);
+						Tuple tuple= (Tuple) x.next();
+						JavaProjectionAnnotation existingAnnotation= tuple.annotation;
+						Position existingPosition= tuple.position;
+						if (newAnnotation.isComment() == existingAnnotation.isComment()) {
+							if (existingPosition != null && (!newPosition.equals(existingPosition) || existingAnnotation.getCaptionOffset() != newAnnotation.getCaptionOffset())) {
+								existingPosition.setOffset(newPosition.getOffset());
+								existingPosition.setLength(newPosition.getLength());
+								existingAnnotation.setCaptionOffset(newAnnotation.getCaptionOffset());
+								updates.add(existingAnnotation);
 							}
+							matched= true;
 							x.remove();
 							break;
 						}
 					}
+					if (!matched)
+						additions.put(newAnnotation, newPosition);
 										
 					if (annotations.isEmpty())
 						previous.remove(element);
@@ -631,7 +644,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				List list= (List) e.next();
 				int size= list.size();
 				for (int i= 0; i < size; i++)
-					deletions.add(((Object[]) list.get(i))[0]);
+					deletions.add(((Tuple) list.get(i)).annotation);
 			}
 			
 			match(model, deletions, additions, updates);
@@ -725,18 +738,19 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			if (annotation instanceof JavaProjectionAnnotation) {
 				JavaProjectionAnnotation java= (JavaProjectionAnnotation) annotation;
 				Position position= model.getPosition(java);
+				Assert.isNotNull(position);
 				List list= (List) map.get(java.getElement());
 				if (list == null) {
 					list= new ArrayList(2);
 					map.put(java.getElement(), list);
 				}
-				list.add(new Object[] {java, position});
+				list.add(new Tuple(java, position));
 			}
 		}
 		
 		Comparator comparator= new Comparator() {
 			public int compare(Object o1, Object o2) {
-				return ((Position)((Object[]) o1)[1]).getOffset() - ((Position)((Object[]) o2)[1]).getOffset();
+				return ((Tuple) o1).position.getOffset() - ((Tuple) o2).position.getOffset();
 			}
 		};
 		for (Iterator it= map.values().iterator(); it.hasNext();) {
