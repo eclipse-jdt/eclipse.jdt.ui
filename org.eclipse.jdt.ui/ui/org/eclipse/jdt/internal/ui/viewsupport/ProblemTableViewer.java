@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  */
 public class ProblemTableViewer extends TableViewer {
 
-	private ResourceToItemsMapper fResourceToItemsMapper;
+	protected ResourceToItemsMapper fResourceToItemsMapper;
 
 	/**
 	 * Constructor for ProblemTableViewer.

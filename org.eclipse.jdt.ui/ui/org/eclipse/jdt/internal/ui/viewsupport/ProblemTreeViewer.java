@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  */
 public class ProblemTreeViewer extends TreeViewer {
 
-	private ResourceToItemsMapper fResourceToItemsMapper;
+	protected ResourceToItemsMapper fResourceToItemsMapper;
 
 	/*
 	 * @see TreeViewer#TreeViewer(Composite)
