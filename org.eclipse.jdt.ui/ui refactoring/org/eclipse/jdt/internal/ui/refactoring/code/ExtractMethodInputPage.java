@@ -46,6 +46,8 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		result.setLayout(layout);
 		RowLayouter layouter= new RowLayouter(2);
 		
+		initializeDialogUnits(result);
+		
 		Label label= new Label(result, SWT.NONE);
 		label.setText(getLabelText());
 		
