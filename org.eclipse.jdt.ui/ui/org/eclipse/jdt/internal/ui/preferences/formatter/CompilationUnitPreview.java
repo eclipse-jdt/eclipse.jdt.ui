@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IContentFormatter;
-import org.eclipse.jface.text.formatter.IContentFormatterExtension2;
+import org.eclipse.jface.text.formatter.IContentFormatterExtension;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
@@ -53,8 +53,8 @@ public class CompilationUnitPreview extends JavaPreview {
 		final IFormattingContext context = new CommentFormattingContext();
 		try {
 			final IContentFormatter formatter =	fViewerConfiguration.getContentFormatter(fSourceViewer);
-			if (formatter instanceof IContentFormatterExtension2) {
-				final IContentFormatterExtension2 extension = (IContentFormatterExtension2) formatter;
+			if (formatter instanceof IContentFormatterExtension) {
+				final IContentFormatterExtension extension = (IContentFormatterExtension) formatter;
 				context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, fWorkingValues);
 				context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(true));
 				extension.format(fPreviewDocument, context);
