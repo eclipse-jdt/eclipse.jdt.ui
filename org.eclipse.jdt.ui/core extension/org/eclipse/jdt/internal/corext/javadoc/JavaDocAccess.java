@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
@@ -58,13 +59,19 @@ public class JavaDocAccess {
 			scanner.setSource(buf.getCharacters());
 			scanner.resetTo(start, start + length - 1);
 			try {
+				int docOffset= -1;
+				int docEnd= -1;
+				
 				int terminal= scanner.getNextToken();
-				while (terminal == ITerminalSymbols.TokenNameCOMMENT_LINE || terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK)
+				while (TokenScanner.isComment(terminal)) {
+					if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
+						docOffset= scanner.getCurrentTokenStartPosition();
+						docEnd= scanner.getCurrentTokenEndPosition() + 1;
+					}
 					terminal= scanner.getNextToken();
-				if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
-					start= scanner.getCurrentTokenStartPosition();
-					int end= scanner.getCurrentTokenEndPosition() + 1;
-					return new JavaDocCommentReader(buf, start, end);
+				}
+				if (docOffset != -1) {
+					return new JavaDocCommentReader(buf, docOffset, docEnd);
 				}
 			} catch (InvalidInputException ex) {
 				// try if there is inherited Javadoc
@@ -122,31 +129,6 @@ public class JavaDocAccess {
 		
 		return null;
 	}
-	
-	/**
-	 * Returns a JavaDoc tags for a comment at the given location. <code>null</code> is returned if the openable
-	 * has no source attached.
-	 */
-	public static JavaDocTag[] getJavaDocTags(IOpenable openable, int offset, int length) throws JavaModelException {
-		IBuffer buffer= openable.getBuffer();
-		if (buffer != null) {
-			return JavaDocTag.createFromComment(new JavaDocCommentReader(buffer, offset, offset + length));
-		}
-		return null;
-	}
-		
-	
-	/**
-	 * Returns a IMember's JavaDoc tags. <code>null</code> is returned if the member 
-	 * does not contain a JavaDoc comment or if no source is available.
-	 */
-	public static JavaDocTag[] getJavaDocTags(IMember member, boolean allowInherited) throws JavaModelException {
-		JavaDocCommentReader rd= getJavaDoc(member, allowInherited);
-		if (rd != null)
-			return JavaDocTag.createFromComment(rd);
-		
-		return null;
-	}	
 	
 
 }
