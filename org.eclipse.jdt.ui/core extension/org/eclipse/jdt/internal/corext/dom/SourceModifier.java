@@ -19,7 +19,6 @@ import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.ISourceModifier;
 import org.eclipse.jdt.internal.corext.textmanipulation.Regions;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -35,14 +34,25 @@ public abstract class SourceModifier implements ISourceModifier {
 	private int fTabWidth;
 	
 	private static class CopyModifier extends SourceModifier {
+		
+		public CopyModifier(int sourceIndentLevel, String destinationIndent, int tabWidth) {
+			super(sourceIndentLevel, destinationIndent, tabWidth);
+		}
+		
 		/* package */ void insertEdits(TextEdit root, List edits) {
 			for (Iterator iter= edits.iterator(); iter.hasNext();) {
 				root.add((TextEdit)iter.next());
 			}
 		}
+
 	}
 	
 	private static class MoveModifier extends SourceModifier {
+		
+		public MoveModifier(int sourceIndentLevel, String destinationIndent, int tabWidth) {
+			super(sourceIndentLevel, destinationIndent, tabWidth);
+		}
+		
 		/* package */ void insertEdits(TextEdit root, List edits) {
 			while(edits.size() > 0) {
 				SimpleTextEdit edit= (SimpleTextEdit)edits.remove(0);
@@ -103,32 +113,26 @@ public abstract class SourceModifier implements ISourceModifier {
 				editRange.getLength() - intersect.getLength());
 			return result;
 		}
+
+
 	}
 	
-	public static SourceModifier createCopyModifier() {
-		return new CopyModifier();
-	}
-	
-	public static SourceModifier createMoveModifier() {
-		return new MoveModifier();
-	}
-	
-	public static SourceModifier createMoveModifier(int sourceIndentLevel, String destIndentString, int tabWidth) {
-		SourceModifier result= new MoveModifier();
-		result.initialize(sourceIndentLevel, destIndentString, tabWidth);
-		return result;
-	}
-	
-	public void initialize(int sourceIndentLevel, String destIndentString, int tabWidth) {
+	public SourceModifier(int sourceIndentLevel, String destinationIndent, int tabWidth) {
+		super();
+		fDestinationIndent= destinationIndent;
 		fSourceIndentLevel= sourceIndentLevel;
-		fDestinationIndent= destIndentString;
 		fTabWidth= tabWidth;
 	}
-	public boolean isInitialized() {
-		return fSourceIndentLevel != -1;
+	
+	public static SourceModifier createCopyModifier(int sourceIndentLevel, String destIndentString, int tabWidth) {
+		return new CopyModifier(sourceIndentLevel, destIndentString, tabWidth);
 	}
+		
+	public static SourceModifier createMoveModifier(int sourceIndentLevel, String destIndentString, int tabWidth) {
+		return new MoveModifier(sourceIndentLevel, destIndentString, tabWidth);
+	}
+	
 	public void addEdits(String source, TextEdit root) {
-		Assert.isTrue(isInitialized(), "CopyIndentedSourceEdit never initialized"); //$NON-NLS-1$
 		List edits= createChangeIndentEdits(source);
 		insertEdits(root, edits);
 	}

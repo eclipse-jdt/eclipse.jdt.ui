@@ -26,8 +26,10 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite.CopyPlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.MovePlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.StringPlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteFormatter.NodeMarker;
+import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
+import org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
@@ -119,29 +121,29 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return range;
 	}
 	
-	final private CopyIndentedSourceEdit[] getCopySources(ASTNode node) {
+	final private CopySourceEdit[] getCopySources(ASTNode node) {
 		int count= fRewrite.getCopyCount(node);
 		if (count == 0) {
 			return null;
 		}
-		CopyIndentedSourceEdit[] edits= (CopyIndentedSourceEdit[]) fCopySources.get(node);
+		CopySourceEdit[] edits= (CopySourceEdit[]) fCopySources.get(node);
 		if (edits == null) {
-			edits= new CopyIndentedSourceEdit[count];
+			edits= new CopySourceEdit[count];
 			ISourceRange range= getNodeRange(node, -1);
 			for (int i= 0; i < count; i++) {
-				edits[i]= new CopyIndentedSourceEdit(range.getOffset(), range.getLength());
+				edits[i]= new CopySourceEdit(range.getOffset(), range.getLength());
 			}
 			fCopySources.put(node, edits);
 		}
 		return edits;
 	}
 	
-	final private MoveIndentedSourceEdit getMoveSource(ASTNode node) {
+	final private MoveSourceEdit getMoveSource(ASTNode node) {
 		if (isMoveSource(node)) {
-			MoveIndentedSourceEdit edit= (MoveIndentedSourceEdit) fMoveSources.get(node);
+			MoveSourceEdit edit= (MoveSourceEdit) fMoveSources.get(node);
 			if (edit == null) {
 				ISourceRange range= getNodeRange(node, -1);
-				edit= new MoveIndentedSourceEdit(range.getOffset(), range.getLength());
+				edit= new MoveSourceEdit(range.getOffset(), range.getLength());
 			}
 			fMoveSources.put(node, edit);
 			return edit;
@@ -273,13 +275,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 		
 	final TextEdit doTextCopy(ASTNode copiedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, GroupDescription description) {
-		CopyIndentedSourceEdit[] edits= getCopySources(copiedNode);
+		CopySourceEdit[] edits= getCopySources(copiedNode);
 		if (edits == null) {
 			Assert.isTrue(false, "Copy source not annotated" + copiedNode.toString()); //$NON-NLS-1$
 		}
-		CopyIndentedSourceEdit sourceEdit= null;
+		CopySourceEdit sourceEdit= null;
 		for (int i= 0; i < edits.length; i++) {
-			if (!edits[i].isInitialized()) {
+			if (edits[i].getSourceModifier() == null) {
 				sourceEdit= edits[i];
 				break;
 			}
@@ -288,7 +290,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			Assert.isTrue(false, "No copy source available" + copiedNode.toString()); //$NON-NLS-1$
 		}
 
-		sourceEdit.initialize(sourceIndentLevel, destIndentString, tabWidth);
+		sourceEdit.setSourceModifier(SourceModifier.createCopyModifier(sourceIndentLevel, destIndentString, tabWidth));
 	
 		CopyTargetEdit targetEdit= new CopyTargetEdit(destOffset, sourceEdit);
 		addEdit(targetEdit);
@@ -302,11 +304,12 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	final TextEdit doTextMove(ASTNode movedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, GroupDescription description) {
-		MoveIndentedSourceEdit moveEdit= getMoveSource(movedNode);
-		if (moveEdit.isInitialized()) {
+		MoveSourceEdit moveEdit= getMoveSource(movedNode);
+		if (moveEdit.getSourceModifier() != null) {
 			Assert.isTrue(false, "No move source available" + movedNode.toString()); //$NON-NLS-1$
-		}		
-		moveEdit.initialize(sourceIndentLevel, destIndentString, tabWidth);
+		}
+		
+		moveEdit.setSourceModifier(SourceModifier.createMoveModifier(sourceIndentLevel, destIndentString, tabWidth));
 	
 		MoveTargetEdit targetEdit= new MoveTargetEdit(destOffset, moveEdit);
 		addEdit(targetEdit);
