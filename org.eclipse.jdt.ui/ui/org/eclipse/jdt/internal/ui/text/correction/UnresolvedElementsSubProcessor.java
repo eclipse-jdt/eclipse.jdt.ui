@@ -18,9 +18,12 @@ import java.util.List;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,38 +31,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.ui.ISharedImages;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -69,8 +44,8 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -79,9 +54,6 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.SwapDescription;
-
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class UnresolvedElementsSubProcessor {
 	
@@ -654,6 +626,34 @@ public class UnresolvedElementsSubProcessor {
 		}
 		return buf.toString();
 	}
+	
+	private static String getArgumentName(ICompilationUnit cu, List arguments, int index) {
+		String def= String.valueOf(index + 1);
+		
+		ASTNode expr= (ASTNode) arguments.get(index);
+		if (expr.getLength() > 18) {
+			return def;
+		}
+		try {
+			String str= cu.getBuffer().getText(expr.getStartPosition(), expr.getLength());
+			for (int i= 0; i < str.length(); i++) {
+				if (Strings.isLineDelimiterChar(str.charAt(i))) {
+					return def;
+				}
+			}
+			ASTMatcher matcher= new ASTMatcher();
+			for (int i= 0; i < arguments.size(); i++) {
+				if (i != index && matcher.safeSubtreeMatch(expr, arguments.get(i))) {
+					return def;
+				}
+			}
+			return '\'' + str + '\'';
+			
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return def;
+	}
 
 	private static void doMoreArguments(IInvocationContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
@@ -835,7 +835,7 @@ public class UnresolvedElementsSubProcessor {
 			ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.getCastProposal(context, castType, nodeToCast, 6);
 			if (proposal != null) { // null returned when no cast is possible
 				proposals.add(proposal);
-				String[] arg= new String[] { String.valueOf(idx + 1), castType };
+				String[] arg= new String[] { getArgumentName(cu, arguments, idx), castType };
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addargumentcast.description", arg)); //$NON-NLS-1$
 			}
 		}
@@ -851,7 +851,7 @@ public class UnresolvedElementsSubProcessor {
 				rewrite.markAsReplaced(arg1, rewrite.createCopy(arg2));
 				rewrite.markAsReplaced(arg2, rewrite.createCopy(arg1));
 				{
-					String[] arg= new String[] { String.valueOf(idx1 + 1), String.valueOf(idx2 + 1) };
+					String[] arg= new String[] { getArgumentName(cu, arguments, idx1), getArgumentName(cu, arguments, idx2) };
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swaparguments.description", arg); //$NON-NLS-1$
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
@@ -866,7 +866,7 @@ public class UnresolvedElementsSubProcessor {
 						for (int i= 0; i < nDiffs; i++) {
 							changeDesc[idx1]= new SwapDescription(idx2);
 						}
-						ITypeBinding[] swappedTypes= new ITypeBinding[] { argTypes[idx1], paramTypes[idx2] };
+						ITypeBinding[] swappedTypes= new ITypeBinding[] { paramTypes[idx1], paramTypes[idx2] };
 						String[] args=  new String[] { getMethodSignature(methodBinding, !targetCU.equals(cu)), getTypeNames(swappedTypes) };
 						String label;
 						if (methodBinding.isConstructor()) {
