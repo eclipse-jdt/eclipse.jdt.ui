@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
+import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -954,7 +955,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						modifyImplicitCallsToNoArgConstructor(subtypeNode, rewrite);
 				}
 			}
-			addTextEditFromRewrite(manager, cu, rewrite, importRewrite);
+			addTextEditFromRewrite(manager, cu, rewrite);
+			addImportEdit(manager, cu, importRewrite);
 		}
 		
 		pm.done();
@@ -1066,17 +1068,25 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
 	
-	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite, ImportRewrite importRewrite) throws CoreException {
+	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdits= new MultiTextEdit();
 		rewrite.rewriteNode(textBuffer, resultingEdits);
-		importRewrite.rewrite(textBuffer, resultingEdits);
 
-		if (resultingEdits.hasChildren() || manager.containsChangesIn(cu)) {
+		if (resultingEdits.hasChildren()) {
 		    TextChange textChange= manager.get(cu);
 		    TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
 		}
 		rewrite.removeModifications();
+	}
+	
+	private void addImportEdit(TextChangeManager manager, ICompilationUnit cu, ImportRewrite importRewrite) throws CoreException {
+		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
+		TextEdit resultingEdits= importRewrite.createEdit(textBuffer);
+		if (! importRewrite.isEmpty()) {
+		    TextChange textChange= manager.get(cu);
+		    TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ChangeSignatureRefactoring.add_imports"), resultingEdits); //$NON-NLS-1$
+		}
 	}
 	
 	private static Expression createNewExpression(ASTRewrite rewrite, ParameterInfo info) {
@@ -1150,8 +1160,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		public abstract void updateNode() throws JavaModelException;
 		
 		protected final void reshuffleElements() {
-			List elementList= getParamguments();
-			ASTNode[] nodes= (ASTNode[]) elementList.toArray(new ASTNode[elementList.size()]);
+			List paramguments= getParamguments();
+			ASTNode[] nodes= (ASTNode[]) paramguments.toArray(new ASTNode[paramguments.size()]);
 			
 			// remove surplus nodes in rewrite (from end):
 			deleteExcessiveElements(nodes);
@@ -1164,7 +1174,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
 				
 				if (info.isAdded())
-					newPermutation[i]= createNewElementForList(info);
+					newPermutation[i]= createNewParamgument(info);
 				 else if (info.getOldIndex() != i)
 				 	if (fRewrite.isReplaced(nodes[info.getOldIndex()])) // if actual argument already changed ...
 						newPermutation[i]= fRewrite.getReplacingNode(nodes[info.getOldIndex()]);
@@ -1184,11 +1194,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			for (int i= nodes.length; i < newPermutation.length; i++) {
 				ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
 				if (info.isAdded()){
-					ASTNode newElement= createNewElementForList(info);
-					elementList.add(i, newElement);
+					ASTNode newElement= createNewParamgument(info);
+					paramguments.add(i, newElement);
 					fRewrite.markAsInserted(newElement);
 				} else {
-					elementList.add(i, newPermutation[i]);
+					paramguments.add(i, newPermutation[i]);
 					fRewrite.markAsInserted(newPermutation[i]);
 				}	
 			}
@@ -1197,13 +1207,40 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		/** @return List of parameters or arguments */
 		protected abstract List getParamguments();
 
+		protected final void changeParamguments() {
+			for (Iterator iter= getParameterInfos().iterator(); iter.hasNext();) {
+				ParameterInfo info= (ParameterInfo) iter.next();
+				if (info.isAdded() || info.isDeleted())
+					continue;
+				
+				if (info.isRenamed())
+					changeParamgumentName(info);
+		
+				if (info.isTypeNameChanged())
+					changeParamgumentType(info);
+			}
+		}
+
+		protected void changeParamgumentName(ParameterInfo info) {
+			// no-op
+		}
+
+		protected void changeParamgumentType(ParameterInfo info) {
+			// no-op
+		}
+
+		protected final void replaceTypeNode(Type typeNode, String newTypeName){
+			Type newTypeNode= createNewTypeNode(newTypeName);
+			fRewrite.markAsReplaced(typeNode, newTypeNode);
+		}
+	
 		private void deleteExcessiveElements(ASTNode[] nodes) {
 			for (int i= getNotDeletedInfos().size(); i < nodes.length; i++) {
 				fRewrite.markAsRemoved(nodes[i]);
 			}
 		}
 
-		protected abstract ASTNode createNewElementForList(ParameterInfo info);
+		protected abstract ASTNode createNewParamgument(ParameterInfo info);
 
 		protected abstract SimpleName getMethodNameNode();
 
@@ -1214,9 +1251,30 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				fRewrite.markAsReplaced(nameNode, newNameNode);
 			}
 		}
+
+		protected final Type createNewTypeNode(String newTypeName) {
+			String elementTypeName= getElementTypeName(newTypeName);
+			String importedTypeName= fImportRewrite.addImport(elementTypeName);
+			int dimensions= getArrayDimensions(newTypeName);
+			
+			Type newTypeNode= (Type) fRewrite.createPlaceholder(importedTypeName, ASTRewrite.TYPE);
+			if (dimensions != 0)
+				newTypeNode= fRewrite.getAST().newArrayType(newTypeNode, dimensions);
+			return newTypeNode;
+		}
+
+		private int getArrayDimensions(String typeName) {
+			int dims= 0;
+			for (int i= 0; i < typeName.length(); i++) {
+				if (typeName.charAt(i) == '[')
+					dims++;
+			}
+			return dims;
+		}
 	}
 	
 	class ReferenceUpdate extends OccurrenceUpdate {
+		/** isReferenceNode(fNode) */
 		private ASTNode fNode; //XXX: IInvocation? See bug 53586.
 
 		protected ReferenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
@@ -1230,10 +1288,25 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 
 		protected List getParamguments() {
-			return getArguments(fNode);
+			if (fNode instanceof MethodInvocation)	
+				return ((MethodInvocation) fNode).arguments();
+				
+			if (fNode instanceof SuperMethodInvocation)	
+				return ((SuperMethodInvocation) fNode).arguments();
+				
+			if (fNode instanceof ClassInstanceCreation)	
+				return ((ClassInstanceCreation) fNode).arguments();
+				
+			if (fNode instanceof ConstructorInvocation)	
+				return ((ConstructorInvocation) fNode).arguments();
+				
+			if (fNode instanceof SuperConstructorInvocation)	
+				return ((SuperConstructorInvocation) fNode).arguments();
+				
+			return new ArrayList(0);
 		}
-
-		protected ASTNode createNewElementForList(ParameterInfo info) {
+		
+		protected ASTNode createNewParamgument(ParameterInfo info) {
 			if (isRecursiveReference())
 				return createNewExpressionRecursive(info);
 			else
@@ -1299,34 +1372,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return Bindings.equals(m1.getParameterTypes(), m2.getParameterTypes());
 		}
 
-		private List getArguments(ASTNode node) {
-			if (node instanceof SimpleName && node.getParent() instanceof MethodInvocation)
-				return ((MethodInvocation)node.getParent()).arguments();
-				
-			if (node instanceof SimpleName && node.getParent() instanceof SuperMethodInvocation)
-				return ((SuperMethodInvocation)node.getParent()).arguments();
-				
-			if (node instanceof SimpleName && node.getParent() instanceof ClassInstanceCreation)
-				return ((ClassInstanceCreation)node.getParent()).arguments();
-				
-			if (node instanceof MethodInvocation)	
-				return ((MethodInvocation)node).arguments();
-				
-			if (node instanceof SuperMethodInvocation)	
-				return ((SuperMethodInvocation)node).arguments();
-				
-			if (node instanceof ClassInstanceCreation)	
-				return ((ClassInstanceCreation)node).arguments();
-				
-			if (node instanceof ConstructorInvocation)	
-				return ((ConstructorInvocation)node).arguments();
-				
-			if (node instanceof SuperConstructorInvocation)	
-				return ((SuperConstructorInvocation)node).arguments();
-				
-			return null;	
-		}
-
 	}
 
 	class DeclarationUpdate extends OccurrenceUpdate {
@@ -1340,17 +1385,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 
 		public void updateNode() throws JavaModelException {
-			changeParameterNames();
+			changeParamguments();
+			
 			if (canChangeNameAndReturnType()) {
 				changeMethodName();
 				changeReturnType();
 			}
-			changeParameterTypes();
 					
 			if (needsVisibilityUpdate())
 				changeVisibility();
 			reshuffleElements();
 			changeExceptions();
+			
+			//TODO: update tags in javadoc: @param, @return, @exception, @throws, ...
 			
 			checkIfDeletedParametersUsed();
 		}
@@ -1359,45 +1406,30 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return fMethDecl.parameters();
 		}
 
-		private void changeParameterNames() {
-			for (Iterator iterator = getParameterInfos().iterator(); iterator.hasNext();) {
-				ParameterInfo info= (ParameterInfo)iterator.next();
-				if (info.isAdded() || ! info.isRenamed())
-					continue;
-				SingleVariableDeclaration param= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
-				if (! info.getOldName().equals(param.getName().getIdentifier())) {
-					continue; //don't change if original parameter name != name in rippleMethod
-				}
-				ASTNode[] paramOccurrences= TempOccurrenceFinder.findTempOccurrenceNodes(param, true, true);
-				for (int j= 0; j < paramOccurrences.length; j++) {
-					ASTNode occurence= paramOccurrences[j];
-					if (occurence instanceof SimpleName){
-						SimpleName newName= occurence.getAST().newSimpleName(info.getNewName());
-						fRewrite.markAsReplaced(occurence, newName);
-					}
+		protected void changeParamgumentName(ParameterInfo info) {
+			SingleVariableDeclaration param= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
+			if (! info.getOldName().equals(param.getName().getIdentifier()))
+				return; //don't change if original parameter name != name in rippleMethod
+
+			ASTNode[] paramOccurrences= TempOccurrenceFinder.findTempOccurrenceNodes(param, true, true);
+			for (int j= 0; j < paramOccurrences.length; j++) {
+				ASTNode occurence= paramOccurrences[j];
+				if (occurence instanceof SimpleName){
+					SimpleName newName= occurence.getAST().newSimpleName(info.getNewName());
+					fRewrite.markAsReplaced(occurence, newName);
 				}
 			}
 		}
 		
+		protected void changeParamgumentType(ParameterInfo info) {
+			SingleVariableDeclaration oldParam= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
+			replaceTypeNode(oldParam.getType(), info.getNewTypeName());
+			removeExtraDimensions(oldParam);
+		}
+
 		private void changeReturnType() throws JavaModelException {
 		    if (! isReturnTypeSameAsInitial())
 		        replaceTypeNode(fMethDecl.getReturnType(), fReturnTypeName);
-		}
-	
-		private void changeParameterTypes() {
-			for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
-				ParameterInfo info= (ParameterInfo) iter.next();
-				if (! info.isAdded() && ! info.isDeleted() && info.isTypeNameChanged()){
-					SingleVariableDeclaration oldParam= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
-					replaceTypeNode(oldParam.getType(), info.getNewTypeName());
-					removeExtraDimensions(oldParam);
-				}
-			}
-		}
-	
-		private void replaceTypeNode(Type typeNode, String newTypeName){
-			Type newTypeNode= createNewTypeNode(newTypeName);
-			fRewrite.markAsReplaced(typeNode, newTypeNode);
 		}
 	
 		private void removeExtraDimensions(SingleVariableDeclaration oldParam) {
@@ -1501,7 +1533,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				return typeDecl.getName().getIdentifier();
 		}
 		
-		protected ASTNode createNewElementForList(ParameterInfo info) {
+		protected ASTNode createNewParamgument(ParameterInfo info) {
 			return createNewSingleVariableDeclaration(info);	
 		}
 	
@@ -1512,26 +1544,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return newP;
 		}
 		
-		private Type createNewTypeNode(String newTypeName) {
-			String elementTypeName= getElementTypeName(newTypeName);
-			String importedTypeName= fImportRewrite.addImport(elementTypeName);
-			int dimensions= getArrayDimensions(newTypeName);
-			
-			Type newTypeNode= (Type) fRewrite.createPlaceholder(importedTypeName, ASTRewrite.TYPE);
-			if (dimensions != 0)
-				newTypeNode= fRewrite.getAST().newArrayType(newTypeNode, dimensions);
-			return newTypeNode;
-		}
-		
-		private int getArrayDimensions(String typeName) {
-			int dims= 0;
-			for (int i= 0; i < typeName.length(); i++) {
-				if (typeName.charAt(i) == '[')
-					dims++;
-			}
-			return dims;
-		}
-	
 		protected SimpleName getMethodNameNode() {
 			return fMethDecl.getName();
 		}
@@ -1539,6 +1551,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	class DocReferenceUpdate extends OccurrenceUpdate {
+		/** instanceof MemberRef || MethodRef */
 		private ASTNode fNode;
 
 		protected DocReferenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
@@ -1547,27 +1560,67 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 
 		public void updateNode() throws JavaModelException {
-//TODO: implement others			reshuffleElements();
-			changeMethodName();
+			changeParamguments();
+			
+			if (canChangeNameAndReturnType())
+				changeMethodName();
+					
+			reshuffleElements();
 		}
 		
-		protected ASTNode createNewElementForList(ParameterInfo info) {
-			// TODO Auto-generated method stub
-			return null;
+		protected ASTNode createNewParamgument(ParameterInfo info) {
+			return createNewMethodRefParameter(info);
 		}
 		
+		private MethodRefParameter createNewMethodRefParameter(ParameterInfo info) {
+			MethodRefParameter newP= fRewrite.getAST().newMethodRefParameter();
+			
+			// only add name iff first parameter already has a name:
+			List parameters= getParamguments();
+			if (parameters.size() > 0)
+				if (((MethodRefParameter) parameters.get(0)).getName() != null)
+					newP.setName(fRewrite.getAST().newSimpleName(info.getNewName()));
+			
+			newP.setType(createNewTypeNode(info.getNewTypeName()));
+			return newP;
+		}
+
 		protected SimpleName getMethodNameNode() {
-			if (fNode instanceof MemberRef)	
-				return ((MemberRef)fNode).getName();
-				
-			if (fNode instanceof MethodRef)	
-				return ((MethodRef)fNode).getName();
-				
+			if (fNode instanceof MemberRef)
+				return ((MemberRef) fNode).getName();
+			
+			if (fNode instanceof MethodRef)
+				return ((MethodRef) fNode).getName();
+			
 			return null;	
 		}
 
 		protected List getParamguments() {
-			return null;
+			if (fNode instanceof MethodRef)
+				return ((MethodRef) fNode).parameters();
+			
+			return new ArrayList(0); // (fNode instanceof MemberRef) or error
+		}
+		
+		protected void changeParamgumentName(ParameterInfo info) {
+			if (! (fNode instanceof MethodRef))
+				return;
+
+			MethodRefParameter oldParam= (MethodRefParameter) ((MethodRef) fNode).parameters().get(info.getOldIndex());
+			SimpleName oldParamName= oldParam.getName();
+			if (oldParamName == null)
+				return;
+			
+			SimpleName newName= oldParamName.getAST().newSimpleName(info.getNewName());
+			fRewrite.markAsReplaced(oldParamName, newName);
+		}
+		
+		protected void changeParamgumentType(ParameterInfo info) {
+			if (! (fNode instanceof MethodRef))
+				return;
+			
+			MethodRefParameter oldParam= (MethodRefParameter) ((MethodRef) fNode).parameters().get(info.getOldIndex());
+			replaceTypeNode(oldParam.getType(), info.getNewTypeName());
 		}
 	}
 	
@@ -1588,9 +1641,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			fResult.addError(msg, JavaStatusContext.create(getOccurrenceCu(), fNode));
 		}
 		protected List getParamguments() {
-			return null;
+			return new ArrayList(0);
 		}
-		protected ASTNode createNewElementForList(ParameterInfo info) {
+		protected ASTNode createNewParamgument(ParameterInfo info) {
 			return null;
 		}
 		protected SimpleName getMethodNameNode() {

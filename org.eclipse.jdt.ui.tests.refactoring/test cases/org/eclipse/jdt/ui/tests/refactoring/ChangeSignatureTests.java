@@ -1228,6 +1228,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
+	public void testAll59() throws Exception{
+		String[] signature= {"I", "J"};
+		String[] newNames= {"really"};
+		String[] newTypes= {"boolean"};
+		String[] newDefaultValues= {"true"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {"from", "to"};
+		String[] newParamNames= {"f", "t"};
+		String[] newParameterTypeNames= {"int", "char"};
+		int[] permutation= {0, 1, 2};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= "java.util.List";
+		helperDoAll("A", "getList", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
 	public void testAddRecursive1()throws Exception{ //bug 42100
 		String[] signature= {"I"};
 		String[] newNames= {"bool"};
