@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -392,9 +393,9 @@ public class RenamePackageTests extends RefactoringTest {
 //		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
-	//native method used r.A as a paramter
+	//native method used r.A as a parameter
 	public void testFail9() throws Exception{
-		printTestDisabledMessage("corner case - qualified name used  as a paramter of a native method");
+		printTestDisabledMessage("corner case - qualified name used  as a parameter of a native method");
 		//helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
@@ -459,7 +460,10 @@ public class RenamePackageTests extends RefactoringTest {
 			}
 		}
 		IPackageFragment thisPackage= packages[0];
-		thisPackage.getCorrespondingResource().setReadOnly(true);
+		final IResource resource= thisPackage.getCorrespondingResource();
+		final ResourceAttributes attributes= resource.getResourceAttributes();
+		if (attributes != null)
+			attributes.setReadOnly(true);
 		RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("preconditions were supposed to pass", null, result);
@@ -467,7 +471,7 @@ public class RenamePackageTests extends RefactoringTest {
 		assertTrue("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());
 		IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
 		assertTrue("new package does not exist", newPackage.exists());
-		assertTrue("new package should be read-only", newPackage.getCorrespondingResource().isReadOnly());
+		assertTrue("new package should be read-only", attributes == null || attributes.isReadOnly());
 	}
 	
 	public void testImportFromMultiRoots1() throws Exception {
