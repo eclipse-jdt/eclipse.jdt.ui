@@ -606,5 +606,12 @@ public class LocalCorrectionsSubProcessor {
 				proposals.add(new RemoveDeclarationCorrectionProposal(context.getCompilationUnit(), context.getASTRoot(), binding, 5));
 			}
 		}
-	}	
+	}
+
+	public static void addSuperfluousSemicolonProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) throws CoreException {
+		String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removesemicolon.description"); //$NON-NLS-1$
+		ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), "", 6); //$NON-NLS-1$
+		proposals.add(proposal);
+	}		
+	
 }

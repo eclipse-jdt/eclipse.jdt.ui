@@ -102,6 +102,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NeedToEmulateFieldWriteAccess:
 			case IProblem.NeedToEmulateMethodAccess:
 			case IProblem.NeedToEmulateConstructorAccess:			
+			case IProblem.SuperfluousSemicolon:
 				return true;
 			default:
 				return false;
@@ -283,6 +284,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NeedToEmulateMethodAccess:
 			case IProblem.NeedToEmulateConstructorAccess:
 				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE, 5);
+				break;
+			case IProblem.SuperfluousSemicolon:
+				LocalCorrectionsSubProcessor.addSuperfluousSemicolonProposal(context, problem, proposals);
 				break;
 			default:
 		}
