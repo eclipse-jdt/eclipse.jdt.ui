@@ -1718,7 +1718,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 							variable.setType(ast.newSimpleType(ast.newSimpleName(name)));
 					}
 				} else
-					variable.setType(ASTNodeFactory.newType(ast, type, false));
+					variable.setType(rewriter.getImportRewrite().addImport(type, ast));
 				return variable;
 			}
 
@@ -1729,8 +1729,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					final ITypeBinding declaring= method.getDeclaringClass();
 					if (declaring != null) {
 						adjustTypeVisibility(declaring);
-						final String type= rewriter.getImportRewrite().addImport(declaring);
-						variable.setType(ASTNodeFactory.newType(ast, type));
+						variable.setType(rewriter.getImportRewrite().addImport(declaring, ast));
 						variable.setName(ast.newSimpleName(fTargetName));
 						if (finder.getResult().size() > 0)
 							variable.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.FINAL_KEYWORD));
@@ -2242,7 +2241,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			public final ASTNode getArgumentNode(final IVariableBinding binding, final boolean last) {
 				Assert.isNotNull(binding);
 				final MethodRefParameter parameter= ast.newMethodRefParameter();
-				parameter.setType(ASTNodeFactory.newType(ast, binding.getType(), true));
+				parameter.setType(ASTNodeFactory.newType(ast, binding.getType().getName()));
 				return parameter;
 			}
 
