@@ -58,7 +58,11 @@ public class ChangeElementTreeViewer extends CheckboxTreeViewer {
 	}
 	
 	private void initializeChildren(ChangeElement element) {
+		if (element == null)
+			return;
 		ChangeElement[] children= element.getChildren();
+		if (children == null)
+			return;
 		for (int i= 0; i < children.length; i++) {
 			ChangeElement child= children[i];
 			int state= child.getActive();
