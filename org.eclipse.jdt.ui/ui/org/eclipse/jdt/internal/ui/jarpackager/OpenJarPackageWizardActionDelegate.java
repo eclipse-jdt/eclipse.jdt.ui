@@ -23,8 +23,6 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
 /**
  * This action delegate opens the JAR Package Wizard and initializes
  * it with the selected JAR package description.
