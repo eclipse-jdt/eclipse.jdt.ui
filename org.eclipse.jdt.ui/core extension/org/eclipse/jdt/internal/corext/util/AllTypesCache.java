@@ -476,7 +476,6 @@ public class AllTypesCache {
 		forceDeltaComplete();
 		
 		if (fgIsLocked) {
-			System.err.println("would block");
 			fgAsyncMode= true;
 			return;
 		}
