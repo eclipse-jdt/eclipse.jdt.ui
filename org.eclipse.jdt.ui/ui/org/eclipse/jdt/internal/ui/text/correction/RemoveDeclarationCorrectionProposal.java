@@ -46,7 +46,10 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		}
 		
 		public boolean visit(PrefixExpression node) {
-			fSideEffectNodes.add(node);
+			Object operator= node.getOperator();
+			if (operator == PrefixExpression.Operator.INCREMENT || operator == PrefixExpression.Operator.DECREMENT) {
+				fSideEffectNodes.add(node);
+			}
 			return false;
 		}
 
