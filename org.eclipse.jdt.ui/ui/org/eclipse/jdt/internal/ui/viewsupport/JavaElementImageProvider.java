@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
@@ -26,7 +25,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -151,7 +149,6 @@ public class JavaElementImageProvider {
 	public ImageDescriptor getBaseImageDescriptor(IJavaElement element, int renderFlags) {
 
 		try {			
-			int flags;
 			switch (element.getElementType()) {	
 				case IJavaElement.INITIALIZER:
 				case IJavaElement.METHOD:
@@ -206,15 +203,18 @@ public class JavaElementImageProvider {
 				
 				case IJavaElement.PACKAGE_FRAGMENT:
 					IPackageFragment fragment= (IPackageFragment)element;
+					boolean doesNotContainJavaElements= false;
 					try {
-						// show the folder icon for packages with only non Java resources
-						// fix for: 1G5WN0V 
-						if (!fragment.hasChildren() && (fragment.getNonJavaResources().length >0)) 
-							return DESC_OBJ_FOLDER;
+						doesNotContainJavaElements= !fragment.hasChildren();
 					} catch(JavaModelException e) {
 						return DESC_OBJ_FOLDER;
 					}
+					if (doesNotContainJavaElements && (fragment.getNonJavaResources().length >0)) 
+						return DESC_OBJ_FOLDER;
+					else if (doesNotContainJavaElements)
+						return JavaPluginImages.DESC_OBJS_EMPTY_PACKAGE;
 					return JavaPluginImages.DESC_OBJS_PACKAGE;
+
 					
 				case IJavaElement.COMPILATION_UNIT:
 					return JavaPluginImages.DESC_OBJS_CUNIT;
