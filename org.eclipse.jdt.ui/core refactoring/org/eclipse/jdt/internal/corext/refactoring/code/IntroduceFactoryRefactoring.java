@@ -324,7 +324,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.checkingActivation"), 1); //$NON-NLS-1$
 
 			if (!fCUHandle.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("Refactoring.syntax_error")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.syntax_error")); //$NON-NLS-1$
 
 			return checkSelection(new SubProgressMonitor(pm, 1));
 		} catch (CoreException e) {
