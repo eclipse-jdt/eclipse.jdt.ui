@@ -16,6 +16,10 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -40,14 +44,14 @@ public class ModifierRewrite {
 	public static ModifierRewrite create(ASTRewrite rewrite, ASTNode declNode) {
 		return new ModifierRewrite(rewrite, declNode);
 	}
-	
+
 	private ModifierRewrite(ASTRewrite rewrite, ASTNode declNode) {
 		ListRewrite modifierRewrite= null;
 		switch (declNode.getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
 				modifierRewrite= rewrite.getListRewrite(declNode, MethodDeclaration.MODIFIERS2_PROPERTY);
 				break;
-			case ASTNode.FIELD_DECLARATION: 
+			case ASTNode.FIELD_DECLARATION:
 				modifierRewrite= rewrite.getListRewrite(declNode, FieldDeclaration.MODIFIERS2_PROPERTY);
 				break;
 			case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
@@ -57,10 +61,22 @@ public class ModifierRewrite {
 				modifierRewrite= rewrite.getListRewrite(declNode, VariableDeclarationStatement.MODIFIERS2_PROPERTY);
 				break;
 			case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY);	
+				modifierRewrite= rewrite.getListRewrite(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
 				break;
 			case ASTNode.TYPE_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.MODIFIERS2_PROPERTY);	
+				modifierRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.MODIFIERS2_PROPERTY);
+				break;
+			case ASTNode.ENUM_DECLARATION:
+				modifierRewrite= rewrite.getListRewrite(declNode, EnumDeclaration.MODIFIERS2_PROPERTY);
+				break;
+			case ASTNode.ANNOTATION_TYPE_DECLARATION:
+				modifierRewrite= rewrite.getListRewrite(declNode, AnnotationTypeDeclaration.MODIFIERS2_PROPERTY);
+				break;
+			case ASTNode.ENUM_CONSTANT_DECLARATION:
+				modifierRewrite= rewrite.getListRewrite(declNode, EnumConstantDeclaration.MODIFIERS2_PROPERTY);
+				break;
+			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+				modifierRewrite= rewrite.getListRewrite(declNode, AnnotationTypeMemberDeclaration.MODIFIERS2_PROPERTY);
 				break;
 			default:
 				throw new IllegalArgumentException("node has no modfiers: " + declNode.getClass().getName()); //$NON-NLS-1$
@@ -68,7 +84,7 @@ public class ModifierRewrite {
 		fModifierRewrite= modifierRewrite;
 		fAst= declNode.getAST();
 	}
-	
+
 	public ListRewrite getModifierRewrite() {
 		return fModifierRewrite;
 	}
