@@ -236,12 +236,10 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IFolder</code>: participants registered for copying folders.</li>
 	 *   <li><code>IFile</code>: participants registered for copying files.</li>
 	 * </ul>
+	 * <p>
 	 * Use the method {@link ResourceMapping#accept(ResourceMappingContext context, IResourceVisitor visitor, IProgressMonitor monitor)} 
 	 * to enumerate the resources which form the Java element. <code>ResourceMappingContext.LOCAL_CONTEXT</code> 
 	 * should be use as the <code>ResourceMappingContext</code> passed to the accept methdod.
-	 * <p>
-	 * NOTE: the support for resource mappings is still experimental and will 
-	 * likely change before the final API freeze.
 	 * </p>
 	 * @see org.eclipse.core.resources.mapping.ResourceMapping
 	 * @since 3.1
