@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
@@ -35,7 +36,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -64,6 +67,9 @@ public class CustomFiltersDialog extends SelectionDialog {
 	private Button fEnableUserDefinedPatterns;
 	private Text fUserDefinedPatterns;
 
+	private Stack fFilterDescriptorChangeHistory;
+
+	
 	/**
 	 * Creates a dialog to customize Java element filters.
 	 *
@@ -92,6 +98,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		fEnabledFilterIds= enabledFilterIds;
 
 		fBuiltInFilters= FilterDescriptor.getFilterDescriptors(fViewId);
+		fFilterDescriptorChangeHistory= new Stack();
 	}
 
 	protected void configureShell(Shell shell) {
@@ -197,7 +204,19 @@ public class CustomFiltersDialog extends SelectionDialog {
 				}
 			}
 		});
-
+		fCheckBoxList.addCheckStateListener(new ICheckStateListener() {
+			/*
+			 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
+			 */
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				Object element= event.getElement();
+				if (element instanceof FilterDescriptor) {
+					// renew if already touched
+					if (fFilterDescriptorChangeHistory.contains(element))
+						fFilterDescriptorChangeHistory.remove(element);
+					fFilterDescriptorChangeHistory.push(element);
+				}
+			}});
 
 		addSelectionButtons(parent);
 	}
@@ -218,6 +237,9 @@ public class CustomFiltersDialog extends SelectionDialog {
 		SelectionListener listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fCheckBoxList.setAllChecked(true);
+				fFilterDescriptorChangeHistory.clear();
+				for (int i= 0; i < fBuiltInFilters.length; i++)
+					fFilterDescriptorChangeHistory.push(fBuiltInFilters[i]);
 			}
 		};
 		selectButton.addSelectionListener(listener);
@@ -229,7 +251,9 @@ public class CustomFiltersDialog extends SelectionDialog {
 		listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fCheckBoxList.setAllChecked(false);
-	
+				fFilterDescriptorChangeHistory.clear();
+				for (int i= 0; i < fBuiltInFilters.length; i++)
+					fFilterDescriptorChangeHistory.push(fBuiltInFilters[i]);
 			}
 		};
 		deselectButton.addSelectionListener(listener);
@@ -305,6 +329,14 @@ public class CustomFiltersDialog extends SelectionDialog {
 	 */
 	public boolean areUserDefinedPatternsEnabled() {
 		return fEnablePatterns;
+	}
+	
+	/**
+	 * @return a stack with the filter descriptor check history
+	 * @since 3.0
+	 */
+	public Stack getFilterDescriptorChangeHistory() {
+		return fFilterDescriptorChangeHistory;
 	}
 
 	private FilterDescriptor[] getEnabledFilterDescriptors() {
