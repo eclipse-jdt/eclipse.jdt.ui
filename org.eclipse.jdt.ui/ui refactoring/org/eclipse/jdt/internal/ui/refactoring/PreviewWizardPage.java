@@ -176,7 +176,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 * 
 	 * @return the tree viewer to present the hierarchy of changes
 	 */
-	protected ChangeElementTreeViewer createTreeViewer(Composite parent){
+	protected ChangeElementTreeViewer createTreeViewer(Composite parent) {
 		return new ChangeElementTreeViewer(parent);
 	}
 	

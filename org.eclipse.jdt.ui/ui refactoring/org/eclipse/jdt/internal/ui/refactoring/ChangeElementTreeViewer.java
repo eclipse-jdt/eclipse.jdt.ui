@@ -29,18 +29,13 @@ public class ChangeElementTreeViewer extends CheckboxTreeViewer {
 				setSubtreeChecked(element, checked);
 				setSubtreeGrayed(element, false);
 				ChangeElement parent= element.getParent();
-				if (parent != null) {
-					if (checked) {
-						while(parent != null) {
-							setChecked(parent, checked);
-							boolean grayed= parent.getActive() == ChangeElement.PARTLY_ACTIVE ? true : false;
-							setGrayed(parent, grayed);
-							parent= parent.getParent();
-						}
-					} else {
-						setParentsGrayed(parent, true);
-					}
-				}				
+				while(parent != null) {
+					int active= parent.getActive();
+					boolean grayed= (active == ChangeElement.PARTLY_ACTIVE);
+					setChecked(parent, checked ? true : grayed);
+					setGrayed(parent, grayed);
+					parent= parent.getParent();
+				}
 			}
 		});
 	}

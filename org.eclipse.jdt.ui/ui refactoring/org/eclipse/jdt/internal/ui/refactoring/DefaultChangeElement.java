@@ -7,6 +7,9 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 
 public class DefaultChangeElement extends ChangeElement {
 	
@@ -48,15 +51,10 @@ public class DefaultChangeElement extends ChangeElement {
 	 * @see ChangeElement.getActive
 	 */
 	public int getActive() {
-		int result= fChange.isActive() ? ACTIVE : INACTIVE;
-		if (fChildren != null) {
-			for (int i= 0; i < fChildren.length; i++) {
-				result= ACTIVATION_TABLE[fChildren[i].getActive()][result];
-				if (result == PARTLY_ACTIVE)
-					break;
-			}
-		}
-		return result;
+		if (fChange instanceof ICompositeChange || fChange instanceof CompilationUnitChange || fChange instanceof TextChange)
+			return getCompositeChangeActive();
+		else
+			return getDefaultChangeActive();
 	}
 	
 	/* non Java-doc
@@ -74,6 +72,32 @@ public class DefaultChangeElement extends ChangeElement {
 	public void setChildren(ChangeElement[] children) {
 		Assert.isNotNull(children);
 		fChildren= children;
-	}		
+	}
+
+	private int getDefaultChangeActive() {
+		int result= fChange.isActive() ? ACTIVE : INACTIVE;
+		if (fChildren != null) {
+			for (int i= 0; i < fChildren.length; i++) {
+				result= ACTIVATION_TABLE[fChildren[i].getActive()][result];
+				if (result == PARTLY_ACTIVE)
+					break;
+			}
+		}
+		return result;
+	}
+	
+	private int getCompositeChangeActive() {		
+		if (fChildren != null && fChildren.length > 0) {
+			int result= fChildren[0].getActive();
+			for (int i= 1; i < fChildren.length; i++) {
+				result= ACTIVATION_TABLE[fChildren[i].getActive()][result];
+				if (result == PARTLY_ACTIVE)
+					break;
+			}
+			return result;
+		} else {
+			return ACTIVE;
+		}
+	}
 }
 

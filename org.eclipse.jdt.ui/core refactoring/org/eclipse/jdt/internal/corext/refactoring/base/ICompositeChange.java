@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
  */
 public interface ICompositeChange extends IChange {
 
-
 	/**
 	 * Returns the set of changes this composite change consists of. If the composite
 	 * change doesn't have any children, <code>null</code> is returned.

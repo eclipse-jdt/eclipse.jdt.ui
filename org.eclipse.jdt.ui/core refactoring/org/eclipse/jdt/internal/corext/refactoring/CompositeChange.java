@@ -29,24 +29,24 @@ public class CompositeChange extends Change implements ICompositeChange {
 	private IChange fUndoChange;
 	private String fName;
 	
-	public CompositeChange(){
+	public CompositeChange() {
 		this(RefactoringCoreMessages.getString("CompositeChange.CompositeChange")); //$NON-NLS-1$
 	}
 
-	public CompositeChange(String name, IChange[] changes){
+	public CompositeChange(String name, IChange[] changes) {
 		this(name, new ArrayList(changes.length));
 		addAll(changes);
 	}
 			
-	public CompositeChange(String name){
+	public CompositeChange(String name) {
 		this(name, new ArrayList(5));
 	}
 	
-	public CompositeChange(String name, int initialCapacity){
+	public CompositeChange(String name, int initialCapacity) {
 		this(name, new ArrayList(initialCapacity));
 	}
 		
-	private CompositeChange(String name, List changes){
+	private CompositeChange(String name, List changes) {
 		fChanges= changes;
 		fName= name;
 	}
@@ -54,7 +54,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
-	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
+	public final RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("", fChanges.size() + 1); //$NON-NLS-1$
@@ -68,7 +68,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
-	public void performed() {
+	public final void performed() {
 		for (Iterator iter= fChanges.iterator(); iter.hasNext(); ) {
 			((IChange)iter.next()).performed();
 		}
@@ -77,17 +77,17 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/* non java-doc
 	 * @see IChange#getUndoChange
 	 */
-	public final IChange getUndoChange(){
+	public final IChange getUndoChange() {
 		return fUndoChange;
 	}
 
-	public void addAll(IChange[] changes){
+	public void addAll(IChange[] changes) {
 		for (int i= 0; i < changes.length; i++) {
 			add(changes[i]);
 		}
 	}
 	
-	public void add(IChange change){
+	public void add(IChange change) {
 		if (change != null)
 			fChanges.add(change);	
 	}
@@ -105,12 +105,12 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/**
 	 * to reverse a composite means reversing all changes in reverse order
 	 */ 
-	private List createUndoList(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
+	private List createUndoList(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
 		List undoList= null;
 		try {
 			undoList= new ArrayList(fChanges.size());
 			pm.beginTask("", fChanges.size()); //$NON-NLS-1$
-			for (Iterator iter= fChanges.iterator(); iter.hasNext();){
+			for (Iterator iter= fChanges.iterator(); iter.hasNext();) {
 				try {
 					IChange each= (IChange)iter.next();
 					each.perform(context, new SubProgressMonitor(pm, 1));
@@ -134,12 +134,12 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/* non java-doc
 	 * @see IChange#perform
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
+	public final void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.getString("CompositeChange.performingChangesTask.name")); //$NON-NLS-1$
-		if (!isActive()){
+		if (!isActive()) {
 			fUndoChange= new NullChange();
-		} else{
+		} else {
 			fUndoChange= new CompositeChange(fName, createUndoList(context, new SubProgressMonitor(pm, 1)));
 		}	
 		pm.done();
@@ -148,10 +148,10 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/* non java-doc
 	 * for debugging only
 	 */	
-	public String toString(){
+	public String toString() {
 		StringBuffer buff= new StringBuffer();
 		buff.append("CompositeChange\n"); //$NON-NLS-1$
-		for (Iterator iter= fChanges.iterator(); iter.hasNext();){
+		for (Iterator iter= fChanges.iterator(); iter.hasNext();) {
 			buff.append("<").append(iter.next().toString()).append("/>\n"); //$NON-NLS-2$ //$NON-NLS-1$
 		};
 		return buff.toString();
@@ -160,25 +160,25 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/* non java-doc
 	 * @see IChange#getName()
 	 */
-	public String getName(){
+	public String getName() {
 		return fName;
 	}
 
 	/* non java-doc
 	 * @see IChange#getModifiedLanguageElement()
 	 */	
-	public Object getModifiedLanguageElement(){
+	public Object getModifiedLanguageElement() {
 		return null;
 	}
 
 	/* non java-doc
 	 * @see IChange#setActive
-	 * Apart setting the active/non-active status on itself 
-	 * this method also activates/disactivates all subchanges of this change.
+	 * This method activates/disactivates all subchanges of this change. The
+	 * change itself is always active to ensure that sub changes are always
+	 * considered if they are active.
 	 */
-	public void setActive(boolean active){
-		super.setActive(active);
-		for (Iterator iter= fChanges.iterator(); iter.hasNext(); ){
+	public void setActive(boolean active) {
+		for (Iterator iter= fChanges.iterator(); iter.hasNext(); ) {
 			((IChange)iter.next()).setActive(active);
 		}
 	}	
@@ -187,8 +187,8 @@ public class CompositeChange extends Change implements ICompositeChange {
 	 * @see IChange#isUndoable()
 	 * Composite can be undone iff all its sub-changes can be undone.
 	 */
-	public boolean isUndoable(){
-		for (Iterator iter= fChanges.iterator(); iter.hasNext(); ){
+	public boolean isUndoable() {
+		for (Iterator iter= fChanges.iterator(); iter.hasNext(); ) {
 			IChange each= (IChange)iter.next();
 			if (! each.isUndoable())
 				return false;
