@@ -89,6 +89,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	/**
 	 * Returns whether the current working set filters the given element
 	 * 
+	 * @param parent the parent
+	 * @param object the elemnt to test
 	 * @return the working set
 	 */
 	public boolean isFiltered(Object parent, Object object) {
@@ -128,6 +130,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	
 	/**
 	 * Saves the state of the filter actions in a memento.
+	 * 
+	 * @param memento the memento
 	 */
 	public void saveState(IMemento memento) {
 		String workingSetName= ""; //$NON-NLS-1$
@@ -160,6 +164,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	
 	/**
 	 * Adds the filter actions to the tool bar
+	 * 
+	 * @param tbm the tool bar manager
 	 */
 	public void contributeToToolBar(IToolBarManager tbm) {
 		// do nothing
@@ -167,6 +173,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 
 	/**
 	 * Adds the filter actions to the menu
+	 * 
+	 * @param mm the menu manager
 	 */
 	public void contributeToMenu(IMenuManager mm) {
 		mm.add(fSelectWorkingSetAction);
