@@ -128,8 +128,8 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 */	
 	public void setVisible(boolean visible) {
 		if (visible) {
-			updateStatus(fCurrStatus);	
 			fBuildPathsBlock.init(getProjectHandle(), false);		
+			updateStatus(fCurrStatus);
 		}
 		super.setVisible(visible);
 	}
@@ -189,7 +189,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 */	
 	private void updateStatus(IStatus status) {
 		fCurrStatus= status;
-		if (isCurrentPage()) {
+		if (isCurrentPage() && isControlCreated() && getControl().isVisible()) {
 			setPageComplete(!status.matches(IStatus.ERROR));
 			StatusTool.applyToStatusLine(this, status);
 		}

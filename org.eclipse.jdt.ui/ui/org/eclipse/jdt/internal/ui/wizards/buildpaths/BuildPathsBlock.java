@@ -368,6 +368,7 @@ public class BuildPathsBlock {
 	
 	// a class path entry should not be the prefix of another entry
 	private void updateClassPathStatus() {
+		fClassPathStatus.setOK();
 		List elements= fClassPathList.getElements();
 		IPath buildPath= new Path(fBuildPathDialogField.getText());
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
@@ -399,10 +400,8 @@ public class BuildPathsBlock {
 			entries[i]= currElement.getClasspathEntry();
 		}
 		if (fCurrJProject.hasClasspathCycle(entries)) {
-			fClassPathStatus.setError(getResourceString(CP_CYCLES_ERROR));
-			return;
-		}
-		fClassPathStatus.setOK();
+			fClassPathStatus.setWarning(getResourceString(CP_CYCLES_ERROR));
+		}	
 	}
 	
 	private void updateBuildPathStatus() {

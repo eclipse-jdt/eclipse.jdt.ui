@@ -90,7 +90,7 @@ public abstract class NewElementWizardPage extends WizardPage {
 	 */
 	protected void updateStatus(IStatus status) {
 		fCurrStatus= status;
-		if (isCurrentPage()) {
+		if (isCurrentPage() && isControlCreated() && getControl().isVisible()) {
 			setPageComplete(!status.matches(IStatus.ERROR));
 			StatusTool.applyToStatusLine(this, status);
 		}

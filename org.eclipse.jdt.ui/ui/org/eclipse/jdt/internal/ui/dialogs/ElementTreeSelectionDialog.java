@@ -83,12 +83,13 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		fLabelProvider= labelProvider;
 		fContentProvider= contentProvider;
 		fAllowMultiple= allowMultiple;
-		fDoubleClickSelects= doubleClickSelects;		
+		fDoubleClickSelects= doubleClickSelects;
 		
 		fValidator= null;
 		setResult(new ArrayList(0));
 		fCurrStatus= new StatusInfo();
 		fEmptyListMessage= JavaPlugin.getResourceString(TREE_EMPTY);
+		setStatusLineAboveButtons(true);
 	}	
 
 	/**
