@@ -248,7 +248,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			ISourceReference element= computeHighlightRangeSourceReference();
 			synchronizeOutlinePage(element);
 			setSelection(element, false);
-			updateStatusLine();
+//			updateStatusLine();
 		}
 	}
 		
@@ -2532,7 +2532,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	public void gotoAnnotation(boolean forward) {
 		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
 		Position position= new Position(0, 0);
-		if (true /* delayed */) {
+		if (false /* delayed */) {
 			getNextAnnotation(selection.getOffset(), selection.getLength(), forward, position);
 			selectAndReveal(position.getOffset(), position.getLength());
 		} else /* no delay */ {
