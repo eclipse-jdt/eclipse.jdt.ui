@@ -83,7 +83,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
