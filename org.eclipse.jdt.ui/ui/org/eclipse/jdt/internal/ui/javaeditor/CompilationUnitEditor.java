@@ -1180,15 +1180,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	/*
-	 * @see AbstractTextEditor#doSaveAs
-	 */
-	public void doSaveAs() {
-		if (askIfNonWorkbenchEncodingIsOk()) {
-			super.doSaveAs();
-		}
-	}
-
-	/*
 	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor progressMonitor) {
@@ -1199,11 +1190,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			return;
 		}
 			
-		if (!askIfNonWorkbenchEncodingIsOk()) {
-			progressMonitor.setCanceled(true);
-			return;
-		}
-		
 		if (p.isDeleted(getEditorInput())) {
 			
 			if (isSaveAsAllowed()) {
@@ -1239,31 +1225,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			} else 
 				performSave(false, progressMonitor);
 		}
-	}
-	
-	/**
-	 * Asks the user if it is OK to store in non-workbench encoding.
-	 * @return <code>true</code> if the user wants to continue
-	 */
-	private boolean askIfNonWorkbenchEncodingIsOk() {
-		IDocumentProvider provider= getDocumentProvider();
-		if (provider instanceof IStorageDocumentProvider) {
-			IEditorInput input= getEditorInput();
-			IStorageDocumentProvider storageProvider= (IStorageDocumentProvider)provider;
-			String encoding= storageProvider.getEncoding(input);
-			String defaultEncoding= storageProvider.getDefaultEncoding();
-			if (encoding != null && !encoding.equals(defaultEncoding)) {
-				Shell shell= getSite().getShell();
-				String title= JavaEditorMessages.getString("CompilationUnitEditor.warning.save.nonWorkbenchEncoding.title"); //$NON-NLS-1$
-				String msg;
-				if (input != null)
-					msg= MessageFormat.format(JavaEditorMessages.getString("CompilationUnitEditor.warning.save.nonWorkbenchEncoding.message1"), new String[] {input.getName(), encoding});//$NON-NLS-1$
-				else
-					msg= MessageFormat.format(JavaEditorMessages.getString("CompilationUnitEditor.warning.save.nonWorkbenchEncoding.message2"), new String[] {encoding});//$NON-NLS-1$
-				return MessageDialog.openQuestion(shell, title, msg);
-			}
-		}
-		return true;
 	}
 	
 	public boolean isSaveAsAllowed() {
