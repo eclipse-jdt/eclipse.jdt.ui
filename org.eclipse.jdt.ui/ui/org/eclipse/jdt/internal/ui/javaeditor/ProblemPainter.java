@@ -159,15 +159,15 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	 * Returns the document offset of the upper left corner of the widgets viewport,
 	 * possibly including partially visible lines.
 	 */
-	private static int getInclusiveTopIndexStartOffset(StyledText text, IDocument document, int visibleRegionOffset) {
+	private int getInclusiveTopIndexStartOffset() {
 		
-		if (text != null) {	
-			int top= text.getTopIndex();
-			if ((text.getTopPixel() % text.getLineHeight()) != 0)
+		if (fTextWidget != null && !fTextWidget.isDisposed()) {	
+			int top= fSourceViewer.getTopIndex();
+			if ((fTextWidget.getTopPixel() % fTextWidget.getLineHeight()) != 0)
 				top--;
 			try {
-				top= document.getLineOffset(top -  visibleRegionOffset);
-				return top + visibleRegionOffset;
+				IDocument document= fSourceViewer.getDocument();
+				return document.getLineOffset(top);
 			} catch (BadLocationException ex) {
 			}
 		}
@@ -189,7 +189,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		int offset= region.getOffset();
 		int length= region.getLength();
 
-		int vOffset= getInclusiveTopIndexStartOffset(fTextWidget, fSourceViewer.getDocument(), offset);		
+		int vOffset= getInclusiveTopIndexStartOffset();		
 		int vLength= fSourceViewer.getBottomIndexEndOffset();		
 		
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
