@@ -29,11 +29,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
 /**
- * This action opens a type hierarchy on a element represented by either
- * <ul>
- * 	<li>a text selection inside a Java editor, or </li>
- * 	<li>a structured selection of a view part showing Java elements</li>
- * </ul>
+ * This action opens a type hierarchy on the selected type.
+ * <p>
+ * The action is applicable to selections containing elements of type
+ * <code>IType</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -46,7 +45,9 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;
 	
 	/**
-	 * Creates a new <code>OpenTypeHierarchyAction</code>.
+	 * Creates a new <code>OpenTypeHierarchyAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -59,10 +60,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>OpenAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public OpenTypeHierarchyAction(JavaEditor editor) {
 		this(editor.getEditorSite());

@@ -57,7 +57,9 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	private FindWriteReferencesInWorkingSetAction fFindWriteReferencesInWorkingSetAction;
 	
 	/**
-	 * Creates a new <code>WriteReferencesSearchGroup</code>.
+	 * Creates a new <code>WriteReferencesSearchGroup</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of 
+	 * type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -78,10 +80,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	}
 
 	/**
-	 * Creates a new <code>WriteReferencesSearchGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public WriteReferencesSearchGroup(JavaEditor editor) {
 		fEditor= editor;

@@ -38,6 +38,10 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
  * Contributes all build related actions to the context menu and installs handlers for the 
  * corresponding global menu actions.
  * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.0
  */
 public class BuildActionGroup extends ActionGroup {
@@ -49,7 +53,9 @@ public class BuildActionGroup extends ActionGroup {
  	private RefreshAction fRefreshAction;
 
 	/**
-	 * Creates a new <code>BuildActionGroup</code>.
+	 * Creates a new <code>BuildActionGroup</code>. The group requires that
+	 * the selection provided by the view part's selection provider is of type
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */

@@ -30,11 +30,17 @@ import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Action to programmatically open a Java perspective.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
+ * @since 2.0
  */
 public class OpenJavaPerspectiveAction extends Action {
 
 	/**
-	 * Create a new <code></code>.
+	 * Create a new <code>OpenJavaPerspectiveAction</code>.
 	 */
 	public OpenJavaPerspectiveAction() {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_JAVA_PERSPECTIVE_ACTION);

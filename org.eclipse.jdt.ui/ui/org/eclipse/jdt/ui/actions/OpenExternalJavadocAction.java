@@ -44,12 +44,11 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
- * This action opens the Javadoc in an external broder if the selected element 
- * is represented by either
- * <ul>
- * 	<li>a text selection inside a Java editor, or </li>
- * 	<li>a structured selection of a view part showing Java elements</li>
- * </ul>
+ * This action opens the selected element's Javadoc in an external 
+ * browser. 
+ * <p>
+ * The action is applicable to selections containing elements of 
+ * type <code>IJavaElement</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -64,10 +63,11 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;
 	
 	/**
-	 * Creates a new <code>OpenExternalJavadocAction</code>.
+	 * Creates a new <code>OpenExternalJavadocAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
-	 * @param site the site providing additional context information for
-	 * 	this action
+	 * @param site the site providing additional context information for this action
 	 */ 
 	public OpenExternalJavadocAction(IWorkbenchSite site) {
 		super(site);
@@ -78,22 +78,12 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>OpenExternalJavadocAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public OpenExternalJavadocAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
-	}
-	
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
-	protected String getDialogTitle() {
-		return getTitle();
 	}
 	
 	/* (non-Javadoc)
@@ -192,5 +182,12 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	private static String getTitle() {
 		return ActionMessages.getString("OpenExternalJavadocAction.dialog.title"); //$NON-NLS-1$
 	}
+	
+	/**
+	 * Note: this method is for internal use only. Clients should not call this method.
+	 */
+	protected String getDialogTitle() {
+		return getTitle();
+	}	
 }
 		

@@ -36,6 +36,10 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
  * Action group to add the Import and Export action to a view part's
  * context menu.
  * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @sine 2.0
  */
 public class ImportActionGroup extends ActionGroup {
@@ -46,7 +50,9 @@ public class ImportActionGroup extends ActionGroup {
 	private ExportResourcesAction fExportAction;
 
 	/**
-	 * Creates a new <code>ImportActionGroup</code>.
+	 * Creates a new <code>ImportActionGroup</code>. The group 
+	 * requires that the selection provided by the part's selection provider 
+	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */

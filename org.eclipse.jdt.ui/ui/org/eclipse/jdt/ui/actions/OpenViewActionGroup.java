@@ -39,9 +39,8 @@ import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
- * Action group that adds the actions that open a new Jdt view part or
- * an external viewer to the context menu and the action bar's navigate 
- * menu.
+ * Action group that adds actions to open a new JDT view part or an external 
+ * viewer to a context menu and the global menu bar.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -61,7 +60,9 @@ public class OpenViewActionGroup extends ActionGroup {
 	private PropertyDialogAction fOpenPropertiesDialog;
 
 	/**
-	 * Creates a new <code>OpenActionGroup</code>.
+	 * Creates a new <code>OpenActionGroup</code>. The group requires
+	 * that the selection provided by the page's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param page the page that owns this action group
 	 */
@@ -70,7 +71,9 @@ public class OpenViewActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Creates a new <code>OpenActionGroup</code>.
+	 * Creates a new <code>OpenActionGroup</code>. The group requires
+	 * that the selection provided by the part's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -80,10 +83,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Creates a new <code>OpenActionGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public OpenViewActionGroup(JavaEditor part) {
 		fEditorIsOwner= true;

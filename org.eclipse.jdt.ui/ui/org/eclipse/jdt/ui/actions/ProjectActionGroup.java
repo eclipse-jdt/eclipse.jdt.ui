@@ -29,6 +29,10 @@ import org.eclipse.ui.actions.CloseResourceAction;
 /**
  * Adds actions to open and close a project to the global menu bar.
  * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.0
  */
 public class ProjectActionGroup extends ActionGroup {
@@ -39,7 +43,9 @@ public class ProjectActionGroup extends ActionGroup {
 	private CloseResourceAction fCloseAction;
 
 	/**
-	 * Creates a new <code>ProjectActionGroup</code>.
+	 * Creates a new <code>ProjectActionGroup</code>. The group requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */

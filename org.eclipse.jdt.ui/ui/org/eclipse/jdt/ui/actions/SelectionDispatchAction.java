@@ -30,6 +30,25 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
+ * Action that dispatches the <code>IAction#run()</code> and the 
+ * <code>ISelectionChangedListener#selectionChanged</code> 
+ * according to the type of the selection. 
+ * 
+ * <ul>
+ * 	<li>if selection is of type <code>ITextSelection</code> then
+ * 	<code>run(ITextSelection)</code> and <code>selectionChanged(ITextSelection)</code>
+ * 	is called.</li> 
+ * 	<li>if selection is of type <code>IStructuredSelection</code> then
+ * 	<code>run(IStructuredSelection)</code> and <code>
+ * 	selectionChanged(IStructuredSelection)</code> is called.</li>
+ * 	<li>default is to call <code>run(ISelection)</code> and <code>
+ * 	selectionChanged(ISelection)</code>.</li>
+ * </ul>
+ * 
+ * <p>
+ * Note: This class is not intended to be subclassed outside the JDT UI plugin.
+ * </p>
+ * 
  * @since 2.0
  */
 public abstract class SelectionDispatchAction extends Action implements ISelectionChangedListener {

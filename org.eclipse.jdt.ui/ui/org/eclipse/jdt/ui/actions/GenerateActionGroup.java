@@ -42,8 +42,8 @@ import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
- * Action group that adds the source and generate actions to a context menu and
- * action bar.
+ * Action group that adds the source and generate actions to a part's context
+ * menu and installs handlers for the corresponding global menu actions.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -76,10 +76,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private ConvertLineDelimitersAction fConvertToMac;
 	
 	/**
-	 * Creates a new <code>GenerateActionGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public GenerateActionGroup(CompilationUnitEditor editor, String groupName) {
 		fSite= editor.getSite();
@@ -141,7 +138,9 @@ public class GenerateActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Creates a new <code>GenerateActionGroup</code>.
+	 * Creates a new <code>GenerateActionGroup</code>. The group 
+	 * requires that the selection provided by the page's selection provider 
+	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param page the page that owns this action group
 	 */
@@ -150,7 +149,9 @@ public class GenerateActionGroup extends ActionGroup {
 	}
 
 	/**
-	 * Creates a new <code>GenerateActionGroup</code>.
+	 * Creates a new <code>GenerateActionGroup</code>. The group 
+	 * requires that the selection provided by the part's selection provider 
+	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -206,13 +207,13 @@ public class GenerateActionGroup extends ActionGroup {
 		fRegisteredSelectionListeners.add(listener);
 	}
 	
-	/**
+	/*
 	 * The state of the editor owning this action group has changed. 
 	 * This method does nothing if the group's owner isn't an
 	 * editor.
-	 * <p>
+	 */
+	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * </p>
 	 */
 	public void editorStateChanged() {
 		Assert.isTrue(fEditorIsOwner);

@@ -57,7 +57,9 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	private FindReferencesInWorkingSetAction fFindReferencesInWorkingSetAction;
 
 	/**
-	 * Creates a new <code>ReferencesSearchGroup</code>.
+	 * Creates a new <code>ReferencesSearchGroup</code>. The group requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -79,10 +81,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 
 
 	/**
-	 * Creates a new <code>ReferencesSearchGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public ReferencesSearchGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);
@@ -108,6 +107,9 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		provider.addSelectionChangedListener(action);
 	};
 
+	/**
+	 * Note: this method is for internal use only. Clients should not call this method.
+	 */	
 	protected FindAction[] getActions(ISelection sel) {
 		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(fFindReferencesAction);
@@ -128,6 +130,9 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		return (FindAction[])actions.toArray(new FindAction[actions.size()]);
 	}
 
+	/**
+	 * Note: this method is for internal use only. Clients should not call this method.
+	 */
 	protected String getName() {
 		return MENU_TEXT;
 	}

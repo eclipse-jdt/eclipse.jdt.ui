@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;;
 
 /**
  * Finds references of the selected element in working sets.
- * The action is applicable for selections representing a Java element.
+ * The action is applicable to selections representing a Java element.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -39,8 +39,10 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	private IWorkingSet[] fWorkingSets;
 	
 	/**
-	 * Creates a new <code>FindReferencesInWorkingSetAction</code>.
-	 * The user will be prompted to select the working sets.
+	 * Creates a new <code>FindReferencesInWorkingSetAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>. The user will 
+	 * be prompted to select the working sets.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -50,7 +52,9 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	}
 
 	/**
-	 * Creates a new <code>FindReferencesInWorkingSetAction</code>.
+	 * Creates a new <code>FindReferencesInWorkingSetAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site			the site providing context information for this action
 	 * @param workingSets	the working sets to be used in the search
@@ -61,10 +65,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	}
 
 	/**
-	 * Creates a new <code>FindReferencesInWorkingSetAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public FindReferencesInWorkingSetAction(JavaEditor editor) {
 		super(editor);
@@ -72,10 +73,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	}
 
 	/**
-	 * Creates a new <code>FindReferencesInWorkingSetAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public FindReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
 		this(editor);

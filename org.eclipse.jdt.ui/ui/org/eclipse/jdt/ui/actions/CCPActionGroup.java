@@ -30,8 +30,12 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 
 /**
- * Action group that adds the copy, cut, paste actions to a view parts context
+ * Action group that adds the copy, cut, paste actions to a view part's context
  * menu and installs handlers for the corresponding global menu actions.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
  * 
  * @since 2.0
  */
@@ -48,7 +52,9 @@ public class CCPActionGroup extends ActionGroup {
 	private SelectionDispatchAction fCutAction;
 	
 	/**
-	 * Creates a new <code>CCPActionGroup</code>.
+	 * Creates a new <code>CCPActionGroup</code>. The group requires that
+	 * the selection provided by the view part's selection provider is of type
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -57,7 +63,9 @@ public class CCPActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Creates a new <code>CCPActionGroup</code>.
+	 * Creates a new <code>CCPActionGroup</code>.  The group requires that
+	 * the selection provided by the page's selection provider is of type
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param page the page that owns this action group
 	 */

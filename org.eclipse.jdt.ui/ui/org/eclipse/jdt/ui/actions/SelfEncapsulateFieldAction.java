@@ -36,9 +36,10 @@ import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Action to run the self encapsulate field refactoring. The action works
- * for both view parts that present Java elements and compilation unit
- * editors. 
+ * Action to run the self encapsulate field refactoring. 
+ * <p>
+ * Action is applicable to selections containing elements of type
+ * <code>IField</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -51,7 +52,9 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	private CompilationUnitEditor fEditor;
 	
 	/**
-	 * Creates a new <code>SelfEncapsulateFieldAction</code>.
+	 * Creates a new <code>SelfEncapsulateFieldAction</code>. The action requires 
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -62,10 +65,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>SelfEncapsulateFieldAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public SelfEncapsulateFieldAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());

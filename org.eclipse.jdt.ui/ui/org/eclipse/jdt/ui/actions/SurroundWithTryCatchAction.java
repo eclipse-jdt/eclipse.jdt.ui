@@ -50,6 +50,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Action to surround a set of statements with a try/catch block.
  * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.0
  */
 public class SurroundWithTryCatchAction extends SelectionDispatchAction {
@@ -73,10 +77,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new <code>SurroundWithTryCatchAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public SurroundWithTryCatchAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());

@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Finds declarations of the selected element in its hierarchy.
- * The action is applicable for selections representing a Java element.
+ * The action is applicable to selections representing a Java element.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -37,7 +37,9 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 
 	/**
-	 * Creates a new <code>FindDeclarationsInHierarchyAction</code>.
+	 * Creates a new <code>FindDeclarationsInHierarchyAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -48,10 +50,7 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 	}
 
 	/**
-	 * Creates a new <code>FindDeclarationsInHierarchyAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public FindDeclarationsInHierarchyAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class} ); //$NON-NLS-1$

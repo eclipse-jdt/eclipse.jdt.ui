@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Finds references of the selected element in its hierarchy.
- * The action is applicable for selections representing a Java element.
+ * The action is applicable to selections representing a Java element.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -35,7 +35,9 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 public class FindReferencesInHierarchyAction extends FindReferencesAction {
 
 	/**
-	 * Creates a new <code>FindReferencesInHierarchyAction</code>.
+	 * Creates a new <code>FindReferencesInHierarchyAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -45,10 +47,7 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 	}
 
 	/**
-	 * Creates a new <code>FindReferencesInHierarchyAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public FindReferencesInHierarchyAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class}); //$NON-NLS-1$

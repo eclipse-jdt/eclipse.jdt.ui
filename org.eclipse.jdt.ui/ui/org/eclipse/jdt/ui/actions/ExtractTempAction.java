@@ -34,9 +34,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Extracts an expression into a new local variable and replaces all occurrences of
  * the expression with the local variable.
+ * 
  * <p>
- * Valid input: <code>ITextSelection</code> covering an expression inside
- * a method body.
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
  * 
  * @since 2.0
  */
@@ -46,10 +47,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	private String fDialogMessageTitle;
 	
 	/**
-	 * Creates a new <code>ExtractTempAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public ExtractTempAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());

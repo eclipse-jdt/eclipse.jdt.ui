@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.action.IToolBarManager;
@@ -21,11 +27,18 @@ import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterAction;
 
 /**
- * Action Group that contributes filter buttons for a views showing methods and fields:
- * Filter public / static & fields.
- * The action group installs a filter on a structured viewer. The filter is connected to the actions and is updated
- * when the state of the buttons changes.
+ * Action Group that contributes filter buttons for a view parts showing 
+ * methods and fields. Contributed filters are: hide fields, hide static
+ * members and hide non-public members.
+ * <p>
+ * The action group installs a filter on a structured viewer. The filter is connected 
+ * to the actions installed in the view part's toolbar menu and is updated when the 
+ * state of the buttons changes.
  *  
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.0
  */
 public class MemberFilterActionGroup extends ActionGroup {
@@ -46,11 +59,11 @@ public class MemberFilterActionGroup extends ActionGroup {
 	
 	
 	/**
-	 * Creates the action group for a viewer. A filter is added to the viewer that is connected to the
-	 * toolbar buttons that can be added to the toolbar with <code>fillActionBars</code>.
-	 * @param viewer The viewer to be filtered.
-	 * @param viewerId A unique id of the viewer. Used as a key to to store the last used filter
-	 * settings in the preference store.
+	 * Creates a new <code>MemberFilterActionGroup</code>.
+	 * 
+	 * @param viewer the viewer to be filtered
+	 * @param viewerId a unique id of the viewer. Used as a key to to store 
+	 * the last used filter settings in the preference store
 	 */
 	public MemberFilterActionGroup(StructuredViewer viewer, String viewerId) {
 		fViewer= viewer;
@@ -105,11 +118,14 @@ public class MemberFilterActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Set the current filter.
+	 * Sets the member filters.
 	 * 
-	 * @param filterProperty Constants FILTER_FIELDS, FILTER_PUBLIC & FILTER_PRIVATE as defined by this
-	 * action group
-	 * @param set The new value. If true, the elements of the given types are filtered.
+	 * @param filterProperty the filter to be manipulated. Valid values are <code>FILTER_FIELDS</code>, 
+	 * <code>FILTER_PUBLIC</code>, and <code>FILTER_PRIVATE</code> as defined by this action 
+	 * group
+	 * @param set if <code>true</code> the given filter is installed. If <code>false</code> the
+	 * given filter is removed
+	 * .
 	 */	
 	public void setMemberFilter(int filterProperty, boolean set) {
 		setMemberFilters(new int[] {filterProperty}, new boolean[] {set}, true);
@@ -146,9 +162,11 @@ public class MemberFilterActionGroup extends ActionGroup {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given filter is set.
-	 * @param filterProperty Constants FILTER_FIELDS, FILTER_PUBLIC & FILTER_PRIVATE as defined by this
-	 * action group
+	 * Returns <code>true</code> if the given filter is installed.
+	 * 
+	 * @param filterProperty the filter to be tested. Valid values are <code>FILTER_FIELDS</code>, 
+	 * <code>FILTER_PUBLIC</code>, and <code>FILTER_PRIVATE</code> as defined by this action 
+	 * group
 	 */	
 	public boolean hasMemberFilter(int filterProperty) {
 		return fFilter.hasFilter(filterProperty);
@@ -156,6 +174,8 @@ public class MemberFilterActionGroup extends ActionGroup {
 	
 	/**
 	 * Saves the state of the filter actions in a memento.
+	 * 
+	 * @param memento the memento to which the state is saved
 	 */
 	public void saveState(IMemento memento) {
 		memento.putString(TAG_HIDEFIELDS, String.valueOf(hasMemberFilter(FILTER_FIELDS)));
@@ -168,7 +188,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * <p>
 	 * Note: This method does not refresh the viewer.
 	 * </p>
-	 * @param memento
+	 * @param memento the memento from which the state is restored
 	 */	
 	public void restoreState(IMemento memento) {
 		setMemberFilters(
@@ -188,7 +208,9 @@ public class MemberFilterActionGroup extends ActionGroup {
 	};
 	
 	/**
-	 * Adds the filter actions to the tool bar
+	 * Adds the filter actions to the given tool bar
+	 * 
+	 * @param tbm the tool bar to which the actions are added
 	 */
 	public void contributeToToolBar(IToolBarManager tbm) {
 		tbm.add(fFilterActions[0]); // fields

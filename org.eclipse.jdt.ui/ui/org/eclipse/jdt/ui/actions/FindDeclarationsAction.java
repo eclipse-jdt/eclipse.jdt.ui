@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Finds declarations of the selected element in the workspace.
- * The action is applicable for selections representing a Java element.
+ * The action is applicable to selections representing a Java element.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -42,7 +42,9 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 public class FindDeclarationsAction extends FindAction {
 
 	/**
-	 * Creates a new <code>FindDeclarationsAction</code>.
+	 * Creates a new <code>FindDeclarationsAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -52,10 +54,7 @@ public class FindDeclarationsAction extends FindAction {
 	}
 
 	/**
-	 * Creates a new <code>FindDeclarationsAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public FindDeclarationsAction(JavaEditor editor) {
 		this(editor, SearchMessages.getString("Search.FindDeclarationAction.label"), new Class[] {IField.class, IMethod.class, IType.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$

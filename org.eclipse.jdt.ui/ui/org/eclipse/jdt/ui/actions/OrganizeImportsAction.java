@@ -1,9 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
-
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -61,6 +66,19 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
+/**
+ * Organizes the imports of a compilation unit.
+ * <p>
+ * The action is applicable to selections containing elements of
+ * type <code>ICompilationUnit</code> or <code>IPackage
+ * </code>.
+ *
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
+ * @since 2.0
+ */
 public class OrganizeImportsAction extends SelectionDispatchAction {
 	
 	private JavaEditor fEditor;
@@ -82,6 +100,13 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		}
 	}
 
+	/**
+	 * Creates a new <code>OrganizeImportsAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * 
+	 * @param site the site providing context information for this action
+	 */
 	public OrganizeImportsAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("OrganizeImportsAction.label")); //$NON-NLS-1$
@@ -92,10 +117,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>OrganizeImportsAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public OrganizeImportsAction(JavaEditor editor) {
 		this(editor.getEditorSite());

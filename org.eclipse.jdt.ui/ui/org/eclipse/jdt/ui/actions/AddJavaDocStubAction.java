@@ -49,13 +49,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * Will open the parent compilation unit in a Java editor. The result is 
  * unsaved, so the user can decide if the changes are acceptable.
  * <p>
- * Valid input:
- * <ul>
- *   <li><code>IStructuredSelection</code>: elements of type
- * 	<code>IMember</code></li>.
- *   <li><code>ITextSelection</code>: a selection that is enclosed
- * 	by a member.</li>
- * </ul> 
+ * The action is applicable to structured selections containing elements
+ * of type <code>IMember</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -68,7 +63,9 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	private CompilationUnitEditor fEditor;
 
 	/**
-	 * Creates a new <code>AddJavaDocStubAction</code>.
+	 * Creates a new <code>AddJavaDocStubAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -81,10 +78,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new <code>AddJavaDocStubAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public AddJavaDocStubAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());

@@ -71,7 +71,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
- * Find all Strings in a package or project that aren't externalized yet.
+ * Find all Strings in a package or project that are not externalized yet.
+ * <p>
+ * The action is applicable to selections containing projects or packages.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -84,7 +86,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	private NonNLSElement[] fElements;
 	
 	/**
-	 * Creates a new <code>FindStringsToExternalizeAction</code>.
+	 * Creates a new <code>FindStringsToExternalizeAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */

@@ -48,8 +48,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
- * Adds unimplemented methods of a type.
- * Will open an editor for the type. Changes are unsaved.
+ * Adds unimplemented methods of a type. Action opens a dialog from
+ * which the user can chosse the methods to be added.
+ * <p>
+ * Will open the parent compilation unit in a Java editor. The result is 
+ * unsaved, so the user can decide if the changes are acceptable.
+ * <p>
+ * The action is applicable to structured selections containing elements
+ * of type <code>IType</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -62,7 +68,9 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	private CompilationUnitEditor fEditor;
 
 	/**
-	 * Creates a new <code>OverrideMethodsAction</code>.
+	 * Creates a new <code>OverrideMethodsAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -76,10 +84,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new <code>OverrideMethodsAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public OverrideMethodsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -105,6 +110,9 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		setEnabled(enabled);
 	}	
 	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
 	protected void run(IStructuredSelection selection) {
 		Shell shell= getShell();
 		try {

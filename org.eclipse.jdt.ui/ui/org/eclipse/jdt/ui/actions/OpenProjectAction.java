@@ -51,6 +51,10 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  * Action to open a closed project. Action presents a dialog from which the
  * user can select the projects to be opened.
  * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.0
  */
 public class OpenProjectAction extends Action implements IResourceChangeListener {

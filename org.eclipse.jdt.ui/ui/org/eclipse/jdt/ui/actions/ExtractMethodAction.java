@@ -36,6 +36,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Necessary arguments, exceptions and returns values are computed and an
  * appropriate method signature is generated.
  * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.0
  */ 
 public class ExtractMethodAction extends SelectionDispatchAction {
@@ -44,10 +48,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 	private String fDialogMessageTitle;
 
 	/**
-	 * Creates a new <code>ExtractMethodAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public ExtractMethodAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());

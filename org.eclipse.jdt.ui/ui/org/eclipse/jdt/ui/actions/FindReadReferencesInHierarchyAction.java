@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Finds field read accesses of the selected element in its hierarchy.
- * The action is applicable for selections representing a Java field.
+ * The action is applicable to selections representing a Java field.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -34,7 +34,9 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 public class FindReadReferencesInHierarchyAction extends FindReferencesInHierarchyAction {
 
 	/**
-	 * Creates a new <code>FindReadReferencesInHierarchyAction</code>.
+	 * Creates a new <code>FindReadReferencesInHierarchyAction</code>.  The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -45,10 +47,7 @@ public class FindReadReferencesInHierarchyAction extends FindReferencesInHierarc
 	}
 
 	/**
-	 * Creates a new <code>FindReadReferencesInHierarchyAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public FindReadReferencesInHierarchyAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindReadReferencesInHierarchyAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$

@@ -51,11 +51,11 @@ import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * This action opens a java editor on an element represented by either
- * <ul>
- * 	<li>a text selection inside a Java editor, or </li>
- * 	<li>a structured selection of a view part showing Java elements</li>
- * </ul>
+ * This action opens a Java editor on a Java element or file.
+ * <p>
+ * The action is applicable to selections containing elements of
+ * type <code>ICompilationUnit</code>, <code>IMember</code>
+ * or <code>IFile</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -68,7 +68,9 @@ public class OpenAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;
 	
 	/**
-	 * Creates a new <code>OpenAction</code>.
+	 * Creates a new <code>OpenAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -81,10 +83,7 @@ public class OpenAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>OpenAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public OpenAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -198,6 +197,9 @@ public class OpenAction extends SelectionDispatchAction {
 		}
 	}
 	
+	/**
+	 * Note: this method is for internal use only. Clients should not call this method.
+	 */
 	public Object getElementToOpen(Object object) throws JavaModelException {
 		return object;
 	}	

@@ -57,7 +57,9 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 	private FindReadReferencesInWorkingSetAction fFindReadReferencesInWorkingSetAction;
 	
 	/**
-	 * Creates a new <code>ReadReferencesSearchGroup</code>.
+	 * Creates a new <code>ReadReferencesSearchGroup</code>. The group requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -78,10 +80,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 	}
 
 	/**
-	 * Creates a new <code>ReadReferencesSearchGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public ReadReferencesSearchGroup(JavaEditor editor) {
 		fEditor= editor;

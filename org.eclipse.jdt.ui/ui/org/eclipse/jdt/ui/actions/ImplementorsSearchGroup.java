@@ -56,7 +56,9 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	private FindImplementorsInWorkingSetAction fFindImplementorsInWorkingSetAction;
 
 	/**
-	 * Creates a new <code>ImplementorsSearchGroup</code>.
+	 * Creates a new <code>ImplementorsSearchGroup</code>. The group 
+	 * requires that the selection provided by the site's selection provider 
+	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -75,10 +77,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	}
 
 	/**
-	 * Creates a new <code>ImplementorsSearchGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public ImplementorsSearchGroup(JavaEditor editor) {
 		fEditor= editor;

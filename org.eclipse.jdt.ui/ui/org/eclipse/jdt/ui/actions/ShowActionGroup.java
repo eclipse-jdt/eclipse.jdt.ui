@@ -46,7 +46,9 @@ public class ShowActionGroup extends ActionGroup {
 	private ShowInNavigatorViewAction fShowInNavigatorViewAction;
 
 	/**
-	 * Creates a new <code>ShowActionGroup</code>.
+	 * Creates a new <code>ShowActionGroup</code>. The action requires 
+	 * that the selection provided by the page's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param page the page that owns this action group
 	 */
@@ -55,7 +57,9 @@ public class ShowActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Creates a new <code>ShowActionGroup</code>.
+	 * Creates a new <code>ShowActionGroup</code>. The action requires 
+	 * that the selection provided by the part's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -65,10 +69,7 @@ public class ShowActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Creates a new <code>ShowActionGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public ShowActionGroup(JavaEditor part) {
 		fShowInPackagesViewAction= new ShowInPackageViewAction(part);

@@ -43,11 +43,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
- * This action opens a java editor on the super implementation of a element represented by either
- * <ul>
- * 	<li>a text selection inside a Java editor, or </li>
- * 	<li>a structured selection of a view part showing Java elements</li>
- * </ul>
+ * The action opens a Java editor on the selected method's super implementation.
+ * <p>
+ * The action is applicable to selections containing elements of type <code>
+ * IMethod</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -60,7 +59,9 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;
 
 	/**
-	 * Creates a new <code>OpenSuperImplementationAction</code>.
+	 * Creates a new <code>OpenSuperImplementationAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -73,10 +74,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>OpenSuperImplementationAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public OpenSuperImplementationAction(JavaEditor editor) {
 		this(editor.getEditorSite());

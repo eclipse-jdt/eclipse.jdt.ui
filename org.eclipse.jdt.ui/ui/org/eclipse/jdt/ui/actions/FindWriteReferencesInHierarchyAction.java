@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Finds field write accesses of the selected element in its hierarchy.
- * The action is applicable for selections representing a Java field.
+ * The action is applicable to selections representing a Java field.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -33,7 +33,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public class FindWriteReferencesInHierarchyAction extends FindReferencesInHierarchyAction {
 
 	/**
-	 * Creates a new <code>FindWriteReferencesInHierarchyAction</code>.
+	 * Creates a new <code>FindWriteReferencesInHierarchyAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -44,10 +46,7 @@ public class FindWriteReferencesInHierarchyAction extends FindReferencesInHierar
 	}
 
 	/**
-	 * Creates a new <code>FindWriteReferencesInHierarchyAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public FindWriteReferencesInHierarchyAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindWriteReferencesInHierarchyAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$

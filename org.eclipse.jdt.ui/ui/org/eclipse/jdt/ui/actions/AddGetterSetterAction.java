@@ -82,13 +82,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * Will open the parent compilation unit in a Java editor. The result is 
  * unsaved, so the user can decide if the changes are acceptable.
  * <p>
- * Valid input:
- * <ul>
- *   <li><code>IStructuredSelection</code>: elements of type
- * 	<code>IMember</code></li>.
- *   <li><code>ITextSelection</code>: a selection that either resolves
- * 	to a field or is enclosed by a type.</li>
- * </ul>
+ * The action is applicable to structured selections containing elements
+ * of type <code>IField</code> or <code>IType</code>.
+ * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
@@ -101,7 +97,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private static final String dialogTitle= ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
 
 	/**
-	 * Creates a new <code>AddGetterSetterAction</code>.
+	 * Creates a new <code>AddGetterSetterAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -115,10 +113,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new <code>AddGetterSetterAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public AddGetterSetterAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());

@@ -48,7 +48,9 @@ public class JavaSearchActionGroup extends ActionGroup {
 	private ImplementorsSearchGroup fImplementorsGroup;
 	
 	/**
-	 * Creates a new <code>JavaSearchActionGroup</code>.
+	 * Creates a new <code>JavaSearchActionGroup</code>. The group 
+	 * requires that the selection provided by the part's selection provider 
+	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -57,7 +59,9 @@ public class JavaSearchActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Creates a new <code>JavaSearchActionGroup</code>.
+	 * Creates a new <code>JavaSearchActionGroup</code>. The group 
+	 * requires that the selection provided by the page's selection provider 
+	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param page the page that owns this action group
 	 */
@@ -66,10 +70,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	}
 
 	/**
-	 * Creates a new Java search action group.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public JavaSearchActionGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);

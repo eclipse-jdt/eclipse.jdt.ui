@@ -55,7 +55,9 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractMethodAction;
 
 	/**
-	 * Creates a new <code>RefactorActionGroup</code>.
+	 * Creates a new <code>RefactorActionGroup</code>. The group requires
+	 * that the selection provided by the part's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -64,7 +66,9 @@ public class RefactorActionGroup extends ActionGroup {
 	}	
 	
 	/**
-	 * Creates a new <code>RefactorActionGroup</code>.
+	 * Creates a new <code>RefactorActionGroup</code>. The action requires
+	 * that the selection provided by the page's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param page the page that owns this action group
 	 */
@@ -73,12 +77,7 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Creates a new <code>RefactorActionGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
-	 * 
-	 * @param editor the editor that owns this action group
 	 */
 	public RefactorActionGroup(CompilationUnitEditor editor, String groupName) {
 		fSite= editor.getEditorSite();

@@ -57,7 +57,9 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	private FindDeclarationsInHierarchyAction fFindDeclarationsInHierarchyAction;
 
 	/**
-	 * Creates a new <code>DeclarationsSearchGroup</code>.
+	 * Creates a new <code>DeclarationsSearchGroup</code>. The group requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * IStructuredSelection</code>.
 	 * 
 	 * @param site the workbench site that owns this action group
 	 */
@@ -78,10 +80,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	}
 
 	/**
-	 * Creates a new <code>DeclarationsSearchGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public DeclarationsSearchGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);

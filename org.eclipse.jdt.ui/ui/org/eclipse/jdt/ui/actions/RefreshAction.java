@@ -47,13 +47,21 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * the selected resources and all of their descendents. This action
  * also considers external Jars managed by the Java Model.
  * <p>
+ * Action is applicable to selections containing resources and Java
+ * elements down to compilation units.
+ * 
+ * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
+ * 
+ * @since 2.0
  */
 public class RefreshAction extends SelectionDispatchAction {
 
 	/**
-	 * Creates a new <code>RefreshAction</code>.
+	 * Creates a new <code>RefreshAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */

@@ -11,8 +11,12 @@
 package org.eclipse.jdt.ui.actions;
 
 /**
- * Action ids for standard actions, groups in the menu bar, and
+ * Action ids for standard actions, for groups in the menu bar, and
  * for actions in context menus of JDT views.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
  * 
  * @since 2.0
  */
@@ -235,6 +239,8 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractMethod"</code>).
 	 */
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.actions.ExtractMethod"; //$NON-NLS-1$
+	
+	// Search Menu
 	
 	/**
 	 * Search menu: name of standard Find References in Workspace global action

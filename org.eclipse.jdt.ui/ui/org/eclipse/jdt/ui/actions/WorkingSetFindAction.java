@@ -24,7 +24,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 /**
  * Wraps a <code>JavaElementSearchActions</code> to find its results
  * in the specified working set.
- * The action is applicable for selections and Search view entries
+ * <p>
+ * The action is applicable to selections and Search view entries
  * representing a Java element.
  * 
  * <p>
@@ -38,11 +39,7 @@ public class WorkingSetFindAction extends FindAction {
 	private FindAction fAction;
 
 	/**
-	 * Creates a new <code>WorkingSetAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
-	 * @param site the site providing context information for this action
 	 */
 	public WorkingSetFindAction(IWorkbenchSite site, FindAction action, String workingSetName) {
 		super(site, workingSetName, null);
@@ -52,10 +49,7 @@ public class WorkingSetFindAction extends FindAction {
 	}
 
 	/**
-	 * Creates a new <code>WorkingSetAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public WorkingSetFindAction(JavaEditor editor, FindAction action, String workingSetName) {
 		super(editor, workingSetName, null);

@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
- * Action group that adds the actions that open a new editor to the 
+ * Action group that adds the actions opening a new editor to the 
  * context menu and the action bar's navigate menu.
  *
  * <p>
@@ -54,7 +54,9 @@ public class OpenEditorActionGroup extends ActionGroup {
 	private OpenAction fOpen;
 
 	/**
-	 * Creates a new <code>OpenActionGroup</code>.
+	 * Creates a new <code>OpenActionGroup</code>. The group requires
+	 * that the selection provided by the part's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -65,10 +67,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	}
 	
 	/**
-	 * Creates a new <code>OpenActionGroup</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public OpenEditorActionGroup(JavaEditor part) {
 		fIsEditorOwner= true;

@@ -46,10 +46,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Reveals the selected element in the resource navigator view. The action
- * is applicable for structured selections containing Java element or
- * <code>IResources</code>, or for text selections representing a 
- * Java element.
+ * Reveals the selected element in the resource navigator view. 
+ * <p>
+ * Action is applicable to structured selections containing Java element 
+ * or resources.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -62,7 +62,9 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;
 	
 	/**
-	 * Creates a new <code>ShowInNavigatorViewAction</code>.
+	 * Creates a new <code>ShowInNavigatorViewAction</code>. The action requires 
+	 * that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -73,10 +75,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new <code>ShowInNavigatorViewAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public ShowInNavigatorViewAction(JavaEditor editor) {
 		this(editor.getEditorSite());

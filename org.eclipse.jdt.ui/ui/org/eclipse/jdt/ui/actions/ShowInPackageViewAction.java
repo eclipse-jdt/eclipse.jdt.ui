@@ -38,12 +38,11 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 /**
- * This action reveals the currently selected Java element in the packages
- * view. The Java element can be represeented by either
- * <ul>
- * 	<li>a text selection inside a Java editor, or </li>
- * 	<li>a structured selection of a view part showing Java elements</li>
- * </ul>
+ * This action reveals the currently selected Java element in the 
+ * package explorer. 
+ * <p>
+ * The action is applicable to selections containing elements of type
+ * <code>IJavaElement</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -56,7 +55,9 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;
 	
 	/**
-	 * Creates a new <code>ShowInPackageViewAction</code>.
+	 * Creates a new <code>ShowInPackageViewAction</code>. The action requires 
+	 * that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -69,10 +70,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	}
 	
 	/**
-	 * Creates a new <code>ShowInPackageViewAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public ShowInPackageViewAction(JavaEditor editor) {
 		this(editor.getEditorSite());

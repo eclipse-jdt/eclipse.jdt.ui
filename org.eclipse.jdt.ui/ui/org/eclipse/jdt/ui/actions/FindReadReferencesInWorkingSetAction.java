@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Finds field read accesses of the selected element in working sets.
- * The action is applicable for selections representing a Java field.
+ * The action is applicable to selections representing a Java field.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -34,8 +34,10 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkingSetAction {
 
 	/**
-	 * Creates a new <code>FindReadReferencesInWorkingSetAction</code>.
-	 * The user will be prompted to select the working sets.
+	 * Creates a new <code>FindReadReferencesInWorkingSetAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>. The user will be 
+	 * prompted to select the working sets.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
@@ -46,7 +48,9 @@ public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkin
 	}
 
 	/**
-	 * Creates a new <code>FindReadReferencesInWorkingSetAction</code>.
+	 * Creates a new <code>FindReadReferencesInWorkingSetAction</code>. The action 
+	 * requires that the selection provided by the site's selection provider is of type 
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site			the site providing context information for this action
 	 * @param workingSets	the working sets to be used in the search
@@ -57,10 +61,7 @@ public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkin
 	}
 
 	/**
-	 * Creates a new <code>FindReadReferencesInWorkingSetAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public FindReadReferencesInWorkingSetAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
@@ -68,10 +69,7 @@ public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkin
 	}
 
 	/**
-	 * Creates a new <code>FindReadReferencesInWorkingSetAction</code>.
-	 * <p>
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * </p>
 	 */
 	public FindReadReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
 		super(editor, workingSets, new Class[] {IField.class});
