@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
  * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v0.5 
+ * are made available under the terms of the Common Public License v1.0 
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
  * 
@@ -24,7 +24,10 @@ package org.eclipse.jdt.ui.text;
  */
 public interface IJavaColorConstants {
 	
-	/** The prefix all color constants start with */
+	/** 
+	 * Note: This constant is for internal use only. Clients should not use this constant.
+	 * The prefix all color constants start with.
+	 */
 	String PREFIX= "java_"; //$NON-NLS-1$
 	
 	/** The color key for multi-line comments in Java code. */

@@ -76,11 +76,15 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
  */
 public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
-	/** Preference key used to look up display tab width
+	/** 
+	 * Preference key used to look up display tab width.
+	 * 
 	 * @since 2.0
 	 */
 	public final static String PREFERENCE_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
-	/** Preference key for inserting spaces rather than tabs
+	/** 
+	 * Preference key for inserting spaces rather than tabs.
+	 * 
 	 * @since 2.0
 	 */
 	public final static String SPACES_FOR_TABS= "spacesForTabs"; //$NON-NLS-1$
@@ -114,6 +118,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the Java multiline comment scanner for this configuration.
 	 *
 	 * @return the Java multiline comment scanner
+	 * 
 	 * @since 2.0
 	 */
 	protected RuleBasedScanner getMultilineCommentScanner() {
@@ -124,6 +129,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the Java singleline comment scanner for this configuration.
 	 *
 	 * @return the Java singleline comment scanner
+	 * 
 	 * @since 2.0
 	 */
 	protected RuleBasedScanner getSinglelineCommentScanner() {
@@ -134,6 +140,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the Java string scanner for this configuration.
 	 *
 	 * @return the Java string scanner
+	 * 
 	 * @since 2.0
 	 */
 	protected RuleBasedScanner getStringScanner() {
@@ -168,8 +175,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/**
-	 * Returns the preference store used for by this configuration to initialize
-	 * the individula bits and pieces.
+	 * Returns the preference store used by this configuration to initialize
+	 * the individual bits and pieces.
+	 * 
+	 * @return the preference store used to initialize this configuration
+	 * 
 	 * @since 2.0
 	 */
 	protected IPreferenceStore getPreferenceStore() {
@@ -375,9 +385,6 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		return getInformationControlCreator(sourceViewer, true);
 	}
 	
-	/**
-	 * @since 2.0
-	 */
 	private IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer, final boolean cutDown) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {

@@ -34,13 +34,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  */
 public class JavaTextTools {
 	
-	/**
-	 * @since 2.0
-	 */
 	private class PreferenceListener implements IPropertyChangeListener {
-		/**
-		 * @since 2.0
-		 */
 		public void propertyChange(PropertyChangeEvent event) {
 			adaptToPreferenceChange(event);
 		}
@@ -50,35 +44,32 @@ public class JavaTextTools {
 	private JavaColorManager fColorManager;
 	/** The Java source code scanner */
 	private JavaCodeScanner fCodeScanner;
-	/** The Java multiline comment scanner
-	 * @since 2.0
-	 */
+	/** The Java multiline comment scanner */
 	private SingleTokenJavaScanner fMultilineCommentScanner;
-	/** The Java singleline comment scanner
-	 * @since 2.0
-	 */
+	/** The Java singleline comment scanner */
 	private SingleTokenJavaScanner fSinglelineCommentScanner;
-	/** The Java string scanner
-	 * @since 2.0
-	 */
+	/** The Java string scanner */
 	private SingleTokenJavaScanner fStringScanner;
 	/** The JavaDoc scanner */
 	private JavaDocScanner fJavaDocScanner;
 	/** The Java partitions scanner */
 	private FastJavaPartitionScanner fPartitionScanner;	
 	
-	/** The preference store
-	 * @since 2.0
-	 */
+	/** The preference store */
 	private IPreferenceStore fPreferenceStore;
-	/** The preference change listener
-	 * @since 2.0
-	 */
+	/** The preference change listener */
 	private PreferenceListener fPreferenceListener= new PreferenceListener();
 
 	
 	/**
 	 * Creates a new Java text tools collection.
+	 * 
+	 * @param store the preference store to initialize the text tools. The text tool
+	 * instance installs a listener on the passed preference store to adapt itself to 
+	 * changes in the preference store. In general <code>PreferenceConstants.
+	 * getPreferenceStore()</code> shoould be used to initialize the text tools.
+	 * 
+	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
 	 * @since 2.0
 	 */
 	public JavaTextTools(IPreferenceStore store) {
@@ -141,6 +132,7 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java multiline comments.
 	 *
 	 * @return a Java multiline comment scanner
+	 * 
 	 * @since 2.0
 	 */
 	public RuleBasedScanner getMultilineCommentScanner() {
@@ -151,6 +143,7 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java singleline comments.
 	 *
 	 * @return a Java singleline comment scanner
+	 * 
 	 * @since 2.0
 	 */
 	public RuleBasedScanner getSinglelineCommentScanner() {
@@ -161,6 +154,7 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java strings.
 	 *
 	 * @return a Java string scanner
+	 * 
 	 * @since 2.0
 	 */
 	public RuleBasedScanner getStringScanner() {
@@ -227,6 +221,7 @@ public class JavaTextTools {
 	 * 
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
+	 * 
 	 * @since 2.0
 	 */
 	public boolean affectsBehavior(PropertyChangeEvent event) {
@@ -241,7 +236,7 @@ public class JavaTextTools {
 	 * Adapts the behavior of the contained components to the change
 	 * encoded in the given event.
 	 * 
-	 * @param event the event to whch to adapt
+	 * @param event the event to which to adapt
 	 * @since 2.0
 	 */
 	protected void adaptToPreferenceChange(PropertyChangeEvent event) {

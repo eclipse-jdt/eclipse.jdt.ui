@@ -13,9 +13,9 @@ package org.eclipse.jdt.ui.text;
 import org.eclipse.swt.graphics.RGB;
 
 /**
- * For internal use only. Not API. <p>
- * A color manager extension is for extending
- * <code>IColorManager</code> instances with new functionality.
+ * A color manager extension for extending <code>IColorManager</code> 
+ * instances with new functionality.
+ * 
  * @since 2.0
  */
 public interface IColorManagerExtension {
