@@ -2,10 +2,9 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.junit.internal;
-
+package org.eclipse.jdt.junit.internal;
 import java.lang.reflect.InvocationTargetException;
-
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
@@ -13,14 +12,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.junit.internal.BaseLauncher;
-
+
 
 /**
  * A launcher for running JUnit (Eclipse Plugin) Test classes. 
  * Uses JDI to launch a vm in debug mode.
  */
 public class Launcher extends BaseLauncher implements IExecutableExtension{
-
+
 	private static IConfigurationElement fgConfigElement;
 	/**
 	 * @see BaseLauncher#configureVM(IType[], int)
@@ -50,7 +49,7 @@ public class Launcher extends BaseLauncher implements IExecutableExtension{
 		for (int i= 0; i < classNames.length; i++) {
 			classNames[i]= testTypes[i].getFullyQualifiedName();
 		}
-
+
 		String[] programArguments= new String[args.length + classNames.length];
 		System.arraycopy(args, 0, programArguments, 0, args.length);
 		System.arraycopy(classNames, 0, programArguments, args.length, classNames.length);

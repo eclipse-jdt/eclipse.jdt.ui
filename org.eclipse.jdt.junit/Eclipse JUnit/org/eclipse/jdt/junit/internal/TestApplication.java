@@ -2,8 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.junit.internal;
-
+package org.eclipse.jdt.junit.internal;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.internal.Workbench;
@@ -22,8 +21,7 @@ public class TestApplication extends Workbench {
 			} catch (Throwable e) {
 				break;
 			}
-		}
-
+		}
 		// Run all tests.
 		String[] arguments= getCommandLineArgs();
 		try {

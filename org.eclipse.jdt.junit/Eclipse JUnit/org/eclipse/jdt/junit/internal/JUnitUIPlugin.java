@@ -3,7 +3,7 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.junit.internal;
-
+
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
@@ -18,8 +18,7 @@ public final class JUnitUIPlugin extends AbstractUIPlugin {
 	/**
 	 * The single instance of this plug-in runtime class.
 	 */
-	private static JUnitUIPlugin fgPlugin= null;
-
+	private static JUnitUIPlugin fgPlugin= null;
 	public JUnitUIPlugin(IPluginDescriptor desc) {
 		super(desc);
 		fgPlugin= this;

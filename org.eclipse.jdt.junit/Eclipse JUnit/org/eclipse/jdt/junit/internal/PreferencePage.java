@@ -2,8 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.junit.internal;
-
+package org.eclipse.jdt.junit.internal;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.SWT;
@@ -15,7 +14,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-
+
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -49,8 +48,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		fgDirectoryDialog= new DirectoryDialog(JUnitUIPlugin.getActiveShell());
 		fgDirectoryDialog.setMessage("Please select the directories where Eclipse plugins can be found. " 
 			+ "Required plugins are collect top - down.");
-	}
-
+	}
 	/**
 	 * @see PreferencePage#createControl(Composite)
 	 */
@@ -73,7 +71,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		
 		return composite;
 	}
-
+
 	protected Composite createContainer(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -84,7 +82,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		composite.setLayoutData(gridData);
 		return composite;
 	}
-
+
 	protected void createPluginsTable(Composite composite) {
 		Label label= new Label(composite, SWT.WRAP);
 		GridData gridData= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
@@ -97,8 +95,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		fgTable.setLayoutData(gridData);
 		fgTable.addSelectionListener(this);
 		fillList();
-	}
-
+	}
 	protected void createAddRemovePanel(Composite composite) {
 		Composite buttonPanel= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -116,8 +113,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		fgRemoveButton.setText("Remove");
 		fgRemoveButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
 		fgRemoveButton.addSelectionListener(this);
-	}
-
+	}
 	protected void createCheckPanel(Composite composite, IPreferenceStore store) {
 		Composite checkPanel= new Composite(composite, SWT.NONE);
 		GridData gridData= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
@@ -131,7 +127,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		createTestPluginCheckLabel(checkPanel, store);
 		createStartupJarCheckLabel(checkPanel, store);
 	}
-
+
 	protected void createTestPluginCheckLabel(Composite checkPanel, IPreferenceStore store) {
 		fTestPluginCheckBox= new Button(checkPanel, SWT.CHECK);
 		GridData gridData= new GridData();
@@ -217,8 +213,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 	private void fillList() {
 		IPreferenceStore store= getPreferenceStore();
 		
-		boolean initDone= store.getBoolean(PLUGIN_INIT_DONE);
-
+		boolean initDone= store.getBoolean(PLUGIN_INIT_DONE);
 		TableItem tableItem= new TableItem(fgTable, SWT.CHECK);
 		tableItem.setText("Workspace");
 		if(initDone)

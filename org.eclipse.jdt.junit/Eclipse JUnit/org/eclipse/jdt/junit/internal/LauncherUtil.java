@@ -3,7 +3,7 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.junit.internal;
-
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
@@ -13,7 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.util.ArrayList;
-
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -33,14 +33,13 @@ import org.eclipse.junit.internal.BaseLauncherUtil;
 import org.eclipse.junit.internal.JUnitPlugin;
 import sun.security.action.GetPropertyAction;
 
-
 public class LauncherUtil { 
 	
 	private LauncherUtil() {
 	}
 	
 	private static long fNumber;		
-
+
 	protected static String[] createClassPath(IType type) throws InvocationTargetException {
 		String[] cp= new String[0];		
 		try {
@@ -197,7 +196,7 @@ public class LauncherUtil {
 		}
 		return required;
 	}
-
+
 	protected static PluginRegistryModel getPluginRegistryModel(IJavaProject project) throws InvocationTargetException {
 		MultiStatus status= new MultiStatus("JUnit plugin.xml scann", 1010, "error scanning plugin.xml", null);
 		Factory factory= new Factory(status);
@@ -217,7 +216,7 @@ public class LauncherUtil {
 			new Exception("could not instantiate the PluginRegistryModel for " + project.getElementName())
 		);
 	}
-
+
 	protected static String getStartupJarDir() throws InvocationTargetException {
 		IPreferenceStore store= JUnitUIPlugin.getDefault().getPreferenceStore();
 	
@@ -244,11 +243,11 @@ public class LauncherUtil {
 	protected static String getTempLocation() {
 		return System.getProperty("java.io.tmpdir") + File.separator;
 	}
-
+
 	protected static String getTempWorkSpaceLocation() {	
  			return getTempLocation() + "workspace_" + fNumber;		
 	}
-
+
 	protected static int countnOfPluginsDirs() {
 		IPreferenceStore store= JUnitUIPlugin.getDefault().getPreferenceStore();	
 		boolean initDone= store.getBoolean(PreferencePage.PLUGIN_INIT_DONE);
@@ -264,8 +263,7 @@ public class LauncherUtil {
 		for (int i= 0; i < store.getInt(PreferencePage.NOF_PLUGINS_DIRS); i++)
 			if (store.getBoolean(PreferencePage.PLUGINS_DIR_IS_CHECKED_ + i)) count++;	
 		return count;
-	}		
-
+	}		
 	protected static URL[] createPluginURLs(File directory) throws InvocationTargetException {
 		ArrayList pluginURLs= new ArrayList();
 		File pluginsDir[]= directory.listFiles();
@@ -285,7 +283,7 @@ public class LauncherUtil {
 		}
 		return (URL[]) pluginURLs.toArray(new URL[pluginURLs.size()]);			
 	}
-
+
 	protected static Object escapeSpaces(String string){
 		int index= 0;
 		String tmp;
@@ -299,7 +297,7 @@ public class LauncherUtil {
 		}
 		return string;	
 	}
-
+
 	protected static String getDefaultPluginsLocation() {
 		String className= LauncherUtil.class.getName();
 		int index= className.lastIndexOf('.');
