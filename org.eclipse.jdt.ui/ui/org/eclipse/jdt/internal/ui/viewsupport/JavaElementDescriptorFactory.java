@@ -16,7 +16,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  {
 	
-	private IErrorTickManager fErrorTickManager;
+	private IErrorTickProvider fErrorTickManager;
 	
 	public JavaElementDescriptorFactory() {
 		fErrorTickManager= null;
@@ -26,7 +26,7 @@ public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  
 	 * Sets the ErrorTickManager
 	 * @param errorTickManager The errorTickManager to set
 	 */
-	public void setErrorTickManager(IErrorTickManager errorTickManager) {
+	public void setErrorTickManager(IErrorTickProvider errorTickManager) {
 		fErrorTickManager= errorTickManager;
 	}	
 	
@@ -64,9 +64,9 @@ public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  
 		if (fErrorTickManager != null) {
 			IJavaElement jElement= (IJavaElement)element;
 			int info= fErrorTickManager.getErrorInfo(jElement);
-			if ((info & IErrorTickManager.ERRORTICK_ERROR) != 0) {
+			if ((info & IErrorTickProvider.ERRORTICK_ERROR) != 0) {
 				flags |= JavaOverlayDescriptor.ERROR;
-			} else if ((info & IErrorTickManager.ERRORTICK_WARNING) != 0) {
+			} else if ((info & IErrorTickProvider.ERRORTICK_WARNING) != 0) {
 				flags |= JavaOverlayDescriptor.WARNING;
 			}
 		}

@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartService;
@@ -61,6 +62,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	
 	/** Outliner context menu Id */
 	protected String fOutlinerContextMenuId;
+	
+	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
 			
 	
 	/**
@@ -84,6 +87,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this));
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		
+		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
 	/**
@@ -289,6 +294,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
+		fJavaEditorErrorTickUpdater.setAnnotationModel(getDocumentProvider().getAnnotationModel(input));
 		setOutlinePageInput(fOutlinePage, input);
 	}	
 	
@@ -306,4 +312,21 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			return true;
 		return ((ITextSelection)selection).getLength() == 0;	
 	}
+	
+	public void updatedTitleImage(Image image) {
+		setTitleImage(image);
+	}
+	
+	
+	/**
+	 * @see AbstractTextEditor#dispose()
+	 */
+	public void dispose() {
+		if (fJavaEditorErrorTickUpdater != null) {
+			fJavaEditorErrorTickUpdater.setAnnotationModel(null);
+			fJavaEditorErrorTickUpdater= null;
+		}
+		super.dispose();
+	}
+
 }

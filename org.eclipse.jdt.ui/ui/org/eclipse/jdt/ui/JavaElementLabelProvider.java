@@ -22,7 +22,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickManager;
+import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaImageLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
@@ -202,7 +202,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 		disposeJarEntryImages();
 	}
 	
-	public void setErrorTickManager(IErrorTickManager manager) {
+	public void setErrorTickManager(IErrorTickProvider manager) {
 		fImageLabelProvider.setErrorTickManager(manager);
 	}	
 	

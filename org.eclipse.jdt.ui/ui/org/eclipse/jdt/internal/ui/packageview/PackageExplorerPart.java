@@ -105,7 +105,7 @@ import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickManager;
+import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.wizards.NewGroup;
@@ -221,7 +221,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	} 
 		
 	 public void dispose() {
-		JavaPlugin.getDefault().getProblemMarkerFilter().removeListener(fViewer);
+		JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fViewer);
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
 		getSite().getPage().removePartListener(fPartListener);
@@ -234,12 +234,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer= new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		
 		fViewer.setContentProvider(new JavaElementContentProvider());
-		JavaPlugin.getDefault().getProblemMarkerFilter().addListener(fViewer);		
+		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
 
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
 					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE;
 		JavaElementLabelProvider labelProvider = new JavaElementLabelProvider(labelFlags);
-		labelProvider.setErrorTickManager(new MarkerErrorTickManager());
+		labelProvider.setErrorTickManager(new MarkerErrorTickProvider());
 		fViewer.setLabelProvider(new DecoratingLabelProvider(labelProvider, null));
 		fViewer.setSorter(new PackageViewerSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());
@@ -927,7 +927,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
 					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE;
 		JavaElementLabelProvider javaProvider= new JavaElementLabelProvider(labelFlags);
-		javaProvider.setErrorTickManager(new MarkerErrorTickManager());
+		javaProvider.setErrorTickManager(new MarkerErrorTickProvider());
 		if (decorator == null) {
 			fViewer.setLabelProvider(javaProvider);
 		} else {

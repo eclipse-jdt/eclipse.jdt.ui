@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerFilter;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
 /**
  * Represents the java plugin. It provides a series of convenience methods such as
@@ -72,7 +72,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
 	private FileDocumentProvider fSnippetDocumentProvider;
 	private JavaTextTools fJavaTextTools;
-	private ProblemMarkerFilter fProblemMarkerFilter;
+	private ProblemMarkerManager fProblemMarkerManager;
 	
 	
 	public static JavaPlugin getDefault() {
@@ -224,10 +224,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return getCompilationUnitDocumentProvider();
 	}
 	
-	public ProblemMarkerFilter getProblemMarkerFilter() {
-		if (fProblemMarkerFilter == null)
-			fProblemMarkerFilter= new ProblemMarkerFilter();
-		return fProblemMarkerFilter;
+	public ProblemMarkerManager getProblemMarkerManager() {
+		if (fProblemMarkerManager == null)
+			fProblemMarkerManager= new ProblemMarkerManager();
+		return fProblemMarkerManager;
 	}	
 	
 	public JavaTextTools getJavaTextTools() {

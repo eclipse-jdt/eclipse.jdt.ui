@@ -19,11 +19,16 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+/**
+ * Extends a  TreeViewer to allow more performance when showing error ticks.
+ * A <code>ProblemItemMapper</code> is contained that maps all items in
+ * the tree to underlying resource
+ */
 public class ProblemTreeViewer extends TreeViewer implements IProblemChangedListener {
 
 	private ProblemItemMapper fProblemItemMapper;
 
-	/**
+	/*
 	 * @see TreeViewer#TreeViewer(Composite)
 	 */
 	public ProblemTreeViewer(Composite parent) {
@@ -31,7 +36,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 		initMapper();
 	}
 
-	/**
+	/*
 	 * @see TreeViewer#TreeViewer(Composite, int)
 	 */
 	public ProblemTreeViewer(Composite parent, int style) {
@@ -39,7 +44,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 		initMapper();
 	}
 
-	/**
+	/*
 	 * @see TreeViewer#TreeViewer(Tree)
 	 */
 	public ProblemTreeViewer(Tree tree) {
@@ -52,7 +57,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	}
 	
 	
-	/**
+	/*
 	 * @see IProblemChangedListener#problemsChanged
 	 */
 	public void problemsChanged(final Set changed) {
@@ -66,7 +71,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 		}
 	}
 	
-	/**
+	/*
 	 * @see StructuredViewer#associate(Object, Item)
 	 */
 	protected void associate(Object element, Item item) {
@@ -76,7 +81,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 		super.associate(element, item);		
 	}
 
-	/**
+	/*
 	 * @see StructuredViewer#disassociate(Item)
 	 */
 	protected void disassociate(Item item) {

@@ -55,7 +55,7 @@ public class JavaImageLabelProvider {
 			fIconManager= new OverlayIconManager(factory, BIG_SIZE);
 	}
 	
-	public void setErrorTickManager(IErrorTickManager manager) {
+	public void setErrorTickManager(IErrorTickProvider manager) {
 		((JavaElementDescriptorFactory)fIconManager.getDescriptorFactory()).setErrorTickManager(manager);
 	}
 	

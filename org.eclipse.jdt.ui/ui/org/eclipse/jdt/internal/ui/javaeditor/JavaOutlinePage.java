@@ -766,7 +766,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private Hashtable fActions= new Hashtable();
 	private ContextMenuGroup[] fActionGroups;
 	
-	private AnnotationErrorTickUpdater fErrorTickUpdater;
+	private JavaOutlineErrorTickUpdater fErrorTickUpdater;
 	
 
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
@@ -791,16 +791,15 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	public void createControl(Composite parent) {
 		
 		Tree tree= new Tree(parent, SWT.MULTI);
-		
+
 		JavaElementLabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_TYPE);
-		lprovider.setErrorTickManager(new AnnotationErrorTickManager(fEditor));	
 		
 		fOutlineViewer= new JavaOutlineViewer(tree);		
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(lprovider);
-		
-		fErrorTickUpdater= new AnnotationErrorTickUpdater(fOutlineViewer);
-		fErrorTickUpdater.install(fEditor);
+
+		fErrorTickUpdater= new JavaOutlineErrorTickUpdater(fOutlineViewer, lprovider);
+		fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
 				
 		MenuManager manager= new MenuManager(fContextMenuID, fContextMenuID);
 		manager.setRemoveAllWhenShown(true);
@@ -833,8 +832,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		if (fEditor == null)
 			return;
-			
-		fErrorTickUpdater.uninstall();			
+		
+		if (fErrorTickUpdater != null)
+			fErrorTickUpdater.setAnnotationModel(null);			
 			
 		fEditor.outlinePageClosed();
 		fEditor= null;
@@ -861,9 +861,11 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	}
 	
 	public void setInput(IJavaElement inputElement) {
-		fInput= inputElement;		
+		fInput= inputElement;	
 		if (fOutlineViewer != null)
 			fOutlineViewer.setInput(fInput);
+		if (fErrorTickUpdater != null)
+			fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
 	}
 		
 	public void select(ISourceReference reference) {

@@ -87,7 +87,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickManager;
+import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -204,7 +204,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
 		
 		fPaneLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS);
-		fPaneLabelProvider.setErrorTickManager(new MarkerErrorTickManager());
+		fPaneLabelProvider.setErrorTickManager(new MarkerErrorTickProvider());
 		
 		fAllViewers= new TypeHierarchyViewer[3];
 	
@@ -362,9 +362,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		getSite().getPage().removePartListener(fPartListener);
 
 		if (fHierarchyProblemListener != null) {
-			JavaPlugin.getDefault().getProblemMarkerFilter().removeListener(fHierarchyProblemListener);
+			JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fHierarchyProblemListener);
 		}
-		JavaPlugin.getDefault().getProblemMarkerFilter().removeListener(fMethodsViewer);
+		JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fMethodsViewer);
 		super.dispose();
 	}
 		
@@ -480,7 +480,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		});
 		
-		JavaPlugin.getDefault().getProblemMarkerFilter().addListener(fMethodsViewer);
+		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fMethodsViewer);
 		return control;
 	}
 	
@@ -893,10 +893,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			updateTitle();
 			
 			if (fHierarchyProblemListener != null) {
-				JavaPlugin.getDefault().getProblemMarkerFilter().removeListener(fHierarchyProblemListener);
+				JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fHierarchyProblemListener);
 			}
 			fHierarchyProblemListener= getCurrentViewer();
-			JavaPlugin.getDefault().getProblemMarkerFilter().addListener(fHierarchyProblemListener);
+			JavaPlugin.getDefault().getProblemMarkerManager().addListener(fHierarchyProblemListener);
 			
 			
 			fDialogSettings.put(DIALOGSTORE_HIERARCHYVIEW, viewerIndex);

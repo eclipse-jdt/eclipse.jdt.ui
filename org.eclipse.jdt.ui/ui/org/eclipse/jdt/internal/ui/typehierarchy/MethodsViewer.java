@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickManager;
+import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemItemMapper;
 
 
@@ -142,7 +142,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		});
 
 		JavaElementLabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		lprovider.setErrorTickManager(new MarkerErrorTickManager());
+		lprovider.setErrorTickManager(new MarkerErrorTickProvider());
 		MethodsContentProvider contentProvider= new MethodsContentProvider();
 
 		setLabelProvider(lprovider);

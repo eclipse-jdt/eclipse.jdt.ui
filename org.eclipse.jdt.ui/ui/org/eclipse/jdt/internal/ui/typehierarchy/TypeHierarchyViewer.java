@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickManager;
+import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.wizards.NewGroup;
  
@@ -53,7 +53,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 		setContentProvider(contentProvider);
 		
 		JavaElementLabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		lprovider.setErrorTickManager(new MarkerErrorTickManager());
+		lprovider.setErrorTickManager(new MarkerErrorTickProvider());
 				
 		setLabelProvider(lprovider);
 		setSorter(new ViewerSorter() {
