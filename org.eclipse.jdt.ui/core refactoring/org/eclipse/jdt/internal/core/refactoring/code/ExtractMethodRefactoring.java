@@ -329,7 +329,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		StringBuffer result= new StringBuffer();
 		String[] locals= localAnalyzer.getLocals();
 		for (int i= 0; i < locals.length; i++)
-			addLine(result, indent, locals[i] + ";", delimiter);
+			addLine(result, indent, locals[i] + ";", delimiter); //$NON-NLS-1$
 		
 		boolean isExpressionExtracting= localAnalyzer.getExpressionReturnType() != null;
 		if (isExpressionExtracting) {
@@ -396,8 +396,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		
 		// We return a value. So the code must look like "return extracted();"
 		if (returnStatementKind == ReturnAnalyzer.TYPE)
-			result.append("return ");
-		result.append(localAnalyzer.getCall(fMethodName)); // @@, fCallOnDecalrationLine));
+			result.append("return "); //$NON-NLS-1$
+		result.append(localAnalyzer.getCall(fMethodName));
 		if (callNeedsSemicolon())
 			result.append(";"); //$NON-NLS-1$
 			
@@ -407,7 +407,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (returnStatementKind == ReturnAnalyzer.VOID) {
 			result.append(delimiter);
 			result.append(firstLineIndent);
-			result.append("return;");
+			result.append("return;"); //$NON-NLS-1$
 		}	
 		if (endsSelectionWithLineDelimiter(lines))
 			result.append(delimiter);

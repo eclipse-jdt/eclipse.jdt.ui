@@ -805,7 +805,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 		if (!visitNode(explicitConstructor, scope))
 			return false;
 		if (fMode == SELECTED) {
-			invalidSelection("Cannot extract super or this call from constructor.");
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.super_or_this")); //$NON-NLS-1$
 			return false;
 		}
 		return true;
