@@ -74,6 +74,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD= JavaCore.COMPILER_PB_SPECIAL_PARAMETER_HIDING_FIELD;
 	private static final String PREF_PB_INDIRECT_STATIC_ACCESS= JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS;
 	private static final String PREF_PB_SUPERFLUOUS_SEMICOLON= JavaCore.COMPILER_PB_SUPERFLUOUS_SEMICOLON;
+	private static final String PREF_PB_UNNECESSARY_TYPE_CHECK= JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK;
+
 
 	private static final String PREF_SOURCE_COMPATIBILITY= JavaCore.COMPILER_SOURCE;
 	private static final String PREF_COMPLIANCE= JavaCore.COMPILER_COMPLIANCE;
@@ -145,7 +147,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		PREF_PB_UNUSED_PRIVATE, PREF_PB_CHAR_ARRAY_IN_CONCAT, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS,
 		PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, PREF_PB_LOCAL_VARIABLE_HIDING, PREF_PB_FIELD_HIDING,
 		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_PB_INDIRECT_STATIC_ACCESS,
-		PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT
+		PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
+		PREF_PB_UNNECESSARY_TYPE_CHECK
 	};	
 	
 	protected String[] getAllKeys() {
@@ -370,6 +373,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_superfluous_semicolon.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_SUPERFLUOUS_SEMICOLON, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+	
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unnecessary_type_check.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_UNNECESSARY_TYPE_CHECK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 	
 		return composite;
 	}
