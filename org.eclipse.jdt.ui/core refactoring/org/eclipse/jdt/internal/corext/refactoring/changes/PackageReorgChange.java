@@ -5,16 +5,17 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 abstract class PackageReorgChange extends Change {
@@ -39,7 +40,7 @@ abstract class PackageReorgChange extends Change {
 		try{
 			if (!isActive())
 				return;
-			doPerform(new SubProgressMonitor(pm, 1));
+			doPerform(pm);
 		}catch (Exception e) {
 			handleException(context, e);
 			setActive(false);	
@@ -67,6 +68,14 @@ abstract class PackageReorgChange extends Change {
 		if (fNameQuery == null)
 			return null;
 		return fNameQuery.getNewName();
+	}
+
+	public boolean isUndoable() {
+		return false;
+	}
+
+	public IChange getUndoChange() {
+		return new NullChange();
 	}
 }
 
