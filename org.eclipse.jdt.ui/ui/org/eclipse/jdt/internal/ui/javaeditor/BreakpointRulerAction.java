@@ -105,7 +105,6 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 		
 		IDocument document= getDocument();
 		int rulerLine= getVerticalRuler().getLineOfLastMouseButtonActivity();
-		IBreakpointManager breakpointManager= DebugPlugin.getDefault().getBreakpointManager();
 		
 		try {
 			BreakpointLocationVerifier bv = new BreakpointLocationVerifier();
@@ -130,7 +129,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 				}
 				if (type != null) {
 					if (!JDIDebugModel.lineBreakpointExists(type, lineNumber)) {
-							IBreakpoint breakpoint = JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
+						JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
 					}
 				}
 			}
