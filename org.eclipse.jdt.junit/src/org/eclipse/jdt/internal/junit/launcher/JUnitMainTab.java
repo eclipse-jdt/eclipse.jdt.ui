@@ -62,7 +62,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -401,15 +400,23 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		IJavaProject javaProject = getJavaProject();
 		
 		IType[] types= new IType[0];
+		boolean[] radioSetting= new boolean[2];
 		try {
-			// fix for 66922 Wrong radio behaviour when switching  
-			types= TestSearchEngine.findTests(PlatformUI.getWorkbench().getProgressService(), new Object[] {javaProject}); 
+			// fix for 66922 Wrong radio behaviour when switching
+			// remember the selected radio button
+			radioSetting[0]= fTestRadioButton.getSelection();
+			radioSetting[1]= fTestContainerRadioButton.getSelection();
+			
+			types= TestSearchEngine.findTests(getLaunchConfigurationDialog(), new Object[] {javaProject}); 
 		} catch (InterruptedException e) {
 			setErrorMessage(e.getMessage());
 			return;
 		} catch (InvocationTargetException e) {
 			JUnitPlugin.log(e.getTargetException());
 			return;
+		} finally {
+			fTestRadioButton.setSelection(radioSetting[0]);
+			fTestContainerRadioButton.setSelection(radioSetting[1]);
 		}
 
 		SelectionDialog dialog = new TestSelectionDialog(shell, types);
