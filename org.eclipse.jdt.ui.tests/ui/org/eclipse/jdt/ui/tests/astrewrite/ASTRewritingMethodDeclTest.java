@@ -102,7 +102,12 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			methodDecl.setReturnType(newReturnType);
 			
 			ASTRewriteAnalyzer.markAsInserted(newReturnType);
-			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, methodDecl.getModifiers(), true);
+			
+			// from constructor to method
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setConstructor(false);
+			modifiedNode.setModifiers(methodDecl.getModifiers());
+			ASTRewriteAnalyzer.markAsModified(methodDecl, modifiedNode);
 		}
 		{ // change return type
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
@@ -118,7 +123,12 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			
 			Type returnType= methodDecl.getReturnType();
 			ASTRewriteAnalyzer.markAsReplaced(returnType, null);
-			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, methodDecl.getModifiers(), true);
+			
+			// from method to constructor
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setConstructor(true);
+			modifiedNode.setModifiers(methodDecl.getModifiers());
+			ASTRewriteAnalyzer.markAsModified(methodDecl, modifiedNode);
 		}
 		{ // rename method name
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "iee");
@@ -197,6 +207,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	public void testListRemoves() throws Exception {
 		ICompilationUnit cu= fCU_E;
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
 		{ // delete first param
@@ -208,7 +219,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // delete second param & remove exception & remove public
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
 			
-			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, 0, false);
+			// change flags
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
+			modifiedNode.setModifiers(0);
+			ASTRewriteAnalyzer.markAsModified(methodDecl, modifiedNode);
 			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
@@ -317,7 +332,12 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // insert before second param & insert before first exception & add synchronized
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
 			
-			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, Modifier.PUBLIC | Modifier.SYNCHRONIZED, false);
+			
+			// change flags
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
+			modifiedNode.setModifiers(Modifier.PUBLIC | Modifier.SYNCHRONIZED);
+			ASTRewriteAnalyzer.markAsModified(methodDecl, modifiedNode);			
 			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
@@ -336,7 +356,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // insert after last param & insert after first exception & add synchronized, static
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "hee");
 			
-			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, Modifier.PUBLIC | Modifier.SYNCHRONIZED | Modifier.STATIC, false);
+			// change flags
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
+			modifiedNode.setModifiers(Modifier.PUBLIC | Modifier.SYNCHRONIZED | Modifier.STATIC);
+			ASTRewriteAnalyzer.markAsModified(methodDecl, modifiedNode);					
 			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
@@ -580,7 +604,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // delete block & set abstract
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
 			
-			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, Modifier.PUBLIC | Modifier.ABSTRACT, false);
+			// change flags
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
+			modifiedNode.setModifiers(Modifier.PUBLIC | Modifier.ABSTRACT);
+			ASTRewriteAnalyzer.markAsModified(methodDecl, modifiedNode);					
 			
 			Block body= methodDecl.getBody();
 			assertTrue("No body: gee", body != null);
@@ -590,7 +618,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // insert block & set to private
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "kee");
 			
-			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, Modifier.PRIVATE, false);
+			// change flags
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
+			modifiedNode.setModifiers(Modifier.PRIVATE);
+			ASTRewriteAnalyzer.markAsModified(methodDecl, modifiedNode);				
 			
 			Block body= methodDecl.getBody();
 			assertTrue("Has body", body == null);

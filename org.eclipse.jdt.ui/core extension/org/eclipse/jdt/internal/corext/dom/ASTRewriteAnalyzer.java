@@ -30,7 +30,16 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
-  */
+ * Infrastructure to support code modifications. Existing code must stay untouched, new code
+ * added with correct formatting, moved code left with the users formattings / comments.
+ * Idea:
+ * - Get the AST for existing code 
+ * - Inserting new nodes or mark existing nodes as replaced, removed, copied or moved.
+ * - This visitor analyses the changes or annottaions and generates text edits (text manipulation
+ *    API) that describe the required code changes.
+ * See test cases in org.eclipse.jdt.ui.tests / package org.eclipse.jdt.ui.tests.astrewrite for
+ * examples
+ */
 public class ASTRewriteAnalyzer extends ASTVisitor {
 
 	private static final String KEY= "ASTChangeData";
@@ -47,20 +56,19 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		markAsReplaced(node, null);
 	}
 	
-	public static void markAsReplaced(ASTNode node, ASTNode modifiedNode) {
+	public static void markAsReplaced(ASTNode node, ASTNode replacingNode) {
 		ASTReplace replace= new ASTReplace();
-		replace.modifiedNode= modifiedNode;
+		replace.replacingNode= replacingNode;
 		node.setProperty(KEY, replace);
 	}
 	
-	public static void markFlagsChanged(ASTNode node, int changedModifiers, boolean invertType) {
-		ASTFlagsModification modifiedFlags= new ASTFlagsModification();
-		modifiedFlags.changedModifiers= changedModifiers;
-		modifiedFlags.invertType= invertType;
-		node.setProperty(KEY, modifiedFlags);
+	public static void markAsModified(ASTNode node, ASTNode modifiedNode) {
+		ASTModify modify= new ASTModify();
+		modify.modifiedNode= modifiedNode;
+		node.setProperty(KEY, modify);
 	}	
 	
-	/* package */ static boolean isModifiedNode(ASTNode node) {
+	/* package */ static boolean isInsertOrReplace(ASTNode node) {
 		return isInserted(node) || isReplaced(node);
 	}
 	
@@ -72,10 +80,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return node.getProperty(KEY) instanceof ASTReplace;
 	}
 	
-	/* package */ static ASTFlagsModification getModifiedFlags(ASTNode node) {
+	/* package */ static boolean isModified(ASTNode node) {
+		return node.getProperty(KEY) instanceof ASTModify;
+	}	
+	
+	/* package */ static ASTNode getModifiedNode(ASTNode node) {
 		Object info= node.getProperty(KEY);
-		if (info instanceof ASTFlagsModification) {
-			return (ASTFlagsModification) info;
+		if (info instanceof ASTModify) {
+			return ((ASTModify) info).modifiedNode;
 		}
 		return null;
 	}
@@ -83,18 +95,17 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	/* package */ static ASTNode getReplacingNode(ASTNode node) {
 		Object info= node.getProperty(KEY);
 		if (info instanceof ASTReplace) {
-			return ((ASTReplace) info).modifiedNode;
+			return ((ASTReplace) info).replacingNode;
 		}
 		return null;
 	}
 		
 	private static final class ASTReplace {
-		public ASTNode modifiedNode;
+		public ASTNode replacingNode;
 	}
 	
-	/* package */ static final class ASTFlagsModification {
-		public int changedModifiers;
-		public boolean invertType;
+	private static final class ASTModify {
+		public ASTNode modifiedNode;
 	}
 	
 	private CompilationUnitChange fChange;
@@ -220,7 +231,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	
 
 	private void rewriteMethodBody(MethodDeclaration methodDecl, Block body) {
-		if (isModifiedNode(body)) {
+		if (isInsertOrReplace(body)) {
 			try {
 				IScanner scanner= getScanner(methodDecl.getStartPosition());
 				if (isInserted(body)) {
@@ -263,7 +274,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private boolean hasChanges(List list) {
 		for (int i= 0; i < list.size(); i++) {
 			ASTNode elem= (ASTNode) list.get(i);
-			if (isModifiedNode(elem)) {
+			if (isInsertOrReplace(elem)) {
 				return true;
 			}
 		}
@@ -337,8 +348,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 						}
 					}
 				} else { // no change
+					elem.accept(this);
+
 					after--;
-										
 					if (after == 0 && before != 0) { // will be last node -> remove comma
 						addDelete(currEnd, nextStart - currEnd, "Remove comma");
 					} else if (after != 0 && before == 0) { // was last, but not anymore -> add comma
@@ -512,10 +524,12 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		// modifiers & class/interface
 		boolean invertType= false;
-		ASTFlagsModification modifiedFlags= getModifiedFlags(typeDecl);
-		if (modifiedFlags != null) {
-			rewriteModifiers(typeDecl.getStartPosition(), typeDecl.getModifiers(), modifiedFlags.changedModifiers);
-			if (modifiedFlags.invertType) { // change from class to interface or reverse
+		if (isModified(typeDecl)) {
+			TypeDeclaration modifiedNode= (TypeDeclaration) getModifiedNode(typeDecl);
+			int modfiedModifiers= modifiedNode.getModifiers();
+			
+			rewriteModifiers(typeDecl.getStartPosition(), typeDecl.getModifiers(), modfiedModifiers);
+			if (modifiedNode.isInterface() != typeDecl.isInterface()) { // change from class to interface or reverse
 				invertType= true;
 				try {
 					IScanner scanner= getScanner(typeDecl.getStartPosition());
@@ -599,14 +613,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(MethodDeclaration)
 	 */
 	public boolean visit(MethodDeclaration methodDecl) {
-		boolean invertKind= false; // from method to constructor or back
-		ASTFlagsModification modfiedFlags= getModifiedFlags(methodDecl);
-		if (modfiedFlags != null) {
-			rewriteModifiers(methodDecl.getStartPosition(), methodDecl.getModifiers(), modfiedFlags.changedModifiers);
-			invertKind= modfiedFlags.invertType;
+		boolean willBeConstructor= methodDecl.isConstructor();
+		if (isModified(methodDecl)) {
+			MethodDeclaration modifiedNode= (MethodDeclaration) getModifiedNode(methodDecl);
+			rewriteModifiers(methodDecl.getStartPosition(), methodDecl.getModifiers(), modifiedNode.getModifiers());
+			willBeConstructor= modifiedNode.isConstructor();
 		}
 		
-		boolean willBeConstructor= methodDecl.isConstructor() != invertKind;
 		Type returnType= methodDecl.getReturnType();
 		if (isReplaced(returnType)) {
 			replaceNode(returnType, getReplacingNode(returnType));
@@ -799,21 +812,39 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayType)
 	 */
 	public boolean visit(ArrayType node) {
-		return super.visit(node);
+		// no changes possible // need to check
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(AssertStatement)
 	 */
 	public boolean visit(AssertStatement node) {
-		return super.visit(node);
+		// not yet supported
+		Assert.isTrue(!isInsertOrReplace(node.getExpression()) && !isInsertOrReplace(node.getMessage()), "Modifications on AssertStatement not yet supported");
+		return true;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(Assignment)
 	 */
 	public boolean visit(Assignment node) {
-		return super.visit(node);
+		Expression leftHand= node.getLeftHandSide();
+		if (isReplaced(leftHand)) {
+			replaceNode(leftHand, getReplacingNode(leftHand));
+		} else {
+			leftHand.accept(this);
+		}		
+			
+			
+		Expression rightHand= node.getRightHandSide();
+		if (isReplaced(rightHand)) {
+			replaceNode(rightHand, getReplacingNode(rightHand));
+		} else {
+			rightHand.accept(this);
+		}				
+		
+		return false;
 	}
 
 	/* (non-Javadoc)

@@ -134,7 +134,11 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		{ // replace method in F, change to interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
 			
-			ASTRewriteAnalyzer.markFlagsChanged(type, 0, true);
+			// change flags
+			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
+			modifiedNode.setInterface(true); 
+			modifiedNode.setModifiers(0);
+			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);				
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", members.size() == 1);
@@ -146,7 +150,12 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 		{ // change to class, add supertype
 			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
-			ASTRewriteAnalyzer.markFlagsChanged(type, 0, true);
+
+			// change flags
+			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
+			modifiedNode.setInterface(false); 
+			modifiedNode.setModifiers(0);
+			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);				
 			
 			SimpleName newSuperclass= ast.newSimpleName("Object");
 			type.setSuperclass(newSuperclass);
@@ -189,7 +198,11 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		{ // change to interface, remove supertype, remove first interface, remove field
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 			
-			ASTRewriteAnalyzer.markFlagsChanged(type, 0, true);
+			// change flags
+			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
+			modifiedNode.setInterface(true); 
+			modifiedNode.setModifiers(0);
+			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);				
 		
 			Name superClass= type.getSuperclass();
 			assertTrue("Has super type", superClass != null);
@@ -209,10 +222,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			MethodDeclaration meth= findMethodDeclaration(type, "hee");
 			ASTRewriteAnalyzer.markAsReplaced(meth, null);
 		}
-		{ // remove interface & method, change to interface
+		{ // remove superinterface & method, change to interface & final
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
 			
-			ASTRewriteAnalyzer.markFlagsChanged(type, Modifier.FINAL, true);
+			// change flags
+			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
+			modifiedNode.setInterface(true); 
+			modifiedNode.setModifiers(Modifier.FINAL);
+			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);					
 			
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
@@ -256,10 +273,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		AST ast= astRoot.getAST();
-		{ // add interface
+		{ // add interface & set to final
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 			
-			ASTRewriteAnalyzer.markFlagsChanged(type, Modifier.PUBLIC | Modifier.FINAL, false);
+			// change flags
+			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
+			modifiedNode.setInterface(type.isInterface()); // no change 
+			modifiedNode.setModifiers(Modifier.PUBLIC | Modifier.FINAL);
+			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);				
 		
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
