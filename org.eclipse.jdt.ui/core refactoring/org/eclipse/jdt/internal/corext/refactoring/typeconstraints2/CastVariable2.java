@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
@@ -25,8 +24,6 @@ public class CastVariable2 extends ConstraintVariable2 implements IDeclaredConst
 
 	public CastVariable2(TType type, CompilationUnitRange range, ConstraintVariable2 expressionVariable) {
 		super(type);
-		Assert.isNotNull(expressionVariable);
-		Assert.isNotNull(range);
 		fRange= range;
 		fExpressionVariable= expressionVariable;
 	}
