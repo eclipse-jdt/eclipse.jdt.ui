@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.ui.text.java.*;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -481,7 +482,7 @@ public class UnresolvedElementsSubProcessor {
 				}
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, binding, 5, image));
 				
-				if (binding.isAnonymous() && cu.equals(targetCU)) {
+				if (binding.isAnonymous() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(binding, methodName, null) == null) { // no covering method
 					ASTNode anonymDecl= astRoot.findDeclaringNode(binding);
 					if (anonymDecl != null) {
 						binding= Bindings.getBindingOfParentType(anonymDecl.getParent());
@@ -496,7 +497,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 		}
 	}
-	
+			
 	private static void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List similarElements, List arguments, Collection proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
@@ -770,6 +771,16 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 		
+		if (nDiffs == 0) {
+			if (nameNode.getParent() instanceof MethodInvocation) {
+				MethodInvocation inv= (MethodInvocation) nameNode.getParent();
+				if (inv.getExpression() == null) {
+					addQualifierToOuterProposal(context, inv, methodBinding, proposals);
+				}
+			}
+			return;
+		}
+		
 		if (nDiffs == 1) { // one argument missmatching: try to fix
 			int idx= indexOfDiff[0];
 			Expression nodeToCast= (Expression) arguments.get(idx);
@@ -865,6 +876,47 @@ public class UnresolvedElementsSubProcessor {
 		}
 		return res;
 	}
+	
+	private static void addQualifierToOuterProposal(IInvocationContext context, MethodInvocation invocationNode, IMethodBinding binding, Collection proposals) throws CoreException {
+		ITypeBinding declaringType= binding.getDeclaringClass();
+		ITypeBinding parentType= Bindings.getBindingOfParentType(invocationNode);
+		ITypeBinding currType= parentType;
+		
+		boolean isInstanceMethod= !Modifier.isStatic(binding.getModifiers());
+		
+		while (currType != null && !Bindings.isSuperType(declaringType, currType)) {
+			if (isInstanceMethod && Modifier.isStatic(currType.getModifiers())) {
+				return;
+			}
+			currType= currType.getDeclaringClass();
+		}
+		if (currType == null || currType == parentType) {
+			return;
+		}
+		
+		ASTRewrite rewrite= new ASTRewrite(invocationNode.getParent());
+		AST ast= invocationNode.getAST();
+		
+		String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetoouter.description", currType.getName()); //$NON-NLS-1$	
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
+		proposal.ensureNoModifications();
+		proposals.add(proposal);				
+		
+		String qualifier=  proposal.addImport(currType);
+		Name name= ASTNodeFactory.newName(ast, qualifier);
+		
+		if (isInstanceMethod) {
+			ThisExpression expr= ast.newThisExpression();
+			expr.setQualifier(name);
+			invocationNode.setExpression(expr);		
+		} else {
+			invocationNode.setExpression(name);
+		}
+		
+		rewrite.markAsInserted(invocationNode.getExpression());
+	}
+	
 
 	public static void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();

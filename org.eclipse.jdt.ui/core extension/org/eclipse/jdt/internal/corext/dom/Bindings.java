@@ -214,23 +214,34 @@ public class Bindings {
 	/**
 	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
 	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
+	 * @param type The type to search the method in
+	 * @param methodName The name of the method to find
+	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
 	 */
 	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
 		if (type.isPrimitive())
 			return null;
 		IMethodBinding[] methods= type.getDeclaredMethods();
 		for (int i= 0; i < methods.length; i++) {
-			if (isEqualMethod(methods[i], methodName, parameters))
-				return methods[i];
+			if (parameters == null) {
+				if (methodName.equals(methods[i].getName()))
+					return methods[i];
+			} else {
+				if (isEqualMethod(methods[i], methodName, parameters))
+					return methods[i];
+			}
 		}
 		return null;
 	}
 
 	/**
-	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
+	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is 
 	 * returned. First the super class is exaimined and than the implemented interfaces.
+	 * @param type The type to search the method in
+	 * @param methodName The name of the method to find
+	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
 	 */
 	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
 		IMethodBinding method= findMethodInType(type, methodName, parameters);
