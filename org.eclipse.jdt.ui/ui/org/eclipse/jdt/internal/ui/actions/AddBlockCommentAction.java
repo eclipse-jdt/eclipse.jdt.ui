@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.IDocument;
@@ -23,7 +24,6 @@ import org.eclipse.jface.text.ITypedRegion;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 /**

@@ -24,7 +24,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import org.eclipse.core.internal.runtime.Assert;
+import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * Reads data from an InputStream and returns a JarPackage
@@ -35,7 +35,7 @@ public class JavadocReader extends Object {
 
 	/**
 	 * Reads a Javadoc Ant Script from the underlying stream.
-	 * It is the client's responsiblity to close the stream.
+	 * It is the client's responsibility to close the stream.
 	 */
 	public JavadocReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);
@@ -44,7 +44,7 @@ public class JavadocReader extends Object {
 
 	/**
 	 * Closes this stream.
-	 * It is the clients responsiblity to close the stream.
+	 * It is the clients responsibility to close the stream.
 	 * 
 	 * @exception IOException
 	 */
@@ -63,7 +63,7 @@ public class JavadocReader extends Object {
 		} catch (ParserConfigurationException ex) {
 			throw new IOException(ex.getMessage());
 		} finally {
-			// Note: Above code is ok since clients are responsible to close the stream
+			// Note: Above code is OK since clients are responsible to close the stream
 		}
 
 		//find the project associated with the ant script
@@ -74,7 +74,7 @@ public class JavadocReader extends Object {
 		for (int i= 0; i < targets.getLength(); i++) {
 			Node target= targets.item(i);
 
-			//look through the xml file for the javadoc task
+			//look through the XML file for the javadoc task
 			if (target.getNodeName().equals("target")) { //$NON-NLS-1$
 				NodeList children= target.getChildNodes();
 				for (int j= 0; j < children.getLength(); j++) {

@@ -31,12 +31,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
@@ -237,7 +237,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 			Object[] fragments= dialog.getResult();
 			String[] res= new String[fragments.length];
 			for (int i= 0; i < res.length; i++) {
-				res[i]= ((PackageFragment) fragments[i]).getElementName() + "*"; //$NON-NLS-1$
+				res[i]= ((IPackageFragment) fragments[i]).getElementName() + "*"; //$NON-NLS-1$
 			}
 			return res;
 		}

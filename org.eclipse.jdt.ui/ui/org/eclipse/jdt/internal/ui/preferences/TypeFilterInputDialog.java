@@ -24,11 +24,11 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -115,7 +115,7 @@ public class TypeFilterInputDialog extends StatusDialog {
 		dialog.setMultipleSelection(false);
 		dialog.setFilter(fNameDialogField.getText());
 		if (dialog.open() == IDialogConstants.OK_ID) {
-			PackageFragment res= (PackageFragment) dialog.getFirstResult();
+			IPackageFragment res= (IPackageFragment) dialog.getFirstResult();
 			fNameDialogField.setText(res.getElementName() + "*"); //$NON-NLS-1$
 		}
 	}
