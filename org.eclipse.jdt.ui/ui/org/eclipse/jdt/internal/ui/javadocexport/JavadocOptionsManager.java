@@ -336,7 +336,7 @@ public class JavadocOptionsManager {
 		fAdditionalParams= ""; //$NON-NLS-1$
 		fOverview= ""; //$NON-NLS-1$
 		fAntpath= ""; //$NON-NLS-1$
-		fDestination= "";
+		fDestination= ""; //$NON-NLS-1$
 
 		fUse= true;
 		fAuthor= true;

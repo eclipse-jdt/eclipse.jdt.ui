@@ -189,7 +189,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 				IPath path= new Path(temp);
 				String file= path.lastSegment();
 				if (file == null)
-					file= "javadoc.xml";
+					file= "javadoc.xml";//$NON-NLS-1$
 				path= path.removeLastSegments(1);
 
 				temp= handleFolderBrowseButtonPressed(path.toOSString(), fAntText.getShell(), JavadocExportMessages.getString("JavadocSpecificsWizardPage.antscriptbrowsedialog.title"), JavadocExportMessages.getString("JavadocSpecificsWizardPage.antscriptbrowsedialog.label")); //$NON-NLS-1$ //$NON-NLS-2$
