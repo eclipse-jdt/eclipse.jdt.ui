@@ -63,7 +63,6 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class ExtractTempRefactoring extends Refactoring {
 	
-	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
 	private static final int DEFAULT_TAB_SIZE= 4;
 			
 	private final int fSelectionStart;
@@ -547,7 +546,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	public static int getTabSize() {
-		return getPositiveIntValue(((String) JavaCore.getOptions().get(PREF_TAB_SIZE)));
+		return getPositiveIntValue(((String) JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE)));
 	}
 	
 	private static int getPositiveIntValue(String string) {

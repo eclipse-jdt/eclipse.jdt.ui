@@ -21,8 +21,7 @@ public class ExtractTempTests extends RefactoringTest {
 	private static final Class clazz= ExtractTempTests.class;
 	private static final String REFACTORING_PATH= "ExtractTemp/";
 
-	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= "org.eclipse.jdt.core.formatter.style.assignment";	 //$NON-NLS-1$
-	private static final String COMPACT= "compact";
+	private static final String COMPACT= JavaCore.COMPACT;
 
 	private Object fCompactPref; 
 		
@@ -65,15 +64,15 @@ public class ExtractTempTests extends RefactoringTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		Hashtable options= JavaCore.getOptions();
-		fCompactPref= options.get(PREF_STYLE_COMPACT_ASSIGNEMENT);
-		options.put(PREF_STYLE_COMPACT_ASSIGNEMENT, COMPACT);
+		fCompactPref= options.get(JavaCore.FORMATTER_COMPACT_ASSIGNMENT);
+		options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, COMPACT);
 		JavaCore.setOptions(options);
 	}
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		Hashtable options= JavaCore.getOptions();
-		options.put(PREF_STYLE_COMPACT_ASSIGNEMENT, fCompactPref);
+		options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, fCompactPref);
 		JavaCore.setOptions(options);	
 	}
 

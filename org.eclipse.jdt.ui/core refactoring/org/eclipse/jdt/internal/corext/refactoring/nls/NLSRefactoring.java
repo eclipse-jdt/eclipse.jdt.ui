@@ -60,11 +60,6 @@ public class NLSRefactoring extends Refactoring {
 	public static final String PROPERTY_FILE_EXT= ".properties"; //$NON-NLS-1$
 	private static final String fgLineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-2$ //$NON-NLS-1$
 
-	/*
-	 * see JavaCore::getDefaultOptions
-	 */
-	private static final String FORMATTER_LINE_LENGTH_OPTION= "org.eclipse.jdt.core.formatter.lineSplit";//$NON-NLS-1$
-
 	private String fAccessorClassName= "Messages";  //$NON-NLS-1$
 	
 	private boolean fCreateAccessorClass= true;
@@ -783,7 +778,7 @@ public class NLSRefactoring extends Refactoring {
 
 	private static Map getFormatterOptions() {
 		Map formatterOptions= JavaCore.getOptions();
-		formatterOptions.put(FORMATTER_LINE_LENGTH_OPTION, "0"); //$NON-NLS-1$
+		formatterOptions.put(JavaCore.FORMATTER_LINE_SPLIT, "0"); //$NON-NLS-1$
 		return formatterOptions;
 	}
 	

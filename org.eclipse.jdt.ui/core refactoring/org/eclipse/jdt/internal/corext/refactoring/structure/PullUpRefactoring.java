@@ -57,7 +57,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class PullUpRefactoring extends Refactoring {
-	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
 
 	private final CodeGenerationSettings fPreferenceSettings;
 	private IMember[] fElementsToPullUp;
@@ -751,7 +750,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 
 	private static int getTabWidth() {
-		return Integer.parseInt((String)JavaCore.getOptions().get(PREF_TAB_SIZE));
+		return Integer.parseInt((String)JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE));
 	}
 	
 	private static boolean needsToChangeVisibility(IMember method) throws JavaModelException {

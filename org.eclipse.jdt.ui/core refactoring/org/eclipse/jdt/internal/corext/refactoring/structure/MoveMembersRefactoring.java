@@ -59,7 +59,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class MoveMembersRefactoring extends Refactoring {
 	
-	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
 	private final CodeGenerationSettings fPreferenceSettings;
 	private IMember[] fMembers;
 	private IType fDestinationType;
@@ -792,7 +791,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	//--- helpers
 
 	private static int getTabWidth() {
-		return Integer.parseInt((String)JavaCore.getOptions().get(PREF_TAB_SIZE));
+		return Integer.parseInt((String)JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE));
 	}
 	
 	private static IMember getLastMember(IType type, int elementType) throws JavaModelException {
