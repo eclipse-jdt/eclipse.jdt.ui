@@ -18,7 +18,6 @@ import org.eclipse.jdt.internal.corext.refactoring.AbstractRefactoringASTAnalyze
 public class TempOccurrenceFinder extends AbstractRefactoringASTAnalyzer{
 
 	private List fOffsets;//set of Integer;
-	private List fReferences; //List of NameReference
 	private boolean fIncludeReferences;
 	private boolean fIncludeDeclaration;
 	private LocalDeclaration fTempDeclaration;
@@ -28,15 +27,10 @@ public class TempOccurrenceFinder extends AbstractRefactoringASTAnalyzer{
 		fIncludeDeclaration= includeDeclaration;
 		fTempDeclaration= tempDeclaration;
 		fOffsets= new ArrayList();
-		fReferences= new ArrayList();
 	}
 	
 	public Integer[] getOccurrenceOffsets(){
 		return (Integer[]) fOffsets.toArray(new Integer[fOffsets.size()]);
-	}
-	
-	public NameReference[] getReferences(){
-		return (NameReference[]) fReferences.toArray(new NameReference[fReferences.size()]);
 	}
 	
 	private boolean visitNameReference(NameReference nameReference){
@@ -46,14 +40,24 @@ public class TempOccurrenceFinder extends AbstractRefactoringASTAnalyzer{
 			return true;
 		LocalVariableBinding localBinding= (LocalVariableBinding)nameReference.binding;
 		if (fTempDeclaration.equals(localBinding.declaration)){
-			fOffsets.add(new Integer(nameReference.sourceStart));
-			fReferences.add(nameReference);
+			//XXX workaround for bug#9001
+			int offset= computeNameOffset(nameReference);
+			fOffsets.add(new Integer(offset));
 		}	
 		return true;
 	}
 	
-	//------- visit ------
+	private int computeNameOffset(NameReference nameReference){
+		if (!(nameReference instanceof SingleNameReference))
+			return nameReference.sourceStart;
+		
+		SingleNameReference singleNameReference= (SingleNameReference)nameReference;
+		int length= singleNameReference.sourceEnd - singleNameReference.sourceStart + 1;
+		int bracketCount= (length - singleNameReference.token.length) / 2;
+		return nameReference.sourceStart + bracketCount;
+	}
 	
+	//------- visit ------
 	public boolean visit(LocalDeclaration localDeclaration, BlockScope blockScope){
 		if (! fIncludeDeclaration)
 			return true;
