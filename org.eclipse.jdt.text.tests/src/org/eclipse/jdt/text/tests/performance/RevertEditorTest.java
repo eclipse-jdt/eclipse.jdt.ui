@@ -25,7 +25,11 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public abstract class RevertEditorTest extends TestCase {
-	private static final int RUNS= 20;
+	
+	private static final int RUNS= 15;
+	
+	private static final int COLD_RUNS= 10;
+	
 	private static final String REPLACE_TEXT= "XXX"; //$NON-NLS-1$
 	
 	private PerformanceMeter fPerformanceMeter;
@@ -39,9 +43,11 @@ public abstract class RevertEditorTest extends TestCase {
 		ITextEditor part= (ITextEditor) EditorTestHelper.openInEditor(file, true);
 		for (int i= 0; i < RUNS; i++) {
 			dirtyEditor(part);
-			fPerformanceMeter.start();
+			if (i >= COLD_RUNS)
+				fPerformanceMeter.start();
 			EditorTestHelper.revertEditor(part, true);
-			fPerformanceMeter.stop();
+			if (i >= COLD_RUNS)
+				fPerformanceMeter.stop();
 			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 			EditorTestHelper.runEventQueue(part);
 		}
