@@ -919,10 +919,6 @@ public class ImportsStructure implements IImportsStructure {
 				return false;
 			}
 			int nImports= getNumberOfImports();
-			if (nImports < threshold) {
-				return false;
-			}
-			
 			int count= 0;
 			boolean containsNew= false;
 			for (int i= 0; i < nImports; i++) {
