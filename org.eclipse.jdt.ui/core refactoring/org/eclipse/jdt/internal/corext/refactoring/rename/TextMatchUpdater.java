@@ -141,6 +141,9 @@ class TextMatchUpdater {
 	private void addCuTextMatches(ICompilationUnit cu) throws JavaModelException{
 		fScanner.scan(cu);
 		Set matches= fScanner.getMatches(); //Set of Integer (start position)
+		if (matches.size() == 0)
+			return;
+
 		removeReferences(cu, matches);
 		if (matches.size() != 0)
 			addTextUpdates(cu, matches); 
@@ -158,7 +161,9 @@ class TextMatchUpdater {
 	private void removeReferences(Set matches, SearchResultGroup group) {
 		SearchResult[] searchResults= group.getSearchResults();
 		for (int r= 0; r < searchResults.length; r++) {
-			matches.remove(new Integer(searchResults[r].getStart()));
+			//int start= searchResults[r].getStart(); // doesn't work for pack.ReferencedType
+			int unqualifiedStart= searchResults[r].getEnd() - fCurrentNameLength;
+			matches.remove(new Integer(unqualifiedStart));
 		}
 	}
 

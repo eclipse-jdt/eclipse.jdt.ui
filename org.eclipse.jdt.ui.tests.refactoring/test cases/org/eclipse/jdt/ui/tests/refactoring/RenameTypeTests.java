@@ -75,8 +75,7 @@ public class RenameTypeTests extends RefactoringTest {
 		helper1_0("A", "B");
 	}
 		
-	private void helper2_0(String oldCuName, String oldName, String newName, String newCUName, boolean updateReferences, boolean updateJavaDoc, 
-											boolean updateComments, boolean updateStrings) throws Exception{
+	private void helperWithTextual(String oldCuName, String oldName, String newName, String newCUName, boolean updateReferences, boolean updateTextualMatches) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldCuName);
 		IType classA= getType(cu, oldName);
 		
@@ -84,9 +83,7 @@ public class RenameTypeTests extends RefactoringTest {
 		RenameRefactoring ref= createRefactoring(classA, newName);
 		RenameTypeProcessor processor= (RenameTypeProcessor)ref.getProcessor();
 		processor.setUpdateReferences(updateReferences);
-		processor.setUpdateJavaDoc(updateJavaDoc);
-		processor.setUpdateComments(updateComments);
-		processor.setUpdateStrings(updateStrings);
+		processor.setUpdateTextualMatches(updateTextualMatches);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
 		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
@@ -94,7 +91,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	private void helper2_0(String oldName, String newName, String newCUName, boolean updateReferences) throws Exception{
-		helper2_0(oldName, oldName, newName, newCUName, updateReferences, false, false, false);
+		helperWithTextual(oldName, oldName, newName, newCUName, updateReferences, false);
 	}
 	
 	private void helper2(String oldName, String newName, boolean updateReferences) throws Exception{
@@ -894,7 +891,9 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void test50() throws Exception { 
-		helper2("A", "B");		
+		printTestDisabledMessage("https://bugs.eclipse.org/bugs/show_bug.cgi?id=54948");
+		if (false)
+			helper2("A", "B");
 	}
 	
 	public void test51() throws Exception { 
@@ -925,16 +924,16 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void test54() throws Exception { 
 		//printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
-		helper2_0("A", "X", "XYZ", "A", true, false, false, false);		
+		helperWithTextual("A", "X", "XYZ", "A", true, false);		
 	}
 	
 	public void test55() throws Exception { 
 		//printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
-		helper2_0("A", "X", "XYZ", "A", false, false, false, false);		
+		helperWithTextual("A", "X", "XYZ", "A", false, false);		
 	}
 	
 	public void test57() throws Exception {
-		helper2_0("A", "A", "B", "B", true, true, true, true);
+		helperWithTextual("A", "A", "B", "B", true, true);
 	}
 	
 	public void test58() throws Exception {
@@ -949,7 +948,7 @@ public class RenameTypeTests extends RefactoringTest {
 
 	public void test60() throws Exception {
 //		printTestDisabledMessage("test for bug 24740");
-		helper2_0("A", "A", "B", "B", true, true, true, true);
+		helperWithTextual("A", "A", "B", "B", true, true);
 	}
 		
 	public void test5() throws Exception { 
