@@ -325,6 +325,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		ToolBarManager tbm= pane.getToolBarManager();
 		tbm.add(new OverrideFlatTreeAction()); // create after tree is created
 		tbm.update(true);
+		treeViewer.getTree().setFocus();
 					
 		return treeViewer;		
 	}		
