@@ -176,6 +176,9 @@ public class TokenScanner {
 	/**
 	 * Reads from the given offset until a non-comment token is reached and returns the start offset of the comments
 	 * directly ahead of the token.
+	 * @param startOffset The offset to before the comments of the non-comment token.
+	 * @param buffer The text buffer that corresponds to the content that is scanned or <code>null</code> if
+	 * the line information shoould be taken from the scanner object
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
 	 */		
@@ -187,14 +190,22 @@ public class TokenScanner {
 		do {
 			curr= readNext(false);
 			
-			int startLine= buffer.getLineOfOffset(getCurrentStartOffset());
+			int startLine= getLineOfOffset(buffer, getCurrentStartOffset());
 			if (lastCommentEndLine == -1 || startLine - lastCommentEndLine > 1) {
 				res= getCurrentStartOffset();
 			}
-			lastCommentEndLine= buffer.getLineOfOffset(getCurrentEndOffset() - 1);
+			lastCommentEndLine= getLineOfOffset(buffer, getCurrentEndOffset() - 1);
 		} while (isComment(curr));
 		return res;
-	}	
+	}
+	
+	private int getLineOfOffset(TextBuffer buffer, int offset) {
+		if (buffer != null) {
+			return buffer.getLineOfOffset(offset);
+		}
+		return fScanner.getLineNumber(offset);
+	}
+	
 		
 	public static boolean isComment(int token) {
 		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC 
