@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.help.DialogPageContextComputer;
@@ -43,6 +44,10 @@ import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 public class NewClassCreationWizardPage extends TypePage {
 	
 	private final static String PAGE_NAME= "NewClassCreationWizardPage"; //$NON-NLS-1$
+	
+	private final static String SETTINGS_CREATEMAIN= "create_main"; //$NON-NLS-1$
+	private final static String SETTINGS_CREATECONSTR= "create_constructor"; //$NON-NLS-1$
+	private final static String SETTINGS_CREATEUNIMPLEMENTED= "create_unimplemented"; //$NON-NLS-1$
 	
 	private SelectionButtonDialogFieldGroup fMethodStubsButtons;
 	
@@ -72,9 +77,18 @@ public class NewClassCreationWizardPage extends TypePage {
 		initTypePage(jelem);
 		updateStatus(findMostSevereStatus());
 		
-		fMethodStubsButtons.setSelection(0, false);
-		fMethodStubsButtons.setSelection(1, false);
-		fMethodStubsButtons.setSelection(2, true);
+		boolean createMain= false;
+		boolean createConstructors= false;
+		boolean createUnimplemented= true;
+		IDialogSettings section= getDialogSettings().getSection(PAGE_NAME);
+		if (section != null) {
+			createMain= section.getBoolean(SETTINGS_CREATEMAIN);
+			createConstructors= section.getBoolean(SETTINGS_CREATECONSTR);
+			createUnimplemented= section.getBoolean(SETTINGS_CREATEUNIMPLEMENTED);
+		}
+		fMethodStubsButtons.setSelection(0, createMain);
+		fMethodStubsButtons.setSelection(1, createConstructors);
+		fMethodStubsButtons.setSelection(2, createUnimplemented);
 	}
 
 	// ------ validation --------
@@ -158,6 +172,7 @@ public class NewClassCreationWizardPage extends TypePage {
 	protected String[] evalMethods(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		List newMethods= new ArrayList();
 		
+		boolean doMain= fMethodStubsButtons.isSelected(0);
 		boolean doConstr= fMethodStubsButtons.isSelected(1);
 		boolean doInherited= fMethodStubsButtons.isSelected(2);
 		String[] meth= constructInheritedMethods(type, doConstr, doInherited, imports, new SubProgressMonitor(monitor, 1));
@@ -168,10 +183,18 @@ public class NewClassCreationWizardPage extends TypePage {
 			monitor.done();
 		}
 		
-		if (fMethodStubsButtons.isSelected(0)) {
+		if (doMain) {
 			String main= "public static void main(String[] args) {}"; //$NON-NLS-1$
 			newMethods.add(main);
-		}		
+		}
+		
+		IDialogSettings section= getDialogSettings().getSection(PAGE_NAME);
+		if (section == null) {
+			section= getDialogSettings().addNewSection(PAGE_NAME);
+		}
+		section.put(SETTINGS_CREATEMAIN, doMain);
+		section.put(SETTINGS_CREATECONSTR, doConstr);
+		section.put(SETTINGS_CREATEUNIMPLEMENTED, doInherited);	
 		
 		return (String[]) newMethods.toArray(new String[newMethods.size()]);
 	}
