@@ -84,8 +84,6 @@
 	</decorator>	
 </extension>
 -->
-   <extension-point id="renameProcessors" name="%renameProcessorExtensionPoint"/>
-   <extension-point id="deleteProcessors" name="%deleteProcessorExtensionPoint"/>
    <extension-point id="renameParticipants" name="%renameParticipantsExtensionPoint"/>
    <extension-point id="createParticipants" name="%createParticipantsExtensionPoint"/>
    <extension-point id="deleteParticipants" name="%deleteParticipantsExtensionPoint"/>
@@ -93,7 +91,6 @@
    <extension-point id="copyParticipants" name="%copyParticipantsExtensionPoint"/>
    <extension-point id="statusContextViewers" name="%statusViewerExtensionPoint"/>
    <extension-point id="changePreviewViewers" name="%changeViewerExtensionPoint"/>
-   <extension-point id="refactoringUserInterfaces" name="%refactoringWizardExtensionPoint"/>
 
    <extension point="org.eclipse.core.runtime.adapters">
 		<factory 
