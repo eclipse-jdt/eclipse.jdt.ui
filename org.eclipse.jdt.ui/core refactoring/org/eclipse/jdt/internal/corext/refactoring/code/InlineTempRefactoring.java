@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.Iterator;
 
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -32,7 +35,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.text.edits.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -235,7 +237,7 @@ public class InlineTempRefactoring extends Refactoring {
 		for(int i= 0; i < offsets.length; i++){
 			int offset= offsets[i].intValue();
             String sourceToInline= getInitializerSource(needsBrackets(offset));
-			change.addTextEdit(changeName, SimpleTextEdit.createReplace(offset, length, sourceToInline));
+			change.addTextEdit(changeName, new ReplaceEdit(offset, length, sourceToInline));
 			pm.worked(1);	
 		}
 	}
@@ -290,7 +292,7 @@ public class InlineTempRefactoring extends Refactoring {
 	private void removeDeclaration(TextChange change, int offset, int length)  throws JavaModelException {
 		ISourceRange range= SourceRangeComputer.computeSourceRange(new SourceRange(offset, length), fCu.getSource());
 		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.remove_edit_name") + getTempName();  //$NON-NLS-1$
-		change.addTextEdit(changeName, SimpleTextEdit.createDelete(range.getOffset(), range.getLength()));
+		change.addTextEdit(changeName, new DeleteEdit(range.getOffset(), range.getLength()));
 	}
 	
 	private String getInitializerSource(boolean brackets) throws JavaModelException{

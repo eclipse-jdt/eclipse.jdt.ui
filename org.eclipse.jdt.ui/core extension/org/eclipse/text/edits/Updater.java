@@ -67,13 +67,13 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 		if (currentLength > 0 && newLength == 0) {
 			// Delete edit
-			undo.add(SimpleTextEdit.createInsert(offset, currentText));
+			undo.add(new InsertEdit(offset, currentText));
 		} else if (currentLength == 0 && newLength > 0) {
 			// insert edit
-			undo.add(SimpleTextEdit.createDelete(offset, newLength));
+			undo.add(new DeleteEdit(offset, newLength));
 		} else {
 			// replace edit
-			undo.add(SimpleTextEdit.createReplace(offset, newLength, currentText));
+			undo.add(new ReplaceEdit(offset, newLength, currentText));
 		}
 	}
 	

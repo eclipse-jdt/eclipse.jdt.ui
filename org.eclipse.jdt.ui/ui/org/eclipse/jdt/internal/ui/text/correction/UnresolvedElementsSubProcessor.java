@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -386,7 +386,7 @@ public class UnresolvedElementsSubProcessor {
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", arg)); //$NON-NLS-1$
 				proposal.setRelevance(relevance + 20);
 			} else {			
-				root.add(SimpleTextEdit.createReplace(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
+				root.add(new ReplaceEdit(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
 				if (packName.length() == 0) {
 					proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.nopack.description", simpleName)); //$NON-NLS-1$
 				} else {

@@ -15,19 +15,7 @@ import org.eclipse.jface.text.IDocument;
 
 public abstract class SimpleTextEdit extends TextEdit {
 
-	public static SimpleTextEdit createReplace(int offset, int length, String text) {
-		return new ReplaceEdit(offset, length, text);
-	}
-
-	public static SimpleTextEdit createInsert(int offset, String text) {
-		return new InsertEdit(offset, text);
-	}
-	
-	public static SimpleTextEdit createDelete(int offset, int length) {
-		return new DeleteEdit(offset, length);
-	}
-	
-	public SimpleTextEdit(int offset, int length) {
+	protected SimpleTextEdit(int offset, int length) {
 		super(offset, length);
 	}
 	
@@ -54,16 +42,6 @@ public abstract class SimpleTextEdit extends TextEdit {
 		String text= getText(); 		
 		if (text != null)
 			performReplace(document, text);
-	}
-	
-	/* non Java-doc
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-		String text= getText();
-		if (text == null)
-			return super.toString() +" NOP"; //$NON-NLS-1$
-		return super.toString() + " <<" + text; //$NON-NLS-1$
 	}
 	
 	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {

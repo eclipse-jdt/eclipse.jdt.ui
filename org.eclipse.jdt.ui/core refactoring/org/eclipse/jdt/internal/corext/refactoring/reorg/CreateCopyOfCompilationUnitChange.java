@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -97,7 +97,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 			SearchResult searchResult= results[j];
 			String oldName= wc.findPrimaryType().getElementName();
 			int offset= searchResult.getEnd() - oldName.length();
-			manager.get(wc).addTextEdit(name, SimpleTextEdit.createReplace(offset, oldName.length(), newName));
+			manager.get(wc).addTextEdit(name, new ReplaceEdit(offset, oldName.length(), newName));
 		}
 		return manager;
 	}

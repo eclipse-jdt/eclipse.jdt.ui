@@ -21,12 +21,15 @@ import junit.framework.TestSuite;
 
 import org.eclipse.text.edits.CopySourceEdit;
 import org.eclipse.text.edits.CopyTargetEdit;
+import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.EditProcessor;
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MoveSourceEdit;
 import org.eclipse.text.edits.MoveTargetEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.SimpleTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditCopier;
@@ -78,10 +81,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap1() throws Exception {
 		// [ [ ] ]
-		fProcessor.add(SimpleTextEdit.createReplace(0, 2, "01"));
+		fProcessor.add(new ReplaceEdit(0, 2, "01"));
 		boolean exception= false;
 		try {
-			fProcessor.add(SimpleTextEdit.createReplace(1, 2, "12"));
+			fProcessor.add(new ReplaceEdit(1, 2, "12"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -90,10 +93,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap2() throws Exception {
 		// [[ ] ]
-		fProcessor.add(SimpleTextEdit.createReplace(0, 2, "01"));
+		fProcessor.add(new ReplaceEdit(0, 2, "01"));
 		boolean exception= false;
 		try {
-			fProcessor.add(SimpleTextEdit.createReplace(0, 1, "0"));
+			fProcessor.add(new ReplaceEdit(0, 1, "0"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -102,10 +105,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap3() throws Exception {
 		// [ [ ]]
-		fProcessor.add(SimpleTextEdit.createReplace(0, 2, "01"));
+		fProcessor.add(new ReplaceEdit(0, 2, "01"));
 		boolean exception= false;
 		try {
-			fProcessor.add(SimpleTextEdit.createReplace(1, 1, "1"));
+			fProcessor.add(new ReplaceEdit(1, 1, "1"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -114,10 +117,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap4() throws Exception {
 		// [ [ ] ]
-		fProcessor.add(SimpleTextEdit.createReplace(0, 3, "012"));
+		fProcessor.add(new ReplaceEdit(0, 3, "012"));
 		boolean exception= false;
 		try {
-			fProcessor.add(SimpleTextEdit.createReplace(1, 1, "1"));
+			fProcessor.add(new ReplaceEdit(1, 1, "1"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -126,10 +129,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap5() throws Exception {
 		// [ []  ]
-		fProcessor.add(SimpleTextEdit.createReplace(0, 3, "012"));
+		fProcessor.add(new ReplaceEdit(0, 3, "012"));
 		boolean exception= false;
 		try {
-			fProcessor.add(SimpleTextEdit.createInsert(1, "xx"));
+			fProcessor.add(new InsertEdit(1, "xx"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -138,10 +141,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap6() throws Exception {
 		// [  [] ]
-		fProcessor.add(SimpleTextEdit.createReplace(0, 3, "012"));
+		fProcessor.add(new ReplaceEdit(0, 3, "012"));
 		boolean exception= false;
 		try {
-			fProcessor.add(SimpleTextEdit.createInsert(2, "xx"));
+			fProcessor.add(new InsertEdit(2, "xx"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -204,8 +207,8 @@ public class TextBufferTest extends TestCase {
 	
 	public void testCopy1() throws Exception {
 		MultiTextEdit root= new MultiTextEdit();
-		SimpleTextEdit e1= SimpleTextEdit.createInsert(2, "yy");
-		SimpleTextEdit e2= SimpleTextEdit.createReplace(2, 3, "3456");
+		SimpleTextEdit e1= new InsertEdit(2, "yy");
+		SimpleTextEdit e2= new ReplaceEdit(2, 3, "3456");
 		root.add(e1);
 		root.add(e2);
 		List org= flatten(root);
@@ -271,8 +274,8 @@ public class TextBufferTest extends TestCase {
 		
 	public void testInsert1() throws Exception {
 		// [][  ]
-		SimpleTextEdit e1= SimpleTextEdit.createInsert(2, "yy");
-		SimpleTextEdit e2= SimpleTextEdit.createReplace(2, 3, "3456");
+		SimpleTextEdit e1= new InsertEdit(2, "yy");
+		SimpleTextEdit e2= new ReplaceEdit(2, 3, "3456");
 		fProcessor.add(e1);
 		fProcessor.add(e2);
 		assertTrue(fProcessor.canPerformEdits());
@@ -285,8 +288,8 @@ public class TextBufferTest extends TestCase {
 	
 	public void testInsert2() throws Exception {
 		// [][]
-		SimpleTextEdit e1= SimpleTextEdit.createInsert(2, "yy");
-		SimpleTextEdit e2= SimpleTextEdit.createInsert(2, "xx");
+		SimpleTextEdit e1= new InsertEdit(2, "yy");
+		SimpleTextEdit e2= new InsertEdit(2, "xx");
 		fProcessor.add(e1);
 		fProcessor.add(e2);
 		assertTrue(fProcessor.canPerformEdits());
@@ -299,9 +302,9 @@ public class TextBufferTest extends TestCase {
 	
 	public void testInsert3() throws Exception {
 		// [  ][][  ]
-		SimpleTextEdit e1= SimpleTextEdit.createReplace(0, 2, "011");
-		SimpleTextEdit e2= SimpleTextEdit.createInsert(2, "xx");
-		SimpleTextEdit e3= SimpleTextEdit.createReplace(2, 2, "2");
+		SimpleTextEdit e1= new ReplaceEdit(0, 2, "011");
+		SimpleTextEdit e2= new InsertEdit(2, "xx");
+		SimpleTextEdit e3= new ReplaceEdit(2, 2, "2");
 		fProcessor.add(e1);
 		fProcessor.add(e2);
 		fProcessor.add(e3);
@@ -315,7 +318,7 @@ public class TextBufferTest extends TestCase {
 	}
 	
 	public void testInsert4() throws Exception {
-		SimpleTextEdit e1= SimpleTextEdit.createInsert(0, "xx");
+		SimpleTextEdit e1= new InsertEdit(0, "xx");
 		fProcessor.add(e1);
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
@@ -326,7 +329,7 @@ public class TextBufferTest extends TestCase {
 	}
 	
 	public void testInsert5() throws Exception {
-		SimpleTextEdit e1= SimpleTextEdit.createInsert(10, "xx");
+		SimpleTextEdit e1= new InsertEdit(10, "xx");
 		fProcessor.add(e1);
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
@@ -337,8 +340,8 @@ public class TextBufferTest extends TestCase {
 	}
 	
 	public void testInsertReplace1() throws Exception {
-		SimpleTextEdit e1= SimpleTextEdit.createReplace(2, 1, "y");
-		SimpleTextEdit e2= SimpleTextEdit.createInsert(2, "xx");
+		SimpleTextEdit e1= new ReplaceEdit(2, 1, "y");
+		SimpleTextEdit e2= new InsertEdit(2, "xx");
 		fProcessor.add(e1);
 		fProcessor.add(e2);
 		assertTrue(fProcessor.canPerformEdits());
@@ -350,7 +353,7 @@ public class TextBufferTest extends TestCase {
 	}
 	
 	public void testDelete1() throws Exception {
-		SimpleTextEdit e1= SimpleTextEdit.createDelete(3, 1);
+		SimpleTextEdit e1= new DeleteEdit(3, 1);
 		fProcessor.add(e1);
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
@@ -360,9 +363,9 @@ public class TextBufferTest extends TestCase {
 	}
 	
 	public void testDelete2() throws Exception {
-		SimpleTextEdit e1= SimpleTextEdit.createDelete(4, 1);
-		SimpleTextEdit e2= SimpleTextEdit.createDelete(3, 1);
-		SimpleTextEdit e3= SimpleTextEdit.createDelete(5, 1);
+		SimpleTextEdit e1= new DeleteEdit(4, 1);
+		SimpleTextEdit e2= new DeleteEdit(3, 1);
+		SimpleTextEdit e3= new DeleteEdit(5, 1);
 		fProcessor.add(e1);
 		fProcessor.add(e2);
 		fProcessor.add(e3);
@@ -376,8 +379,8 @@ public class TextBufferTest extends TestCase {
 	}
 	
 	public void testDelete3() throws Exception {
-		SimpleTextEdit e1= SimpleTextEdit.createInsert(3, "x");
-		SimpleTextEdit e2= SimpleTextEdit.createDelete(3, 1);
+		SimpleTextEdit e1= new InsertEdit(3, "x");
+		SimpleTextEdit e2= new DeleteEdit(3, 1);
 		fProcessor.add(e1);
 		fProcessor.add(e2);
 		assertTrue("Can perform edits", fProcessor.canPerformEdits());
@@ -389,11 +392,11 @@ public class TextBufferTest extends TestCase {
 	}
 	
 	public void testDeleteWithChildren() throws Exception {
-		SimpleTextEdit e1= SimpleTextEdit.createDelete(2, 6);
+		SimpleTextEdit e1= new DeleteEdit(2, 6);
 		MultiTextEdit e2= new MultiTextEdit(3, 3);
 		e1.add(e2);
-		SimpleTextEdit e3= SimpleTextEdit.createReplace(3,1,"xx");
-		SimpleTextEdit e4= SimpleTextEdit.createReplace(5,1,"yy");
+		SimpleTextEdit e3= new ReplaceEdit(3, 1, "xx");
+		SimpleTextEdit e4= new ReplaceEdit(5, 1, "yy");
 		e2.add(e3);
 		e2.add(e4);
 		fProcessor.add(e1);
@@ -435,7 +438,7 @@ public class TextBufferTest extends TestCase {
 	public void testMove3() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit e2= SimpleTextEdit.createReplace(4, 1, "x");
+		SimpleTextEdit e2= new ReplaceEdit(4, 1, "x");
 		fProcessor.add(s1);
 		fProcessor.add(t1);
 		fProcessor.add(e2);
@@ -451,7 +454,7 @@ public class TextBufferTest extends TestCase {
 	public void testMove4() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(7, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		SimpleTextEdit e2= SimpleTextEdit.createReplace(5, 1, "x");
+		SimpleTextEdit e2= new ReplaceEdit(5, 1, "x");
 		fProcessor.add(s1);
 		fProcessor.add(t1);
 		fProcessor.add(e2);
@@ -468,7 +471,7 @@ public class TextBufferTest extends TestCase {
 		// Move onto itself
 		MoveSourceEdit s1= new MoveSourceEdit(2, 1);
 		MoveTargetEdit t1= new MoveTargetEdit(3, s1);
-		SimpleTextEdit e2= SimpleTextEdit.createReplace(2,1,"x");
+		SimpleTextEdit e2= new ReplaceEdit(2, 1, "x");
 		s1.add(e2);
 		fProcessor.add(s1);
 		fProcessor.add(t1);
@@ -485,7 +488,7 @@ public class TextBufferTest extends TestCase {
 		// Move onto itself
 		MoveSourceEdit s1= new MoveSourceEdit(2, 1);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		SimpleTextEdit e2= SimpleTextEdit.createReplace(2,1,"x");
+		SimpleTextEdit e2= new ReplaceEdit(2, 1, "x");
 		s1.add(e2);
 		fProcessor.add(s1);
 		fProcessor.add(t1);
@@ -501,7 +504,7 @@ public class TextBufferTest extends TestCase {
 	public void testMove7() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 3);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit e2= SimpleTextEdit.createReplace(3, 1, "x");
+		SimpleTextEdit e2= new ReplaceEdit(3, 1, "x");
 		s1.add(e2);
 		fProcessor.add(s1);
 		fProcessor.add(t1);
@@ -517,7 +520,7 @@ public class TextBufferTest extends TestCase {
 	public void testMove8() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(5, 3);
 		MoveTargetEdit t1= new MoveTargetEdit(1, s1);
-		SimpleTextEdit e2= SimpleTextEdit.createReplace(6, 1, "x");
+		SimpleTextEdit e2= new ReplaceEdit(6, 1, "x");
 		s1.add(e2);
 		fProcessor.add(s1);
 		fProcessor.add(t1);
@@ -595,7 +598,7 @@ public class TextBufferTest extends TestCase {
 	public void testMoveWithTargetDelete() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 3);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit e2= SimpleTextEdit.createDelete(6, 2);
+		SimpleTextEdit e2= new DeleteEdit(6, 2);
 		e2.add(t1);
 		fProcessor.add(s1);
 		fProcessor.add(e2);
@@ -612,7 +615,7 @@ public class TextBufferTest extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(5, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
 		
-		SimpleTextEdit d1= SimpleTextEdit.createDelete(5, 2);
+		SimpleTextEdit d1= new DeleteEdit(5, 2);
 		d1.add(s1);
 		
 		RangeMarker marker= new RangeMarker(5, 2);
@@ -633,9 +636,9 @@ public class TextBufferTest extends TestCase {
 	
 	public void testMoveDown() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
-		SimpleTextEdit i1= SimpleTextEdit.createInsert(5, "x");
+		SimpleTextEdit i1= new InsertEdit(5, "x");
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit d1= SimpleTextEdit.createDelete(9, 1);
+		SimpleTextEdit d1= new DeleteEdit(9, 1);
 	
 		RangeMarker m1= new RangeMarker(2, 2);
 		s1.add(m1);
@@ -659,8 +662,8 @@ public class TextBufferTest extends TestCase {
 	public void testMoveUp() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(7, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		SimpleTextEdit i1= SimpleTextEdit.createInsert(5, "x");
-		SimpleTextEdit d1= SimpleTextEdit.createDelete(9, 1);
+		SimpleTextEdit i1= new InsertEdit(5, "x");
+		SimpleTextEdit d1= new DeleteEdit(9, 1);
 	
 		RangeMarker m1= new RangeMarker(7, 2);
 		s1.add(m1);
@@ -685,7 +688,7 @@ public class TextBufferTest extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 	
-		SimpleTextEdit d1= SimpleTextEdit.createDelete(2, 2);
+		SimpleTextEdit d1= new DeleteEdit(2, 2);
 		d1.add(s1);
 		
 		RangeMarker m1= new RangeMarker(2, 2);
@@ -707,7 +710,7 @@ public class TextBufferTest extends TestCase {
 	public void testMoveUpWithInnerMark() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(7, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		SimpleTextEdit m= SimpleTextEdit.createReplace(4, 1, "yy");
+		SimpleTextEdit m= new ReplaceEdit(4, 1, "yy");
 		fProcessor.add(t1);
 		fProcessor.add(m);
 		fProcessor.add(s1);
@@ -723,7 +726,7 @@ public class TextBufferTest extends TestCase {
 	public void testMoveDownWithInnerMark() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit m= SimpleTextEdit.createReplace(4, 1, "yy");
+		SimpleTextEdit m= new ReplaceEdit(4, 1, "yy");
 		fProcessor.add(t1);
 		fProcessor.add(m);
 		fProcessor.add(s1);
@@ -827,11 +830,11 @@ public class TextBufferTest extends TestCase {
 		{
 			CopySourceEdit innerRoot= new CopySourceEdit(0, 9);
 			
-			SimpleTextEdit e1= SimpleTextEdit.createReplace(0, 9, "");
+			SimpleTextEdit e1= new ReplaceEdit(0, 9, "");
 			e1.add(innerRoot);
 			CopyTargetEdit t1= new CopyTargetEdit(11, innerRoot);
 			
-			SimpleTextEdit e2= SimpleTextEdit.createReplace(11, 1, "");
+			SimpleTextEdit e2= new ReplaceEdit(11, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(11, 1);
 			e2.add(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(0, s2);
@@ -857,12 +860,12 @@ public class TextBufferTest extends TestCase {
 		
 		MultiTextEdit innerRoot= new MultiTextEdit();
 		{
-			SimpleTextEdit e1= SimpleTextEdit.createReplace(4, 1, "");
+			SimpleTextEdit e1= new ReplaceEdit(4, 1, "");
 			CopySourceEdit s1= new CopySourceEdit(4, 1);
 			e1.add(s1);
 			CopyTargetEdit t1= new CopyTargetEdit(7, s1);
 			
-			SimpleTextEdit e2= SimpleTextEdit.createReplace(7, 1, "");
+			SimpleTextEdit e2= new ReplaceEdit(7, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(7, 1);
 			e2.add(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(4, s2);
@@ -888,12 +891,12 @@ public class TextBufferTest extends TestCase {
 		
 		CopySourceEdit innerRoot= new CopySourceEdit(0, 9);
 		{
-			SimpleTextEdit e1= SimpleTextEdit.createReplace(4, 1, "");
+			SimpleTextEdit e1= new ReplaceEdit(4, 1, "");
 			CopySourceEdit s1= new CopySourceEdit(4, 1);
 			e1.add(s1);
 			CopyTargetEdit t1= new CopyTargetEdit(7, s1);
 			
-			SimpleTextEdit e2= SimpleTextEdit.createReplace(7, 1, "");
+			SimpleTextEdit e2= new ReplaceEdit(7, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(7, 1);
 			e2.add(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(4, s2);
@@ -905,11 +908,11 @@ public class TextBufferTest extends TestCase {
 		}
 		MultiTextEdit root= new MultiTextEdit();
 		{
-			SimpleTextEdit e1= SimpleTextEdit.createReplace(0, 9, "");
+			SimpleTextEdit e1= new ReplaceEdit(0, 9, "");
 			e1.add(innerRoot);
 			CopyTargetEdit t1= new CopyTargetEdit(11, innerRoot);
 			
-			SimpleTextEdit e2= SimpleTextEdit.createReplace(11, 1, "");
+			SimpleTextEdit e2= new ReplaceEdit(11, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(11, 1);
 			e2.add(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(0, s2);

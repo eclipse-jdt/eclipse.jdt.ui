@@ -11,7 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -52,18 +54,18 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		if (parentPack.isDefaultPackage() && decls.length > 0) {
 			for (int i= 0; i < decls.length; i++) {
 				ISourceRange range= decls[i].getSourceRange();
-				root.add(SimpleTextEdit.createDelete(range.getOffset(), range.getLength()));
+				root.add(new DeleteEdit(range.getOffset(), range.getLength()));
 			}
 			return change;
 		}
 		if (!parentPack.isDefaultPackage() && decls.length == 0) {
 			String lineDelim= StubUtility.getLineDelimiterUsed(cu);
 			String str= "package " + parentPack.getElementName() + ";" + lineDelim + lineDelim; //$NON-NLS-1$ //$NON-NLS-2$
-			root.add(SimpleTextEdit.createInsert(0, str));
+			root.add(new InsertEdit(0, str));
 			return change;
 		}
 		
-		root.add(SimpleTextEdit.createReplace(fLocation.getOffset(), fLocation.getLength(), parentPack.getElementName()));
+		root.add(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), parentPack.getElementName()));
 		return change;
 	}
 	

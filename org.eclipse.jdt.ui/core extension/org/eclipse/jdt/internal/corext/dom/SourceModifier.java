@@ -14,15 +14,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.ISourceModifier;
+import org.eclipse.text.edits.Regions;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.text.edits.ISourceModifier;
-import org.eclipse.text.edits.Regions;
-import org.eclipse.text.edits.SimpleTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 
@@ -97,17 +100,17 @@ public abstract class SourceModifier implements ISourceModifier {
 		
 		private static SimpleTextEdit[] splitIntersectRight(SimpleTextEdit edit, IRegion editRange, IRegion intersect) {
 			SimpleTextEdit[] result= new SimpleTextEdit[2];
-			result[0]= SimpleTextEdit.createDelete(
+			result[0]= new DeleteEdit(
 				intersect.getOffset(), intersect.getLength());
-			result[1]= SimpleTextEdit.createReplace(
+			result[1]= new ReplaceEdit(
 				editRange.getOffset(), intersect.getOffset() - editRange.getOffset(), edit.getText());
 			return result;
 		}
 		
 		private static SimpleTextEdit[] splitIntersectLeft(SimpleTextEdit edit, IRegion editRange, IRegion intersect) {
 			SimpleTextEdit[] result= new SimpleTextEdit[2];
-			result[0]= SimpleTextEdit.createReplace(intersect.getOffset(), intersect.getLength(), edit.getText());
-			result[1]= SimpleTextEdit.createDelete(
+			result[0]= new ReplaceEdit(intersect.getOffset(), intersect.getLength(), edit.getText());
+			result[1]= new DeleteEdit(
 				intersect.getOffset() + intersect.getLength(),
 				editRange.getLength() - intersect.getLength());
 			return result;
@@ -159,10 +162,10 @@ public abstract class SourceModifier implements ISourceModifier {
 				String line= source.substring(offset, offset + region.getLength());
 				int length= Strings.computeIndentLength(line, fSourceIndentLevel, fTabWidth);
 				if (length >= 0) {
-					result.add(SimpleTextEdit.createReplace(offset, length, fDestinationIndent));
+					result.add(new ReplaceEdit(offset, length, fDestinationIndent));
 				} else {
 					length= Strings.computeIndent(line, fTabWidth);
-					result.add(SimpleTextEdit.createDelete(offset, length));
+					result.add(new DeleteEdit(offset, length));
 				}
 			}
 		} catch (BadLocationException cannotHappen) {

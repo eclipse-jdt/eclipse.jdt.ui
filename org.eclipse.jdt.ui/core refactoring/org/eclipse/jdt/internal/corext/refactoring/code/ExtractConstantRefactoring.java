@@ -15,6 +15,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -44,8 +48,6 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.text.edits.SimpleTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -454,7 +456,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		BodyDeclaration first = (BodyDeclaration) getBodyDeclarations().next();
 		int insertOffset = first.getStartPosition();
 		String text= createConstantDeclarationSource() + getLineDelimiter() + getIndent(first);
-		return SimpleTextEdit.createInsert(insertOffset, text);		
+		return new InsertEdit(insertOffset, text);		
 	}
 	
 	private TextEdit createInsertDeclarationAfterEdit(BodyDeclaration toInsertAfter) throws JavaModelException, CoreException {
@@ -505,7 +507,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			
 		int insertOffset= getStartOfFollowingLine(toInsertAfter);
 		String text= getIndent(toInsertAfter) + createConstantDeclarationSource() + getLineDelimiter();
-		return SimpleTextEdit.createInsert(insertOffset, text);		
+		return new InsertEdit(insertOffset, text);		
 	}
 	
 	private int getStartOfFollowingLine(BodyDeclaration declaration) {
@@ -534,7 +536,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 		int insertOffset= getNodeExclusiveEnd(toInsertAfter);
 		String text= " " + createConstantDeclarationSource(); //$NON-NLS-1$
-		return SimpleTextEdit.createInsert(insertOffset, text);
+		return new InsertEdit(insertOffset, text);
 	}
 		
 	// !! almost identical to version in ExtractTempRefactoring
@@ -568,7 +570,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	
 	private TextEdit createReplaceEdit(int offset, int length) throws JavaModelException {
 		String constantReference= getConstantNameForReference();
-		return SimpleTextEdit.createReplace(offset, length, constantReference);	
+		return new ReplaceEdit(offset, length, constantReference);	
 	}
 	
 	private String getConstantNameForReference() throws JavaModelException {

@@ -49,4 +49,11 @@ public final class InsertEdit extends SimpleTextEdit {
 	protected TextEdit doCopy() {
 		return new InsertEdit(this);
 	}
+	
+	/* non Java-doc
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return super.toString() + " <<" + fText; //$NON-NLS-1$
+	}	
 }

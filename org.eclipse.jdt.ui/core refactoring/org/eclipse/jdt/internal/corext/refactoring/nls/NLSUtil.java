@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -80,7 +80,7 @@ public class NLSUtil {
 		int indexInElementList= Arrays.asList(elements).indexOf(element);
 		int editOffset= computeInsertOffset(elements, indexInElementList, cu);
 		String editText= " " + NLSElement.createTagText(indexInElementList + 1); //tags are 1-based //$NON-NLS-1$
-		return SimpleTextEdit.createInsert(editOffset, editText);
+		return new InsertEdit(editOffset, editText);
 	}
 
 	private static NLSLine scanCurrentLine(ICompilationUnit cu, int position) throws JavaModelException{

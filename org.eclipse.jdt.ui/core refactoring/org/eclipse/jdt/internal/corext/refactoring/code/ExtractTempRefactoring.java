@@ -18,6 +18,10 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -61,8 +65,6 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.text.edits.SimpleTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -520,7 +522,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		ASTNode insertBefore= getNodeToInsertTempDeclarationBefore();		
 		int insertOffset= insertBefore.getStartPosition();
 		String text= createTempDeclarationSource(getInitializerSource(), true) + getIndent(insertBefore);
-		return SimpleTextEdit.createInsert(insertOffset, text); 
+		return new InsertEdit(insertOffset, text); 
 	}
 
 	private TextEdit replaceSelectedExpressionWithTempDeclaration() throws CoreException {
@@ -535,7 +537,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		ASTNode parent= getSelectedExpression().getAssociatedNode().getParent();
 		Assert.isTrue(parent instanceof ExpressionStatement);
 		
-		return SimpleTextEdit.createReplace(parent.getStartPosition(), parent.getLength(), text);
+		return new ReplaceEdit(parent.getStartPosition(), parent.getLength(), text);
 	}
 
 	private TextEdit createImportEditIfNeeded(TextBuffer buffer) throws CoreException {
@@ -560,7 +562,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			IASTFragment fragment= fragmentsToReplace[i];
 			int offset= fragment.getStartPosition();
 			int length= fragment.getLength();
-			result[i]= SimpleTextEdit.createReplace(offset, length, fTempName);
+			result[i]= new ReplaceEdit(offset, length, fTempName);
 		}
 		return result;
 	}

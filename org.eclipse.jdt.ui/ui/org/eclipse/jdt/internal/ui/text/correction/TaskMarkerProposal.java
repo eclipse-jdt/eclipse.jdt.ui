@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -64,9 +64,9 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 			}
 		}
 		if (pos != null) {
-			rootEdit.add(SimpleTextEdit.createReplace(pos.getOffset(), pos.getLength(), "")); //$NON-NLS-1$
+			rootEdit.add(new ReplaceEdit(pos.getOffset(), pos.getLength(), "")); //$NON-NLS-1$
 		} else {
-			rootEdit.add(SimpleTextEdit.createReplace(fLocation.getOffset(), fLocation.getLength(), "")); //$NON-NLS-1$
+			rootEdit.add(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), "")); //$NON-NLS-1$
 		}
 		return change;
 	}

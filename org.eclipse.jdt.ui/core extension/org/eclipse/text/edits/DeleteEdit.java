@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.text.edits;
 
-
 /**
  * Text edit to delete a range in a document.
  */
@@ -36,7 +35,7 @@ public final class DeleteEdit extends SimpleTextEdit {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit#getText()
+	 * @see org.eclipse.text.edits.SimpleTextEdit#getText()
 	 */
 	public String getText() {
 		return ""; //$NON-NLS-1$
@@ -44,5 +43,5 @@ public final class DeleteEdit extends SimpleTextEdit {
 	
 	protected TextEdit doCopy() {
 		return new DeleteEdit(this);
-	}
+	}	
 }

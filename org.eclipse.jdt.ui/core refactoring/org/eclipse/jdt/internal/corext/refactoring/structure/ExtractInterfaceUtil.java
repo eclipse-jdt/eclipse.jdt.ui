@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -216,7 +216,7 @@ class ExtractInterfaceUtil {
 	//TODO to be deleted
 	private static TextEdit createTypeUpdateEdit(ISourceRange sourceRange, String className, String interfaceName) {
 		int offset= sourceRange.getOffset() + sourceRange.getLength() - className.length();
-		return SimpleTextEdit.createReplace(offset, className.length(), interfaceName);
+		return new ReplaceEdit(offset, className.length(), interfaceName);
 	}
 	
 	private static ConstraintVariable[] getUpdatableVariables(ITypeConstraint[] constraints, ITypeBinding classBinding, ITypeBinding interfaceBinding){

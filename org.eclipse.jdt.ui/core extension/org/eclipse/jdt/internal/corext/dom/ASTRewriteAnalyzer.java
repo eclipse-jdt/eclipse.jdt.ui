@@ -15,6 +15,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.CopySourceEdit;
+import org.eclipse.text.edits.CopyTargetEdit;
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.MoveSourceEdit;
+import org.eclipse.text.edits.MoveTargetEdit;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ISourceRange;
@@ -89,13 +99,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.text.edits.CopySourceEdit;
-import org.eclipse.text.edits.CopyTargetEdit;
-import org.eclipse.text.edits.MoveSourceEdit;
-import org.eclipse.text.edits.MoveTargetEdit;
-import org.eclipse.text.edits.RangeMarker;
-import org.eclipse.text.edits.SimpleTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.CopyPlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.MovePlaceholderData;
@@ -275,7 +278,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	
 	final void doTextInsert(int offset, String insertString, GroupDescription description) {
 		if (insertString.length() > 0) {
-			TextEdit edit= SimpleTextEdit.createInsert(offset, insertString);
+			TextEdit edit= new InsertEdit(offset, insertString);
 			addEdit(edit);
 			if (description != null) {
 				addDescription(description, edit);
@@ -292,7 +295,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		if (len == 0) {
 			return null;
 		}
-		TextEdit edit= SimpleTextEdit.createDelete(offset, len);
+		TextEdit edit= new DeleteEdit(offset, len);
 		addEdit(edit);
 		if (description != null) {
 			addDescription(description, edit);
@@ -317,7 +320,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	
 	final void doTextReplace(int offset, int len, String insertString, GroupDescription description) {
 		if (len > 0 || insertString.length() > 0) {
-			TextEdit edit= SimpleTextEdit.createReplace(offset, len, insertString);
+			TextEdit edit= new ReplaceEdit(offset, len, insertString);
 			addEdit(edit);
 			if (description != null) {
 				addDescription(description, edit);

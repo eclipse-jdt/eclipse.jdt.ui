@@ -14,8 +14,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.text.edits.SimpleTextEdit;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit; 
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -54,14 +54,14 @@ public class TrackPositionTest extends TestCase {
 	}
 
 	public void test1() throws Exception {
-		TextEdit edit= SimpleTextEdit.createReplace(2, 2, "xyz");
+		TextEdit edit= new ReplaceEdit(2, 2, "xyz");
 		fChange.addTextEdit(NN, edit);
 		executeChange();
 		assertEquals(fChange.getNewTextRange(edit), 2, 3);
 	}
 	
 	public void test2() throws Exception {
-		TextEdit edit= SimpleTextEdit.createReplace(5, 3, "xy");
+		TextEdit edit= new ReplaceEdit(5, 3, "xy");
 		fChange.addTextEdit(NN, edit);
 		TextBuffer preview= fChange.getPreviewTextBuffer();
 		assertEquals(fBuffer.getContent(), "0123456789");

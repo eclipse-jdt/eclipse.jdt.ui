@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -65,7 +65,7 @@ public class QualifiedNameFinder {
 			if (element != null && element.exists())
 				return;
 			TextChange change= fResult.getChange(file);
-			change.addTextEdit(RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"), SimpleTextEdit.createReplace(start, length, fNewValue)); //$NON-NLS-1$
+			change.addTextEdit(RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"), new ReplaceEdit(start, length, fNewValue)); //$NON-NLS-1$
 		}
 
 		public void done() throws CoreException {

@@ -22,7 +22,8 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.Set;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -581,7 +582,7 @@ public class NLSRefactoring extends Refactoring {
 			
 		String newImportText= fgLineDelimiter + "import " + fAddedImport + ";"; //$NON-NLS-2$ //$NON-NLS-1$
 		String name= NLSMessages.getFormattedString("NLSrefactoring.add_import_declaration", fAddedImport); //$NON-NLS-1$
-		builder.addTextEdit(name, SimpleTextEdit.createInsert(start + 1, newImportText));
+		builder.addTextEdit(name, new InsertEdit(start + 1, newImportText));
 	}
 
 	private void addNLS(NLSSubstitution sub, TextChange builder){
@@ -589,7 +590,7 @@ public class NLSRefactoring extends Refactoring {
 		String resourceGetter= createResourceGetter(sub.key);
 		String text= NLSMessages.getFormattedString("NLSrefactoring.extrenalize_string", sub.value.getValue()); //$NON-NLS-1$
 		if (sub.task == NLSSubstitution.TRANSLATE){
-			builder.addTextEdit(text, SimpleTextEdit.createReplace(position.getOffset(), position.getLength(), resourceGetter));
+			builder.addTextEdit(text, new ReplaceEdit(position.getOffset(), position.getLength(), resourceGetter));
 		}	
 		if (sub.task != NLSSubstitution.SKIP){
 			NLSElement element= sub.value;
@@ -633,7 +634,7 @@ public class NLSRefactoring extends Refactoring {
 	private TextEdit createAddTagChange(NLSElement element){
 		int offset= element.getTagPosition().getOffset(); //to be changed
 		String text= createTagText(element);
-		return SimpleTextEdit.createInsert (offset, text);
+		return new InsertEdit(offset, text);
 	}
 	
 	private String createResourceGetter(String key){
@@ -657,7 +658,7 @@ public class NLSRefactoring extends Refactoring {
 		StringBuffer old= new StringBuffer(getOldPropertyFileSource());
 
 		if (needsLineDelimiter(old))
-			tfc.addTextEdit(NLSMessages.getString("NLSRefactoring.add_line_delimiter"), SimpleTextEdit.createInsert(old.length(), fgLineDelimiter)); //$NON-NLS-1$
+			tfc.addTextEdit(NLSMessages.getString("NLSRefactoring.add_line_delimiter"), new InsertEdit(old.length(), fgLineDelimiter)); //$NON-NLS-1$
 		
 		for (int i= 0; i < fNlsSubs.length; i++){
 			if (fNlsSubs[i].task == NLSSubstitution.TRANSLATE){
@@ -665,7 +666,7 @@ public class NLSRefactoring extends Refactoring {
 					String entry= createEntry(fNlsSubs[i].value, fNlsSubs[i].key).toString();
 					String message= NLSMessages.getFormattedString("NLSRefactoring.add_entry", //$NON-NLS-1$
 										fNlsSubs[i].key);
-					tfc.addTextEdit(message, SimpleTextEdit.createInsert(old.length(), entry));
+					tfc.addTextEdit(message, new InsertEdit(old.length(), entry));
 				}	
 			}	
 		}	

@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.text.edits.SimpleTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -38,7 +38,7 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	 */
 	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit root) throws CoreException {
 		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, root);
-		TextEdit edit= SimpleTextEdit.createReplace(fOffset, fLength, fReplacementString);
+		TextEdit edit= new ReplaceEdit(fOffset, fLength, fReplacementString);
 		root.add(edit);
 		return change;
 	}
