@@ -116,33 +116,39 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		 */
 		static protected class ProblemAnnotation extends Annotation implements IProblemAnnotation {
 			
+			private static Image fgImage;
+			private static boolean fgImageInitialized= false;
+			
 			private List fOverlaids;
 			private IProblem fProblem;
 			private Image fImage;
-			private static Image fgImage;
+			private boolean fImageInitialized= false;
+			
 			
 			public ProblemAnnotation(IProblem problem) {
 				fProblem= problem;
 				setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
-				
-				if (fgImage == null) {
-					// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
-					Display display= Display.getDefault();
-					display.syncExec(new Runnable() {
-						public void run() {
+			}
+			
+			private void initializeImage() {
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
+				if (!fImageInitialized) {
+					if (JavaEditorPreferencePage.showTempProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID())) {
+						if (!fgImageInitialized) {
 							fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+							fgImageInitialized= true;
 						}
-					});
+						fImage= fgImage;
+					}
+					fImageInitialized= true;
 				}
-				
-				if (JavaEditorPreferencePage.showTempProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID()))
-					fImage= fgImage;
 			}
 						
 			/*
 			 * @see Annotation#paint
 			 */
 			public void paint(GC gc, Canvas canvas, Rectangle r) {
+				initializeImage();
 				if (fImage != null)
 					drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.CENTER);
 			}
@@ -151,6 +157,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemAnnotation#getImage(Display)
 			 */
 			public Image getImage(Display display) {
+				initializeImage();
 				return fImage;
 			}
 			
