@@ -230,8 +230,8 @@ public class VariableSelectionDialog extends StatusDialog {
 	private void updateFullTextField() {
 		if (fFullPath != null && !fFullPath.isDisposed()) {
 			if (fVariable != null) {
-				IClasspathEntry entry= JavaCore.getClasspathVariable(fVariable);
-				fFullPath.setText(entry.getPath().append(fExtensionField.getText()).toString());
+				IPath entryPath= JavaCore.getClasspathVariable(fVariable);
+				fFullPath.setText(entryPath.append(fExtensionField.getText()).toString());
 			} else {
 				fFullPath.setText("");
 			}
@@ -240,11 +240,10 @@ public class VariableSelectionDialog extends StatusDialog {
 	
 	private IPath chooseExtJar() {
 		String varName= fVariableField.getText();
-		IClasspathEntry entry= JavaCore.getClasspathVariable(varName);
-		if (entry == null) {
+		IPath entryPath= JavaCore.getClasspathVariable(varName);
+		if (entryPath == null) {
 			return null;
 		}
-		IPath entryPath= entry.getPath();
 		String lastUsedPath= entryPath.append(fExtensionField.getText()).removeLastSegments(1).toOSString();
 		
 		FileDialog dialog= new FileDialog(getShell(), SWT.SINGLE);
@@ -268,9 +267,8 @@ public class VariableSelectionDialog extends StatusDialog {
 		CPVariableElement[] elements= new CPVariableElement[nEntries];
 		for (int i= 0; i < nEntries; i++) {
 			String curr= entries[i];
-			IClasspathEntry entry= JavaCore.getClasspathVariable(curr);
-			IPath path= entry != null ? entry.getPath() : Path.EMPTY;
-			elements[i]= new CPVariableElement(curr, path);
+			IPath entryPath= JavaCore.getClasspathVariable(curr);
+			elements[i]= new CPVariableElement(curr, entryPath);
 		}
 	
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new CPVariableElementLabelProvider(), false, true);

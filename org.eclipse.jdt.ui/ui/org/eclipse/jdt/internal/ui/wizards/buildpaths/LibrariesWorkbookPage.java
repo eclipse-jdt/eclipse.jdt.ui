@@ -366,7 +366,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		VariableSelectionDialog dialog= new VariableSelectionDialog(getShell(), existing);
 		if (dialog.open() == dialog.OK) {
 			IPath res= dialog.getVariable();
-			IClasspathEntry entry= JavaCore.newVariableEntry(res.segment(0));
+			IClasspathEntry entry= JavaCore.newVariableEntry(res);
 			return new CPListElement[] { new CPListElement(entry, null) };
 		}
 		return null;

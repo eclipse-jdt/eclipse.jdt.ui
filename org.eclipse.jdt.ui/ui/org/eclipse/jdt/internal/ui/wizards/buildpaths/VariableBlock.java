@@ -31,9 +31,9 @@ public class VariableBlock {
 		ArrayList elements= new ArrayList(entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			String name= entries[i];
-			IClasspathEntry entry= JavaCore.getClasspathVariable(name);
-			if (entry != null) {
-				CPVariableElement elem= new CPVariableElement(name, entry.getPath());
+			IPath entryPath= JavaCore.getClasspathVariable(name);
+			if (entryPath != null) {
+				CPVariableElement elem= new CPVariableElement(name, entryPath);
 				if (!ClasspathVariablesPreferencePage.JDKLIB_VARIABLE.equals(name)) {
 					elements.add(elem);
 				}
@@ -117,8 +117,7 @@ public class VariableBlock {
 			List elements= fVariablesList.getElements();
 			for (int i= 0; i < elements.size(); i++) {
 				CPVariableElement curr= (CPVariableElement) elements.get(i);
-				IClasspathEntry libEntry= JavaCore.newLibraryEntry(curr.getPath());
-				JavaCore.setClasspathVariable(curr.getName(), libEntry);
+				JavaCore.setClasspathVariable(curr.getName(), curr.getPath());
 				existing.remove(curr.getName());
 			}
 			

@@ -523,7 +523,7 @@ public class BuildPathsBlock {
 			CPListElement entry= ((CPListElement)classPathEntries.get(i));
 			IClasspathEntry cp= entry.getClasspathEntry();
 			if (cp.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-				cp= JavaCore.getResolvedClasspathVariable(ClasspathVariablesPreferencePage.JDKLIB_VARIABLE);
+				cp= JavaCore.getResolvedClasspathVariable(cp.getPath());
 			}
 			if (cp != null && cp.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 				attachSource(cp.getPath(), entry);

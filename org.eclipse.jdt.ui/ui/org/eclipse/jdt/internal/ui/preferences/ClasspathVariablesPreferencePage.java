@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.util.IPropertyChangeListener;import org.eclipse.jface.util.PropertyChangeEvent;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.util.IPropertyChangeListener;import org.eclipse.jface.util.PropertyChangeEvent;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
 
 public class ClasspathVariablesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -78,8 +78,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		if (jdkPath == null) {
 			jdkPath= new Path("");
 		}
-		IClasspathEntry libEntry= JavaCore.newLibraryEntry(jdkPath);
-		JavaCore.setClasspathVariable(JDKLIB_VARIABLE, libEntry);
+		JavaCore.setClasspathVariable(JDKLIB_VARIABLE, jdkPath);
 	}	
 	
 

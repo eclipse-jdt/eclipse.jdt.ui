@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.swt.graphics.Image;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.swt.graphics.Image;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 public class CPVariableElementLabelProvider extends LabelProvider {
@@ -26,10 +26,13 @@ public class CPVariableElementLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof CPVariableElement) {
 			CPVariableElement curr= (CPVariableElement)element;
-			StringBuffer buf= new StringBuffer();
-			buf.append(curr.getName());
-			buf.append(" - ");
-			buf.append(curr.getPath().toString());
+			String name= curr.getName();
+			IPath path= curr.getPath();
+			StringBuffer buf= new StringBuffer(name);
+			if (path != null) {
+				buf.append(" - ");
+				buf.append(path.toString());
+			}
 			return buf.toString();
 		}		
 		
