@@ -13,10 +13,12 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -26,10 +28,10 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -39,6 +41,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -91,6 +94,39 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			pageSettings.put(INDEX, 3);
 		}
 		return pageSettings;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		if (fBuildPathsBlock != null) {
+			if (!visible) {
+				if (fBuildPathsBlock.hasChangesInDialog()) {
+					String title= PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.title"); //$NON-NLS-1$
+					String message= PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.message"); //$NON-NLS-1$
+					String[] buttonLabels= new String[] {
+							PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.button.save"), //$NON-NLS-1$
+							PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.button.discard"), //$NON-NLS-1$
+							PreferencesMessages.getString("BuildPathsPropertyPage.unsavedchanges.button.ignore") //$NON-NLS-1$
+					};
+					MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
+					int res= dialog.open();
+					if (res == 0) {
+						performOk();
+					} else if (res == 1) {
+						fBuildPathsBlock.init(JavaCore.create(getProject()), null, null);
+					} else {
+						fBuildPathsBlock.initializeTimeStamps();
+					}
+				}
+			} else {
+				if (!fBuildPathsBlock.hasChangesInDialog() && fBuildPathsBlock.hasChangesInClasspathFile()) {
+					fBuildPathsBlock.init(JavaCore.create(getProject()), null, null);
+				}
+			}
+		}
+		super.setVisible(visible);
 	}
 	
 	
@@ -155,16 +191,12 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
 			
 			Shell shell= getControl().getShell();
-			IRunnableWithProgress runnable= new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor)	throws InvocationTargetException, InterruptedException {
-					try {
-						fBuildPathsBlock.configureJavaProject(monitor);
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					} 
+			IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+				public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
+					fBuildPathsBlock.configureJavaProject(monitor);
 				}
 			};
-			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable, getProject());
+			IRunnableWithProgress op= new WorkbenchRunnableAdapter(runnable, getProject());
 			try {
 				new ProgressMonitorDialog(shell).run(true, true, op);
 			} catch (InvocationTargetException e) {

@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.widgets.Composite;
@@ -292,6 +293,8 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 					fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 6));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
+				} catch (OperationCanceledException e) {
+					throw new InterruptedException();
 				} finally {
 					monitor.done();
 				}

@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.widgets.Composite;
@@ -200,6 +201,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 			IProject project= getJavaProject().getProject();
 			BuildPathsBlock.addJavaNature(project, new SubProgressMonitor(monitor, 1));
 			fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 5));
+		} catch (OperationCanceledException e) {
+			throw new InterruptedException();
 		} finally {
 			monitor.done();
 		}			

@@ -12,6 +12,12 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -23,15 +29,10 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
-
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -77,16 +78,12 @@ public class BuildPathDialog extends StatusDialog {
 
 	private void configureBuildPath() {
 		Shell shell= getShell();
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor)	throws InvocationTargetException, InterruptedException {
-				try {
-					fBlock.configureJavaProject(monitor);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} 
+		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
+				fBlock.configureJavaProject(monitor); 
 			}
 		};
-		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable, fProject.getProject());
+		IRunnableWithProgress op= new WorkbenchRunnableAdapter(runnable, fProject.getProject());
 		try {
 			new ProgressMonitorDialog(shell).run(true, true, op);
 		} catch (InvocationTargetException e) {

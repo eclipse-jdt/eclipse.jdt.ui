@@ -329,6 +329,56 @@ public class CPListElement {
 			elem.setIsMissing(isMissing);
 		}
 		return elem;
+	}
+
+	public static StringBuffer appendEncodePath(IPath path, StringBuffer buf) {
+		if (path != null) {
+			String str= path.toString();
+			buf.append('[').append(str.length()).append(']').append(str);
+		} else {
+			buf.append('[').append(']');
+		}
+		return buf;
+	}
+	
+	public static StringBuffer appendEncodedURL(URL url, StringBuffer buf) {
+		if (url != null) {
+			String str= url.toExternalForm();
+			buf.append('[').append(str.length()).append(']').append(str);
+		} else {
+			buf.append('[').append(']');
+		}
+		return buf;
+	}
+	
+	/**
+	 * @return
+	 */
+	public StringBuffer appendEncodedSettings(StringBuffer buf) {
+		buf.append(fEntryKind).append(';');
+		appendEncodePath(fPath, buf).append(';');
+		buf.append(Boolean.valueOf(fIsExported)).append(';');
+		switch (fEntryKind) {
+			case IClasspathEntry.CPE_SOURCE:
+				IPath output= (IPath) getAttribute(OUTPUT);
+				appendEncodePath(output, buf).append(';');
+				IPath[] exclusion= (IPath[]) getAttribute(EXCLUSION);
+				buf.append('[').append(exclusion.length).append(']');
+				for (int i= 0; i < exclusion.length; i++) {
+					appendEncodePath(exclusion[i], buf).append(';');
+				}
+				break;
+			case IClasspathEntry.CPE_LIBRARY:
+			case IClasspathEntry.CPE_VARIABLE:
+				IPath sourceAttach= (IPath) getAttribute(SOURCEATTACHMENT);
+				appendEncodePath(sourceAttach, buf).append(';');
+				URL javadoc= (URL) getAttribute(JAVADOC);
+				appendEncodedURL(javadoc, buf).append(';');				
+				break;
+			default:
+			
+		}
+		return buf;
 	}	
 
 }

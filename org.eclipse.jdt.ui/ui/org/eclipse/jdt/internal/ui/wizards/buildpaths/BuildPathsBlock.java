@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -25,6 +26,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -99,9 +101,9 @@ public class BuildPathsBlock {
 		 * old output location.
 		 * @param oldOutputLocation The old output location
 		 * @return Returns true if .class files should be removed.
-		 * @throws InterruptedException
+		 * @throws OperationCanceledException
 		 */
-		boolean doQuery(IPath oldOutputLocation) throws InterruptedException;
+		boolean doQuery(IPath oldOutputLocation) throws OperationCanceledException;
 		
 	}
 
@@ -129,6 +131,9 @@ public class BuildPathsBlock {
 	private LibrariesWorkbookPage fLibrariesPage;
 	
 	private BuildPathBasePage fCurrPage;
+	
+	private String fUserSettingsTimeStamp;
+	private long fFileTimeStamp;
 		
 	public BuildPathsBlock(IStatusChangeListener context, int pageToShow) {
 		fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
@@ -325,7 +330,39 @@ public class BuildPathsBlock {
 		}
 
 		doStatusLineUpdate();
+		initializeTimeStamps();
 	}
+	
+	private String getEncodedSettings() {
+		StringBuffer buf= new StringBuffer();	
+		CPListElement.appendEncodePath(fOutputLocationPath, buf).append(';');
+
+		int nElements= fClassPathList.getSize();
+		buf.append('[').append(nElements).append(']');
+		for (int i= 0; i < nElements; i++) {
+			CPListElement elem= (CPListElement) fClassPathList.getElement(i);
+			elem.appendEncodedSettings(buf);
+		}
+		return buf.toString();
+	}
+	
+	public boolean hasChangesInDialog() {
+		String currSettings= getEncodedSettings();
+		return !currSettings.equals(fUserSettingsTimeStamp);
+	}
+	
+	public boolean hasChangesInClasspathFile() {
+		IFile file= fCurrJProject.getProject().getFile(".classpath"); //$NON-NLS-1$
+		return fFileTimeStamp != file.getModificationStamp();
+	}
+	
+	public void initializeTimeStamps() {
+		IFile file= fCurrJProject.getProject().getFile(".classpath"); //$NON-NLS-1$
+		fFileTimeStamp= file.getModificationStamp();
+		fUserSettingsTimeStamp= getEncodedSettings();
+	}
+	
+	
 
 	private ArrayList getExistingEntries(IClasspathEntry[] classpathEntries) {
 		ArrayList newClassPath= new ArrayList();
@@ -582,7 +619,7 @@ public class BuildPathsBlock {
 		}
 	}
 	
-	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
+	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
@@ -600,7 +637,7 @@ public class BuildPathsBlock {
 	 * Creates the Java project and sets the configured build path and output location.
 	 * If the project already exists only build paths are updated.
 	 */
-	private void internalConfigureJavaProject(List classPathEntries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, InterruptedException {
+	private void internalConfigureJavaProject(List classPathEntries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		// 10 monitor steps to go
 		
 		IRemoveOldBinariesQuery reorgQuery= getRemoveOldBinariesQuery(null);
@@ -625,6 +662,10 @@ public class BuildPathsBlock {
 			folder.setDerived(true);		
 		}
 		
+
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
 		monitor.worked(2);
 				
 		int nEntries= classPathEntries.size();
@@ -654,9 +695,13 @@ public class BuildPathsBlock {
 		}	
 		JavaUI.setLibraryJavadocLocations((IPath[]) paths.toArray(new IPath[paths.size()]), (URL[]) urls.toArray(new URL[paths.size()]));
 		
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
 		monitor.worked(1);
 				
-		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));		
+		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));
+		initializeTimeStamps();
 	}
 	
 	private void collectJavaDocLocations(CPListElement entry, List paths, List urls) {
@@ -709,7 +754,7 @@ public class BuildPathsBlock {
 	
 	public static IRemoveOldBinariesQuery getRemoveOldBinariesQuery(final Shell shell) {
 		return new IRemoveOldBinariesQuery() {
-			public boolean doQuery(final IPath oldOutputLocation) throws InterruptedException {
+			public boolean doQuery(final IPath oldOutputLocation) throws OperationCanceledException {
 				final int[] res= new int[] { 1 };
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
@@ -725,7 +770,7 @@ public class BuildPathsBlock {
 				} else if (res[0] == 1) {
 					return false;
 				}
-				throw new InterruptedException();
+				throw new OperationCanceledException();
 			}
 		};
 	}	
