@@ -235,9 +235,9 @@ public class JavaElementLabels {
 	public final static int DEFAULT_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED;
 
 
-	private final static String CONCAT_STRING= JavaUIMessages.getString("JavaElementLabels.concat_string"); // " - "; //$NON-NLS-1$
-	private final static String COMMA_STRING= JavaUIMessages.getString("JavaElementLabels.comma_string"); // ", "; //$NON-NLS-1$
-	private final static String DECL_STRING= JavaUIMessages.getString("JavaElementLabels.declseparator_string"); // "  "; // use for return type //$NON-NLS-1$
+	public final static String CONCAT_STRING= JavaUIMessages.getString("JavaElementLabels.concat_string"); // " - "; //$NON-NLS-1$
+	public final static String COMMA_STRING= JavaUIMessages.getString("JavaElementLabels.comma_string"); // ", "; //$NON-NLS-1$
+	public final static String DECL_STRING= JavaUIMessages.getString("JavaElementLabels.declseparator_string"); // "  "; // use for return type //$NON-NLS-1$
 
 	/*
 	 * Package name compression
