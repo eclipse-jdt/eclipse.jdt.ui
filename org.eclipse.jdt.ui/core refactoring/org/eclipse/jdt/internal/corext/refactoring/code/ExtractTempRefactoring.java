@@ -639,7 +639,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 			
 	private ASTNode getNodeToInsertTempDeclarationBefore() throws JavaModelException {
-		if ((! fReplaceAllOccurrences) || (getFragmentsToReplace().length == 1))
+		if ((! fReplaceAllOccurrences) || (getFragmentsToReplace().length <= 1))
 			return getInnermostStatementInBlock(getSelectedExpression());
 		
 		ASTNode[] firstReplaceNodeParents= getParents(getFirstReplacedExpression().getAssociatedNode());
@@ -721,6 +721,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (! fReplaceAllOccurrences)
 			return getSelectedExpression();
 		IASTFragment[] nodesToReplace= getFragmentsToReplace();
+		if (nodesToReplace.length == 0)
+			return getSelectedExpression();
 		Comparator comparator= new Comparator(){
 			public int compare(Object o1, Object o2){
 				return ((IASTFragment)o1).getStartPosition() - ((IASTFragment)o2).getStartPosition();
