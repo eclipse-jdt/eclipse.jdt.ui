@@ -31,7 +31,9 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -59,11 +61,11 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -133,16 +135,19 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * Returns the field which corresponds to the specified variable declaration fragment
 	 * 
 	 * @param fragment the variable declaration fragment
-	 * @param project the java project
 	 * @return the corresponding field
 	 * @throws JavaModelException if an error occurs
 	 */
-	protected final IField getCorrespondingField(final VariableDeclarationFragment fragment, final IJavaProject project) throws JavaModelException {
+	protected final IField getCorrespondingField(final VariableDeclarationFragment fragment) throws JavaModelException {
 		final IBinding binding= fragment.getName().resolveBinding();
 		if (binding instanceof IVariableBinding) {
 			final IVariableBinding variable= (IVariableBinding) binding;
-			if (variable.isField())
-				return Bindings.findField(variable, project, fOwner);
+			if (variable.isField()) {
+				final ICompilationUnit unit= RefactoringASTParser.getCompilationUnit(fragment);
+				final IJavaElement element= unit.getElementAt(fragment.getStartPosition());
+				if (element instanceof IField)
+					return (IField) element;
+			}
 		}
 		return null;
 	}
@@ -193,7 +198,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			node= nodes[index];
 			project= RefactoringASTParser.getCompilationUnit(node).getJavaProject();
 			if (project != null) {
-				method= getReferencingMethod(node, project);
+				method= getReferencingMethod(node);
 				if (method != null) {
 					Set set= (Set) units.get(project);
 					if (set == null) {
@@ -252,7 +257,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				VariableDeclarationFragment fragment= null;
 				for (final Iterator iterator= fragments.iterator(); iterator.hasNext();) {
 					fragment= (VariableDeclarationFragment) iterator.next();
-					final IField field= getCorrespondingField(fragment, project);
+					final IField field= getCorrespondingField(fragment);
 					if (field != null)
 						result.add(field);
 				}
@@ -265,17 +270,20 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * Returns the method which references the specified ast node.
 	 * 
 	 * @param node the ast node
-	 * @param project the java project
 	 * @return the referencing method
 	 * @throws JavaModelException if an error occurs
 	 */
-	protected final IMethod getReferencingMethod(final ASTNode node, final IJavaProject project) throws JavaModelException {
+	protected final IMethod getReferencingMethod(final ASTNode node) throws JavaModelException {
 		if (node instanceof Type) {
 			final BodyDeclaration parent= (BodyDeclaration) ASTNodes.getParent(node, BodyDeclaration.class);
 			if (parent instanceof MethodDeclaration) {
 				final IMethodBinding binding= ((MethodDeclaration) parent).resolveBinding();
-				if (binding != null)
-					return Bindings.findMethod(binding, project, fOwner);
+				if (binding != null) {
+					final ICompilationUnit unit= RefactoringASTParser.getCompilationUnit(node);
+					final IJavaElement element= unit.getElementAt(node.getStartPosition());
+					if (element instanceof IMethod)
+						return (IMethod) element;
+				}
 			}
 		}
 		return null;
@@ -553,7 +561,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			Collection collection= null;
 			try {
 				final ASTParser parser= ASTParser.newParser(AST.JLS3);
+				Object element= null;
 				SearchResultGroup group= null;
+				SearchMatch[] matches= null;
 				final Map groups= new HashMap();
 				for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
 					project= (IJavaProject) outer.next();
@@ -563,7 +573,12 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					if (collection != null) {
 						for (final Iterator inner= collection.iterator(); inner.hasNext();) {
 							group= (SearchResultGroup) inner.next();
-							groups.put(group.getCompilationUnit(), group);
+							matches= group.getSearchResults();
+							if (matches.length > 0) {
+								element= matches[0].getElement();
+								if (element instanceof IMember)
+									groups.put(((IMember) element).getCompilationUnit(), group);
+							}
 						}
 					}
 				}
@@ -577,7 +592,12 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 						units= new HashSet(collection.size());
 						for (final Iterator inner= collection.iterator(); inner.hasNext();) {
 							group= (SearchResultGroup) inner.next();
-							units.add(group.getCompilationUnit());
+							matches= group.getSearchResults();
+							if (matches.length > 0) {
+								element= matches[0].getElement();
+								if (element instanceof IMember)
+									units.add(((IMember) element).getCompilationUnit());
+							}
 						}
 						parser.setWorkingCopyOwner(fOwner);
 						parser.setResolveBindings(true);
@@ -600,13 +620,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					}
 				}
 				performFirstPass(creator, secondPass, groups, subUnit, subNode);
-				if (superUnit != null && !processed.contains(superUnit)) {
-					collection= (Collection) secondPass.get(superUnit.getJavaProject());
-					if (collection == null)
-						collection= Collections.singleton(superUnit);
-					else
-						collection.add(superUnit);
-				}
 				for (final Iterator iterator= secondPass.keySet().iterator(); iterator.hasNext();) {
 					project= (IJavaProject) iterator.next();
 					if (level == 3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
