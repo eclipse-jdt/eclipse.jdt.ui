@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.core.refactoring.changes;
 
 import java.util.ArrayList;
@@ -17,8 +21,10 @@ import org.eclipse.jdt.internal.core.refactoring.base.Change;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.*;
+import org.eclipse.jdt.internal.core.refactoring.*;
 
-class AddToClasspathChange extends Change {
+public class AddToClasspathChange extends Change {
 	
 	private String fProjectHandle;
 	private int fEntryKind;
@@ -27,7 +33,7 @@ class AddToClasspathChange extends Change {
 	private IPath fSourceAttachmentPath;
 	private IPath fSourceAttachmentRootPath;
 	
-	AddToClasspathChange(IJavaProject project, int entryKind, int contentKind, IPath path, IPath sourceAttachmentPath, IPath sourceAttachmentRootPath){
+	public AddToClasspathChange(IJavaProject project, int entryKind, int contentKind, IPath path, IPath sourceAttachmentPath, IPath sourceAttachmentRootPath){
 		fProjectHandle= project.getHandleIdentifier();
 		fEntryKind= entryKind;
 		fContentKind= contentKind;
@@ -36,7 +42,7 @@ class AddToClasspathChange extends Change {
 		fSourceAttachmentRootPath= sourceAttachmentRootPath;
 	}
 	
-	/**
+	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
@@ -68,16 +74,17 @@ class AddToClasspathChange extends Change {
 				return JavaCore.newSourceEntry(fPath);
 			case IClasspathEntry.CPE_VARIABLE:
 				return JavaCore.newVariableEntry(fPath, fSourceAttachmentPath, fSourceAttachmentRootPath);	
+			default:
+				Assert.isTrue(false, "not expected: " + fEntryKind);
+				return null;	
 		}
-		Assert.isTrue(false, "not expected: " + fEntryKind);
-		return null;
 	}
 	
 	private IJavaProject getJavaProject(){
 		return (IJavaProject)JavaCore.create(fProjectHandle);
 	}
 
-	/**
+	/* non java-doc
 	 * @see IChange#getUndoChange()
 	 */
 	public IChange getUndoChange() {
@@ -88,14 +95,14 @@ class AddToClasspathChange extends Change {
 		return new DeleteFromClasspathChange(classpathEntryPath, getJavaProject());
 	}
 
-	/**
+	/* non java-doc
 	 * @see IChange#getName()
 	 */
 	public String getName() {
 		return "Add entry to classpath";
 	}
 
-	/**
+	/* non java-doc
 	 * @see IChange#getCorrespondingJavaElement()
 	 */
 	public IJavaElement getCorrespondingJavaElement() {

@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.core.refactoring.changes;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -11,13 +15,11 @@ import org.eclipse.jdt.internal.core.refactoring.base.Change;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 
-public abstract class PackageReorgChange extends Change {
+abstract class PackageReorgChange extends Change {
 
 	private String fPackageHandle;
 	private String fNewName;
 	private String fDestinationHandle;
-	
-	private String fNewPackageHandle;
 	
 	PackageReorgChange(IPackageFragment pack, IPackageFragmentRoot dest, String newName){
 		fPackageHandle= pack.getHandleIdentifier();
@@ -25,9 +27,9 @@ public abstract class PackageReorgChange extends Change {
 		fNewName= newName;
 	}
 	
-	protected abstract void doPerform(IProgressMonitor pm) throws JavaModelException;
+	abstract void doPerform(IProgressMonitor pm) throws JavaModelException;
 	
-	/**
+	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
 	public final void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
@@ -40,35 +42,30 @@ public abstract class PackageReorgChange extends Change {
 			String oldName= pkg.getElementName();
 			IPackageFragmentRoot destination= getDestination();
 			doPerform(new SubProgressMonitor(pm, 1));
-			if (fNewName == null)
-				fNewPackageHandle= destination.getPackageFragment(oldName).getHandleIdentifier();
-			else 
-				fNewPackageHandle= destination.getPackageFragment(fNewName).getHandleIdentifier();
+		}catch (Exception e) {
+			handleException(context, e);
+			setActive(false);	
 		} finally{
 			pm.done();
 		}
 	}
 	
-	/**
+	/* non java-doc
 	 * @see IChange#getCorrespondingJavaElement()
 	 */
 	public IJavaElement getCorrespondingJavaElement() {
 		return getPackage();
 	}
 	
-	protected IPackageFragmentRoot getDestination(){
+	IPackageFragmentRoot getDestination(){
 		return (IPackageFragmentRoot)JavaCore.create(fDestinationHandle);
 	}
 	
-	protected IPackageFragment getPackage(){
+	IPackageFragment getPackage(){
 		return (IPackageFragment)JavaCore.create(fPackageHandle);
 	}
 
-	public IJavaElement getCopiedElement(){
-		return JavaCore.create(fNewPackageHandle);
-	}
-	
-	protected String getNewName() {
+	String getNewName() {
 		return fNewName;
 	}
 }
