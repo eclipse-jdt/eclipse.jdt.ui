@@ -52,10 +52,6 @@ public class PromoteTempWizard extends RefactoringWizard {
 		addPage(new PromoteTempInputPage());
 	}
 	
-	private PromoteTempToFieldRefactoring getPromoteTempToFieldRefactoring() {
-		return (PromoteTempToFieldRefactoring) getRefactoring();
-	}
-	
 	private static class PromoteTempInputPage extends UserInputWizardPage {
 
 		private static final String DESCRIPTION = RefactoringMessages.getString("PromoteTempInputPage.description");//$NON-NLS-1$
