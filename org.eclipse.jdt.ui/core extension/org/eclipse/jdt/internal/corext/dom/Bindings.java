@@ -145,15 +145,18 @@ public class Bindings {
 		return type;
 	}
 	
-	public static Type createType(ITypeBinding binding, AST ast) {
+	public static Type createType(ITypeBinding binding, AST ast, boolean fullyQualify) {
 		if (binding.isPrimitive()) {
 			String name= binding.getName();
 			return ast.newPrimitiveType(PrimitiveType.toCode(name));
 		} else if (binding.isArray()) {
-			Type elementType= createType(binding.getElementType(), ast);
+			Type elementType= createType(binding.getElementType(), ast, fullyQualify);
 			return ast.newArrayType(elementType, binding.getDimensions());
 		} else {
-			return ast.newSimpleType(ast.newName(Bindings.getAllNameComponents(binding)));
+			if (fullyQualify)
+				return ast.newSimpleType(ast.newName(Bindings.getAllNameComponents(binding)));
+			else
+				return ast.newSimpleType(ast.newName(Bindings.getNameComponents(binding)));	
 		}
 	}
 
