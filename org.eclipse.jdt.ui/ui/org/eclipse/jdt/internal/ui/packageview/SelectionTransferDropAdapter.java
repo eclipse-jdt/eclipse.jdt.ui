@@ -8,11 +8,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
+import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.reorg.ReorgRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.JdtTreeViewerDropAdapter;
@@ -23,6 +22,8 @@ import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeC
 import org.eclipse.jdt.internal.ui.reorg.CopyAction;
 import org.eclipse.jdt.internal.ui.reorg.MoveAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -30,6 +31,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 
@@ -146,12 +148,7 @@ public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter imple
 	}
 	
 	private void handleDropMove(final Object target, DropTargetEvent event) throws JavaModelException{
-		MoveAction action= new MoveAction("#MOVE", StructuredSelectionProvider.createFrom(getViewer())){
-			protected Object selectDestination(ReorgRefactoring ref) {
-				return target;
-			}
-		};
-		action.run();
+		new DragNDropMoveAction(StructuredSelectionProvider.createFrom(getViewer()), target).run();
 	}
 	
 	private boolean handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
@@ -180,5 +177,79 @@ public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter imple
 			}
 		};
 		action.run();
+	}
+	
+	//--
+	private static class DragNDropMoveAction extends MoveAction{
+		private Object fTarget;
+		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
+		
+		public DragNDropMoveAction(StructuredSelectionProvider provider, Object target){
+			super("#MOVE", provider);
+			Assert.isNotNull(target);
+			fTarget= target;
+		}
+		
+		protected Object selectDestination(ReorgRefactoring ref) {
+			return fTarget;
+		}
+		
+		protected boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException{
+			if (!super.isOkToProceed(refactoring))
+				return false;
+			return askIfUpdateReferences((MoveRefactoring)refactoring);
+		}
+		
+		//returns false iff canceled or error
+		private boolean askIfUpdateReferences(MoveRefactoring ref) throws JavaModelException{
+			if (! ref.canUpdateReferences()){
+				setShowPreview(false);
+				return true;
+			}	
+			switch (askIfUpdateReferences()){
+				case IDialogConstants.CANCEL_ID:
+				   setShowPreview(false);
+					return false;
+				case IDialogConstants.NO_ID:
+					ref.setUpdateReferences(false);
+					setShowPreview(false);
+					return true;	
+				case IDialogConstants.YES_ID:
+					ref.setUpdateReferences(true);
+					setShowPreview(false);
+					return true;
+				case PREVIEW_ID:		 
+					ref.setUpdateReferences(true);
+					setShowPreview(true);
+					return true;
+				default: 
+					Assert.isTrue(false); //not expected to get here
+					return false;
+			}
+		}
+		
+		private static int askIfUpdateReferences(){
+			Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
+			String title= "Move";
+			String preview= "Pre&view";
+			String question= "Do you want to update references to the moved element(s)? Press '" + preview + "' to see the preview of the reference updates.";
+			
+			String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL,
+																 preview,  IDialogConstants.CANCEL_LABEL };
+			final MessageDialog dialog = new MessageDialog(shell, title, null, question, MessageDialog.QUESTION,	labels, 2); //preview is default
+			shell.getDisplay().syncExec(new Runnable() {
+				public void run() {
+					dialog.open();
+				}
+			});
+			int result = dialog.getReturnCode();
+			if (result == 0)
+				return IDialogConstants.YES_ID;
+			if (result == 1)
+				return IDialogConstants.NO_ID;
+			if (result == 2)
+				return PREVIEW_ID;
+			return IDialogConstants.CANCEL_ID;
+		}
 	}
 }

@@ -4,15 +4,14 @@
  */
 
 package org.eclipse.jdt.internal.ui.reorg;
-
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
-
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.reorg.MoveRefactoring;
@@ -21,23 +20,31 @@ import org.eclipse.jdt.internal.core.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-
+
 public class MoveAction extends ReorgDestinationAction {
 	
-	private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
-	private static boolean fShowPreview= false;
+	private boolean fShowPreview= false;
 	
 	public MoveAction(StructuredSelectionProvider provider) {
 		this(ReorgMessages.getString("moveAction.label"), provider); //$NON-NLS-1$
@@ -71,13 +78,19 @@ public class MoveAction extends ReorgDestinationAction {
 		return new MoveRefactoring(elements, changeCreator);
 	}
 	
+	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, JavaElementContentProvider cp, ReorgRefactoring refactoring){
+		return new MoveDestinationDialog(parent, labelProvider, cp, (MoveRefactoring)refactoring);
+	}	
+	
 	/* non java-doc
 	 * see @ReorgDestinationAction#isOkToProceed
 	 */
-	boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException{
-		if (!isOkToMoveReadOnly(refactoring))
-			return false;
-		return askIfUpdateReferences((MoveRefactoring)refactoring);
+	protected boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException{
+		return (isOkToMoveReadOnly(refactoring));
+	}
+	
+	protected void setShowPreview(boolean showPreview) {
+		fShowPreview = showPreview;
 	}
 	
 	private static boolean isOkToMoveReadOnly(ReorgRefactoring refactoring){
@@ -91,58 +104,6 @@ public class MoveAction extends ReorgDestinationAction {
 			}
 		}
 		return true;
-	}
-	
-	//returns false iff canceled or error
-	private boolean askIfUpdateReferences(MoveRefactoring ref) throws JavaModelException{
-		if (! ref.canUpdateReferences()){
-			fShowPreview= false;
-			return true;
-		}	
-		switch (askIfUpdateReferences()){
-			case IDialogConstants.CANCEL_ID:
-				fShowPreview= false;
-				return false;
-			case IDialogConstants.NO_ID:
-				ref.setUpdateReferences(false);
-				fShowPreview= false;
-				return true;	
-			case IDialogConstants.YES_ID:
-				ref.setUpdateReferences(true);
-				fShowPreview= false;
-				return true;
-			case PREVIEW_ID:		 
-				ref.setUpdateReferences(true);
-				fShowPreview= true;
-				return true;
-			default: 
-				Assert.isTrue(false); //not expected to get here
-				return false;
-		}
-	}
-	
-	private static int askIfUpdateReferences(){
-		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
-		String title= "Move";
-		String preview= "Pre&view";
-		String question= "Do you want to update references to the moved elements? Press '" + preview + "' to see the preview of the reference updates.";
-		
-		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL,
-															 preview,  IDialogConstants.CANCEL_LABEL };
-		final MessageDialog dialog = new MessageDialog(shell,	title, null, question, MessageDialog.QUESTION,	labels, 2); //preview is default
-		shell.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				dialog.open();
-			}
-		});
-		int result = dialog.getReturnCode();
-		if (result == 0)
-			return IDialogConstants.YES_ID;
-		if (result == 1)
-			return IDialogConstants.NO_ID;
-		if (result == 2)
-			return PREVIEW_ID;
-		return IDialogConstants.CANCEL_ID;
 	}
 	
 	/* non java-doc
@@ -212,4 +173,69 @@ public class MoveAction extends ReorgDestinationAction {
 			return op.getChange();
 		}		
 	}
+	
+	private class MoveDestinationDialog extends ElementTreeSelectionDialog {
+		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
+		private MoveRefactoring fRefactoring;
+		private Button fCheckbox;
+		private Button fPreview;
+		
+		MoveDestinationDialog(Shell parent, ILabelProvider labelProvider, 	ITreeContentProvider contentProvider, MoveRefactoring refactoring){
+			super(parent, labelProvider, contentProvider);
+			fRefactoring= refactoring;
+			fShowPreview= false;//from outter instance
+		}
+		
+		protected Control createDialogArea(Composite parent) {
+			Composite result= (Composite)super.createDialogArea(parent);
+			fCheckbox= new Button(result, SWT.CHECK);
+			fCheckbox.setText("Update references to the moved element(s).");
+			fCheckbox.setEnabled(canUpdateReferences());
+			fCheckbox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					updatePreviewButton();
+					fRefactoring.setUpdateReferences(fCheckbox.getEnabled() && fCheckbox.getSelection());
+				}
+			});
+			fCheckbox.setSelection(canUpdateReferences());
+			return result;
+		}
+		
+		protected void createButtonsForButtonBar(Composite parent) {
+			super.createButtonsForButtonBar(parent);
+			fPreview= createButton(parent, PREVIEW_ID, "Preview", false);
+		}
+		
+		protected void updateOKStatus() {
+			super.updateOKStatus();
+			try{
+				fRefactoring.setDestination(getFirstResult());
+				fCheckbox.setEnabled(getOkButton().getEnabled() &&  canUpdateReferences());
+				updatePreviewButton();
+			} catch (JavaModelException e){
+				ExceptionHandler.handle(e, "Move", "Unexpected exception occurred. See log for details.");
+			}		
+		}
+		
+		protected void buttonPressed(int buttonId) {
+			fShowPreview= (buttonId == PREVIEW_ID);
+			super.buttonPressed(buttonId);
+			if (buttonId == PREVIEW_ID)
+				close();
+		}
+		
+		private void updatePreviewButton(){
+			fPreview.setEnabled(fCheckbox.getEnabled() && fCheckbox.getSelection());
+		}
+		
+		private boolean canUpdateReferences(){
+			try{
+				return fRefactoring.canUpdateReferences();
+			} catch (JavaModelException e){
+				return false;
+			}
+		}
+	}
+
+
 }

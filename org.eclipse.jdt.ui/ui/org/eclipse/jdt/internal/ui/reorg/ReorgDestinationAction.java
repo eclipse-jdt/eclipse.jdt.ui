@@ -17,9 +17,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -120,7 +122,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 	abstract ReorgRefactoring createRefactoring(List elements);
 	
 	//hook to override
-	boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException{
+	protected boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException{
 		return true;
 	}
 	
@@ -275,9 +277,10 @@ abstract class ReorgDestinationAction extends ReorgAction {
 				return !(element instanceof IPackageFragment) && super.hasChildren(element);
 			}
 		};
-		ILabelProvider labelProvider= new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS	);
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(parent, labelProvider, cp);
+		ElementTreeSelectionDialog dialog= createDestinationSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), 
+																																	 new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS	),
+																																	 cp,
+																																	 refactoring);
 		dialog.setTitle(getActionName());
 		dialog.setValidator(new ReorgSelectionValidator(refactoring));
 		dialog.addFilter(new ContainerFilter(refactoring));
@@ -285,10 +288,77 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		dialog.setMessage(getDestinationDialogMessage());
 		dialog.setSize(60, 18);
 		dialog.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
+		dialog.setInitialSelection(computeCommonParent(refactoring.getElementsToReorg()));
 		
 		if (dialog.open() != dialog.CANCEL)
 			return dialog.getFirstResult();
 		return null;
+	}
+		
+	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, JavaElementContentProvider cp, ReorgRefactoring refactoring){
+		return new ElementTreeSelectionDialog(parent, labelProvider, cp);
+	}
+	
+	private static Object computeCommonParent(List elements){
+		if (elements.isEmpty())
+			return null;
+		Object parent= elements.get(0);
+		for (Iterator iter= elements.iterator(); iter.hasNext(); ){
+			Object o2= iter.next();
+			Object oldParent= parent;
+			parent= computeCommonParent(parent, o2);
+		}
+		IResource parentRes= getResource(parent);
+		IJavaElement parentElement= JavaCore.create(parentRes);
+		if (parentElement != null)
+			return parentElement;
+		return getResource(parent);	
+	}
+	
+	private static Object computeCommonParent(Object e1, Object e2){
+		IResource r1= getResource(e1);
+		IResource r2= getResource(e2);	
+		if (r1 == null && r2 == null)
+			return null;
+		if (r1 == null)
+			return r2.getParent();
+		if (r2 == null)
+			return r1.getParent();
+		
+		if (r1.equals(r2))
+			return r1.getParent();
+			
+		if (r1.getFullPath().isPrefixOf(r2.getFullPath()))
+			return r1;
+
+		if (r2.getFullPath().isPrefixOf(r1.getFullPath()))
+			return r2;
+						
+		IPath p1= r1.getParent().getFullPath();
+		IPath p2= r2.getParent().getFullPath();
+		IPath commonPath= new Path("");
+		int segCount= Math.min(p1.segmentCount(), p2.segmentCount());
+		for (int i= 0; i < segCount; i++){
+			if (p1.segment(i).equals(p2.segment(i)))
+				commonPath= commonPath.append(p1.segment(i));
+			else
+				break;	
+		}
+		return ResourcesPlugin.getWorkspace().getRoot().findMember(commonPath);
+	}
+	
+	private static IResource getResource(Object o) {
+		try{
+			if (o instanceof IResource)
+				return (IResource)o;
+			else if (o instanceof IJavaElement)
+				return 	((IJavaElement)o).getCorrespondingResource();
+			else
+				return null;	
+		} catch (JavaModelException e){
+			JavaPlugin.log(e);
+			return null;
+		}		
 	}
 
 	/* non java-doc
