@@ -444,5 +444,9 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 	public void testFail28() throws Exception{
 		helper2("j");
 	}
+
+	public void testFail29() throws Exception{
+		helper2("j");
+	}
 	
 }
