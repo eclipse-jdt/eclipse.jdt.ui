@@ -571,9 +571,9 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	}
 	
 	public boolean visit(LocalDeclaration localDeclaration, BlockScope scope) {
-		return visitRange(localDeclaration.declarationSourceStart, localDeclaration.declarationSourceEnd,
-			localDeclaration, scope);
-		// return visitNode(localDeclaration, scope);
+		// return visitRange(localDeclaration.declarationSourceStart, localDeclaration.declarationSourceEnd,
+		//	localDeclaration, scope);
+		return visitNode(localDeclaration, scope);
 	}
 
 	public boolean visit(FieldReference fieldReference, BlockScope scope) {

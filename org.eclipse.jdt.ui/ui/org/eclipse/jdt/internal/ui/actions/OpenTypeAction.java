@@ -31,8 +31,18 @@ public class OpenTypeAction extends OpenJavaElementAction implements IWorkbenchW
 		
 		Object[] types= dialog.getResult();
 		if (types != null && types.length > 0) {
-			IType type= (IType)types[0];		
-			new OpenTypeHierarchyHelper().open(new IType[] { type }, JavaPlugin.getActiveWorkbenchWindow());
+			IType type= (IType)types[0];
+			if(dialog.showInTypeHierarchy()) {
+				new OpenTypeHierarchyHelper().open(new IType[] { type }, JavaPlugin.getActiveWorkbenchWindow());
+			} else {
+				try {
+					open(type);
+				} catch (JavaModelException e) {
+					ExceptionHandler.handle(e, JavaPlugin.getResourceBundle(), ERROR_OPEN_PREFIX);
+				} catch (PartInitException e) {
+					ExceptionHandler.handle(e, JavaPlugin.getResourceBundle(), ERROR_OPEN_PREFIX);
+				}
+			}
 		}
 	}
 
