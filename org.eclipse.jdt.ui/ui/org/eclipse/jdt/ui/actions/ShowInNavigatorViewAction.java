@@ -172,9 +172,18 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		}
 		if (element == null)
 			return null;
-		IResource result= element.getCorrespondingResource();
-		if (result == null)
-			result= element.getUnderlyingResource();
+		IResource result;
+		try {
+			result= element.getCorrespondingResource();
+			if (result == null)
+				result= element.getUnderlyingResource();
+		} catch (JavaModelException e) {
+			if (e.isDoesNotExist()) {
+				result= null;
+			} else {
+				throw e;
+			}
+		}
 		return result;
 	}
 	
