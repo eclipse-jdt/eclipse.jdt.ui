@@ -4,25 +4,12 @@
  */
 package org.eclipse.jdt.ui;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceDelta;
-
-import org.eclipse.swt.widgets.Control;
-
-import org.eclipse.jface.viewers.IBasicPropertyConstants;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.TreeViewer;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.viewsupport.AbstractJavaElementContentProvider;
+import org.eclipse.core.resources.*;
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.internal.ui.*;
+import org.eclipse.jdt.internal.ui.viewsupport.*;
+import org.eclipse.jface.viewers.*;
+import org.eclipse.swt.widgets.*;
  
 /**
  * Standard tree content provider for Java elements.
@@ -48,24 +35,50 @@ Java model (<code>IJavaModel</code>)
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  */
-public class JavaElementContentProvider extends AbstractJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
+public class JavaElementContentProvider extends BaseJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
+	protected TreeViewer fViewer;
+	protected Object fInput;
+	
+	/* (non-Javadoc)
+	 * Method declared on IContentProvider.
+	 */
+	public void dispose() {
+		super.dispose();
+		JavaCore.removeElementChangedListener(this);
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IContentProvider.
+	 */
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		super.inputChanged(viewer, oldInput, newInput);
+		fViewer= (TreeViewer)viewer;
+		if (oldInput == null && newInput != null) {
+			JavaCore.addElementChangedListener(this); 
+		} else if (oldInput != null && newInput == null) {
+			JavaCore.removeElementChangedListener(this); 
+		}
+		fInput= newInput;
+	}
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
 	public JavaElementContentProvider() {
 	}
 
+
 	/* (non-Javadoc)
-	 * Method declared on ITreeContentProvider.
+	 * Method declared on IElementChangedListener.
 	 */
-	public Object getParent(Object element) {
-		if (!exists(element))
-			return null;
-
-		return internalGetParent(element);			
+	public void elementChanged(final ElementChangedEvent event) {
+		try {
+			processDelta(event.getDelta());
+		} catch(JavaModelException e) {
+			JavaPlugin.getDefault().logErrorStatus(JavaUIMessages.getString("JavaElementContentProvider.errorMessage"), e.getStatus()); //$NON-NLS-1$
+		}
 	}
-
+	
 	/**
 	 * Processes a delta recursively. When more than two children are affected the
 	 * tree is fully refreshed starting at this node. The delta is processed in the
@@ -149,7 +162,10 @@ public class JavaElementContentProvider extends AbstractJavaElementContentProvid
 				return;
 			}
 			// more than one child changed, refresh from here downwards
-			postRefresh(fixupProjectPackageFragmentRoot(element));
+			if (element instanceof IPackageFragmentRoot)
+				postRefresh(skipProjectPackageFragmentRoot((IPackageFragmentRoot)element));
+			else
+				postRefresh(element);
 			return;
 		}
 		for (int i= 0; i < affectedChildren.length; i++) {
@@ -225,7 +241,7 @@ public class JavaElementContentProvider extends AbstractJavaElementContentProvid
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) 
-					((TreeViewer)fViewer).add(parent, element);
+					fViewer.add(parent, element);
 			}
 		});
 	}
@@ -235,7 +251,7 @@ public class JavaElementContentProvider extends AbstractJavaElementContentProvid
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) 
-					((TreeViewer)fViewer).remove(element);
+					fViewer.remove(element);
 			}
 		});
 	}

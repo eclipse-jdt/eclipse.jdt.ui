@@ -4,57 +4,26 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.wizard.IWizardPage;
-
-import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.dialogs.WizardExportResourcesPage;
-import org.eclipse.ui.help.DialogPageContextComputer;
-import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.*;
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.internal.core.refactoring.util.*;
+import org.eclipse.jdt.internal.ui.*;
+import org.eclipse.jdt.internal.ui.packageview.*;
+import org.eclipse.jdt.internal.ui.viewsupport.*;
+import org.eclipse.jdt.ui.*;
+import org.eclipse.jface.dialogs.*;
+import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.wizard.*;
+import org.eclipse.swt.*;
+import org.eclipse.swt.events.*;
+import org.eclipse.swt.layout.*;
+import org.eclipse.swt.widgets.*;
+import org.eclipse.ui.dialogs.*;
+import org.eclipse.ui.help.*;
 
 /**
  *	Page 1 of the JAR Package wizard
@@ -450,7 +419,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 					JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()),
 					treeContentProvider,
 					new JavaElementLabelProvider(labelFlags),
-					new JavaElementModalListContentProvider(),
+					new BaseJavaElementContentProvider(),
 					new JavaElementLabelProvider(labelFlags),
 					SWT.NONE,
 					SIZING_SELECTION_WIDGET_WIDTH,
