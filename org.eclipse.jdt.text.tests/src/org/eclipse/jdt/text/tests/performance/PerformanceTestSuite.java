@@ -24,14 +24,23 @@ public class PerformanceTestSuite extends TestSuite {
 	}
 	
 	public PerformanceTestSuite() {
-		addTest(new OpenJavaEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
-		addTest(new OpenTextEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
 		addTest(RevertTextEditorTest.suite());
 		addTest(RevertJavaEditorTest.suite());
 		addTest(ToggleCommentTest.suite());
-		addTest(UndoJavaEditorTest.suite());
 		addTest(UndoTextEditorTest.suite());
+		addTest(UndoJavaEditorTest.suite());
 		addTest(OpenQuickOutlineTest.suite());
+		addTest(OpenJavaContentAssistTest.suite());
 		addTest(OpenJavaEditorStressTest.suite());
+		addTest(JavaSmartPasteTest.suite());
+		addTest(ActivateTextEditorTest.suite());
+		addTest(ActivateJavaEditorTest.suite());
+		addTest(SaveTextEditorTest.suite());
+		addTest(SaveJavaEditorTest.suite());
+		addTest(JavaFormatterTest.suite());
+		addTest(JavaExpandSelectionTest.suite());
+		addTest(JavaFormatterProjectTest.suite());
+		addTest(EventDrivenTestSuite.suite());
+		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
 	}
 }

@@ -13,28 +13,27 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
 
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
+/**
+ * Measures the time to comment/uncomment a large compilation unit.
+ * 
+ * @since 3.1
+ */
 public class ToggleCommentTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= ToggleCommentTest.class;
 	
-	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
+	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
 	private static final int WARM_UP_RUNS= 3;
 
 	private static final int MEASURED_RUNS= 3;
-
-	private PerformanceMeter fCommentMeter;
-
-	private PerformanceMeter fUncommentMeter;
 
 	private ITextEditor fEditor;
 	
@@ -43,9 +42,7 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 	}
 
 	protected void setUp() throws Exception {
-		Performance performance= Performance.getDefault();
-		fCommentMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "comment"));
-		fUncommentMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "uncomment"));
+		super.setUp();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
 		setWarmUpRuns(WARM_UP_RUNS);
@@ -53,38 +50,34 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 	}
 	
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		EditorTestHelper.closeAllEditors();
-		fCommentMeter.dispose();
-		fUncommentMeter.dispose();
 	}
 
-	public void testToggleComment2() throws PartInitException {
-		// warm run
-		measureToggleComment();
+	/**
+	 * Measures the time to comment/uncomment a large compilation unit.
+	 */
+	public void testToggleComment2() {
+		measureToggleComment(getNullPerformanceMeter(), getNullPerformanceMeter(), getWarmUpRuns());
+		PerformanceMeter commentMeter= createPerformanceMeter("-comment");
+		PerformanceMeter uncommentMeter= createPerformanceMeter("-uncomment");
+		measureToggleComment(commentMeter, uncommentMeter, getMeasuredRuns());
+		commitAllMeasurements();
+		assertAllPerformance();
 	}
 
-	private void measureToggleComment() throws PartInitException {
+	private void measureToggleComment(PerformanceMeter commentMeter, PerformanceMeter uncommentMeter, int runs) {
 		IAction toggleComment= fEditor.getAction("ToggleComment");
-		int warmUpRuns= getWarmUpRuns();
-		int measuredRuns= getMeasuredRuns();
-		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
-			if (i >= warmUpRuns)
-				fCommentMeter.start();
+		for (int i= 0; i < runs; i++) {
+			commentMeter.start();
 			runAction(toggleComment);
-			if (i >= warmUpRuns)
-				fCommentMeter.stop();
+			commentMeter.stop();
 			EditorTestHelper.runEventQueue(5000);
-			if (i >= warmUpRuns)
-				fUncommentMeter.start();
+			uncommentMeter.start();
 			runAction(toggleComment);
-			if (i >= warmUpRuns)
-				fUncommentMeter.stop();
+			uncommentMeter.stop();
 			EditorTestHelper.runEventQueue(5000);
 		}
-		fCommentMeter.commit();
-		fUncommentMeter.commit();
-		Performance.getDefault().assertPerformance(fCommentMeter);
-		Performance.getDefault().assertPerformance(fUncommentMeter);
 	}
 
 	private void runAction(IAction action) {

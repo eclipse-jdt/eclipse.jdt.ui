@@ -52,6 +52,14 @@ public class KeyboardProbe {
 	 *         index into the array.
 	 */
 	public synchronized char[][] getKeycodes() {
+		initialize();
+		return fCodes;
+	}
+	
+	/**
+	 * Initializes this keyboard probe.
+	 */
+	public void initialize() {
 		if (fCodes == null) {
 			try {
 				probe();
@@ -67,9 +75,8 @@ public class KeyboardProbe {
 				fShell= null;
 			}
 		}
-		return fCodes;
 	}
-	
+
 	/**
 	 * Returns the character resulting from pressing the character 'key' with
 	 * or without shift being pressed.

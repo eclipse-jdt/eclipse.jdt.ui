@@ -31,7 +31,6 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -88,11 +87,12 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 				fJavaProject= JavaCore.create(ResourceTestHelper.getProject(PROJECT));
 			
 			fWasSearchViewShown= EditorTestHelper.isViewShown(SEARCH_VIEW);
-			ITextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), true);
+			AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), true);
 			FindAction action= new FindReferencesAction(editor.getSite());
 			ICompilationUnit unit= JavaCore.createCompilationUnitFrom(ResourceTestHelper.findFile(getFile()));
 			IMethod method= unit.getType("Test").getMethod("test", new String[] { });
 			action.run(method);
+			EditorTestHelper.joinBackgroundActivities(editor);
 			EditorTestHelper.closeAllEditors();
 			
 			super.setUp();

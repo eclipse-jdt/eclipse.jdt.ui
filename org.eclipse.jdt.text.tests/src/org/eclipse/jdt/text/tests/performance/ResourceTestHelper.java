@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,16 +20,22 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import junit.framework.Assert;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Preferences;
 
 public class ResourceTestHelper {
 
@@ -80,6 +87,11 @@ public class ResourceTestHelper {
 		getFile(file).delete(true, null);
 	}
 
+	public static void delete(String prefix, String suffix, int n) throws CoreException {
+		for (int i= 0; i < n; i++)
+			delete(prefix + i + suffix);
+	}
+
 	public static IFile findFile(String pathStr) {
 		IFile file= getFile(pathStr);
 		Assert.assertTrue(file != null && file.exists());
@@ -123,11 +135,13 @@ public class ResourceTestHelper {
 		}
 	}
 
-	public static void copy(String src, String dest, String srcName, String destName) throws IOException, CoreException {
-		StringBuffer buf= read(src);
-		List positions= identifierPositions(buf, srcName);
-		replacePositions(buf, srcName.length(), destName, positions);
-		write(dest, buf.toString());
+	public static void copy(String src, String dest, String srcName, String destName, int ifExists) throws IOException, CoreException {
+		if (handleExisting(dest, ifExists)) {
+			StringBuffer buf= read(src);
+			List positions= identifierPositions(buf, srcName);
+			replacePositions(buf, srcName.length(), destName, positions);
+			write(dest, buf.toString());
+		}
 	}
 
 	private static void replacePositions(StringBuffer c, int origLength, String string, List positions) {
@@ -159,14 +173,6 @@ public class ResourceTestHelper {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
-	public static boolean enableAutoBuilding() {
-		IWorkspaceDescription description= ResourcesPlugin.getWorkspace().getDescription();
-		boolean wasOff= !description.isAutoBuilding();
-		if (wasOff)
-			description.setAutoBuilding(true);
-		return wasOff;
-	}
-
 	public static void incrementalBuild() throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
 	}
@@ -176,10 +182,44 @@ public class ResourceTestHelper {
 	}
 
 	public static boolean disableAutoBuilding() {
-		IWorkspaceDescription description= ResourcesPlugin.getWorkspace().getDescription();
-		boolean wasOn= description.isAutoBuilding();
-		if (wasOn)
-			description.setAutoBuilding(false);
-		return wasOn;
+		return setAutoBuilding(false);
+	}
+
+	public static boolean enableAutoBuilding() {
+		return setAutoBuilding(true);
+	}
+	
+	public static boolean setAutoBuilding(boolean value) {
+		Preferences preferences= ResourcesPlugin.getPlugin().getPluginPreferences();
+		boolean oldValue= preferences.getBoolean(ResourcesPlugin.PREF_AUTO_BUILDING);
+		if (value != oldValue)
+			preferences.setValue(ResourcesPlugin.PREF_AUTO_BUILDING, value);
+		return oldValue;
+	}
+
+	public static IProject createExistingProject(String projectName) throws CoreException {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IProject project= workspace.getRoot().getProject(projectName);
+		IProjectDescription description= workspace.newProjectDescription(projectName);
+		description.setLocation(null);
+	
+		project.create(description, null);
+		project.open(null);
+		return project;
+	}
+
+	public static IProject createProjectFromZip(Plugin installationPlugin, String projectZip, String projectName) throws IOException, ZipException, CoreException {
+		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
+		FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(installationPlugin, new Path(projectZip))), new File(workspacePath));
+		return createExistingProject(projectName);
+	}
+
+	public static IProject getProject(String projectName) {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		return workspace.getRoot().getProject(projectName);
+	}
+
+	public static boolean projectExists(String projectName) {
+		return getProject(projectName).exists();
 	}
 }

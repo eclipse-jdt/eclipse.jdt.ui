@@ -33,6 +33,7 @@ public abstract class RevertEditorTest extends TextPerformanceTestCase {
 	private PerformanceMeter fPerformanceMeter;
 	
 	protected void setUp() throws Exception {
+		super.setUp();
 		Performance performance= Performance.getDefault();
 		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		setWarmUpRuns(WARM_UP_RUNS);
@@ -59,6 +60,7 @@ public abstract class RevertEditorTest extends TextPerformanceTestCase {
 	}
 	
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		fPerformanceMeter.dispose();
 		EditorTestHelper.closeAllEditors();
 	}

@@ -23,6 +23,11 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
  * The main plugin class to be used in the desktop.
  */
 public class JdtTextTestPlugin extends AbstractUIPlugin {
+	/**
+	 * The plug-in id
+	 * @since 3.1
+	 */
+	public static final String PLUGIN_ID= "org.eclipse.jdt.text.tests";
 	//The shared instance.
 	private static JdtTextTestPlugin plugin;
 	//Resource bundle.

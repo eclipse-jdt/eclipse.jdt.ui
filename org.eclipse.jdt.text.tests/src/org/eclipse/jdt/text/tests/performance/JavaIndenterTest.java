@@ -17,7 +17,6 @@ import junit.framework.TestSuite;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
@@ -41,8 +40,6 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 
 	private static final int[] CTRL_END= new int[] { SWT.CTRL, SWT.END };
 	
-	private PerformanceMeter fPerformanceMeter;
-
 	private ITextEditor fEditor;
 
 	public static Test suite() {
@@ -50,9 +47,8 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	}
 	
 	protected void setUp() throws Exception {
+		super.setUp();
 		EditorTestHelper.runEventQueue();
-		Performance performance= Performance.getDefault();
-		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		
 		EditorTestHelper.bringToTop();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
@@ -66,36 +62,30 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	}
 
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		EditorTestHelper.closeAllEditors();
-		fPerformanceMeter.dispose();
 	}
 	
 	public void testJavaIndenter2() {
-		// cold run
-		measureJavaIndenter(getWarmUpRuns(), false);
-		// warm run
-		measureJavaIndenter(getMeasuredRuns(), true);
+		measureJavaIndenter(getNullPerformanceMeter(), getWarmUpRuns());
+		measureJavaIndenter(createPerformanceMeter(), getMeasuredRuns());
+		commitAllMeasurements();
+		assertAllPerformance();
 	}
 
-	private void measureJavaIndenter(int runs, boolean measure) {
+	private void measureJavaIndenter(PerformanceMeter performanceMeter, int runs) {
 		IDocument document= ((JavaEditor) fEditor).getViewer().getDocument();
 		Display display= EditorTestHelper.getActiveDisplay();
 		IAction undo= fEditor.getAction(ITextEditorActionConstants.UNDO);
 		int originalNumberOfLines= document.getNumberOfLines();
 		for (int i= 0; i < runs; i++) {
-			if (measure)
-				fPerformanceMeter.start();
+			performanceMeter.start();
 			SWTEventHelper.pressKeyCode(display, SWT.CR);
-			if (measure)
-				fPerformanceMeter.stop();
+			performanceMeter.stop();
 			assertEquals(originalNumberOfLines + 1, document.getNumberOfLines());
 			runAction(undo);
 			assertEquals(originalNumberOfLines, document.getNumberOfLines());
 			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
-		}
-		if (measure) {
-			fPerformanceMeter.commit();
-			Performance.getDefault().assertPerformance(fPerformanceMeter);
 		}
 	}
 
