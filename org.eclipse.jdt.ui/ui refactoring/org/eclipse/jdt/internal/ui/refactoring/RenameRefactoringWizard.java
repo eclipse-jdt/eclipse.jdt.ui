@@ -10,6 +10,9 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jface.resource.ImageDescriptor;
+/**
+ * @deprecated
+ */
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
 	private String fPageMessage;
