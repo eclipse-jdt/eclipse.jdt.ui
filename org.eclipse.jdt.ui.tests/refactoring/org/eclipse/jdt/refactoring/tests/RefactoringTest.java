@@ -9,26 +9,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
 
 import junit.framework.TestCase;
-
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
-import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
@@ -37,13 +32,15 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
+import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public abstract class RefactoringTest extends TestCase {
 
-	private IJavaProject fJavaTestProject;
-
 	private IPackageFragmentRoot fRoot;
 	private IPackageFragment fPackageP;
+	private IJavaProject fJavaProject;
 	
 	public boolean fIsVerbose= false;
 
@@ -61,11 +58,10 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected void setUp() throws Exception {
-		fJavaTestProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
-
-		fRoot= JavaProjectHelper.addSourceContainer(fJavaTestProject, CONTAINER);
-		fPackageP= fRoot.createPackageFragment("p", true, null);
-
+		fJavaProject= MySetup.getProject();
+		fRoot= MySetup.getDefaultSourceFolder();
+		fPackageP= MySetup.getPackageP();
+		
 		if (fIsVerbose){
 			System.out.println("---------------------------------------------");
 			System.out.println("Test:" + getClass() + "." + name());
@@ -74,7 +70,23 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJavaTestProject);
+		//JavaProjectHelper.removeSourceContainer(fJavaProject, CONTAINER);
+		if (fPackageP.exists()){	
+			IJavaElement[] kids= fPackageP.getChildren();
+			for (int i= 0; i < kids.length; i++){
+				if (kids[i] instanceof ISourceManipulation)
+					((ISourceManipulation)kids[i]).delete(true, null);
+			}
+		}	
+		
+		if (fRoot.exists()){
+			IJavaElement[] packages= fRoot.getChildren();
+			for (int i= 0; i < packages.length; i++){
+				IPackageFragment pack= (IPackageFragment)packages[i];
+				if (! pack.equals(fPackageP))	
+					pack.delete(true, null);
+			}
+		}
 	}
 
 	protected IPackageFragmentRoot getRoot() {
@@ -87,7 +99,7 @@ public abstract class RefactoringTest extends TestCase {
 
 	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws JavaModelException {
 		if (ref instanceof Refactoring)
-			((Refactoring)ref).setUnsavedFileList(new ArrayList(0));
+			((Refactoring)ref).setUnsavedFiles(new IFile[0]);
 		RefactoringStatus status= new RefactoringStatus();
 		if (ref instanceof IPreactivatedRefactoring)
 			status.merge(((IPreactivatedRefactoring)ref).checkPreactivation());

@@ -21,12 +21,12 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 class ReorderParameterMoveFinder extends AbstractSyntaxTreeVisitorAdapter {
 	
 	private List fRegionsFound;
-	private List fSearchResults;
+	private SearchResult[] fSearchResults;
 	
 	/**
 	 * returns List of TextRegion[]
 	 */
-	List findParameterRegions(List searchResults, ICompilationUnit cu) throws JavaModelException{
+	List findParameterRegions(SearchResult[] searchResults, ICompilationUnit cu) throws JavaModelException{
 		fSearchResults= searchResults;
 		fRegionsFound= new ArrayList();
 		((CompilationUnit)cu).accept(this);
@@ -52,9 +52,8 @@ class ReorderParameterMoveFinder extends AbstractSyntaxTreeVisitorAdapter {
 	}
 	
 	private boolean isStartPositionOnList(int start){
-		for (Iterator iter=fSearchResults.iterator(); iter.hasNext();){
-			SearchResult sr= (SearchResult)iter.next();
-			if (sr.getStart() == start)
+		for (int i= 0; i< fSearchResults.length; i++){
+			if (fSearchResults[i].getStart() == start)
 				return true;
 		};
 		return false;

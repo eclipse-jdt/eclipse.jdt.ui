@@ -4,27 +4,22 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.testplugin.JavaTestSetup;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class RenameTypeTests extends RefactoringTest {
 	
+	private static final Class clazz= RenameTypeTests.class;
 	private static final String REFACTORING_PATH= "RenameType/";
 	
 	public RenameTypeTests(String name) {
@@ -32,17 +27,17 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameTypeTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 	
 	public static Test noSetupSuite() {
-		return new TestSuite(RenameTypeTests.class);
+		return new TestSuite(clazz);
 	}
 
 	protected String getRefactoringPath() {
@@ -884,9 +879,13 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
 		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
 		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());		
-		
 	}
-
+	
+	public void test52() throws Exception {
+		System.out.println("\nRenameTypeTest::" + name() + " disabled (1GJY2XN: ITPJUI:WIN2000 - rename type: error when with reference)");
+		//helper2("A", "B");		
+	}
+	
 	public void test5() throws Exception { 
 		helper2("A", "B");		
 	}

@@ -4,12 +4,21 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.fields.RenameFieldRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.*;
-
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.fields.RenameFieldRefactoring;
+import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class RenamePrivateFieldTests extends RefactoringTest {
 
+	private static final Class clazz= RenamePrivateFieldTests.class;
 	private static final String REFACTORING_PATH= "RenamePrivateField/";
 
 	public RenamePrivateFieldTests(String name) {
@@ -17,17 +26,17 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenamePrivateFieldTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 
 	public static Test noSetupSuite() {
-		return new TestSuite(RenamePrivateFieldTests.class);
+		return new TestSuite(clazz);
 	}
 
 	protected String getRefactoringPath() {

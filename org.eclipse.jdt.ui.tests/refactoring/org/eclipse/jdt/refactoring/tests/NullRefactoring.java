@@ -11,6 +11,10 @@ import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.*;
+import org.eclipse.jdt.internal.core.refactoring.*;
+
+
 
 /**
  * useful for tests

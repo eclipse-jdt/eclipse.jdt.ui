@@ -9,17 +9,20 @@ import org.eclipse.jdt.testplugin.*;
 
 
 public class AllTests {
+	
+	private static final Class clazz= AllTests.class;
+	
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), AllTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(AllRefactoringTests.noSetupSuite());
 		suite.addTest(AllChangeTests.noSetupSuite());
 		suite.addTest(UndoManagerTests.noSetupSuite());
 		suite.addTest(PathTransformationTests.noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 }
 

@@ -17,14 +17,16 @@ import junit.framework.TestSuite;
 
 public class RenameFieldTests {
 	
+	private static final Class clazz= RenameFieldTests.class;
+	
 	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameFieldTests.class, args);
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(RenameNonPrivateFieldTests.noSetupSuite());
 		suite.addTest(RenamePrivateFieldTests.noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 }

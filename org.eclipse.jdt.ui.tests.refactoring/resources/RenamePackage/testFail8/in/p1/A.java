@@ -1,8 +1,8 @@
 package p1;
-import p.*;
+import r.*;
 class B{
 	void m(){
-		p.A a;
+		r.A a;
 	}
 }
 class fred{

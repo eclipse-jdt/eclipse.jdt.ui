@@ -12,6 +12,10 @@ import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jdt.internal.core.refactoring.changes.*;
+import org.eclipse.jdt.internal.core.refactoring.*;
+
+
 
 /*
  * The following should be cofigurable:

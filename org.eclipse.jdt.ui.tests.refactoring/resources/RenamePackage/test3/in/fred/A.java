@@ -1,6 +1,6 @@
 package fred;
-import p.r.*;
+import r.r.*;
 class A{
-	p.r.B a;
+	r.r.B a;
 	A a1;
 }

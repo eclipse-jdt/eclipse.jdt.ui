@@ -4,28 +4,33 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.*;
-
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class UndoManagerTests extends RefactoringTest {
 	
+	private static final Class clazz= UndoManagerTests.class;
 	public UndoManagerTests(String name) {
 		super(name);
 	}
 	
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), UndoManagerTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 	
 	public static Test noSetupSuite() {
-		return new TestSuite(UndoManagerTests.class);
+		return new TestSuite(clazz);
 	}
 	
 	private void checkState(boolean undo, boolean redo, int undoCount, int redoCount){

@@ -11,16 +11,15 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 
 class ReorderParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer {
 	
-	private List fSearchResults;
+	private SearchResult[] fSearchResults;
 
-	ReorderParameterASTAnalyzer(List searchResults){
+	ReorderParameterASTAnalyzer(SearchResult[] searchResults){
 		fSearchResults= searchResults;
 	}
 	
 	private boolean isStartPositionOnList(int start){
-		for (Iterator iter=fSearchResults.iterator(); iter.hasNext();){
-			SearchResult sr= (SearchResult)iter.next();
-			if (sr.getStart() == start)
+		for (int i= 0; i < fSearchResults.length; i++){
+			if (fSearchResults[i].getStart() == start)
 				return true;
 		};
 		return false;

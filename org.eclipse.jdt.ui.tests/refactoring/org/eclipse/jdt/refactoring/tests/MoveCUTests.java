@@ -10,7 +10,8 @@ import org.eclipse.jdt.testplugin.*;
 import junit.framework.*;
 
 public class MoveCUTests extends RefactoringTest {
-
+	
+	private static final Class clazz= MoveCUTests.class;
 	private static final String REFACTORING_PATH= "MoveCU/";
 	
 	public MoveCUTests(String name) {
@@ -18,17 +19,17 @@ public class MoveCUTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), MoveCUTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 	
 	public static Test noSetupSuite() {
-		return new TestSuite(MoveCUTests.class);
+		return new TestSuite(clazz);
 	}
 
 	protected String getRefactoringPath() {

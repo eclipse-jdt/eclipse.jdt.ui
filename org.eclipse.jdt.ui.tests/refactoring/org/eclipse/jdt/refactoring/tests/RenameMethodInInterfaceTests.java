@@ -15,15 +15,15 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.methods.RenameMethodInInterfaceRefactoring;
 
+import org.eclipse.jdt.internal.core.refactoring.methods.RenameMethodRefactoring;
 import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.testplugin.*;
 
-
 public class RenameMethodInInterfaceTests extends RefactoringTest {
-
+	
+	private static final Class clazz= RenameMethodInInterfaceTests.class;
 	private static final String REFACTORING_PATH= "RenameMethodInInterface/";
 
 	public RenameMethodInInterfaceTests(String name) {
@@ -31,17 +31,17 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameMethodInInterfaceTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 
 	public static Test noSetupSuite() {
-		return new TestSuite(RenameMethodInInterfaceTests.class);
+		return new TestSuite(clazz);
 	}
 
 	protected String getRefactoringPath() {
@@ -51,7 +51,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		RenameMethodInInterfaceRefactoring ref= new RenameMethodInInterfaceRefactoring(fgChangeCreator, interfaceI.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(fgChangeCreator, interfaceI.getMethod(methodName, signatures));
 		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
@@ -64,7 +64,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		RenameMethodInInterfaceRefactoring ref= new RenameMethodInInterfaceRefactoring(fgChangeCreator, interfaceI.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(fgChangeCreator, interfaceI.getMethod(methodName, signatures));
 		ref.setNewName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){
@@ -280,9 +280,11 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	public void test12() throws Exception{
 		helper2();
 	}
-	public void test13() throws Exception{
-		helper2();
-	}
+	
+	//test13 became testFail45
+	//public void test13() throws Exception{
+	//	helper2();
+	//}
 	public void test14() throws Exception{
 		helper2();
 	}
@@ -311,9 +313,12 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	public void test22() throws Exception{
 		helper2();
 	}
-	public void test23() throws Exception{
-		helper2();
-	}
+	
+	//test23 became testFail45
+	//public void test23() throws Exception{
+	//	helper2();
+	//}
+	
 	public void test24() throws Exception{
 		helper2();
 	}

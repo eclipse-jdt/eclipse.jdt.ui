@@ -8,12 +8,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.refactoring.tests.RefactoringTest;
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
-import experiments.AbstractFieldRefactoring;
-import org.eclipse.jdt.testplugin.*;
 
 
 public class AbstractFieldTests extends RefactoringTest {

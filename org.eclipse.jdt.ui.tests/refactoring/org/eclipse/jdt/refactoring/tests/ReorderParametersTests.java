@@ -7,16 +7,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.testplugin.JavaTestSetup;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import experiments.ReorderParametersRefactoring;
-import org.eclipse.jdt.testplugin.*;
-
 
 public class ReorderParametersTests extends RefactoringTest {
 	
+	private static final Class clazz= ReorderParametersTests.class;
 	private static final String REFACTORING_PATH= "ReorderParameters/";
 	
 	/**
@@ -31,17 +28,17 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), ReorderParametersTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 	
 	public static Test noSetupSuite() {
-		return new TestSuite(ReorderParametersTests.class);
+		return new TestSuite(clazz);
 	}
 		
 	private String getSimpleTestFileName(boolean canReorder, boolean input){

@@ -3,40 +3,37 @@ package org.eclipse.jdt.refactoring.tests;
 import java.io.InputStream;
 import java.io.StringBufferInputStream;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.jdt.testplugin.JavaTestSetup;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.resources.RenameResourceChange;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class RenameResourceChangeTests extends RefactoringTest {
 	
+	private static final Class clazz= RenameResourceChangeTests.class;
 	public RenameResourceChangeTests(String name) {
 		super(name);
 	}
 	
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameResourceChangeTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 	
 	public static Test noSetupSuite() {
-		return new TestSuite(RenameResourceChangeTests.class);
+		return new TestSuite(clazz);
 	}
 	
-	private InputStream getStream(String content){
+	private static InputStream getStream(String content){
 		return new StringBufferInputStream(content);
 	}
 	

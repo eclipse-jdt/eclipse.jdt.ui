@@ -5,6 +5,6 @@ package p;
 }
 class X extends p.B{
 	void x(){
-		p.B.A= B.A;
+		p.B.A= A.A;
 	}
 }

@@ -7,19 +7,17 @@ package org.eclipse.jdt.refactoring.tests;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
+import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.testplugin.*;
 
-
 public class PathTransformationTests extends TestCase {
-
+	
+	private static final Class clazz= PathTransformationTests.class;
 	public PathTransformationTests(String name) {
 		super(name);
 	}
@@ -29,13 +27,13 @@ public class PathTransformationTests extends TestCase {
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 	
 	public static Test noSetupSuite() {
-		return new TestSuite(PathTransformationTests.class);
+		return new TestSuite(clazz);
 	}
 	
 /************/	
@@ -49,7 +47,7 @@ public class PathTransformationTests extends TestCase {
 		if (oldName.lastIndexOf(".") != -1)
 			extension= oldName.substring(oldName.lastIndexOf("."));
 		IPath pNew= createIPath(path + "/" + newName + extension);
-		IPath newPath= RenameResourceChange.renamedResourcePath(pOld, newName);
+		IPath newPath= Checks.renamedResourcePath(pOld, newName);
 		
 		assertEquals(pNew.toString(), newPath.toString());
 	}

@@ -23,6 +23,7 @@ import junit.framework.TestSuite;
 
 public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
+	private static final Class clazz= RenameNonPrivateFieldTests.class;
 	private static final String REFACTORING_PATH= "RenameNonPrivateField/";
 
 	public RenameNonPrivateFieldTests(String name) {
@@ -34,13 +35,13 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 		
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 
 	public static Test noSetupSuite() {
-		return new TestSuite(RenameNonPrivateFieldTests.class);
+		return new TestSuite(clazz);
 	}
 
 	protected String getRefactoringPath() {
@@ -197,13 +198,13 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	public void test12() throws Exception{
-		System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT - search for static field should be more accurate)");
-		//helper2();
+		//System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT - search for static field should be more accurate)");
+		helper2();
 	}
 	
 	public void test13() throws Exception{
-		System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT - search for static field should be more accurate)");
-		//helper2();
+		//System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT - search for static field should be more accurate)");
+		helper2();
 	}
 	
 }

@@ -19,6 +19,7 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
+import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.methods.MethodRefactoring;
@@ -33,7 +34,7 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	private int[] fPermutation;
 	
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
-	private List fOccurrences;
+	private SearchResultGroup[] fOccurrences;
 	
 	public ReorderParametersRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
 		super(method);
@@ -145,16 +146,16 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	}
 
 	//XXX 
-	private static ICompilationUnit getCompilationUnit(List searchResults){
-		SearchResult first= (SearchResult)searchResults.get(0);
-		return (ICompilationUnit)JavaCore.create(first.getResource());
+	private static ICompilationUnit getCompilationUnit(SearchResultGroup searchResults){
+		return (ICompilationUnit)JavaCore.create(searchResults.getResource());
 	}
 	
 	private RefactoringStatus checkExpressionsInMethodInvocation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		for (Iterator iter= fOccurrences.iterator(); iter.hasNext(); ){
-			List searchResults= (List)iter.next();
-			result.merge(new ReorderParameterASTAnalyzer(searchResults).analyze(getCompilationUnit(searchResults)));
+		for (int i= 0; i < fOccurrences.length; i++){
+			SearchResultGroup group=fOccurrences[i]; 
+			SearchResult[] searchResults= group.getSearchResults();
+			result.merge(new ReorderParameterASTAnalyzer(searchResults).analyze(getCompilationUnit(group)));
 		}
 		return result;
 	}
@@ -183,23 +184,23 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	 * returns a List of TextRegion[]
 	 */
 	private List getRegionArrays() throws JavaModelException{
-		return new ReorderParameterMoveFinder().findParameterRegions((List)fOccurrences.get(0), getMethod().getCompilationUnit());
+		return new ReorderParameterMoveFinder().findParameterRegions(fOccurrences[0].getSearchResults(), getMethod().getCompilationUnit());
 	}
 
 	private IJavaSearchScope createRefactoringScope()  throws JavaModelException{
 		return SearchEngine.createWorkspaceScope();
 	}
-		private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
-		if (fOccurrences == null){
-			if (pm == null)
-				pm= new NullProgressMonitor();
-			pm.beginTask("", 2);
-			pm.subTask("creating pattern"); 
-			ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
-			pm.subTask("searching");
-			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), pattern);	
-			pm.done();
-		}
+		private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{
+		if (fOccurrences != null)
+			return fOccurrences;
+		if (pm == null)
+			pm= new NullProgressMonitor();
+		pm.beginTask("", 2);
+		pm.subTask("creating pattern"); 
+		ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
+		pm.subTask("searching");
+		fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), pattern);	
+		pm.done();
 		return fOccurrences;
 	}
 	

@@ -10,21 +10,22 @@ import org.eclipse.jdt.testplugin.*;
 
 public class AllRefactoringTests {
 
+	private static final Class clazz= AllRefactoringTests.class;
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), AllRefactoringTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());						
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 	
 	public static Test noSetupSuite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		
 		//--code
-		suite.addTest(ExtractMethodTests.noSetupSuite());
+		//suite.addTest(ExtractMethodTests.noSetupSuite());
 		
 		//--methods
 		suite.addTest(RenameVirtualMethodInClassTests.noSetupSuite());
@@ -32,7 +33,7 @@ public class AllRefactoringTests {
 		suite.addTest(RenamePrivateMethodTests.noSetupSuite());	
 		suite.addTest(RenameStaticMethodTests.noSetupSuite());
 		suite.addTest(RenameParametersTests.noSetupSuite());
-		suite.addTest(ReorderParametersTests.noSetupSuite());
+		//suite.addTest(ReorderParametersTests.noSetupSuite());
 		
 		//--types
 		suite.addTest(RenameTypeTests.noSetupSuite());	
@@ -45,7 +46,8 @@ public class AllRefactoringTests {
 		suite.addTest(RenameNonPrivateFieldTests.noSetupSuite());
 		
 		//--compilation units
-		suite.addTest(MoveCUTests.noSetupSuite());
+		//suite.addTest(MoveCUTests.noSetupSuite());
+		suite.addTest(MultiMoveTests.noSetupSuite());
 
 		return suite;
 	}

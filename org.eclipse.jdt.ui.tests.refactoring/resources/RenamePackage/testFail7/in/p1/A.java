@@ -1,7 +1,7 @@
 package p1;
 class B{
 	void m(AA fred){
-		p.A.length();
+		r.A.length();
 	}
 }
 class AA{

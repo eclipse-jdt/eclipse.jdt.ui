@@ -4,13 +4,22 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
-import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.methods.RenameVirtualMethodRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.*;
-
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.methods.RenameMethodRefactoring;
+import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
+	private static final Class clazz= RenameVirtualMethodInClassTests.class;
 	private static final String REFACTORING_PATH= "RenameVirtualMethodInClass/";
 		
 	public RenameVirtualMethodInClassTests(String name) {
@@ -18,19 +27,18 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameVirtualMethodInClassTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 	
 	public static Test noSetupSuite() {
-		return new TestSuite(RenameVirtualMethodInClassTests.class);
+		return new TestSuite(clazz);
 	}
-	
 	
 	protected String getRefactoringPath(){
 		return REFACTORING_PATH;
@@ -38,7 +46,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameVirtualMethodRefactoring ref= new RenameVirtualMethodRefactoring(fgChangeCreator, classA.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(fgChangeCreator, classA.getMethod(methodName, signatures));
 		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
@@ -51,7 +59,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameVirtualMethodRefactoring ref= new RenameVirtualMethodRefactoring(fgChangeCreator, classA.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref=  RenameMethodRefactoring.createInstance(fgChangeCreator, classA.getMethod(methodName, signatures));
 		ref.setNewName(newMethodName);
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
@@ -284,7 +292,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
 		
 		IType classB= getType(cu, "B");
-		RenameVirtualMethodRefactoring ref= new RenameVirtualMethodRefactoring(fgChangeCreator, classB.getMethod("m", new String[]{"I"}));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(fgChangeCreator, classB.getMethod("m", new String[]{"I"}));
 		ref.setNewName("kk");
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());

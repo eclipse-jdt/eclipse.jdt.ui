@@ -4,47 +4,45 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-
-import org.eclipse.jdt.testplugin.JavaTestSetup;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class RenamePackageTests extends RefactoringTest {
 	
+	private static final Class clazz= RenamePackageTests.class;
 	private static final String REFACTORING_PATH= "RenamePackage/";
-
+	
 	public RenamePackageTests(String name) {
 		super(name);
 		//fgIsVerbose= true;
 	}
 
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenamePackageTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 
 	public static Test noSetupSuite() {
-		return new TestSuite(RenamePackageTests.class);
+		return new TestSuite(clazz);
 	}
 
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
-
+	
+	
 	// -------------
 	private RenamePackageRefactoring createRefactoring(IPackageFragment pack, String newName) {
 		RenamePackageRefactoring ref= new RenamePackageRefactoring(fgChangeCreator, pack);
@@ -70,6 +68,10 @@ public class RenamePackageTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 		if (fIsVerbose)
 			DebugUtils.dump("" + result);
+		
+		for (int i= 0; i < packageNames.length; i++){
+			getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+		}	
 	}
 	
 	/* non java-doc
@@ -86,10 +88,14 @@ public class RenamePackageTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 		if (fIsVerbose)
 			DebugUtils.dump("" + result);
+			
+		for (int i= 0; i < packageNames.length; i++){
+			getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+		}		
 	}
 	
 	private void helper1() throws Exception{
-		helper1(new String[]{"p"}, new String[][]{{"A"}}, "p1");
+		helper1(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
 	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception{
@@ -129,24 +135,30 @@ public class RenamePackageTests extends RefactoringTest {
 				assertEquals("invalid update in file " + cu.getElementName(), s1,	s2);
 			}
 		}
+		
+		getRoot().getPackageFragment(newPackageName).delete(true, null);
+		for (int i= 1; i < packageNames.length; i++){
+			getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+		}	
+		
 	}
 	
 	// ---------- tests -------------	
 	public void testFail0() throws Exception{
-		helper1(new String[]{"p"}, new String[][]{{"A"}}, "9");
+		helper1(new String[]{"r"}, new String[][]{{"A"}}, "9");
 	}
 	
 	public void testFail1() throws Exception{
 		System.out.println("\nRenamePackageTest::" + name() + " disabled (needs revisiting)");
-		//helper1(new String[]{"p.p1"}, new String[][]{{"A"}}, "p");
+		//helper1(new String[]{"r.p1"}, new String[][]{{"A"}}, "r");
 	}
 	
 	public void testFail2() throws Exception{
-		helper1(new String[]{"p.p1", "fred"}, "fred");
+		helper1(new String[]{"r.p1", "fred"}, "fred");
 	}	
 	
 	public void testFail3() throws Exception{
-		helper1(new String[]{"p"}, new String[][]{{"A"}}, "fred");
+		helper1(new String[]{"r"}, new String[][]{{"A"}}, "fred");
 	}
 	
 	public void testFail4() throws Exception{
@@ -162,45 +174,45 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void testFail7() throws Exception{
-		helper1(new String[]{"p", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
 	public void testFail8() throws Exception{
-		helper1(new String[]{"p", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
-	//native method used p.A as a paramter
+	//native method used r.A as a paramter
 	public void testFail9() throws Exception{
 		System.out.println("\nRenamePackageTest::" + name() + " disabled (corner case)");
-		//helper1(new String[]{"p", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		//helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
 	public void testFail10() throws Exception{
-		helper1(new String[]{"p.p1", "p"}, new String[][]{{"A"}, {"A"}}, "p");
+		helper1(new String[]{"r.p1", "r"}, new String[][]{{"A"}, {"A"}}, "r");
 	}
 
 	public void testFail11() throws Exception{
-		helper1(new String[]{"p.p1", "p", "r.p1"}, new String[][]{{"A"}, {"A"}, {}}, "r.p1");
+		helper1(new String[]{"q.p1", "q", "r.p1"}, new String[][]{{"A"}, {"A"}, {}}, "r.p1");
 	}
 	
 	//-------
 	public void test0() throws Exception{
-		helper2(new String[]{"p"}, new String[][]{{"A"}}, "p1");
+		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
 	public void test1() throws Exception{
-		helper2(new String[]{"p"}, new String[][]{{"A"}}, "p1");
+		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
 	public void test2() throws Exception{
-		helper2(new String[]{"p", "fred"}, new String[][]{{"A"}, {"A"}}, "p1");
+		helper2(new String[]{"r", "fred"}, new String[][]{{"A"}, {"A"}}, "p1");
 	}
 	
 	public void test3() throws Exception{
-		helper2(new String[]{"fred", "p.r"}, new String[][]{{"A"}, {"B"}}, "p");
+		helper2(new String[]{"fred", "r.r"}, new String[][]{{"A"}, {"B"}}, "r");
 	}
 	
 	public void test4() throws Exception{
-		helper2(new String[]{"p.p1", "p"}, new String[][]{{"A"}, {"A"}}, "r");
+		helper2(new String[]{"r.p1", "r"}, new String[][]{{"A"}, {"A"}}, "q");
 	}
 }

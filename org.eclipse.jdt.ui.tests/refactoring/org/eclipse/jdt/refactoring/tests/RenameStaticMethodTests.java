@@ -4,11 +4,21 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.methods.RenameStaticMethodRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.*;
-
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.methods.RenameMethodRefactoring;
+import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class RenameStaticMethodTests extends RefactoringTest {
+	private static final Class clazz= RenameStaticMethodTests.class;
 	private static final String REFACTORING_PATH= "RenameStaticMethod/";
 
 	public RenameStaticMethodTests(String name) {
@@ -16,17 +26,17 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	}
 
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameStaticMethodTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), clazz, args);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
+		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(noSetupSuite());
-		return new JavaTestSetup(suite);
+		return new MySetup(suite);
 	}
 
 	public static Test noSetupSuite() {
-		return new TestSuite(RenameStaticMethodTests.class);
+		return new TestSuite(clazz);
 	}
 
 	protected String getRefactoringPath() {
@@ -35,7 +45,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameStaticMethodRefactoring ref= new RenameStaticMethodRefactoring(fgChangeCreator, classA.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(fgChangeCreator, classA.getMethod(methodName, signatures));
 		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
@@ -48,7 +58,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameStaticMethodRefactoring ref= new RenameStaticMethodRefactoring(fgChangeCreator, classA.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(fgChangeCreator, classA.getMethod(methodName, signatures));
 		ref.setNewName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
@@ -86,9 +96,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		helper1();
 	}
 	
-	public void testFail3() throws Exception{
-		helper1();
-	}
+	//testFail3 deleted
 	
 	public void testFail4() throws Exception{
 		helper1();
