@@ -249,12 +249,18 @@ content access.</li>
   context (identified by the empty <code>path</code> attribute), and a sample 
   web application being developed in an Eclipse workspace (in this case, rooted 
   at <code>d:\testspaces\test-space\JSPs\webapps\myWebApp</code>).</p>
-<pre>&lt;Context path="" docBase="ROOT" debug="0"/&gt;<br>&lt;Context path="/myWebApp" docBase="d:\testspaces\test-space\JSPs\webapps\myWebApp" debug="0"/&gt;</pre>
+<pre>&lt;Context path="" docBase="ROOT" debug="0"/&gt;
+&lt;Context path="/myWebApp" docBase="d:\testspaces\test-space\JSPs\webapps\myWebApp" debug="0"/&gt;</pre>
 <p>The corresponding Java project is "<code>JSPs</code>", containing 
   the folder "<code>webapps</code>", etc. The project may also contain 
   Java source code (for example, in a "<code>src</code>" folder), and 
   the output location is set to "<code>JSPs\webapps\myWebApp\WEB-INF\classes</code>". 
   JSPs are created in the "<code>myWebApp</code>" folder.</p>
+<p><b>Update</b>: The tomcat 5.0 documentation specifies that &quot;<i>it is NOT
+  recommended to place &lt;Context&gt; elements directly in the server.xml file</i>&quot;.
+  Instead, create a new file <code>myWebApp.xml</code> in the folder <code>$CATALINA_HOME/conf/Catalina/localhost</code>
+  with the following content:</p>
+<pre>&lt;Context path="/myWebApp" docBase="d:\testspaces\test-space\JSPs\webapps\myWebApp" debug="0"/&gt;</pre>  
 <h3>Example JSP Project</h3>
 <p>An example JSP project is included in the <code>exampleJspProject.zip</code> 
   file, found in the <code>stuff</code> folder of the <code>javafamily</code> 
