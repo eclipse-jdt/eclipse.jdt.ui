@@ -413,14 +413,15 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 				for (int k= 0; k < children.length; k++) {
 					list.add(children[k]);
 				}
-				if (list.size() == 0)
-					System.out.println("No children found");	
+				if (list.size() == 0) {
+//					System.out.println("No children found");	
+				}
 			}
 			else if (hasChildren(root)/*root.hasChildren()*/) {
 				if (root.getKind() == IPackageFragmentRoot.K_SOURCE || fShowBinaries)
 					list.add(root);
 			} else {
-				System.out.println("Root doesn't have children");
+//				System.out.println("Root doesn't have children");
 			}
 		}
 		if (projectIsRoot || !fShowPackageContent)

@@ -173,7 +173,6 @@ public class JarPackageWriter extends Object {
      */
     public void close() throws IOException {
     	if (fOutputStream != null) {
-			fOutputStream.flush();
 			fOutputStream.close();
     	}
 	}

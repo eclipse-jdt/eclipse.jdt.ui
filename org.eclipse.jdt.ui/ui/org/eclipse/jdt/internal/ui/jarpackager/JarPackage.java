@@ -468,11 +468,9 @@ public class JarPackage implements java.io.Serializable {
 		JarPackageWriter writer= new JarPackageWriter(out);
 		try {
 			writer.writeString(this);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			return "";
-		}
-		finally {
+		} finally {
 			try {
 				if (writer != null)
 					writer.close();
