@@ -63,7 +63,7 @@
 		<menu
 			id="vcm.managing"
 			path="additions"
-			label="%Managing">
+			label="%ManageGroupMenu.label">
 			<separator name="manageGroup"/>
 		</menu>
 	</objectContribution>
