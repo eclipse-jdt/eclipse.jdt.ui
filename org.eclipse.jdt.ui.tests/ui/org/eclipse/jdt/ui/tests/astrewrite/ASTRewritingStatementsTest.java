@@ -12,25 +12,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.BooleanLiteral;
-import org.eclipse.jdt.core.dom.BreakStatement;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.DoStatement;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
@@ -47,9 +28,6 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
-
-	private ICompilationUnit fCU_C;
-	private ICompilationUnit fCU_D;
 
 	public ASTRewritingStatementsTest(String name) {
 		super(name);
@@ -81,43 +59,26 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    public Object foo() {\n");
-		buf.append("        if (this.equals(new Object())) {\n");
-		buf.append("            toString();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		fCU_C= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class D {\n");
-		buf.append("    public Object goo() {\n");
-		buf.append("        return new Integer(3);\n");
-		buf.append("    }\n");
-		buf.append("    public void hoo(int p1, Object p2) {\n");
-		buf.append("        return;\n");
-		buf.append("    }\n");		
-		buf.append("}\n");	
-		fCU_D= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
-				
 	}
-
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
 	
-	
-	
 	public void testAdd() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		{	/* foo(): append a return statement */
-			ICompilationUnit cu= fCU_C;
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class C {\n");
+			buf.append("    public Object foo() {\n");
+			buf.append("        if (this.equals(new Object())) {\n");
+			buf.append("            toString();\n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+			ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 			
@@ -136,7 +97,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			proposal.apply(null);
 			
-			StringBuffer buf= new StringBuffer();
+			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class C {\n");
 			buf.append("    public Object foo() {\n");
@@ -150,7 +111,18 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertEqualString(cu.getSource(), buf.toString());
 		}
 		{	/* hoo(): return; -> return false;  */
-			ICompilationUnit cu= fCU_D;
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class D {\n");
+			buf.append("    public Object goo() {\n");
+			buf.append("        return new Integer(3);\n");
+			buf.append("    }\n");
+			buf.append("    public void hoo(int p1, Object p2) {\n");
+			buf.append("        return;\n");
+			buf.append("    }\n");		
+			buf.append("}\n");	
+			ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
+			
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "D");
 		
@@ -173,7 +145,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			proposal.apply(null);
 			
-			StringBuffer buf= new StringBuffer();
+			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class D {\n");
 			buf.append("    public Object goo() {\n");
@@ -190,8 +162,19 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	}
 	
 	public void testRemove() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);			
 		{	/* foo():  remove if... */
-			ICompilationUnit cu= fCU_C;
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class C {\n");
+			buf.append("    public Object foo() {\n");
+			buf.append("        if (this.equals(new Object())) {\n");
+			buf.append("            toString();\n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+			ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+			
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 			
@@ -209,7 +192,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			proposal.apply(null);
 			
-			StringBuffer buf= new StringBuffer();
+			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class C {\n");
 			buf.append("    public Object foo() {\n");
@@ -218,8 +201,19 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 				
 			assertEqualString(cu.getSource(), buf.toString());
 		}
-		{	/* goo(): remove new Integer(3) */
-			ICompilationUnit cu= fCU_D;
+		{
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class D {\n");
+			buf.append("    public Object goo() {\n");
+			buf.append("        return new Integer(3);\n");
+			buf.append("    }\n");
+			buf.append("    public void hoo(int p1, Object p2) {\n");
+			buf.append("        return;\n");
+			buf.append("    }\n");		
+			buf.append("}\n");	
+			ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
+			
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "D");
 		
@@ -240,7 +234,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			proposal.apply(null);
 			
-			StringBuffer buf= new StringBuffer();
+			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class D {\n");
 			buf.append("    public Object goo() {\n");
@@ -256,8 +250,19 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	}
 	
 	public void testReplace() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);		
 		{	/* foo(): if.. -> return; */
-			ICompilationUnit cu= fCU_C;
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class C {\n");
+			buf.append("    public Object foo() {\n");
+			buf.append("        if (this.equals(new Object())) {\n");
+			buf.append("            toString();\n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+			ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+			
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 			
@@ -276,7 +281,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			proposal.apply(null);
 			
-			StringBuffer buf= new StringBuffer();
+			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class C {\n");
 			buf.append("    public Object foo() {\n");
@@ -287,7 +292,18 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertEqualString(cu.getSource(), buf.toString());
 		}		
 		{	/* goo(): new Integer(3) -> 'null' */
-			ICompilationUnit cu= fCU_D;
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class D {\n");
+			buf.append("    public Object goo() {\n");
+			buf.append("        return new Integer(3);\n");
+			buf.append("    }\n");
+			buf.append("    public void hoo(int p1, Object p2) {\n");
+			buf.append("        return;\n");
+			buf.append("    }\n");		
+			buf.append("}\n");	
+			ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
+			
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "D");
 		
@@ -310,7 +326,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			proposal.apply(null);
 			
-			StringBuffer buf= new StringBuffer();
+			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class D {\n");
 			buf.append("    public Object goo() {\n");

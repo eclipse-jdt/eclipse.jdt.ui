@@ -11,25 +11,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
@@ -43,8 +25,6 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
-
-	private ICompilationUnit fCU_E;
 
 	public ASTRewritingTypeDeclTest(String name) {
 		super(name);
@@ -661,11 +641,11 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	}
 	
 	public void testSingleVariableDeclaration() throws Exception {
-/*		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(int i, int[] k, int[] x[]) {\n");
+		buf.append("    public void foo(int i, int[] k/*, int[] x[]*/) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -679,16 +659,21 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
 		List arguments= methodDecl.parameters();
-		assertTrue("Number of arguments not 3", arguments.size() == 3);
-		{
+		{ // change type, change name
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(0);
+			
+			ArrayType newVarType= ast.newArrayType(ast.newPrimitiveType(PrimitiveType.FLOAT), 2);
+			ASTRewriteAnalyzer.markAsReplaced(decl.getType(), newVarType);
+			
+			Name newName= ast.newSimpleName("count");
+			ASTRewriteAnalyzer.markAsReplaced(decl.getName(), newName);
 		}
-		{
+/*		{
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(1);
 		}
 		{
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(2);
-		}						
+		}*/			
 			
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
@@ -698,10 +683,10 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(int i, int[] k, int[] x[]) {\n");
+		buf.append("    public void foo(float[][] count, int[] k/*, int[] x[]*/) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());*/
+		assertEqualString(cu.getSource(), buf.toString());
 	}	
 	
 	public void testVariableDeclarationFragment() throws Exception {

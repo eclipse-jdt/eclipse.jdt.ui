@@ -31,7 +31,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
@@ -40,8 +39,6 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
-
-	private ICompilationUnit fCU_E;
 
 	public ASTRewritingMethodDeclTest(String name) {
 		super(name);
@@ -53,10 +50,13 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		return new TestSuite(THIS);
-//		TestSuite suite= new TestSuite();
-//		suite.addTest(new ASTRewritingTest("testListCombinations"));
-//		return suite;
+		if (true) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new ASTRewritingMethodDeclTest("testVariableDeclarationFragment"));
+			return suite;
+		}
 	}
 
 
@@ -71,6 +71,17 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
+		
+	}
+
+
+	protected void tearDown() throws Exception {
+		JavaProjectHelper.delete(fJProject1);
+	}
+	
+
+	
+	public void testMethodDeclChanges() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -83,18 +94,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("    public abstract void kee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
 		buf.append("    public abstract void lee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
 		buf.append("}\n");	
-		fCU_E= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
-	}
-
-
-	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
-	}
-	
-
-	
-	public void testMethodDeclChanges() throws Exception {
-		ICompilationUnit cu= fCU_E;
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
+		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -193,7 +194,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		
 		proposal.apply(null);
 		
-		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public abstract class E {\n");
 		buf.append("    public float E(int p1, int p2, int p3) {}\n");
@@ -209,7 +210,20 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	}
 	
 	public void testListRemoves() throws Exception {
-		ICompilationUnit cu= fCU_E;
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public E(int p1, int p2, int p3) {}\n");
+		buf.append("    public void gee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
+		buf.append("    public void hee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
+		buf.append("    public void iee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
+		buf.append("    public void jee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
+		buf.append("    public abstract void kee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
+		buf.append("    public abstract void lee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
+		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -296,7 +310,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		
 		proposal.apply(null);
 		
-		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public abstract class E {\n");
 		buf.append("    public E(int p2, int p3) {}\n");
@@ -312,7 +326,20 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	}	
 	
 	public void testListInserts() throws Exception {
-		ICompilationUnit cu= fCU_E;
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public E(int p1, int p2, int p3) {}\n");
+		buf.append("    public void gee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
+		buf.append("    public void hee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
+		buf.append("    public void iee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
+		buf.append("    public void jee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
+		buf.append("    public abstract void kee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
+		buf.append("    public abstract void lee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
+		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -471,7 +498,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		
 		proposal.apply(null);
 		
-		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public abstract class E {\n");
 		buf.append("    public E(float m, int p1, int p2, int p3) throws InterruptedException {}\n");
@@ -487,7 +514,20 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	}
 	
 	public void testListCombinations() throws Exception {
-		ICompilationUnit cu= fCU_E;
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public E(int p1, int p2, int p3) {}\n");
+		buf.append("    public void gee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
+		buf.append("    public void hee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
+		buf.append("    public void iee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
+		buf.append("    public void jee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
+		buf.append("    public abstract void kee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
+		buf.append("    public abstract void lee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
+		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -574,7 +614,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		
 		proposal.apply(null);
 		
-		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public abstract class E {\n");
 		buf.append("    public E(float m) throws InterruptedException, ArrayStoreException {}\n");
@@ -590,7 +630,20 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	}
 	
 	public void testMethodBody() throws Exception {
-		ICompilationUnit cu= fCU_E;
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public E(int p1, int p2, int p3) {}\n");
+		buf.append("    public void gee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
+		buf.append("    public void hee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
+		buf.append("    public void iee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
+		buf.append("    public void jee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
+		buf.append("    public abstract void kee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
+		buf.append("    public abstract void lee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
+		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -642,7 +695,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		
 		proposal.apply(null);
 		
-		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public abstract class E {\n");
 		buf.append("    public E(int p1, int p2, int p3) {\n");
@@ -656,7 +709,6 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("    public abstract void lee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
-		
 	}
 	
 	public void testFieldDeclaration() throws Exception {

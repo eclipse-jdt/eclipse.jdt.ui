@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -48,10 +47,13 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		return new TestSuite(THIS);
-//		TestSuite suite= new TestSuite();
-//		suite.addTest(new ASTRewritingMoveCodeTest("testMoveDeclDifferentLevel"));
-//		return suite;
+		if (true) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new ASTRewritingMoveCodeTest("testVariableDeclarationFragment"));
+			return suite;
+		}
 	}
 
 

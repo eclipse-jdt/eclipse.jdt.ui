@@ -22,11 +22,11 @@ public class ASTRewritingTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
-		suite.addTest(ASTRewritingMethodDeclTest.suite());
-		suite.addTest(ASTRewritingStatementsTest.suite());
-		suite.addTest(ASTRewritingTypeDeclTest.suite());
-		suite.addTest(ASTRewritingMoveCodeTest.suite());
-		suite.addTest(ASTRewritingExpressionsTest.suite());
+		suite.addTest(new TestSuite(ASTRewritingMethodDeclTest.class));
+		suite.addTest(new TestSuite(ASTRewritingStatementsTest.class));
+		suite.addTest(new TestSuite(ASTRewritingTypeDeclTest.class));
+		suite.addTest(new TestSuite(ASTRewritingMoveCodeTest.class));
+		suite.addTest(new TestSuite(ASTRewritingExpressionsTest.class));
 		return suite;
 	}
 
