@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
@@ -47,6 +48,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -91,6 +93,10 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	private static final String PREF_BUILD_INVALID_CLASSPATH= JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH;
 	private static final String PREF_PB_INCOMPLETE_BUILDPATH= JavaCore.CORE_INCOMPLETE_CLASSPATH;
 	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
+	private static final String PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE= JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE;
+	private static final String PREF_COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
+
+
 
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
 
@@ -110,6 +116,9 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	private static final String WARNING= JavaCore.WARNING;
 	private static final String IGNORE= JavaCore.IGNORE;
 	private static final String ABORT= JavaCore.ABORT;
+
+	private static final String ENABLED= JavaCore.ENABLED;
+	private static final String DISABLED= JavaCore.DISABLED;
 	
 	private static final String DEFAULT= "default"; //$NON-NLS-1$
 	private static final String USER= "user";	 //$NON-NLS-1$
@@ -122,7 +131,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
 			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
 			PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_INCOMPLETE_BUILDPATH,
-			PREF_PB_CIRCULAR_BUILDPATH
+			PREF_PB_CIRCULAR_BUILDPATH, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, PREF_COMPILER_TASK_TAGS
 		};	
 	}
 
@@ -175,6 +184,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	
 	private ArrayList fComplianceControls;
 
+	IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus, fTaskTagsStatus;
+
 	public CompilerPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(JavaUIMessages.getString("CompilerPreferencePage.description")); //$NON-NLS-1$
@@ -201,6 +212,11 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 				textChanged((Text) e.widget);
 			}
 		};
+		
+		fComplianceStatus= new StatusInfo();
+		fMaxNumberProblemsStatus= new StatusInfo();
+		fResourceFilterStatus= new StatusInfo();
+		fTaskTagsStatus= new StatusInfo();		
 	}
 	
 	/**
@@ -229,6 +245,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		Composite warningsComposite= createWarningsTabContent(folder);
+		Composite markersComposite= createMarkersTabContent(folder);
 		Composite codeGenComposite= createCodeGenTabContent(folder);
 		Composite complianceComposite= createComplianceTabContent(folder);
 		Composite othersComposite= createOthersTabContent(folder);
@@ -236,6 +253,10 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		TabItem item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("CompilerPreferencePage.warnings.tabtitle")); //$NON-NLS-1$
 		item.setControl(warningsComposite);
+
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(JavaUIMessages.getString("CompilerPreferencePage.markers.tabtitle")); //$NON-NLS-1$
+		item.setControl(markersComposite);
 	
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("CompilerPreferencePage.generation.tabtitle")); //$NON-NLS-1$
@@ -253,6 +274,69 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	
 		return folder;
 	}
+
+	private Composite createMarkersTabContent(TabFolder folder) {
+		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		
+		String[] errorWarningIgnoreLabels= new String[] {
+			JavaUIMessages.getString("CompilerPreferencePage.error"),  //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.warning"), //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.ignore") //$NON-NLS-1$
+		};
+		
+		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
+					
+		Composite markersComposite= new Composite(folder, SWT.NULL);
+		markersComposite.setLayout(new GridLayout());
+
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
+
+		Group group= new Group(markersComposite, SWT.NONE);
+		group.setText(JavaUIMessages.getString("CompilerPreferencePage.markers.deprecated.label"));
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setLayout(layout);
+		
+		int indent= convertWidthInCharsToPixels(2);
+
+		String label= JavaUIMessages.getString("CompilerPreferencePage.pb_deprecation.label"); //$NON-NLS-1$
+		addComboBox(group, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= JavaUIMessages.getString("CompilerPreferencePage.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
+		addCheckBox(group, label, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, indent);
+
+		layout= new GridLayout();
+		layout.numColumns= 1;
+
+
+
+		group= new Group(markersComposite, SWT.NONE);
+		group.setText(JavaUIMessages.getString("CompilerPreferencePage.markers.taskmarkers.label"));
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setLayout(layout);
+
+		label= JavaUIMessages.getString("CompilerPreferencePage.pb_todo_comments.label"); //$NON-NLS-1$
+		Text text= addTextField(group, label, PREF_COMPILER_TASK_TAGS);
+		GridData gd= (GridData) text.getLayoutData();
+		gd.grabExcessHorizontalSpace= true;
+		gd.widthHint= convertWidthInCharsToPixels(10);		
+		
+
+		layout= new GridLayout();
+		layout.numColumns= 2;
+
+		group= new Group(markersComposite, SWT.NONE);
+		group.setText(JavaUIMessages.getString("CompilerPreferencePage.markers.nls.label"));
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setLayout(layout);
+
+		label= JavaUIMessages.getString("CompilerPreferencePage.pb_non_externalized_strings.label"); //$NON-NLS-1$
+		addComboBox(group, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+	
+		return markersComposite;
+	}
+
 
 	private Composite createOthersTabContent(TabFolder folder) {
 		String[] abortIgnoreValues= new String[] { ABORT, IGNORE };
@@ -341,23 +425,20 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_invalid_import.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_INVALID_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
+		label= JavaUIMessages.getString("CompilerPreferencePage.pb_unused_local.label"); //$NON-NLS-1$
+		addComboBox(warningsComposite, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_overriding_pkg_dflt.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_method_naming.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
-		label= JavaUIMessages.getString("CompilerPreferencePage.pb_deprecation.label"); //$NON-NLS-1$
-		addComboBox(warningsComposite, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_hidden_catchblock.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_unused_imports.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= JavaUIMessages.getString("CompilerPreferencePage.pb_unused_local.label"); //$NON-NLS-1$
-		addComboBox(warningsComposite, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_unused_parameter.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
@@ -367,9 +448,6 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_synth_access_emul.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= JavaUIMessages.getString("CompilerPreferencePage.pb_non_externalized_strings.label"); //$NON-NLS-1$
-		addComboBox(warningsComposite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_max_per_unit.label"); //$NON-NLS-1$
 		Text text= addTextField(warningsComposite, label, PREF_PB_MAX_PER_UNIT);
@@ -558,18 +636,29 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 				if (checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT)) {
 					updateComplianceDefaultSettings();
 				}
-			} else if (!PREF_SOURCE_COMPATIBILITY.equals(changedKey) &&
-					!PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey) &&
-					!PREF_PB_ASSERT_AS_IDENTIFIER.equals(changedKey) &&
-					!PREF_RESOURCE_FILTER.equals(changedKey) &&
-					!PREF_PB_MAX_PER_UNIT.equals(changedKey)) {
+			} else if (PREF_SOURCE_COMPATIBILITY.equals(changedKey) ||
+					PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey) ||
+					PREF_PB_ASSERT_AS_IDENTIFIER.equals(changedKey)) {
+				fComplianceStatus= validateCompliance();
+			} else if (!PREF_PB_MAX_PER_UNIT.equals(changedKey)) {
+				fMaxNumberProblemsStatus= validateMaxNumberProblems();
+			} else if (!PREF_RESOURCE_FILTER.equals(changedKey)) {
+				fResourceFilterStatus= validateResourceFilters();
+			} else if (!PREF_COMPILER_TASK_TAGS.equals(changedKey)) {
+				fTaskTagsStatus= validateTaskTags();
+			} else {
 				return;
 			}
 		} else {
 			updateComplianceEnableState();
 		}
 		
-		IStatus status= StatusUtil.getMostSevere(new IStatus[] { validateCompliance(), validateMaxNumberProblems(), validateResourceFilters() });
+		IStatus fComplianceStatus= validateCompliance();
+		IStatus fMaxNumberProblemsStatus= validateMaxNumberProblems();
+		IStatus fResourceFilterStatus= validateResourceFilters();
+		IStatus fTaskTagsStatus= validateTaskTags();
+		
+		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fComplianceStatus, validateMaxNumberProblems(), validateResourceFilters(), validateTaskTags() });
 		updateStatus(status);
 	}
 	
@@ -639,6 +728,22 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		}
 		return new StatusInfo();
 	}
+	
+	private IStatus validateTaskTags() {
+		String text= (String) fWorkingValues.get(PREF_COMPILER_TASK_TAGS);
+		
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+
+		String[] tags= getFilters(text);
+		for (int i= 0; i < tags.length; i++) {
+			IStatus status= JavaConventions.validateIdentifier(tags[i]);
+			if (status.matches(IStatus.ERROR)) {
+				String message= JavaUIMessages.getFormattedString("CompilerPreferencePage.task.invalidsegment.error", status.getMessage()); //$NON-NLS-1$
+				return new StatusInfo(IStatus.ERROR, message);
+			}
+		}
+		return new StatusInfo();
+	}	
 	
 	private String[] getFilters(String text) {
 		StringTokenizer tok= new StringTokenizer(text, ","); //$NON-NLS-1$
