@@ -166,10 +166,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 	
 	//XXX similar to code in ExtractTemp
 	public String guessConstantName() throws JavaModelException {
-		IExpressionFragment selectedFregment= getSelectedExpression();
-		if (selectedFregment == null)
+		IExpressionFragment selectedFragment= getSelectedExpression();
+		if (selectedFragment == null)
 			return fConstantName;
-		Expression selected= selectedFregment.getAssociatedExpression();
+		Expression selected= selectedFragment.getAssociatedExpression();
 		if (selected instanceof MethodInvocation){
 			String candidate= guessContantName((MethodInvocation) selected);
 			if (candidate != null)
