@@ -744,7 +744,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 		
 		if (fViewer.isExpandable(element)) {
-			if (JavaBasePreferencePage.doubleClockGoesInto()) {
+			if (JavaBasePreferencePage.doubleClickGoesInto()) {
 				// don't zoom into compilation units and class files
 				if (element instanceof IOpenable && 
 					!(element instanceof ICompilationUnit) && 

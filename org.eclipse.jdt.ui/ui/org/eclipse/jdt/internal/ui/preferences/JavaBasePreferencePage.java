@@ -137,7 +137,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 			JavaPlugin.getDefault().getPreferenceStore().getString(IPreferencesConstants.OPEN_TYPE_HIERARCHY));
 	}
 	
-	public static boolean doubleClockGoesInto() {
+	public static boolean doubleClickGoesInto() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(IPreferencesConstants.DOUBLE_CLICK_GOES_INTO);
 	}
