@@ -552,7 +552,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 
 	private boolean mustRenameCU() throws JavaModelException{
-		return Checks.isTopLevel(fType)	&& (Flags.isPublic(fType.getFlags()));
+		return Checks.isTopLevel(fType) && (Flags.isPublic(fType.getFlags()));
 	}
 	
 	private static ICompilationUnit getCompilationUnit(IImportDeclaration imp){
