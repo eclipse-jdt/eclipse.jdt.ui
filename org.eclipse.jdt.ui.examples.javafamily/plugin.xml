@@ -124,13 +124,21 @@
 	<!-- =========================================================================== -->
 	<!-- Tomcat Launcnhing                                                              -->
 	<!-- =========================================================================== -->
+   <extension point="org.eclipse.debug.core.sourcePathComputers">
+   		<sourcePathComputer
+   			id="org.eclipse.jsp.TomcatSourcePathComputer"
+   			class="org.eclipse.jsp.launching.TomcatSourcePathComputer">
+   		</sourcePathComputer>
+   </extension>
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
             name="%tomcatLaunchConfigurationTypeName"
             delegate="org.eclipse.jsp.launching.TomcatLaunchDelegate"
             modes="run, debug"
-            id="org.eclipse.jsp.TomcatConfigurationType">
+            id="org.eclipse.jsp.TomcatConfigurationType"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jsp.TomcatSourcePathComputer">
       </launchConfigurationType>
    </extension>
    <extension

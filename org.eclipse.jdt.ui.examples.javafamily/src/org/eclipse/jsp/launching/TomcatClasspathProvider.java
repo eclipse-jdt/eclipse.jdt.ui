@@ -38,41 +38,37 @@ public class TomcatClasspathProvider extends StandardClasspathProvider {
 	public IRuntimeClasspathEntry[] computeUnresolvedClasspath(ILaunchConfiguration configuration) throws CoreException {
 		boolean useDefault = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, true);
 		if (useDefault) {
+			IRuntimeClasspathEntry[] defaults = super.computeUnresolvedClasspath(configuration);
 			IVMInstall vm = JavaRuntime.computeVMInstall(configuration);
 			LibraryLocation[] libs = JavaRuntime.getLibraryLocations(vm);
-			if (libs == null) {
-				return new IRuntimeClasspathEntry[0];
-			} else {
-				List rtes = new ArrayList();
-				// add bootstrap.jar
-				String catalinaHome = TomcatLaunchDelegate.getCatalinaHome();
-				IPath path = new Path(catalinaHome).append("bin").append("bootstrap.jar"); //$NON-NLS-1$ //$NON-NLS-2$
-				IRuntimeClasspathEntry r = JavaRuntime.newArchiveRuntimeClasspathEntry(path);
-				rtes.add(r);
-				// add class libraries to bootpath			
-				boolean tools = false; // keeps track of whether a tools.jar was found	
-				for (int i = 0; i < libs.length; i++) {
-					LibraryLocation lib = libs[i];
-					r = JavaRuntime.newArchiveRuntimeClasspathEntry(lib.getSystemLibraryPath());
-					r.setSourceAttachmentPath(lib.getSystemLibrarySourcePath());
-					r.setSourceAttachmentRootPath(lib.getPackageRootPath());
-					r.setClasspathProperty(IRuntimeClasspathEntry.STANDARD_CLASSES);
+			List rtes = new ArrayList();
+			for (int i = 0; i < defaults.length; i++) {
+				rtes.add(defaults[i]);
+			}
+			// add bootstrap.jar
+			String catalinaHome = TomcatLaunchDelegate.getCatalinaHome();
+			IPath path = new Path(catalinaHome).append("bin").append("bootstrap.jar"); //$NON-NLS-1$ //$NON-NLS-2$
+			IRuntimeClasspathEntry r = JavaRuntime.newArchiveRuntimeClasspathEntry(path);
+			r.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+			rtes.add(r);
+			// add class libraries to bootpath			
+			boolean tools = false; // keeps track of whether a tools.jar was found	
+			for (int i = 0; i < libs.length; i++) {
+				LibraryLocation lib = libs[i];
+				if (lib.getSystemLibraryPath().toString().endsWith("tools.jar")) { //$NON-NLS-1$
+					tools = true;
+				}
+			}
+			if (!tools) {
+				// add a tools.jar
+				IPath toolsPath = new Path(vm.getInstallLocation().getAbsolutePath()).append("lib").append("tools.jar"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (toolsPath.toFile().exists()) {
+					r = JavaRuntime.newArchiveRuntimeClasspathEntry(toolsPath);
+					r.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 					rtes.add(r);
-					if (lib.getSystemLibraryPath().toString().endsWith("tools.jar")) { //$NON-NLS-1$
-						tools = true;
-					}
 				}
-				if (!tools) {
-					// add a tools.jar
-					IPath toolsPath = new Path(vm.getInstallLocation().getAbsolutePath()).append("lib").append("tools.jar"); //$NON-NLS-1$ //$NON-NLS-2$
-					if (toolsPath.toFile().exists()) {
-						r = JavaRuntime.newArchiveRuntimeClasspathEntry(toolsPath);
-						r.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-						rtes.add(r);
-					}
-				}
-				return (IRuntimeClasspathEntry[])rtes.toArray(new IRuntimeClasspathEntry[rtes.size()]);
-			}				
+			}
+			return (IRuntimeClasspathEntry[])rtes.toArray(new IRuntimeClasspathEntry[rtes.size()]);
 		} else {
 			// recover persisted classpath
 			return recoverRuntimePath(configuration, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH);
