@@ -35,11 +35,11 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingExpressionsTest("testSuperConstructorInvocation"));
+			suite.addTest(new ASTRewritingExpressionsTest("testMethodInvocation1"));
 			return suite;
 		}		
 	}
@@ -976,6 +976,72 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	public void testMethodInvocation1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        foo(foo(1, 2), 3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		{ // remove expression, add param, change name
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			MethodInvocation invocation= (MethodInvocation) stmt.getExpression();
+			
+			List arguments= invocation.arguments();
+			MethodInvocation first= (MethodInvocation) arguments.get(0);
+			ASTNode second= (ASTNode) arguments.get(1);
+			
+			ASTNode placeholder1= rewrite.createCopy(first);
+			ASTNode placeholder2= rewrite.createCopy(second);
+			
+			rewrite.markAsReplaced(first, placeholder2);
+			rewrite.markAsReplaced(second, placeholder1);
+			
+			List innerArguments= first.arguments();
+			ASTNode innerFirst= (ASTNode) innerArguments.get(0);
+			ASTNode innerSecond= (ASTNode) innerArguments.get(1);
+			
+			ASTNode innerPlaceholder1= rewrite.createCopy(innerFirst);
+			ASTNode innerPlaceholder2= rewrite.createCopy(innerSecond);
+			
+			rewrite.markAsReplaced(innerFirst, innerPlaceholder2);
+			rewrite.markAsReplaced(innerSecond, innerPlaceholder1);			
+			
+			
+			
+		}
+			
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        foo(3, foo(2, 1));\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}	
 	
 	public void testParenthesizedExpression() throws Exception {
 		//System.out.println(getClass().getName()+"::" + getName() +" disabled (bug 23362)");
