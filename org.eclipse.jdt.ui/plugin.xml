@@ -1086,6 +1086,17 @@ JavaStructureDiffViewerCreator
       		allowLabelUpdate="true"
 			retarget="true" />
 
+		<!-- =================================================================== -->
+		<!-- Search Menu                                                         -->
+		<!-- =================================================================== -->
+		
+      	<!-- dialog group  -->		
+		<action id="org.eclipse.jdt.ui.actions.OpenJavaSearchPage"
+			menubarPath="org.eclipse.search.menu/dialogGroup"
+			label="%openJavaSearchPageAction.label"
+	        icon="icons/full/obj16/jsearch_obj.gif"
+			class="org.eclipse.jdt.internal.ui.search.OpenJavaSearchPageAction"/>
+
 	</actionSet>			
 </extension>
 
