@@ -17,19 +17,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -41,8 +38,6 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Assert;
-
-import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -296,66 +291,6 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		return getParentScrolledComposite(parent) != null;
 	}
 	
-	/**
-	 * Creates a widget containing text with links. The tokens may be either instances
-	 * of <code>String</code> for normal text, or <code>String[]</code> for links. A <code>String[] link</code>
-	 * defines a link as follows: 
-	 * <ul>
-	 * 	<li><code>link[0]</code> contains the text displayed as hyperlink</li>
-	 * 	<li><code>link[1]</code> contains the preference page id to link to</li>
-	 * 	<li><code>link[2]</code> (optional) contains the tooltip text</li>
-	 * </ul>
-	 * 
-	 * @param parent the parent composite
-	 * @param tokens the tokens to add to the text, either instances of <code>String</code> or <code>String[]</code>
-	 * @return the hyperlink control
-	 */
-	protected Control createLinkText(Composite parent, Object[] tokens) {
-		Composite description= new Composite(parent, SWT.NONE);
-		RowLayout rowLayout= new RowLayout(SWT.HORIZONTAL);
-		rowLayout.justify= false;
-		rowLayout.fill= true;
-		rowLayout.marginBottom= 0;
-		rowLayout.marginHeight= 0;
-		rowLayout.marginLeft= 0;
-		rowLayout.marginRight= 0;
-		rowLayout.marginTop= 0;
-		rowLayout.marginWidth= 0;
-		rowLayout.spacing= 0;
-		rowLayout.pack= true;
-		rowLayout.wrap= true;
-		description.setLayout(rowLayout);
-		
-		for (int i= 0; i < tokens.length; i++) {
-			String text;
-			if (tokens[i] instanceof String[]) {
-				String[] strings= (String[]) tokens[i];
-				text= strings[0];
-				final String target= strings[1];
-				final CHyperLink link= new CHyperLink(description, SWT.NONE);
-				link.setText(text);
-				link.addSelectionListener(new SelectionAdapter() {
-						public void widgetSelected(SelectionEvent e) {
-								PreferencesUtil.createPreferenceDialogOn(link.getShell(), target, null, null);
-						}
-				});
-				if (strings.length > 2)
-					link.setToolTipText(strings[2]);
-				continue;
-			}
-			
-			text= (String) tokens[i];
-			StringTokenizer tokenizer= new StringTokenizer(text);
-			while (tokenizer.hasMoreTokens()) {
-				Label label= new Label(description, SWT.NONE);
-				String token= tokenizer.nextToken();
-				label.setText(token + " "); //$NON-NLS-1$
-			}
-		}
-		
-		return description;
-	}
-
 	protected Button addCheckBox(Composite parent, String label, String key, int indentation) {		
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(label);

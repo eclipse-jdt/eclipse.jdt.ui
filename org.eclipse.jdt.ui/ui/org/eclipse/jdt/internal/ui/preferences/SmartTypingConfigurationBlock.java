@@ -24,12 +24,15 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.ui.dialogs.PreferencesUtil;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.CHyperLinkText.ILinkListener;
 
 /**
  * Configures Java Editor typing preferences.
@@ -217,12 +220,16 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		String linkTooltip= PreferencesMessages.getString("SmartTypingConfigurationBlock.tabs.message.linktooltip"); //$NON-NLS-1$
 		String after= PreferencesMessages.getFormattedString("SmartTypingConfigurationBlock.tabs.message.after", new String[] {Integer.toString(getIndentSize()), getIndentChar()}); //$NON-NLS-1$
 		
-		final Control link= createLinkText(composite, new Object[] { before,
-				new String[] { linkText, "org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage", linkTooltip }, //$NON-NLS-1$
-				after, });
+		final CHyperLinkText link= new CHyperLinkText(composite, SWT.NONE);
+		link.setText(before + " {org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage," + linkText + "," + linkTooltip + "}" + after ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gd.widthHint= 300; // don't get wider initially
 		link.setLayoutData(gd);
+		link.addLinkListener(new ILinkListener() {
+			public void linkSelected(String url) {
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), url, null, null);
+			}
+		});
 		
 		final IPreferenceStore combinedStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		final IPropertyChangeListener propertyChangeListener= new IPropertyChangeListener() {

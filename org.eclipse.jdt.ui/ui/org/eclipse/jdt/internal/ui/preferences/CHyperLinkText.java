@@ -23,6 +23,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.util.SafeRunnable;
 
@@ -123,14 +124,22 @@ public class CHyperLinkText extends Composite {
 			if (token instanceof LinkSpec) {
 				final LinkSpec spec= (LinkSpec) token;
 				Assert.isNotNull(spec.url);
-				CHyperLink link= new CHyperLink(this, SWT.NONE);
-				link.setText(spec.text == null ? spec.url : spec.text);
+				Link link= new Link(this, SWT.NONE);
+				link.setText("<a href=\"" + spec.url + "\">" + (spec.text == null ? spec.url : spec.text) + "</a>");
 				link.setToolTipText(spec.tooltip);
 				link.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
 						fireLinkSelected(spec.url);
 					}
 				});
+//				CHyperLink link= new CHyperLink(this, SWT.NONE);
+//				link.setText(spec.text == null ? spec.url : spec.text);
+//				link.setToolTipText(spec.tooltip);
+//				link.addSelectionListener(new SelectionAdapter() {
+//					public void widgetSelected(SelectionEvent e) {
+//						fireLinkSelected(spec.url);
+//					}
+//				});
 				continue;
 			}
 			
