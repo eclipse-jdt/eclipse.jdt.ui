@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
@@ -63,6 +64,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * The first page of the TestCase creation wizard. 
@@ -263,6 +265,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		//set default and focus
 		fClassToTestText.setText(fDefaultClassToTest);
 		restoreWidgetValues();
+		WorkbenchHelp.setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);	
+
 	}
 
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {

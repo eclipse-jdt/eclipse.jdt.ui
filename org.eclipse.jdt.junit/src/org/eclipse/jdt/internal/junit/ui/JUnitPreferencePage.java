@@ -11,6 +11,7 @@ import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.*;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Preference page for JUnit settings. Supports to define the failure
@@ -98,6 +99,8 @@ public class JUnitPreferencePage extends PreferencePage
 		createShowCheck(composite);
 		createFilterTable(composite);
 		createListButtons(composite);
+		WorkbenchHelp.setHelp(composite, IJUnitHelpContextIds.JUNIT_PREFERENCE_PAGE);
+
 		return composite;
 	}
 

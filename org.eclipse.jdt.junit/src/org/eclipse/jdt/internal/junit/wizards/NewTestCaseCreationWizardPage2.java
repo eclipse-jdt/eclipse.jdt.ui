@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -31,6 +32,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.internal.dialogs.ContainerCheckedTreeViewer;
 
 /**
@@ -76,6 +78,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		createTasksControls(container);
 		setControl(container);
 		restoreWidgetValues();
+		WorkbenchHelp.setHelp(container, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE2);	
 	}
 
 	protected void createTasksControls(Composite container) {

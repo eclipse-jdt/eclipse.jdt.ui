@@ -149,6 +149,8 @@ public class RemoteTestRunner implements TestListener {
 		RemoteTestRunner testRunServer= new RemoteTestRunner();
 		testRunServer.init(args);
 		testRunServer.run();
+		// fix for 14434
+		System.exit(0);
 	}
 	
 	/**
@@ -224,6 +226,7 @@ public class RemoteTestRunner implements TestListener {
 			waitForReruns();
 			
 		shutDown();
+		
 	}
 
 	/**

@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jface.action.Action;
 
@@ -29,6 +30,7 @@ public class RerunAction extends Action {
 	 */
 	public RerunAction(TestRunnerViewPart runner, String className, String testName) {
 		super(JUnitMessages.getString("RerunAction.action.label"));  //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.RERUN_ACTION);
 		fTestRunner= runner;
 		fClassName= className;
 		fTestName= testName;

@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Action to enable/disable stack trace filtering.
@@ -24,6 +25,7 @@ public class EnableStackFilterAction extends Action {
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/cfilter.gif")); //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/cfilter.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.ENABLEFILTER_ACTION);
 
 		fView= view;
 		setChecked(JUnitPreferencePage.getFilterStack());

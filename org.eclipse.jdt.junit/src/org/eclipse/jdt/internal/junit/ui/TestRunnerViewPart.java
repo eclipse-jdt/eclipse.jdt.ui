@@ -50,6 +50,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 
@@ -748,6 +749,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 		JUnitPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
+		WorkbenchHelp.setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
 	}
 
 	private IStatusLineManager getStatusLine() {

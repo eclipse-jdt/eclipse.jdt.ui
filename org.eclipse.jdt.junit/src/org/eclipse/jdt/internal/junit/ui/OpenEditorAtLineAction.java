@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.junit.ui;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -25,6 +26,7 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 	 */
 	public OpenEditorAtLineAction(TestRunnerViewPart testRunner, String className, int line) {
 		super(testRunner, className);
+		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.OPENEDITORATLINE_ACTION);
 		fLineNumber= line;
 	}
 		

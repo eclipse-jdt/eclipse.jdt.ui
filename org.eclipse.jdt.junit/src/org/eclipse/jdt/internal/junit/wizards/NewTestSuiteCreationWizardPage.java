@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
+import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
@@ -51,6 +52,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Wizard page to select the test classes to include
@@ -130,7 +132,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		createClassesInSuiteControl(composite, nColumns);
 		createMethodStubSelectionControls(composite, nColumns);
 		setControl(composite);
-		restoreWidgetValues();			
+		restoreWidgetValues();	
+		WorkbenchHelp.setHelp(composite, IJUnitHelpContextIds.NEW_TESTSUITE_WIZARD_PAGE);			
 	}
 
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {

@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jface.action.Action;
 
@@ -27,6 +28,7 @@ public class CopyTraceAction extends Action {
 	 */
 	public CopyTraceAction(FailureTraceView view) {
 		super(JUnitMessages.getString("CopyTrace.action.label"));  //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.COPYTRACE_ACTION);
 		fView= view;
 	}
 
