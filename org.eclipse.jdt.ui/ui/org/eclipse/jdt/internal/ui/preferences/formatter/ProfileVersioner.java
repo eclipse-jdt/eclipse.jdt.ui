@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
 
@@ -76,10 +77,7 @@ public class ProfileVersioner {
 	 * @param map The map to update
 	 */
 	public static void setLatestCompliance(Map map) {
-		map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
-		map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
-		map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
-		map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		JavaModelUtil.set50CompilanceOptions(map);
 	}
 		
 	private static void version1to2(final Map oldSettings) {

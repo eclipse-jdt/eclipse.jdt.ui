@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -54,6 +56,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -244,5 +247,35 @@ public class ReorgCorrectionsSubProcessor {
 		return null;
 	}
 	
+	private static class ChangeTo50Compilace extends ChangeCorrectionProposal {
+	
+		private final IJavaProject fProject;
+		
+		public ChangeTo50Compilace(String name, IJavaProject project) {
+			super(name, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+			fProject= project;
+		}
+		
+		public void apply(IDocument document) {
+			if (fProject != null) {
+				Map map= fProject.getOptions(false);
+				JavaModelUtil.set50CompilanceOptions(map);
+				fProject.setOptions(map);
+			} else {
+				Hashtable map= JavaCore.getOptions();
+				JavaModelUtil.set50CompilanceOptions(map);
+				JavaCore.setOptions(map);
+			}
+			CoreUtility.startBuildInBackground(fProject.getProject());
+		}
+	}
+
+	public static void getNeed50ComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ICompilationUnit cu= context.getCompilationUnit();
+		String label1= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.50_project_compliance.description"); //$NON-NLS-1$
+		proposals.add(new ChangeTo50Compilace(label1, cu.getJavaProject()));
+		String label2= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.50_workspace_compliance.description"); //$NON-NLS-1$
+		proposals.add(new ChangeTo50Compilace(label2, null));
+	}
 	
 }

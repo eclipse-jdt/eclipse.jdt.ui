@@ -13,16 +13,6 @@ package org.eclipse.jdt.internal.ui.wizards;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -35,7 +25,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 /**
@@ -88,62 +79,18 @@ public class ChangeComplianceDialog extends MessageDialog {
 		if (res == OK) {
 			if (fChangeProject.isSelected()) {
 				Map map= fProject.getOptions(false);
-				set50Compiliance(map);
+				JavaModelUtil.set50CompilanceOptions(map);
 				fProject.setOptions(map);
 			} else {
 				Hashtable map= JavaCore.getOptions();
-				set50Compiliance(map);
+				JavaModelUtil.set50CompilanceOptions(map);
 				JavaCore.setOptions(map);
 			}
-			doFullBuild();
-			
+			CoreUtility.startBuildInBackground(fProject.getProject());
 		}
 		return res;
 	}
-
-	private void set50Compiliance(Map map) {
-		map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
-		map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
-		map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
-		map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-	}
 	
-	private boolean doFullBuild() {
-		
-		Job buildJob = new Job(NewWizardMessages.getString("ChangeComplianceDialog.job.title")){  //$NON-NLS-1$
-			/* (non-Javadoc)
-			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-			 */
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					if (fChangeProject.isSelected()) {
-						monitor.beginTask(NewWizardMessages.getFormattedString("ChangeComplianceDialog.buildproject.taskname", fProject.getElementName()), 2); //$NON-NLS-1$
-						fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
-						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
-					} else {
-						monitor.beginTask(NewWizardMessages.getString("ChangeComplianceDialog.buildall.taskname"), 2); //$NON-NLS-1$
-						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
-					}
-				} catch (CoreException e) {
-					return e.getStatus();
-				} catch (OperationCanceledException e) {
-					return Status.CANCEL_STATUS;
-				}
-				finally {
-					monitor.done();
-				}
-				return Status.OK_STATUS;
-			}
-			public boolean belongsTo(Object family) {
-				return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
-			}
-		};
-		
-		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		buildJob.setUser(true); 
-		buildJob.schedule();
-		return true;
-	}	
 	
 
 }

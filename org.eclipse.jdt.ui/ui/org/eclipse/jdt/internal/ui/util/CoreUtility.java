@@ -10,15 +10,27 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
+import org.osgi.framework.Bundle;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.custom.BusyIndicator;
-import org.osgi.framework.Bundle;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 public class CoreUtility {
@@ -74,4 +86,44 @@ public class CoreUtility {
 		}
 	}	
 
+	
+	/**
+	 * Starts a build in the background.
+	 * @param project The project to build or <code>null</code> to build the workspace.
+	 */
+	public static void startBuildInBackground(final IProject project) {
+		
+		Job buildJob = new Job(JavaUIMessages.getString("CoreUtility.job.title")){  //$NON-NLS-1$
+			/* (non-Javadoc)
+			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+			 */
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					if (project != null) {
+						monitor.beginTask(JavaUIMessages.getFormattedString("CoreUtility.buildproject.taskname", project.getName()), 2); //$NON-NLS-1$
+						project.build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
+						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
+					} else {
+						monitor.beginTask(JavaUIMessages.getString("CoreUtility.buildall.taskname"), 2); //$NON-NLS-1$
+						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
+					}
+				} catch (CoreException e) {
+					return e.getStatus();
+				} catch (OperationCanceledException e) {
+					return Status.CANCEL_STATUS;
+				}
+				finally {
+					monitor.done();
+				}
+				return Status.OK_STATUS;
+			}
+			public boolean belongsTo(Object family) {
+				return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
+			}
+		};
+		
+		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		buildJob.setUser(true); 
+		buildJob.schedule();
+	}
 }

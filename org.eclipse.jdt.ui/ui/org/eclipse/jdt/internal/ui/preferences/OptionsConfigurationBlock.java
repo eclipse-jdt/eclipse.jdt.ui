@@ -18,16 +18,7 @@ import java.util.StringTokenizer;
 import org.osgi.service.prefs.BackingStoreException;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -67,6 +58,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
@@ -615,39 +607,7 @@ public abstract class OptionsConfigurationBlock {
 	protected abstract String[] getFullBuildDialogStrings(boolean workspaceSettings);
 		
 	protected boolean doFullBuild() {
-		
-		Job buildJob = new Job(PreferencesMessages.getString("OptionsConfigurationBlock.job.title")){  //$NON-NLS-1$
-			/* (non-Javadoc)
-			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-			 */
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					if (fProject != null) {
-						monitor.beginTask(PreferencesMessages.getFormattedString("OptionsConfigurationBlock.buildproject.taskname", fProject.getName()), 2); //$NON-NLS-1$
-						fProject.build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
-						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
-					} else {
-						monitor.beginTask(PreferencesMessages.getString("OptionsConfigurationBlock.buildall.taskname"), 2); //$NON-NLS-1$
-						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
-					}
-				} catch (CoreException e) {
-					return e.getStatus();
-				} catch (OperationCanceledException e) {
-					return Status.CANCEL_STATUS;
-				}
-				finally {
-					monitor.done();
-				}
-				return Status.OK_STATUS;
-			}
-			public boolean belongsTo(Object family) {
-				return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
-			}
-		};
-		
-		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		buildJob.setUser(true); 
-		buildJob.schedule();
+		CoreUtility.startBuildInBackground(fProject);
 		return true;
 	}		
 	

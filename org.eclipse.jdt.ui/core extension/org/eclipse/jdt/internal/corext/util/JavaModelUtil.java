@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.util;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -870,4 +871,16 @@ public final class JavaModelUtil {
 		}
 	}
 
+	
+	/**
+	 * Sets all compliance settings in the given map to 5.0
+	 */
+	public static void set50CompilanceOptions(Map map) {
+		map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+		map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
+	}
+	
 }

@@ -153,6 +153,14 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.RedefinedLocal:
 			case IProblem.RedefinedArgument:
 			case IProblem.CodeCannotBeReached:
+			case IProblem.InvalidUsageOfTypeParameters:
+			case IProblem.InvalidUsageOfStaticImports:
+			case IProblem.InvalidUsageOfForeachStatements:
+			case IProblem.InvalidUsageOfTypeArguments:
+			case IProblem.InvalidUsageOfEnumDeclarations:
+			case IProblem.InvalidUsageOfVarargs:
+			case IProblem.InvalidUsageOfAnnotations:
+			case IProblem.InvalidUsageOfAnnotationDeclarations:
 				return true;
 			default:
 				return false;
@@ -210,7 +218,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.CannotImportPackage:
 			case IProblem.ConflictingImport:
 				ReorgCorrectionsSubProcessor.removeImportStatementProposals(context, problem, proposals);
-			break;
+				break;
 			case IProblem.ImportNotFound:
 				ReorgCorrectionsSubProcessor.importNotFoundProposals(context, problem, proposals);
 				ReorgCorrectionsSubProcessor.removeImportStatementProposals(context, problem, proposals);
@@ -422,6 +430,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.MissingSerialVersion:
 			    SerialVersionSubProcessor.getSerialVersionProposals(context, problem, proposals);
+				break;
 			case IProblem.UnnecessaryElse:
 				LocalCorrectionsSubProcessor.getUnnecessaryElseProposals(context, problem, proposals);
 				break;
@@ -430,6 +439,16 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.CodeCannotBeReached:
 				LocalCorrectionsSubProcessor.getUnreachableCodeProposals(context, problem, proposals);
+				break;
+			case IProblem.InvalidUsageOfTypeParameters:
+			case IProblem.InvalidUsageOfStaticImports:
+			case IProblem.InvalidUsageOfForeachStatements:
+			case IProblem.InvalidUsageOfTypeArguments:
+			case IProblem.InvalidUsageOfEnumDeclarations:
+			case IProblem.InvalidUsageOfVarargs:
+			case IProblem.InvalidUsageOfAnnotations:
+			case IProblem.InvalidUsageOfAnnotationDeclarations:
+				ReorgCorrectionsSubProcessor.getNeed50ComplianceProposals(context, problem, proposals);
 				break;
 			default:
 		}
