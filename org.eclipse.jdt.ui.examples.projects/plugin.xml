@@ -22,15 +22,15 @@
 	point="org.eclipse.ui.newWizards">
 	<wizard 
 		id="org.eclipse.jdt.examples.projects.JUnitProjectExampleCreationWizard"
-		name="Example Project - JUnit"
+		name="%JUnitProjectExampleCreationWizard.title"
 		class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		project="true"
 		finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
 		icon="icons/full/ctool16/newjprjex_wiz.gif">
-		<description>Create a new JUnit project</description>
-		<pagetitle>JUnit</pagetitle>
-		<pagedescription>Create a Java project containing the JUnit source</pagedescription>
+		<description>%JUnitProjectExampleCreationWizard.description</description>
+		<pagetitle>%JUnitProjectExampleCreationWizard.pagetitle</pagetitle>
+		<pagedescription>%JUnitProjectExampleCreationWizard.pagedescription</pagedescription>
 		<projectsetup output="" jre="true">
     		<src path="" import="archive/junit/junit37src.jar"/>
     	</projectsetup>

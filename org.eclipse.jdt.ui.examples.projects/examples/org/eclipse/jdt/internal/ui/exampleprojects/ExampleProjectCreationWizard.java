@@ -4,15 +4,32 @@
  */
 package org.eclipse.jdt.internal.ui.exampleprojects;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IConfigurationElement;import org.eclipse.core.runtime.IExecutableExtension;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.ui.INewWizard;import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
+import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
+import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
+
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
 
 public class ExampleProjectCreationWizard extends BasicNewResourceWizard implements INewWizard, IExecutableExtension {
-
-	private static final String WIZARD_NAME= "ExampleProjectCreationWizard";
-	private static final String WIZARD_TITLE= WIZARD_NAME + ".title";
-	private static final String ERROR_TITLE= WIZARD_NAME + ".op_error.title";
-	private static final String ERROR_MESSAGE= WIZARD_NAME + ".op_error.message";
-
+
 	private WizardNewProjectCreationPage fMainPage;
 	private IConfigurationElement fConfigElement;
 	
@@ -21,7 +38,7 @@ public class ExampleProjectCreationWizard extends BasicNewResourceWizard impleme
 	public ExampleProjectCreationWizard() {
 		super();
 		setDialogSettings(ExampleProjectsPlugin.getDefault().getDialogSettings());
-		setWindowTitle(ExampleProjectsPlugin.getResourceString(WIZARD_TITLE));		
+		setWindowTitle(ExampleProjectMessages.getString("ExampleProjectCreationWizard.title"));		 //$NON-NLS-1$
 		setNeedsProgressMonitor(true);
 	}
 	
@@ -29,7 +46,7 @@ public class ExampleProjectCreationWizard extends BasicNewResourceWizard impleme
 	 * @see BasicNewResourceWizard#initializeDefaultPageImageDescriptor
 	 */
 	protected void initializeDefaultPageImageDescriptor() {
-		ImageDescriptor desc= ExampleProjectsPlugin.getDefault().getImageDescriptor("wizban/newjprjex_wiz.gif");
+		ImageDescriptor desc= ExampleProjectsPlugin.getDefault().getImageDescriptor("wizban/newjprjex_wiz.gif"); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(desc);
 	}
 
@@ -38,9 +55,9 @@ public class ExampleProjectCreationWizard extends BasicNewResourceWizard impleme
 	 */	
 	public void addPages() {
 		super.addPages();
-		fMainPage= new WizardNewProjectCreationPage("id");
-		fMainPage.setTitle(getConfigurationText("pagetitle"));
-		fMainPage.setDescription(getConfigurationText("pagedescription"));
+		fMainPage= new WizardNewProjectCreationPage("id"); //$NON-NLS-1$
+		fMainPage.setTitle(getConfigurationText("pagetitle")); //$NON-NLS-1$
+		fMainPage.setDescription(getConfigurationText("pagedescription")); //$NON-NLS-1$
 
 		addPage(fMainPage);
 		
@@ -56,7 +73,7 @@ public class ExampleProjectCreationWizard extends BasicNewResourceWizard impleme
 				return children[0].getValue();
 			}
 		}
-		return "!" + tag + "!";
+		return '!' + tag + '!';
 	}
 	
 	/**
@@ -82,8 +99,8 @@ public class ExampleProjectCreationWizard extends BasicNewResourceWizard impleme
 	}
 	
 	private void handleException(Throwable target) {
-		String title= ExampleProjectsPlugin.getResourceString(ERROR_TITLE);
-		String message= ExampleProjectsPlugin.getResourceString(ERROR_MESSAGE);
+		String title= ExampleProjectMessages.getString("ExampleProjectCreationWizard.op_error.title"); //$NON-NLS-1$
+		String message= ExampleProjectMessages.getString("ExampleProjectCreationWizard.op_error.message"); //$NON-NLS-1$
 		if (target instanceof CoreException) {
 			IStatus status= ((CoreException)target).getStatus();
 			ErrorDialog.openError(getShell(), title, message, status);
