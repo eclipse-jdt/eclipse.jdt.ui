@@ -244,7 +244,7 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 	private final IPreferenceStore fPreferences;
 
 	/** The problem requestor */
-	private final IProblemRequestor fRequestor;
+	private IProblemRequestor fRequestor;
 
 	/**
 	 * Creates a new comment reconcile strategy.
@@ -261,8 +261,7 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 		fPartitioning= partitioning;
 		fPreferences= store;
 
-		final IAnnotationModel model= editor.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
-		fRequestor= (model instanceof IProblemRequestor) ? (IProblemRequestor) model : null;
+		updateProblemRequestor();
 	}
 
 	/**
@@ -364,6 +363,8 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 	 */
 	public final void setDocument(final IDocument document) {
 		fDocument= document;
+		
+		updateProblemRequestor();
 	}
 
 	/*
@@ -371,5 +372,15 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 	 */
 	public final void setProgressMonitor(final IProgressMonitor monitor) {
 		// Do nothing
+	}
+
+	/**
+	 * Update the problem requestor based on the current editor
+	 * 
+	 * @since 3.0
+	 */
+	private void updateProblemRequestor() {
+		final IAnnotationModel model= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
+		fRequestor= (model instanceof IProblemRequestor) ? (IProblemRequestor) model : null;
 	}
 }
