@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 public class TypeHierarchyTransferDropAdapter extends SelectionTransferDropAdapter {
 
+	private static final int OPERATION = DND.DROP_LINK;
 	private TypeHierarchyViewPart fTypeHierarchyViewPart;
 
 	public TypeHierarchyTransferDropAdapter(TypeHierarchyViewPart viewPart, AbstractTreeViewer viewer) {
@@ -40,11 +41,11 @@ public class TypeHierarchyTransferDropAdapter extends SelectionTransferDropAdapt
 			return;
 		}	
 		if (getInputElement(getSelection()) != null) 
-			event.detail= DND.DROP_COPY;
+			event.detail= TypeHierarchyTransferDropAdapter.OPERATION;
 	}
 
 	public void drop(Object target, DropTargetEvent event) {
-		if (target != null || event.detail != DND.DROP_COPY){
+		if (target != null || event.detail != TypeHierarchyTransferDropAdapter.OPERATION){
 			super.drop(target, event);
 			return;
 		}	
