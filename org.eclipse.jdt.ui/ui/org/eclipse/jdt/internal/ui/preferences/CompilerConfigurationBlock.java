@@ -75,8 +75,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_INDIRECT_STATIC_ACCESS= JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS;
 	private static final String PREF_PB_SUPERFLUOUS_SEMICOLON= JavaCore.COMPILER_PB_SUPERFLUOUS_SEMICOLON;
 	private static final String PREF_PB_UNNECESSARY_TYPE_CHECK= JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK;
-	private static final String PREF_PB_INVALID_ANNOTATION= JavaCore.COMPILER_PB_INVALID_ANNOTATION;
-	private static final String PREF_PB_MISSING_ANNOTATION= JavaCore.COMPILER_PB_MISSING_ANNOTATION;
+	private static final String PREF_PB_INVALID_ANNOTATION= JavaCore.COMPILER_PB_INVALID_JAVADOC;
+	private static final String PREF_PB_MISSING_ANNOTATION= JavaCore.COMPILER_PB_MISSING_JAVADOC;
 	
 	private static final String PREF_SOURCE_COMPATIBILITY= JavaCore.COMPILER_SOURCE;
 	private static final String PREF_COMPLIANCE= JavaCore.COMPILER_COMPLIANCE;

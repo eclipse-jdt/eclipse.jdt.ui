@@ -63,8 +63,8 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		Hashtable options= JavaCore.getDefaultOptions();
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
-		options.put(JavaCore.COMPILER_PB_INVALID_ANNOTATION, JavaCore.ERROR);
-		options.put("org.eclipse.jdt.core.compiler.problem.missingAnnotation", JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_PB_INVALID_JAVADOC, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC, JavaCore.ENABLED);
 		JavaCore.setOptions(options);			
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
