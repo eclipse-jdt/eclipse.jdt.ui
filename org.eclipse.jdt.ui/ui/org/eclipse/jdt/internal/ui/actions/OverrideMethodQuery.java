@@ -81,8 +81,8 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 
 	private static class OverrideMethodContentProvider implements ITreeContentProvider {
 
-		private final String SETTINGS_SECTION= "OverrideMethodDialog";
-		private final String SETTINGS_SHOWTYPES= "showtypes";
+		private final String SETTINGS_SECTION= "OverrideMethodDialog"; //$NON-NLS-1$
+		private final String SETTINGS_SHOWTYPES= "showtypes"; //$NON-NLS-1$
 
 		private Object[] fTypes;
 		private IMethod[] fMethods;
