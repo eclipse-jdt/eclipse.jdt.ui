@@ -12,30 +12,16 @@ import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.widgets.*;
  
 /**
- * Standard tree content provider for Java elements.
- * Use this class when you want to present the Java elements in a viewer.
- * <p>
- * The following Java element hierarchy is surfaced by this content provider:
- * <p>
- * <pre>
-Java model (<code>IJavaModel</code>)
-   Java project (<code>IJavaProject</code>)
-      package fragment root (<code>IPackageFragmentRoot</code>)
-         package fragment (<code>IPackageFragment</code>)
-            compilation unit (<code>ICompilationUnit</code>)
-            binary class file (<code>IClassFile</code>)
- * </pre>
- * </p> 			
- * <p>
- * Note that when the entire Java project is declared to be package fragment root,
- * the corresponding package fragment root element that normally appears between the
- * Java project and the package fragments is automatically filtered out.
- * </p>
+ * A tree content provider for Java elements. It extends the 
+ * StandardJavaElementContentProvider with support for listening to changes.
+ * It is recommended to implement a custom listening support
+ * and to derive from the StandardJavaElementContentProvider directly.
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
+ * @see StandardJavaElementContentProvider
  */
-public class JavaElementContentProvider extends BaseJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
+public class JavaElementContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
 	protected TreeViewer fViewer;
 	protected Object fInput;

@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
@@ -61,7 +62,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
@@ -473,7 +473,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 					JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()),
 					treeContentProvider,
 					new JavaElementLabelProvider(labelFlags),
-					new BaseJavaElementContentProvider(),
+					new StandardJavaElementContentProvider(),
 					new JavaElementLabelProvider(labelFlags),
 					SWT.NONE,
 					SIZING_SELECTION_WIDGET_WIDTH,

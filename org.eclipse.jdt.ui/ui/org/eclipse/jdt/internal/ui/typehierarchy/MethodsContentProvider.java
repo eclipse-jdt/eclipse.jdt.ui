@@ -19,13 +19,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.viewsupport.IReconciled;
+import org.eclipse.jdt.ui.IWorkingCopyProvider;
 
 /**
  * Content provider used for the method view.
  * Allows also seeing methods inherited from base classes.
  */
-public class MethodsContentProvider implements IStructuredContentProvider, IReconciled {
+public class MethodsContentProvider implements IStructuredContentProvider, IWorkingCopyProvider {
 	
 	private static final Object[] NO_ELEMENTS = new Object[0];
 		
@@ -56,7 +56,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IReco
 	/* (non-Javadoc)
 	 * @see IReconciled#isReconciled()
 	 */
-	public boolean isReconciled() {
+	public boolean providesWorkingCopies() {
 		return fIsReconciled;
 	}	
 	
@@ -131,7 +131,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IReco
 	 * is a corresponding working copy.
 	 */
 	private IType getSuitableType(IType type) throws JavaModelException {
-		if (isReconciled() && type.getCompilationUnit() != null) {
+		if (providesWorkingCopies() && type.getCompilationUnit() != null) {
 			IType typeInWc= (IType)EditorUtility.getWorkingCopy(type);
 			if (typeInWc != null)
 				return typeInWc;

@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IWorkingCopy;
 
+import org.eclipse.jdt.ui.*;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 
@@ -189,6 +190,6 @@ public class ProblemTableViewer extends TableViewer {
 	 */
 	private boolean isShowingWorkingCopies() {
 		Object contentProvider= getContentProvider();
-		return contentProvider instanceof IReconciled && ((IReconciled)contentProvider).isReconciled();
+		return contentProvider instanceof IWorkingCopyProvider && ((IWorkingCopyProvider)contentProvider).providesWorkingCopies();
 	}
 }

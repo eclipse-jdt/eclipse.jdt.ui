@@ -43,10 +43,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 
-class JavaBrowsingContentProvider extends BaseJavaElementContentProvider implements IElementChangedListener {
+class JavaBrowsingContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
 	
 	private StructuredViewer fViewer;
 	private Object fInput;

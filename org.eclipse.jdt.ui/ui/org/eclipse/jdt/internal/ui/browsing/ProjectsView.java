@@ -19,12 +19,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 public class ProjectsView extends JavaBrowsingPart {
@@ -41,7 +41,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/**
 	 * Creates the the content provider of this part.
 	 */
-	protected BaseJavaElementContentProvider createContentProvider() {
+	protected StandardJavaElementContentProvider createContentProvider() {
 		return new ProjectAndSourceFolderContentProvider(this);
 	}
 
