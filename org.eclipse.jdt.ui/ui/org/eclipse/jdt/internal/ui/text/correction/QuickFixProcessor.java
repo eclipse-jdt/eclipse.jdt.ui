@@ -146,6 +146,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NoMessageSendOnArrayType:
 			case IProblem.InvalidOperator:
 			case IProblem.MissingSerialVersion:
+			case IProblem.UnnecessaryElse:
 				return true;
 			default:
 				return false;
