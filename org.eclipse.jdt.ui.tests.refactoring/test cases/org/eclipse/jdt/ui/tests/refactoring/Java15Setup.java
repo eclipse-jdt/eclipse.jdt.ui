@@ -10,14 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import java.util.Hashtable;
-
 import junit.framework.Test;
 
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
+/**
+ * TODO: replace by RefactoringTestSetup
+ */
 public class Java15Setup extends RefactoringTestSetup {
 
 	public Java15Setup(Test test) {
@@ -26,9 +23,5 @@ public class Java15Setup extends RefactoringTestSetup {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-
-		Hashtable options= JavaCore.getOptions();
-		JavaProjectHelper.set15CompilerOptions(options);
-		JavaCore.setOptions(options);
 	}
 }

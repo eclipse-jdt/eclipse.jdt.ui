@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -314,10 +315,16 @@ public class RenamePackageTests extends RefactoringTest {
 			projectPrg= JavaProjectHelper.createJavaProject("RenamePack1", "bin");
 			assertNotNull(JavaProjectHelper.addRTJar(projectPrg));
 			IPackageFragmentRoot srcPrg= JavaProjectHelper.addSourceContainer(projectPrg, "srcPrg");
+			Map optionsPrg= projectPrg.getOptions(false);
+			JavaProjectHelper.set15CompilerOptions(optionsPrg);
+			projectPrg.setOptions(optionsPrg);
 
 			projectTest= JavaProjectHelper.createJavaProject("RenamePack2", "bin");
 			assertNotNull(JavaProjectHelper.addRTJar(projectTest));
 			IPackageFragmentRoot srcTest= JavaProjectHelper.addSourceContainer(projectTest, "srcTest");
+			Map optionsTest= projectTest.getOptions(false);
+			JavaProjectHelper.set15CompilerOptions(optionsTest);
+			projectTest.setOptions(optionsTest);
 
 			JavaProjectHelper.addRequiredProject(projectTest, projectPrg);
 

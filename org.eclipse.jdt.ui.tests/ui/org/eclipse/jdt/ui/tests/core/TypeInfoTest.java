@@ -120,10 +120,14 @@ public class TypeInfoTest extends TestCase {
 			null); 
 		findTypeRef(result, "com.oti.V");
 		findTypeRef(result, "com.oti.V.VInner");
+		
 		findTypeRef(result, "java.lang.VerifyError");
+		findTypeRef(result, "java.lang.VirtualMachineError");
 		findTypeRef(result, "java.lang.Void");
 		findTypeRef(result, "java.util.Vector");
+		
 		findTypeRef(result, "junit.samples.VectorTest");
+		findTypeRef(result, "junit.runner.Version");
 
 		
 		for (int i= 0; i < result.size(); i++) {
@@ -134,7 +138,7 @@ public class TypeInfoTest extends TestCase {
 				assertTrue("Could not be resolved: " + ref.toString(), false);
 			}
 		}
-		assertTrue("Should find 9 elements, is " + result.size(), result.size() == 9);
+		assertTrue("Should find 8 elements, is " + result.size(), result.size() == 8);
 
 
 	}
@@ -179,7 +183,7 @@ public class TypeInfoTest extends TestCase {
 		findTypeRef(result, "junit.framework.TestListener");
 		findTypeRef(result, "junit.tests.TestCaseTest.TornDown");
 
-		assertTrue("Should find 37 elements, is " + result.size(), result.size() == 37);
+		assertTrue("Should find 49 elements, is " + result.size(), result.size() == 49);
 		//System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
@@ -267,7 +271,7 @@ public class TypeInfoTest extends TestCase {
 				JarFileEntryTypeInfo jarInfo= (JarFileEntryTypeInfo)info;
 				if (info.getTypeName().equals("Object")) {
 					assertEquals(info.getPackageName(), "java.lang");
-					assertTrue(jarInfo.getJar().endsWith("rtstubs.jar"));
+					assertTrue(jarInfo.getJar().endsWith("rtstubs15.jar"));
 					assertEquals(jarInfo.getFileName(), "Object");
 					assertEquals(jarInfo.getExtension(), "class");
 				}

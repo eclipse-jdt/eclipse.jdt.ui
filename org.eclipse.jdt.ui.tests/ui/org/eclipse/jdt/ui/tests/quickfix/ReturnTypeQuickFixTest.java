@@ -63,6 +63,9 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		}
 	}
 
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getFormatterOptions();
@@ -533,11 +536,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	public void testConstructorReturnsValue() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Arrays;\n");		
+		buf.append("package test1;\n");	
 		buf.append("public class E {\n");
 		buf.append("    public E() {\n");
-		buf.append("        return Arrays.asList(null);\n");		
+		buf.append("        return System.getProperties();\n");		
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -553,11 +555,12 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
-			buf.append("import java.util.Arrays;\n");
-			buf.append("import java.util.List;\n");					
+			buf.append("\n");
+			buf.append("import java.util.Properties;\n");					
+			buf.append("\n");
 			buf.append("public class E {\n");
-			buf.append("    public List E() {\n");
-			buf.append("        return Arrays.asList(null);\n");		
+			buf.append("    public Properties E() {\n");
+			buf.append("        return System.getProperties();\n");		
 			buf.append("    }\n");
 			buf.append("}\n");
 			assertEqualString(preview, buf.toString());
@@ -567,8 +570,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 			String preview= getPreviewContent(proposal);
 	
 			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.util.Arrays;\n");		
+			buf.append("package test1;\n");	
 			buf.append("public class E {\n");
 			buf.append("    public E() {\n");
 			buf.append("    }\n");

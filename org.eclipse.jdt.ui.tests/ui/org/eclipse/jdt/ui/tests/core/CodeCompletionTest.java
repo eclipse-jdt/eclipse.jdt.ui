@@ -64,7 +64,10 @@ public class CodeCompletionTest extends CoreTests {
 			return new ProjectTestSetup(suite);
 		}	
 	}
-
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");

@@ -30,7 +30,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
-
+/**
+ * Sets up an 1.5 project with rtstubs15.jar and compiler, code formatting, code generation, and template options.
+ */
 public class ProjectTestSetup extends TestSetup {
 
 	public static final String PROJECT_NAME= "TestSetupProject";
@@ -62,7 +64,7 @@ public class ProjectTestSetup extends TestSetup {
 		super.setUp();
 		
 		IJavaProject project= getProject();
-		if (project.exists()) { // allow nesting of ProjectTestSetup's
+		if (project.exists()) { // allow nesting of ProjectTestSetups
 			return;
 		}
 		

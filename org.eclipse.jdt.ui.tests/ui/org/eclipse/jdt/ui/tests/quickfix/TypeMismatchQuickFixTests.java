@@ -50,19 +50,16 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	}
 	
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
 	}
 	
 	public static Test suite() {
-		if (false) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new TypeMismatchQuickFixTests("testMismatchingExceptions2"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
 	}
-
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getFormatterOptions();
@@ -617,7 +614,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2); // 2nd is type safety warning for toArray
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 

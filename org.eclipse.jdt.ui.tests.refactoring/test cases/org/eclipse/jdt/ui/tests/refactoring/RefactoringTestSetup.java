@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.Map;
+
 import junit.framework.Test;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -22,6 +24,9 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
 
+/**
+ * Sets up an 1.5 project with rtstubs15.jar and compiler, code formatting, code generation, and template options.
+ */
 public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 	
 	public RefactoringTestSetup(Test test) {
@@ -53,13 +58,26 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		JavaProjectHelper.setAutoBuilding(false);
 		if (JavaPlugin.getActivePage() != null)
-			JavaPlugin.getActivePage().close();
+			JavaPlugin.getActivePage().close(); // Closed perspective is NOT restored in tearDown()!
+		
+		if (fgJavaTestProject != null && fgJavaTestProject.exists()) {
+			int breakpointTarget= 0; breakpointTarget++;
+		}
 		fgJavaTestProject= JavaProjectHelper.createJavaProject("TestProject"+System.currentTimeMillis(), "bin");
 		JavaProjectHelper.addRTJar(fgJavaTestProject);
 		fgRoot= JavaProjectHelper.addSourceContainer(fgJavaTestProject, CONTAINER);
 		fgPackageP= fgRoot.createPackageFragment("p", true, null);
+		
+		//set compiler options on project
+		Map options= fgJavaTestProject.getOptions(false);
+		JavaProjectHelper.set15CompilerOptions(options);
+		fgJavaTestProject.setOptions(options);
+		
+		// Global options: configured globally in super.setUp():
+		//JavaCore.setOptions(TestOptions.getFormatterOptions());
+		//TestOptions.initializeCodeGenerationOptions();
+		//JavaPlugin.getDefault().getCodeTemplateStore().load();
 	}
 	
 	protected void tearDown() throws Exception {
@@ -67,6 +85,10 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 			fgPackageP.delete(true, null);
 		JavaProjectHelper.removeSourceContainer(fgJavaTestProject, CONTAINER);
 		JavaProjectHelper.delete(fgJavaTestProject);
+//TODO: enable
+//		fgPackageP= null;
+//		fgRoot= null;
+//		fgJavaTestProject= null;
 		super.tearDown();
 	}
 	

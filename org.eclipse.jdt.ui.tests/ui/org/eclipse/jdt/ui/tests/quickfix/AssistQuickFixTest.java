@@ -67,6 +67,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		}
 	}
 
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getFormatterOptions();
@@ -122,7 +125,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    private Class class1;\n");
+		buf.append("    private Class< ? extends E> class1;\n");
 		buf.append("\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        class1 = getClass();\n");
@@ -137,7 +140,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        Class class1 = getClass();\n");
+		buf.append("        Class< ? extends E> class1 = getClass();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -417,7 +420,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    private static Class class1;\n");
+		buf.append("    private static Class< ? extends E> class1;\n");
 		buf.append("\n");
 		buf.append("    static {\n");
 		buf.append("        class1 = getClass(); // comment\n");
@@ -432,7 +435,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    static {\n");
-		buf.append("        Class class1 = getClass(); // comment\n");
+		buf.append("        Class< ? extends E> class1 = getClass(); // comment\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();

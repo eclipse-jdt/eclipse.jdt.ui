@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.testplugin.StringAsserts;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -145,14 +147,12 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	public void testLocalSuperTypesOfArrayList() throws Exception {
 		System.out.println("running testLocalSuperTypesOfArrayList()");
 		Collection types= helper1(5, 19, 5, 23, "java.util.List").getValidTypeNames();
-		Assert.assertTrue(types.size() == 7);
-		Assert.assertTrue(types.contains("java.lang.Object"));
-		Assert.assertTrue(types.contains("java.util.AbstractList"));
-		Assert.assertTrue(types.contains("java.util.AbstractCollection"));
-		Assert.assertTrue(types.contains("java.util.List"));
-		Assert.assertTrue(types.contains("java.util.Collection"));
-		Assert.assertTrue(types.contains("java.io.Serializable"));
-		Assert.assertTrue(types.contains("java.lang.Cloneable"));		
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object", "java.lang.Cloneable", "java.lang.Iterable", 
+				"java.io.Serializable", "java.util.Collection", "java.util.List",
+				"java.util.AbstractList", "java.util.AbstractCollection", "java.util.RandomAccess" };
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
 	public void testParameterName() throws Exception {
 		System.out.println("running testParameterName()");
@@ -254,22 +254,20 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	public void testLocalVarCast() throws Exception {
 		System.out.println("running testLocalVarCast()");
 		Collection types= helper1(7, 24, 7, 24, "java.util.List").getValidTypeNames();
-		Assert.assertTrue(types.size() == 7);
-		Assert.assertTrue(types.contains("java.io.Serializable"));
-		Assert.assertTrue(types.contains("java.util.Collection"));		
-		Assert.assertTrue(types.contains("java.util.List"));
-		Assert.assertTrue(types.contains("java.util.AbstractList"));		
-		Assert.assertTrue(types.contains("java.lang.Object"));
-		Assert.assertTrue(types.contains("java.lang.Cloneable"));
-		Assert.assertTrue(types.contains("java.util.AbstractCollection"));		
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object", "java.lang.Cloneable", "java.lang.Iterable", 
+				"java.io.Serializable", "java.util.Collection", "java.util.List",
+				"java.util.AbstractList", "java.util.AbstractCollection", "java.util.RandomAccess" };
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
 	public void testReturnType() throws Exception {
 		System.out.println("running testReturnType()");
 		createAdditionalCU("A_testReturnType2", getPackageP());
 		Collection types= helper1(6, 12, 6, 15, "java.util.Collection").getValidTypeNames();
-		Assert.assertTrue(types.size() == 2);
-		Assert.assertTrue(types.contains("java.util.Collection"));
-		Assert.assertTrue(types.contains("java.lang.Object"));
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= { "java.lang.Object", "java.lang.Iterable", "java.util.Collection" };
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}	
 	public void testFieldWithAccess() throws Exception {
 		System.out.println("running testFieldWithAccess()");
@@ -305,11 +303,11 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	public void testString() throws Exception {
 		System.out.println("running testString()");
 		Collection types= helper1(4, 9, 4, 14, "java.lang.Object").getValidTypeNames();
-		Assert.assertTrue(types.size() == 3);
-		Assert.assertTrue(types.contains("java.lang.Object"));
-//		Assert.assertTrue(types.contains("java.lang.CharSequence")); // not in rtstubs.jar
-		Assert.assertTrue(types.contains("java.lang.Comparable"));
-		Assert.assertTrue(types.contains("java.io.Serializable"));	
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object", "java.lang.CharSequence", "java.lang.Comparable", "java.io.Serializable"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
 	public void testInterfaceTypes() throws Exception {
 		System.out.println("running testInterfaceTypes()");
@@ -322,14 +320,12 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	public void testImport() throws Exception {
 		System.out.println("running testImport()");
 		Collection types= helper1(11, 9, 11, 17, "java.util.List").getValidTypeNames();
-		Assert.assertTrue(types.size() == 7);
-		Assert.assertTrue(types.contains("java.io.Serializable"));
-		Assert.assertTrue(types.contains("java.lang.Cloneable"));
-		Assert.assertTrue(types.contains("java.lang.Object"));
-		Assert.assertTrue(types.contains("java.util.List"));
-		Assert.assertTrue(types.contains("java.util.AbstractList"));
-		Assert.assertTrue(types.contains("java.util.Collection"));
-		Assert.assertTrue(types.contains("java.util.AbstractCollection"));
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object", "java.lang.Cloneable", "java.lang.Iterable", 
+				"java.io.Serializable", "java.util.Collection", "java.util.List",
+				"java.util.AbstractList", "java.util.AbstractCollection", "java.util.RandomAccess" };
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
 	
 	

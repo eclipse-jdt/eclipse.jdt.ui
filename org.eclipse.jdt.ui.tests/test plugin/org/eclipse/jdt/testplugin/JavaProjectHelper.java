@@ -60,8 +60,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  */
 public class JavaProjectHelper {
 	
-	public static final IPath RT_STUBS= new Path("testresources/rtstubs.jar");
-	public static final IPath RT15_STUBS= new Path("testresources/rtstubs.jar"); // TODO: create rt15 stubs
+	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
 	
 	public static final IPath MYLIB= new Path("testresources/mylib.jar");
@@ -394,7 +393,7 @@ public class JavaProjectHelper {
 	 */	
 	public static IPackageFragmentRoot addRTJar(IJavaProject jproject) throws CoreException {
 
-		IPath[] rtJarPath= findRtJar();
+		IPath[] rtJarPath= find15RtJar();
 		if (rtJarPath != null) {
 			return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 		}
@@ -424,7 +423,7 @@ public class JavaProjectHelper {
 	 * @return Returns <code>null</code>, if no JRE installation was found.
 	 */	
 	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
-		IPath[] rtJarPaths= findRtJar();
+		IPath[] rtJarPaths= find15RtJar();
 		if (rtJarPaths != null) {
 			IPath libVarPath= new Path(libVarName);
 			IPath srcVarPath= null;
@@ -495,25 +494,10 @@ public class JavaProjectHelper {
 	}
 	
 	/**
-	 * Try to find rt.jar
-	 */
-	public static IPath[] findRtJar() {
-		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(RT_STUBS);
-		if (rtStubs != null && rtStubs.exists()) {
-			return new IPath[] {
-				new Path(rtStubs.getPath()),
-				null,
-				null
-			};
-		}
-		return null;
-	}
-	
-	/**
 	 * Try to find a 1.5 rt.jar
 	 */
 	public static IPath[] find15RtJar() {
-		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(RT15_STUBS);
+		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(RT_STUBS_15);
 		if (rtStubs != null && rtStubs.exists()) {
 			return new IPath[] {
 				new Path(rtStubs.getPath()),

@@ -65,9 +65,13 @@ public class AllTypesCacheTest extends TestCase {
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -112,55 +116,55 @@ public class AllTypesCacheTest extends TestCase {
 		ArrayList res1= new ArrayList();
 		
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
-		assertTrue("542 types in workspace expected, is " + res1.size(), res1.size() == 542);
+		assertExpectedCount(870, " types in workspace expected, is ", res1.size());
 		
 		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
 		
 		res1.clear();		
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.INTERFACE, null, res1);
-		assertTrue("73 interfaces in workspace expected, is " + res1.size(), res1.size() == 73);
+		assertExpectedCount(143, " interfaces in workspace expected, is ", res1.size());
 		
 		assertTrue("unnecessary flush of cache", AllTypesCache.getNumberOfCacheFlushes() == nFlushes);	
 		
 		res1.clear();
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.CLASS, null, res1);
-		assertTrue("469 classes in workspace expected, is " + res1.size(), res1.size() == 469);
+		assertExpectedCount(727, " classes in workspace expected, is ", res1.size());
 		
 		assertTrue("unnecessary flush of cache", AllTypesCache.getNumberOfCacheFlushes() == nFlushes);
 		
 		res1.clear();
 		AllTypesCache.getTypes(proj1Scope, IJavaSearchConstants.TYPE, null, res1);
-		assertTrue("471 types in proj1 expected, is " + res1.size(), res1.size() == 471);
+		assertExpectedCount(799, " types in proj1 expected, is ", res1.size());
 		
 		assertTrue("unnecessary flush of cache", AllTypesCache.getNumberOfCacheFlushes() == nFlushes);
 		
 		res1.clear();		
 		AllTypesCache.getTypes(proj1Scope, IJavaSearchConstants.INTERFACE, null, res1);
-		assertTrue("65 interfaces in proj1 expected, is " + res1.size(), res1.size() == 65);
+		assertExpectedCount(135, " interfaces in proj1 expected, is ", res1.size());
 		
 		assertTrue("unnecessary flush of cache", AllTypesCache.getNumberOfCacheFlushes() == nFlushes);
 		
 		res1.clear();
 		AllTypesCache.getTypes(proj1Scope, IJavaSearchConstants.CLASS, null, res1);
-		assertTrue("406 classes in proj1 expected, is " + res1.size(), res1.size() == 406);
+		assertExpectedCount(664, " classes in proj1 expected, is ", res1.size());
 		
 		assertTrue("unnecessary flush of cache", AllTypesCache.getNumberOfCacheFlushes() == nFlushes);
 		
 		res1.clear();
 		AllTypesCache.getTypes(proj2Scope, IJavaSearchConstants.TYPE, null, res1);
-		assertTrue("539 types in proj2 expected, is " + res1.size(), res1.size() == 539);
+		assertExpectedCount(867, " types in proj2 expected, is ", res1.size());
 		
 		assertTrue("unnecessary flush of cache", AllTypesCache.getNumberOfCacheFlushes() == nFlushes);
 		
 		res1.clear();		
 		AllTypesCache.getTypes(proj2Scope, IJavaSearchConstants.INTERFACE, null, res1);
-		assertTrue("73 interfaces in proj2 expected, is " + res1.size(), res1.size() == 73);
+		assertExpectedCount(143, " interfaces in proj2 expected, is ", res1.size());
 		
 		assertTrue("unnecessary flush of cache", AllTypesCache.getNumberOfCacheFlushes() == nFlushes);
 		
 		res1.clear();
 		AllTypesCache.getTypes(proj2Scope, IJavaSearchConstants.CLASS, null, res1);
-		assertTrue("466 classes in proj2 expected, is " + res1.size(), res1.size() == 466);
+		assertExpectedCount(724, " classes in proj2 expected, is ", res1.size());
 		
 		assertTrue("unnecessary flush of cache", AllTypesCache.getNumberOfCacheFlushes() == nFlushes);
 	}
@@ -172,7 +176,7 @@ public class AllTypesCacheTest extends TestCase {
 		
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 		assertNotNull("mylib.Foo not found", findTypeRef(res1, "mylib.Foo"));
-		assertTrue("542 types expected, is " + res1.size(), res1.size() == 542);
+		assertExpectedCount(870, " types expected, is ", res1.size());
 		
 		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
 		
@@ -182,7 +186,7 @@ public class AllTypesCacheTest extends TestCase {
 		res1.clear();
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 		assertNull("mylib.Foo still found", findTypeRef(res1, "mylib.Foo"));
-		assertTrue("539 types in workspace expected, is " + res1.size(), res1.size() == 539);
+		assertExpectedCount(867, " types in workspace expected, is ", res1.size());
 	}
 	
 	public void testNewElementCreation() throws Exception {
@@ -191,7 +195,7 @@ public class AllTypesCacheTest extends TestCase {
 		ArrayList res1= new ArrayList();
 		
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
-		assertTrue("542 types expected, is " + res1.size(), res1.size() == 542);
+		assertExpectedCount(870, " types expected, is ", res1.size());
 		
 		// add type
 		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
@@ -202,7 +206,7 @@ public class AllTypesCacheTest extends TestCase {
 		res1.clear();
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 		assertNotNull("A not found", findTypeRef(res1, "A"));
-		assertTrue("543 types in workspace expected, is " + res1.size(), res1.size() == 543);
+		assertExpectedCount(871, " types in workspace expected, is ", res1.size());
 		
 		
 		// create a field: should not flush cache
@@ -211,7 +215,7 @@ public class AllTypesCacheTest extends TestCase {
 		assertTrue("cache was flushed", nFlushes == AllTypesCache.getNumberOfCacheFlushes());
 		res1.clear();
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);		
-		assertTrue("still 543 types in workspace expected, is " + res1.size(), res1.size() == 543);
+		assertExpectedCount(871, " types in workspace expected, is ", res1.size());
 		
 
 		// create an inner type: should flush cache
@@ -221,7 +225,7 @@ public class AllTypesCacheTest extends TestCase {
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);		
 		assertTrue("cache not flushed after inner type creation", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
 		assertNotNull("AInner not found", findTypeRef(res1, "A.AInner"));
-		assertTrue("still 544 types in workspace expected, is " + res1.size(), res1.size() == 544);
+		assertExpectedCount(872, " types in workspace expected, is ", res1.size());
 	}
 	
 	public void testWorkingCopies() throws Exception {
@@ -234,7 +238,7 @@ public class AllTypesCacheTest extends TestCase {
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 		TypeInfo ref= findTypeRef(res1, "junit.framework.TestCase");
 		assertNotNull("TestCase not found", ref);
-		assertTrue("542 types expected, is " + res1.size(), res1.size() == 542);
+		assertExpectedCount(870, " types expected, is ", res1.size());
 		
 		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
 		
@@ -255,7 +259,7 @@ public class AllTypesCacheTest extends TestCase {
 			TypeInfo ref2= findTypeRef(res1, "junit.framework.TestCase");
 			assertNull("TestCase still found", ref2);
 			
-			assertTrue("542 types in workspace expected, is " + res1.size(), res1.size() == 542);
+			assertExpectedCount(870, " types in workspace expected, is ", res1.size());
 			
 			assertTrue("cache not flushed", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
 		} finally {
@@ -273,7 +277,7 @@ public class AllTypesCacheTest extends TestCase {
 		
 		AllTypesCache.getTypes(workspaceScope, IJavaSearchConstants.TYPE, null, res1);
 		assertNotNull("TestCase not found", findTypeRef(res1, "junit.framework.TestCase"));
-		assertTrue("542 types expected, is " + res1.size(), res1.size() == 542);
+		assertExpectedCount(870, " types expected, is ", res1.size());
 		
 		int nFlushes= AllTypesCache.getNumberOfCacheFlushes();
 		
@@ -291,7 +295,7 @@ public class AllTypesCacheTest extends TestCase {
 			assertNotNull("A not found", findTypeRef(res1, "junit.framework.A"));
 			assertNull("TestCase still found", findTypeRef(res1, "junit.framework.TestCase"));
 			
-			assertTrue("542 types in workspace expected, is " + res1.size(), res1.size() == 542);
+			assertExpectedCount(870, " types in workspace expected, is ", res1.size());
 			
 			assertTrue("cache not flushed", nFlushes != AllTypesCache.getNumberOfCacheFlushes());
 		} finally {
@@ -325,5 +329,10 @@ public class AllTypesCacheTest extends TestCase {
 		return null;
 	}
 		
+	private void assertExpectedCount(int expected, String message, int actual) {
+		if (expected != actual)
+			fail(expected + message + actual);
+		
+	}
 	
 }
