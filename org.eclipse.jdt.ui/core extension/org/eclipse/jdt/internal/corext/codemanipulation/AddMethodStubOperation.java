@@ -135,7 +135,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 								continue;
 							}
 						}
-						genStubSetting.callSuper= !Flags.isAbstract(overwrittenMethod.getFlags());
+						genStubSetting.callSuper= true;
 						genStubSetting.methodOverwrites= true;
 					
 						IMethod declaration= JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, fType, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());

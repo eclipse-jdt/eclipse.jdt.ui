@@ -410,7 +410,7 @@ public class StubUtility {
 		for (int i= 0; i < toImplementArray.length; i++) {
 			IMethod curr= toImplementArray[i];
 			IMethod overrides= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-			genStubSettings.callSuper= (overrides != null) && !Flags.isAbstract(overrides.getFlags());
+			genStubSettings.callSuper= (overrides != null);
 						
 			IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 			if (desc != null) {

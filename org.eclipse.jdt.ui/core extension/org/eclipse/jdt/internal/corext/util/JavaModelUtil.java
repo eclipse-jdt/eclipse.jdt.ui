@@ -357,7 +357,7 @@ public class JavaModelUtil {
 	
 	/**
 	 * Finds a method implementation in a type's classhierarchy. The search is bottom-up, so this
-	 * returns the overridden method. Does not find method in interfaces.
+	 * returns the nearest overridden method. Does not find methods in interfaces or abstract methods.
 	 * This searches for a method with a name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done.
 	 * Constructors are only compared by parameters, not the name.
@@ -372,6 +372,9 @@ public class JavaModelUtil {
 		for (int i= 0; i < superTypes.length; i++) {
 			IMethod found= findMethod(name, paramTypes, isConstructor, superTypes[i]);
 			if (found != null) {
+				if (Flags.isAbstract(found.getFlags())) {
+					return null;
+				}
 				return found;
 			}
 		}
