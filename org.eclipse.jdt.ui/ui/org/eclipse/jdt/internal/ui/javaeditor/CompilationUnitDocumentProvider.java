@@ -907,14 +907,27 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				
 			if (fSavePolicy != null)
 				fSavePolicy.preSave(info.fCopy);
-				
+			
+			// inform about the upcoming content change
+			fireElementStateChanging(element);	
 			try {
 				fIsAboutToSave= true;
 				// commit working copy
 				info.fCopy.commit(overwrite, monitor);
+			} catch (CoreException x) {
+				// inform about the failure
+				fireElementStateChangeFailed(element);
+				throw x;
+			} catch (RuntimeException x) {
+				// inform about the failure
+				fireElementStateChangeFailed(element);
+				throw x;
 			} finally {
 				fIsAboutToSave= false;
 			}
+			
+			// If here, the dirty state of the editor will change to "not dirty".
+			// Thus, the state changing flag will be reset.
 			
 			AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 			model.updateMarkers(info.fDocument);
