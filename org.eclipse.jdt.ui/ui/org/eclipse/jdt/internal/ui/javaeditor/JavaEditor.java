@@ -135,9 +135,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation");
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, new ShowInPackageViewAction());
-		
-		addAction(menu, "RunToLine"); //$NON-NLS-1$
-
 	}			
 	
 	/**
@@ -325,8 +322,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		super.createActions();
 		
 		setAction("ShowJavaDoc", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION));
-		
-		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$
 		
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(getSite().getWorkbenchWindow().getSelectionService());
 		setAction("OpenSuperImplementation", new OpenSuperImplementationAction(provider)); //$NON-NLS-1$
