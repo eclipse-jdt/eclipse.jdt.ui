@@ -36,7 +36,7 @@ public class LocalDeclarationAnalyzer extends ASTVisitor {
 	
 	public boolean visit(SimpleName node) {
 		IVariableBinding binding= null; 
-		if (!considerNode(node) || (binding= ASTNodes.getLocalVariableBinding(node)) == null)
+		if (node.isDeclaration() || !considerNode(node) || (binding= ASTNodes.getLocalVariableBinding(node)) == null)
 			return false;
 		handleReferenceToLocal(node, binding);
 		return true;

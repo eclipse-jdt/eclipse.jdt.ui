@@ -82,7 +82,7 @@ class AccessAnalyzer extends ASTVisitor {
 	}
 
 	public boolean visit(SimpleName node) {
-		if (considerBinding(node.resolveBinding(), node))
+		if (!node.isDeclaration() && considerBinding(node.resolveBinding(), node))
 			fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, node));
 		return true;
 	}

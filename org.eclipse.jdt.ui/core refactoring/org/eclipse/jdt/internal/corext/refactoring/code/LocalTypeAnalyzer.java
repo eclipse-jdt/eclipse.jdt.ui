@@ -42,6 +42,8 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 	}
 	
 	public boolean visit(SimpleName node) {
+		if (node.isDeclaration())
+			return true;
 		IBinding binding= node.resolveBinding();
 		if (binding instanceof ITypeBinding)
 			processLocalTypeBinding((ITypeBinding)binding, fSelection.getVisitSelectionMode(node));
