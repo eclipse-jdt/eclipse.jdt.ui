@@ -365,7 +365,7 @@ public class PullUpMethodRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private static boolean canBeAccessedFrom(IMember member, IType newHome) throws JavaModelException{
+	private boolean canBeAccessedFrom(IMember member, IType newHome) throws JavaModelException{
 		Assert.isTrue(!(member instanceof IInitializer));
 		if (newHome.equals(member.getDeclaringType()))
 			return true;
@@ -373,6 +373,9 @@ public class PullUpMethodRefactoring extends Refactoring {
 		if (newHome.equals(member))
 			return true;	
 		
+		if (! member.exists())
+			return false;
+			
 		if (Flags.isPrivate(member.getFlags()))
 			return false;
 			
@@ -386,8 +389,18 @@ public class PullUpMethodRefactoring extends Refactoring {
 			//FIX ME: protected and default treated the same
 			return ((IType)member).getPackageFragment().equals(newHome.getPackageFragment());		
 		}	
-		
-		return false;
+
+		 if (! canBeAccessedFrom(member.getDeclaringType(), newHome))
+		 	return false;
+
+		if (member.getDeclaringType().equals(getDeclaringType())) //XXX
+			return false;
+			
+		if (Flags.isPublic(member.getFlags()))
+			return true;
+		 
+		//FIX ME: protected and default treated the same
+		return (member.getDeclaringType().getPackageFragment().equals(newHome.getPackageFragment()));		
 	}
 	
 	private RefactoringStatus checkSuperclass() throws JavaModelException {	
