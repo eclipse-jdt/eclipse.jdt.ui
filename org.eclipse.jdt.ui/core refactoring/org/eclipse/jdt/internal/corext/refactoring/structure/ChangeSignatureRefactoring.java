@@ -1165,10 +1165,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	abstract class OccurrenceUpdate {
 		protected final CompilationUnitRewrite fCuRewrite;
 		protected final TextEditGroup fDescription;
+		protected RefactoringStatus fResult;
 		
-		protected OccurrenceUpdate(CompilationUnitRewrite cuRewrite, TextEditGroup description) {
+		protected OccurrenceUpdate(CompilationUnitRewrite cuRewrite, TextEditGroup description, RefactoringStatus result) {
 			fCuRewrite= cuRewrite;
 			fDescription= description;
+			fResult= result;
 		}
 		
 		protected final ASTRewrite getASTRewrite() {
@@ -1194,6 +1196,23 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			List newNodes= new ArrayList();
 			for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 				ParameterInfo info= (ParameterInfo) iter.next();
+				//XXX: logging for bugs 74035, 71662:
+				if (nodes.size() <= info.getOldIndex()) {
+					ICompilationUnit cu= fCuRewrite.getCu();
+					String msg= "Problems reshuffling argument list. Please post error log entry to bug 74035." + //$NON-NLS-1$
+							" CU: " + cu.getElementName() + "; info: " + info.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+					ASTNode occurrence= ((ASTNode) listRewrite.getOriginalList().get(0)).getParent();
+					fResult.addError(msg, JavaStatusContext.create(cu, occurrence));
+					int start= occurrence.getStartPosition();
+					int end= start + occurrence.getLength();
+					try {
+						JavaPlugin.logErrorMessage(msg + "\n" + cu.getSource().substring(start, end)); //$NON-NLS-1$
+					} catch (JavaModelException e) {
+						JavaPlugin.logErrorMessage(msg + "\n[" + start + ", " + end + "]"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+					}
+					return;
+				}
+				
 				if (info.isDeleted()) {
 					getImportRemover().registerRemovedNode((ASTNode) nodes.get(info.getOldIndex()));
 					continue;
@@ -1297,7 +1316,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private ASTNode fNode;
 
 		protected ReferenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_reference"))); //$NON-NLS-1$
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_reference")), result); //$NON-NLS-1$
 			fNode= node; //holds: Assert.isTrue(isReferenceNode(node));
 		}
 
@@ -1353,7 +1372,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				return false;
 			
 			IMethodBinding enclosingMethodBinding= enclosingMethodDeclaration.resolveBinding();
-		
+			if (enclosingMethodBinding == null)
+				return false;
+			
 			if (fNode instanceof MethodInvocation)	
 				return enclosingMethodBinding == ((MethodInvocation)fNode).resolveMethodBinding();
 				
@@ -1396,12 +1417,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	class DeclarationUpdate extends OccurrenceUpdate {
 		private MethodDeclaration fMethDecl;
-		private RefactoringStatus fResult;
 
 		protected DeclarationUpdate(MethodDeclaration decl, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.change_signature"))); //$NON-NLS-1$
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.change_signature")), result); //$NON-NLS-1$
 			fMethDecl= decl;
-			fResult= result;
 		}
 
 		public void updateNode() throws JavaModelException {
@@ -1821,7 +1840,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private ASTNode fNode;
 
 		protected DocReferenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_javadoc_reference"))); //$NON-NLS-1$
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_javadoc_reference")), result); //$NON-NLS-1$
 			fNode= node;
 		}
 
@@ -1887,11 +1906,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	class NullOccurrenceUpdate extends OccurrenceUpdate {
 		private ASTNode fNode;
-		private RefactoringStatus fResult;
 		protected NullOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-			super(cuRewrite, null);
+			super(cuRewrite, null, result);
 			fNode= node;
-			fResult= result;
 		}
 		public void updateNode() throws JavaModelException {
 			int start= fNode.getStartPosition();
