@@ -186,6 +186,14 @@ public class SefTests extends AbstractSelectionTestCase {
 	public void testSimpleReadWrite() throws Exception {
 		objectTest("field");
 	}
+
+	public void testEnumRead() throws Exception {
+//		objectTest("field");
+	}
+
+	public void testEnumReadWrite() throws Exception {
+//		objectTest("field");
+	}
 	
 	public void testNestedRead() throws Exception {
 		objectTest("field");
