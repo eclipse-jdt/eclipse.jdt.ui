@@ -120,8 +120,8 @@ public class TemplateEditorSourceViewerConfiguration extends JavaSourceViewerCon
 		assistant.enableAutoInsert(store.getBoolean(PreferenceConstants.CODEASSIST_AUTOINSERT));
 		assistant.enableAutoActivation(store.getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION));
 		assistant.setAutoActivationDelay(store.getInt(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY));
-		assistant.setProposalPopupOrientation(ContentAssistant.PROPOSAL_OVERLAY);
-		assistant.setContextInformationPopupOrientation(ContentAssistant.CONTEXT_INFO_ABOVE);
+		assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
+		assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 		assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 
 		Color background= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);			
