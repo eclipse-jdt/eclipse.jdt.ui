@@ -258,16 +258,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 		if (elem != null) {
 			// evaluate the enclosing type
-			pack= (IPackageFragment) JavaModelUtil.findElementOfKind(elem, IJavaElement.PACKAGE_FRAGMENT);
-			IType typeInCU= (IType) JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
+			pack= (IPackageFragment) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+			IType typeInCU= (IType) elem.getAncestor(IJavaElement.TYPE);
 			if (typeInCU != null) {
 				if (typeInCU.getCompilationUnit() != null) {
 					enclosingType= typeInCU;
 				}
 			} else {
-				ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
+				ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (cu != null) {
-					enclosingType= JavaModelUtil.findPrimaryType(cu);
+					enclosingType= cu.findPrimaryType();
 				}
 			}
 			
