@@ -12,22 +12,23 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.HashSet;
 
-import org.eclipse.jdt.core.CompletionRequestorAdapter;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.CompletionRequestor;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
-public class SimilarElementsRequestor extends CompletionRequestorAdapter {
+public class SimilarElementsRequestor extends CompletionRequestor {
 	
 	public static final int CLASSES= 1 << 1;
 	public static final int INTERFACES= 1 << 2;
@@ -35,20 +36,13 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	public static final int VOIDTYPE= 1 << 4;
 	public static final int REF_TYPES= CLASSES | INTERFACES;
 	public static final int ALL_TYPES= PRIMITIVETYPES | REF_TYPES;
-	public static final int METHODS= 1 << 5;
-	public static final int FIELDS= 1 << 6;
-	public static final int LOCALS= 1 << 7;
-	public static final int VARIABLES= FIELDS | LOCALS;
 
 	private static final String[] PRIM_TYPES= { "boolean", "byte", "char", "short", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
-	private String fPreferredType;
-	private int fNumberOfArguments;
 	private int fKind;
 	private String fName;
 
 	private HashSet fResult;
-	private HashSet fOthers;
 
 	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, Name name, int kind) throws JavaModelException {
 		int pos= name.getStartPosition();
@@ -58,7 +52,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		String returnType= null;
 		ICompilationUnit preparedCU= null;
 		
-		if ((kind & REF_TYPES) != 0) {
+		try {
 			if (name.isQualifiedName()) {
 				pos= ((QualifiedName) name).getName().getStartPosition();
 			} else {
@@ -69,28 +63,23 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 				preparedCU= createPreparedCU(cu, javadoc, name.getStartPosition());
 				cu= preparedCU;
 			}
-			
-		} else {	
-			if (name.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
-				MethodInvocation invocation= (MethodInvocation) name.getParent();
-				if (name.equals(invocation.getName())) {
-					if ((kind & METHODS) != 0) {
-						nArguments= invocation.arguments().size();
-					}
-				} else if (invocation.arguments().contains(name)) {
-					pos= invocation.getStartPosition(); // workaround for code assist
-					// foo(| code assist here returns only method declaration
-				}
-			}
-			ITypeBinding binding= ASTResolving.guessBindingForReference(name);
-			if (binding != null) {
-				returnType= binding.getName();
-			}
-		}
 
-		try {
 			SimilarElementsRequestor requestor= new SimilarElementsRequestor(identifier, kind, nArguments, returnType);
-			return requestor.process(cu, pos);		
+			requestor.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
+			requestor.setIgnored(CompletionProposal.KEYWORD, true);
+			requestor.setIgnored(CompletionProposal.LABEL_REF, true);
+			requestor.setIgnored(CompletionProposal.METHOD_DECLARATION, true);
+			requestor.setIgnored(CompletionProposal.PACKAGE_REF, true);
+			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
+			requestor.setIgnored(CompletionProposal.METHOD_REF, true);
+			requestor.setIgnored(CompletionProposal.FIELD_REF, true);
+			requestor.setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, true);
+			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
+			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
+			// bug 80126 
+			//requestor.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
+			//requestor.setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
+			return requestor.process(cu, pos);
 		} finally {
 			if (preparedCU != null) {
 				preparedCU.discardWorkingCopy();
@@ -128,11 +117,8 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		super();
 		fName= name;
 		fKind= kind;
-		fNumberOfArguments= nArguments;
-		fPreferredType= preferredType;
 		
 		fResult= new HashSet();
-		fOthers= new HashSet();	
 	}
 	
 	private void addResult(SimilarElement elem) {
@@ -143,16 +129,9 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		try {
 			cu.codeComplete(pos, this);
 			processKeywords();
-			
-			if (fResult.size() == 0) {
-				if (fOthers.size() < 6) {
-					fResult= fOthers;
-				}
-			}
 			return (SimilarElement[]) fResult.toArray(new SimilarElement[fResult.size()]);
 		} finally {
 			fResult.clear();
-			fOthers.clear();
 		}
 	}
 
@@ -175,102 +154,30 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		}
 	}
 	
-	private void addType(int kind, char[] packageName, char[] typeName, char[] completionName, int relevance) {
-		if (TypeFilter.isFiltered(packageName, typeName)) {
+	private void addType(char[] typeNameSig, int flags, int relevance) {
+		String fullName= new String(Signature.toCharArray(Signature.getTypeErasure(typeNameSig)));
+		if (TypeFilter.isFiltered(fullName)) {
 			return;
 		}
-		
-		StringBuffer buf= new StringBuffer();
-		if (packageName.length > 0) {
-			buf.append(packageName);
-			buf.append('.');
-		}
-		buf.append(typeName);
-		SimilarElement elem= new SimilarElement(kind, buf.toString(), relevance);
-
-		if (NameMatcher.isSimilarName(fName, new String(typeName))) {
-			addResult(elem);
-		}
-		//addOther(elem);
-	}
-	
-	private void addVariable(int kind, char[] name, char[] typePackageName, char[] typeName, int relevance) {
-		if (TypeFilter.isFiltered(typePackageName, typeName)) {
+		if (Flags.isAnnotation(flags)) {
 			return;
 		}
-		
-		String variableName= new String(name);
-		if (NameMatcher.isSimilarName(fName, variableName)) {
-			addResult(new SimilarElement(kind, variableName, 1));
-		} else if (fPreferredType != null) {
-			if (fPreferredType.equals(JavaModelUtil.concatenateName(typePackageName, typeName))) {
-				addResult(new SimilarElement(kind, variableName, 0));
+		if (NameMatcher.isSimilarName(fName, Signature.getSimpleName(fullName))) {
+			int kind= CLASSES;
+			if (Flags.isInterface(flags)) {
+				 kind= INTERFACES;
 			}
-		}
-		
-	}	
-	
-	/*
-	 * @see ICompletionRequestor#acceptClass(char[], char[], char[], int, int, int)
-	 */
-	public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		if ((fKind & CLASSES) != 0) {
-			addType(CLASSES, packageName, className, completionName, relevance);
-		}
-	}
-
-	/*
-	 * @see ICompletionRequestor#acceptInterface(char[], char[], char[], int, int, int)
-	 */
-	public void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		if ((fKind & INTERFACES) != 0) {
-			addType(INTERFACES, packageName, interfaceName, completionName, relevance);
+			addResult(new SimilarElement(kind, fullName, relevance));
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see ICompletionRequestor#acceptField(char[], char[], char[], char[], char[], char[], int, int, int, int)
-	 */
-	public void acceptField(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[] typePackageName, char[] typeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		if ((fKind & FIELDS) != 0) {
-			addVariable(FIELDS, name, typePackageName, typeName, relevance);
-		}
-	}
 
 	/* (non-Javadoc)
-	 * @see ICompletionRequestor#acceptLocalVariable(char[], char[], char[], int, int, int)
+	 * @see org.eclipse.jdt.core.CompletionRequestor#accept(org.eclipse.jdt.core.CompletionProposal)
 	 */
-	public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		if ((fKind & VARIABLES) != 0) {
-			addVariable(VARIABLES, name,  typePackageName, typeName, relevance);
-		}
-	}
-	
-	/*
-	 * @see ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int, int)
-	 */
-	public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		if ((fKind & METHODS) != 0) {
-			if (TypeFilter.isFiltered(declaringTypePackageName, declaringTypeName)) {
-				return;
-			}
-			
-			String methodName= new String(selector);
-			if (fName.equals(methodName)) {
-				String[] paramTypes= new String[parameterTypeNames.length];
-				for (int i= 0; i < paramTypes.length; i++) {
-					paramTypes[i]= JavaModelUtil.concatenateName(parameterPackageNames[i], parameterTypeNames[i]);
-				}
-				addResult(new SimilarElement(METHODS, methodName, paramTypes, relevance));
-			} else if ((fNumberOfArguments == -1 || fNumberOfArguments == parameterTypeNames.length)) {
-				int similarity= NameMatcher.getSimilarity(fName, methodName);
-				if (similarity >= 0) {
-					SimilarElement elem= new SimilarElement(METHODS, methodName, null, relevance + similarity);
-					addResult(elem);
-				}
-			}
+	public void accept(CompletionProposal proposal) {
+		if (proposal.getKind() == CompletionProposal.TYPE_REF) {
+			addType(proposal.getSignature(), proposal.getFlags(), proposal.getRelevance());
 		}
 	}	
-			
-
 }

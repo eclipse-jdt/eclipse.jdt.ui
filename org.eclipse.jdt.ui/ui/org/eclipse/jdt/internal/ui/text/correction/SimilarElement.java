@@ -16,17 +16,17 @@ public class SimilarElement {
 	
 	private final int fKind;
 	private final String fName;
-	private final String[] fParamTypes;
+	private final String[] fTypesParameters;
 	private final int fRelevance;
 
 	public SimilarElement(int kind, String name, int relevance) {
 		this(kind, name, null, relevance);
 	}
 	
-	public SimilarElement(int kind, String name, String[] paramTypes, int relevance) {
+	public SimilarElement(int kind, String name, String[] typesParameters, int relevance) {
 		fKind= kind;
 		fName= name;
-		fParamTypes= paramTypes;
+		fTypesParameters= typesParameters;
 		fRelevance= relevance;
 	}	
 
@@ -42,8 +42,8 @@ public class SimilarElement {
 	 * Gets the parameter types.
 	 * @return Returns a int
 	 */
-	public String[] getParameterTypes() {
-		return fParamTypes;
+	public String[] getTypesParameter() {
+		return fTypesParameters;
 	}	
 
 	/**
@@ -68,7 +68,7 @@ public class SimilarElement {
 	public boolean equals(Object obj) {
 		if (obj instanceof SimilarElement) {
 			SimilarElement elem= (SimilarElement) obj;
-			return fName.equals(elem.fName) && fKind == elem.fKind && Arrays.equals(fParamTypes, elem.fParamTypes);
+			return fName.equals(elem.fName) && fKind == elem.fKind && Arrays.equals(fTypesParameters, elem.fTypesParameters);
 		}
 		return false;
 	}
