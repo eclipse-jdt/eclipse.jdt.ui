@@ -59,6 +59,9 @@ public class WorkingCopyUtil {
 	}
 
 	public static ICompilationUnit getNewWorkingCopy(ICompilationUnit cu) throws JavaModelException{
+		/*
+		 * Explicitly create a new working copy.
+		 */
 		return (ICompilationUnit)(getOriginal(cu).getWorkingCopy());
 	}
 

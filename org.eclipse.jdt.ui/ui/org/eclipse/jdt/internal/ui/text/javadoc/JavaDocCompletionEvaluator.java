@@ -410,6 +410,9 @@ public class JavaDocCompletionEvaluator {
 		if (cu.isWorkingCopy()) {
 			cu= (ICompilationUnit) cu.getOriginalElement();
 		}
+		/*
+		 * Explicitly create a new working copy.
+		 */
 		ICompilationUnit newCU= (ICompilationUnit) cu.getWorkingCopy();
 		newCU.getBuffer().setContents(content);
 		return newCU;
