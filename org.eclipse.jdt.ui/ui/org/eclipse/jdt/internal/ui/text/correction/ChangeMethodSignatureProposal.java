@@ -76,20 +76,20 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		}
 	}	
 		
-	private ASTNode fNameNode;
+	private ASTNode fInvocationNode;
 	private IMethodBinding fSenderBinding;
 	private ChangeDescription[] fParameterChanges;
 		
-	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, ASTNode nameNode, IMethodBinding binding, ChangeDescription[] changes, int relevance, Image image) {
+	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, IMethodBinding binding, ChangeDescription[] changes, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
 		
-		fNameNode= nameNode;
+		fInvocationNode= invocationNode;
 		fSenderBinding= binding;
 		fParameterChanges= changes;
 	}
 	
 	protected ASTRewrite getRewrite() throws CoreException {
-		CompilationUnit astRoot= (CompilationUnit) fNameNode.getRoot();
+		CompilationUnit astRoot= (CompilationUnit) fInvocationNode.getRoot();
 		ASTNode methodDecl= astRoot.findDeclaringNode(fSenderBinding);
 		ASTNode newMethodDecl= null;
 		boolean isInDifferentCU;

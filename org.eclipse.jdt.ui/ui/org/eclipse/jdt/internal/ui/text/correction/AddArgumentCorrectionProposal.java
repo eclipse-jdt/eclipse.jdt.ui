@@ -33,11 +33,11 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 
 	private int[] fInsertIndexes;
 	private ITypeBinding[] fParamTypes;
-	private ASTNode fNameNode;
+	private ASTNode fCallerNode;
 
-	public AddArgumentCorrectionProposal(String label, ICompilationUnit cu, ASTNode nameNode, int[] insertIdx, ITypeBinding[] expectedTypes, int relevance) {
+	public AddArgumentCorrectionProposal(String label, ICompilationUnit cu, ASTNode callerNode, int[] insertIdx, ITypeBinding[] expectedTypes, int relevance) {
 		super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
-		fNameNode= nameNode;
+		fCallerNode= callerNode;
 		fInsertIndexes= insertIdx;
 		fParamTypes= expectedTypes;
 	}
@@ -46,15 +46,14 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
 	protected ASTRewrite getRewrite() {
-		AST ast= fNameNode.getAST();
-		ASTRewrite rewrite= new ASTRewrite(fNameNode.getParent());
+		AST ast= fCallerNode.getAST();
+		ASTRewrite rewrite= new ASTRewrite(fCallerNode);
 
-		ASTNode callerNode= fNameNode.getParent();
 		for (int i= 0; i < fInsertIndexes.length; i++) {
 			int idx= fInsertIndexes[i];
 			String key= "newarg_" + i; //$NON-NLS-1$
 			Expression newArg= evaluateArgumentExpressions(ast, fParamTypes[idx], key);
-			rewrite.markAsInsertInNew(callerNode, ASTNodeConstants.ARGUMENTS, newArg, idx, null);
+			rewrite.markAsInsertInNew(fCallerNode, ASTNodeConstants.ARGUMENTS, newArg, idx, null);
 			
 			markAsLinked(rewrite, newArg, i == 0, key); 
 		}
@@ -62,9 +61,9 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	}
 	
 	private Expression evaluateArgumentExpressions(AST ast, ITypeBinding requiredType, String key) {
-		CompilationUnit root= (CompilationUnit) fNameNode.getRoot();
+		CompilationUnit root= (CompilationUnit) fCallerNode.getRoot();
 
-		int offset= fNameNode.getStartPosition();
+		int offset= fCallerNode.getStartPosition();
 		Expression best= null;
 		
 		ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
@@ -93,7 +92,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 		if ((modifiers & staticFinal) == staticFinal) {
 			return false;
 		}
-		if (Modifier.isStatic(modifiers) && !ASTResolving.isInStaticContext(fNameNode)) {
+		if (Modifier.isStatic(modifiers) && !ASTResolving.isInStaticContext(fCallerNode)) {
 			return false;
 		}
 		return true;

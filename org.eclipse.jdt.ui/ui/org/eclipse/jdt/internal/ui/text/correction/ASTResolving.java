@@ -190,6 +190,57 @@ public class ASTResolving {
 			
 		return null;
 	}
+	
+	public static Type guessTypeForReference(AST ast, ASTNode node) {
+		ASTNode parent= node.getParent();
+		while (parent != null) {
+			switch (parent.getNodeType()) {
+				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+					if (((VariableDeclarationFragment) parent).getInitializer() == node) {
+						return ASTNodes.getType(ast, (VariableDeclaration) parent);
+					}
+					return null;
+				case ASTNode.SINGLE_VARIABLE_DECLARATION:
+					if (((VariableDeclarationFragment) parent).getInitializer() == node) {
+						return ASTNodes.getType(ast, (VariableDeclaration) parent);
+					}
+					return null;
+				case ASTNode.ARRAY_ACCESS:
+					if (!((ArrayAccess) parent).getIndex().equals(node)) {
+						Type type= guessTypeForReference(ast, parent);
+						if (type != null) {
+							return ast.newArrayType(type);
+						}
+					}
+					return null;
+				case ASTNode.FIELD_ACCESS:
+					if (node.equals(((FieldAccess) parent).getName())) {
+						node= parent;
+						parent= parent.getParent();
+					} else {
+						return null;
+					}
+					break;
+				case ASTNode.SUPER_FIELD_ACCESS:
+				case ASTNode.PARENTHESIZED_EXPRESSION:
+					node= parent;
+					parent= parent.getParent();
+					break;
+				case ASTNode.QUALIFIED_NAME:
+					if (node.equals(((QualifiedName) parent).getName())) {
+						node= parent;
+						parent= parent.getParent();
+					} else {
+						return null;
+					}
+					break;
+				default:
+					return null;
+			}
+		}
+		return null;
+	}
+	
 
 	private static ITypeBinding getParameterTypeBinding(ASTNode node, List args, IMethodBinding binding) {
 		ITypeBinding[] paramTypes= binding.getParameterTypes();

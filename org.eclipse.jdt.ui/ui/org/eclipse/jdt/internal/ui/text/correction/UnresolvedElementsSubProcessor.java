@@ -80,6 +80,11 @@ public class UnresolvedElementsSubProcessor {
 		boolean suggestVariablePropasals= true;
 		int typeKind= 0;
 		
+		while (selectedNode instanceof ParenthesizedExpression) {
+			selectedNode= ((ParenthesizedExpression) selectedNode).getExpression();
+		}
+		
+		
 		Name node= null;
 		switch (selectedNode.getNodeType()) {
 			case ASTNode.SIMPLE_NAME:
@@ -474,7 +479,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 		}
 			
-		addParameterMissmatchProposals(context, problem, parameterMismatchs, arguments, proposals);
+		addParameterMissmatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
 		
 		// new method
 		ITypeBinding binding= null;
@@ -568,7 +573,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List similarElements, List arguments, Collection proposals) throws CoreException {
+	private static void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List similarElements, ASTNode invocationNode, List arguments, Collection proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
 		if (argTypes == null || nSimilarElements == 0)  {
@@ -580,19 +585,19 @@ public class UnresolvedElementsSubProcessor {
 			int diff= elem.getParameterTypes().length - argTypes.length;
 			if (diff == 0) {
 				int nProposals= proposals.size();
-				doEqualNumberOfParameters(context, problem, arguments, argTypes, elem, proposals);
+				doEqualNumberOfParameters(context, invocationNode, problem, arguments, argTypes, elem, proposals);
 				if (nProposals != proposals.size()) {
 					return; // only suggest for one method (avoid duplicated proposals)
 				}
 			} else if (diff > 0) {
-				doMoreParameters(context, problem, arguments, argTypes, elem, proposals);
+				doMoreParameters(context, problem, invocationNode, arguments, argTypes, elem, proposals);
 			} else {
-				doMoreArguments(context, problem, arguments, argTypes, elem, proposals);
+				doMoreArguments(context, problem, invocationNode, arguments, argTypes, elem, proposals);
 			}
 		}
 	}
 	
-	private static void doMoreParameters(IInvocationContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
+	private static void doMoreParameters(IInvocationContext context, IProblemLocation problem, ASTNode invocationNode, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= paramTypes.length - argTypes.length;
@@ -610,12 +615,7 @@ public class UnresolvedElementsSubProcessor {
 		ITypeBinding declaringType= methodBinding.getDeclaringClass();
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
-		
-		ASTNode nameNode= problem.getCoveringNode(astRoot);
-		if (nameNode == null) {
-			return;
-		}
-	
+			
 		// add arguments
 		{			
 			String[] arg= new String[] { getMethodSignature(methodBinding, false) };
@@ -625,7 +625,7 @@ public class UnresolvedElementsSubProcessor {
 			} else {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addarguments.description", arg); //$NON-NLS-1$
 			}			
-			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), nameNode, indexSkipped, paramTypes, 8);
+			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), invocationNode, indexSkipped, paramTypes, 8);
 			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD));
 			proposal.ensureNoModifications();
 			proposals.add(proposal);				
@@ -662,7 +662,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 		
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
-			ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 5, image);
+			ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, invocationNode, methodBinding, changeDesc, 5, image);
 			proposals.add(proposal);
 		}
 	}
@@ -706,7 +706,7 @@ public class UnresolvedElementsSubProcessor {
 		return def;
 	}
 
-	private static void doMoreArguments(IInvocationContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
+	private static void doMoreArguments(IInvocationContext context, IProblemLocation problem, ASTNode invocationNode, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= argTypes.length - paramTypes.length;
@@ -725,11 +725,7 @@ public class UnresolvedElementsSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
 		
-		ASTNode nameNode= problem.getCoveringNode(astRoot);
-		if (nameNode == null) {
-			return;
-		}
-		
+	
 		// remove arguments
 		{
 			ASTNode selectedNode= problem.getCoveringNode(astRoot);
@@ -792,7 +788,7 @@ public class UnresolvedElementsSubProcessor {
 				}
 			}	
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-			ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 5, image);
+			ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, invocationNode, methodBinding, changeDesc, 5, image);
 			proposals.add(proposal);
 		}
 	}
@@ -851,7 +847,7 @@ public class UnresolvedElementsSubProcessor {
 	}	
 	
 
-	private static void doEqualNumberOfParameters(IInvocationContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
+	private static void doEqualNumberOfParameters(IInvocationContext context, ASTNode invocationNode, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int[] indexOfDiff= new int[paramTypes.length];
 		int nDiffs= 0;
@@ -929,7 +925,7 @@ public class UnresolvedElementsSubProcessor {
 							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swapparams.description", args); //$NON-NLS-1$
 						}
 						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-						ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 5, image);
+						ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, invocationNode, methodBinding, changeDesc, 5, image);
 						proposals.add(proposal);
 					}
 				}
@@ -955,7 +951,7 @@ public class UnresolvedElementsSubProcessor {
 					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changeparamsignature.description", args); //$NON-NLS-1$
 				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 7, image);
+				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, invocationNode, methodBinding, changeDesc, 7, image);
 				proposals.add(proposal);
 			}
 		}
@@ -1068,7 +1064,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 		}
 		
-		addParameterMissmatchProposals(context, problem, similarElements, arguments, proposals);
+		addParameterMissmatchProposals(context, problem, similarElements, selectedNode, arguments, proposals);
 		
 		if (targetBinding.isFromSource()) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetBinding);
