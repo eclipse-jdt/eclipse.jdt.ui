@@ -251,6 +251,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRef
 		printTestDisabledMessage("regression test for bug#6224");
 //		helper1(new String[]{"j"}, new String[]{"I"});
 	}	
+
+	public void test36() throws Exception{
+//		printTestDisabledMessage("regression test for bug#21163");
+		helper1(new String[]{"j"}, new String[]{"I"});
+	}
 	
 	// -----
 	
