@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
@@ -75,15 +74,20 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		}
 		try {			
 			monitor.beginTask(CodeGenerationMessages.getString("AddGetterSetterOperation.description"), fGetterFields.length + fSetterFields.length); //$NON-NLS-1$
+
+			fSkipAllFinalSetters= (fSkipFinalSettersQuery == null);
+			fSkipAllExisting= (fSkipExistingQuery == null);
 			
 			for (int i= 0; i < fGetterFields.length; i++) {
-				generateGetter(fGetterFields[i], new SubProgressMonitor(monitor, 1));
+				generateGetter(fGetterFields[i]);
+				monitor.worked(1);
 				if (monitor.isCanceled()){
 					throw new OperationCanceledException();
 				}	
 			}
 			for (int i= 0; i < fSetterFields.length; i++) {
-				generateSetter(fSetterFields[i], new SubProgressMonitor(monitor, 1));
+				generateSetter(fSetterFields[i]);
+				monitor.worked(1);
 				if (monitor.isCanceled()){
 					throw new OperationCanceledException();
 				}	
@@ -122,119 +126,110 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		return true;
 	}	
 	
-	private void generateGetter(IField field, IProgressMonitor monitor) throws JavaModelException, OperationCanceledException {
-		generateStub(field, monitor, true);
-	}
-	
-	private void generateSetter(IField field, IProgressMonitor monitor) throws JavaModelException, OperationCanceledException {
-		generateStub(field, monitor, false);
-	}
-	
-	/**
-	 * Creates setter and getter for a given field.
-	 */
-	private void generateStub(IField field, IProgressMonitor monitor, boolean getter) throws JavaModelException, OperationCanceledException {
-		try {
-			monitor.beginTask(CodeGenerationMessages.getFormattedString("AddGetterSetterOperation.processField", field.getElementName()), 2); //$NON-NLS-1$
-	
-			fSkipAllFinalSetters= (fSkipFinalSettersQuery == null);
-			fSkipAllExisting= (fSkipExistingQuery == null);
-	
-			String fieldName= field.getElementName();
-			String argname= fNameProposer.proposeArgName(field);
-			
-			boolean isStatic= Flags.isStatic(field.getFlags());
-			boolean isFinal= Flags.isFinal(field.getFlags());
-			boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
-			
-			String typeName= Signature.toString(field.getTypeSignature());
-			
-			IType parentType= field.getDeclaringType();
-			
-			boolean addComments= fSettings.createComments;
-			
-			// test if the getter already exists
-			String getterName= fNameProposer.proposeGetterName(field);
-			IMethod existingGetter= JavaModelUtil.findMethod(getterName, new String[0], false, parentType);
-			
-			String setterName= fNameProposer.proposeSetterName(field.getElementName());
-			String[] args= new String[] { field.getTypeSignature() };		
-			IMethod existingSetter= JavaModelUtil.findMethod(setterName, args, false, parentType);			
-			
-			boolean doCreateGetter= (getter) && ((existingGetter == null) || !querySkipExistingMethods(existingGetter));
-			boolean doCreateSetter= (! getter) && ((!isFinal || !querySkipFinalSetters(field)) && (existingSetter == null || querySkipExistingMethods(existingSetter)));
-						
-			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
-			int indent= StubUtility.getIndentUsed(field);
-					
-			if (doCreateGetter) {			
-				// create the getter stub
-				StringBuffer buf= new StringBuffer();
-				if (addComments) {
-					buf.append("/**\n"); //$NON-NLS-1$
-					buf.append(" * Returns the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
-					buf.append(" * @return "); buf.append(typeName); buf.append('\n'); //$NON-NLS-1$
-					buf.append(" */\n"); //$NON-NLS-1$
-				}
-				buf.append("public "); //$NON-NLS-1$
-				if (isStatic) {
-					buf.append("static "); //$NON-NLS-1$
-				}
-				buf.append(typeName);
-				buf.append(' '); buf.append(getterName);
-				buf.append("() {\nreturn "); buf.append(fieldName); buf.append(";\n}\n"); //$NON-NLS-2$ //$NON-NLS-1$
-				
-				IJavaElement sibling= null;
-				if (existingGetter != null) {
-					sibling= StubUtility.findNextSibling(existingGetter);
-					existingGetter.delete(false, null);
-				}				
-				
-				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
-				fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
+	private void generateGetter(IField field) throws JavaModelException, OperationCanceledException {
+		String fieldName= field.getElementName();
+		String argname= fNameProposer.proposeArgName(field);
+		
+		boolean isStatic= Flags.isStatic(field.getFlags());
+
+		String typeName= Signature.toString(field.getTypeSignature());
+		
+		IType parentType= field.getDeclaringType();
+		
+		boolean addComments= fSettings.createComments;
+		String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
+		int indent= StubUtility.getIndentUsed(field);
+
+
+		String getterName= fNameProposer.proposeGetterName(field);
+		IMethod existingGetter= JavaModelUtil.findMethod(getterName, new String[0], false, parentType);
+		boolean doCreateGetter= ((existingGetter == null) || !querySkipExistingMethods(existingGetter));
+
+		if (doCreateGetter) {			
+			// create the getter stub
+			StringBuffer buf= new StringBuffer();
+			if (addComments) {
+				buf.append("/**\n"); //$NON-NLS-1$
+				buf.append(" * Returns the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				buf.append(" * @return "); buf.append(typeName); buf.append('\n'); //$NON-NLS-1$
+				buf.append(" */\n"); //$NON-NLS-1$
 			}
-			
-			monitor.worked(1);
-									
-			if (doCreateSetter) {
-				// create the setter stub
-				StringBuffer buf= new StringBuffer();
-				if (addComments) {
-					buf.append("/**\n"); //$NON-NLS-1$
-					buf.append(" * Sets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
-					buf.append(" * @param "); buf.append(argname); buf.append(" The "); buf.append(argname); buf.append(" to set\n"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
-					buf.append(" */\n"); //$NON-NLS-1$
-				}
-				buf.append("public "); //$NON-NLS-1$
-				if (isStatic) {
-					buf.append("static "); //$NON-NLS-1$
-				}
-				buf.append("void "); buf.append(setterName); //$NON-NLS-1$
-				buf.append('('); buf.append(typeName); buf.append(' '); 
-				buf.append(argname); buf.append(") {\n"); //$NON-NLS-1$
-				if (argname.equals(fieldName)) {
-					if (isStatic) {
-						buf.append(parentType.getElementName());
-						buf.append('.');
-					} else {
-						buf.append("this."); //$NON-NLS-1$
-					}
-				}
-				buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n}\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				IJavaElement sibling= null;
-				if (existingSetter != null) {
-					sibling= StubUtility.findNextSibling(existingSetter);
-					existingSetter.delete(false, null);
-				}
-				
-				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
-				fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
+			buf.append("public "); //$NON-NLS-1$
+			if (isStatic) {
+				buf.append("static "); //$NON-NLS-1$
 			}
-		} finally {
-			monitor.done();
+			buf.append(typeName);
+			buf.append(' '); buf.append(getterName);
+			buf.append("() {\nreturn "); buf.append(fieldName); buf.append(";\n}\n"); //$NON-NLS-2$ //$NON-NLS-1$
+			
+			IJavaElement sibling= null;
+			if (existingGetter != null) {
+				sibling= StubUtility.findNextSibling(existingGetter);
+				existingGetter.delete(false, null);
+			}				
+			
+			String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
+			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}
+	
+	private void generateSetter(IField field) throws JavaModelException, OperationCanceledException {
+		String fieldName= field.getElementName();
+		String argname= fNameProposer.proposeArgName(field);
+		
+		boolean isStatic= Flags.isStatic(field.getFlags());
+		boolean isFinal= Flags.isFinal(field.getFlags());
+
+		String typeName= Signature.toString(field.getTypeSignature());
+		
+		IType parentType= field.getDeclaringType();
+		
+		boolean addComments= fSettings.createComments;
+		String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
+		int indent= StubUtility.getIndentUsed(field);
+
+
+		String setterName= fNameProposer.proposeSetterName(field.getElementName());
+		String[] args= new String[] { field.getTypeSignature() };		
+		IMethod existingSetter= JavaModelUtil.findMethod(setterName, args, false, parentType);			
+		boolean doCreateSetter= ((!isFinal || !querySkipFinalSetters(field)) && (existingSetter == null || querySkipExistingMethods(existingSetter)));
+
+		if (doCreateSetter) {
+			// create the setter stub
+			StringBuffer buf= new StringBuffer();
+			if (addComments) {
+				buf.append("/**\n"); //$NON-NLS-1$
+				buf.append(" * Sets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				buf.append(" * @param "); buf.append(argname); buf.append(" The "); buf.append(argname); buf.append(" to set\n"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
+				buf.append(" */\n"); //$NON-NLS-1$
+			}
+			buf.append("public "); //$NON-NLS-1$
+			if (isStatic) {
+				buf.append("static "); //$NON-NLS-1$
+			}
+			buf.append("void "); buf.append(setterName); //$NON-NLS-1$
+			buf.append('('); buf.append(typeName); buf.append(' '); 
+			buf.append(argname); buf.append(") {\n"); //$NON-NLS-1$
+			if (argname.equals(fieldName)) {
+				if (isStatic) {
+					buf.append(parentType.getElementName());
+					buf.append('.');
+				} else {
+					buf.append("this."); //$NON-NLS-1$
+				}
+			}
+			buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n}\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			IJavaElement sibling= null;
+			if (existingSetter != null) {
+				sibling= StubUtility.findNextSibling(existingSetter);
+				existingSetter.delete(false, null);
+			}
+			
+			String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
+			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
+		}
+	}			
 	
 	/**
 	 * Returns the created accessors. To be called after a sucessful run.
