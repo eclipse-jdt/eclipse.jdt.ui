@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
@@ -55,6 +57,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -704,6 +707,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		private Color fColor;
 		/** The key modifier mask. */
 		private int fKeyModifierMask;
+		
+		/**
+		 * The URL string if a URL was detected or <code>null</code> otherwise.
+		 * @since 3.1
+		 */
+		private String fURLString;
 
 		
 		public void deactivate() {
@@ -966,14 +975,67 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					elements= ((ICodeAssist) input).codeSelect(offset, 0);
 				}
 				
+				IDocument document= viewer.getDocument();
 				if (elements == null || elements.length == 0)
-					return null;
-					
-				return selectWord(viewer.getDocument(), offset);
+					return findAndSetURLText(document, offset);
+				else
+					return selectWord(document, offset);
 					
 			} catch (JavaModelException e) {
 				return null;	
 			}
+		}
+		
+		private IRegion findAndSetURLText(IDocument document, int offset) {
+			fURLString= null;
+			if (document == null)
+				return null;
+			
+			IRegion lineInfo;
+			String line;
+			try {
+				lineInfo= document.getLineInformationOfOffset(offset);
+				line= document.get(lineInfo.getOffset(), lineInfo.getLength());
+			} catch (BadLocationException ex) {
+				return null;
+			}
+			
+			int offsetInLine= offset - lineInfo.getOffset();
+			
+			int urlSeparatorOffset= line.indexOf("://"); //$NON-NLS-1$
+			if (urlSeparatorOffset < 0)
+				return null;
+			
+			// URL protocol (left to "://")
+			int urlOffsetInLine= urlSeparatorOffset;
+			char ch;
+			do {
+				urlOffsetInLine--;
+				ch= ' ';
+				if (urlOffsetInLine > -1)
+					ch= line.charAt(urlOffsetInLine);
+			} while (!Character.isWhitespace(ch));
+			urlOffsetInLine++;
+			
+			// Right to "://"
+			StringTokenizer tokenizer= new StringTokenizer(line.substring(urlSeparatorOffset + 3));
+			if (!tokenizer.hasMoreTokens())
+				return null;
+			
+			int urlLength= tokenizer.nextToken().length() + 3 + urlSeparatorOffset - urlOffsetInLine;
+			if (offsetInLine < urlOffsetInLine || offsetInLine > urlOffsetInLine + urlLength)
+				return null;
+			
+			// Set and validate URL string
+			try {
+				fURLString= line.substring(urlOffsetInLine, urlOffsetInLine + urlLength);
+				new URL(fURLString);
+			} catch (MalformedURLException ex) {
+				fURLString= null;
+				return null;
+			}
+			
+			return new Region(lineInfo.getOffset() + urlOffsetInLine, urlLength);
 		}
 
 		private int getCurrentTextOffset(ISourceViewer viewer) {
@@ -1150,9 +1212,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			deactivate();
 
 			if (wasActive) {
-				IAction action= getAction("OpenEditor");  //$NON-NLS-1$
-				if (action != null)
-					action.run();
+				if (fURLString != null) {
+					Program.launch(fURLString);
+				} else {
+					IAction action= getAction("OpenEditor");  //$NON-NLS-1$
+					if (action != null)
+						action.run();
+				}
 			}
 		}
 
@@ -1190,6 +1256,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return;
 			}
 		
+			fURLString= null;
 			IRegion region= getCurrentTextRegion(viewer);
 			if (region == null || region.getLength() == 0) {
 				repairRepresentation();
