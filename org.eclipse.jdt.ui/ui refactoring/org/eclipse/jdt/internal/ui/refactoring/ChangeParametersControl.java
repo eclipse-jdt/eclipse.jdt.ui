@@ -168,7 +168,7 @@ public class ChangeParametersControl extends Composite {
 	private Button fAddButton;
 	private Button fRemoveButton;
 	private List fParameterInfos;
-	private TableCursor fTableCursor;
+	private TableCursor fTableCursor; 
 
 	public ChangeParametersControl(Composite parent, int style, String label, ParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters) {
 		super(parent, style);
@@ -199,9 +199,11 @@ public class ChangeParametersControl extends Composite {
 		fTableViewer.setInput(fParameterInfos);
 		if (fParameterInfos.size() > 0)
 			fTableViewer.setSelection(new StructuredSelection(fParameterInfos.get(0)));
-		if (fTableCursor != null && getTableItemCount() == 0){
-			fTableCursor.dispose();
-			fTableCursor= null;
+			
+		//XXX workaround for bug 24798	
+		if (canEditTableCells() && fTableCursor == null && getTableItemCount() != 0){
+			addTableCursor(getTable());		
+			showTableCursor(true);
 		}	
 	}
 
@@ -246,7 +248,7 @@ public class ChangeParametersControl extends Composite {
 
 		if (canEditTableCells()){
 			addCellEditors();
-			addTableCursor(table);
+//			addTableCursor(table); //XXX don't create it here  see bug 24798
 		}	
 	}
 
