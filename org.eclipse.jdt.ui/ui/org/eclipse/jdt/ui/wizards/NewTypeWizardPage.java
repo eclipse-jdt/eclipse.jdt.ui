@@ -33,6 +33,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -53,8 +54,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.compiler.env.IConstants;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -65,13 +66,13 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -128,7 +129,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 * 
 		 * @param qualifiedTypeName The fully qualified name of the type to import
 		 * (dot separated)
-		 * @return Retuns the simple type name that can be used in the code or the
+		 * @return Returns the simple type name that can be used in the code or the
 		 * fully qualified type name if an import conflict prevented the import
 		 */				
 		public String addImport(String qualifiedTypeName) {
@@ -137,17 +138,17 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/** Public access flag. See The Java Virtual Machine Specification for more details. */
-	public int F_PUBLIC = IConstants.AccPublic;
+	public int F_PUBLIC = Flags.AccPublic;
 	/** Private access flag. See The Java Virtual Machine Specification for more details. */
-	public int F_PRIVATE = IConstants.AccPrivate;
+	public int F_PRIVATE = Flags.AccPrivate;
 	/**  Protected access flag. See The Java Virtual Machine Specification for more details. */
-	public int F_PROTECTED = IConstants.AccProtected;
+	public int F_PROTECTED = Flags.AccProtected;
 	/** Static access flag. See The Java Virtual Machine Specification for more details. */
-	public int F_STATIC = IConstants.AccStatic;
+	public int F_STATIC = Flags.AccStatic;
 	/** Final access flag. See The Java Virtual Machine Specification for more details. */
-	public int F_FINAL = IConstants.AccFinal;
+	public int F_FINAL = Flags.AccFinal;
 	/** Abstract property flag. See The Java Virtual Machine Specification for more details. */
-	public int F_ABSTRACT = IConstants.AccAbstract;
+	public int F_ABSTRACT = Flags.AccAbstract;
 
 	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
 	
