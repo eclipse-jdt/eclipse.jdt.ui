@@ -212,6 +212,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	private boolean fFieldsInitialized= false;
 
+	/**
+	 * List of master/slave listeners when there's a dependency.
+	 * 
+	 * @see #createDependency(Button, String, Control)
+	 * @since 3.0
+	 */
+	private ArrayList fMasterSlaveListeners= new ArrayList();
+
 	
 	/**
 	 * Creates a new preference page.
@@ -284,7 +292,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_DISABLE_CUSTOM_CARETS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_WIDE_CARET));
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_OCCURRENCES));
@@ -643,11 +651,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0); //$NON-NLS-1$
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.disableCustomCarets"); //$NON-NLS-1$
-		master= addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_DISABLE_CUSTOM_CARETS, 0);
+		master= addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, 0);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.wideCaret"); //$NON-NLS-1$
 		slave= addCheckBox(appearanceComposite, label, ExtendedTextEditorPreferenceConstants.EDITOR_WIDE_CARET, 0);
-		createDependency(master, ExtendedTextEditorPreferenceConstants.EDITOR_DISABLE_CUSTOM_CARETS, slave);
+		createDependency(master, ExtendedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, slave);
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -1018,13 +1026,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		indent(slave);
 		boolean masterState= fOverlayStore.getBoolean(masterKey);
 		slave.setEnabled(masterState);
-		master.addSelectionListener(new SelectionListener() {
+		SelectionListener listener= new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				slave.setEnabled(master.getSelection());
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {}
-		});
+		};
+		master.addSelectionListener(listener);
+		fMasterSlaveListeners.add(listener);
 	}
 
 	private Control createContentAssistPage(Composite parent) {
@@ -1440,6 +1450,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
         
         fFieldsInitialized= true;
         updateStatus(validatePositiveNumber("0")); //$NON-NLS-1$
+        
+        // Update slaves
+        Iterator iter= fMasterSlaveListeners.iterator();
+        while (iter.hasNext()) {
+            SelectionListener listener= (SelectionListener)iter.next();
+            listener.widgetSelected(null);
+        }
 	}
 
 	private void initializeDefaultColors() {	
