@@ -22,6 +22,9 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -124,7 +127,12 @@ public class NewEnumWizardPage extends NewTypeWizardPage {
 		
 		createCommentControls(composite, nColumns);
 		enableCommentControl(true);
-						
+		boolean annotations= false;
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root != null)
+			annotations= JavaModelUtil.is50OrHigher(root.getJavaProject());
+		enableAnnotationControl(annotations);
+		
 		setControl(composite);
 		
 		Dialog.applyDialogFont(composite);

@@ -65,7 +65,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -78,17 +77,25 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -220,6 +227,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
 	
 	private final static String DIALOGSETTINGS_ADDCOMMENTS= "NewTypeWizardPage.add_comments"; //$NON-NLS-1$
+
+	private final static String DIALOGSETTINGS_ADDANNOTATIONS= "NewTypeWizardPage.add_annotations"; //$NON-NLS-1$
 	
 	/** Field ID of the package input field. */
 	protected final static String PACKAGE= PAGE_NAME + ".package";	 //$NON-NLS-1$
@@ -275,7 +284,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
 	
 	private SelectionButtonDialogField fAddCommentButton;
-	private boolean fUseAddCommentButtonValue; // used for compatibilty: Wizards that don't show the comment button control
+	private SelectionButtonDialogField fAddAnnotationButton;
+	private boolean fUseAddCommentButtonValue;
+	private boolean fUseAddAnnotationButtonValue;
+	// used for compatibilty: Wizards that don't show the comment button control
 	// will use the preferences settings
 	
 	private IType fCreatedType;
@@ -426,7 +438,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fAddCommentButton.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.addcomment.label")); //$NON-NLS-1$
 		fAddCommentButton.setSelection(JavaPlugin.getDefault().getDialogSettings().getBoolean(DIALOGSETTINGS_ADDCOMMENTS));
 		
+		fAddAnnotationButton= new SelectionButtonDialogField(SWT.CHECK);
+		fAddAnnotationButton.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.addannotation.label")); //$NON-NLS-1$
+		fAddAnnotationButton.setSelection(JavaPlugin.getDefault().getDialogSettings().getBoolean(DIALOGSETTINGS_ADDANNOTATIONS));
+		
 		fUseAddCommentButtonValue= false; // only used when enabled
+		fUseAddAnnotationButtonValue= true; // only used when enabled
 		
 		fCurrPackageCompletionProcessor= new JavaPackageCompletionProcessor();
 		fEnclosingTypeCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
@@ -676,6 +693,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		DialogField.createEmptySpace(composite);
 		fAddCommentButton.doFillIntoGrid(composite, nColumns - 1);
+		DialogField.createEmptySpace(composite);
+		fAddAnnotationButton.doFillIntoGrid(composite, nColumns - 1);
 	}
 
 
@@ -1086,6 +1105,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
+	 * Sets 'Add annotation' checkbox. The value set will only be used when creating source when
+	 * the annotation control is enabled (see {@link #enableAnnotationControl(boolean)}
+	 * 
+	 * @param doAddAnnotations if <code>true</code>, annotations are added.
+	 * @param canBeModified if <code>true</code> check box is
+	 * editable; otherwise it is read-only.
+	 * 	@since 3.1
+	 */	
+	public void setAddAnnotations(boolean doAddAnnotations, boolean canBeModified) {
+		fAddAnnotationButton.setSelection(doAddAnnotations);
+		fAddAnnotationButton.setEnabled(canBeModified);
+	}
+	
+	/**
 	 * Sets to use the 'Add comment' checkbox value. Clients that use the 'Add comment' checkbox
 	 * additionally have to enable the control. This has been added for backwards compatibility.
 	 * 
@@ -1096,6 +1129,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fUseAddCommentButtonValue= useAddCommentValue;
 	}
 	
+	/**
+	 * Sets to use the 'Add annotation' checkbox value. Clients that use the 'Add annotation' checkbox
+	 * additionally have to enable the control. This has been added for backwards compatibility.
+	 * 
+	 * @param useAddAnnotationValue if <code>true</code>, 
+	 * 	@since 3.1
+	 */	
+	public void enableAnnotationControl(boolean useAddAnnotationValue) {
+		fUseAddAnnotationButtonValue= useAddAnnotationValue;
+	}
 	
 	/**
 	 * Returns if comments are added. This method can be overridden by clients.
@@ -1112,6 +1155,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		IJavaProject project= (root != null) ? root.getJavaProject() : null; // use project settings 
 		return StubUtility.doAddComments(project); 
+	}
+	
+	/**
+	 * Returns if annotations are added. This method can be overridden by clients.
+	 * The selection of the annotation control is taken if enabled (see {@link #enableAnnotationControl(boolean)}, otherwise
+	 * the settings as specified in the preferences is used.
+	 * 
+	 * @return Returns <code>true</code> if annotations can be added
+	 * @since 3.1
+	 */	
+	public boolean isAddAnnotations() {
+		if (fUseAddAnnotationButtonValue) {
+			return fAddAnnotationButton.isSelected();
+		}
+		return false;
 	}
 			
 	/**
@@ -2097,42 +2155,63 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @throws CoreException thrown when the creation fails.
 	 */
 	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
+		final ICompilationUnit cu= type.getCompilationUnit();
+		JavaModelUtil.reconcile(cu);
+		IMethod[] typeMethods= type.getMethods();
+		Set handleIds= new HashSet(typeMethods.length);
+		for (int index= 0; index < typeMethods.length; index++)
+			handleIds.add(typeMethods[index].getHandleIdentifier());
 		ArrayList newMethods= new ArrayList();
-		ITypeHierarchy hierarchy= null;
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());	
-
-		if (doConstructors) {
-			hierarchy= type.newSupertypeHierarchy(monitor);
-			IType superclass= hierarchy.getSuperclass(type);
-			if (superclass != null) {
-				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports.fImportsStructure);
-				if (constructors != null) {
-					for (int i= 0; i < constructors.length; i++) {
-						newMethods.add(constructors[i]);
-					}
-				}
-			
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
+		settings.createComments= isAddComments();
+		ITypeBinding binding= null;
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setResolveBindings(true);
+		parser.setSource(cu);
+		CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
+		if (type.isAnonymous()) {
+			ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), ClassInstanceCreation.class);
+			if (creation != null)
+				binding= creation.resolveTypeBinding();
+		} else {
+			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
+			if (declaration != null)
+				binding= declaration.resolveBinding();
+		}
+		if (binding != null) {
+			if (doConstructors) {
+				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, null, createBindingKeys(StubUtility2.getVisibleConstructors(binding)), settings, false, true, true);
+				operation.run(monitor);
+				createImports(imports, operation.getCreatedImports());
+			}
+			if (doUnimplementedMethods) {
+				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, isAddAnnotations(), false, true, true);
+				operation.run(monitor);
+				createImports(imports, operation.getCreatedImports());
 			}
 		}
-		if (doUnimplementedMethods) {
-			if (hierarchy == null) {
-				hierarchy= type.newSupertypeHierarchy(monitor);
-			}			
-			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, imports.fImportsStructure);
-			if (unimplemented != null) {
-				for (int i= 0; i < unimplemented.length; i++) {
-					newMethods.add(unimplemented[i]);					
-				}
-			}
-		}
-		IMethod[] createdMethods= new IMethod[newMethods.size()];
-		for (int i= 0; i < newMethods.size(); i++) {
-			String content= (String) newMethods.get(i) + '\n'; // content will be formatted, OK to use \n
-			createdMethods[i]= type.createMethod(content, null, false, null);
-		}
-		return createdMethods;
+		JavaModelUtil.reconcile(cu);
+		typeMethods= type.getMethods();
+		for (int index= 0; index < typeMethods.length; index++)
+			if (!handleIds.contains(typeMethods[index].getHandleIdentifier()))
+				newMethods.add(typeMethods[index]);
+		IMethod[] methods= new IMethod[newMethods.size()];
+		newMethods.toArray(methods);
+		return methods;
 	}
-	
+
+	private void createImports(ImportsManager imports, String[] createdImports) {
+		for (int index= 0; index < createdImports.length; index++)
+			imports.addImport(createdImports[index]);
+	}
+
+	private String[] createBindingKeys(IBinding[] bindings) {
+		String[] keys= new String[bindings.length];
+		for (int index= 0; index < bindings.length; index++)
+			keys[index]= bindings[index].getKey();
+		return keys;
+	}
+
 	/**
 	 * @deprecated Use createInheritedMethods(IType,boolean,boolean,IImportsManager,IProgressMonitor)
 	 */
@@ -2168,7 +2247,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public void dispose() {
 		JavaPlugin.getDefault().getDialogSettings().put(DIALOGSETTINGS_ADDCOMMENTS, fAddCommentButton.isSelected());
+		JavaPlugin.getDefault().getDialogSettings().put(DIALOGSETTINGS_ADDANNOTATIONS, fAddAnnotationButton.isSelected());
 		super.dispose();
 	}
-
 }

@@ -27,7 +27,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -160,6 +167,11 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		
 		createCommentControls(composite, nColumns);
 		enableCommentControl(true);
+		boolean annotations= false;
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root != null)
+			annotations= JavaModelUtil.is50OrHigher(root.getJavaProject());
+		enableAnnotationControl(annotations);
 		
 		setControl(composite);
 			
@@ -246,9 +258,18 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 
 		if (doMain) {
 			StringBuffer buf= new StringBuffer();
+			String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", new String[] {"args"}, new String[0], Signature.createTypeSignature("void", true), null, StubUtility.getLineDelimiterUsed(type)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (comment != null) {
+				buf.append(comment);
+				buf.append('\n');
+			}
 			buf.append("public static void main("); //$NON-NLS-1$
 			buf.append(imports.addImport("java.lang.String")); //$NON-NLS-1$
-			buf.append("[] args) {}"); //$NON-NLS-1$
+			buf.append("[] args) {\n"); //$NON-NLS-1$
+			final String content= CodeGeneration.getMethodBodyContent(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", false, "", "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (content != null && content.length() != 0)
+				buf.append(content);
+			buf.append("\n}"); //$NON-NLS-1$
 			type.createMethod(buf.toString(), null, false, null);
 		}
 		
