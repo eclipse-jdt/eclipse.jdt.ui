@@ -132,15 +132,19 @@ public class RefactoringStatus {
 			return result;
 		}
 	}
-	
-	private static RefactoringStatus createStatus(int severity, String msg, Context context) {
+
+	public static RefactoringStatus createStatus(int severity, String msg, Context context, Object data, int code) {
 		RefactoringStatus result= new RefactoringStatus(); 
-		result.fEntries.add(new RefactoringStatusEntry(msg, severity, context));
+		result.fEntries.add(new RefactoringStatusEntry(msg, severity, context, data, code));
 		result.fSeverity= severity;
 		return result;
 	}
 	
-	private static RefactoringStatus createStatus(int severity, String msg){
+	public static RefactoringStatus createStatus(int severity, String msg, Context context) {
+		return createStatus(severity, msg, context, null, RefactoringStatusCodes.NONE);
+	}
+	
+	public static RefactoringStatus createStatus(int severity, String msg){
 		return createStatus(severity, msg, null);
 	}
 	
