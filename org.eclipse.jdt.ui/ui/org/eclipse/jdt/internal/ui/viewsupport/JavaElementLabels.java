@@ -464,8 +464,8 @@ public class JavaElementLabels {
 			if (!pack.isDefaultPackage()) {
 				getPackageFragmentLabel(pack, (flags & P_COMPRESSED), buf);
 				buf.append('.');
-				buf.append(JavaModelUtil.getTypeQualifiedName(type));
 			}
+			buf.append(JavaModelUtil.getTypeQualifiedName(type));
 		} else if (getFlag(flags, T_CONTAINER_QUALIFIED)) {
 			buf.append(JavaModelUtil.getTypeQualifiedName(type));
 		} else {
