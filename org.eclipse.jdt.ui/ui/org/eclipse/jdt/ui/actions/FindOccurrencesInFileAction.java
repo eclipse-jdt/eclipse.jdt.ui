@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
@@ -92,6 +93,10 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	
 	private FindOccurrencesInFileAction(IWorkbenchSite site) {
 		super(site);
+		ISelection selection= getSelection();
+		if (selection instanceof IStructuredSelection) {
+			setEnabled(getMember((IStructuredSelection)selection) != null);		
+		}
 		setText(SearchMessages.getString("Search.FindOccurrencesInFile.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindOccurrencesInFile.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_OCCURRENCES_IN_FILE_ACTION);
