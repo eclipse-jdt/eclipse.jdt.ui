@@ -110,6 +110,7 @@ public class JavaSearchScopeFactory {
 		return createJavaProjectSearchScope(new StructuredSelection(selection), includeJRE);
 	}
 	
+	
 	public IJavaSearchScope createJavaProjectSearchScope(ISelection selection, boolean includeJRE) {
 		IEditorInput input= getActiveEditorInput();
 		if (input != null)
@@ -117,6 +118,24 @@ public class JavaSearchScopeFactory {
 		return internalCreateProjectScope(selection, includeJRE);
 		
 	}
+	public String getProjectScopeDescription(IJavaElement element) {
+		IJavaProject project= element.getJavaProject();
+		IEditorInput input= getActiveEditorInput();
+		if (input != null) {
+			IAdaptable inputElement = getEditorInputElement(input);
+			if (inputElement != null) {
+				IJavaProject project2= getJavaProject(inputElement);
+				if (project2 != null)
+					project= project2;
+			}
+		}
+
+		if (project != null)
+			return SearchMessages.getFormattedString("ProjectScope", project.getElementName()); //$NON-NLS-1$
+		else 
+			return SearchMessages.getFormattedString("ProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 	private IEditorInput getActiveEditorInput() {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null) {

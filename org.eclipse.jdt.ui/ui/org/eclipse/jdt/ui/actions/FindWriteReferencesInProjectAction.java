@@ -20,7 +20,6 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
-import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -68,7 +67,7 @@ public class FindWriteReferencesInProjectAction extends FindWriteReferencesActio
 	}
 
 	String getScopeDescription(IJavaElement element) {
-		return SearchUtil.getProjectScopeDescription(element);
+		return JavaSearchScopeFactory.getInstance().getProjectScopeDescription(element);
 	}
 
 	JavaSearchOperation makeOperation(IJavaElement element) {

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -23,7 +24,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -368,13 +368,5 @@ public class SearchUtil {
 		char first= fieldType.charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_ARRAY)
 			|| (first == Signature.C_RESOLVED && fieldType.substring(1, fieldType.length() - 1).equals(String.class.getName()));
-	}
-	
-	public static String getProjectScopeDescription(IJavaElement element) {
-		IJavaProject project= element.getJavaProject();
-		if (project != null)
-			return SearchMessages.getFormattedString("ProjectScope", project.getElementName()); //$NON-NLS-1$
-		else 
-			return SearchMessages.getFormattedString("ProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
