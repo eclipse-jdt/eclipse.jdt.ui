@@ -88,10 +88,17 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	public static RenamePackageRefactoring create(IPackageFragment pack) throws JavaModelException{
-		RenamePackageRefactoring ref= new RenamePackageRefactoring(pack);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(pack))
 			return null;
-		return ref;
+		return new RenamePackageRefactoring(pack);
+	}
+	
+	public static boolean isAvailable(IPackageFragment pack) throws JavaModelException{
+		if (! Checks.isAvailable(pack))
+			return false;
+		if (pack.isDefaultPackage())
+			return false;
+		return true;
 	}
 	
 	/* non java-doc
@@ -241,21 +248,10 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	//--- preconditions
 	
-	private RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkAvailability(fPackage));
-		
-		if (fPackage.isDefaultPackage())
-			result.addFatalError(""); //$NON-NLS-1$
-		return result;
-	}
-	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 1); //$NON-NLS-1$
-		RefactoringStatus result= checkPreactivation();
-		//TODO fix this 		
 		pm.done();	
-		return result;
+		return new RefactoringStatus();
 	}
 	
 	public RefactoringStatus checkNewName(String newName) throws JavaModelException{

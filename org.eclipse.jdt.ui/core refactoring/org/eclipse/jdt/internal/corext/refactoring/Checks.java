@@ -571,6 +571,20 @@ public class Checks {
 			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.binary", javaElement.getElementName())); //$NON-NLS-1$
 		return result;
 	}
+	
+	public static boolean isAvailable(IJavaElement javaElement) throws JavaModelException{
+		if (javaElement == null)
+			return false;
+		if (! javaElement.exists())
+			return false;
+		if (javaElement.isReadOnly())
+			return false;
+		if (!javaElement.isStructureKnown())
+			return false;
+		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
+			return false;
+		return true;
+	}
 
 	public static IType findTypeInPackage(IPackageFragment pack, String name) throws JavaModelException{
 		Assert.isTrue(pack.exists());

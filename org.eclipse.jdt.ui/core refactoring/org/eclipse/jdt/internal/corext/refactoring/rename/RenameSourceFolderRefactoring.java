@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -42,10 +43,28 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	}
 	
 	public static RenameSourceFolderRefactoring create(IPackageFragmentRoot sourceFolder) throws JavaModelException{
-		RenameSourceFolderRefactoring ref= new RenameSourceFolderRefactoring(sourceFolder);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(sourceFolder))
 			return null;
-		return ref;
+		return new RenameSourceFolderRefactoring(sourceFolder);
+	}
+	
+	public static boolean isAvailable(IPackageFragmentRoot sourceFolder) throws JavaModelException{
+		if (! Checks.isAvailable(sourceFolder))
+			return false;
+		
+		if (sourceFolder.isArchive())
+			return false;
+		
+		if (sourceFolder.isExternal())	
+			return false;
+			
+		if (! sourceFolder.isConsistent())	
+			return false;
+		
+		if (sourceFolder.getResource() instanceof IProject)
+			return false;
+
+		return true;
 	}
 	
 	/* non java-doc
@@ -88,39 +107,13 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 		return fSourceFolder.getElementName();
 	}
 			
-	private RefactoringStatus checkPreactivation() throws JavaModelException {
-		if (! fSourceFolder.exists())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-		
-		if (fSourceFolder.isArchive())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-		
-		if (fSourceFolder.isExternal())	
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-		if (fSourceFolder.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-		if (! fSourceFolder.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus("");	 //$NON-NLS-1$
-		
-		if (! fSourceFolder.isConsistent())	
-			return RefactoringStatus.createFatalErrorStatus("");	 //$NON-NLS-1$
-		
-		if (fSourceFolder.getResource() instanceof IProject)
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-
-		return new RefactoringStatus();
-	}
-	
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);  //$NON-NLS-1$
 		pm.done();
-		//TODO could simply return OK status
-		return checkPreactivation();
+		return new RefactoringStatus();
 	}
 
 	/* non java-doc

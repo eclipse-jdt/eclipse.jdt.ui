@@ -131,10 +131,13 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	public static MoveInnerToTopRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
-		MoveInnerToTopRefactoring ref= new MoveInnerToTopRefactoring(type, codeGenerationSettings);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(type))
 			return null;
-		return ref;
+		return new MoveInnerToTopRefactoring(type, codeGenerationSettings);
+	}
+	
+	public static boolean isAvailable(IType type) throws JavaModelException{
+		return (Checks.isAvailable(type) && ! Checks.isTopLevel(type));
 	}
 	
 	public boolean isInstanceFieldMarkedFinal(){
@@ -201,26 +204,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	public void setEnclosingInstanceName(String name){
 		Assert.isNotNull(name);
 		fEnclosingInstanceFieldName= name;
-	}
-	
-	private RefactoringStatus checkPreactivation() throws JavaModelException {
-		RefactoringStatus result= Checks.checkAvailability(fType);	
-		if (result.hasFatalError())
-			return result;
-		if (Checks.isTopLevel(fType))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.only_nested_types")); //$NON-NLS-1$
-		return result;
-	}
-
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
 	}
 	
 	/*

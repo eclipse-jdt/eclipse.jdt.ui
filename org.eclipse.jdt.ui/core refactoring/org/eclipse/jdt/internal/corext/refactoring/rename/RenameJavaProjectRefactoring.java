@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -42,10 +43,17 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	}
 	
 	public static RenameJavaProjectRefactoring create(IJavaProject project) throws JavaModelException{
-		RenameJavaProjectRefactoring ref= new RenameJavaProjectRefactoring(project);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(project))
 			return null;
-		return ref;
+		return new RenameJavaProjectRefactoring(project);
+	}
+	
+	public static boolean isAvailable(IJavaProject project) throws JavaModelException{
+		if (! Checks.isAvailable(project))	
+			return false;
+		if (! project.isConsistent())
+			return false;	
+		return true;
 	}
 	
 	public Object getNewElement() throws JavaModelException{
@@ -108,30 +116,13 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 		
 	//-- preconditions
 	
-	private RefactoringStatus checkPreactivation() throws JavaModelException {
-		if (! fProject.exists())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-		
-		if (fProject.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-		
-		if (! fProject.isConsistent())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-		
-		if (! fProject.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-		
-		return new RefactoringStatus();
-	}
-
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);  //$NON-NLS-1$
 		pm.done();
-		//TODO could simply return OK status
-		return checkPreactivation();
+		return new RefactoringStatus();
 	}
 	
 	/* non java-doc

@@ -74,10 +74,25 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	}
 	
 	public static MoveStaticMembersRefactoring create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
-		MoveStaticMembersRefactoring ref= new MoveStaticMembersRefactoring(elements, preferenceSettings);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(elements))
 			return null;
-		return ref;
+		return new MoveStaticMembersRefactoring(elements, preferenceSettings);
+	}
+	
+	public static boolean isAvailable(IMember[] elements) throws JavaModelException{
+		if (elements == null)
+			return false;
+
+		if (elements.length == 0)
+			return false;
+		
+		if (! areAllMoveable(elements))
+			return false;		
+
+		if (! haveCommonDeclaringType(elements))
+			return false;
+		
+		return true;
 	}
 	
 	/*
@@ -105,42 +120,13 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return getDeclaringType().getJavaProject().findType(fullyQualifiedTypeName);
 	}
 
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
-	}
-	
-	private RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-			
-		result.merge(checkAllElements());
-		if (result.hasFatalError())
-			return result;
-			
-		if (! haveCommonDeclaringType())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.same_type"));			 //$NON-NLS-1$
-		
-		return new RefactoringStatus();
-	}
-	
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus preAct= checkPreactivation();
-		if (preAct.hasFatalError())
-			return preAct;
 		try{
 			pm.beginTask("", 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(preAct);
-			
 			result.merge(checkDeclaringType());
 			pm.worked(1);
 			if (result.hasFatalError())
@@ -423,40 +409,36 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	private static boolean canDeclareStaticMembers(IType type) throws JavaModelException {
 		return (JdtFlags.isStatic(type)) || (type.getDeclaringType() == null);
 	}
-
-	private RefactoringStatus checkAllElements() throws JavaModelException{
-		//just 1 error message
-		for (int i = 0; i < fMembers.length; i++) {
-			IMember member = fMembers[i];
-
-			if (member.getElementType() != IJavaElement.METHOD && 
-				member.getElementType() != IJavaElement.FIELD)
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.fields_methods")); //$NON-NLS-1$
-			if (! member.exists())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.exist")); //$NON-NLS-1$
 	
-			if (member.isBinary())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.binary_elements"));	 //$NON-NLS-1$
-
-			if (member.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.read_only_elements")); //$NON-NLS-1$
-
-			if (! member.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.structure")); //$NON-NLS-1$
-
-			if (member.getElementType() == IJavaElement.METHOD && member.getDeclaringType().isInterface())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.interface_methods")); //$NON-NLS-1$
-				
-			if (member.getElementType() == IJavaElement.METHOD && ! JdtFlags.isStatic(member))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.static_methods")); //$NON-NLS-1$
-
-			if (! member.getDeclaringType().isInterface() && ! JdtFlags.isStatic(member))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.static_elements")); //$NON-NLS-1$
-			
-			if (member.getElementType() == IJavaElement.METHOD && ((IMethod)member).isConstructor())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.constructors"));	//$NON-NLS-1$
+	private static boolean areAllMoveable(IMember[] elements) throws JavaModelException{
+		for (int i = 0; i < elements.length; i++) {
+			if (! isMoveable(elements[i]))
+				return false;
 		}
-		return null;
+		return true;
+	}
+	
+	private static boolean isMoveable(IMember member) throws JavaModelException{
+		if (member.getElementType() != IJavaElement.METHOD && 
+			member.getElementType() != IJavaElement.FIELD)
+				return false;
+
+		if (! Checks.isAvailable(member))
+			return false;
+			
+		if (member.getElementType() == IJavaElement.METHOD && member.getDeclaringType().isInterface())
+			return false;
+				
+		if (member.getElementType() == IJavaElement.METHOD && ! JdtFlags.isStatic(member))
+			return false;
+
+		if (! member.getDeclaringType().isInterface() && ! JdtFlags.isStatic(member))
+			return false;
+			
+		if (member.getElementType() == IJavaElement.METHOD && ((IMethod)member).isConstructor())
+			return false;
+			
+		return true;
 	}
 	
 	private RefactoringStatus checkDeclaringType() throws JavaModelException{
@@ -479,10 +461,10 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return  fMembers[0].getDeclaringType(); //index safe - checked in constructor
 	}
 	
-	private boolean haveCommonDeclaringType(){
-		IType declaringType= fMembers[0].getDeclaringType(); //index safe - checked in constructor
-		for (int i= 0; i < fMembers.length; i++) {
-			if (! declaringType.equals(fMembers[i].getDeclaringType()))
+	private static boolean haveCommonDeclaringType(IMember[] members){
+		IType declaringType= members[0].getDeclaringType(); //index safe - checked in constructor
+		for (int i= 0; i < members.length; i++) {
+			if (! declaringType.equals(members[i].getDeclaringType()))
 				return false;			
 		}	
 		return true;

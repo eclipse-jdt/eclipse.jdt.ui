@@ -239,10 +239,21 @@ public class PushDownRefactoring extends Refactoring {
 	}
 
 	public static PushDownRefactoring create(IMember[] members, CodeGenerationSettings preferenceSettings) throws JavaModelException{
-		PushDownRefactoring ref= new PushDownRefactoring(members, preferenceSettings);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(members))
 			return null;
-		return ref;
+		return new PushDownRefactoring(members, preferenceSettings);
+	}
+	
+	public static boolean isAvailable(IMember[] members) throws JavaModelException{
+		if (members == null)
+			return false;
+		if (members.length == 0)
+			return false;
+		if (! areAllPushable(members))
+			return false;
+		if (! haveCommonDeclaringType(members))
+			return false;
+		return true;
 	}
 	
 	/*
@@ -261,78 +272,25 @@ public class PushDownRefactoring extends Refactoring {
 	}
 
 
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
-	}
-	
-	private RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-					
-		result.merge(checkAllSelectedMembers());
-		if (result.hasFatalError())
-			return result;
-		
-		if (! haveCommonDeclaringType())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.no_common_type")); //$NON-NLS-1$
-
-		return new RefactoringStatus();
-	}
-
-	private boolean haveCommonDeclaringType() {
-		IType declaringType= fSelectedMembers[0].getDeclaringType(); //index safe - checked in constructor
+	private static boolean haveCommonDeclaringType(IMember[] members) {
+		if (members.length == 0)
+			return false;
+		IType declaringType= members[0].getDeclaringType();
 		if (declaringType == null)
 			return false;
-		for (int i= 0; i < fSelectedMembers.length; i++) {
-			if (! declaringType.equals(fSelectedMembers[i].getDeclaringType()))
+		for (int i= 0; i < members.length; i++) {
+			if (! declaringType.equals(members[i].getDeclaringType()))
 				return false;
 		}
 		return true;
 	}
 
-	private RefactoringStatus checkAllSelectedMembers() throws JavaModelException {
-		for (int i = 0; i < fSelectedMembers.length; i++) {
-			RefactoringStatus status= checkElement(fSelectedMembers[i]);
-			if (! status.isOK())
-				return status;
+	private static boolean areAllPushable(IMember[] members) throws JavaModelException {
+		for (int i = 0; i < members.length; i++) {
+			if (! isPushable(members[i]))
+				return false;
 		}
-		return new RefactoringStatus();
-	}
-	
-	private static RefactoringStatus checkElement(IMember member) throws JavaModelException{
-		if (member.getElementType() != IJavaElement.METHOD && 
-			member.getElementType() != IJavaElement.FIELD)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.only_fields_and_methods")); //$NON-NLS-1$
-		if (! member.exists())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.not_exists")); //$NON-NLS-1$
-	
-		if (member.isBinary())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.binary")); //$NON-NLS-1$
-
-		if (member.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.read_only")); //$NON-NLS-1$
-
-		if (! member.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.unknown_structure")); //$NON-NLS-1$
-
-		if (JdtFlags.isStatic(member))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.static")); //$NON-NLS-1$
-			
-		if (member.getElementType() == IJavaElement.METHOD){
-			IMethod method= (IMethod) member;
-			if (method.isConstructor())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.constructors")); //$NON-NLS-1$
-			
-			if (JdtFlags.isNative(method))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.native")); //$NON-NLS-1$
-		}
-		return new RefactoringStatus();	
+		return true;
 	}
 
 	/*
@@ -422,7 +380,25 @@ public class PushDownRefactoring extends Refactoring {
 	}
 
 	private static boolean isPushable(IMember member) throws JavaModelException {
-		return checkElement(member).isOK();
+		if (member.getElementType() != IJavaElement.METHOD && 
+			member.getElementType() != IJavaElement.FIELD)
+			return false;
+
+		if (! Checks.isAvailable(member))
+			return false;
+		
+		if (JdtFlags.isStatic(member))
+			return false;
+			
+		if (member.getElementType() == IJavaElement.METHOD){
+			IMethod method= (IMethod) member;
+			if (method.isConstructor())
+				return false;
+			
+			if (JdtFlags.isNative(method))
+				return false;
+		}
+		return true;
 	}
 
 	public MemberActionInfo[] getMemberActionInfos(){

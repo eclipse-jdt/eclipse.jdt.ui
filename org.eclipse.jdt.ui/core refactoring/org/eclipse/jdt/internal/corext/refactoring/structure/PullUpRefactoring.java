@@ -250,10 +250,21 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	public static PullUpRefactoring create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
-		PullUpRefactoring ref= new PullUpRefactoring(elements, preferenceSettings);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(elements))
 			return null;
-		return ref;
+		return new PullUpRefactoring(elements, preferenceSettings);
+	}
+	
+	public static boolean isAvailable(IMember[] members) throws JavaModelException{
+		if (members == null)
+			return false;
+		if (members.length == 0)
+			return false;
+		if (! areAllPullable(members))
+			return false;
+		if (! haveCommonDeclaringType(members))
+			return false;
+		return true;
 	}
 	
 	/*
@@ -343,7 +354,28 @@ public class PullUpRefactoring extends Refactoring {
 		}	
 	}
 	private static boolean isPullable(IMember member) throws JavaModelException {
-		return checkElement(member).isOK();
+		if (member.getElementType() != IJavaElement.METHOD && 
+			member.getElementType() != IJavaElement.FIELD &&
+			member.getElementType() != IJavaElement.TYPE)
+				return false;
+		
+		if (! Checks.isAvailable(member))
+			return false;
+	
+		if (member instanceof IType){
+			if (! JdtFlags.isStatic(member))
+				return false;
+		}
+		if (member instanceof IMethod ){
+			IMethod method= (IMethod) member;
+			if (method.isConstructor())
+				return false;
+			
+			if (JdtFlags.isNative(method)) //for now - move to input preconditions
+				return false;
+		}
+
+		return true;	
 	}
 	
 	public ITypeHierarchy getTypeHierarchyOfTargetClass(IProgressMonitor pm) throws JavaModelException {
@@ -591,28 +623,6 @@ public class PullUpRefactoring extends Refactoring {
 		
 		return result;		
 	}
-	
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
-	}
-	
-	private RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus precheck= precheckAllElements(); //this just checks basic things like being binary etc.
-		if (precheck.hasFatalError())
-			return precheck;
-
-		if (! haveCommonDeclaringType())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.same_declaring_type"));			 //$NON-NLS-1$
-
-		return new RefactoringStatus();
-	}
 		
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
@@ -621,10 +631,6 @@ public class PullUpRefactoring extends Refactoring {
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-
-			result.merge(checkAllElements());
-			if (result.hasFatalError())
-				return result;
 
 			fMembersToPullUp= WorkingCopyUtil.getOriginals(fMembersToPullUp);
 						
@@ -837,67 +843,14 @@ public class PullUpRefactoring extends Refactoring {
 		return JavaElementUtil.createMethodSignature(method);
 	}
 
-	private RefactoringStatus precheckAllElements() throws JavaModelException {
-		//just 1 error message
-		for (int i = 0; i < fMembersToPullUp.length; i++) {
-			RefactoringStatus status= precheckElement(fMembersToPullUp[i]);
-			if (! status.isOK())
-				return status;
+	private static boolean areAllPullable(IMember[] members) throws JavaModelException {
+		for (int i = 0; i < members.length; i++) {
+			if (! isPullable(members[i]))
+				return false;
 		}
-		return new RefactoringStatus();
+		return true;
 	}
 
-	private RefactoringStatus checkAllElements() throws JavaModelException {
-		//just 1 error message
-		for (int i = 0; i < fMembersToPullUp.length; i++) {
-			RefactoringStatus status= checkElement(fMembersToPullUp[i]);
-			if (! status.isOK())
-				return status;
-		}
-		return new RefactoringStatus();
-	}
-
-	private static RefactoringStatus precheckElement(IMember member) throws JavaModelException{
-		if (member.getElementType() != IJavaElement.METHOD && 
-			member.getElementType() != IJavaElement.FIELD &&
-			member.getElementType() != IJavaElement.TYPE)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.only_fields_and_methods"));			 //$NON-NLS-1$
-				
-		if (! member.exists())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.elements_do_not_exist"));			 //$NON-NLS-1$
-	
-		if (member.isBinary())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_binary_elements"));	 //$NON-NLS-1$
-
-		if (member.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_read_only_elements"));					 //$NON-NLS-1$
-
-		if (! member.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_unknown_structure"));					 //$NON-NLS-1$
-
-		return new RefactoringStatus();	
-	}
-		
-	private static RefactoringStatus checkElement(IMember member) throws JavaModelException{
-		RefactoringStatus precheck= precheckElement(member);
-		if (precheck.hasFatalError())
-			return precheck;
-		
-		if (member instanceof IType){
-			if (! JdtFlags.isStatic(member))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.only_static_types")); //$NON-NLS-1$
-		}
-		if (member instanceof IMethod ){
-			IMethod method= (IMethod) member;
-			if (method.isConstructor())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_constructors"));			 //$NON-NLS-1$
-			
-			if (JdtFlags.isNative(method)) //for now - move to input preconditions
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_native_methods"));				 //$NON-NLS-1$
-		}
-		return new RefactoringStatus();	
-	}
-	
 	private RefactoringStatus checkDeclaringType(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 3); //$NON-NLS-1$
 		IType declaringType= getDeclaringType();
@@ -923,12 +876,14 @@ public class PullUpRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 	
-	private boolean haveCommonDeclaringType(){
-		IType declaringType= fMembersToPullUp[0].getDeclaringType(); //index safe - checked in constructor
+	private static boolean haveCommonDeclaringType(IMember[] members){
+		if (members.length == 0)
+			return false;
+		IType declaringType= members[0].getDeclaringType();
 		if (declaringType == null)
 			return false;
-		for (int i= 0; i < fMembersToPullUp.length; i++) {
-			if (! declaringType.equals(fMembersToPullUp[i].getDeclaringType()))
+		for (int i= 0; i < members.length; i++) {
+			if (! declaringType.equals(members[i].getDeclaringType()))
 				return false;			
 		}	
 		return true;

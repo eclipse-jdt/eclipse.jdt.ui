@@ -54,10 +54,22 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	}
 	
 	public static RenameCompilationUnitRefactoring create(ICompilationUnit cu) throws JavaModelException{
-		RenameCompilationUnitRefactoring ref= new RenameCompilationUnitRefactoring(cu);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(cu))
 			return null;
-		return ref;
+		return new RenameCompilationUnitRefactoring(cu);
+	}
+	
+	public static boolean isAvailable(ICompilationUnit cu){
+		//cannot call Checks.isAvailable here - we still want to rename if !isStructureKnown
+		if (cu == null)
+			return false;
+		if (! cu.exists())
+			return false;
+		if (cu.isWorkingCopy())
+			return false; //needs to be fed with a real cu
+		if (cu.isReadOnly())
+			return false;
+		return true;
 	}
 	
 	public Object getNewElement(){
@@ -70,17 +82,6 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		return pack.getCompilationUnit(getNewCuName());
 	}
 	
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
-	}
-
 	/* non java-doc
 	 * @see IRenameRefactoring#setNewName(String)
 	 * @param newName 'java' must not be included
@@ -264,38 +265,19 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	//--- preconditions
 	
 	/* non java-doc
-	 * @see IPreactivatedRefactoring#checkPreactivation
-	 */
-	private RefactoringStatus checkPreactivation() throws JavaModelException {
-		try{
-			ICompilationUnit cu= fCu;
-			
-			if (cu.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-			if (cancelTypeRenameDueToParseErrors())
-				fWillRenameType= false;
-			
-			return new RefactoringStatus();
-		} catch (JavaModelException e){
-			if (e.isDoesNotExist())
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			throw e;
-		}		
-	}
-	
-	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		if (cancelTypeRenameDueToParseErrors()){
-			Assert.isTrue(! fWillRenameType);
-			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed", fCu.getElementName())); //$NON-NLS-1$
+		if (fRenameTypeRefactoring != null && ! fCu.isStructureKnown()){
+			fRenameTypeRefactoring= null;
+			fWillRenameType= false;
+			return new RefactoringStatus();
 		}
 		
 		//for a test case what it's needed, see bug 24248 
 		//(the type might be gone from the editor by now)
 		if (fWillRenameType && fRenameTypeRefactoring != null && ! fRenameTypeRefactoring.getType().exists()){
+			fRenameTypeRefactoring= null;
 			fWillRenameType= false;
 			return new RefactoringStatus();
 		}
@@ -341,7 +323,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 			fRenameTypeRefactoring= RenameTypeRefactoring.create(type);
 		else
 			fRenameTypeRefactoring= null;
-		fWillRenameType= (fRenameTypeRefactoring != null);	
+		fWillRenameType= fRenameTypeRefactoring != null && fCu.isStructureKnown();
 	}
 
 	private IType getTypeWithTheSameName() {
@@ -356,10 +338,6 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		} catch (JavaModelException e) {
 			return null;
 		}
-	}
-	
-	private boolean cancelTypeRenameDueToParseErrors() throws JavaModelException {
-		return (fRenameTypeRefactoring != null) && (! fCu.isStructureKnown());
 	}
 	
 	private String getSimpleCUName(){

@@ -123,11 +123,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	public static ChangeSignatureRefactoring create(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, codeGenerationSettings);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(method))
 			return null;
-		return ref;
+		return new ChangeSignatureRefactoring(method, codeGenerationSettings);
 	}
+	
+	public static boolean isAvailable(IMethod method) throws JavaModelException{
+		return Checks.isAvailable(method);
+	}	
 	
 	private String getInitialReturnTypeName() throws JavaModelException{
 		return Signature.toString(Signature.getReturnType(fMethod.getSignature()));
@@ -399,21 +402,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				trimmed.equals(cuBuff.substring(selected.getStartPosition(), ASTNodes.getExclusiveEnd(selected)));
 	}
 
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
-	}
-
-	private RefactoringStatus checkPreactivation() throws JavaModelException{
-		return Checks.checkAvailability(fMethod);
-	}
-	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */

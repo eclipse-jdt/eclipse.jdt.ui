@@ -37,24 +37,20 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 	}
 	
 	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
-		RenameMethodInInterfaceRefactoring ref= new RenameMethodInInterfaceRefactoring(method);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(method))
 			return null;
-		return ref;
+		return new RenameMethodInInterfaceRefactoring(method);
 	}
-		
-	//---- preconditions ---------------------------
 	
-	/* non java-doc
-	 * @see IPreactivatedRefactoring#checkPreactivation
-	 */	
-	RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(super.checkPreactivation());
-		if (! getMethod().getDeclaringType().isInterface())
-			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.no_class_method")); //$NON-NLS-1$
-		return result;
+	public static boolean isAvailable(IMethod method) throws JavaModelException{
+		return RenameMethodRefactoring.isAvailable(method) && internalIsAvailable(method);
 	}
+
+	static boolean internalIsAvailable(IMethod method) throws JavaModelException{
+		return method.getDeclaringType().isInterface();
+	}
+	
+	//---- preconditions ---------------------------
 	
 	/*
 	 * non java-doc

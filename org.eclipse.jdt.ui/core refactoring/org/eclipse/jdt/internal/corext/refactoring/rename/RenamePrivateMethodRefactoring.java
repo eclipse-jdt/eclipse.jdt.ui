@@ -41,25 +41,19 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	}
 	
 	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
-		RenamePrivateMethodRefactoring ref= new RenamePrivateMethodRefactoring(method);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(method))
 			return null;
-		return ref;
+		return new RenamePrivateMethodRefactoring(method);
 	}
 	
+	public static boolean isAvailable(IMethod method) throws JavaModelException{
+		return RenameMethodRefactoring.isAvailable(method) && internalIsAvailable(method);
+	}
+	
+	static boolean internalIsAvailable(IMethod method) throws JavaModelException{
+		return JdtFlags.isPrivate(method);
+	}
 	//----------- preconditions --------------
-	
-	/* non java-doc
-	 * @see IPreactivatedRefactoring@checkPreactivation
-	 */
-	RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(super.checkPreactivation());
-		result.merge(Checks.checkAvailability(getMethod()));
-		if (! JdtFlags.isPrivate(getMethod()))
-			result.addFatalError(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.only_private")); //$NON-NLS-1$
-		return result;
-	}
 	
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)

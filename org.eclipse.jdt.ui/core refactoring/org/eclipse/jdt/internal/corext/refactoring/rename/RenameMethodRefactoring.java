@@ -69,14 +69,41 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 		
 	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
-		if (JdtFlags.isPrivate(method))
-		   return RenamePrivateMethodRefactoring.create(method);
-		else if (JdtFlags.isStatic(method))
-		   return RenameStaticMethodRefactoring.create(method);
-		else if (method.getDeclaringType().isClass())	
-		   return RenameVirtualMethodRefactoring.create(method);
-		else 	
-		   return RenameMethodInInterfaceRefactoring.create(method);	
+		if (! isAvailable(method))
+			return null;
+		RenameMethodRefactoring refactoring;
+
+		refactoring= RenamePrivateMethodRefactoring.create(method);
+		if (refactoring != null)
+		   return refactoring;
+
+		refactoring= RenameStaticMethodRefactoring.create(method);
+		if (refactoring != null)
+			return refactoring;
+
+		refactoring= RenameVirtualMethodRefactoring.create(method);
+		if (refactoring != null)
+			return refactoring;
+
+		refactoring= RenameMethodInInterfaceRefactoring.create(method);
+		if (refactoring != null)
+			return refactoring;
+
+		return null;
+	}
+	
+	public static boolean isAvailable(IMethod method) throws JavaModelException{
+		if (! Checks.isAvailable(method))
+			return false;
+		if (method.isConstructor())
+			return false;
+		if (isSpecialCase(method))
+			return false;
+		
+		return RenamePrivateMethodRefactoring.internalIsAvailable(method)
+			|| RenameStaticMethodRefactoring.internalIsAvailable(method)
+			|| RenameVirtualMethodRefactoring.internalIsAvailable(method)
+			|| RenameMethodInInterfaceRefactoring.internalIsAvailable(method);
 	}
 	
 	public static RenameMethodRefactoring create(IMethod method, RenameMethodRefactoring other) throws JavaModelException {
@@ -95,17 +122,17 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return fMethod.getDeclaringType().getMethod(fNewName, fMethod.getParameterTypes());
 	}
 	
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
-	}
-
+//	/* non java-doc
+//	 * @see Refactoring#checkPreconditions(IProgressMonitor)
+//	 */
+//	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
+//		RefactoringStatus result= checkPreactivation();
+//		if (result.hasFatalError())
+//			return result;
+//		result.merge(super.checkPreconditions(pm));
+//		return result;
+//	}
+//
 	/* non java-doc
 	 * @see IRenameRefactoring#setNewName
 	 */
@@ -162,20 +189,6 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}	
 	
 	//----------- preconditions ------------------
-	
-	/*
-	 * non java-doc
-	 * @see IPreactivatedRefactoring#checkPreactivation
-	 */
-	RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkAvailability(fMethod));
-		if (isSpecialCase(fMethod))
-			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.special_case")); //$NON-NLS-1$
-		if (fMethod.isConstructor())
-			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodRefactoring.no_constructors"));	 //$NON-NLS-1$
-		return result;
-	}
 
 	/*
 	 * non java-doc

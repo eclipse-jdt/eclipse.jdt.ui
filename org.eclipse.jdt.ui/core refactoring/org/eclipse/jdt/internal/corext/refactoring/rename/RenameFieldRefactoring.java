@@ -84,10 +84,13 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 	
 	public static RenameFieldRefactoring create(IField field) throws JavaModelException{
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(field);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(field))
 			return null;
-		return ref;
+		return new RenameFieldRefactoring(field);
+	}
+	
+	public static boolean isAvailable(IField field) throws JavaModelException{
+		return Checks.isAvailable(field);
 	}
 	
 	public Object getNewElement(){
@@ -143,17 +146,6 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		fUpdateStrings= update;
 	}
 	
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
-	}
-		
 	/* non java-doc
 	 * IRenameRefactoring#setNewName
 	 */
@@ -281,10 +273,6 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		
 	// -------------- Preconditions -----------------------
 	
-	private RefactoringStatus checkPreactivation() throws JavaModelException {
-		return Checks.checkAvailability(fField);	
-	}
-
 	/* non java-doc
 	 * Refactoring#checkActivation
 	 */

@@ -31,26 +31,20 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	}
 	
 	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
-		RenameVirtualMethodRefactoring ref= new RenameVirtualMethodRefactoring(method);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(method))
 			return null;
-		return ref; 
+		return new RenameVirtualMethodRefactoring(method);
 	}
-	//------------ preconditions -------------
+
+	public static boolean isAvailable(IMethod method) throws JavaModelException{
+		return RenameMethodRefactoring.isAvailable(method) && internalIsAvailable(method);
+	}	
+
+	static boolean internalIsAvailable(IMethod method) throws JavaModelException{
+		return MethodChecks.isVirtual(method);
+	}
 	
-	RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(super.checkPreactivation());
-		result.merge(Checks.checkAvailability(getMethod()));
-					
-		if (JdtFlags.isPrivate(getMethod()))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.no_private")); //$NON-NLS-1$
-		if (JdtFlags.isStatic(getMethod()))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.no_static"));	 //$NON-NLS-1$
-		if (! getMethod().getDeclaringType().isClass())
-			result.addFatalError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.only_class_methods")); //$NON-NLS-1$
-		return result;
-	}
+	//------------ preconditions -------------
 	
 	/*
 	 * non java-doc

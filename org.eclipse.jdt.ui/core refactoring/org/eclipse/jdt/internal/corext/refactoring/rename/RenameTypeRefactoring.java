@@ -99,10 +99,17 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	public static RenameTypeRefactoring create(IType type) throws JavaModelException{
-		RenameTypeRefactoring ref= new RenameTypeRefactoring(type);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(type))
 			return null;
-		return ref;
+		return new RenameTypeRefactoring(type);
+	}
+	
+	public static boolean isAvailable(IType type) throws JavaModelException{
+		if (! Checks.isAvailable(type))
+			return false;
+		if (isSpecialCase(type))
+			return false;
+		return true;
 	}
 	 
 	public Object getNewElement(){
@@ -167,19 +174,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	public void setUpdateStrings(boolean update) {
 		fUpdateStrings= update;
 	}
-	
-	/* non java-doc
-	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-	 */
-	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= checkPreactivation();
-		if (result.hasFatalError())
-			return result;
-		result.merge(super.checkPreconditions(pm));
-		return result;
-	}
-	
-	
+		
 	/* non java-doc
 	 * @see IRenameRefactoring#getNewName
 	 */
@@ -268,14 +263,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	//------------- Conditions -----------------
-	
-	private RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkAvailability(fType));
-		if (isSpecialCase(fType))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.special_case"));	 //$NON-NLS-1$
-		return result;
-	}
 	
 	/* non java-doc
 	 * @see Refactoring#checkActivation
