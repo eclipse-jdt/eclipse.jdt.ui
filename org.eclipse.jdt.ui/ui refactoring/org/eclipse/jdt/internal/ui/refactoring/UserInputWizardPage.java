@@ -167,10 +167,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 			JdtHackFinder.fixme("1GCQYJK: ITPUI:WIN2000 - Invalid thread access when saving an editor");
 			getContainer().run(false, false, createRunnable(editorsToSave));
 		} catch (InvocationTargetException e) {
-			JdtHackFinder.fixme("1GCZLPL: ITPJUI:WINNT - ExceptionHandler::handle - should accept null as message");
-			String msg= e.getMessage();
-			if (msg == null) msg= "";
-			ExceptionHandler.handle(e, getShell(), "InvocationTargerException", msg);
+			ExceptionHandler.handle(e, getShell(), "Refactoring", "Unexpected error while saving open editors");
 			return false;
 		} catch (InterruptedException e) {
 			// Can't happen. Operation isn't cancelable.

@@ -303,10 +303,7 @@ public class RefactoringWizard extends Wizard {
 	}
 	
 	private void handleUnexpectedException(InvocationTargetException e) {
-		JdtHackFinder.fixme("1GCZLPL: ITPJUI:WINNT - ExceptionHandler::handle - should accept null as message");
-		String msg= e.getMessage();
-		if (msg == null) msg= "";
-		ExceptionHandler.handle(e, "InvocationTargerException in finish()", msg);
+		ExceptionHandler.handle(e, "Refactoring", "Unexpected exception while performing the refactoring");
 	}
 
 	//---- Condition checking ------------------------------------------------------------
@@ -337,10 +334,7 @@ public class RefactoringWizard extends Wizard {
 		if (exception != null) {
 			JavaPlugin.log(exception);
 			status= new RefactoringStatus();
-			String message= exception.getMessage();
-			if (message == null)
-				message= "Internal error during precondition checking. See log for detailed error description";
-			status.addFatalError(message);
+			status.addFatalError("Internal error during precondition checking. See log for detailed error description");
 			JavaPlugin.log(exception);
 		} else {
 			status= op.getStatus();

@@ -52,15 +52,11 @@ public class ExtractMethodAction extends JavaUIAction implements IUpdate {
 	 * Method declared in IAction.
 	 */
 	public void run() {
-		ICompilationUnit o= getCompilationUnit();
-		JdtHackFinder.fixme("");
-		if (o instanceof CompilationUnit) {
-			CompilationUnit cu= (CompilationUnit)o;
-			ITextSelection selection= getTextSelection();
-			ExtractMethodWizard wizard= new ExtractMethodWizard(cu, selection, fEditor.getDocumentProvider());
-			WizardDialog dialog= new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
-			dialog.open();			
-		}
+		ICompilationUnit cu= getCompilationUnit();
+		ITextSelection selection= getTextSelection();
+		ExtractMethodWizard wizard= new ExtractMethodWizard(cu, selection, fEditor.getDocumentProvider());
+		WizardDialog dialog= new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
+		dialog.open();			
 	}
 	
 	private boolean canOperateOn() {
