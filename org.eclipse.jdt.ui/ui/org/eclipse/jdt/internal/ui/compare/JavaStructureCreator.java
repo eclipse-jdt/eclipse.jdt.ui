@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.compiler.IProblemFactory;
 import org.eclipse.jdt.internal.compiler.SourceElementParser;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -246,7 +246,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			scanner.setSource(b);
 			try {
 				int token;
-				while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+				while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 					switch (token) {
 					case Scanner.TokenNameWHITESPACE:
 					case Scanner.TokenNameCOMMENT_BLOCK:

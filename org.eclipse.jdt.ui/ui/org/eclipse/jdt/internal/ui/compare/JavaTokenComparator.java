@@ -8,7 +8,7 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
@@ -43,7 +43,7 @@ class JavaTokenComparator implements ITokenComparator {
 		Scanner scanner= new Scanner(true, true);	// returns comments & whitespace
 		scanner.setSource(fText.toCharArray());
 		try {
-			while (scanner.getNextToken() != TerminalSymbols.TokenNameEOF) {
+			while (scanner.getNextToken() != ITerminalSymbols.TokenNameEOF) {
 				fStarts[fCount]= scanner.startPosition;
 				fLengths[fCount]= scanner.currentPosition - fStarts[fCount];
 				fCount++;
