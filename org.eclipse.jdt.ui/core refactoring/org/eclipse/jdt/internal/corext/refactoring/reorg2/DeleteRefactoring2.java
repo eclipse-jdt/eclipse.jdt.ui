@@ -20,15 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -169,7 +166,7 @@ public class DeleteRefactoring2 extends Refactoring{
 	//ask for confirmation of deletion of all package fragment roots that are on classpaths of other projects
 	private void removeUnconfirmedReferencedArchives() throws JavaModelException {
 		String queryTitle= "Confirm Referenced Package Fragment Root Delete";
-		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.DELETE_REFERENCED_ARCHIVES);
+		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_REFERENCED_ARCHIVES);
 		List rootsToSkip= new ArrayList(0);
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement element= fJavaElements[i];
@@ -189,7 +186,7 @@ public class DeleteRefactoring2 extends Refactoring{
 
 	private void removeUnconfirmedFoldersThatContainSourceFolders() throws CoreException {
 		String queryTitle= "Confirm Folder Delete";
-		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS);
+		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS);
 		List foldersToSkip= new ArrayList(0);
 		for (int i= 0; i < fResources.length; i++) {
 			IResource resource= fResources[i];
@@ -283,7 +280,7 @@ public class DeleteRefactoring2 extends Refactoring{
 	private List getGettersSettersToDelete(Map getterSetterMapping) {
 		List gettersSettersToAdd= new ArrayList(getterSetterMapping.size());
 		String queryTitle= "Confirm Delete of Getters/Setters";
-		IConfirmQuery getterSetterQuery= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.DELETE_GETTER_SETTER);
+		IConfirmQuery getterSetterQuery= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_GETTER_SETTER);
 		for (Iterator iter= getterSetterMapping.keySet().iterator(); iter.hasNext();) {
 			IField field= (IField) iter.next();
 			Assert.isTrue(hasGetter(getterSetterMapping, field) || hasSetter(getterSetterMapping, field));
@@ -377,18 +374,8 @@ public class DeleteRefactoring2 extends Refactoring{
 
 	//----------- read-only confirmation business ------
 	private void confirmDeletingReadOnly() throws CoreException {
-		String queryTitle= "Confirm Delete of Read Only Elements";
-		boolean hasReadOnlyResources= ReadOnlyResourceFinder.hasReadOnlyResourcesAndSubResources(fJavaElements, fResources);
-		if (hasReadOnlyResources) {
-			IConfirmQuery query= fDeleteQueries.createYesNoQuery(queryTitle, false, IReorgQueries.DELETE_READ_ONLY_ELEMENTS);
-			String question= "The selected elements contain read-only resources. Do you still want to delete them?";
-			if (! query.confirm(question)) {
-				//empty the arrays as a safety net
-				fJavaElements= new IJavaElement[0];
-				fResources= new IResource[0];
-				throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
-		}
-	}
+		if (! ReadOnlyResourceFinder.confirmDeleteOfReadOnlyElements(fJavaElements, fResources, fDeleteQueries))
+			throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
 	}
 
 	//----------- empty CUs related method
@@ -517,95 +504,6 @@ public class DeleteRefactoring2 extends Refactoring{
 
 		private boolean isNothingToDelete() {
 			return fJavaElements.length + fResources.length == 0;
-		}
-	}
-	
-	private static class ReadOnlyResourceFinder{
-		private ReadOnlyResourceFinder(){
-		}
-		static boolean hasReadOnlyResourcesAndSubResources(IJavaElement[] javaElements, IResource[] resources) throws CoreException {
-			return (hasReadOnlyResourcesAndSubResources(resources)||
-					  hasReadOnlyResourcesAndSubResources(javaElements));
-		}
-
-		private static boolean hasReadOnlyResourcesAndSubResources(IJavaElement[] javaElements) throws CoreException {
-			for (int i= 0; i < javaElements.length; i++) {
-				if (hasReadOnlyResourcesAndSubResources(javaElements[i]))
-					return true;
-			}
-			return false;
-		}
-
-		private static boolean hasReadOnlyResourcesAndSubResources(IJavaElement javaElement) throws CoreException {
-			switch(javaElement.getElementType()){
-				case IJavaElement.CLASS_FILE:
-					//if this assert fails, it means that a precondition is missing
-					Assert.isTrue(((IClassFile)javaElement).getResource() instanceof IFile);
-					//fall thru
-				case IJavaElement.COMPILATION_UNIT:
-					IResource resource= ReorgUtils2.getResource(javaElement);
-					return (resource != null && resource.isReadOnly());
-				case IJavaElement.PACKAGE_FRAGMENT:
-					IResource packResource= ReorgUtils2.getResource(javaElement);
-					if (packResource == null)
-						return false;
-					IPackageFragment pack= (IPackageFragment)javaElement;
-					if (packResource.isReadOnly())
-						return true;
-					Object[] nonJava= pack.getNonJavaResources();
-					for (int i= 0; i < nonJava.length; i++) {
-						Object object= nonJava[i];
-						if (object instanceof IResource && hasReadOnlyResourcesAndSubResources((IResource)object))
-							return true;
-					}
-					return hasReadOnlyResourcesAndSubResources(pack.getChildren());
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-					IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
-					if (root.isArchive())
-						return false;
-					IResource pfrResource= ReorgUtils2.getResource(javaElement);
-					if (pfrResource == null)
-						return false;
-					if (pfrResource.isReadOnly())
-						return true;
-					Object[] nonJava1= root.getNonJavaResources();
-					for (int i= 0; i < nonJava1.length; i++) {
-						Object object= nonJava1[i];
-						if (object instanceof IResource && hasReadOnlyResourcesAndSubResources((IResource)object))
-							return true;
-					}
-					return hasReadOnlyResourcesAndSubResources(root.getChildren());
-
-				case IJavaElement.FIELD:
-				case IJavaElement.IMPORT_CONTAINER:
-				case IJavaElement.IMPORT_DECLARATION:
-				case IJavaElement.INITIALIZER:
-				case IJavaElement.METHOD:
-				case IJavaElement.PACKAGE_DECLARATION:
-				case IJavaElement.TYPE:
-					return false;
-				default: 
-					Assert.isTrue(false);//not handled here
-					return false;
-			}
-		}
-
-		private static boolean hasReadOnlyResourcesAndSubResources(IResource[] resources) throws CoreException {
-			for (int i= 0; i < resources.length; i++) {
-				if (hasReadOnlyResourcesAndSubResources(resources[i]))
-					return true;
-			}
-			return false;
-		}
-	
-		private static boolean hasReadOnlyResourcesAndSubResources(IResource resource) throws CoreException {
-			if (resource.isLinked()) //we don't want to count these because we never actually delete linked resources
-				return false;
-			if (resource.isReadOnly())
-				return true;
-			if (resource instanceof IContainer)
-				return hasReadOnlyResourcesAndSubResources(((IContainer)resource).members());
-			return false;
 		}
 	}
 }

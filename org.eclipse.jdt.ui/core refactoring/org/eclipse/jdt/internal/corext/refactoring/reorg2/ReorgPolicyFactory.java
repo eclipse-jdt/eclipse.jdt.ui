@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -1184,6 +1185,23 @@ class ReorgPolicyFactory {
 			}
 			return false;
 		}
+		
+		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
+			try{
+				RefactoringStatus status= super.checkInput(pm, reorgQueries);
+				confirmMovingReadOnly(reorgQueries);
+				return status;
+			} catch(JavaModelException e){
+				throw e;
+			} catch (CoreException e) {
+				throw new JavaModelException(e);
+			}
+		}
+
+		private void confirmMovingReadOnly(IReorgQueries reorgQueries) throws CoreException {
+			if (! ReadOnlyResourceFinder.confirmMoveOfReadOnlyElements(getJavaElements(), getResources(), reorgQueries))
+				throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
+		}		
 	}
 	
 	private static class MovePackagesPolicy extends PackagesReorgPolicy implements IMovePolicy{
@@ -1226,6 +1244,23 @@ class ReorgPolicyFactory {
 		private IChange createChange(IPackageFragment pack, IPackageFragmentRoot destination) {
 			return new MovePackageChange(pack, destination);
 		}
+		
+		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
+			try{
+				RefactoringStatus status= super.checkInput(pm, reorgQueries);
+				confirmMovingReadOnly(reorgQueries);
+				return status;
+			} catch(JavaModelException e){
+				throw e;
+			} catch (CoreException e) {
+				throw new JavaModelException(e);
+			}
+		}
+
+		private void confirmMovingReadOnly(IReorgQueries reorgQueries) throws CoreException {
+			if (! ReadOnlyResourceFinder.confirmMoveOfReadOnlyElements(getJavaElements(), getResources(), reorgQueries))
+				throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
+		}		
 	}
 	
 	private static class MoveFilesFoldersAndCusPolicy extends FilesFoldersAndCusReorgPolicy implements IMovePolicy{
@@ -1447,12 +1482,25 @@ class ReorgPolicyFactory {
 		}	
 		
 		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
-			pm.beginTask("", 2);
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
-			RefactoringStatus status= super.checkInput(new SubProgressMonitor(pm, 1), reorgQueries);
-			pm.done();
-			return status;
+			try{
+				pm.beginTask("", 2);
+				confirmMovingReadOnly(reorgQueries);
+				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+				RefactoringStatus status= super.checkInput(new SubProgressMonitor(pm, 1), reorgQueries);
+				return status;
+			} catch (JavaModelException e){
+				throw e;
+			} catch (CoreException e) {
+				throw new JavaModelException(e);
+			} finally{
+				pm.done();
+			}
 		}
+		
+		private void confirmMovingReadOnly(IReorgQueries reorgQueries) throws CoreException {
+			if (! ReadOnlyResourceFinder.confirmMoveOfReadOnlyElements(getJavaElements(), getResources(), reorgQueries))
+				throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
+		}		
 		
 		public IFile[] getAllModifiedFiles() {
 			List result= new ArrayList();

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -30,6 +31,7 @@ public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdat
 
 	private IReorgQueries fReorgQueries;
 	private IMovePolicy fMovePolicy;
+	private boolean fWasCanceled;
 
 	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
 		return isAvailable(ReorgPolicyFactory.createMovePolicy(resources, javaElements, settings));
@@ -48,6 +50,10 @@ public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdat
 	
 	private static boolean isAvailable(IMovePolicy copyPolicy) throws JavaModelException{
 		return copyPolicy.canEnable();
+	}
+
+	public boolean wasCanceled() {
+		return fWasCanceled;
 	}
 
 	/* (non-Javadoc)
@@ -83,7 +89,13 @@ public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdat
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		return fMovePolicy.checkInput(pm, fReorgQueries);
+		try{
+			fWasCanceled= false;
+			return fMovePolicy.checkInput(pm, fReorgQueries);
+		} catch (OperationCanceledException e) {
+			fWasCanceled= true;
+			throw e;
+		}
 	}
 
 	/* (non-Javadoc)

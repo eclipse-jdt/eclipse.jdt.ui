@@ -79,6 +79,13 @@ public class ReorgMoveWizard extends RefactoringWizard{
 			return getMoveRefactoring().getCommonParentForInputElements();
 		}
 		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
+		 */
+		protected boolean performFinish() {
+			return super.performFinish() || getMoveRefactoring().wasCanceled(); //close the dialog if canceled
+		}
+		
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
 			MoveRefactoring2 refactoring= getMoveRefactoring();
 			final RefactoringStatus refactoringStatus;
