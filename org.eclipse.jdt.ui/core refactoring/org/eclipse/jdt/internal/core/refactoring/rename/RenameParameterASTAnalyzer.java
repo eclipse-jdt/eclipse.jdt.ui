@@ -7,7 +7,8 @@ package org.eclipse.jdt.internal.core.refactoring.rename;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.eclipse.jdt.core.IMethod;
+import java.util.Map;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.IProblem;
@@ -17,34 +18,18 @@ import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
-	
-	private String[] fNewParameterNames;
-	private String[] fSortedNewParameterNames;
-	
-	private String[] fOldParameterNames;
-	private String[] fSortedOldParameterNames;
-	
+	private Map fRenamings;
 	private ISourceRange fMethodSourceRange;
 	private int fMethodSourceRangeEnd;
 	
 	private List fParamBindings;
 	
-	RenameParameterASTAnalyzer(IMethod method, String[] newParameterNames) throws JavaModelException{
-		fNewParameterNames= newParameterNames;
-		fOldParameterNames= method.getParameterNames();
-		fSortedNewParameterNames= getSortedCopy(fNewParameterNames);
-		fSortedOldParameterNames= getSortedCopy(fOldParameterNames);
-		
+	RenameParameterASTAnalyzer(IMethod method, Map renamings) throws JavaModelException{
+		fRenamings= renamings;
 		fMethodSourceRange= method.getSourceRange();
 		fMethodSourceRangeEnd= fMethodSourceRange.getOffset() + fMethodSourceRange.getLength();
 	}
 	
-	private static String[] getSortedCopy(String[] array){
-		String[] copy= (String[])array.clone();
-		Arrays.sort(copy);
-		return copy;
-	}
-			
 	private void addShadowingError(AstNode node, char[] name){
 		addError(RefactoringCoreMessages.getFormattedString("RenameParameterASTAnalyzer.error",  //$NON-NLS-1$
 															new Object[]{new Integer(getLineNumber(node)), new String(name)}),
@@ -57,22 +42,12 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	}
 	
 	private boolean isOneOfOldNames(char[] name){
-		return indexInOldNames(name) >= 0;
+		return fRenamings.keySet().contains(new String(name));
 	}
 	
 	private boolean isOneOfNewNames(char[] name){
-		return indexInNewNames(name) >= 0;
+		return fRenamings.values().contains(new String(name));
 	}
-	
-	private int indexInOldNames(char[] name){
-		return Arrays.binarySearch(fSortedOldParameterNames, new String(name));
-	}
-	
-	//enough to check the renamed names
-	//but we check all
-	private int indexInNewNames(char[] name){
-		return Arrays.binarySearch(fSortedNewParameterNames, new String(name));
-	}	
 	
 	private boolean willBeShadowed(SingleNameReference singleNameReference, BlockScope blockScope){
 		if (! isOneOfNewNames(singleNameReference.token))
@@ -107,11 +82,11 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	}
 	
 	private void analyzeArgumentReference(SingleNameReference singleNameReference, BlockScope blockScope){
-		int index= indexInOldNames(singleNameReference.token);
-		if (index < 0 )
+		String oldName= new String(singleNameReference.token);
+		if (! fRenamings.keySet().contains(oldName))
 			return;
 			
-		char[] newName= fNewParameterNames[index].toCharArray();
+		char[] newName= ((String)fRenamings.get(oldName)).toCharArray();
 		Binding newBinding= blockScope.getBinding(newName, blockScope.VARIABLE, singleNameReference);
 		
 		if (newBinding == null)

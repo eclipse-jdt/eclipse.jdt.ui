@@ -2,31 +2,28 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.code.ExtractMethodRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameTempRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 import org.eclipse.jface.text.ITextSelection;
 
 /**
  * Extracts a new method from the text editor's text selection by using the
  * extract method refactoing.
  */
-public class ExtractMethodAction extends TextSelectionBasedRefactoringAction{
+public class RenameTempAction extends TextSelectionBasedRefactoringAction{
 
 	/**
 	 * Creates a new extract method action when used as an action delegate.
 	 */
-	public ExtractMethodAction() {
-		super(RefactoringMessages.getString("ExtractMethodAction.extract_method")); //$NON-NLS-1$
+	public RenameTempAction() {
+		super("Rename Local Variable");
 	}
 	
 	/**
@@ -35,7 +32,7 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction{
 	 * method.
 	 * @param editor the text editor.
 	 */
-	public ExtractMethodAction(JavaEditor editor) {
+	public RenameTempAction(JavaEditor editor) {
 		this();
 		setEditor(editor);
 	}
@@ -44,25 +41,23 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction{
 	 * @see TextSelectionBasedRefactoringAction#createRefactoring
 	 */	
 	Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection, ITextBufferChangeCreator changeCreator) {
-		return new ExtractMethodRefactoring(
-			cunit, changeCreator, 
-			selection.getOffset(), selection.getLength(),
-			CodeFormatterPreferencePage.isCompactingAssignment(),
-			CodeFormatterPreferencePage.getTabSize());
+		return new RenameTempRefactoring(cunit, changeCreator, selection.getOffset(), selection.getLength());
 	}
-
+	
 	/*
 	 * @see TextSelectionBasedRefactoringAction#getDialogTitle()
 	 */
 	protected String getDialogTitle() {
-		return "Extract Method";
+		return "Rename Local Variable";
 	}
 
 	/*
 	 * @see TextSelectionBasedRefactoringAction#createWizard(Refactoring)
 	 */
 	RefactoringWizard createWizard(Refactoring refactoring) {
-		return new ExtractMethodWizard((ExtractMethodRefactoring)refactoring);
+		String message= "Choose a new name for the local variable.";
+		//FIXME wrong help
+		return new RenameRefactoringWizard((RenameTempRefactoring)refactoring, getDialogTitle(), message, "HELPID", "ERRORHELPID");
 	}
-
 }
+

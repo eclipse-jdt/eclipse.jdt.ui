@@ -4,9 +4,8 @@
 	private CompilationUnit fCu;
 	
 	private int[] fLineSeparatorPositions; //set in visit(CompilationUnitDeclaration)
-	
+		protected AbstractRefactoringASTAnalyzer(){		fResult= new RefactoringStatus();	}		public void setCU(ICompilationUnit cu){		fCu= (CompilationUnit)cu;	}		public RefactoringStatus getStatus(){		return fResult;	}	
 	public final RefactoringStatus analyze(ICompilationUnit cu) throws JavaModelException{
-		fResult= new RefactoringStatus();
 		fCu= (CompilationUnit)cu;
 		fCu.accept(this);
 		return fResult;	

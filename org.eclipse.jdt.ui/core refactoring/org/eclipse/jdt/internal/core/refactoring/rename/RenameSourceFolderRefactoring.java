@@ -57,27 +57,7 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	public String getCurrentName() {
 		return fSourceFolder.getElementName();
 	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#canUpdateReferences()
-	 */
-	public boolean canEnableUpdateReferences() {
-		return false;
-	}
-
-	/* non java-doc
-	 * @see IRenameRefactoring#setUpdateReferences(boolean)
-	 */
-	public void setUpdateReferences(boolean update) {
-	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#getUpdateReferences()
-	 */	
-	public boolean getUpdateReferences(){
-		return false;
-	}
-		
+			
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */

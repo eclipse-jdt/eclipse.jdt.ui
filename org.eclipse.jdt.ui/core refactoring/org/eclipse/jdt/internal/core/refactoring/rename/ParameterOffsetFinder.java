@@ -19,37 +19,35 @@ import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 
-/*
- * not API
- */
 class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 	
 	private IMethod fMethod;
-	private int fParameterIndex;
 	private char[] fParameterName; 
 	private ISourceRange fMethodSourceRange;
-
-	private List fOffsetsFound;
 	private int fMethodSourceRangeEnd;
+	
+	private List fOffsetsFound;
 	private List fParamBindings;
 	private boolean fIncludeReferences;
 	
-	ParameterOffsetFinder(IMethod method, int parameterIndex) throws JavaModelException{ 
+	private ParameterOffsetFinder(IMethod method, String parameterName, boolean includeReferences) throws JavaModelException{ 
 		fMethod= method;
-		fParameterIndex= parameterIndex;
-		fParameterName= method.getParameterNames()[fParameterIndex].toCharArray();
+		fParameterName= parameterName.toCharArray();
 		fMethodSourceRange= method.getSourceRange();
 		fMethodSourceRangeEnd= fMethodSourceRange.getOffset() + fMethodSourceRange.getLength();
+		fOffsetsFound= new ArrayList();
+		fIncludeReferences= includeReferences;
 	}
 	/**
+	 * @param method
+	 * @param parameterName
 	 * @param includeReferences if it is <code>true</code>, then not only the parameter declaration but also references will be included
 	 * @return indices of offsets of the references to the parameter specified in constructor
 	 */
-	int[] findOffsets(boolean includeReferences) throws JavaModelException{
-		fIncludeReferences= includeReferences;
-		fOffsetsFound= new ArrayList();
-		((CompilationUnit)fMethod.getCompilationUnit()).accept(this);
-		return convertFromIntegerList(fOffsetsFound);
+	static int[] findOffsets(IMethod method, String parameterName, boolean includeReferences) throws JavaModelException{
+		ParameterOffsetFinder instance= new ParameterOffsetFinder(method, parameterName, includeReferences);		
+		((CompilationUnit)method.getCompilationUnit()).accept(instance);
+		return convertFromIntegerList(instance.fOffsetsFound);
 	}
 	
 	private static int[] convertFromIntegerList(List list){
@@ -70,7 +68,7 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 			&& (node.sourceStart <= fMethodSourceRangeEnd);
 	}
 		
-	private boolean isParameterMatch(SingleNameReference singleNameReference, BlockScope blockScope){
+	private boolean isParameterMatch(SingleNameReference singleNameReference){
 		if (! withinMethod(singleNameReference))
 			return false;
 		if (! CharOperation.equals(fParameterName, singleNameReference.token))
@@ -86,7 +84,7 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 		if (! fIncludeReferences)
 			return true;
 		
-		if  (isParameterMatch(singleNameReference, blockScope))
+		if  (isParameterMatch(singleNameReference))
 			addNodeOffset(singleNameReference);
 		return true;
 	}

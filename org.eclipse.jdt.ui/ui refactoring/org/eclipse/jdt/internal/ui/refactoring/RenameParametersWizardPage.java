@@ -4,9 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.rename.RenameParametersRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IMultiRenameRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.viewers.CellEditor;
@@ -45,13 +51,14 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 	private static final int NEWNAME_PROP= 1; 
 	
 	private TableViewer fViewer;
+	private boolean fAlreadyShown= false;
 	
 	public RenameParametersWizardPage(boolean isLastUserPage) {
 		super(PAGE_NAME, isLastUserPage);
 	}
 	
-	private RenameParametersRefactoring getRenameParametersRefactoring(){
-		return (RenameParametersRefactoring)getRefactoring();
+	private IMultiRenameRefactoring getMultiRenameRefactoring(){
+		return (IMultiRenameRefactoring)getRefactoring();
 	}			
 	
 	/* non java-doc
@@ -89,7 +96,7 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		fViewer.setContentProvider(new ParameterPairContentProvider());
 		fViewer.setLabelProvider(new ParameterPairLabelProvider());
 		
-		fViewer.setInput(createParameterNamePairs());
+		fViewer.setInput(createNamePairs());
 		
 		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.RENAME_PARAMS_WIZARD_PAGE));
 	}
@@ -106,34 +113,47 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 	 */
 	public void setVisible(boolean visible) {
 		if (visible) {
-			tableModified(getNewParameterNames());
+			if (fAlreadyShown)
+				tableModified(getNewParameterNames());
+			else{
+				setPageComplete(false);
+				setErrorMessage(null);	
+			}	
+			fAlreadyShown= true;
 		}
 		super.setVisible(visible);
 	}
 	
-	private RefactoringStatus validateTable(String[] newNames){
-		RenameParametersRefactoring ref= getRenameParametersRefactoring();
-		ref.setNewParameterNames(newNames);
+	private RefactoringStatus validateTable(Map renamings) throws JavaModelException{
+		IMultiRenameRefactoring ref= getMultiRenameRefactoring();
+		ref.setNewNames(renamings);
 		return ref.checkNewNames();
 	}
 	
-	private void tableModified(String[] newNames) {			
-		RefactoringStatus status= validateTable(newNames);
-		getRefactoringWizard().setStatus(status);
-		if (status != null && status.hasFatalError()) {
+	private void tableModified(Map renamings) {
+		try{
+			RefactoringStatus status= validateTable(renamings);
+			getRefactoringWizard().setStatus(status);
+			if (status != null && status.hasFatalError()) {
+				setPageComplete(false);
+				setErrorMessage(status.getFirstMessage(RefactoringStatus.FATAL));
+			} else {
+				setPageComplete(true);	
+				setErrorMessage(null);
+			}	
+		} catch (JavaModelException e){
+			ExceptionHandler.handle(e, "Exception", "Unexpected exception occurred. See log for details.");
 			setPageComplete(false);
-			setErrorMessage(status.getFirstMessage(RefactoringStatus.FATAL));
-		} else {
-			setPageComplete(true);	
 			setErrorMessage(null);
 		}	
 	}
 	
-	private String[] getNewParameterNames(){
+	private Map getNewParameterNames(){
 		ParameterNamePair[] input= (ParameterNamePair[])fViewer.getInput();
-		String[] result= new String[input.length];
-		for (int i= 0; i < result.length; i++)
-			result[i]= input[i].newName;
+		Map result= new HashMap();
+		for (int i= 0; i < input.length; i++){
+			result.put(input[i].oldName, input[i].newName);
+		}	
 		return result;
 	}
 	
@@ -160,12 +180,19 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 	}
 
 	private void addCheckBox(Composite c) {
+		if (! (getRefactoring() instanceof IReferenceUpdatingRefactoring))
+			return;
+		
+		final IReferenceUpdatingRefactoring ref= (IReferenceUpdatingRefactoring)getRefactoring();
+		if (! ref.canEnableUpdateReferences())
+			return;
+			
 		final Button checkBox= new Button(c, SWT.CHECK);
-		checkBox.setText("Update references to the renamed paremeters");
-		checkBox.setSelection(getRenameParametersRefactoring().getUpdateReferences());
+		checkBox.setText("Update references");
+		checkBox.setSelection(ref.getUpdateReferences());
 		checkBox.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
-				getRenameParametersRefactoring().setUpdateReferences(checkBox.getSelection());
+				ref.setUpdateReferences(checkBox.getSelection());
 			}
 		});
 		checkBox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -190,28 +217,24 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		return layout;
 	}
 	
-	private ParameterNamePair[] createParameterNamePairs(){
-		String[] oldNames= getOldParameterNames();
-		ParameterNamePair[] result= new ParameterNamePair[oldNames.length];
-		for (int i= 0; i < oldNames.length ; i++){
-			result[i]= new ParameterNamePair();
-			result[i].oldName= oldNames[i];
-			result[i].newName= oldNames[i];
-		}		
-		return result;
-	}
-	
-	private String[] getOldParameterNames(){
-		RenameParametersRefactoring ref= getRenameParametersRefactoring();
-		String[] oldNames;
+	private ParameterNamePair[] createNamePairs()   {
 		try{
-			oldNames= ref.getMethod().getParameterNames();
+			Map renamings= getMultiRenameRefactoring().getNewNames();
+			Set result= new HashSet();
+			for (Iterator iterator = renamings.keySet().iterator(); iterator.hasNext();) {
+				String oldName = (String) iterator.next();
+				String newName= (String)renamings.get(oldName);
+				ParameterNamePair each= new ParameterNamePair();	
+				each.oldName= oldName;
+				each.newName= newName;
+				result.add(each);
+			}
+			return (ParameterNamePair[]) result.toArray(new ParameterNamePair[result.size()]);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameParametersWizardPage.refactoring"), RefactoringMessages.getString("RenameParametersWizardPage.internal_error"));  //$NON-NLS-2$ //$NON-NLS-1$
-			oldNames= new String[]{""}; //$NON-NLS-1$
-		}
-		return oldNames;
-	}	
+			ExceptionHandler.handle(e, "Exception", "Unexpected exception occurred. See log for details.");
+			return new ParameterNamePair[0];
+		}	
+	}
 	
 	//--------- private classes 
 	private static class ParameterNamePair{

@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenamePackageChange;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
@@ -38,7 +39,7 @@ import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
 
 
-public class RenamePackageRefactoring extends Refactoring implements ITextUpdatingRefactoring{
+public class RenamePackageRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
 	
 	private IPackageFragment fPackage;
 	private String fNewName;

@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
@@ -45,7 +46,7 @@ import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 
-public abstract class RenameMethodRefactoring extends Refactoring implements IRenameRefactoring{
+public abstract class RenameMethodRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring{
 	
 	private String fNewName;
 	private SearchResultGroup[] fOccurrences;

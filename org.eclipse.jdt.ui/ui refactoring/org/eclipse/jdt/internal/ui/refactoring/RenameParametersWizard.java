@@ -3,13 +3,17 @@
  * All Rights Reserved.
  */
 
-package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.jdt.internal.core.refactoring.rename.RenameParametersRefactoring;
+package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IMultiRenameRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class RenameParametersWizard extends RefactoringWizard {
 	
-	public RenameParametersWizard(RenameParametersRefactoring refactoring){
-		super(refactoring, getTitle(), IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE);
+	private String fMessage;
+	
+	public RenameParametersWizard(IMultiRenameRefactoring refactoring, String helpId, String title, String message){
+		super((Refactoring)refactoring, title, helpId);
+		fMessage= message;
 	}
 
 	/* non java-doc
@@ -17,7 +21,7 @@ public class RenameParametersWizard extends RefactoringWizard {
 	 */ 
 	protected void addUserInputPages(){
 		RenameParametersWizardPage page= new RenameParametersWizardPage(true);
-		page.setMessage(getMessage());
+		page.setMessage(fMessage);
 		addPage(page);
 	}
 	
@@ -29,13 +33,4 @@ public class RenameParametersWizard extends RefactoringWizard {
 		page.setExpandFirstNode(true);
 		addPage(page);
 	}
-	
-	private static String getTitle(){
-		return RefactoringMessages.getString("RenameParametersWizard.title"); //$NON-NLS-1$
-	}
-
-	private static String getMessage(){
-		return RefactoringMessages.getString("RenameParametersWizard.message"); //$NON-NLS-1$
-	}
-	
 }

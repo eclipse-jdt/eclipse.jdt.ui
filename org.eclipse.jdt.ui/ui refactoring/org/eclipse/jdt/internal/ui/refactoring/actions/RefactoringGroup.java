@@ -8,11 +8,13 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameParametersRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameTempRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
@@ -72,7 +74,10 @@ public class RefactoringGroup extends ContextMenuGroup {
 				return ((RenameParametersRefactoring)refactoring).checkPreactivation().isOK();
 			}
 			protected RefactoringWizard createWizard(Refactoring ref){
-				return new RenameParametersWizard((RenameParametersRefactoring)ref);
+				String title= "Rename Method Parameters";
+				String msg= "Enter the new names for the parameters. You can rename one or more parameters. All references to the renamed parameters will be updated.";
+				String helpId= IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE;
+				return new RenameParametersWizard((RenameParametersRefactoring)ref, helpId, title, msg);
 			}
 		};
 	}

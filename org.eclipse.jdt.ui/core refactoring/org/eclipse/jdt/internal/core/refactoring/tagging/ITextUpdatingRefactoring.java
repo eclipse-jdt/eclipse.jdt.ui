@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.tagging;
 
+import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
+
 public interface ITextUpdatingRefactoring extends IRenameRefactoring{
 
 	/**

@@ -28,6 +28,8 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
@@ -35,7 +37,7 @@ import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
 
-public class RenameFieldRefactoring extends Refactoring implements ITextUpdatingRefactoring{
+public class RenameFieldRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
 	
 	private String fNewName;
 	private IField fField;

@@ -59,27 +59,7 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	public String getCurrentName() {
 		return fResource.getName();
 	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#canUpdateReferences()
-	 */
-	public boolean canEnableUpdateReferences() {
-		return false;
-	}
-
-	/* non java-doc
-	 * @see IRenameRefactoring#setUpdateReferences(boolean)
-	 */
-	public void setUpdateReferences(boolean update) {
-	}	
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#getUpdateReferences()
-	 */	
-	public boolean getUpdateReferences(){
-		return false;
-	}
-	
+		
 	//--- preconditions 
 	
 	/* non java-doc

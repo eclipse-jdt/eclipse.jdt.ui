@@ -32,11 +32,15 @@ class RefactoringScope {
 	static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException{
 		if (javaElement instanceof IMember){
 			IMember member= (IMember)javaElement;
-			if (Flags.isPrivate(member.getFlags()))
-				return SearchEngine.createJavaSearchScope(new IResource[]{Refactoring.getResource(member)});
+			if (Flags.isPrivate(member.getFlags())){
+				//XXX workaround for bug#5217 
+				IPackageFragment pack= (IPackageFragment)member.getCompilationUnit().getParent();
+				return SearchEngine.createJavaSearchScope(new IJavaElement[]{pack});
+				//return SearchEngine.createJavaSearchScope(new IJavaElement[]{member});
+			}	
 			if (! Flags.isPublic(member.getFlags()) && !Flags.isProtected(member.getFlags())){
-				IResource packageResource= ((IPackageFragment)member.getCompilationUnit().getParent()).getUnderlyingResource();
-				return SearchEngine.createJavaSearchScope(new IResource[]{packageResource});
+				IPackageFragment pack= (IPackageFragment)member.getCompilationUnit().getParent();
+				return SearchEngine.createJavaSearchScope(new IJavaElement[]{pack});
 			}	
 		}
 		return create(javaElement.getJavaProject());
