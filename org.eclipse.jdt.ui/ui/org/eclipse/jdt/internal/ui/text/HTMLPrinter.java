@@ -105,7 +105,7 @@ public class HTMLPrinter {
 			
 			pageProlog.append("<html>"); //$NON-NLS-1$
 			
-			appendStyleSheetLink(pageProlog, styleSheetURL);
+			appendStyleSheetURL(pageProlog, styleSheetURL);
 			
 			pageProlog.append("<body text=\"#000000\" bgcolor=\""); //$NON-NLS-1$
 			appendColor(pageProlog, bgRGB);
@@ -113,6 +113,25 @@ public class HTMLPrinter {
 			
 			buffer.insert(position,  pageProlog.toString());
 		}
+	}
+	
+	public static void insertStyles(StringBuffer buffer, String[] styles) {
+		if (styles == null || styles.length == 0)
+			return;
+		
+		StringBuffer styleBuf= new StringBuffer(10 * styles.length);
+		for (int i= 0; styles != null && i < styles.length; i++) {
+			styleBuf.append(" style=\""); //$NON-NLS-1$
+			styleBuf.append(styles[i]);
+			styleBuf.append('"');
+		}
+		
+		// Find insertion index
+		int index= buffer.indexOf("<body "); //$NON-NLS-1$
+		if (index == -1)
+			return;
+		
+		buffer.insert(index+5, styleBuf);
 	}
 	
 	public static void insertPageProlog(StringBuffer buffer, int position, RGB bgRGB) {
@@ -127,7 +146,7 @@ public class HTMLPrinter {
 		}
 	}
 	
-	private static void appendStyleSheetLink(StringBuffer buffer, URL styleSheetURL) {
+	private static void appendStyleSheetURL(StringBuffer buffer, URL styleSheetURL) {
 		if (styleSheetURL == null)
 			return;
 

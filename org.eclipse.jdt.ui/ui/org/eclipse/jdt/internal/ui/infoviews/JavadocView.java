@@ -63,7 +63,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -407,6 +406,12 @@ public class JavadocView extends AbstractInfoView {
 		String javadocHtml= (String)input;
 		
 		if (fIsUsingBrowserWidget) {
+			boolean RTL= (getSite().getShell().getStyle() & SWT.RIGHT_TO_LEFT) != 0;
+			if (javadocHtml != null && RTL) {
+				StringBuffer buffer= new StringBuffer(javadocHtml);
+				HTMLPrinter.insertStyles(buffer, new String[] { "direction:rtl" } ); //$NON-NLS-1$
+				javadocHtml= buffer.toString();
+			}
 			fBrowser.setText(javadocHtml);
 		} else {
 			fPresentation.clear();
