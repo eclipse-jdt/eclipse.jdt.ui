@@ -1,53 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin
-	name="%pluginName"
-	id = "org.eclipse.jdt.ui.examples.projects"
-	version = "3.0.0"
-	provider-name = "%providerName"
-	class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectsPlugin">
-
-   <requires>
-       <import plugin="org.eclipse.ui.ide"/>
-       <import plugin="org.eclipse.ui.views"/>
-       <import plugin="org.eclipse.jface.text"/>
-       <import plugin="org.eclipse.ui.workbench.texteditor"/>
-       <import plugin="org.eclipse.ui.editors"/>
-       <import plugin="org.eclipse.core.runtime"/>
-       <import plugin="org.eclipse.core.resources"/>
-       <import plugin="org.eclipse.ui"/>
-   </requires>
+   id="org.eclipse.jdt.ui.examples.projects"
+   name="%pluginName"
+   version="3.0.0"
+   provider-name="%providerName"
+   class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectsPlugin">
 
    <runtime>
       <library name="jdtexamples.jar"/>
    </runtime>
-  
- <extension 
-	point="org.eclipse.ui.newWizards">
-	<category
-	   id = "org.eclipse.jdt.ui.java"
-	   parentCategory="org.eclipse.ui.Examples"
-	   name="%JUnitProjectExampleCreationWizard.categoryName">
-	</category>
+   <requires>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui"/>
+   </requires>
 
-	<wizard 
-		id="org.eclipse.jdt.examples.projects.JUnitProjectExampleCreationWizard"
-		name="%JUnitProjectExampleCreationWizard.title"
-		class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectCreationWizard"
-		category="org.eclipse.ui.Examples/org.eclipse.jdt.ui.java"
-		project="true"
-		finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
-		icon="icons/full/ctool16/newjprjex_wiz.gif"
-		banner="icons/full/wizban/newjprjex_wiz.gif">
-		<description>%JUnitProjectExampleCreationWizard.description</description>
-	    <projectsetup
-        	pagetitle="%JUnitProjectExampleCreationWizard.pagetitle"
-        	pagedescription="%JUnitProjectExampleCreationWizard.pagedescription"
-         	label="%JUnitProjectExampleCreationWizard.label"
-        	name="JUnit">
-           <nature id="org.eclipse.jdt.core.javanature"/>
-           <import dest="" src="archive/junit/junit37src.jar"/>
-        </projectsetup>
-      </wizard>	
-</extension>  
+
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="%JUnitProjectExampleCreationWizard.categoryName"
+            parentCategory="org.eclipse.ui.Examples"
+            id="org.eclipse.jdt.ui.java">
+      </category>
+      <wizard
+            banner="icons/full/wizban/newjprjex_wiz.gif"
+            name="%JUnitProjectExampleCreationWizard.title"
+            icon="icons/full/ctool16/newjprjex_wiz.gif"
+            category="org.eclipse.ui.Examples/org.eclipse.jdt.ui.java"
+            class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectCreationWizard"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="org.eclipse.jdt.examples.projects.JUnitProjectExampleCreationWizard">
+         <description>
+            %JUnitProjectExampleCreationWizard.description
+         </description>
+         <projectsetup
+               pagetitle="%JUnitProjectExampleCreationWizard.pagetitle"
+               name="JUnit"
+               label="%JUnitProjectExampleCreationWizard.label"
+               pagedescription="%JUnitProjectExampleCreationWizard.pagedescription">
+            <nature
+                  id="org.eclipse.jdt.core.javanature">
+            </nature>
+            <import
+                  dest=""
+                  src="archive/junit/junit37src.jar">
+            </import>
+         </projectsetup>
+      </wizard>
+   </extension>
+
 </plugin>
