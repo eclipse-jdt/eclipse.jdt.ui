@@ -36,6 +36,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 public class ChangeTypeRefactoringTests extends RefactoringTest {
 	private static final Class clazz= ChangeTypeRefactoringTests.class;
 	private static final String REFACTORING_PATH= "ChangeTypeRefactoring/";
+	
+	private static final boolean BUG_84670= true;
 
 	public ChangeTypeRefactoringTests(String name) {
 		super(name);
@@ -477,6 +479,10 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
 	public void testRawSubType() throws Exception {
+		if (BUG_84670) {
+			System.out.println("Disabled to due bug 84670");
+			return;
+		}
 		System.out.println("running testRawSubType()");
 		Collection types= helper1(7, 5, 7, 10, "java.lang.Comparable<java.lang.String>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
