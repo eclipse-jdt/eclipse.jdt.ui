@@ -559,7 +559,7 @@ public class JavaModelUtil {
 	public static IMember toOriginal(IMember type) {
 		ICompilationUnit cu= type.getCompilationUnit();
 		if (cu != null && cu.isWorkingCopy())
-			return (IType)cu.getOriginal(type);
+			return (IMember)cu.getOriginal(type);
 		return type;
 	}
 	
@@ -584,7 +584,7 @@ public class JavaModelUtil {
 			if (workingCopy != null) {
 				IJavaElement[] types= workingCopy.findElements(member);
 				if (types != null && types.length > 0) {
-					return (IType) types[0];
+					return (IMember) types[0];
 				}
 			}
 		}
