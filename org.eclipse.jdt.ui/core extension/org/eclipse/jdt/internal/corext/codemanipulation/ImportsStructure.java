@@ -498,12 +498,6 @@ public class ImportsStructure implements IImportsStructure {
 					buf.append(lineDelim);
 				}
 			}
-//		} else {
-//			// remove the line delimiter added in the end
-//			int pos= buf.length() - lineDelim.length();
-//			if (pos >= 0 && lineDelim.equals(buf.substring(pos))) {
-//				buf.setLength(pos);
-//			}
 		}
 		fNumberOfImportsCreated= nCreated;
 		
