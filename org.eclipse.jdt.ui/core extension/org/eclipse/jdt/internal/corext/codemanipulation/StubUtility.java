@@ -82,7 +82,7 @@ public class StubUtility {
 				// java doc
 				if (settings.methodOverwrites) {
 					boolean isDeprecated= Flags.isDeprecated(flags);
-					genJavaDocSeeTag(declaringtype.getElementName(), methodName, paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
+					genJavaDocSeeTag(JavaModelUtil.getFullyQualifiedName(declaringtype), methodName, paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
 				} else {
 					// generate a default java doc comment
 					String desc= "Method " + methodName; //$NON-NLS-1$
