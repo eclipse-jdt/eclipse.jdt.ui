@@ -14,8 +14,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
@@ -24,13 +24,9 @@ import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
-import org.eclipse.jface.util.PropertyChangeEvent;
-
 import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
-
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
@@ -41,7 +37,6 @@ import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
  */
 public final class JavaCodeScanner extends AbstractJavaScanner {
 
-	private static final boolean COLOR_RETURN_AS_METHOD_NAME= Boolean.getBoolean("org.eclipse.jdt.internal.ui.text.java.colorReturnAsMethodName");  //$NON-NLS-1$
 	
 	/**
 	 * Rule to detect java operators.
@@ -143,10 +138,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 				boolean isKeyword= false;
 				final String word= buffer.toString();
 
-				// Treat "return" as method name
-				if (COLOR_RETURN_AS_METHOD_NAME && "return".equals(word)) //$NON-NLS-1$
-					return fToken;
-				
 				// Check for keywords
 				for (int index= 0; index < JavaCodeScanner.fgKeywords.length; index++) {
 					if (JavaCodeScanner.fgKeywords[index].equals(word)) {
@@ -231,7 +222,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		"if", "implements", "import", "instanceof", "interface", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		"native", "new", //$NON-NLS-2$ //$NON-NLS-1$
 		"package", "private", "protected", "public", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		"return", //$NON-NLS-1$
 		"static", "super", "switch", "synchronized", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		"this", "throw", "throws", "transient", "try", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		"volatile", //$NON-NLS-1$
@@ -250,6 +240,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVA_STRING,
 		IJavaColorConstants.JAVA_DEFAULT,
 		IJavaColorConstants.JAVA_METHOD_NAME,
+		IJavaColorConstants.JAVA_KEYWORD_RETURN,
 		IJavaColorConstants.JAVA_OPERATOR
 	};
 	
@@ -257,6 +248,9 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 	/**
 	 * Creates a Java code scanner
+	 * 
+	 * @param manager	the color manager
+	 * @param store		the preference store
 	 */
 	public JavaCodeScanner(IColorManager manager, IPreferenceStore store) {
 		super(manager, store);
@@ -308,6 +302,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add word rule for keywords, types, and constants.
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
 		WordRule wordRule= new WordRule(new JavaWordDetector(), token);
+		
+		// Add word rule for keyword 'return'.
+		token= getToken(IJavaColorConstants.JAVA_KEYWORD_RETURN);
+		wordRule.addWord("return", token);  //$NON-NLS-1$
 		
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i=0; i<fgKeywords.length; i++)
