@@ -265,6 +265,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 
 		final int insertionLine= document.getLineOfOffset(replace.getOffset());
 		final int statementLine= document.getLineOfOffset(statement.getOffset() + statement.getLength());
+		final int statementLineBegin= document.getLineOfOffset(statement.getOffset());
 
 		final String outerSpace= (prevStatement.getOffset() + prevStatement.getLength() == replace.getOffset()) ? "" : " "; //$NON-NLS-1$ //$NON-NLS-2$
 		final String innerSpace= (replace.getOffset() + replace.getLength() == statement.getOffset()) ? "" : " "; //$NON-NLS-1$ //$NON-NLS-2$
@@ -281,12 +282,14 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 
 			// more than one line distance between block begin and next statement:
 			default:
-				// statement is too far away, assume normal typing; add closing braces before statement
-				makeBlock(document, command);
-				break;
-
 			// statement on next line
 			case 1:
+				// statement is too far away, assume normal typing; add closing braces before statement
+				if (statementLineBegin - insertionLine >= 2) {
+					makeBlock(document, command);
+					break;					
+				}			
+			
 				final String lineDelimiter= getLineDelimiter(document);
 				final String lineIndentation= getLineIndentation(document, insertionLine, replace.getOffset());
 
