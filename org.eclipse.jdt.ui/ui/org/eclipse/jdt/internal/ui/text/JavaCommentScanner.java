@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jdt.core.JavaCore;
@@ -58,14 +59,23 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		}
 	
 		public void addTaskTags(String value) {
-			String[] tasks= value.split(",");
+			String[] tasks= split(value, ","); //$NON-NLS-1$
 			for (int i= 0; i < tasks.length; i++) {
 				if (tasks[i].length() > 0) {
 					addWord(tasks[i], fToken);
 				}
 			}
 		}
-	
+		
+		private String[] split(String value, String delimiters) {
+			StringTokenizer tokenizer= new StringTokenizer(value, delimiters);
+			int size= tokenizer.countTokens();
+			String[] tokens= new String[size];
+			int i= 0;
+			while (i < size)
+				tokens[i++]= tokenizer.nextToken();
+			return tokens;
+		}
 	}
 	
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;	
