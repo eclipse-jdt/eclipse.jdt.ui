@@ -65,7 +65,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 	
 	protected static class PrimaryTypeName extends TemplateVariable {
 		public PrimaryTypeName() {
-			super("primary_type_name", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.primary.type.name"));
+			super("primary_type_name", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.primary.type.name")); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}
 		public String evaluate(TemplateContext context) {
@@ -73,7 +73,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 			if (unit == null) 
 				return null;
 			String elementName= unit.getElementName();
-			return elementName.substring(0, elementName.lastIndexOf('.') - 1);
+			return elementName.substring(0, elementName.lastIndexOf('.'));
 		}
 		public boolean isResolved(TemplateContext context) {
 			return evaluate(context) != null;
