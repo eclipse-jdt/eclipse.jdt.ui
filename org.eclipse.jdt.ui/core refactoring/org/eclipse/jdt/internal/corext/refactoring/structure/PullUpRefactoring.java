@@ -819,9 +819,30 @@ public class PullUpRefactoring extends Refactoring {
 			
 		if (JdtFlags.isPrivate(member))
 			return substitutePrivateWithProtected(source);
-		return "protected " + removeLeadingWhiteSpaces(source); //$NON-NLS-1$
+		
+		return addProtectedBeforeFirstToken(source);		
+	}
+	
+	private static String addProtectedBeforeFirstToken(String source){
+		int firstTokenStart= findFirstTokenOffset(source);
+		StringBuffer buff= new StringBuffer();
+		buff.append(source.substring(0, firstTokenStart));
+		buff.append("protected "); //$NON-NLS-1$
+		buff.append(source.substring(firstTokenStart));
+		return buff.toString();
 	}
 
+	private static int findFirstTokenOffset(String source){
+		try {
+			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			scanner.setSource(source.toCharArray());
+			scanner.getNextToken();
+			return scanner.getCurrentTokenStartPosition();
+		} catch (InvalidInputException e) {
+			return 0;
+		}
+	}
+	
 	private String replaceSuperCalls(IMethod method) throws JavaModelException {
 		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method, getSuperType(new NullProgressMonitor())));
 		
