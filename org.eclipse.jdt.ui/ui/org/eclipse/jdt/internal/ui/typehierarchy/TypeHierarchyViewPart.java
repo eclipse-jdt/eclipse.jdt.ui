@@ -739,7 +739,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (fSelectedType != null &&  fAddStubAction.init(fSelectedType, fMethodsViewer.getSelection())) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fAddStubAction);
 		}
-		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fMethodsViewer));	
+		//menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fMethodsViewer));	
 		addOpenWithMenu(menu, (IStructuredSelection)fMethodsViewer.getSelection());
 		addRefactoring(menu, fMethodsViewer);
 		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(), new ReorgGroup() }, fMethodsViewer);

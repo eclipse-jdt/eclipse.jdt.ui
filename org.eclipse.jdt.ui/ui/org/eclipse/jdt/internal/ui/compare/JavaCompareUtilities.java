@@ -12,29 +12,15 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.part.FileEditorInput;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 class JavaCompareUtilities {
 	
-	/**
-	 * Returns true if the given file is open in an editor.
-	 */
-	static boolean beingEdited(IFile file) {
-		CompilationUnitDocumentProvider dp= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		FileEditorInput input= new FileEditorInput(file);	
-		return dp.getDocument(input) != null;
-	}
-
 	/**
 	 * Returns a name for the given Java element that uses the same conventions
 	 * as the JavaNode name of a corresponding element.

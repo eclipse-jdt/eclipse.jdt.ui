@@ -8,30 +8,21 @@ import java.util.ResourceBundle;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 
-import org.eclipse.compare.EditionSelectionDialog;
-import org.eclipse.compare.HistoryItem;
-import org.eclipse.compare.IStreamContentAccessor;
-import org.eclipse.compare.ITypedElement;
-import org.eclipse.compare.ResourceNode;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFileState;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.*;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+
+import org.eclipse.compare.*;
 
 
 /**
@@ -45,18 +36,20 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 	public JavaReplaceWithEditionAction() {
 	}	
 
-	public JavaReplaceWithEditionAction(ISelectionProvider sp) {
-		super(sp);
-		
-		setText(CompareMessages.getString("ReplaceFromHistory.action.label")); //$NON-NLS-1$
-		
-		update();
+	// CompareMessages.getString("ReplaceFromHistory.action.label")
+	
+	protected ITypedElement[] buildEditions(ITypedElement target, IFile file, IFileState[] states) {
+		ITypedElement[] editions= new ITypedElement[states.length+1];
+		editions[0]= new ResourceNode(file);
+		for (int i= 0; i < states.length; i++)
+			editions[i+1]= new HistoryItem(target, states[i]);
+		return editions;
 	}
-			
+
 	/**
 	 * @see Action#run
 	 */
-	public final void run() {
+	public void run(IAction action) {
 		
 		String errorTitle= CompareMessages.getString("ReplaceFromHistory.title"); //$NON-NLS-1$
 		String errorMessage= CompareMessages.getString("ReplaceFromHistory.internalErrorMessage"); //$NON-NLS-1$
@@ -72,44 +65,15 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			return;
 		}
 		
-		// extract CU from selection
-		ICompilationUnit cu= input.getCompilationUnit();
-		if (cu.isWorkingCopy())
-			cu= (ICompilationUnit) cu.getOriginalElement();
-
-		// find underlying file
-		IFile file= null;
-		try {
-			file= (IFile) cu.getUnderlyingResource();
-		} catch (JavaModelException ex) {
-			JavaPlugin.log(ex);
-		}
+		IFile file= getFile(input);
 		if (file == null) {
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
-		
-		// setup array of editions
-		int numberOfEditions= 1;
-		IFileState[] states= null;
-		
-		// add available editions
-		try {
-			states= file.getHistory(null);
-		} catch (CoreException ex) {
-			JavaPlugin.log(ex);
-		}
-		
-		if (states != null)
-			numberOfEditions += states.length;
-			
-		ITypedElement[] editions= new ITypedElement[numberOfEditions];
-		editions[0]= new ResourceNode(file);
-		if (states != null)		
-			for (int i= 0; i < states.length; i++)
-				editions[i+1]= new HistoryItem(editions[0], states[i]);
-						
-		boolean inEditor= JavaCompareUtilities.beingEdited(file);
+										
+		boolean inEditor= beingEdited(file);
+		if (inEditor)
+			input= (IMember) getWorkingCopy(input);
 
 		// get a TextBuffer where to insert the text
 		TextBuffer buffer= null;
@@ -119,7 +83,11 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			
-			ITypedElement ti= d.selectEdition(new JavaTextBufferNode(buffer, inEditor), editions, input);
+			ITypedElement target= new JavaTextBufferNode(buffer, inEditor);
+
+			ITypedElement[] editions= buildEditions(target, file);
+
+			ITypedElement ti= d.selectEdition(target, editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
 				IStreamContentAccessor sca= (IStreamContentAccessor) ti;				
@@ -153,10 +121,6 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			if (buffer != null)
 				TextBuffer.release(buffer);
 		}
-	}
-	
-	protected boolean isEnabled(ISelection selection) {
-		return getEditionElement(selection) != null;
 	}
 }
 

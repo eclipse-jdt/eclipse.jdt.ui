@@ -547,8 +547,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		JavaOutlinePage page= super.createOutlinePage();
 		
 		page.setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
-		page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page)); //$NON-NLS-1$
-		page.setAction("AddEdition", new JavaAddElementFromHistory(this, page)); //$NON-NLS-1$
+		//page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page)); //$NON-NLS-1$
+		//page.setAction("AddEdition", new JavaAddElementFromHistory(this, page)); //$NON-NLS-1$
 		
 		DeleteAction deleteElement= new DeleteAction(page);
 		page.setAction("DeleteElement", deleteElement); //$NON-NLS-1$

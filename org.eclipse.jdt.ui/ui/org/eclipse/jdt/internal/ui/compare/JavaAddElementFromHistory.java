@@ -8,38 +8,25 @@ import java.util.ResourceBundle;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.compare.EditionSelectionDialog;
-import org.eclipse.compare.HistoryItem;
-import org.eclipse.compare.IStreamContentAccessor;
-import org.eclipse.compare.ITypedElement;
-import org.eclipse.compare.ResourceNode;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFileState;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.viewers.*;
 
 import org.eclipse.ui.IEditorInput;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.*;
 
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
-
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+
+import org.eclipse.compare.*;
 
 
 public class JavaAddElementFromHistory extends JavaHistoryAction {
@@ -51,22 +38,12 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	public JavaAddElementFromHistory() {
 	}
 	
-	/**
-	 * The optional argument editor is used iff the selection provider's
-	 * selection is empty. In this case the editor's CU is the container
-	 * to which to add an element from the local history.
-	 */
-	public JavaAddElementFromHistory(JavaEditor editor, ISelectionProvider sp) {
-		super(sp);
-		fEditor= editor;
-		setText(CompareMessages.getString("AddFromHistory.action.label")); //$NON-NLS-1$
-		update();
-	}
+	// CompareMessages.getString("AddFromHistory.action.label")
 	
 	/**
 	 * @see Action#run
 	 */
-	public final void run() {
+	public void run(IAction action) {
 		
 		String errorTitle= CompareMessages.getString("AddFromHistory.title"); //$NON-NLS-1$
 		String errorMessage= CompareMessages.getString("AddFromHistory.internalErrorMessage"); //$NON-NLS-1$
@@ -118,37 +95,20 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
-				
-		// extract CU from selection
-		if (cu.isWorkingCopy())
-			cu= (ICompilationUnit) cu.getOriginalElement();
-
-		// find underlying file 
-		IFile file= null;
-		try {
-			file= (IFile) cu.getUnderlyingResource();
-		} catch (JavaModelException ex) {
-			JavaPlugin.log(ex);
-		}
+		
+		IFile file= getFile(parent);
 		if (file == null) {
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
-		
-		// get available editions
-		IFileState[] states= null;
-		try {
-			states= file.getHistory(null);
-		} catch (CoreException ex) {
-			JavaPlugin.log(ex);
-		}	
-		if (states == null || states.length <= 0) {
-			MessageDialog.openInformation(shell, errorTitle, CompareMessages.getString("AddFromHistory.noHistoryMessage")); //$NON-NLS-1$
-			return;
+				
+		boolean inEditor= beingEdited(file);
+		if (inEditor) {
+			parent= (IParent) getWorkingCopy((IJavaElement)parent);
+			if (input != null)
+				input= (IMember) getWorkingCopy(input);
 		}
-		
-		boolean inEditor= JavaCompareUtilities.beingEdited(file);
-		
+
 		// get a TextBuffer where to insert the text
 		TextBuffer buffer= null;
 		try {
@@ -156,12 +116,9 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		
 			// configure EditionSelectionDialog and let user select an edition
 			ITypedElement target= new JavaTextBufferNode(buffer, inEditor);
-			
-			ITypedElement[] editions= new ITypedElement[states.length+1];
-			editions[0]= new ResourceNode(file);
-			for (int i= 0; i < states.length; i++)
-				editions[i+1]= new HistoryItem(target, states[i]);
-								
+
+			ITypedElement[] editions= buildEditions(target, file);
+											
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			d.setAddMode(true);
@@ -265,8 +222,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			if (o instanceof ICompilationUnit)
 				return true;
 		}
-	
-		return getEditionElement(selection) != null;
+		
+		return super.isEnabled(selection);
 	}
-	
 }

@@ -810,7 +810,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fMenu= manager.createContextMenu(tree);
 		tree.setMenu(fMenu);
 		
-//		getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer);
+		getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer);
 		getSite().setSelectionProvider(fOutlineViewer);
 		
 		IStatusLineManager statusLineManager= getSite().getActionBars().getStatusLineManager();

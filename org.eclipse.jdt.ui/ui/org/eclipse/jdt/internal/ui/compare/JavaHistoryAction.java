@@ -4,59 +4,148 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.text.MessageFormat;
+import java.io.*;
 
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.action.*;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.*;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-
-import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.IActionDelegate;
-import org.eclipse.jface.action.IAction;
+import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.part.FileEditorInput;
 
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+
+import org.eclipse.compare.*;
 
 /**
  * Base class for the "Replace with local history"
  * and "Add from local history" actions.
  */
-public abstract class JavaHistoryAction extends Action
-				implements ISelectionChangedListener, IUpdate, IActionDelegate { 
+public abstract class JavaHistoryAction implements IActionDelegate { 
 	
-	private ISelectionProvider fSelectionProvider;
+	/**
+	 * Implements the IStreamContentAccessor and ITypedElement protocols
+	 * for a TextBuffer.
+	 */
+	class JavaTextBufferNode implements ITypedElement, IStreamContentAccessor {
+		
+		private TextBuffer fBuffer;
+		private boolean fInEditor;
+		
+		JavaTextBufferNode(TextBuffer buffer, boolean inEditor) {
+			fBuffer= buffer;
+			fInEditor= inEditor;
+		}
+		
+		public String getName() {
+			if (fInEditor)
+				return "Editor Buffer";
+			return "Workspace File";
+		}
+		
+		public String getType() {
+			return "java";
+		}
+		
+		public Image getImage() {
+			return null;
+		}
+		
+		public InputStream getContents() {
+			return new ByteArrayInputStream(fBuffer.getContent().getBytes());
+		}
+	}
+
 	private ISelection fSelection;
 
 	
-	public JavaHistoryAction() {			
-	}
-		
-	public JavaHistoryAction(ISelectionProvider sp) {			
-		fSelectionProvider= sp;
-		Assert.isNotNull(fSelectionProvider);
-	}
-	
 	ISelection getSelection() {
-		if (fSelectionProvider != null)
-			return fSelectionProvider.getSelection();
 		return fSelection;
 	}
 		
-	/* (non Java doc)
-	 * @see IUpdate#update
-	 */
-	public void update() {
-		setEnabled(isEnabled(getSelection()));
+	protected IFile getFile(Object input) {
+		// extract CU from input
+		ICompilationUnit cu= null;
+		if (input instanceof ICompilationUnit)
+			cu= (ICompilationUnit) input;
+		else if (input instanceof IMember)
+			cu= ((IMember)input).getCompilationUnit();
+			
+		// get to original CU
+		if (cu.isWorkingCopy())
+			cu= (ICompilationUnit) cu.getOriginalElement();
+			
+		// find underlying file
+		IFile file= null;
+		try {
+			file= (IFile) cu.getUnderlyingResource();
+		} catch (JavaModelException ex) {
+			JavaPlugin.log(ex);
+		}
+		return file;
 	}
 	
-	/* (non Java doc)
-	 * @see ISelectionAction#selectionChanged
-	 */	
-	public final void selectionChanged(SelectionChangedEvent e) {
-		setEnabled(isEnabled(e.getSelection()));
-	}
+	protected ITypedElement[] buildEditions(ITypedElement target, IFile file) {
+
+
+		// setup array of editions
+		IFileState[] states= null;		
+		// add available editions
+		try {
+			states= file.getHistory(null);
+		} catch (CoreException ex) {
+			JavaPlugin.log(ex);
+		}
 		
+		int count= 1;
+		if (states != null)
+			count+= states.length;
+
+		ITypedElement[] editions= new ITypedElement[count];
+		editions[0]= new ResourceNode(file);
+		if (states != null)
+			for (int i= 0; i < states.length; i++)
+				editions[i+1]= new HistoryItem(target, states[i]);
+		return editions;
+		
+		/*
+		if (states == null || states.length <= 0) {
+			MessageDialog.openInformation(shell, errorTitle, CompareMessages.getString("AddFromHistory.noHistoryMessage")); //$NON-NLS-1$
+			return;
+		}
+		*/
+	}
+
+	/**
+	 * Tries to find the given element in a workingcopy.
+	 */
+	protected IJavaElement getWorkingCopy(IJavaElement input) {
+		try {
+			return EditorUtility.getWorkingCopy(input, true);
+		} catch (JavaModelException ex) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns true if the given file is open in an editor.
+	 */
+	boolean beingEdited(IFile file) {
+		CompilationUnitDocumentProvider dp= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+		FileEditorInput input= new FileEditorInput(file);	
+		return dp.getDocument(input) != null;
+	}
+
 	/**
 	 * Returns an IMember or null.
 	 */
@@ -76,10 +165,9 @@ public abstract class JavaHistoryAction extends Action
 		return null;
 	}
 			
-	abstract protected boolean isEnabled(ISelection selection);
-	
-	public void run(IAction action) {
-		run();
+	protected boolean isEnabled(ISelection selection) {
+		IMember m= getEditionElement(selection);
+		return getWorkingCopy(m) != null;
 	}
 	
 	/**
