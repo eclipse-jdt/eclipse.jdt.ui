@@ -392,24 +392,99 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	// !!! analogue in ExtractTempRefactoring
 	private TextEdit createConstantDeclarationEdit() throws CoreException {
-		
-		String text;
-		int insertOffset;
-		if(insertFirst()) {
-			BodyDeclaration first = (BodyDeclaration) getBodyDeclarations().next();
-			insertOffset = first.getStartPosition();
-			text= createConstantDeclarationSource(getInitializerSource()) + getLineDelimiter() + getIndent(first);
-
-		} else {
-			BodyDeclaration insertAfter = getNodeToInsertConstantDeclarationAfter();
-			Assert.isNotNull(insertAfter);
-			insertOffset= insertAfter.getStartPosition() + insertAfter.getLength(); 
-			text= getLineDelimiter() + getIndent(insertAfter) + createConstantDeclarationSource(getInitializerSource());
-		}
-		
-		return SimpleTextEdit.createInsert(insertOffset, text);
+		if(insertFirst())
+			return createInsertDeclarationFirstEdit();
+		else
+			return createInsertDeclarationAfterEdit(getNodeToInsertConstantDeclarationAfter());
 	}
 	
+	private TextEdit createInsertDeclarationFirstEdit() throws JavaModelException, CoreException {
+		BodyDeclaration first = (BodyDeclaration) getBodyDeclarations().next();
+		int insertOffset = first.getStartPosition();
+		String text= createConstantDeclarationSource() + getLineDelimiter() + getIndent(first);
+		return SimpleTextEdit.createInsert(insertOffset, text);		
+	}
+	
+	private TextEdit createInsertDeclarationAfterEdit(BodyDeclaration toInsertAfter) throws JavaModelException, CoreException {
+		Assert.isNotNull(toInsertAfter);
+
+		if(isOtherDeclOrClassEndOnSameLine(toInsertAfter))
+			return createInsertDeclarationOnSameLineEdit(toInsertAfter);
+		else
+			return createInsertDeclarationOnNextLineEdit(toInsertAfter);			
+	}
+		
+	private boolean isOtherDeclOrClassEndOnSameLine(BodyDeclaration toInsertAfter) throws JavaModelException {
+		int indexToInsertAtOrAfter= toInsertAfter.getStartPosition() + toInsertAfter.getLength();
+		
+		BodyDeclaration nextBodyDecl= getNextBodyDeclaration(toInsertAfter);
+		if(nextBodyDecl != null) {
+			if(isOnSameLine(indexToInsertAtOrAfter, nextBodyDecl.getStartPosition()))
+				return true;
+		} else {
+			TypeDeclaration typeDecl= getContainingTypeDeclarationNode();
+			int typeDeclClose= typeDecl.getStartPosition() + typeDecl.getLength() - 1;
+			if(isOnSameLine(indexToInsertAtOrAfter, typeDeclClose))
+				return true;
+		}
+		return false;
+	}
+	
+	private boolean isOnSameLine(int firstOffset, int secondOffset) throws JavaModelException {
+		return lineNumber(firstOffset) == lineNumber(secondOffset);
+	}
+	
+	private int lineNumber(int offset) {
+		return fCompilationUnitNode.lineNumber(offset);	
+	}
+	
+	private BodyDeclaration getNextBodyDeclaration(BodyDeclaration bodyDeclaration) throws JavaModelException {
+		Assert.isNotNull(bodyDeclaration);
+		
+		for(Iterator it= getBodyDeclarations(); it.hasNext();)
+			if(bodyDeclaration.equals(it.next()))
+				if(it.hasNext())
+					return (BodyDeclaration) it.next();	
+		return null;	
+	}
+	
+	private TextEdit createInsertDeclarationOnNextLineEdit(BodyDeclaration toInsertAfter) throws JavaModelException, CoreException {
+		Assert.isNotNull(toInsertAfter);
+			
+		int insertOffset= getStartOfFollowingLine(toInsertAfter);
+		String text= getIndent(toInsertAfter) + createConstantDeclarationSource() + getLineDelimiter();
+		return SimpleTextEdit.createInsert(insertOffset, text);		
+	}
+	
+	private int getStartOfFollowingLine(BodyDeclaration declaration) {
+		CompilationUnit cu= fCompilationUnitNode;
+		
+		int declEnd= getNodeInclusiveEnd(declaration);
+		int declLine= cu.lineNumber(declEnd);
+		
+		int i= declEnd;
+		while(cu.lineNumber(i) == declLine)
+			i++;
+			
+		return i;
+	}
+	
+	private int getNodeInclusiveEnd(ASTNode node) {
+		return getNodeExclusiveEnd(node) - 1;
+	}
+	
+	private int getNodeExclusiveEnd(ASTNode node) {
+		return node.getStartPosition() + node.getLength();	
+	}
+	
+	private TextEdit createInsertDeclarationOnSameLineEdit(BodyDeclaration toInsertAfter) throws JavaModelException, CoreException {
+		Assert.isNotNull(toInsertAfter);
+
+		int insertOffset= getNodeExclusiveEnd(toInsertAfter);
+		String text= " " + createConstantDeclarationSource();
+		return SimpleTextEdit.createInsert(insertOffset, text);
+	}
+		
 	// !! almost identical to version in ExtractTempRefactoring
 	private TextEdit createImportEditIfNeeded() throws JavaModelException {
 		ITypeBinding type= getSelectedExpression().getAssociatedExpression().resolveTypeBinding();
@@ -566,6 +641,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if(fBodyDeclarations == null)
 			fBodyDeclarations= getContainingTypeDeclarationNode().bodyDeclarations();
 		return fBodyDeclarations.iterator();
+	}
+
+	private String createConstantDeclarationSource() throws JavaModelException, CoreException {
+		return createConstantDeclarationSource(getInitializerSource());		
 	}
 
 	// !!! similar to one in ExtractTempRefactoring
