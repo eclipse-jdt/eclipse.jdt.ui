@@ -31,8 +31,6 @@
 			basedir="Eclipse JUnit"
 		/>
 		
-		<copy file="startup.jar" todir="${dest}"/>
-
 		<copy file="plugin.xml" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
 		<copy todir="${dest}/icons">
