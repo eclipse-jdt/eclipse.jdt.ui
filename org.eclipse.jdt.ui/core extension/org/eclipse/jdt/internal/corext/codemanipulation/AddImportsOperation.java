@@ -122,10 +122,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
 		try {
-			if (monitor == null) {
-				monitor= new NullProgressMonitor();
-			}
 			monitor.beginTask(CodeGenerationMessages.getString("AddImportsOperation.description"), 15); //$NON-NLS-1$
 
 			ImportRewrite importRewrite= new ImportRewrite(fCompilationUnit);

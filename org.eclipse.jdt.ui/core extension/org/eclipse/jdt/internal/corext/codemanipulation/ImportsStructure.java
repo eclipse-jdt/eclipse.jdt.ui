@@ -86,7 +86,7 @@ public final class ImportsStructure implements IImportsStructure {
 	private boolean fFilterImplicitImports;
 	private boolean fFindAmbiguousImports;
 	
-	private int fNumberOfImportsCreated;
+	private List fImportsCreated;
 	private boolean fHasChanges= false;
 	private IRegion fReplaceRange;
 	
@@ -133,7 +133,7 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		addPreferenceOrderHolders(preferenceOrder);
 		
-		fNumberOfImportsCreated= 0;
+		fImportsCreated= null;
 		fHasChanges= false;
 	}
 	
@@ -923,7 +923,6 @@ public final class ImportsStructure implements IImportsStructure {
 					}
 				}
 			}
-			fNumberOfImportsCreated= nCreated;
 			
 			String newContent= buf.toString();
 			String oldContent= document.get(importsStart, importsLen);
@@ -1043,6 +1042,10 @@ public final class ImportsStructure implements IImportsStructure {
 		buf.append(';');
 		buf.append(lineDelim);
 		// str= StubUtility.codeFormat(str, 0, lineDelim);
+		
+		if (fImportsCreated != null) {
+			fImportsCreated.add(importName);
+		}
 	}
 	
 	private int getPackageStatementEndPos(IDocument document) throws JavaModelException, BadLocationException {
@@ -1341,15 +1344,10 @@ public final class ImportsStructure implements IImportsStructure {
 			return buf.toString();
 		}
 	}	
-
-	/**
-	 * Gets the number of imports created.
-	 * @return Returns a int
-	 */
-	public int getNumberOfImportsCreated() {
-		return fNumberOfImportsCreated;
+	
+	public void setCreatedImportCollector(ArrayList list) {
+	    fImportsCreated= list;
 	}
-
 
 	/**
 	 * Returns <code>true</code> if imports have been added or removed.

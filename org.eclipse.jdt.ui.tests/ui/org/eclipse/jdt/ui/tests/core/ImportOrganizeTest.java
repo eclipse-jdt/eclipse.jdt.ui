@@ -1849,5 +1849,362 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testImportCountAddNew() throws Exception {
+	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");	
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");	
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");	
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		
+		assertEquals(2, op.getNumberOfImportsAdded());
+		assertEquals(0, op.getNumberOfImportsRemoved());
+	}
+	
+	public void testImportCountAddandRemove() throws Exception {
+	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		
+		assertEquals(2, op.getNumberOfImportsAdded());
+		assertEquals(1, op.getNumberOfImportsRemoved());
+	}
+	
+	public void testImportCountKeepOne() throws Exception {
+	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		
+		assertEquals(1, op.getNumberOfImportsAdded());
+		assertEquals(0, op.getNumberOfImportsRemoved());
+	}
+	
+	public void testImportCountKeepStar() throws Exception {
+	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("        Collection c;\n");
+		buf.append("        Socket s;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.net.Socket;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("        Collection c;\n");
+		buf.append("        Socket s;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		
+		assertEquals(1, op.getNumberOfImportsAdded());
+		assertEquals(0, op.getNumberOfImportsRemoved());
+	}
+	
+	public void testImportCountAddTwoRemoveOne() throws Exception {
+	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.BitSet;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		
+		assertEquals(2, op.getNumberOfImportsAdded());
+		assertEquals(1, op.getNumberOfImportsRemoved());
+	}
+	
+	public void testImportCountAddTwoNewRemoveThree() throws Exception {
+	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.BitSet;\n");
+		buf.append("import java.util.Calendar;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		
+		assertEquals(2, op.getNumberOfImportsAdded());
+		assertEquals(3, op.getNumberOfImportsRemoved());
+	}
+	
+	public void testImportCountAddTwoNewRemoveFourWithComments() throws Exception {
+	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.BitSet;\n");
+		buf.append("// some comment;\n");
+		buf.append("import java.util.Calendar; /*another comment*/\n");
+		buf.append("import static java.io.File.pathSeparator;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		
+		assertEquals(2, op.getNumberOfImportsAdded());
+		assertEquals(4, op.getNumberOfImportsRemoved());
+	}
+	
+	public void testImportCountWithStaticAndComments() throws Exception {
+	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.BitSet;\n");
+		buf.append("// some comment;\n");
+		buf.append("import java.util.Calendar; /*another comment*/\n");
+		buf.append("import static java.io.File.pathSeparator;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String s= pathSeparator;\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import static java.io.File.pathSeparator;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String s= pathSeparator;\n");
+		buf.append("        HashMap m;\n");
+		buf.append("        ArrayList l;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		
+		assertEquals(2, op.getNumberOfImportsAdded());
+		assertEquals(3, op.getNumberOfImportsRemoved());
+	}
 		
 }

@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -77,8 +78,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	private static class TypeReferenceProcessor {
 		
-		private List fOldSingleImports;
-		private List fOldDemandImports;
+		private Set fOldSingleImports;
+		private Set fOldDemandImports;
+		
+		private Set fImplicitImports;
 		
 		private HashSet fImportsAdded;
 		
@@ -93,9 +96,17 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		private ScopeAnalyzer fAnalyzer;
 		
-		public TypeReferenceProcessor(List oldSingleImports, List oldDemandImports, CompilationUnit root, ImportsStructure impStructure, boolean ignoreLowerCaseNames) {
+		
+		
+		public TypeReferenceProcessor(Set oldSingleImports, Set oldDemandImports, CompilationUnit root, ImportsStructure impStructure, boolean ignoreLowerCaseNames) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
+			
+			fImplicitImports= new HashSet(3);
+			fImplicitImports.add(""); //$NON-NLS-1$
+			fImplicitImports.add("java.lang"); //$NON-NLS-1$
+			fImplicitImports.add(impStructure.getCompilationUnit().getParent().getElementName());	
+			
 			fImpStructure= impStructure;
 			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
 			fAnalyzer= new ScopeAnalyzer(root);
@@ -199,7 +210,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 							// was single-imported
 							fImpStructure.addImport(fullName);
 							return null;
-						} else if (fOldDemandImports.contains(containerName)) {
+						} else if (fOldDemandImports.contains(containerName) || fImplicitImports.contains(containerName)) {
 							if (containerToImport == null) {
 								containerToImport= containerName;
 							} else {  // more than one import-on-demand
@@ -220,7 +231,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			return null;
 		}
-		
+				
 		private void findTypeRefs(String simpleTypeName, Collection typeRefsFound, IProgressMonitor monitor) throws JavaModelException {
 			if (fDoIgnoreLowerCaseNames && simpleTypeName.length() > 0) {
 				char ch= simpleTypeName.charAt(0);
@@ -249,6 +260,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private IChooseImportQuery fChooseImportQuery;
 	
 	private int fNumberOfImportsAdded;
+	private int fNumberOfImportsRemoved;
 
 	private IProblem fParsingError;
 	private CompilationUnit fASTRoot;
@@ -262,6 +274,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fChooseImportQuery= chooseImportQuery;
 
 		fNumberOfImportsAdded= 0;
+		fNumberOfImportsRemoved= 0;
 		
 		fParsingError= null;
 		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
@@ -279,18 +292,21 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
 	 */	
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
 		try {
-
-			if (monitor == null) {
-				monitor= new NullProgressMonitor();
-			}
 			ICompilationUnit cu= fImportsStructure.getCompilationUnit();
 			fNumberOfImportsAdded= 0;
+			fNumberOfImportsRemoved= 0;
+			
+			ArrayList createdImports= new ArrayList();
+			fImportsStructure.setCreatedImportCollector(createdImports);
 			
 			monitor.beginTask(CodeGenerationMessages.getFormattedString("OrganizeImportsOperation.description", cu.getElementName()), 5); //$NON-NLS-1$
 
-			List/*<String>*/ oldSingleImports= new ArrayList();
-			List/*<String>*/  oldDemandImports= new ArrayList();
+			Set/*<String>*/ oldSingleImports= new HashSet();
+			Set/*<String>*/  oldDemandImports= new HashSet();
 			List/*<SimpleName>*/ typeReferences= new ArrayList();
 			List/*<SimpleName>*/ staticReferences= new ArrayList();
 			
@@ -298,13 +314,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (!res) {
 				return;
 			}
-			
-			int nOldImports= oldDemandImports.size() + oldSingleImports.size();
 						
-			oldDemandImports.add(""); //$NON-NLS-1$
-			oldDemandImports.add("java.lang"); //$NON-NLS-1$
-			oldDemandImports.add(cu.getParent().getElementName());			
-			
 			monitor.worked(1);
 		
 			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, fASTRoot, fImportsStructure, fIgnoreLowerCaseNames);
@@ -328,7 +338,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				subMonitor.done();
 			}
 			
-			processor= null;
 			
 			addStaticImports(staticReferences, fImportsStructure);
 			
@@ -347,11 +356,30 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			fImportsStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
 			
-			fNumberOfImportsAdded= fImportsStructure.getNumberOfImportsCreated() - nOldImports;
+			determineImportDifferences(createdImports, oldSingleImports, oldDemandImports);
+			processor= null;
 		} finally {
 			monitor.done();
 		}
 	}
+	
+	private void determineImportDifferences(List importsAdded, Set oldSingleImports, Set oldDemandImports) {
+  		Object[] content= oldSingleImports.toArray();
+	    for (int i= 0; i < content.length; i++) {
+	        String importName= (String) content[i];
+	        if (importsAdded.remove(importName))
+	            oldSingleImports.remove(importName);
+	    }
+	    content= oldDemandImports.toArray();
+	    for (int i= 0; i < content.length; i++) {
+	        String importName= (String) content[i]; 
+	        if (importsAdded.remove(importName + ".*")) //$NON-NLS-1$
+	            oldDemandImports.remove(importName);
+	    }
+	    fNumberOfImportsAdded= importsAdded.size();
+	    fNumberOfImportsRemoved= oldSingleImports.size() + oldDemandImports.size();	    
+	}
+	
 	
 	private void addStaticImports(List/*<SimpleName>*/ staticReferences, ImportsStructure importsStructure) {
 		for (int i= 0; i < staticReferences.size(); i++) {
@@ -376,7 +404,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 	
 	// find type references in a compilation unit
-	private boolean collectReferences(List typeReferences, List staticReferences, List oldSingleImports, List oldDemandImports) {
+	private boolean collectReferences(List typeReferences, List staticReferences, Set oldSingleImports, Set oldDemandImports) {
 		IProblem[] problems= fASTRoot.getProblems();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem curr= problems[i];
@@ -414,6 +442,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	public int getNumberOfImportsAdded() {
 		return fNumberOfImportsAdded;
 	}
+	
+	public int getNumberOfImportsRemoved() {
+		return fNumberOfImportsRemoved;
+	}
 
 	/**
 	 * @return Returns the scheduling rule for this operation
@@ -421,6 +453,5 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	public ISchedulingRule getScheduleRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
-	
 	
 }
