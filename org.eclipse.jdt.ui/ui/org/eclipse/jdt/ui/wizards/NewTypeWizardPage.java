@@ -240,6 +240,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	private IType fCreatedType;
 	
+	private JavaPackageCompletionProcessor fCurrPackageCompletionProcessor;
+	private JavaTypeCompletionProcessor fEnclosingTypeCompletionProcessor;
+	private JavaTypeCompletionProcessor fSuperClassCompletionProcessor;
+	
 	protected IStatus fEnclosingTypeStatus;
 	protected IStatus fPackageStatus;
 	protected IStatus fTypeNameStatus;
@@ -335,6 +339,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, false);
 		fOtherMdfButtons.enableSelectionButton(fStaticMdfIndex, false);
 
+		fCurrPackageCompletionProcessor= new JavaPackageCompletionProcessor();
+		fEnclosingTypeCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
+		fSuperClassCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
+		
 		fPackageStatus= new StatusInfo();
 		fEnclosingTypeStatus= new StatusInfo();
 		
@@ -438,8 +446,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		Text text= fPackageDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());	
 		LayoutUtil.setHorizontalGrabbing(text);
-		JavaPackageCompletionProcessor processor= new JavaPackageCompletionProcessor(getPackageFragmentRoot()); //$NON-NLS-1$
-		ControlContentAssistHelper.createTextContentAssistant(text, processor);
+		ControlContentAssistHelper.createTextContentAssistant(text, fCurrPackageCompletionProcessor);
 	}
 
 	/**
@@ -459,17 +466,18 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		fEnclosingTypeSelection.doFillIntoGrid(tabGroup, 1);
 
-		Control c= fEnclosingTypeDialogField.getTextControl(composite);
+		Text text= fEnclosingTypeDialogField.getTextControl(composite);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= getMaxFieldWidth();
 		gd.horizontalSpan= 2;
-		c.setLayoutData(gd);
+		text.setLayoutData(gd);
 		
 		Button button= fEnclosingTypeDialogField.getChangeControl(composite);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.heightHint = SWTUtil.getButtonHeightHint(button);
 		gd.widthHint = SWTUtil.getButtonWidthHint(button);
 		button.setLayoutData(gd);
+		ControlContentAssistHelper.createTextContentAssistant(text, fEnclosingTypeCompletionProcessor);
 	}	
 
 	/**
@@ -524,8 +532,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperClassDialogField.doFillIntoGrid(composite, nColumns);
 		Text text= fSuperClassDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
-		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(getPackageFragmentRoot().getPackageFragment(""), false, false); //$NON-NLS-1$
-		ControlContentAssistHelper.createTextContentAssistant(text, processor);
+		ControlContentAssistHelper.createTextContentAssistant(text, fSuperClassCompletionProcessor);
 	}
 
 	/**
@@ -910,6 +917,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			
 	// ----------- validation ----------
 		
+	/*
+	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#containerChanged()
+	 */
+	protected IStatus containerChanged() {
+		IStatus status= super.containerChanged();
+		fCurrPackageCompletionProcessor.setPackageFragmentRoot(getPackageFragmentRoot());
+		fEnclosingTypeCompletionProcessor.setPackageFragment(getPackageFragmentRoot().getPackageFragment("")); //$NON-NLS-1$
+		return status;
+	}
+	
 	/**
 	 * A hook method that gets called when the package field has changed. The method 
 	 * validates the package name and returns the status of the validation. The validation
@@ -958,6 +975,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			
 			fCurrPackage= root.getPackageFragment(packName);
+			fSuperClassCompletionProcessor.setPackageFragment(fCurrPackage);
 		} else {
 			status.setError(""); //$NON-NLS-1$
 		}
