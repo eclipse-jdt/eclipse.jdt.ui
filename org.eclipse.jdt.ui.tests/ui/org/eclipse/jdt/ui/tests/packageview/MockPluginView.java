@@ -23,6 +23,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
@@ -212,6 +214,6 @@ public class MockPluginView extends PackageExplorerPart {
 	 * @param fold
 	 */
 	public void setFolding(boolean fold) {
-		JavaPlugin.getDefault().getPreferenceStore().setValue(AppearancePreferencePage.PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
+		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
 	}
 }

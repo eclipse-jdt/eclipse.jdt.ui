@@ -24,11 +24,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
@@ -96,7 +94,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	public int computeAdornmentFlags(Object element) {
-		if (AppearancePreferencePage.showOverrideIndicators()) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR)) {
 			if (element instanceof IMethod) {
 				try {
 					IMethod method= (IMethod) element;

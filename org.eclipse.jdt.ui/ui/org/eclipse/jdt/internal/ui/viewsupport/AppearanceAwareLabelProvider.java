@@ -5,10 +5,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 
 /**
  * JavaUILabelProvider that respects settings from the Appearance preference page.
@@ -28,7 +26,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	public AppearanceAwareLabelProvider(int textFlags, int imageFlags, ILabelDecorator[] labelDecorators) {
 		super(textFlags, imageFlags, labelDecorators);
 		initMasks();
-		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);
 	}
 
 	/**
@@ -40,10 +38,10 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	
 	private void initMasks() {
 		fTextFlagMask= -1;
-		if (!AppearancePreferencePage.showMethodReturnType()) {
+		if (!PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)) {
 			fTextFlagMask ^= JavaElementLabels.M_APP_RETURNTYPE;
 		}
-		if (!AppearancePreferencePage.isCompressingPkgNameInPackagesView()) {
+		if (!PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
 		
@@ -55,10 +53,10 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
-		if (property.equals(AppearancePreferencePage.PREF_METHOD_RETURNTYPE)
-				|| property.equals(AppearancePreferencePage.PREF_OVERRIDE_INDICATOR)
-				|| property.equals(AppearancePreferencePage.PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW)
-				|| property.equals(AppearancePreferencePage.PREF_COMPRESS_PACKAGE_NAMES)) {
+		if (property.equals(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)
+				|| property.equals(PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR)
+				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW)
+				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
 			initMasks();
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(this, null); // refresh all
 			fireLabelProviderChanged(lpEvent);
@@ -69,7 +67,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	 * @see IBaseLabelProvider#dispose()
 	 */
 	public void dispose() {
-		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
+		PreferenceConstants.getPreferenceStore().removePropertyChangeListener(this);
 		super.dispose();
 	}
 

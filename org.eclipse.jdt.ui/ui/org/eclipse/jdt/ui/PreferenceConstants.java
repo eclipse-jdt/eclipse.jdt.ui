@@ -1697,7 +1697,7 @@ public class PreferenceConstants {
 	 * 
 	 * @return the JDT-UI preference store
 	 */
-	public IPreferenceStore getPreferenceStore() {
+	public static IPreferenceStore getPreferenceStore() {
 		return JavaPlugin.getDefault().getPreferenceStore();
 	}
 	

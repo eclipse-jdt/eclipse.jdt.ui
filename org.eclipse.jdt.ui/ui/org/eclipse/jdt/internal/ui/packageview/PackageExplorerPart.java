@@ -105,8 +105,6 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
@@ -414,8 +412,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * and from test cases.
 	 */
 	public PackageExplorerContentProvider createContentProvider() {
-		boolean showCUChildren= AppearancePreferencePage.showCompilationUnitChildren();
-		boolean reconcile= JavaBasePreferencePage.reconcileJavaViews();
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		boolean showCUChildren= store.getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
+		boolean reconcile= PreferenceConstants.UPDATE_WHILE_EDITING.equals(store.getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
 		return new PackageExplorerContentProvider(showCUChildren, reconcile);
 	}
 	
@@ -646,7 +645,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Returns whether the preference to link selection to active editor is enabled.
 	 */
 	boolean isLinkingEnabled() {
-		return JavaBasePreferencePage.linkPackageSelectionToEditor();
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
 	}
 
 	/**
@@ -1010,12 +1009,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		boolean refreshViewer= false;
 	
-		if (AppearancePreferencePage.SHOW_CU_CHILDREN.equals(event.getProperty())) {
+		if (PreferenceConstants.SHOW_CU_CHILDREN.equals(event.getProperty())) {
 			IActionBars actionBars= getViewSite().getActionBars();
 			fActionSet.fillToolBar(actionBars.getToolBarManager());
 			actionBars.updateActionBars();
 			
-			boolean showCUChildren= AppearancePreferencePage.showCompilationUnitChildren();
+			boolean showCUChildren= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 			((StandardJavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
 			
 			refreshViewer= true;
