@@ -1,7 +1,3 @@
-/*
- * (c) Copyright 2001 MyCorporation.
- * All Rights Reserved.
- */
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import org.eclipse.jdt.core.IField;
