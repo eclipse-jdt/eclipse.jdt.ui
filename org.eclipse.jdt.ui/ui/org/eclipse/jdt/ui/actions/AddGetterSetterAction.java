@@ -185,7 +185,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		ILabelProvider lp= new AddGetterSetterLabelProvider(createNameProposer());
 		Map entries= createGetterSetterMapping(type);
 		if (entries.isEmpty()){
-			MessageDialog.openInformation(getShell(), dialogTitle, "The type contains no fields or all fields have getters/setters already.");
+			MessageDialog.openInformation(getShell(), dialogTitle, ActionMessages.getString("AddGettSetterAction.typeContainsNoFields.message")); //$NON-NLS-1$
 			return;
 		}	
 		ITreeContentProvider cp= new AddGetterSetterContentProvider(entries);

@@ -92,7 +92,7 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		if (! containsSourceFolderAsSubresource(selection))
 			return true;
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
-		String label= "The selection includes a folder that contains a Java source folder. Delete it as well?";
+		String label= ReorgMessages.getString("DeleteResourcesAction.deleteAction.confirm.message"); //$NON-NLS-1$
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);		
 	}
 	

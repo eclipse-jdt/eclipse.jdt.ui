@@ -77,7 +77,7 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		try {
 			return (IContainer)((IJavaElement)target).getCorrespondingResource();	
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, "Paste", "Internal error occurred. Please see log for details.");
+			ExceptionHandler.handle(e, ReorgMessages.getString("PasteResourcesFromClipboardAction.error.title"), ReorgMessages.getString("PasteResourcesFromClipboardAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
     }

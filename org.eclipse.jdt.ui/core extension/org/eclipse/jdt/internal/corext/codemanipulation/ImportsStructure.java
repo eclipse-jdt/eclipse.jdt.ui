@@ -296,7 +296,7 @@ public class ImportsStructure implements IImportsStructure {
 	public String addImport(String typeContainerName, String typeName) {
 		String fullTypeName= JavaModelUtil.concatenateName(typeContainerName, typeName);
 		
-		if (!"*".equals(typeName)) {
+		if (!"*".equals(typeName)) { //$NON-NLS-1$
 			String existing= findImport(typeName);
 			if (existing != null) {
 				if (fullTypeName.equals(existing)) {

@@ -129,7 +129,7 @@ public class JavaUIHelp {
 					if (fText == null) {
 						fText= retrieveText(element);
 					} else {
-						fText= ""; // no doc on multiple selection
+						fText= ""; // no doc on multiple selection //$NON-NLS-1$
 					}					
 					
 					URL url= JavaDocLocations.getJavadocLocation(element, true);
@@ -187,7 +187,7 @@ public class JavaUIHelp {
 					JavaPlugin.log(e); // ignore
 				}
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 
 		public IHelpResource[] getRelatedTopics() {

@@ -29,9 +29,9 @@ public class JavadocLinkDialogLabelProvider extends JavaUILabelProvider {
 				if (url != null) {
 					doc = url.toExternalForm();
 					Object[] args= new Object[] { text, doc };
-					return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.configuredentry", args);
+					return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.configuredentry", args); //$NON-NLS-1$
 				} else {
-					return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.notconfiguredentry", text);
+					return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.notconfiguredentry", text); //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);

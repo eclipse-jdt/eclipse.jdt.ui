@@ -28,32 +28,32 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CopyQueries implements ICopyQueries {
 
-	private static final String EMPTY= " "; //XXX workaround for bug#16256
+	private static final String EMPTY= " "; //XXX workaround for bug#16256 //$NON-NLS-1$
 
 	public CopyQueries() {
 	}
 
 	private static String removeTrailingJava(String name) {
-		Assert.isTrue(name.endsWith(".java"));
-		return name.substring(0, name.length() - ".java".length());
+		Assert.isTrue(name.endsWith(".java")); //$NON-NLS-1$
+		return name.substring(0, name.length() - ".java".length()); //$NON-NLS-1$
 	}
 
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu) {
-		String key= "Enter a new name for ''{0}'':";
+		String key= ReorgMessages.getString("CopyQueries.enterNewNameQuestion"); //$NON-NLS-1$
 		String message= MessageFormat.format(key, new String[]{removeTrailingJava(cu.getElementName())});
 		return createStaticQuery(createCompilationUnitNameValidator(cu), message, removeTrailingJava(cu.getElementName()));
 	}
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res) {
-		String key= "Enter a new name for ''{0}'':";
+		String key= ReorgMessages.getString("CopyQueries.enterNewNameQuestion"); //$NON-NLS-1$
 		String message= MessageFormat.format(key, new String[]{ res.getName()});
 		return createStaticQuery(createResourceNameValidator(res), message, res.getName());
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack) {
-		String key= "Enter a new name for ''{0}'':";
+		String key= ReorgMessages.getString("CopyQueries.enterNewNameQuestion"); //$NON-NLS-1$
 		String message= MessageFormat.format(key, new String[]{pack.getElementName()});
 		return createStaticQuery(createPackageNameValidator(pack), message, pack.getElementName());
 	}
@@ -75,7 +75,7 @@ public class CopyQueries implements ICopyQueries {
 	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial){
 		return new INewNameQuery(){
 			public String getNewName() {
-				InputDialog dialog= new InputDialog(JavaPlugin.getActiveWorkbenchShell(), "Name Conflict", message, initial, validator);
+				InputDialog dialog= new InputDialog(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("CopyQueries.nameConflictMessage"), message, initial, validator); //$NON-NLS-1$
 				if (dialog.open() == Window.CANCEL)
 					throw new OperationCanceledException();
 				return dialog.getValue();
@@ -86,18 +86,18 @@ public class CopyQueries implements ICopyQueries {
 	private static IInputValidator createResourceNameValidator(final IResource res){
 		IInputValidator validator= new IInputValidator(){
 			public String isValid(String newText) {
-				if (newText == null || "".equals(newText) || res.getParent() == null)
+				if (newText == null || "".equals(newText) || res.getParent() == null) //$NON-NLS-1$
 					return EMPTY;
 				if (res.getParent().findMember(newText) != null)
-					return "Resource with this name already exists";
+					return ReorgMessages.getString("CopyQueries.resourceWithThisNameAlreadyExists"); //$NON-NLS-1$
 				if (! res.getParent().getFullPath().isValidSegment(newText))
-					return "Invalid name";
+					return ReorgMessages.getString("CopyQueries.invalidNameMessage"); //$NON-NLS-1$
 				IStatus status= res.getParent().getWorkspace().validateName(newText, res.getType());
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
 					
 				if (res.getName().equalsIgnoreCase(newText))
-					return "Resource exists with different case";
+					return ReorgMessages.getString("CopyQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
 					
 				return null;
 			}
@@ -108,9 +108,9 @@ public class CopyQueries implements ICopyQueries {
 	private static IInputValidator createCompilationUnitNameValidator(final ICompilationUnit cu) {
 		IInputValidator validator= new IInputValidator(){
 			public String isValid(String newText) {
-				if (newText == null || "".equals(newText))
+				if (newText == null || "".equals(newText)) //$NON-NLS-1$
 					return EMPTY;
-				String newCuName= newText + ".java";
+				String newCuName= newText + ".java"; //$NON-NLS-1$
 				IStatus status= JavaConventions.validateCompilationUnitName(newCuName);	
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
@@ -124,7 +124,7 @@ public class CopyQueries implements ICopyQueries {
 					return refStatus.getFirstMessage(RefactoringStatus.FATAL);
 
 				if (cu.getElementName().equalsIgnoreCase(newCuName))
-					return "Resource exists with different case";
+					return ReorgMessages.getString("CopyQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
 				
 				return null;	
 			}
@@ -136,7 +136,7 @@ public class CopyQueries implements ICopyQueries {
 	private static IInputValidator createPackageNameValidator(final IPackageFragment pack) {
 		IInputValidator validator= new IInputValidator(){
 			public String isValid(String newText) {
-				if (newText == null || "".equals(newText))
+				if (newText == null || "".equals(newText)) //$NON-NLS-1$
 					return EMPTY;
 				IStatus status= JavaConventions.validatePackageName(newText);
 				if (status.getSeverity() == IStatus.ERROR)
@@ -146,13 +146,13 @@ public class CopyQueries implements ICopyQueries {
 				try {
 					if (parent instanceof IPackageFragmentRoot){ 
 						if (! RenamePackageRefactoring.isPackageNameOkInRoot(newText, (IPackageFragmentRoot)parent))
-							return "Package with that name exists";	
+							return ReorgMessages.getString("CopyQueries.packagewithThatNameexistsMassage");	 //$NON-NLS-1$
 					}	
 				} catch (JavaModelException e) {
 					return EMPTY;
 				}
 				if (pack.getElementName().equalsIgnoreCase(newText))
-					return "Resource exists with different case";
+					return ReorgMessages.getString("CopyQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
 					
 				return null;
 			}

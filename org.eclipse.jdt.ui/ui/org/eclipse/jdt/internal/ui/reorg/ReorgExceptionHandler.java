@@ -79,9 +79,9 @@ class ReorgExceptionHandler implements IReorgExceptionHandler{
 		final MessageDialog dialog=
 			new MessageDialog(
 				shell,
-				"Problems Deleting",
+				ReorgMessages.getString("ReorgExceptionHandler.error.title"), //$NON-NLS-1$
 				null,
-				MessageFormat.format("Resource {0} is out of synch with the file system. Do you want to delete it anyway?", new Object[] {name}),	
+				MessageFormat.format(ReorgMessages.getString("ReorgExceptionHandler.error.message"), new Object[] {name}),	 //$NON-NLS-1$
 				MessageDialog.QUESTION,
 				new String[] {
 					IDialogConstants.YES_LABEL,

@@ -72,7 +72,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 		} catch (SWTError e){
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 				throw e;
-			if (MessageDialog.openQuestion(getShell(), "Problem Copying to Clipboard", "There was a problem when accessing the system clipboard. Retry?"))
+			if (MessageDialog.openQuestion(getShell(), ReorgMessages.getString("CopyToClipboardProblemDialog.title"), ReorgMessages.getString("CopyToClipboardProblemDialog.message"))) //$NON-NLS-1$ //$NON-NLS-2$
 				run(selection);
 		}				
 	}

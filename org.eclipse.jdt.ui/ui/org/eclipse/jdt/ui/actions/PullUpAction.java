@@ -19,7 +19,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
@@ -129,7 +132,7 @@ public class PullUpAction extends SelectionDispatchAction{
 			if (isEnabled())
 				run(mockSelection);
 			else
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Refactoring", "Operation not possible.");	
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), ActionMessages.getString("PullUpAction.problem.title"), ActionMessages.getString("PullUpAction.problem.message"));	 //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}

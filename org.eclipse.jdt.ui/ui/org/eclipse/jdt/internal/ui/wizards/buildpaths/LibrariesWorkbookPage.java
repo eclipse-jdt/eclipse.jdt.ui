@@ -248,7 +248,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 		switch (elem.getEntryKind()) {
 		case IClasspathEntry.CPE_CONTAINER:
-			String title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.edit.title");
+			String title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.edit.title"); //$NON-NLS-1$
 			res= openContainerDialog(title, new ClasspathContainerWizard(elem.getClasspathEntry()));
 			break;
 		case IClasspathEntry.CPE_LIBRARY:
@@ -328,7 +328,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 		
 	private CPListElement[] openNewClassFolderDialog(CPListElement existing) {
-		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.NewClassFolderDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.NewClassFolderDialog.edit.title");
+		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.NewClassFolderDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.NewClassFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
 		IProject currProject= fCurrJProject.getProject();
 		
 		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, currProject, getUsedContainers(existing), existing);
@@ -353,8 +353,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 
-		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.title");
-		String message= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.new.description") : NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.description");
+		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
+		String message= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.new.description") : NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.description"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setValidator(validator);
@@ -388,8 +388,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 
-		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.edit.title");
-		String message= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.new.description") : NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.edit.description");
+		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
+		String message= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.new.description") : NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.edit.description"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setValidator(validator);
@@ -475,7 +475,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				lastUsedPath= ""; //$NON-NLS-1$
 			}
 		}
-		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.ExtJARArchiveDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.ExtJARArchiveDialog.edit.title");
+		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.ExtJARArchiveDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.ExtJARArchiveDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		FileDialog dialog= new FileDialog(getShell(), existing == null ? SWT.MULTI : SWT.SINGLE);
 		dialog.setText(title);
@@ -504,7 +504,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private CPListElement[] openVariableSelectionDialog(CPListElement existing) {
-		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title");
+		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell(), title, null);
 		if (dialog.open() == dialog.OK) {
@@ -592,16 +592,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			fDescriptors= ClasspathContainerDescriptor.getDescriptors();
 			
 			fLabelField= new DialogField();
-			fLabelField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.description"));
+			fLabelField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.description")); //$NON-NLS-1$
 			
 			fCreateFolderField= new SelectionButtonDialogField(SWT.RADIO);
-			fCreateFolderField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.createfolder"));
+			fCreateFolderField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.createfolder")); //$NON-NLS-1$
 
 			fAddFolderField= new SelectionButtonDialogField(SWT.RADIO);
-			fAddFolderField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.addfolder"));
+			fAddFolderField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.addfolder")); //$NON-NLS-1$
 
 			fAddContainerField= new SelectionButtonDialogField(SWT.RADIO);
-			fAddContainerField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.addcontainer"));
+			fAddContainerField.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.AdvancedDialog.addcontainer")); //$NON-NLS-1$
 						
 			String[] names= new String[fDescriptors.length];
 			for (int i = 0; i < names.length; i++) {
@@ -658,7 +658,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				String selected= fCombo.getText();
 				for (int i = 0; i < fDescriptors.length; i++) {
 					if (fDescriptors[i].getName().equals(selected)) {
-						String title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.new.title");
+						String title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.new.title"); //$NON-NLS-1$
 						fResult= openContainerDialog(title, new ClasspathContainerWizard(fDescriptors[i]));
 						break;
 					}

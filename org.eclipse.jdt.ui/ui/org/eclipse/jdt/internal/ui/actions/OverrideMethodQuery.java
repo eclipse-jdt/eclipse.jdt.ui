@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.IOverrideMethodQuery;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class OverrideMethodQuery implements IOverrideMethodQuery {
@@ -59,7 +59,7 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			
 			Button flatListButton= new Button(inner, SWT.CHECK);
-			flatListButton.setText("Group methods by &types");
+			flatListButton.setText(ActionMessages.getString("OverrideMethodQuery.groupMethodsByTypes")); //$NON-NLS-1$
 			flatListButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 			
 			flatListButton.addSelectionListener(new SelectionListener() {
@@ -220,9 +220,9 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 			}
 			String message;
 			if (count == 1) {
-				message= JavaUIMessages.getFormattedString("OverrideMethodQuery.selectioninfo.one", String.valueOf(count)); //$NON-NLS-1$
+				message= ActionMessages.getFormattedString("OverrideMethodQuery.selectioninfo.one", String.valueOf(count)); //$NON-NLS-1$
 			} else {
-				message= JavaUIMessages.getFormattedString("OverrideMethodQuery.selectioninfo.more", String.valueOf(count)); //$NON-NLS-1$
+				message= ActionMessages.getFormattedString("OverrideMethodQuery.selectioninfo.more", String.valueOf(count)); //$NON-NLS-1$
 			}
 			return new StatusInfo(IStatus.INFO, message);
 		}
@@ -263,8 +263,8 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		
 		OverrideTreeSelectionDialog dialog= new OverrideTreeSelectionDialog(fShell, lprovider, contentProvider);
 		dialog.setValidator(new OverrideMethodValidator());
-		dialog.setTitle(JavaUIMessages.getString("OverrideMethodQuery.dialog.title")); //$NON-NLS-1$
-		dialog.setMessage(JavaUIMessages.getString("OverrideMethodQuery.dialog.description")); //$NON-NLS-1$
+		dialog.setTitle(ActionMessages.getString("OverrideMethodQuery.dialog.title")); //$NON-NLS-1$
+		dialog.setMessage(ActionMessages.getString("OverrideMethodQuery.dialog.description")); //$NON-NLS-1$
 		dialog.setInitialSelections(defaultSelected);
 		dialog.setExpandedElements(expanded.toArray());
 		dialog.setContainerMode(true);

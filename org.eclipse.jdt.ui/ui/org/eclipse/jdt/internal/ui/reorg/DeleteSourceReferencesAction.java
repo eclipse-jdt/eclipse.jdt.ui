@@ -74,7 +74,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		try {
             new ProgressMonitorDialog(getShell()).run(false, true, createDeleteOperation(selection));
         } catch (InvocationTargetException e) {
-        	ExceptionHandler.handle(e, getShell(), "Delete", "An error occurred while performing this operation. See log for details.");
+        	ExceptionHandler.handle(e, getShell(), ReorgMessages.getString("DeleteSourceReferenceAction.error.title"), ReorgMessages.getString("DeleteSourceReferenceAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
         } catch (InterruptedException e) {
         	//nothing. action interrupted
         }
@@ -94,7 +94,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	
 	private void performDeletion(IStructuredSelection selection, IProgressMonitor pm) throws CoreException{
 		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess(selection)); //IFile -> List of ISourceReference (elements from that file)
-		pm.beginTask("Deleting", 2 * mapping.keySet().size());
+		pm.beginTask(ReorgMessages.getString("DeleteSourceReferenceAction.deleting"), 2 * mapping.keySet().size()); //$NON-NLS-1$
 		
 		if (areAllFilesReadOnly(mapping)){
 			String title= ReorgMessages.getString("DeleteSourceReferencesAction.title"); //$NON-NLS-1$
@@ -142,7 +142,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	private static void deleteAll(Map mapping, IFile file, IProgressMonitor pm) throws CoreException {
 		List l= (List)mapping.get(file);
 		ISourceReference[] refs= (ISourceReference[]) l.toArray(new ISourceReference[l.size()]);
-		pm.beginTask("", refs.length);
+		pm.beginTask("", refs.length); //$NON-NLS-1$
 		
 		ISourceReference[] nonFields= getNonFields(refs);
 		delete(file, nonFields, new SubProgressMonitor(pm, nonFields.length));
@@ -152,7 +152,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	}
 
 	private static void delete(IFile file, ISourceReference[] nonFields, IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		TextBuffer tb= TextBuffer.acquire(file);
 		try{
 			TextBufferEditor tbe= new TextBufferEditor(tb);
@@ -173,7 +173,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	}
 	
 	private static void delete(IField[] fields, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", fields.length);
+		pm.beginTask("", fields.length); //$NON-NLS-1$
 		for (int i= 0; i < fields.length; i++) {
 			fields[i].delete(false, new SubProgressMonitor(pm, 1));
 			if (pm.isCanceled())

@@ -264,8 +264,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		fBinFolderNameText.addModifyListener(fModifyListener);
 		
 		new Label(composite, SWT.NONE); // spacer
-		new Label(composite, SWT.NONE).setText("Link settings:");
-		addCheckBox(composite, "&Link Java Browsing views selection to active editor", LINK_BROWSING_VIEW_TO_EDITOR);
+		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.linkSettings.text")); //$NON-NLS-1$
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkJavaBrowsingViewsCheckbox.text"), LINK_BROWSING_VIEW_TO_EDITOR); //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
 

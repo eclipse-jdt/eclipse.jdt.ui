@@ -116,7 +116,7 @@ public class SelectionConverter {
 		try {
 			return codeResolveOrInput(editor);
 		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.converstion_failed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, shell, title, ActionMessages.getString("SelectionConverter.codeResolve_failed")); //$NON-NLS-1$
 		}
 		return null;
 	}
