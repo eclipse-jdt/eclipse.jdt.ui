@@ -2123,9 +2123,15 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), newStore, this, IJavaPartitions.JAVA_PARTITIONING));
 		setRangeIndicator(new DefaultRangeIndicator());
-		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
 		fMarkOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 		fStickyOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
+	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#initializeKeyBindingScopes()
+	 */
+	protected void initializeKeyBindingScopes() {
+		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
 	}
 	
 	/*
