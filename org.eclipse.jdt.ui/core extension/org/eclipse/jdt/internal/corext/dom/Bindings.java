@@ -345,7 +345,7 @@ public class Bindings {
 	}
 	
 	/**
-	 * Finds the method that is defines the given method.
+	 * Finds the method that is implemented by the given method.
 	 * @param method The method to find
 	 */
 	public static IMethodBinding findMethodImplementation(IMethodBinding method) {
