@@ -841,15 +841,17 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 		try {
 			ITypedRegion partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
-			validPosition= getValidPositionForPartition(document, partition, eol);
-			while (validPosition == -1) {
-				nextPartitionPos= partition.getOffset() - 1;
-				if (nextPartitionPos <= docOffset) {
-					validPosition= docOffset;
-					break;
-				}
-				partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
+			if (partition != null) {
 				validPosition= getValidPositionForPartition(document, partition, eol);
+				while (validPosition == -1) {
+					nextPartitionPos= partition.getOffset() - 1;
+					if (nextPartitionPos <= docOffset) {
+						validPosition= docOffset;
+						break;
+					}
+					partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
+					validPosition= getValidPositionForPartition(document, partition, eol);
+				}
 			}
 		} catch (BadLocationException e) {
 		}
