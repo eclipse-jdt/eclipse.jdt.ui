@@ -140,8 +140,16 @@ public class IndentAction extends TextEditorAction {
 						
 						Assert.isTrue(newLength >= 0);
 						Assert.isTrue(newOffset >= 0);
+
+						// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43489
+						if (target != null) {
+							target.endCompoundChange();
+							target.setRedraw(true);
+							target= null;
+						}
 						
 						// always reset the selection if anything was replaced
+						// TODO selectAndReveal is too intrusive, plus causes above bug
 						if (hasChanged || newOffset != offset || newLength != length)
 							getTextEditor().selectAndReveal(newOffset, newLength);
 						
