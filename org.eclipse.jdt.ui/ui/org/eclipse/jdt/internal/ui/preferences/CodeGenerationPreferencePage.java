@@ -98,7 +98,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	 * Initializes the current options (read from preference store)
 	 */
 	public static void initDefaults(IPreferenceStore prefs) {
-		prefs.setDefault(PREF_USE_GETTERSETTER_PREFIX, true);
+		prefs.setDefault(PREF_USE_GETTERSETTER_PREFIX, false);
 		prefs.setDefault(PREF_USE_GETTERSETTER_SUFFIX, false);
 		prefs.setDefault(PREF_GETTERSETTER_PREFIX, "f, fg, _, m_"); //$NON-NLS-1$
 		prefs.setDefault(PREF_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
