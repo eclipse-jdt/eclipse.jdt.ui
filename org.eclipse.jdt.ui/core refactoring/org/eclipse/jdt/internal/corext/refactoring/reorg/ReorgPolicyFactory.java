@@ -630,6 +630,7 @@ class ReorgPolicyFactory {
 			VariableDeclarationFragment originalFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, sourceCuNode);
 			VariableDeclarationFragment copiedFragment= (VariableDeclarationFragment) ASTNode.copySubtree(targetAst, originalFragment);
 			FieldDeclaration newFieldDeclaration= targetAst.newFieldDeclaration(copiedFragment);
+			// TODO insert copy of source buffer
 			if (fieldDeclaration.getJavadoc() != null)
 				newFieldDeclaration.setJavadoc((Javadoc) ASTNode.copySubtree(targetAst, fieldDeclaration.getJavadoc()));
 			newFieldDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(targetAst, fieldDeclaration.getModifiers()));
