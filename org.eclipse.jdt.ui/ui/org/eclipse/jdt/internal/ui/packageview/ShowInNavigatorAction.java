@@ -78,7 +78,6 @@ public class ShowInNavigatorAction extends SelectionProviderAction {
 			return;
 		}
 		Iterator elements= selection.iterator();
-		boolean enabled= false;
 		if (elements.hasNext()) {
 			Object o= elements.next();
 			if ((o instanceof IAdaptable) &&  
