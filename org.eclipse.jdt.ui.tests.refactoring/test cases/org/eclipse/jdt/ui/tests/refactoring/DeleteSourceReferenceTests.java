@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferenceEdit;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 
 public class DeleteSourceReferenceTests extends RefactoringTest {
 
