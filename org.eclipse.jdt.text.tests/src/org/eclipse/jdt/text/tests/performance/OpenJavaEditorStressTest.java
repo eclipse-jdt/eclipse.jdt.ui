@@ -11,17 +11,18 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.TestCase;
+
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 
-public class OpenJavaEditorStressTest extends OpenEditorTest {
+public class OpenJavaEditorStressTest extends TestCase {
 
 	private static final String FILE= PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 	
@@ -39,10 +40,9 @@ public class OpenJavaEditorStressTest extends OpenEditorTest {
 		performanceMeter.start();
 		try {
 			for (int i= 0; i < NUMBER_OF_RUNS; i++) {
-				IEditorPart part= IDE.openEditor(EditorTestHelper.getActivePage(), file);
-				EditorTestHelper.runEventQueue(part);
+				EditorTestHelper.openInEditor(file, true);
 				EditorTestHelper.closeAllEditors();
-				EditorTestHelper.runEventQueue(part);
+				EditorTestHelper.runEventQueue();
 			}
 			performanceMeter.stop();
 			performanceMeter.commit();
