@@ -14,6 +14,8 @@ package org.eclipse.jdt.text.tests.performance;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
+
 public class SystemTimePerformanceMeter extends PerformanceMeter {
 
 	private String fScenario;
@@ -50,5 +52,14 @@ public class SystemTimePerformanceMeter extends PerformanceMeter {
 		for (int i= 0; i < n; i++)
 			buf.append(s);
 		return buf.toString();
+	}
+
+	public MeteringSession getSessionData() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getScenarioName() {
+		return fScenario;
 	}
 }

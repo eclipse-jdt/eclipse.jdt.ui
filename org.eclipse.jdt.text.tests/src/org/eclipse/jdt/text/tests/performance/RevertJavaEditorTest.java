@@ -20,7 +20,6 @@ import org.eclipse.ui.PartInitException;
  */
 public class RevertJavaEditorTest extends RevertEditorTest {
 
-	private static final int N_OF_COPIES= 20;
 	private static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
 	private static final String FILE_PREFIX= "TextLayout";
 	private static final String FILE_SUFFIX= ".java";
@@ -32,7 +31,7 @@ public class RevertJavaEditorTest extends RevertEditorTest {
 
 	public void testRevertJavaEditor() throws PartInitException, BadLocationException {
 		// cold run
-		measureRevert(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
+		measureRevert(EditorTestHelper.findFile(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX + FILE_SUFFIX));
 	}
 
 }

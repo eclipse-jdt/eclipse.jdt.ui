@@ -18,13 +18,20 @@ import org.eclipse.perfmsr.core.LoadValueConstants;
 import org.eclipse.perfmsr.core.PerfMsrCorePlugin;
 import org.eclipse.perfmsr.core.Upload;
 
+import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
+import org.eclipse.jdt.text.tests.performance.data.PerformanceFileParser;
+
 public class OSPerformanceMeter extends PerformanceMeter {
 
 	private IPerformanceMonitor fPerformanceMonitor;
+	private final String fScenario;
+	private String fLogFile;
 	
 	public OSPerformanceMeter(String scenario) {
+		fScenario= scenario;
 		fPerformanceMonitor= PerfMsrCorePlugin.getPerformanceMonitor(false);
-		fPerformanceMonitor.setLogFile(getLogFile(scenario));
+		fLogFile= getLogFile(scenario);
+		fPerformanceMonitor.setLogFile(fLogFile);
 		fPerformanceMonitor.setTestName(scenario);
 	}
 	
@@ -38,6 +45,8 @@ public class OSPerformanceMeter extends PerformanceMeter {
 	
 	public void commit() {
 		Upload.Status status= fPerformanceMonitor.upload(null);
+		if (status.fileRenamed)
+			fLogFile= status.message.substring(status.message.indexOf("Measurement file has been renamed to: ") + 38);
 		System.out.println(status.message);
 	}
 	
@@ -59,5 +68,17 @@ public class OSPerformanceMeter extends PerformanceMeter {
 				return value + "/" + logFile;
 		}
 		return logFile;
+	}
+
+	public MeteringSession getSessionData() {
+		MeteringSession[] parsed= new PerformanceFileParser().parseLocation(fLogFile);
+		if (parsed.length > 0)
+			return parsed[0];
+		else
+			return null;
+	}
+
+	public String getScenarioName() {
+		return fScenario;
 	}	
 }
