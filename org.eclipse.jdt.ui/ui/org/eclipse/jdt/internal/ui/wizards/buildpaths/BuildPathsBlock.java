@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
@@ -82,7 +83,7 @@ public class BuildPathsBlock {
 
 	private IWorkspaceRoot fWorkspaceRoot;
 
-	private ListDialogField fClassPathList;
+	private CheckedListDialogField fClassPathList;
 	private StringDialogField fBuildPathDialogField;
 	
 	private StatusInfo fClassPathStatus;
@@ -100,7 +101,6 @@ public class BuildPathsBlock {
 	private SourceContainerWorkbookPage fSourceContainerPage;
 	private ProjectsWorkbookPage fProjectsPage;
 	private LibrariesWorkbookPage fLibrariesPage;
-	private VisibilityWorkbookPage fVisibilityPage;
 	
 	private BuildPathBasePage fCurrPage;
 		
@@ -117,14 +117,20 @@ public class BuildPathsBlock {
 	
 		String[] buttonLabels= new String[] {
 			/* 0 */ NewWizardMessages.getString("BuildPathsBlock.classpath.up.button"), //$NON-NLS-1$
-			/* 1 */ NewWizardMessages.getString("BuildPathsBlock.classpath.down.button") //$NON-NLS-1$
+			/* 1 */ NewWizardMessages.getString("BuildPathsBlock.classpath.down.button"), //$NON-NLS-1$
+			/* 2 */ null,
+			/* 3 */ NewWizardMessages.getString("BuildPathsBlock.classpath.checkall.button"), //$NON-NLS-1$
+			/* 4 */ NewWizardMessages.getString("BuildPathsBlock.classpath.uncheckall.button") //$NON-NLS-1$
+		
 		};
 		
-		fClassPathList= new ListDialogField(null, buttonLabels, new CPListLabelProvider());
+		fClassPathList= new CheckedListDialogField(null, buttonLabels, new CPListLabelProvider());
 		fClassPathList.setDialogFieldListener(adapter);
 		fClassPathList.setLabelText(NewWizardMessages.getString("BuildPathsBlock.classpath.label")); 
 		fClassPathList.setUpButtonIndex(0);
 		fClassPathList.setDownButtonIndex(1);
+		fClassPathList.setCheckAllButtonIndex(3);
+		fClassPathList.setUncheckAllButtonIndex(4);		
 			
 		if (isNewProject) {
 			fBuildPathDialogField= new StringDialogField();
@@ -204,19 +210,11 @@ public class BuildPathsBlock {
 		item.setImage(cpoImage);
 		item.setData(ordpage);
 		item.setControl(ordpage.getControl(folder));
-						
-		fVisibilityPage= new VisibilityWorkbookPage(fClassPathList);		
-		item= new TabItem(folder, SWT.NONE);
-		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.visibility")); //$NON-NLS-1$
-		item.setImage(projectImage);
-		item.setData(fVisibilityPage);
-		item.setControl(fVisibilityPage.getControl(folder));		
 				
 		if (fCurrJProject != null) {
 			fSourceContainerPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
-			fVisibilityPage.update();
 		}		
 						
 		Composite editorcomp= new Composite(composite, SWT.NONE);	
@@ -281,6 +279,7 @@ public class BuildPathsBlock {
 		}
 		
 		List newClassPath;
+
 		if (classpathEntries == null) {
 			newClassPath= getDefaultClassPath(jproject);
 		} else {
@@ -310,10 +309,18 @@ public class BuildPathsBlock {
 				newClassPath.add(elem);
 			}
 		}
+		List exportedEntries = new ArrayList();
+		for (int i= 0; i < exportedEntries.size(); i++) {
+			CPListElement curr= (CPListElement) exportedEntries.get(i);
+			if (curr.isExported() || curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+				exportedEntries.add(curr);
+			}
+		}
 		
 		// inits the dialog field
 		fBuildPathDialogField.setText(outputLocation.toString());
 		fClassPathList.setElements(newClassPath);
+		fClassPathList.setCheckedElements(exportedEntries);
 
 		if (fSourceContainerPage != null) {
 			fSourceContainerPage.init(fCurrJProject);
@@ -416,9 +423,6 @@ public class BuildPathsBlock {
 		} else if (field == fBuildPathDialogField) {
 			updateBuildPathStatus();
 		}
-		if (fVisibilityPage != null) {
-			fVisibilityPage.update();
-		}
 		doStatusLineUpdate();
 	}	
 	
@@ -449,6 +453,15 @@ public class BuildPathsBlock {
 
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
 			CPListElement currElement= (CPListElement)elements.get(i);
+			boolean isChecked= fClassPathList.isChecked(currElement);
+			if (currElement.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+				if (!isChecked) {
+					fClassPathList.setCheckedWithoutUpdate(currElement, true);
+				}
+			} else {
+				currElement.setExported(isChecked);
+			}
+
 			entries[i]= currElement.getClasspathEntry();
 			entryMissing= entryMissing || currElement.isMissing();			
 		}
