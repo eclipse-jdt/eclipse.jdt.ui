@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
@@ -30,8 +31,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -48,8 +49,12 @@ public abstract class ElementSearchAction extends JavaElementAction {
 	private static final String STORE_LRU_WORKING_SET_NAMES= "lastUsedWorkingSetNames"; //$NON-NLS-1$
 	private static IDialogSettings fgSettingsStore;
 
-	public ElementSearchAction(String label, Class[] validTypes) {
-		super(label, validTypes);
+	ElementSearchAction(IWorkbenchSite site, String label, Class[] validTypes) {
+		super(site, label, validTypes);
+	}
+
+	ElementSearchAction(JavaEditor editor, String label, Class[] validTypes) {
+		super(editor, label, validTypes);
 	}
 
 	protected void run(IJavaElement element) {

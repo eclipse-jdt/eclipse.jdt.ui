@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -11,15 +13,26 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
 public class FindReferencesInHierarchyAction extends FindReferencesAction {
 
-	public FindReferencesInHierarchyAction() {
-		super(SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class}); //$NON-NLS-1$
+	public FindReferencesInHierarchyAction(IWorkbenchSite site) {
+		super(site, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class}); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyReferencesAction.tooltip")); //$NON-NLS-1$
 	}
 
-	FindReferencesInHierarchyAction(String label, Class[] validTypes) {
-		super(label, validTypes);
+	public FindReferencesInHierarchyAction(JavaEditor editor) {
+		super(editor, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindHierarchyReferencesAction.tooltip")); //$NON-NLS-1$
+	}
+
+	FindReferencesInHierarchyAction(IWorkbenchSite site, String label, Class[] validTypes) {
+		super(site, label, validTypes);
+	}
+
+	FindReferencesInHierarchyAction(JavaEditor editor, String label, Class[] validTypes) {
+		super(editor, label, validTypes);
 	}
 
 	protected IJavaSearchScope getScope(IType type) throws JavaModelException {

@@ -1085,6 +1085,35 @@ JavaStructureDiffViewerCreator
       		label="%ConvertLineDelimitersToWindowsAction.label"
       		allowLabelUpdate="true"
 			retarget="true" />
+	</actionSet>			
+</extension>
+
+<extension point="org.eclipse.ui.actionSetPartAssociations">
+	<actionSetPartAssociation 
+		targetID="org.eclipse.jdt.ui.CodingActionSet">
+		<part id="org.eclipse.jdt.ui.PackageExplorer"/>
+		<part id="org.eclipse.jdt.ui.TypeHierarchy" />
+		<part id="org.eclipse.jdt.ui.CompilationUnitEditor"/>
+		<part id="org.eclipse.jdt.ui.ClassFileEditor"/>
+		<part id="org.eclipse.jdt.ui.ProjectsView"/>
+		<part id="org.eclipse.jdt.ui.PackagesView"/>
+		<part id="org.eclipse.jdt.ui.TypesView"/>
+		<part id="org.eclipse.jdt.ui.MembersView"/>
+	</actionSetPartAssociation>
+</extension>
+
+<!-- End Java Action Set (Adding the source, refactor and navigate menu -->
+
+
+<!-- Begin Java Search action set -->
+<extension point="org.eclipse.ui.actionSets">
+
+
+	<actionSet
+		id="org.eclipse.jdt.ui.JavaSearchActionSet"
+        label="%JavaSearchActionSet.label"
+        description= "%JavaSearchActionSet.description"
+		visible="false">
 
 		<!-- =================================================================== -->
 		<!-- Search Menu                                                         -->
@@ -1182,7 +1211,6 @@ JavaStructureDiffViewerCreator
       			allowLabelUpdate="true"
 				retarget="true" />	
 
-
 		<menu
 			id="referencesSubMenu"
 			label="%referencesSubMenu.label"
@@ -1209,7 +1237,7 @@ JavaStructureDiffViewerCreator
 
 <extension point="org.eclipse.ui.actionSetPartAssociations">
 	<actionSetPartAssociation 
-		targetID="org.eclipse.jdt.ui.CodingActionSet">
+		targetID="org.eclipse.jdt.ui.JavaSearchActionSet">
 		<part id="org.eclipse.jdt.ui.PackageExplorer"/>
 		<part id="org.eclipse.jdt.ui.TypeHierarchy" />
 		<part id="org.eclipse.jdt.ui.CompilationUnitEditor"/>
@@ -1218,10 +1246,50 @@ JavaStructureDiffViewerCreator
 		<part id="org.eclipse.jdt.ui.PackagesView"/>
 		<part id="org.eclipse.jdt.ui.TypesView"/>
 		<part id="org.eclipse.jdt.ui.MembersView"/>
+		<part id="org.eclipse.search.SearchResultView"/>
 	</actionSetPartAssociation>
 </extension>
 
-<!-- End Java Action Set (Adding the source, refactor and navigate menu -->
+<!-- End Java contributions for Search view -->
+
+
+<!-- Begin Java contributions for Search view -->
+<extension point="org.eclipse.ui.actionSets">
+
+	<!-- =========================================================================== -->
+	<!-- Navigate Menu                                                               -->
+	<!-- =========================================================================== -->
+		
+
+	<actionSet
+		id="org.eclipse.jdt.internal.ui.SearchViewActionSet"
+        label="%JavaSearchViewActionSet.label"
+        description= "%JavaSearchViewActionSet.description"
+		visible="false">
+
+		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
+      		menubarPath="navigate/openGroup"
+      		label="%OpenTypeHierarchyAction.label"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.Open"
+      		menubarPath="navigate/openGroup"
+      		label="%OpenAction.label"
+			tooltip="%OpenAction.tooltip"
+			description="%OpenAction.description"
+			retarget="true" 
+			allowLabelUpdate="true"/>
+	</actionSet>			
+</extension>
+
+<extension point="org.eclipse.ui.actionSetPartAssociations">
+	<actionSetPartAssociation 
+		targetID="org.eclipse.jdt.internal.ui.SearchViewActionSet">
+		<part id="org.eclipse.search.SearchResultView"/>
+	</actionSetPartAssociation>
+</extension>
+
+<!-- End Java contributions for Search view -->
 
 <extension
 	point="org.eclipse.ui.popupMenus">         

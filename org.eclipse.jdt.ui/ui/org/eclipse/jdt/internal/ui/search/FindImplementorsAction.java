@@ -6,13 +6,15 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -20,8 +22,17 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class FindImplementorsAction extends ElementSearchAction {
 
-	public FindImplementorsAction() {
-		super(SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {IType.class}); //$NON-NLS-1$
+	public FindImplementorsAction(IWorkbenchSite site) {
+		super(site, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {IType.class}); //$NON-NLS-1$
+		init();
+	}
+
+	public FindImplementorsAction(JavaEditor editor) {
+		super(editor, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {IType.class}); //$NON-NLS-1$
+		init();
+	}
+
+	private void init() {
 		setToolTipText(SearchMessages.getString("Search.FindImplementorsAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 	}

@@ -4,39 +4,61 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.dialogs.Dialog;
-
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
-import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;;
 
 public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 
 	private IWorkingSet[] fWorkingSets;
 	
-	public FindReferencesInWorkingSetAction() {
+	public FindReferencesInWorkingSetAction(IWorkbenchSite site) {
+		super(site);
+		init();
+	}
+
+	public FindReferencesInWorkingSetAction(JavaEditor editor) {
+		super(editor);
+		init();
+	}
+
+	public FindReferencesInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
+		this(site);
+		fWorkingSets= workingSets;
+	}
+
+	public FindReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
+		this(editor);
+		fWorkingSets= workingSets;
+	}
+
+	private void init() {
 		setText(SearchMessages.getString("Search.FindReferencesInWorkingSetAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
 	}
 
-	FindReferencesInWorkingSetAction(String label, Class[] validTypes) {
-		super(label, validTypes);
+
+	FindReferencesInWorkingSetAction(IWorkbenchSite site, String label, Class[] validTypes) {
+		super(site, label, validTypes);
 	}
 
-	FindReferencesInWorkingSetAction(IWorkingSet[] workingSets, Class[] validTypes) {
-		super("", validTypes);  //$NON-NLS-1$
+	FindReferencesInWorkingSetAction(JavaEditor editor, String label, Class[] validTypes) {
+		super(editor, label, validTypes);
+	}
+
+	FindReferencesInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets, Class[] validTypes) {
+		super(site, "", validTypes);  //$NON-NLS-1$
 		fWorkingSets= workingSets;
 	}
 
-	public FindReferencesInWorkingSetAction(IWorkingSet[] workingSets) {
-		this();
+	FindReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets, Class[] validTypes) {
+		super(editor, "", validTypes);  //$NON-NLS-1$
 		fWorkingSets= workingSets;
 	}
 

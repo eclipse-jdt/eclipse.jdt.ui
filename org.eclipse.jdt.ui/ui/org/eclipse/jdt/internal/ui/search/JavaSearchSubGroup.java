@@ -9,19 +9,36 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Contribute Java search specific menu elements.
  */
 public abstract class JavaSearchSubGroup extends ContextMenuGroup  {
+
 	public static final String GROUP_ID= IContextMenuConstants.GROUP_SEARCH;
-	abstract protected ElementSearchAction[] getActions();
+
+	abstract protected ElementSearchAction[] getActions(IWorkbenchSite site);
+	abstract protected ElementSearchAction[] getActions(JavaEditor editor);
+
+	IWorkbenchSite fSite;
+	JavaEditor fEditor;
 	
 	abstract protected String getName();
+
+	protected final ElementSearchAction[] getActions() {
+		if (fEditor != null)
+			return getActions(fEditor);
+		else if (fSite != null)
+			return getActions(fSite);
+		return null;
+	}
 	
 	public void fill(IMenuManager manager, GroupContext context) {
 		MenuManager javaSearchMM= new MenuManager(getName(), GROUP_ID);

@@ -4,13 +4,22 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
 public class FindWriteReferencesAction extends FindReferencesAction {
 
-	public FindWriteReferencesAction() {
-		super(SearchMessages.getString("Search.FindWriteReferencesAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
+	public FindWriteReferencesAction(IWorkbenchSite site) {
+		super(site, SearchMessages.getString("Search.FindWriteReferencesAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesAction.tooltip")); //$NON-NLS-1$
+	}
+
+	public FindWriteReferencesAction(JavaEditor editor) {
+		super(editor, SearchMessages.getString("Search.FindWriteReferencesAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesAction.tooltip")); //$NON-NLS-1$
 	}
 

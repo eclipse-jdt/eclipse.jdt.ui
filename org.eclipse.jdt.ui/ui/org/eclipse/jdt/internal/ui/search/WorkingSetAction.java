@@ -7,12 +7,22 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
+
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
 public class WorkingSetAction extends ElementSearchAction {
 
 	private ElementSearchAction fAction;
 
-	public WorkingSetAction(ElementSearchAction action, String workingSetName) {
-		super(workingSetName, null);
+	public WorkingSetAction(IWorkbenchSite site, ElementSearchAction action, String workingSetName) {
+		super(site, workingSetName, null);
+		Assert.isNotNull(action);
+		fAction= action;
+	}
+
+	public WorkingSetAction(JavaEditor editor, ElementSearchAction action, String workingSetName) {
+		super(editor, workingSetName, null);
 		Assert.isNotNull(action);
 		fAction= action;
 	}

@@ -10,15 +10,16 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Contribute Java search specific menu elements.
@@ -34,18 +35,25 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 
 	private boolean fInline;
 
-	public JavaSearchGroup() {
-		this(true);
+	public JavaSearchGroup(IWorkbenchSite site) {
+		fInline= true;
+		fGroups= new JavaSearchSubGroup[] {
+			new ReferencesSearchGroup(site),
+			new DeclarationsSearchGroup(site),
+			new ImplementorsSearchGroup(site),
+			new ReadReferencesSearchGroup(site),
+			new WriteReferencesSearchGroup(site)
+		};
 	}
 
-	public JavaSearchGroup(boolean inline) {
-		fInline= inline;
+	public JavaSearchGroup(JavaEditor editor) {
+		fInline= false;
 		fGroups= new JavaSearchSubGroup[] {
-			new ReferencesSearchGroup(),
-			new DeclarationsSearchGroup(),
-			new ImplementorsSearchGroup(),
-			new ReadReferencesSearchGroup(),
-			new WriteReferencesSearchGroup()
+			new ReferencesSearchGroup(editor),
+			new DeclarationsSearchGroup(editor),
+			new ImplementorsSearchGroup(editor),
+			new ReadReferencesSearchGroup(editor),
+			new WriteReferencesSearchGroup(editor)
 		};
 	}
 

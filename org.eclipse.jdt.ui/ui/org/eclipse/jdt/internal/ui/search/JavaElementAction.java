@@ -7,14 +7,13 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.dialogs.ErrorDialog;
 
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
@@ -27,25 +26,32 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 /**
  * Abstract class for actions that run on IJavaElement.
  */
-public abstract class JavaElementAction extends Action {
+public abstract class JavaElementAction extends SelectionDispatchAction {
 	
 	// A dummy which can't be selected in the UI
 	protected static final IJavaElement RETURN_WITHOUT_BEEP= JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot());
 	
 	private Class[] fValidTypes;
+	private JavaEditor fEditor;	
 
-	public JavaElementAction(String label, Class[] validTypes) {
-		super(label);
+	JavaElementAction(IWorkbenchSite site, String label, Class[] validTypes) {
+		super(site);
+		setText(label);
 		fValidTypes= validTypes;
+	}
+
+	JavaElementAction(JavaEditor editor, String label, Class[] validTypes) {
+		this (editor.getEditorSite(), label, validTypes);
+		fEditor= editor;
 	}
 	public boolean canOperateOn(IStructuredSelection sel) {
 		boolean hasSelection= !sel.isEmpty();
@@ -67,22 +73,22 @@ public abstract class JavaElementAction extends Action {
 		}
 		return false;
 	}
-	public void run() {
-		if (!canOperateOn(getSelection())) {
-			beep();
-			return;
-		}
-		
-		IJavaElement element= getJavaElement(getSelection(), false);
-		if (element == null) {
-			beep();
-			return;
-		} 
-		else if (element == RETURN_WITHOUT_BEEP)
-			return;
-		
-		run(element);
-	}
+//	public void run() {
+//		if (!canOperateOn(getSelection())) {
+//			beep();
+//			return;
+//		}
+//		
+//		IJavaElement element= getJavaElement(getSelection(), false);
+//		if (element == null) {
+//			beep();
+//			return;
+//		} 
+//		else if (element == RETURN_WITHOUT_BEEP)
+//			return;
+//		
+//		run(element);
+//	}
 	protected abstract void run(IJavaElement element);
 
 	private IJavaElement getJavaElement(IJavaElement o, boolean silent) {
@@ -123,20 +129,20 @@ public abstract class JavaElementAction extends Action {
 			return getJavaElement(selection.getFirstElement(), silent);
 		return null;
 	}
-	public IStructuredSelection getSelection() {
-		IWorkbenchPage page= JavaPlugin.getActivePage();
-		if (page != null) {
-			IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
-			if (part != null) {
-				try {
-					return SelectionConverter.getStructuredSelection(part);
-				} catch (JavaModelException ex) {
-					return StructuredSelection.EMPTY;
-				}
-			}
-		}
-		return StructuredSelection.EMPTY;
-	}
+//	public IStructuredSelection getSelection() {
+//		IWorkbenchPage page= JavaPlugin.getActivePage();
+//		if (page != null) {
+//			IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
+//			if (part != null) {
+//				try {
+//					return SelectionConverter.getStructuredSelection(part);
+//				} catch (JavaModelException ex) {
+//					return StructuredSelection.EMPTY;
+//				}
+//			}
+//		}
+//		return StructuredSelection.EMPTY;
+//	}
 	private IJavaElement chooseFromList(IJavaElement[] openChoices) {
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED;
 		ILabelProvider labelProvider= new JavaElementLabelProvider(flags);
@@ -205,4 +211,52 @@ public abstract class JavaElementAction extends Action {
 		}
 		return mainType;
 	}
+	
+	/**
+	 * @see SelectionDispatchAction#run(IStructuredSelection)
+	 */
+	protected void run(IStructuredSelection selection) {
+		IJavaElement element= getJavaElement(selection, false);
+		if (element == null) {
+			beep();
+			return;
+		} 
+		else if (element == RETURN_WITHOUT_BEEP)
+			return;
+		
+		run(element);
+	}
+
+	/**
+	 * @see SelectionDispatchAction#run(ITextSelection)
+	 */
+	protected void run(ITextSelection selection) {
+		try {
+			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+			if (element != null && canOperateOn(element))
+					run(element);
+			else
+				beep();
+		} catch (JavaModelException ex) {
+			JavaPlugin.log(ex);
+			String title= "Search Error";
+			String message= "Code resolve error";
+			ErrorDialog.openError(getShell(), title, message, ex.getStatus());
+		}
+	}
+
+	/**
+	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+	 */
+	protected void selectionChanged(IStructuredSelection selection) {
+		super.selectionChanged(selection);
+	}
+
+	/**
+	 * @see SelectionDispatchAction#selectionChanged(ITextSelection)
+	 */
+	protected void selectionChanged(ITextSelection selection) {
+		super.selectionChanged(selection);
+	}
+
 }

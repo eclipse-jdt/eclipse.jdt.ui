@@ -7,7 +7,10 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
+
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Contribute Java search specific menu elements.
@@ -16,16 +19,38 @@ public class DeclarationsSearchGroup extends JavaSearchSubGroup  {
 
 	public static final String GROUP_NAME= SearchMessages.getString("group.declarations"); //$NON-NLS-1$
 
-	protected ElementSearchAction[] getActions() {
+	public DeclarationsSearchGroup(IWorkbenchSite site) {
+		fSite= site;
+	}
+
+	public DeclarationsSearchGroup(JavaEditor editor) {
+		fEditor= editor;
+	}
+
+	protected ElementSearchAction[] getActions(IWorkbenchSite site) {
 		ArrayList actions= new ArrayList(ElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
-		actions.add(new FindDeclarationsAction());
-		actions.add(new FindDeclarationsInHierarchyAction());
-		actions.add(new FindDeclarationsInWorkingSetAction());
+		actions.add(new FindDeclarationsAction(site));
+		actions.add(new FindDeclarationsInHierarchyAction(site));
+		actions.add(new FindDeclarationsInWorkingSetAction(site));
 
 		Iterator iter= ElementSearchAction.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
-			actions.add(new WorkingSetAction(new FindDeclarationsInWorkingSetAction(workingSets), SearchUtil.toString(workingSets)));
+			actions.add(new WorkingSetAction(site, new FindDeclarationsInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
+		}
+		return (ElementSearchAction[])actions.toArray(new ElementSearchAction[actions.size()]);
+	}
+
+	protected ElementSearchAction[] getActions(JavaEditor editor) {
+		ArrayList actions= new ArrayList(ElementSearchAction.LRU_WORKINGSET_LIST_SIZE + 3);
+		actions.add(new FindDeclarationsAction(editor));
+		actions.add(new FindDeclarationsInHierarchyAction(editor));
+		actions.add(new FindDeclarationsInWorkingSetAction(editor));
+
+		Iterator iter= ElementSearchAction.getLRUWorkingSets().sortedIterator();
+		while (iter.hasNext()) {
+			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
+			actions.add(new WorkingSetAction(editor, new FindDeclarationsInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));
 		}
 		return (ElementSearchAction[])actions.toArray(new ElementSearchAction[actions.size()]);
 	}

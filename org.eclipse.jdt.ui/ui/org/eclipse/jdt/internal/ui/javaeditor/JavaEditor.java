@@ -244,7 +244,7 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
 		
-		new JavaSearchGroup(false).fill(menu, ITextEditorActionConstants.GROUP_FIND, this);		
+		new JavaSearchGroup(this).fill(menu, ITextEditorActionConstants.GROUP_FIND, this);		
 	}			
 	
 	/**

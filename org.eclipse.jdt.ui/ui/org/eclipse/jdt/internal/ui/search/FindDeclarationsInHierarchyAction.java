@@ -4,20 +4,26 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 
-	public FindDeclarationsInHierarchyAction() {
-		super(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class} ); //$NON-NLS-1$
+	public FindDeclarationsInHierarchyAction(IWorkbenchSite site) {
+		super(site, SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class} ); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
+	}
+
+	public FindDeclarationsInHierarchyAction(JavaEditor editor) {
+		super(editor, SearchMessages.getString("Search.FindHierarchyDeclarationsAction.label"), new Class[] {IField.class, IMethod.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
 	}
 	

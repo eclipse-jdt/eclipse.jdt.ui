@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -13,17 +14,33 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 
 	private IWorkingSet[] fWorkingSet;
 
-	public FindDeclarationsInWorkingSetAction(IWorkingSet[] workingSets) {
-		this();
+	public FindDeclarationsInWorkingSetAction(IWorkbenchSite site) {
+		super(site);
+		init();
+	}
+
+	public FindDeclarationsInWorkingSetAction(JavaEditor editor) {
+		super(editor);
+		init();
+	}
+
+	public FindDeclarationsInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
+		this(site);
 		fWorkingSet= workingSets;
 	}
 
-	public FindDeclarationsInWorkingSetAction() {
+	public FindDeclarationsInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
+		this(editor);
+		fWorkingSet= workingSets;
+	}
+
+	private void init() {
 		setText(SearchMessages.getString("Search.FindDeclarationsInWorkingSetAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInWorkingSetAction.tooltip")); //$NON-NLS-1$
 	}

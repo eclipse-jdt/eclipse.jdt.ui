@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -17,19 +19,34 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class FindReferencesAction extends ElementSearchAction {
 
-	public FindReferencesAction() {
-		this(SearchMessages.getString("Search.FindReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindReferencesAction.tooltip")); //$NON-NLS-1$
+	public FindReferencesAction(IWorkbenchSite site) {
+		this(site, SearchMessages.getString("Search.FindReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
 	}
 
-	public FindReferencesAction(String label, Class[] validTypes) {
-		super(label, validTypes);
+	public FindReferencesAction(JavaEditor editor) {
+		this(editor, SearchMessages.getString("Search.FindReferencesAction.label"), new Class[] {IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		
+	}
+
+	FindReferencesAction(IWorkbenchSite site, String label, Class[] validTypes) {
+		super(site, label, validTypes);
+		init();
+	}
+
+	FindReferencesAction(JavaEditor editor, String label, Class[] validTypes) {
+		super(editor, label, validTypes);
+		init();
+	}
+
+	private void init() {
+		setToolTipText(SearchMessages.getString("Search.FindReferencesAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 	}
-
+	
 	protected boolean canOperateOn(IJavaElement element) {
 		if (super.canOperateOn(element)) {
 			if (element.getElementType() == IJavaElement.FIELD) {

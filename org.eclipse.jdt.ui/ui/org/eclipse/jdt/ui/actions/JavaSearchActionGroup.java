@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
@@ -52,7 +53,25 @@ public class JavaSearchActionGroup extends ActionGroup {
 
 	private JavaSearchGroup fOldGroup;
 	private GroupContext fOldContext;
+	private JavaEditor fEditor;
+	private IWorkbenchSite fSite;
 
+	private FindReferencesAction fFindReferencesAction;
+	private FindReferencesInHierarchyAction fFindReferencesInHierarchyAction;
+	private FindReferencesInWorkingSetAction fFindReferencesInWorkingSetAction;
+	private FindReadReferencesAction fFindReadReferencesAction;
+	private FindReadReferencesInHierarchyAction fFindReadReferencesInHierarchyAction;
+	private FindReadReferencesInWorkingSetAction fFindReadReferencesInWorkingSetAction;
+	private FindWriteReferencesAction fFindWriteReferencesAction;
+	private FindWriteReferencesInHierarchyAction fFindWriteReferencesInHierarchyAction;
+	private FindWriteReferencesInWorkingSetAction fFindWriteReferencesInWorkingSetAction;
+	private FindDeclarationsAction fFindDeclarationsAction;
+	private FindDeclarationsInWorkingSetAction fFindDeclarationsInWorkingSetAction;
+	private FindDeclarationsInHierarchyAction fFindDeclarationsInHierarchyAction;
+	private FindImplementorsAction fFindImplementorsAction;
+	private FindImplementorsInWorkingSetAction fFindImplementorsInWorkingSetAction;
+	
+	
 	/**
 	 * Creates a new <code>JavaSearchActionGroup</code>.
 	 * 
@@ -63,7 +82,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 * </p>
 	 */
 	public JavaSearchActionGroup(IViewPart part, IInputSelectionProvider provider) {
-		fOldGroup= new JavaSearchGroup();
+		this(part.getViewSite());
 		fOldContext= new GroupContext(provider);
 	}
 	
@@ -77,7 +96,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 * </p>
 	 */
 	public JavaSearchActionGroup(IViewPart part, ISelectionProvider provider) {
-		fOldGroup= new JavaSearchGroup();
+		this(part.getViewSite());
 		fOldContext= new GroupContext(provider);
 	}
 	
@@ -91,7 +110,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 * </p>
 	 */
 	public JavaSearchActionGroup(Page page, IInputSelectionProvider provider) {
-		fOldGroup= new JavaSearchGroup();
+		this(page.getSite());
 		fOldContext= new GroupContext(provider);
 	}
 
@@ -101,11 +120,67 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * </p>
 	 */
-	public JavaSearchActionGroup(JavaEditor editor) {
-//		fEditor= editor;
-		fOldGroup= new JavaSearchGroup(false);
+	public JavaSearchActionGroup(IWorkbenchSite site) {
+		fFindReferencesAction= new FindReferencesAction(site);
+		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(site);
+		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(site);
+		
+		fFindReadReferencesAction= new FindReadReferencesAction(site);
+		fFindReadReferencesInHierarchyAction= new FindReadReferencesInHierarchyAction(site);
+		fFindReadReferencesInWorkingSetAction= new FindReadReferencesInWorkingSetAction(site);
+
+		fFindWriteReferencesAction= new FindWriteReferencesAction(site);
+		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(site);
+		fFindWriteReferencesInWorkingSetAction= new FindWriteReferencesInWorkingSetAction(site);
+
+		fFindDeclarationsAction= new FindDeclarationsAction(site);
+		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(site);
+		fFindDeclarationsInHierarchyAction= new FindDeclarationsInHierarchyAction(site);
+
+		fFindImplementorsAction= new FindImplementorsAction(site);
+		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(site);
+		
+		fOldGroup= new JavaSearchGroup(site);
+		
+		initialize(site, false);
 	}
-	
+
+	/**
+	 * Creates a new Java search action group.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 */
+	public JavaSearchActionGroup(JavaEditor editor) {
+		fEditor= editor;
+		
+		fFindReferencesAction= new FindReferencesAction(editor);
+		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(editor);
+		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(editor);
+		
+		fFindReadReferencesAction= new FindReadReferencesAction(editor);
+		fFindReadReferencesInHierarchyAction= new FindReadReferencesInHierarchyAction(editor);
+		fFindReadReferencesInWorkingSetAction= new FindReadReferencesInWorkingSetAction(editor);
+
+		fFindWriteReferencesAction= new FindWriteReferencesAction(editor);
+		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(editor);
+		fFindWriteReferencesInWorkingSetAction= new FindWriteReferencesInWorkingSetAction(editor);
+
+		fFindDeclarationsAction= new FindDeclarationsAction(editor);
+		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(editor);
+		fFindDeclarationsInHierarchyAction= new FindDeclarationsInHierarchyAction(editor);
+
+		fFindImplementorsAction= new FindImplementorsAction(editor);
+		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(editor);
+
+		fOldGroup= new JavaSearchGroup(editor);
+		initialize(editor.getEditorSite(), true);
+	}
+
+	private void initialize(IWorkbenchSite site, boolean isJavaEditor) {
+		fSite= site;
+	}
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -115,24 +190,24 @@ public class JavaSearchActionGroup extends ActionGroup {
 	}
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInWorkspace", new FindReferencesAction()); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInHierarchy", new FindReferencesInHierarchyAction()); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInWorkingSet", new FindReferencesInWorkingSetAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInWorkspace", fFindReferencesAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInHierarchy", fFindReferencesInHierarchyAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInWorkingSet", fFindReferencesInWorkingSetAction); //$NON-NLS-1$
 		
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInWorkspace", new FindReadReferencesAction()); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInHierarchy", new FindReadReferencesInHierarchyAction()); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInWorkingSet", new FindReadReferencesInWorkingSetAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInWorkspace", fFindReadReferencesAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInHierarchy", fFindReadReferencesInHierarchyAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInWorkingSet", fFindReadReferencesInWorkingSetAction); //$NON-NLS-1$
 
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInWorkspace", new FindWriteReferencesAction()); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInHierarchy", new FindWriteReferencesInHierarchyAction()); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet", new FindWriteReferencesInWorkingSetAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInWorkspace", fFindWriteReferencesAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInHierarchy", fFindWriteReferencesInHierarchyAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet", fFindWriteReferencesInWorkingSetAction); //$NON-NLS-1$
 
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInWorkspace", new FindDeclarationsAction()); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInWorkingSet", new FindDeclarationsInWorkingSetAction()); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInHierarchy", new FindDeclarationsInHierarchyAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInWorkspace", fFindDeclarationsAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInWorkingSet", fFindDeclarationsInWorkingSetAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInHierarchy", fFindDeclarationsInHierarchyAction); //$NON-NLS-1$
 
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ImplementorsInWorkspace", new FindImplementorsAction()); //$NON-NLS-1$
-		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ImplementorsInWorkingSet", new FindImplementorsInWorkingSetAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ImplementorsInWorkspace", fFindImplementorsAction); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ImplementorsInWorkingSet", fFindImplementorsInWorkingSetAction); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)

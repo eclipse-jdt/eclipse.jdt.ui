@@ -63,7 +63,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 
 		public void fill(IMenuManager menu, IInputSelectionProvider inputProvider) {
 			JavaPlugin.createStandardGroups(menu);
-			new JavaSearchGroup().fill(menu, new GroupContext(inputProvider));
+			new JavaSearchGroup(SearchUI.getSearchResultView().getViewSite()).fill(menu, new GroupContext(inputProvider));
 			OpenTypeHierarchyUtil.addToMenu(getWorbenchWindow(), menu, convertSelection(inputProvider.getSelection()));
 		}
 		
