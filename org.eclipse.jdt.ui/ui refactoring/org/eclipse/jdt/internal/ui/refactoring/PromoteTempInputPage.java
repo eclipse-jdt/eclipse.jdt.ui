@@ -58,8 +58,8 @@ public class PromoteTempInputPage extends UserInputWizardPage {
 		layout.verticalSpacing= 8;
 		result.setLayout(layout);
 		
-        addVisibilityControl(result);
         addFieldNameField(result);
+        addVisibilityControl(result);
         addInitizeInRadioButtonGroup(result);
         addDeclareStaticCheckbox(result);
         addDeclareFinalCheckbox(result);
@@ -74,6 +74,7 @@ public class PromoteTempInputPage extends UserInputWizardPage {
         
         final Text nameField= new Text(result, SWT.BORDER | SWT.SINGLE);
         nameField.setText(getPromoteTempRefactoring().getFieldName());
+        nameField.selectAll();
         nameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         nameField.addModifyListener(new ModifyListener(){
         	public void modifyText(ModifyEvent e) {
