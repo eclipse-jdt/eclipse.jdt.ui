@@ -273,15 +273,6 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		Label patternLabel= createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.pattern")); //$NON-NLS-1$
 		patternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		fPatternEditor= createEditor(fEditor);
-		StyledText text= fPatternEditor.getTextWidget();
-		text.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				if (fCurrent == null)
-					return;
-				
-				fCurrent.setPattern(fPatternEditor.getTextWidget().getText());				
-			}
-		});
 
 		Composite secondPage= new Composite(folder, SWT.NONE);
 		layout= new GridLayout();
@@ -407,6 +398,9 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		if (template == fCurrent) // #4916
 			return;
 		
+		if (fCurrent != null) // #4358
+			leaveEditor();
+		
 		fCurrent= template;
 	
 		fNameText.setText(template.getName());
@@ -421,6 +415,12 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	}
 	
 	private void leaveEditor() {
+		if (fCurrent == null)
+			return;
+			
+		// #4358			
+		fCurrent.setPattern(fPatternEditor.getTextWidget().getText());
+		
 		fCurrent= null;
 
 		fNameText.setText(""); //$NON-NLS-1$
@@ -453,7 +453,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			TemplateSet.getInstance().remove(template);
 		}
 
-		leaveEditor();		
+		leaveEditor();
 		fTableViewer.refresh();
 	}
 	
@@ -494,6 +494,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	 * @see PreferencePage#performOk()
 	 */	
 	public boolean performOk() {
+		leaveEditor(); // #4358
+		
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		prefs.setValue(PREF_FORMAT_TEMPLATES, fFormatButton.getSelection());
 
