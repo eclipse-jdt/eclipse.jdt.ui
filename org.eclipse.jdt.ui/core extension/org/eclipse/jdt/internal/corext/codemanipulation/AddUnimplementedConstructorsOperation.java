@@ -251,6 +251,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 								}
 							}
 						}
+						imports.createEdit(document);
 						if (!fImports)
 							rewrite.clearImportRewrites();
 						final Change result= rewrite.createChange();

@@ -232,6 +232,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 								}
 							}
 						}
+						imports.createEdit(document);
 						if (!fImports)
 							rewrite.clearImportRewrites();
 						final Change result= rewrite.createChange();
