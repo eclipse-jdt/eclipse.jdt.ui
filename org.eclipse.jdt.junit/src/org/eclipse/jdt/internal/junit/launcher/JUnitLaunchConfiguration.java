@@ -20,6 +20,8 @@ import java.util.Vector;
 
 import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IPluginRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -107,22 +109,30 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 	}
 	
 	private String[] createClassPath(ILaunchConfiguration configuration) throws CoreException {
+		IPluginRegistry registry= Platform.getPluginRegistry();
+		IPluginDescriptor descriptor= registry.getPluginDescriptor("org.eclipse.jdt.junit.runtime");
+		URL runtimeURL= descriptor.getInstallURL();
+		
 		URL url= JUnitPlugin.getDefault().getDescriptor().getInstallURL();
+		
 		String[] cp= getClasspath(configuration);
 		String[] classPath= null;
 		
 		try {
 			if (BootLoader.inDevelopmentMode()) {
 				// assumption is that the output folder is called bin!
-				classPath= new String[cp.length + 2];
-				System.arraycopy(cp, 0, classPath, 2, cp.length);
+				classPath= new String[cp.length + 4];
+				System.arraycopy(cp, 0, classPath, 4, cp.length);
 				classPath[0]= Platform.asLocalURL(new URL(url, "bin")).getFile(); //$NON-NLS-1$
 				classPath[1]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
+				classPath[2]= Platform.asLocalURL(new URL(runtimeURL, "bin")).getFile(); //$NON-NLS-1$
+				classPath[3]= Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile(); //$NON-NLS-1$
 			}
 			else {
-				classPath= new String[cp.length + 1];
-				System.arraycopy(cp, 0, classPath, 1, cp.length);
+				classPath= new String[cp.length + 2];
+				System.arraycopy(cp, 0, classPath, 2, cp.length);
 				classPath[0]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
+				classPath[1]= Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile(); //$NON-NLS-1$
 			}
 		} catch (IOException e) {
 			JUnitPlugin.log(e); // TODO abort run and inform user
