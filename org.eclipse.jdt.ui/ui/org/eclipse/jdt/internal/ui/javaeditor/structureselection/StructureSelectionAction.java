@@ -50,8 +50,11 @@ public abstract class StructureSelectionAction extends Action {
 	 */
 	public final  void run() {
 		ITextSelection selection= getTextSelection();
-		fSelectionHistory.remember(new SourceRange(selection.getOffset(), selection.getLength()));
 		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection), getCompilationUnit());
+		// Check if new selection differs from current selection
+		if (selection.getOffset() == newRange.getOffset() && selection.getLength() == newRange.getLength())
+			return;
+		fSelectionHistory.remember(new SourceRange(selection.getOffset(), selection.getLength()));
 		try {
 			fSelectionHistory.ignoreSelectionChanges();
 			fEditor.selectAndReveal(newRange.getOffset(), newRange.getLength());
