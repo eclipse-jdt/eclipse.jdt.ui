@@ -189,6 +189,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	}
 	
 	protected Control createContents(Composite parent) {
+		initializeDialogUnits(parent);
 		initialize(getImportOrderPreference(), getImportNumberThreshold(), doIgnoreLowerCaseNames());
 	
 		Composite composite= new Composite(parent, SWT.NONE);
@@ -202,6 +203,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		
 		fOrderListField.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalSpan(fOrderListField.getLabelControl(null), 2);
+		LayoutUtil.setWidthHint(fOrderListField.getLabelControl(null), convertWidthInCharsToPixels(40));
 		LayoutUtil.setHorizontalGrabbing(fOrderListField.getListControl(null));
 		
 		fThresholdField.doFillIntoGrid(composite, 2);

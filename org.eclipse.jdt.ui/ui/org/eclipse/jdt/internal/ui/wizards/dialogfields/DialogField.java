@@ -115,7 +115,7 @@ public class DialogField {
 	}	
 	
 	protected static GridData gridDataForLabel(int span) {
-		GridData gd= new GridData();
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= span;
 		return gd;
 	}
