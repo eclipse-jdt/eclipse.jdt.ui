@@ -202,8 +202,7 @@ public class CompareResultDialog extends Dialog {
 		}
 		IDialogSettings bounds= fSettings.getSection(DIALOG_BOUNDS_KEY); 
 		if (bounds == null) {
-			width= 400;
-			height= 300;
+			return super.getInitialSize();
 		}
 		else {
 			try {
