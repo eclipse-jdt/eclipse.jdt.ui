@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -101,7 +102,8 @@ public abstract class Change implements IChange {
 	protected void handleException(ChangeContext context, Exception exception) throws ChangeAbortException {
 		if (exception instanceof ChangeAbortException)
 			throw (ChangeAbortException)exception;
-			
+		if (exception instanceof OperationCanceledException)
+			throw (OperationCanceledException)exception;
 		context.getExceptionHandler().handle(context, this, exception);
 	}
 	
