@@ -91,7 +91,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		
 		String newSource= cu.getSource();
 	
-		assertEqualLines(getName() + ": ", newSource, getFileContents(getTestFileName(true, false)));
+		assertEqualLines(getName() + ": ", getFileContents(getTestFileName(true, false)), newSource);
 	
 		
 		return ref;
@@ -111,7 +111,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 
 		String	canonAfterSrcName= getTestFileName(false, false);
 
-		assertEqualLines(cu.getSource(), getFileContents(canonAfterSrcName));
+		assertEqualLines(getFileContents(canonAfterSrcName), cu.getSource());
 	}	
 	
 
