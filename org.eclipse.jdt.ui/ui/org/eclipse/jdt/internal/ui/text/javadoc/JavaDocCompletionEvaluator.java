@@ -93,6 +93,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 				}
 				return currPos;
 			} catch (BadLocationException e) {
+				// ignore
 			}
 		}
 		return pos;
@@ -106,6 +107,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			}
 			return currPos + 1;
 		} catch (BadLocationException e) {
+			// ignore
 		}
 		return pos;	
 	}
@@ -149,7 +151,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 				return pos1;
 			}
 		} catch (BadLocationException e) {
-			e.printStackTrace();
+			// ignore
 		}
 		return pos;
 	}
