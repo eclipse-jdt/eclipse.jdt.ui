@@ -18,17 +18,17 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CutAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the copy, cut, paste actions to a view part's context
@@ -118,10 +118,10 @@ public class CCPActionGroup extends ActionGroup {
 	 */
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, fCopyAction);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.CUT, fCutAction);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PASTE, fPasteAction);
+		actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
+		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
+		actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), fCutAction);
+		actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), fPasteAction);
 	}
 	
 	/* (non-Javadoc)
