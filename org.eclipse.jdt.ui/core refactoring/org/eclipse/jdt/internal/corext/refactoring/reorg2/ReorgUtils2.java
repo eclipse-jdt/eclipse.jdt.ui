@@ -475,21 +475,6 @@ public class ReorgUtils2 {
 		} else return false;
 	}
 	
-	public static IPackageFragmentRoot getDestinationAsPackageFragmentRoot(IJavaElement javaElement) throws JavaModelException{
-		if (javaElement instanceof IPackageFragmentRoot)
-			return (IPackageFragmentRoot) javaElement;
-
-		if (javaElement instanceof IPackageFragment){
-			IPackageFragment pack= (IPackageFragment)javaElement;
-			if (pack.getParent() instanceof IPackageFragmentRoot)
-				return (IPackageFragmentRoot) pack.getParent();
-		}
-
-		if (javaElement instanceof IJavaProject)
-			return ReorgUtils2.getCorrespondingPackageFragmentRoot((IJavaProject) javaElement);				
-		return null;
-	}
-
 	public static boolean isParentInWorkspaceOrOnDisk(IPackageFragment pack, IPackageFragmentRoot root){
 		if (pack == null)
 			return false;		
