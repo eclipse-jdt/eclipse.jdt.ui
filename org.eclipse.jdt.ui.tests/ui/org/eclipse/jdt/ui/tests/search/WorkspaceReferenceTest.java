@@ -20,7 +20,7 @@ public class WorkspaceReferenceTest extends TestCase {
 
 	public static Test allTests() {
 		return new JUnitSourceSetup(new TestSuite(WorkspaceReferenceTest.class));
-	};
+	}
 	
 	public static Test suite() {
 		return allTests();

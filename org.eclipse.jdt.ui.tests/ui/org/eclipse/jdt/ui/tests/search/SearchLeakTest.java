@@ -29,7 +29,7 @@ public class SearchLeakTest extends LeakTestCase {
 	
 	public static Test allTests() {
 		return new LeakTestSetup(new JUnitSourceSetup(new TestSuite(SearchLeakTest.class)));
-	};
+	}
 	
 	public static Test suite() {
 		return allTests();
