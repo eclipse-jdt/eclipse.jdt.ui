@@ -156,7 +156,14 @@
 		icon="icons/full/ctool16/newsbook_wiz.gif">
 		<description>%NewJavaScrapbookPage.description</description>
 	</wizard>	    
-  
+	<wizard
+		id="org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard"
+		name="%NewSourceFolderCreationWizard.label"
+		class="org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard"
+		category="org.eclipse.jdt.ui.java"
+		icon="icons/full/ctool16/newpackfolder_wiz.gif">
+		<description>%NewSourceFolderCreationWizard.description</description>
+	</wizard>	    
 </extension>
 
 <extension
