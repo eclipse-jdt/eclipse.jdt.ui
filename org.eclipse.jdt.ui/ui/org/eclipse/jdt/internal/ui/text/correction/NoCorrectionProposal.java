@@ -21,10 +21,12 @@ import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 public class NoCorrectionProposal extends ChangeCorrectionProposal {
 
 	private ProblemPosition fProblemPosition;
+	private String fMessage;
 
-	public NoCorrectionProposal(ProblemPosition problemPosition) {
+	public NoCorrectionProposal(ProblemPosition problemPosition, String message) {
 		super(CorrectionMessages.getString("NoCorrectionProposal.description"), new NullChange(), 0, null); //$NON-NLS-1$
 		fProblemPosition= problemPosition;
+		fMessage= message;
 	}
 
 	/*
@@ -43,7 +45,7 @@ public class NoCorrectionProposal extends ChangeCorrectionProposal {
 		buf.append(getErrorCode(fProblemPosition.getId()));
 		buf.append("</b></p>"); //$NON-NLS-1$
 		buf.append("<p>"); //$NON-NLS-1$
-		buf.append(fProblemPosition.getMessage());
+		buf.append(fMessage);
 		buf.append("</p>"); //$NON-NLS-1$
 		String[] arg= fProblemPosition.getArguments();
 		if (arg != null) {

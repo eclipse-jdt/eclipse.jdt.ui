@@ -14,31 +14,38 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
 
 
 public class ProblemPosition extends Position {
 
-	private IProblemAnnotation fAnnotation;
+	private int fId;
+	private String[] fArguments;
 	private ICompilationUnit fCompilationUnit;
 	
 	public ProblemPosition(Position position, IProblemAnnotation annotation, ICompilationUnit cu) {
-		super(position.getOffset(), position.getLength());
-		fAnnotation= annotation;
-		fCompilationUnit= cu;
+		this(position.getOffset(), position.getLength(), annotation.getId(), annotation.getArguments(), cu);
 	}
-		
-	public String getMessage() {
-		return fAnnotation.getMessage();
+	
+	public ProblemPosition(IProblem problem, ICompilationUnit cu) {
+		this(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1, problem.getID(), problem.getArguments(), cu);
+	}	
+	
+	public ProblemPosition(int offset, int length, int id, String[] arguments, ICompilationUnit cu) {
+		super(offset, length);
+		fArguments= arguments;
+		fId= id;
+		fCompilationUnit= cu;		
 	}
 	
 	public int getId() {
-		return fAnnotation.getId();
+		return fId;
 	}
 	
 	public String[] getArguments() {
-		return fAnnotation.getArguments();
+		return fArguments;
 	}
 	/**
 	 * Gets the compilationUnit.
@@ -46,10 +53,6 @@ public class ProblemPosition extends Position {
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
-	}
-	
-	public IProblemAnnotation getAnnotation() {
-		return fAnnotation;
 	}
 
 }

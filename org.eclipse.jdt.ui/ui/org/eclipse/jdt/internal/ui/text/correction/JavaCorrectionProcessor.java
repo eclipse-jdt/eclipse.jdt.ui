@@ -68,6 +68,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.VoidMethodReturnsValue:
 			case IProblem.MissingReturnType:			
 			case IProblem.NonExternalizedStringLiteral:
+            case IProblem.NonStaticAccessToStaticField:
+            case IProblem.NonStaticAccessToStaticMethod:			
 				return true;
 			default:
 				return false;
@@ -125,6 +127,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 							ProblemPosition pp = new ProblemPosition(pos, annot, cu);
 							idsProcessed.add(probId);
 							collectCorrections(pp, proposals);
+							if (proposals.isEmpty()) {
+								//proposals.add(new NoCorrectionProposal(pp, annot.getMessage()));
+							}
 						}
 					}
 				}
@@ -132,7 +137,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		}
 		
 		if (proposals.isEmpty()) {
-			proposals.add(new NoCorrectionProposal(null));
+			proposals.add(new NoCorrectionProposal(null, null));
 		}
 		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 		Arrays.sort(res, new CorrectionsComparator());
@@ -211,7 +216,6 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
                     LocalCorrectionsSubProcessor.addAccessToStaticProposals(problemPos, proposals);
                     break;
 				default:
-					proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.IDocument;
@@ -23,11 +25,15 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
@@ -53,15 +59,15 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	
 	private final String fNewTypeName;
 	private final boolean fIsClass;
-	private final ICompilationUnit fCompilationUnit;
     private final ProblemPosition fProblemPos;
 
-    public NewCUCompletionUsingWizardProposal(String name, String newTypeName, ICompilationUnit compilationUnit, boolean isClass, ProblemPosition problemPos, int severity) {
+	private boolean fShowDialog;
+
+    public NewCUCompletionUsingWizardProposal(String name, String newTypeName, boolean isClass, ProblemPosition problemPos, int severity) {
         super(name, null, severity, null);
         
         fNewTypeName= newTypeName;
         fIsClass= isClass;
-        fCompilationUnit= compilationUnit;
         fProblemPos= problemPos;
     	
         if (isClass) {
@@ -69,39 +75,55 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
         } else {
             setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE));
         }
+        fShowDialog= true;
     }
     
 	public void apply(IDocument document) {
+		NewElementWizard wizard= createWizard();
+		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fProblemPos.getCompilationUnit()));
+		
+		if (fShowDialog) {
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			WizardDialog dialog= new WizardDialog(shell, wizard);
+			PixelConverter converter= new PixelConverter(shell);
+			
+			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
+			dialog.create();
+			dialog.getShell().setText("New");
+			
+			configureWizardPage(wizard);
+			dialog.open();
+		} else {
+			wizard.addPages();
+			try {
+				NewTypeWizardPage page= configureWizardPage(wizard);
+				page.createType(null);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);				
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
+	private NewElementWizard createWizard() {
 		NewElementWizard wizard;
 		if (fIsClass) {
 			wizard= new NewClassCreationWizard();
 		} else {
 			wizard= new NewInterfaceCreationWizard();
 		}
-		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fCompilationUnit));
-		
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		WizardDialog dialog= new WizardDialog(shell, wizard);
-		PixelConverter converter= new PixelConverter(shell);
-		
-		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
-		dialog.create();
-		dialog.getShell().setText("New");
-
-        fillInWizardPage(wizard);
-        
-		dialog.open();
+		return wizard;
 	}
 
-	private void fillInWizardPage(NewElementWizard wizard) {
+	private NewTypeWizardPage configureWizardPage(NewElementWizard wizard) {
         IWizardPage[] pages= wizard.getPages();
         Assert.isTrue(pages.length > 0 && pages[0] instanceof NewTypeWizardPage);
 
         NewTypeWizardPage page= (NewTypeWizardPage) pages[0];
-                
         page.setTypeName(fNewTypeName, false);
         
 		fillInWizardPageSuperTypes(page);
+		return page;
 	}
 
 	/**
@@ -111,7 +133,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	private void fillInWizardPageSuperTypes(NewTypeWizardPage page) {
         List superInterfaces = new ArrayList();
         
-		for (Iterator i = getSuperTypes(fCompilationUnit, fProblemPos).iterator(); i.hasNext();) {
+		for (Iterator i = getSuperTypes(fProblemPos).iterator(); i.hasNext();) {
 			ITypeBinding type = (ITypeBinding) i.next();
                         
 		    if (type.isClass()) {
@@ -128,29 +150,62 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
      * @return a list of {@link ITypeBinding}s representing the super types of the type
      * needing correction. The list may be empty, in which case the only supertype is Object.
      */
-    private List getSuperTypes(ICompilationUnit cu, ProblemPosition problemPos) {
-        List superTypes= new ArrayList();        
+    private List getSuperTypes(ProblemPosition problemPos) {
+        List superTypes= new ArrayList();
+        ICompilationUnit cu= fProblemPos.getCompilationUnit();
         CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 
-        if (problemPos.getId() == IProblem.ExceptionTypeNotFound) {
-            superTypes.add(astRoot.getAST().resolveWellKnownType("java.lang.Exception"));
-        } else {
-            ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-            if (selectedNode != null) {
-                ITypeBinding type= ASTResolving.getTypeBinding(selectedNode.getParent());
-                if (type != null) {
-                    if (type.isArray()) {
-                        type= type.getElementType();
-                    }
-                    if (type.isClass() || type.isInterface()) {
-                        superTypes.add(type);            
-                    }
-                }
-            }
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode != null) {
+			ITypeBinding type= getBindingForTypeReference(selectedNode.getAST(), selectedNode);
+			if (type != null) {
+				if (type.isArray()) {
+					type= type.getElementType();
+				}
+				if (type.isClass() || type.isInterface()) {
+					superTypes.add(type);            
+				}
+			}
         }
-                
         return superTypes;
     }
+    
+    private ITypeBinding getBindingForTypeReference(AST ast, ASTNode node) {
+    	ASTNode parent= node.getParent();
+    	switch (parent.getNodeType()) {
+    	case ASTNode.METHOD_DECLARATION:
+			MethodDeclaration decl= (MethodDeclaration) parent;
+			if (decl.thrownExceptions().contains(node)) {
+				return ast.resolveWellKnownType("java.lang.Exception");
+			}
+			break;
+		case ASTNode.INSTANCEOF_EXPRESSION:
+			InstanceofExpression instanceofExpression= (InstanceofExpression) parent;
+			return instanceofExpression.getLeftOperand().resolveTypeBinding();
+    	case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+    		VariableDeclarationStatement statement= (VariableDeclarationStatement) parent;
+    		List fragments= statement.fragments();
+    		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
+				VariableDeclarationFragment frag= (VariableDeclarationFragment) iter.next();
+				if (frag.getInitializer() != null) {
+					return frag.getInitializer().resolveTypeBinding();
+				}
+			}
+			break;
+		case ASTNode.ARRAY_CREATION:
+			ArrayCreation creation= (ArrayCreation) parent;
+			if (creation.getInitializer() != null) {
+				return creation.getInitializer().resolveTypeBinding();
+			}
+			break;
+        case ASTNode.CATCH_CLAUSE:
+            return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$						
+     	}   	
+    	return null;
+    
+    }    
+    
+    
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
@@ -161,6 +216,22 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		} else {
 			return "Open new interface wizard";
 		}
+	}
+
+	/**
+	 * Returns the showDialog.
+	 * @return boolean
+	 */
+	public boolean isShowDialog() {
+		return fShowDialog;
+	}
+
+	/**
+	 * Sets the showDialog.
+	 * @param showDialog The showDialog to set
+	 */
+	public void setShowDialog(boolean showDialog) {
+		fShowDialog= showDialog;
 	}
 
 }

@@ -22,13 +22,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -40,12 +36,12 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
@@ -56,14 +52,12 @@ import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UnresolvedElementsSubProcessor {
 		
 	private static ProblemPosition createProblemPosition(ASTNode node, ProblemPosition problemPos) {
-		Position pos= new Position(node.getStartPosition(), node.getLength());
-		return new ProblemPosition(pos, problemPos.getAnnotation(), problemPos.getCompilationUnit());
+		return new ProblemPosition(node.getStartPosition(), node.getLength(), problemPos.getId(), problemPos.getArguments(), problemPos.getCompilationUnit());
 	}
 	
 	public static void getVariableProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
@@ -73,19 +67,21 @@ public class UnresolvedElementsSubProcessor {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
 
+		int similarNodeKind= SimilarElementsRequestor.VARIABLES;
+
 		SimpleName node= null;
 		if (selectedNode instanceof SimpleName) {
 			node= (SimpleName) selectedNode;
 			ASTNode parent= node.getParent();
 			if (parent instanceof MethodInvocation && node.equals(((MethodInvocation)parent).getExpression())) {
-				getTypeProposals(createProblemPosition(node, problemPos), SimilarElementsRequestor.CLASSES, proposals);
+				similarNodeKind |= SimilarElementsRequestor.CLASSES;
 			}
 		} else if (selectedNode instanceof QualifiedName) {
 			QualifiedName qualifierName= (QualifiedName) selectedNode;
 			Name qualifier= qualifierName.getQualifier();
 			if (qualifier instanceof SimpleName) {
-				SimpleName simpleQualifier= (SimpleName) qualifier;
-				getTypeProposals(createProblemPosition(simpleQualifier, problemPos), SimilarElementsRequestor.REF_TYPES, proposals);
+				node= (SimpleName) qualifier;
+				similarNodeKind |= SimilarElementsRequestor.REF_TYPES;
 			}
 		} else if (selectedNode instanceof FieldAccess) {
 			FieldAccess access= (FieldAccess) selectedNode;
@@ -100,12 +96,19 @@ public class UnresolvedElementsSubProcessor {
 
 
 		// corrections
-		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, SimilarElementsRequestor.VARIABLES);
+		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, similarNodeKind);
 		for (int i= 0; i < elements.length; i++) {
 			SimilarElement curr= elements[i];
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
 			proposals.add(new ReplaceCorrectionProposal(label, problemPos.getCompilationUnit(), node.getStartPosition(), node.getLength(), curr.getName(), 3));
 		}
+		// add type proposals
+		if ((similarNodeKind & SimilarElementsRequestor.ALL_TYPES) != 0) {
+			ProblemPosition newProblemPos= createProblemPosition(node, problemPos);
+			addSimilarTypeProposals(elements, node.getIdentifier(), newProblemPos, proposals);
+			addNewTypeProposals(node.getIdentifier(), newProblemPos, SimilarElementsRequestor.REF_TYPES, proposals);
+		}
+		
 
 		// new variables
 		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
@@ -127,8 +130,10 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 	public static void getTypeProposals(ProblemPosition problemPos, int kind, ArrayList proposals) throws CoreException {
-		
 		ICompilationUnit cu= problemPos.getCompilationUnit();
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
 		
 		// corrections
 		String typeName= cu.getBuffer().getText(problemPos.getOffset(), problemPos.getLength());
@@ -137,30 +142,28 @@ public class UnresolvedElementsSubProcessor {
 			typeName= typeName.substring(0, bracketIndex);
 		}
 		
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		
 		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, problemPos.getOffset(), typeName, kind);
+		addSimilarTypeProposals(elements, typeName, problemPos, proposals);
+		
+		// add type
+		addNewTypeProposals(typeName, problemPos, kind, proposals);
+	}
+
+	public static void addSimilarTypeProposals(SimilarElement[] elements, String typeName, ProblemPosition problemPos, ArrayList proposals) throws JavaModelException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		for (int i= 0; i < elements.length; i++) {
-			String curr= elements[i].getName();
-			String simpleName= Signature.getSimpleName(curr);
-			
-			String replaceName= simpleName;
-			
-			ImportEdit importEdit= new ImportEdit(cu, settings);
-						
-			IImportDeclaration existingImport= JavaModelUtil.findImport(cu, simpleName);
-			if (existingImport != null) {
-				if (!existingImport.getElementName().equals(curr)) {
-					// import for otehr type already exists -> use qualified
-					replaceName= curr;
-				}
-			} else {
-				importEdit.addImport(curr);
+			SimilarElement elem= elements[i];
+			if ((elem.getKind() & SimilarElementsRequestor.ALL_TYPES) == 0) {
+				continue;
 			}
+
+			String fullName= elem.getName();
+			
+			ImportEdit importEdit= new ImportEdit(cu, settings);				
+			String simpleName= importEdit.addImport(fullName);
 						
-			replaceName= importEdit.addImport(curr);
-						
-			boolean importOnly= replaceName.equals(typeName);
+			boolean importOnly= simpleName.equals(typeName);
 			
 			CUCorrectionProposal proposal= new CUCorrectionProposal("", cu, 0); //$NON-NLS-1$
 			proposals.add(proposal);
@@ -171,29 +174,31 @@ public class UnresolvedElementsSubProcessor {
 				root.add(importEdit); //$NON-NLS-1$
 			}
 			if (!importOnly) {
-				root.add(SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), replaceName)); //$NON-NLS-1$
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", replaceName)); //$NON-NLS-1$
+				root.add(SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), simpleName)); //$NON-NLS-1$
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", simpleName)); //$NON-NLS-1$
 				proposal.setRelevance(3);
 			} else {
 				proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", curr)); //$NON-NLS-1$
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", fullName)); //$NON-NLS-1$
 				proposal.setRelevance(5);
 			}
 		}
-		
-		// add type
+	}
+
+	public static void addNewTypeProposals(String typeName, ProblemPosition problemPos, int kind, ArrayList proposals) {
 		String addedCUName= typeName + ".java"; //$NON-NLS-1$
 		if (!JavaConventions.validateCompilationUnitName(addedCUName).matches(IStatus.ERROR)) {
+			ICompilationUnit cu= problemPos.getCompilationUnit();
 			IPackageFragment pack= (IPackageFragment) cu.getParent();
 			final ICompilationUnit addedCU= pack.getCompilationUnit(addedCUName);
 			if (!addedCU.exists()) {
 				if ((kind & SimilarElementsRequestor.CLASSES) != 0) {
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclassusingwizard.description", typeName); //$NON-NLS-1$
-                    proposals.add(new NewCUCompletionUsingWizardProposal(label, typeName, cu, true, problemPos, 0));
+		            proposals.add(new NewCUCompletionUsingWizardProposal(label, typeName, true, problemPos, 0));
 				}
 				if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterfaceusingwizard.description", typeName); //$NON-NLS-1$
-                    proposals.add(new NewCUCompletionUsingWizardProposal(label, typeName, cu, false, problemPos, 0));
+		            proposals.add(new NewCUCompletionUsingWizardProposal(label, typeName, false, problemPos, 0));
 				}				
 			}
 		}
