@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.HashMap;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -27,6 +31,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.search.ui.IContextMenuConstants;
 import org.eclipse.search.ui.ISearchResultViewPart;
+import org.eclipse.search.ui.SearchUI;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -74,12 +79,31 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		} else if (element instanceof IFile) {
 			editor= IDE.openEditor(JavaPlugin.getActivePage(), (IFile) element, false);
 		}
-		if (!(editor instanceof ITextEditor))
-			return;
-		ITextEditor textEditor= (ITextEditor) editor;
-		textEditor.selectAndReveal(offset, length);
+		if (!(editor instanceof ITextEditor)) {
+			if (element instanceof IFile) {
+				IFile file= (IFile) element;
+				showWithMarker(editor, file, offset, length);
+			}
+		} else {
+			ITextEditor textEditor= (ITextEditor) editor;
+			textEditor.selectAndReveal(offset, length);
+		}
 	}
 	
+	private void showWithMarker(IEditorPart editor, IFile file, int offset, int length) throws PartInitException {
+		try {
+			IMarker marker= file.createMarker(SearchUI.SEARCH_MARKER);
+			HashMap attributes= new HashMap(4);
+			attributes.put(IMarker.CHAR_START, new Integer(offset));
+			attributes.put(IMarker.CHAR_END, new Integer(offset + length));
+			marker.setAttributes(attributes);
+			IDE.gotoMarker(editor, marker);
+			marker.delete();
+		} catch (CoreException e) {
+			throw new PartInitException(SearchMessages.getString("JavaSearchResultPage.error.marker"), e); //$NON-NLS-1$
+		}
+	}
+
 	protected void fillContextMenu(IMenuManager mgr) {
 		super.fillContextMenu(mgr);
 		addSortActions(mgr);
