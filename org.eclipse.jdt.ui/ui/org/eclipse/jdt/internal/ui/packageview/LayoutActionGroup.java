@@ -84,6 +84,8 @@ class LayoutAction extends Action implements IAction {
 	private PackageExplorerPart fPackageExplorer;
 
 	public LayoutAction(PackageExplorerPart packageExplorer, boolean flat) {
+		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
+
 		fIsFlatLayout= flat;
 		fPackageExplorer= packageExplorer;
 		if (fIsFlatLayout)

@@ -72,7 +72,12 @@ public class MultiActionGroup extends ActionGroup {
 			viewMenu.add(new ContributionItem() {
 
 				public void fill(Menu menu, int index) {
-					MenuItem mi= new MenuItem(menu, SWT.CHECK, index);
+					
+					int style= SWT.CHECK;
+					if ((fActions[j].getStyle() & IAction.AS_RADIO_BUTTON) != 0)
+						style= SWT.RADIO;
+					
+					MenuItem mi= new MenuItem(menu, style, index);
 					ImageDescriptor d= fActions[j].getImageDescriptor();
 					mi.setImage(JavaPlugin.getImageDescriptorRegistry().get(d));
 					fItems[j]= mi;
