@@ -77,24 +77,23 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 
-	protected final static String PAGE_NAME= "NewTestCaseCreationWizardPage"; //$NON-NLS-1$
-	protected final static String CLASS_TO_TEST= PAGE_NAME + ".classtotest"; //$NON-NLS-1$
-	protected final static String TEST_CLASS= PAGE_NAME + ".testclass"; //$NON-NLS-1$
-	protected final static String TEST_SUFFIX= "Test"; //$NON-NLS-1$
-	protected final static String SETUP= "setUp"; //$NON-NLS-1$
-	protected final static String TEARDOWN= "tearDown"; //$NON-NLS-1$
+	private final static String PAGE_NAME= "NewTestCaseCreationWizardPage"; //$NON-NLS-1$
+	private final static String CLASS_TO_TEST= PAGE_NAME + ".classtotest"; //$NON-NLS-1$
+	private final static String TEST_SUFFIX= "Test"; //$NON-NLS-1$
+	private final static String SETUP= "setUp"; //$NON-NLS-1$
+	private final static String TEARDOWN= "tearDown"; //$NON-NLS-1$
 
-	protected final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
-	protected final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
-	protected final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE"; //$NON-NLS-1$
+	private final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
+	private final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
+	private final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE"; //$NON-NLS-1$
 	
 	private String fDefaultClassToTest;
 	private NewTestCaseCreationWizardPage2 fPage2;
 	private MethodStubsSelectionButtonGroup fMethodStubsButtons;
 
 	private IType fClassToTest;
-	protected IStatus fClassToTestStatus;
-	protected IStatus fTestClassStatus;
+	private IStatus fClassToTestStatus;
+	private IStatus fTestClassStatus;
 
 	private int fIndexOfFirstTestMethod;
 
@@ -102,16 +101,11 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	private Text fClassToTestText;
 	private Button fClassToTestButton;
 	
-	private Label fTestClassLabel;
-	private Text fTestClassText;
-	private String fTestClassTextInitialValue;
-
 	private boolean fFirstTime;  
 
 	public NewTestCaseCreationWizardPage() {
 		super(true, PAGE_NAME);
 		fFirstTime= true;
-		fTestClassTextInitialValue= ""; //$NON-NLS-1$
 		
 		setTitle(WizardMessages.getString("NewTestClassWizPage.title")); //$NON-NLS-1$
 		setDescription(WizardMessages.getString("NewTestClassWizPage.description")); //$NON-NLS-1$
@@ -199,16 +193,16 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		} else if (fieldName.equals(SUPER)) {
 			validateSuperClass(); 
 			if (!fFirstTime)
-				fTestClassStatus= testClassChanged();	
-		} else if (fieldName.equals(TEST_CLASS)) {
-			fTestClassStatus= testClassChanged();
+				fTestClassStatus= typeNameChanged();	
+		} else if (fieldName.equals(TYPENAME)) {
+			fTestClassStatus= typeNameChanged();
 		} else if (fieldName.equals(PACKAGE) || fieldName.equals(CONTAINER) || fieldName.equals(SUPER)) {
 			if (fieldName.equals(PACKAGE))
 				fPackageStatus= packageChanged();
 			if (!fFirstTime) {
 				validateSuperClass();
 				fClassToTestStatus= classToTestClassChanged();			
-				fTestClassStatus= testClassChanged();
+				fTestClassStatus= typeNameChanged();
 			}
 			if (fieldName.equals(CONTAINER)) {
 				validateJUnitOnBuildPath(); 
@@ -252,7 +246,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		createSeparator(composite, nColumns);
 		createClassToTestControls(composite, nColumns);
 		createSeparator(composite, nColumns);
-		createTestClassControls(composite, nColumns);		
+		createTypeNameControls(composite, nColumns);		
 		createSuperClassControls(composite, nColumns);
 		createMethodStubSelectionControls(composite, nColumns);
 		setSuperClass(JUnitPlugin.TEST_SUPERCLASS_NAME, true);
@@ -262,7 +256,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		//set default and focus
 		if (fDefaultClassToTest.length() > 0) {
 			fClassToTestText.setText(fDefaultClassToTest);
-			fTestClassText.setText(fDefaultClassToTest+TEST_SUFFIX);
+			setTypeName(Signature.getSimpleName(fDefaultClassToTest)+TEST_SUFFIX, true);
 		}
 		restoreWidgetValues();
 		Dialog.applyDialogFont(composite);
@@ -270,13 +264,13 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 
 	}
 
-	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {
+	private void createMethodStubSelectionControls(Composite composite, int nColumns) {
 		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getLabelControl(composite), nColumns);
 		LayoutUtil.createEmptySpace(composite,1);
 		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getSelectionButtonsGroup(composite), nColumns - 1);	
 	}	
 
-	protected void createClassToTestControls(Composite composite, int nColumns) {
+	private void createClassToTestControls(Composite composite, int nColumns) {
 		fClassToTestLabel= new Label(composite, SWT.LEFT | SWT.WRAP);
 		fClassToTestLabel.setFont(composite.getFont());
 
@@ -355,7 +349,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		return type;
 	}
 
-	protected IStatus classToTestClassChanged() {
+	private IStatus classToTestClassChanged() {
 		fClassToTestButton.setEnabled(getPackageFragmentRoot() != null);	// sets the test class field?
 		IStatus status= validateClassToTest();
 		return status;
@@ -407,7 +401,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		}
 	}
 
-	protected void createConstructor(IType type, ImportsManager imports) throws JavaModelException {
+	private void createConstructor(IType type, ImportsManager imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
 		String constr= ""; //$NON-NLS-1$
@@ -443,12 +437,12 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fIndexOfFirstTestMethod++;
 	}
 
-	protected void createMain(IType type) throws JavaModelException {
+	private void createMain(IType type) throws JavaModelException {
 		type.createMethod(fMethodStubsButtons.getMainMethod(getTypeName()), null, false, null);	
 		fIndexOfFirstTestMethod++;		
 	}
 
-	protected void createSetUp(IType type, ImportsManager imports) throws JavaModelException {
+	private void createSetUp(IType type, ImportsManager imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
 		String setUp= ""; //$NON-NLS-1$
@@ -491,7 +485,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fIndexOfFirstTestMethod++;
 	}
 	
-	protected void createTearDown(IType type, ImportsManager imports) throws JavaModelException {
+	private void createTearDown(IType type, ImportsManager imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
 		String tearDown= ""; //$NON-NLS-1$
@@ -522,7 +516,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		}				
 	}
 
-	protected void createTestMethodStubs(IType type) throws JavaModelException {
+	private void createTestMethodStubs(IType type) throws JavaModelException {
 		IMethod[] methods= fPage2.getCheckedMethods();
 		if (methods.length == 0)
 			return;
@@ -702,7 +696,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		String superClassName= getSuperClass();
 		if (superClassName == null || superClassName.trim().equals("")) { //$NON-NLS-1$
 			fSuperClassStatus= new JUnitStatus();
-			((JUnitStatus)fSuperClassStatus).setError("Super class name is empty"); //$NON-NLS-1$
+			((JUnitStatus)fSuperClassStatus).setError(WizardMessages.getString("NewTestClassWizPage.error.superclass.empty")); //$NON-NLS-1$
 			return;	
 		}
 		if (getPackageFragmentRoot() != null) { //$NON-NLS-1$
@@ -735,82 +729,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			}
 		}
 	}
-	
-	protected void createTestClassControls(Composite composite, int nColumns) {
-		fTestClassLabel= new Label(composite, SWT.LEFT | SWT.WRAP);
-		fTestClassLabel.setFont(composite.getFont());
-		fTestClassLabel.setText(WizardMessages.getString("NewTestClassWizPage.testcase.label")); //$NON-NLS-1$
-		GridData gd= new GridData();
-		gd.horizontalSpan= 1;
-		fTestClassLabel.setLayoutData(gd);
-
-		fTestClassText= new Text(composite, SWT.SINGLE | SWT.BORDER);
-		fTestClassText.setEnabled(true);
-		fTestClassText.setFont(composite.getFont());
-		fTestClassText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				handleFieldChanged(TEST_CLASS);
-			}
-		});
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.FILL;
-		gd.grabExcessHorizontalSpace= true;
-		gd.horizontalSpan= nColumns - 2;
-		fTestClassText.setLayoutData(gd);
 		
-		Label space= new Label(composite, SWT.LEFT);
-		space.setText(" "); //$NON-NLS-1$
-		gd= new GridData();
-		gd.horizontalSpan= 1;
-		space.setLayoutData(gd);
-	}
-
-	/**
-	 * Gets the type name.
-	 */
-	public String getTypeName() {
-		return (fTestClassText==null)?fTestClassTextInitialValue:fTestClassText.getText();
-	}	
-
-	/**
-	 * Called when the type name has changed.
-	 * The method validates the type name and returns the status of the validation.
-	 * Can be extended to add more validation
-	 */
-	protected IStatus testClassChanged() {
-		JUnitStatus status= new JUnitStatus();
-		String typeName= getTypeName();
-		// must not be empty
-		if (typeName.length() == 0) {
-			status.setError(WizardMessages.getString("NewTestClassWizPage.error.testcase.name_empty")); //$NON-NLS-1$
-			return status;
-		}
-		if (typeName.indexOf('.') != -1) {
-			status.setError(WizardMessages.getString("NewTestClassWizPage.error.testcase.name_qualified")); //$NON-NLS-1$
-			return status;
-		}
-		IStatus val= JavaConventions.validateJavaTypeName(typeName);
-
-		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(WizardMessages.getString("NewTestClassWizPage.error.testcase.name_not_valid")+val.getMessage()); //$NON-NLS-1$
-			return status;
-		} else if (val.getSeverity() == IStatus.WARNING) {
-			status.setWarning(WizardMessages.getString("NewTestClassWizPage.error.testcase.name_discouraged")+val.getMessage()); //$NON-NLS-1$
-			// continue checking
-		}		
-
-		IPackageFragment pack= getPackageFragment();
-		if (pack != null) {
-			ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
-			if (cu.exists()) {
-					status.setError(WizardMessages.getFormattedString("NewTestClassWizPage.error.testcase.already_exists", typeName));//$NON-NLS-1$
-				return status;
-			}
-		}
-		return status;
-	}
-
-	
 	/**
 	 * @see IWizardPage#canFlipToNextPage
 	 */
@@ -822,7 +741,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		return !getClassToTestText().equals(""); //$NON-NLS-1$
 	}
 
-	protected JUnitStatus validateClassToTest() {
+	private JUnitStatus validateClassToTest() {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		IPackageFragment pack= getPackageFragment();
 		String classToTestName= getClassToTestText();
@@ -841,8 +760,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		
 		if (root != null) {
 			try {		
-				IType type= NewTestCaseCreationWizardPage.resolveClassNameToType(root.getJavaProject(), pack, classToTestName);
-				//IType type= wizpage.resolveClassToTestName();
+				IType type= resolveClassNameToType(root.getJavaProject(), pack, classToTestName);
 				if (type == null) {
 					//status.setWarning("Warning: "+typeLabel+" does not exist in current project.");
 					status.setError(WizardMessages.getString("NewTestClassWizPage.error.class_to_test.not_exist")); //$NON-NLS-1$
@@ -865,7 +783,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		return status;
 	}
 
-	static public IType resolveClassNameToType(IJavaProject jproject, IPackageFragment pack, String classToTestName) throws JavaModelException {
+	private IType resolveClassNameToType(IJavaProject jproject, IPackageFragment pack, String classToTestName) throws JavaModelException {
 		IType type= null;
 		if (type == null && pack != null) {
 			String packName= pack.getElementName();
@@ -883,14 +801,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			type= jproject.findType(classToTestName);
 		}
 		return type;
-	}
-
-	/**
-	 * Sets the focus on the type name.
-	 */		
-	protected void setFocus() {
-		fTestClassText.setFocus();
-		fTestClassText.setSelection(fTestClassText.getText().length(), fTestClassText.getText().length());
 	}
 	
 	/**
