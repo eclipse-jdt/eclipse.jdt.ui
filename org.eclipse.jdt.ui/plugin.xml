@@ -202,24 +202,6 @@
 	</view>
 </extension>
 
-<extension
-	point="org.eclipse.ui.capabilities"> 
-    <category 
-        id = "org.eclipse.jdt.ui.java" 
-        name = "%JavaCapabilityCategoryName"> 
-    </category> 
-
-    <capability 
-        id="org.eclipse.jdt.ui.wizards.JavaCapabilityWizard" 
-        icon="icons/full/ctool16/newjprj_wiz.gif" 
-        natureId="org.eclipse.jdt.core.javanature" 
-        category="org.eclipse.jdt.ui.java" 
-        description="%JavaCapabilityWizard.description" 
-        installWizard="org.eclipse.jdt.internal.ui.wizards.JavaCapabilityWizard" 
-        installDetails="%JavaCapabilityWizard.details"> 
-    </capability>
-</extension> 
-
 <extension 
 	point="org.eclipse.ui.newWizards">
 	<category
