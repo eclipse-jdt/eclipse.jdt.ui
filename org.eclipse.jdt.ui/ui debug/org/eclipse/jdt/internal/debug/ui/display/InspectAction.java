@@ -48,4 +48,12 @@ public class InspectAction extends EvaluateAction {
 			});
 		}
 	}
+	
+	/**
+	 * Returns whether to display the expression via
+	 * the data display.
+	 */
+	protected boolean displayExpression() {
+		return false;
+	}
 }

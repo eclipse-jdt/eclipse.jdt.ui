@@ -176,7 +176,7 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 					fExpression= selection.getText();
 					
 					IDataDisplay dataDisplay= getDataDisplay();
-					if (dataDisplay != null)
+					if (dataDisplay != null && displayExpression())
 						dataDisplay.displayExpression(fExpression);
 						
 					adapter.evaluate(fExpression, this, project);
@@ -301,5 +301,13 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 			reportError(MessageFormat.format(DisplayMessages.getString("Evaluate.error.message.wrapped_exception"), new Object[] { ref.referenceType().name() })); //$NON-NLS-1$
 		} else
 			reportError(exception);
+	}
+	
+	/**
+	 * Returns whether to display the expression via
+	 * the data display.
+	 */
+	protected boolean displayExpression() {
+		return true;
 	}
 }
