@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;

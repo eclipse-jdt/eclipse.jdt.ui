@@ -10,10 +10,10 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
-import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.rename.RenamePackageRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
+import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactoring;
 
 
 public class RenamePackageTests extends RefactoringTest {

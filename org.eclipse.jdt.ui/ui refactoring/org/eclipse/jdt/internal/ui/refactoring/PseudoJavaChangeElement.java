@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jface.util.Assert;
 
 /* package */ class PseudoJavaChangeElement extends ChangeElement {

@@ -12,9 +12,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;
-import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.core.refactoring.changes.TextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;

@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 
 public class PathTransformationTests extends TestCase {
 	

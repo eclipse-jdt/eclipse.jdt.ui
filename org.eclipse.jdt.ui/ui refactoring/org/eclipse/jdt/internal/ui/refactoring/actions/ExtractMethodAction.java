@@ -6,9 +6,9 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.code.ExtractMethodRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;

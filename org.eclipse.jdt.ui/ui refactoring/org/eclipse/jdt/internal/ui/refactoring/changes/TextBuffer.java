@@ -14,8 +14,8 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextStore;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextRegion;
+import org.eclipse.jdt.internal.corext.refactoring.text.ITextBuffer;
+import org.eclipse.jdt.internal.corext.refactoring.text.ITextRegion;
 
 /**
  * An implementation of ITextBuffer</code> that is based on <code>ITextSelection</code>

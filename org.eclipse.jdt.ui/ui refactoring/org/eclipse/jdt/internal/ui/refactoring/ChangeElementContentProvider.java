@@ -20,11 +20,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;
-import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.core.refactoring.changes.TextChange.TextEditChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChange;
 
 /**
  * A default content provider to present a hierarchy of <code>IChange</code>

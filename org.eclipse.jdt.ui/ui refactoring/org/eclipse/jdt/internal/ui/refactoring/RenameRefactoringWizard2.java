@@ -1,6 +1,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 public class RenameRefactoringWizard2 extends RenameRefactoringWizard {
 

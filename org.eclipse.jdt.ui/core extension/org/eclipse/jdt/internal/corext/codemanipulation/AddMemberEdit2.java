@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.codemanipulation.*;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;

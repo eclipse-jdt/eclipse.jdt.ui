@@ -12,9 +12,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.core.refactoring.SourceRange;
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.rename.RenameTempRefactoring;public class RenameTempTests extends RefactoringTest{
+import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;public class RenameTempTests extends RefactoringTest{
 	
 	private static final Class clazz= RenameTempTests.class;
 	private static final String REFACTORING_PATH= "RenameTemp/";

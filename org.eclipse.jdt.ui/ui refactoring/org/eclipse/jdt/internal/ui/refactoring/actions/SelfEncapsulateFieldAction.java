@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 import org.eclipse.jdt.core.IField;
 
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 

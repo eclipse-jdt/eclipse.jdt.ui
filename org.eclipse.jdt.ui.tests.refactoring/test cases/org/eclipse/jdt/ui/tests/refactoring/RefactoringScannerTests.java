@@ -6,7 +6,7 @@ import java.util.Set;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.internal.core.refactoring.rename.RefactoringScanner;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner;
 
 public class RefactoringScannerTests extends RefactoringTest{
 

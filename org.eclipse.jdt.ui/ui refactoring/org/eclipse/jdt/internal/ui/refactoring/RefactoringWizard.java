@@ -18,12 +18,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
-import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.base.IUndoManager;
-import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;

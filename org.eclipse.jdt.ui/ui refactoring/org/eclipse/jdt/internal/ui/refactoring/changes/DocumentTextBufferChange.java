@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.changes;
 
-import java.util.List;import org.eclipse.jface.text.Document;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;import org.eclipse.jdt.internal.ui.util.IDocumentManager;
+import java.util.List;import org.eclipse.jface.text.Document;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.corext.refactoring.base.IChange;import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.corext.refactoring.text.AbstractTextBufferChange;import org.eclipse.jdt.internal.corext.refactoring.text.ITextBuffer;import org.eclipse.jdt.internal.ui.util.IDocumentManager;
 
 /**
  * @deprecated Use TextBufferChange instead

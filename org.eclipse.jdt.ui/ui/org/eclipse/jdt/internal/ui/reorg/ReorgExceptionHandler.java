@@ -7,9 +7,9 @@ package org.eclipse.jdt.internal.ui.reorg;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.base.IChangeExceptionHandler;
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Class used to handle exceptions occurring during reorg actions.

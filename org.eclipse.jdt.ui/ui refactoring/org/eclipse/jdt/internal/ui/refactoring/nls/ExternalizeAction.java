@@ -14,9 +14,9 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.nls.search.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 

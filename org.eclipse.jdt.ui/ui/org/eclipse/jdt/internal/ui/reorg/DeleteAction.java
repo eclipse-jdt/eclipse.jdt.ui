@@ -13,8 +13,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.reorg.DeleteRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
@@ -23,7 +23,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.jdt.internal.core.refactoring.reorg.*;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.*;
 
 /** 
  * Action for deleting elements in a delete target.

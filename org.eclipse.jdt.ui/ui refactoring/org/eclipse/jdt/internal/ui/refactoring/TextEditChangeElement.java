@@ -6,8 +6,8 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.changes.TextChange.TextEditChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChange;
 
 /* package */ class TextEditChangeElement extends ChangeElement {
 	

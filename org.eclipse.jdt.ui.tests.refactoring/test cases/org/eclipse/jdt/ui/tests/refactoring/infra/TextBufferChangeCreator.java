@@ -6,8 +6,8 @@ package org.eclipse.jdt.ui.tests.refactoring.infra;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChange;
+import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
 
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChange;
 

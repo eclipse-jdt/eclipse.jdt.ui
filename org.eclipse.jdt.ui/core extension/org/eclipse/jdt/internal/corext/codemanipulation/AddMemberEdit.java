@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 
 public class AddMemberEdit extends SimpleTextEdit {

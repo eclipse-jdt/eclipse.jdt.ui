@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jdt.internal.core.Assert;
-import org.eclipse.jdt.internal.core.refactoring.util.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 

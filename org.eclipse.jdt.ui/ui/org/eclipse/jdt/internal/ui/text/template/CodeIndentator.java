@@ -11,7 +11,7 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextStore;
 
-import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
+import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
 
 /**
  * The code indentator indentates a text block by a given indentation level.

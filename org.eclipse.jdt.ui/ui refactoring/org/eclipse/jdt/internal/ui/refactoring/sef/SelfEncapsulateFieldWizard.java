@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.sef;
 
-import org.eclipse.jdt.internal.core.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.refactoring.NewPreviewWizardPage;

@@ -15,8 +15,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.rename.RenameParametersRefactoring;public class RenameParametersTests extends RefactoringTest{
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameParametersRefactoring;public class RenameParametersTests extends RefactoringTest{
 	
 	private static final Class clazz= RenameParametersTests.class;
 	private static final String REFACTORING_PATH= "RenameParameters/";
