@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -83,11 +84,6 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
- * <p>
- * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
- * and expected to change significantly before reaching stability. It is being made available at 
- * this early stage to solicit feedback from pioneering adopters on the understanding that any 
- * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public class ExtractMethodRefactoring extends Refactoring {
 
@@ -106,6 +102,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private boolean fGenerateJavadoc;
 	private boolean fReplaceDuplicates;
 	private SnippetFinder.Match[] fDuplicates;
+	// either of type TypeDeclaration or AnonymousClassDeclaration
+	private ASTNode fDestination;
+	// either of type TypeDeclaration or AnonymousClassDeclaration
+	private ASTNode[] fDestinations;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
 
@@ -229,6 +229,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		initializeParameterInfos();
 		initializeUsedNames();
 		initializeDuplicates();
+		initializeDestinations();
 		return result;
 	}
 	
@@ -298,6 +299,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkMethodName() {
 		return Checks.checkMethodName(fMethodName);
+	}
+	
+	public ASTNode[] getDestinations() {
+		return fDestinations;
+	}
+	
+	public void setDestination(int index) {
+		fDestination= fDestinations[index];
 	}
 	
 	/**
@@ -393,8 +402,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 			result.addTextEditGroup(insertDesc);
 			
 			fRewriter.markAsInserted(mm, insertDesc);
-			List container= ASTNodes.getContainingList(declaration);
-			container.add(container.indexOf(declaration) + 1, mm);
+			if (fDestination == fDestinations[0]) {
+				List container= ASTNodes.getContainingList(declaration);
+				container.add(container.indexOf(declaration) + 1, mm);
+			} else {
+				List container= ASTNodes.getBodyDeclarations(fDestination);
+				int index= ASTNodes.getInsertionIndex(mm, container);
+				container.add(index, mm);
+			}
 			
 			TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName)); //$NON-NLS-1$
 			result.addTextEditGroup(description);
@@ -402,7 +417,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ASTNode[] callNodes= createCallNodes(null);
 			fRewriter.replace(target, callNodes[0], description);
 			if (callNodes.length > 1) {
-				container= ASTNodes.getContainingList(target);
+				List container= ASTNodes.getContainingList(target);
 				int index= container.indexOf(target);
 				for (int i= 1; i < callNodes.length; i++) {
 					ASTNode node= callNodes[i];
@@ -530,6 +545,41 @@ public class ExtractMethodRefactoring extends Refactoring {
 			(TypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), TypeDeclaration.class), 
 			fAnalyzer.getSelectedNodes());
 		fReplaceDuplicates= fDuplicates.length > 0 && ! fAnalyzer.isLiteralNodeSelected();
+	}
+	
+	private void initializeDestinations() {
+		List result= new ArrayList();
+		BodyDeclaration decl= fAnalyzer.getEnclosingBodyDeclaration();
+		ASTNode current= getNextParent(decl);
+		result.add(current);
+		if (decl instanceof MethodDeclaration) {
+			ITypeBinding binding= resolveBinding(current);
+			ASTNode next= getNextParent(current);
+			while (next != null && binding != null && binding.isNested() && !Modifier.isStatic(binding.getDeclaredModifiers())) {
+				result.add(next);
+				current= next;
+				binding= resolveBinding(current);
+				next= getNextParent(next);
+			}
+		}
+		fDestinations= (ASTNode[])result.toArray(new ASTNode[result.size()]);
+		fDestination= fDestinations[0];
+	}
+	
+	private ASTNode getNextParent(ASTNode node) {
+		do {
+			node= node.getParent();
+		} while (node != null && !((node instanceof TypeDeclaration) || (node instanceof AnonymousClassDeclaration)));
+		return node;
+	}
+	
+	private ITypeBinding resolveBinding(ASTNode node) {
+		if (node instanceof TypeDeclaration) {
+			return ((TypeDeclaration)node).resolveBinding();
+		} else if (node instanceof AnonymousClassDeclaration) {
+			return ((AnonymousClassDeclaration)node).resolveBinding();
+		}
+		return null;
 	}
 	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
@@ -768,5 +818,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 		result.setModifiers(ASTNodes.getModifiers(original));
 		result.setType(ASTNodes.getType(fAST, original));
 		return result;
+	}
+	
+	/**
+	 * TODO Auto-generated Javadoc stub
+	 * @param i
+	 */
+	public void foo(int i) {
+		
 	}
 }

@@ -13,16 +13,22 @@ package org.eclipse.jdt.internal.ui.refactoring.code;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -32,6 +38,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
@@ -88,6 +95,26 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		fTextField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		layouter.perform(label, fTextField, 1);
+		
+		ASTNode[] destinations= fRefactoring.getDestinations();
+		if (destinations.length > 1) {
+			label= new Label(result, SWT.NONE);
+			label.setText(RefactoringMessages.getString("ExtractMethodInputPage.destination_type")); //$NON-NLS-1$
+			final Combo combo= new Combo(result, SWT.READ_ONLY | SWT.DROP_DOWN);
+			for (int i= 0; i < destinations.length; i++) {
+				ASTNode declaration= destinations[i];
+				combo.add(getLabel(declaration));
+			}
+			combo.select(0);
+			combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			combo.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent e) {
+					fRefactoring.setDestination(combo.getSelectionIndex());
+				}
+				public void widgetDefaultSelected(SelectionEvent e) {
+				}
+			});
+		}
 		
 		label= new Label(result, SWT.NONE);
 		label.setText(RefactoringMessages.getString("ExtractMethodInputPage.access_Modifiers")); //$NON-NLS-1$
@@ -200,7 +227,18 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		layouter.perform(label, fPreview, 1);
 		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE);		
-	}	
+	}
+	
+	private String getLabel(ASTNode node) {
+		if (node instanceof TypeDeclaration) {
+			return ((TypeDeclaration)node).getName().getIdentifier();
+		} else {
+			ClassInstanceCreation creation= (ClassInstanceCreation)ASTNodes.getParent((AnonymousClassDeclaration)node, ClassInstanceCreation.class);
+			return RefactoringMessages.getFormattedString(
+				"ExtractMethodInputPage.anonymous_type_label",  //$NON-NLS-1$
+				creation.getName().getFullyQualifiedName()); 
+		}
+	}
 
 	private Text createTextInputField(Composite parent, int style) {
 		Text result= new Text(parent, style);
