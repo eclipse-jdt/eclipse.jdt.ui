@@ -47,7 +47,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 
 	private boolean fShowPreview= false;
 
-	public JdtMoveAction(String name, StructuredSelectionProvider provider) {
+	public JdtMoveAction(String name, ISelectionProvider provider) {
 		super(name, provider);
 		setDescription(ReorgMessages.getString("moveAction.description")); //$NON-NLS-1$
 	}
