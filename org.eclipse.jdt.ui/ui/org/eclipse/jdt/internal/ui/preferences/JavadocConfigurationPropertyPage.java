@@ -9,7 +9,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -25,6 +24,7 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -44,7 +44,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	private IStatus fJavaDocStatus;
 
 	public JavadocConfigurationPropertyPage() {
-		setDescription("Specify the location (URL) of the project's Javadoc documentation.\nExample is 'file://c:/myworkspace/myproject/doc/'. This location is used by the Javadoc export wizard as default value and by the 'Open External Javadoc' action.");
+		setDescription(JavaUIMessages.getString("JavadocConfigurationPropertyPage.description")); //$NON-NLS-1$
 	}
 
 
@@ -61,8 +61,8 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 
 		fJavaDocField= new StringButtonDialogField(adapter);
 		fJavaDocField.setDialogFieldListener(adapter);
-		fJavaDocField.setLabelText("&Javadoc Location: ");
-		fJavaDocField.setButtonLabel("Bro&wse...");
+		fJavaDocField.setLabelText(JavaUIMessages.getString("JavadocConfigurationPropertyPage.location.label")); //$NON-NLS-1$
+		fJavaDocField.setButtonLabel(JavaUIMessages.getString("JavadocConfigurationPropertyPage.location.button")); //$NON-NLS-1$
 
 		fJavaDocField.doFillIntoGrid(topComp, 3);
 
@@ -85,7 +85,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 		if (location != null)
 			fJavaDocField.setText(location.toExternalForm());
 		else
-			fJavaDocField.setText("");
+			fJavaDocField.setText(""); //$NON-NLS-1$
 
 	}
 
@@ -93,7 +93,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		fJavaDocField.setText("");
+		fJavaDocField.setText(""); //$NON-NLS-1$
 		super.performDefaults();
 	}
 
@@ -120,27 +120,26 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 		if (jdocLocation.length() > 0) {
 			try {
 				URL url= new URL(jdocLocation);
-				if ("file".equals(url.getProtocol())) {
-					String temp= url.getFile();
-					if (temp == null) {
-						status.setError("Not a valid URL.");
+				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
+					if (url.getFile() == null) {
+						status.setError(JavaUIMessages.getString("JavadocConfigurationPropertyPage.error.notafolder")); //$NON-NLS-1$
 						return status;
 					} else {
 						File dir= new File(url.getFile());
 						if (!dir.isDirectory()) {
-							status.setError("Location does not exist.");
+							status.setError(JavaUIMessages.getString("JavadocConfigurationPropertyPage.error.notafolder")); //$NON-NLS-1$
 							return status;
 						}
-						File packagesFile= new File(dir, "package-list");
+						File packagesFile= new File(dir, "package-list"); //$NON-NLS-1$
 						if (!packagesFile.exists()) {
-							status.setWarning("Location does not contain file 'package-list'.");
+							status.setWarning(JavaUIMessages.getString("JavadocConfigurationPropertyPage.warning.packagelistnotfound")); //$NON-NLS-1$
 							// only a warning, go on
 						}						
 					}
 				}
 				fJavaDocLocation= url;
 			} catch (MalformedURLException e) {
-				status.setError(e.getLocalizedMessage());
+				status.setError(JavaUIMessages.getFormattedString("JavadocConfigurationPropertyPage.error.invalidurl", e.getLocalizedMessage())); //$NON-NLS-1$
 				return status;
 			}
 		}
@@ -148,13 +147,13 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 	}
 
 	private URL chooseJavaDocLocation() {
-		String initPath= "";
-		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) {
+		String initPath= ""; //$NON-NLS-1$
+		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) { //$NON-NLS-1$
 			initPath= (new File(fJavaDocLocation.getFile())).getPath();
 		}
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
-		dialog.setText("Javadoc Location Selection");
-		dialog.setMessage("&Select project's Javadoc location:");
+		dialog.setText(JavaUIMessages.getString("JavadocConfigurationPropertyPage.javadocLocationDialog.label")); //$NON-NLS-1$
+		dialog.setMessage(JavaUIMessages.getString("JavadocConfigurationPropertyPage.javadocLocationDialog.message")); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {

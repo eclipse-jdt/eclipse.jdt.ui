@@ -26,6 +26,7 @@ import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -39,7 +40,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	private StringButtonDialogField fJavadocSelection;
 	private Composite fComposite;
 
-	private static final String PREF_JAVADOC_COMMAND= "command";
+	private static final String PREF_JAVADOC_COMMAND= "command"; //$NON-NLS-1$
 
 	private class JDocDialogFieldAdapter implements IDialogFieldListener, IStringButtonAdapter {
 		/*
@@ -53,7 +54,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		 * @see IStringButtonAdapter#changeControlPressed(DialogField)
 		 */
 		public void changeControlPressed(DialogField field) {
-			handleFileBrowseButtonPressed(fJavadocSelection.getTextControl(fComposite), null, "Javadoc Command Selection");
+			handleFileBrowseButtonPressed(fJavadocSelection.getTextControl(fComposite), null, JavaUIMessages.getString("JavadocPreferencePage.browsedialog.title")); //$NON-NLS-1$
 
 		}
 
@@ -83,7 +84,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		fComposite.setLayout(layout);
 
 		DialogField javaDocCommentLabel= new DialogField();
-		javaDocCommentLabel.setLabelText("Specify the location of the Javadoc command to be used by the Javadoc export wizard. Location must be an absolute path.");
+		javaDocCommentLabel.setLabelText(JavaUIMessages.getString("JavadocPreferencePage.description")); //$NON-NLS-1$
 		javaDocCommentLabel.doFillIntoGrid(fComposite, 3);
 		LayoutUtil.setWidthHint(javaDocCommentLabel.getLabelControl(null), convertWidthInCharsToPixels(80));
 
@@ -91,8 +92,8 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 
 		fJavadocSelection= new StringButtonDialogField(adapter);
 		fJavadocSelection.setDialogFieldListener(adapter);
-		fJavadocSelection.setLabelText("J&avadoc command:");
-		fJavadocSelection.setButtonLabel("Bro&wse...");
+		fJavadocSelection.setLabelText(JavaUIMessages.getString("JavadocPreferencePage.command.label")); //$NON-NLS-1$
+		fJavadocSelection.setButtonLabel(JavaUIMessages.getString("JavadocPreferencePage.command.button")); //$NON-NLS-1$
 		fJavadocSelection.doFillIntoGrid(fComposite, 3);
 		LayoutUtil.setHorizontalGrabbing(fJavadocSelection.getTextControl(null));
 		LayoutUtil.setWidthHint(fJavadocSelection.getTextControl(null), convertWidthInCharsToPixels(50));
@@ -113,7 +114,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		if (file != null)
 			store.setDefault(PREF_JAVADOC_COMMAND, file.getPath());
 		else
-			store.setDefault(PREF_JAVADOC_COMMAND, "");
+			store.setDefault(PREF_JAVADOC_COMMAND, ""); //$NON-NLS-1$
 	}
 
 	private static File findJavaDocCommand() {
@@ -124,11 +125,11 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 			for (int k= 0; k < installs.length; k++) {
 				File installLocation= installs[k].getInstallLocation();
 				if (installLocation != null) {
-					File javaDocCommand= new File(installLocation, "bin/javadoc");
+					File javaDocCommand= new File(installLocation, "bin/javadoc"); //$NON-NLS-1$
 					if (javaDocCommand.isFile()) {
 						return javaDocCommand;
 					}
-					javaDocCommand= new File(installLocation, "bin/javadoc.exe");
+					javaDocCommand= new File(installLocation, "bin/javadoc.exe"); //$NON-NLS-1$
 					if (javaDocCommand.isFile()) {
 						return javaDocCommand;
 					}
@@ -172,7 +173,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		if (text.length() > 0) {
 			File file= new File(text);
 			if (!file.isFile()) {
-				status.setError("Javadoc command does not exist.");	
+				status.setError(JavaUIMessages.getString("JavadocPreferencePage.error.notexists"));	 //$NON-NLS-1$
 			}
 		}
 		updateStatus(status);
