@@ -58,8 +58,6 @@ import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
-import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageViewerSorter;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
@@ -383,7 +381,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 	private IFolder chooseFolder() {	
 		Class[] acceptedClasses= new Class[] { IFolder.class };
 		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
-		List notWanted= getFilteredExistingContainerEntries();
+		Object[] notWanted= getFilteredExistingContainerEntries();
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, notWanted);	
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
@@ -490,10 +488,10 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 	}
 
 	
-	private List getFilteredExistingContainerEntries() {
+	private Object[] getFilteredExistingContainerEntries() {
 		List res= new ArrayList();
 		if (fCurrJProject == null) {
-			return res;
+			return res.toArray();
 		}
 		
 		try {
@@ -516,7 +514,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 				}
 			}		
 		}
-		return res;
+		return res.toArray();
 	}	
 		
 }

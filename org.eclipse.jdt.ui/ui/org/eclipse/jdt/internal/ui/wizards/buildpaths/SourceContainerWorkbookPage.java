@@ -12,13 +12,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
-
 import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -34,9 +35,9 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -267,7 +268,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private CPListElement createNewSourceContainer() {	
 		IProject proj= fCurrJProject.getProject();
 		String title= NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.title"); //$NON-NLS-1$
-		NewContainerDialog dialog= new NewContainerDialog(fShell, title, proj, getFilteredExistingContainerEntries());
+		NewContainerDialog dialog= new NewContainerDialog(fShell, title, proj, getExistingContainers());
 		dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
 		if (dialog.open() == dialog.OK) {
 			IFolder folder= dialog.getFolder();
@@ -298,8 +299,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
 			
 		acceptedClasses= new Class[] { IFolder.class };
-		List rejectedElements= getFilteredExistingContainerEntries();
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements);	
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getExistingContainers());	
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
@@ -323,14 +323,17 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		return null;		
 	}
 	
-	private List getFilteredExistingContainerEntries() {
+	private IContainer[] getExistingContainers() {
 		List res= new ArrayList();
 		List cplist= fFoldersList.getElements();
 		for (int i= 0; i < cplist.size(); i++) {
 			CPListElement elem= (CPListElement)cplist.get(i);
-			res.add(elem.getResource());		
+			IResource resource= elem.getResource();
+			if (resource instanceof IContainer) { // defensive code
+				res.add(resource);	
+			}
 		}
-		return res;
+		return (IContainer[]) res.toArray(new IContainer[res.size()]);
 	}
 	
 	private CPListElement newCPSourceElement(IResource res) {

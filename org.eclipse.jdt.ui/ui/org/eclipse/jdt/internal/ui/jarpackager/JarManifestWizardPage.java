@@ -824,14 +824,16 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		dialog.addFilter(new LibraryFilter());
 		dialog.addFilter(new SealPackagesFilter(packages));
 		dialog.setValidator(new ISelectionValidator() {
-			public void isValid(Object[] selection, StatusInfo res) {
+			public IStatus isValid(Object[] selection) {
+				StatusInfo res= new StatusInfo();
 				for (int i= 0; i < selection.length; i++) {
 					if (!(selection[i] instanceof IPackageFragment)) {
 						res.setError(JarPackagerMessages.getString("JarManifestWizardPage.error.mustContainPackages")); //$NON-NLS-1$
-						return;
+						return res;
 					}
 				}
 				res.setOK();
+				return res;
 			}
 		});
 		return dialog;		
@@ -858,12 +860,14 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		ILabelProvider labelProvider= new JavaElementLabelProvider(labelFlags);
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider, false, true); 
 		dialog.setValidator(new ISelectionValidator() {
-			public void isValid(Object[] selection, StatusInfo res) {
+			public IStatus isValid(Object[] selection) {
+				StatusInfo res= new StatusInfo();
 				// only single selection
 				if (selection.length == 1 && (selection[0] instanceof IFile))
 					res.setOK();
 				else
 					res.setError(""); //$NON-NLS-1$
+				return res;
 			}
 		});
 		dialog.addFilter(new EmptyInnerPackageFilter());

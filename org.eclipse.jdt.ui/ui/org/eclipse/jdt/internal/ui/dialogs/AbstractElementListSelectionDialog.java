@@ -11,13 +11,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
@@ -37,9 +37,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	private String fMessageText= ""; //$NON-NLS-1$
 	private String fEmptyListMessage= ""; //$NON-NLS-1$
 	private String fNothingSelectedMessage= ""; //$NON-NLS-1$
-	
-	private StatusInfo fCurrStatus= new StatusInfo();
-	
+		
 	private int fWidth= 60;
 	private int fHeight= 18;
 
@@ -230,23 +228,25 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * accordingly.
 	 */
 	protected boolean verifyCurrentSelection() {
+		IStatus status;
 		List sel= getWidgetSelection();
 		int length= sel.size();
 		if (length > 0) {
 			if (fValidator != null) {
-				fValidator.isValid(sel.toArray(), fCurrStatus);
+				status= fValidator.isValid(sel.toArray());
 			} else {
-				fCurrStatus.setOK();
+				status= new StatusInfo();
 			}
 		} else {
+			
 			if (isEmptyList()) {
-				fCurrStatus.setError(fEmptyListMessage);
+				status= new StatusInfo(IStatus.ERROR, fEmptyListMessage);
 			} else {
-				fCurrStatus.setError(fNothingSelectedMessage);
+				status= new StatusInfo(IStatus.ERROR, fNothingSelectedMessage);
 			}
 		}
-		updateStatus(fCurrStatus);
-		return fCurrStatus.isOK();
+		updateStatus(status);
+		return status.isOK();
 	}
 
 	/*

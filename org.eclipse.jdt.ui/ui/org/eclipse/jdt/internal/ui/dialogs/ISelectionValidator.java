@@ -4,9 +4,18 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
+import org.eclipse.core.runtime.IStatus;
 
-import java.util.List;
-
+/**
+ * Used in selection dialogs to validate selections
+ */
 public interface ISelectionValidator {
-	void isValid(Object[] selection, StatusInfo res);
+	
+	/**
+ 	 * Validates an array of elements and returns the resulting status.
+ 	 * @param selection The elements to validate
+ 	 * @return The resulting status
+	 */	
+	IStatus isValid(Object[] selection);
+	
 }

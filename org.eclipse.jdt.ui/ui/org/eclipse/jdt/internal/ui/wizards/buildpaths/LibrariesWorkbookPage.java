@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -47,10 +48,10 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
-import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -254,7 +255,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		String title= NewWizardMessages.getString("LibrariesWorkbookPage.NewClassFolderDialog.title"); //$NON-NLS-1$
 		IProject currProject= fCurrJProject.getProject();
 		
-		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, currProject, getFilteredExistingContainerEntries());
+		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, currProject, getExistingContainers());
 		IPath projpath= currProject.getFullPath();
 		dialog.setMessage(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.NewClassFolderDialog.description", projpath.toString())); //$NON-NLS-1$
 		int ret= dialog.open();
@@ -271,9 +272,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
 			
 		acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		
-		List rejectedFolders= getFilteredExistingContainerEntries();
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedFolders);	
+
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getExistingContainers());	
 			
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
@@ -328,14 +328,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	
 	
-	private List getFilteredExistingContainerEntries() {
-		List res= new ArrayList();
+	private IContainer[] getExistingContainers() {
+		ArrayList res= new ArrayList();
 		if (fCurrJProject.exists()) {
 			try {
 				IPath outputLocation= fCurrJProject.getOutputLocation();
 				if (outputLocation != null) {
 					IResource resource= fWorkspaceRoot.findMember(outputLocation);
-					if (resource != null) {
+					if (resource instanceof IContainer) {
 						res.add(resource);
 					}
 				}
@@ -349,11 +349,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		for (int i= 0; i < cplist.size(); i++) {
 			CPListElement elem= (CPListElement)cplist.get(i);
 			IResource resource= elem.getResource();
-			if (resource instanceof IFolder) {
+			if (resource instanceof IContainer) {
 				res.add(resource);
 			}
 		}
-		return res;
+		return (IContainer[]) res.toArray(new IContainer[res.size()]);
 	}
 	
 	private List getFilteredExistingJAREntries() {

@@ -20,7 +20,8 @@ public class CompilationUnitEditor extends JavaEditor {
 	/** The editor's save policy */
 	protected ISavePolicy fSavePolicy;
 	
-	
+	/* listener to annotation model changes that updates the error tick in the tab image */
+	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;	
 	
 	/**
 	 * Default constructor.
@@ -32,6 +33,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		setRulerContextMenuId("#CompilationUnitRulerContext"); //$NON-NLS-1$
 		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
 		fSavePolicy= new CUSavePolicy();
+			
+		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
 	/**
@@ -434,4 +437,23 @@ public class CompilationUnitEditor extends JavaEditor {
 				progressMonitor.setCanceled(!success);
 		}
 	}
+	/**
+	 * @see AbstractTextEditor#doSetInput(IEditorInput)
+	 */
+	protected void doSetInput(IEditorInput input) throws CoreException {
+		super.doSetInput(input);
+		fJavaEditorErrorTickUpdater.setAnnotationModel(getDocumentProvider().getAnnotationModel(input));
+	}
+	
+	/**
+	 * @see AbstractTextEditor#dispose()
+	 */
+	public void dispose() {
+		if (fJavaEditorErrorTickUpdater != null) {
+			fJavaEditorErrorTickUpdater.setAnnotationModel(null);
+			fJavaEditorErrorTickUpdater= null;
+		}
+		super.dispose();
+	}	
+
 }

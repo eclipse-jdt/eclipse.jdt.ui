@@ -61,10 +61,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	protected JavaOutlinePage fOutlinePage;
 	
 	/** Outliner context menu Id */
-	protected String fOutlinerContextMenuId;
-	
-	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
-			
+	protected String fOutlinerContextMenuId;	
 	
 	/**
 	 * Returns the smallest ISourceReference also implementing IJavaElement
@@ -87,8 +84,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this));
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		
-		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
 	/**
@@ -294,7 +289,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
-		fJavaEditorErrorTickUpdater.setAnnotationModel(getDocumentProvider().getAnnotationModel(input));
 		setOutlinePageInput(fOutlinePage, input);
 	}	
 	
@@ -316,17 +310,4 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	public void updatedTitleImage(Image image) {
 		setTitleImage(image);
 	}
-	
-	
-	/**
-	 * @see AbstractTextEditor#dispose()
-	 */
-	public void dispose() {
-		if (fJavaEditorErrorTickUpdater != null) {
-			fJavaEditorErrorTickUpdater.setAnnotationModel(null);
-			fJavaEditorErrorTickUpdater= null;
-		}
-		super.dispose();
-	}
-
 }

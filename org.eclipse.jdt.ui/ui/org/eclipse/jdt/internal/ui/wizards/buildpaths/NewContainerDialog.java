@@ -4,13 +4,12 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -32,10 +31,10 @@ public class NewContainerDialog extends StatusDialog {
 	private StatusInfo fContainerFieldStatus;
 	
 	private IFolder fFolder;
-	private List fExistingFolders;
+	private IContainer[] fExistingFolders;
 	private IProject fCurrProject;
 		
-	public NewContainerDialog(Shell parent, String title, IProject project, List existingFolders) {
+	public NewContainerDialog(Shell parent, String title, IProject project, IContainer[] existingFolders) {
 		super(parent);
 		setTitle(title);
 		
@@ -108,13 +107,24 @@ public class NewContainerDialog extends StatusDialog {
 			return;
 		}
 		IFolder folder= fCurrProject.getFolder(pathStr);
-		if (fExistingFolders.contains(folder)) {
+		if (isFolderExisting(folder)) {
 			fContainerFieldStatus.setError(NewWizardMessages.getString("NewContainerDialog.error.pathexists")); //$NON-NLS-1$
 			return;
 		}
 		fContainerFieldStatus.setOK();
 		fFolder= folder;
 	}
+	
+	private boolean isFolderExisting(IFolder folder) {
+		for (int i= 0; i < fExistingFolders.length; i++) {
+			if (folder.equals(fExistingFolders[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+		
+	
 		
 	public IFolder getFolder() {
 		return fFolder;
