@@ -487,7 +487,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	void enableLimit(boolean enable) {
 		fLimitElements= enable;
 		if (fLimitElements)
-			getSettings().put(KEY_GROUPING, TRUE);
+			getSettings().put(KEY_LIMIT_ENABLED, TRUE);
 		else 
 			getSettings().put(KEY_LIMIT_ENABLED, FALSE);
 		limitChanged();
