@@ -157,32 +157,24 @@ class JavaEditorHoverConfigurationBlock {
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		fModifierEditor.setLayoutData(gd);
 
-fModifierEditor.addKeyListener(new KeyListener() {
-	int time;
-	public void keyPressed(KeyEvent e) {
-		System.out.println(Action.findModifierString(e.stateMask));
-		System.out.println("pressed:"+ "key: " + e.keyCode + ", mask: " + e.stateMask + ", char: " + e.character + "time: "+e.time);
-
-		if (e.keyCode > 0 && e.character == 0 && e.stateMask == 0)
-			time= e.time;
-		else
-			time= -1;
-	}
-
-	public void keyReleased(KeyEvent e) {
-		System.out.println(Action.findModifierString(e.stateMask));
-		System.out.println("released:"+ "key: " + e.keyCode + ", mask: " + e.stateMask + ", char: " + e.character + ", time: " + e.time);
-
-		if (time != -1 && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
-			String text= fModifierEditor.getText();
-			if (text.length() > 0)
-				text= text + " + ";
-			text= text + Action.findModifierString(e.stateMask);
-			fModifierEditor.setText(text);
-			fModifierEditor.setSelection(text.length(), text.length());
-		}
-	}
-});
+		// XXX: work in progress
+		fModifierEditor.addKeyListener(new KeyListener() {
+			boolean isModifier;
+			public void keyPressed(KeyEvent e) {
+				isModifier= e.keyCode > 0 && e.character == 0 && e.stateMask == 0;
+			}
+		
+			public void keyReleased(KeyEvent e) {
+				if (isModifier && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
+					String text= fModifierEditor.getText();
+					if (text.length() > 0)
+						text= text + " + ";
+					text= text + Action.findModifierString(e.stateMask);
+					fModifierEditor.setText(text);
+					fModifierEditor.setSelection(text.length(), text.length());
+				}
+			}
+		});
 
 		fModifierEditor.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
