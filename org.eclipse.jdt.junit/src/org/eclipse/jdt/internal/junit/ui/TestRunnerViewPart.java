@@ -36,6 +36,8 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
@@ -58,41 +60,43 @@ import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
 /**
  * A ViewPart that shows the results of a test run.
  */
-public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
+public class TestRunnerViewPart
+	extends ViewPart
+	implements ITestRunListener, IPropertyChangeListener {
 
-	public static final String NAME= "org.eclipse.jdt.junit.viewpart"; //$NON-NLS-1$
+	public static final String NAME = "org.eclipse.jdt.junit.viewpart";
  	/**
  	 * Number of executed tests during a test run
  	 */
 	protected int fExecutedTests;
- 	/**
- 	 * Number of errors during this test run
- 	 */
+	/**
+	 * Number of errors during this test run
+	 */
 	protected int fErrors;
- 	/**
- 	 * Number of failures during this test run
- 	 */
-	protected int fFailures;	
- 	/**
- 	 * Number of tests run
- 	 */
-	private int fTestCount; 
+	/**
+	 * Number of failures during this test run
+	 */
+	protected int fFailures;
+	/**
+	 * Number of tests run
+	 */
+	private int fTestCount;
 	/**
 	 * Map storing TestInfos for each executed test keyed by
 	 * the test name.
 	 */
-	private Map fTestInfos= new HashMap();
+	private Map fTestInfos = new HashMap();
 	/**
 	 * The first failure of a test run. Used to reveal the
 	 * first failed tests at the end of a run.
 	 */
 	private TestRunInfo fFirstFailure;
-	
+
 	private ProgressBar fProgressBar;
 	private Image fProgressImage;
 	private CounterPanel fCounterPanel;
 	private boolean fShowOnErrorOnly= false;
-	
+
 	/** 
 	 * The view that shows the stack trace of a failure
 	 */
@@ -100,7 +104,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	/** 
 	 * The collection of ITestRunViews
 	 */
-	private Vector fTestRunViews= new Vector();
+	private Vector fTestRunViews = new Vector();
 	/**
 	 * The currently active run view
 	 */
@@ -122,22 +126,24 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 * The client side of the remote test runner
 	 */
 	private RemoteTestRunnerClient fTestRunnerClient;
-	
-	protected final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass()); //$NON-NLS-1$
-	protected final Image fStackViewIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass()); //$NON-NLS-1$
+
+	protected final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass());
+	protected final Image fStackViewIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass());
+	//$NON-NLS-1$
+	protected Image fOriginalViewImage = null;
 
 	private class StopAction extends Action{
 		public StopAction() {
-			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text")); //$NON-NLS-1$
-			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.stopaction.tooltip")); //$NON-NLS-1$
-			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/stopIcon.gif")); //$NON-NLS-1$
+			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text"));//$NON-NLS-1$
+			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.stopaction.tooltip"));//$NON-NLS-1$
+			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/stopIcon.gif"));//$NON-NLS-1$
 		}
-		
-		public void run(){
+
+		public void run() {
 			stopTest();
 		}
 	}
-	
+
 	private class RerunAction extends Action{
 		public RerunAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
@@ -149,7 +155,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			rerunTestRun();
 		}
 	}
-	
+
 	/**
 	 * Stops the currently running test and shuts down the RemoteTestRunner
 	 */
@@ -157,7 +163,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		if (fTestRunnerClient != null)
 			fTestRunnerClient.stopTest();
 	}
-			
+
 	/**
 	 * Stops the currently running test and shuts down the RemoteTestRunner
 	 */
@@ -172,7 +178,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			}
 		}
 	}
-	
+
 	/*
 	 * @see ITestRunListener#testRunStarted(testCount)
 	 */
@@ -181,7 +187,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		fShowOnErrorOnly= JUnitPreferencePage.getShowOnErrorOnly();
 		fExecutedTests++;
 	}
-	
+
 	/*
 	 * @see ITestRunListener#testRunEnded
 	 */
@@ -204,7 +210,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	private String elapsedTimeAsString(long runTime) {
 		return NumberFormat.getInstance().format((double)runTime/1000);
 	}
-	
+
 	/*
 	 * @see ITestRunListener#testRunStopped
 	 */
@@ -225,7 +231,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		showInformation(msg);
 		postError(msg);
 	}
-		
+
 	/*
 	 * @see ITestRunListener#testStarted
 	 */
@@ -239,7 +245,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		if (testInfo == null) 
 			fTestInfos.put(testName, new TestRunInfo(testName));
 	}
-	
+
 	/*
 	 * @see ITestRunListener#testEnded
 	 */
@@ -247,7 +253,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		postEndTest(testName);
 		fExecutedTests++;
 	}
-	
+
 	/*
 	 * @see ITestRunListener#testFailed
 	 */
@@ -269,7 +275,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		if (fShowOnErrorOnly && (fErrors + fFailures == 1)) 
 			postShowTestResultsView();
 	}
-	
+
 	/*
 	 * @see ITestRunListener#testReran
 	 */
@@ -292,7 +298,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			showFailure(info.fTrace);
 		}
 	}
-	
+
 	private void updateTest(TestRunInfo info, final int status) {
 		if (status == info.fStatus)
 			return;
@@ -329,7 +335,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		});
 		
 	}
-	
+
 	/*
 	 * @see ITestRunListener#testTreeEntry
 	 */
@@ -363,7 +369,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		setTitle(title);
 		setTitleToolTip(fTestType.getFullyQualifiedName());
 	}
-	
+
 	public void rerunTest(String className, String testName) {
 		if (fTestRunnerClient != null && fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(fLaunchMode))
 			fTestRunnerClient.rerunTest(className, testName);
@@ -378,8 +384,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	public synchronized void dispose(){
 		fIsDisposed= true;
 		stopTest();
+		JUnitPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(
+			this);
 	}
-	
+
 	private void start(final int total) {
 		resetProgressBar(total);
 		fCounterPanel.setTotal(total);
@@ -397,12 +405,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		if (!isDisposed())
 			getDisplay().syncExec(r);
 	}
-		
+
 	private void postAsyncRunnable(Runnable r) {
 		if (!isDisposed())
 			getDisplay().asyncExec(r);
 	}
-	
+
 	private void aboutToStart() {
 		postSyncRunnable(new Runnable() {
 			public void run() {
@@ -415,7 +423,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			}
 		});
 	}
-	
+
 	private void postEndTest(final String testName) {
 		postSyncRunnable(new Runnable() {
 			public void run() {
@@ -429,7 +437,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			}
 		});	
 	}
-	
+
 	private void handleEndTest() {
 		refreshCounters();
 		updateProgressColor(fFailures+fErrors);
@@ -456,7 +464,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		fCounterPanel.setRunValue(fExecutedTests);
 		updateProgressColor(fErrors + fFailures);
 	}
-	
+
 	protected void postShowTestResultsView() {
 		postAsyncRunnable(new Runnable() {
 			public void run() {
@@ -466,7 +474,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			}
 		});
 	}
-	
+
 	public void showTestResultsView() {
 		IWorkbenchWindow window= getSite().getWorkbenchWindow();
 		IWorkbenchPage page= window.getActivePage();
@@ -480,7 +488,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			);
 		}
 	}
-	
+
 	protected void postInfo(final String message) {
 		postAsyncRunnable(new Runnable() {
 			public void run() {
@@ -491,7 +499,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			}
 		});
 	}
-	
+
 	protected void postError(final String message) {
 		postAsyncRunnable(new Runnable() {
 			public void run() {
@@ -506,7 +514,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	protected void showInformation(final String info){
 		postSyncRunnable(new Runnable() {
 			public void run() {
-				if(!isDisposed())
+				if (!isDisposed())
 					fFailureView.setInformation(info);
 			}
 		});
@@ -572,7 +580,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		sashForm.setWeights(new int[]{50, 50});
 		return sashForm;
 	}
-		
+
 	private void reset(final int testCount) {
 		postAsyncRunnable(new Runnable() {
 			public void run() {
@@ -592,7 +600,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		fTestInfos.clear();
 		fFirstFailure= null;
 	}
-	
+
 	private void clearStatus() {
 		getStatusLine().setMessage(null);
 		getStatusLine().setErrorMessage(null);
@@ -601,7 +609,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
     public void setFocus() {
     	fProgressBar.setFocus();
     }
-	
+
     public void createPartControl(Composite parent) {		
 		GridLayout gridLayout= new GridLayout();
 		gridLayout.marginWidth= 0;
@@ -618,7 +626,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		counterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		SashForm sashForm= createSashForm(parent);
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, new CopyTraceAction(fFailureView));
+		actionBars.setGlobalActionHandler(
+			IWorkbenchActionConstants.COPY,
+			new CopyTraceAction(fFailureView));
+
+		JUnitPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+		fOriginalViewImage= getTitleImage();
 	}
 
 	private IStatusLineManager getStatusLine() {
@@ -647,10 +660,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	private Composite createProgressCountPanel(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
-		fProgressBar= new ProgressBar(composite, SWT.HORIZONTAL);
-		fProgressBar.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
-		fCounterPanel= new CounterPanel(composite);
-		fCounterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		fProgressBar = new ProgressBar(composite, SWT.HORIZONTAL);
+		fProgressBar.setLayoutData(
+			new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		fCounterPanel = new CounterPanel(composite);
+		fCounterPanel.setLayoutData(
+			new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		return composite;
 	}
 
@@ -671,7 +686,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	private void showFailure(final String failure) {
 		postSyncRunnable(new Runnable() {
 			public void run() {
-				if(!isDisposed())
+				if (!isDisposed())
 					fFailureView.showFailure(failure);
 			}
 		});		
@@ -684,11 +699,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	protected static Image createImage(String fName, Class clazz) {
 		return (new Image(Display.getCurrent(), clazz.getResourceAsStream(fName)));
 	}
-	
+
 	private boolean isDisposed() {
 		return fIsDisposed || fCounterPanel.isDisposed();
 	}
-	
+
 	private Display getDisplay() {
 		return fCounterPanel.getDisplay();
 	}
@@ -696,9 +711,24 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 * @see IWorkbenchPart#getTitleImage()
 	 */
 	public Image getTitleImage() {
-		if (fProgressImage == null || !fShowOnErrorOnly)
+		if (fOriginalViewImage == null)
+			fOriginalViewImage= super.getTitleImage();
+			
+		if (fProgressImage == null)
 			return super.getTitleImage();
 		return fProgressImage;
+	}
+
+	public void propertyChange(PropertyChangeEvent event) {
+		if (isDisposed())
+			return;
+
+		if (event.getProperty() == JUnitPreferencePage.SHOW_ON_ERROR_ONLY) {
+			if (!JUnitPreferencePage.getShowOnErrorOnly()) {
+				fProgressImage= fOriginalViewImage;
+				firePropertyChange(IWorkbenchPart.PROP_TITLE);
+			}
+		}
 	}
 
 }
