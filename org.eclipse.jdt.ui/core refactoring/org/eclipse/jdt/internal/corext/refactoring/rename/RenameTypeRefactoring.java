@@ -629,7 +629,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private IFile[] getAllFilesToModify() throws CoreException{
 		List result= new ArrayList();
 		result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
-		result.addAll(Arrays.asList(fQualifiedNameFinder.getAllFiles()));
+		if (fQualifiedNameFinder != null)
+			result.addAll(Arrays.asList(fQualifiedNameFinder.getAllFiles()));
 		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 	
@@ -723,7 +724,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			pm.beginTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.creating_change"), 4); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange();
 			builder.addAll(fChangeManager.getAllChanges());
-			builder.addAll(fQualifiedNameFinder.getAllChanges());
+			if (fQualifiedNameFinder != null)
+				builder.addAll(fQualifiedNameFinder.getAllChanges());
 			if (willRenameCU())
 				builder.add(new RenameResourceChange(ResourceUtil.getResource(fType), fNewName + ".java")); //$NON-NLS-1$
 			pm.worked(1);	

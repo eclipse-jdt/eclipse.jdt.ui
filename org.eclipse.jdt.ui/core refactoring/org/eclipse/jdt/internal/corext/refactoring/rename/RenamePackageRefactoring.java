@@ -452,7 +452,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		List combined= new ArrayList();
 		combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 		combined.addAll(Arrays.asList(getAllCusInPackageAsFiles()));
-		combined.addAll(Arrays.asList(fQualifiedNameFinder.getAllFiles()));
+		if (fQualifiedNameFinder != null)
+			combined.addAll(Arrays.asList(fQualifiedNameFinder.getAllFiles()));
 		return (IFile[]) combined.toArray(new IFile[combined.size()]);
 	}
 	
@@ -469,8 +470,10 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 			if (fUpdateReferences)
 				builder.addAll(fChangeManager.getAllChanges());
+			
+			if (fQualifiedNameFinder != null)	
+				builder.addAll(fQualifiedNameFinder.getAllChanges());
 				
-			builder.addAll(fQualifiedNameFinder.getAllChanges());
 			builder.add(new RenamePackageChange(fPackage, fNewName));
 			pm.worked(1);
 			return builder;
