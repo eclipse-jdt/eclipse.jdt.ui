@@ -1,7 +1,7 @@
 package p;
 class A{
 
-	protected void m() {}	
+	void m() {}	
 }
 class B extends A{
 }

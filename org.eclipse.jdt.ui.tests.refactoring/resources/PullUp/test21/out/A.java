@@ -2,7 +2,7 @@ package p;
 
 class A {
 
-	protected void m() {
+	void m() {
 		super.toString();
 	}
 }

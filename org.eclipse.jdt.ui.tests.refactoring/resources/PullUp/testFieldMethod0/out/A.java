@@ -2,11 +2,11 @@ package p;
 
 class A {
 
-	protected void m() { 
+	void m() { 
 		int i= f;
 	}
 
-	protected int f;
+	int f;
 }
 
 class B extends A {

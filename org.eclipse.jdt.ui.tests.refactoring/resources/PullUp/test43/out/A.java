@@ -4,7 +4,7 @@ class A{
 	/**
 	 * comment
 	 */
-	protected void f() {}
+	void f() {}
 }
 class B extends A{
 }

@@ -1,7 +1,7 @@
 package p;
 class A{
 
-	protected int[] m()[] {
+	int[] m()[] {
 		return null;
 	}	
 }
