@@ -628,6 +628,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fHasCustomFilter= state;
 	}
 	
+	protected Object getInput() {
+		return fViewer.getInput();
+	}
+
 	protected void setInput(Object input) {
 		setViewerInput(input);
 		updateTitle();
