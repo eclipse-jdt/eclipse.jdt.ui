@@ -248,7 +248,7 @@ public class BuildPathsBlock {
 							}
 						} else {
 							IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
-							isMissing= !resolvedPath.toFile().isFile();
+							isMissing= (resolvedPath == null) || !resolvedPath.toFile().isFile();
 						}												
 						CPListElement elem= new CPListElement(entryKind, path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath());
 						elem.setIsMissing(isMissing);
