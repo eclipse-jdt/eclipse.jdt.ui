@@ -177,6 +177,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		private List fTextConverters;
 		private OverviewRuler fOverviewRuler;
 		private boolean fIsOverviewRulerVisible;
+		private boolean fIgnoreTextConverters= false;
 		
 		private IVerticalRuler fCachedVerticalRuler;
 		private boolean fCachedIsVerticalRulerVisible;
@@ -217,6 +218,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					String msg= fContentAssistant.showPossibleCompletions();
 					setStatusLineErrorMessage(msg);
 					return;
+				case UNDO:
+					fIgnoreTextConverters= true;
+					break;
+				case REDO:
+					fIgnoreTextConverters= true;
+					break;
 			}
 			
 			super.doOperation(operation);
@@ -247,10 +254,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 */
 		protected void customizeDocumentCommand(DocumentCommand command) {
 			super.customizeDocumentCommand(command);
-			if (fTextConverters != null) {
+			if (!fIgnoreTextConverters && fTextConverters != null) {
 				for (Iterator e = fTextConverters.iterator(); e.hasNext();)
 					((ITextConverter) e.next()).customizeDocumentCommand(getDocument(), command);
 			}
+			fIgnoreTextConverters= false;
 		}
 		
 		public IVerticalRuler getVerticalRuler() {
