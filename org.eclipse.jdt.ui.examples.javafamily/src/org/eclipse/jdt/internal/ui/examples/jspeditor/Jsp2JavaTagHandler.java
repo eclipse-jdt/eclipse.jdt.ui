@@ -11,9 +11,12 @@
 
 package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.source.ITagHandler;
+import org.eclipse.jface.text.source.ITranslatorResultCollector;
 
 /**
  * 
@@ -49,7 +52,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 	/*
 	 * @see org.eclipse.jface.text.source.ITagHandler#addAttribute(java.lang.String, java.lang.String)
 	 */
-	public void addAttribute(String name, String value) {
+	public void addAttribute(String name, String value, int sourceLineNumber) {
 		if (fInUseBean) {
 			if ("id".equals(name))
 				fId= value;
@@ -62,59 +65,11 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.source.ITagHandler#translate(java.lang.StringBuffer)
-	 */
-	public void translate(StringBuffer declBuffer, StringBuffer localDeclBuffer, StringBuffer contentBuffer, ArrayList dec, ArrayList localDec, ArrayList content, int line) {
-		if (fInUseBean) {
-			if (fId != null && fClass != null) {
-				localDeclBuffer.append(fClass + " " + fId + "= new " + fClass + "();\n");
-				localDec.add(new Integer(line));
-
-				System.out.println("  jsp_typeRef/" + fClass);
-
-				fId= fClass= null;
-			}
-			fInUseBean= false;
-		}
-		if (fInTagLib && fTagLibValue != null) {
-			contentBuffer.append("System.out.println(" + fTagLibValue.substring(2, fTagLibValue.length() - 1) + ");\n");
-			content.add(new Integer(line));
-
-			fTagLibValue= null;
-			fInTagLib= false;
-		}
-	}
-
-	/*
 	 * @see org.eclipse.jface.text.source.ITagHandler#getSmap()
 	 */
 	public int[] getSmap() {
 		// XXX Auto-generated method stub
 		return null;
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.source.ITagHandler#translate(java.lang.StringBuffer[], java.util.ArrayList[], int, int)
-	 */
-	public void translate(StringBuffer[] targetBuffers, ArrayList[] lineMappingInfos, int startingLine, int endingLine) {
-		if (fInUseBean) {
-			if (fId != null && fClass != null) {
-				targetBuffers[1].append(fClass + " " + fId + "= new " + fClass + "();\n");
-				lineMappingInfos[1].add(new Integer(startingLine));
-
-				System.out.println("  jsp_typeRef/" + fClass);
-
-				fId= fClass= null;
-			}
-			fInUseBean= false;
-		}
-		if (fInTagLib && fTagLibValue != null) {
-			targetBuffers[2].append("System.out.println(" + fTagLibValue.substring(2, fTagLibValue.length() - 1) + ");\n");
-			lineMappingInfos[2].add(new Integer(startingLine));
-
-			fTagLibValue= null;
-			fInTagLib= false;
-		}
 	}
 
 	/*
@@ -164,5 +119,27 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 
 		// start relative to Jsp line start
 		return javaPartitionStart - relativeLineOffsetInJava;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.source.ITagHandler#processEndTag(ITranslatorResultCollector, int)
+	 */
+	public void processEndTag(ITranslatorResultCollector resultCollector, int sourceLineNumber) throws IOException {
+		Assert.isTrue(resultCollector instanceof JspTranslatorResultCollector);
+
+		JspTranslatorResultCollector jspResultCollector= (JspTranslatorResultCollector)resultCollector;
+		
+		if (fInUseBean) {
+			if (fId != null && fClass != null) {
+				jspResultCollector.appendLocalDeclaration(fClass + " " + fId + "= new " + fClass + "();\n", sourceLineNumber);
+				fId= fClass= null;
+			}
+			fInUseBean= false;
+		}
+		if (fInTagLib && fTagLibValue != null) {
+			jspResultCollector.appendContent("System.out.println(" + fTagLibValue.substring(2, fTagLibValue.length() - 1) + ");\n", sourceLineNumber);  
+			fTagLibValue= null;
+			fInTagLib= false;
+		}
 	}
 }

@@ -21,8 +21,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
-import org.eclipse.jface.text.source.ITagHandler;
-import org.eclipse.jface.text.source.ITagHandlerFactory;
 import org.eclipse.jface.text.source.ITranslator;
 
 import org.eclipse.jsp.JspTranslator;
@@ -44,7 +42,6 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 	
 	private TextModelAdapter fModel;
 	private ITranslator fJspTranslator;
-	private ITagHandlerFactory fTagHandlerFactory;
 
 	/**
 	 * Creates the last reconcile participant of the pipe.
@@ -64,8 +61,7 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 	
 	protected void initialize()  {
 		fJspTranslator= new JspTranslator();
-		fTagHandlerFactory= new Jsp2JavaTagHandlerFactory();
-		fJspTranslator.setTagHandlerFactory(fTagHandlerFactory);
+		fJspTranslator.setTagHandlerFactory(new Jsp2JavaTagHandlerFactory());
 	}
 
 	/*
@@ -129,8 +125,9 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 				String jspLineStr= ((TextModelAdapter)getInputModel()).getDocument().get(((TextModelAdapter)getInputModel()).getDocument().getLineOffset(jspLine-1), ((TextModelAdapter)getInputModel()).getDocument().getLineLength(jspLine-1));
 
 				// XXX: Once partitioner is in place the partition can be used to ease section detection
-				ITagHandler handler= fTagHandlerFactory.findHandler(jspLineStr);
-				pos.offset += handler.backTranslateOffsetInLine(jspLineStr, null, relativeLineOffsetInJava);
+				int offsetInLine= fJspTranslator.backTranslateOffsetInLine(jspLineStr, null, relativeLineOffsetInJava, null);
+				if (offsetInLine > 0)
+					pos.offset += offsetInLine;
 
 			} catch (BadLocationException e) {
 				e.printStackTrace();

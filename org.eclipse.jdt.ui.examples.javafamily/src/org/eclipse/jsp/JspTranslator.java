@@ -19,6 +19,8 @@ import org.eclipse.jface.text.source.ITagHandlerFactory;
 import org.eclipse.jface.text.source.ITranslator;
 
 import org.eclipse.jdt.internal.ui.examples.jspeditor.Jsp2JavaTagHandlerFactory;
+import org.eclipse.jdt.internal.ui.examples.jspeditor.JspReconcilingStrategy;
+import org.eclipse.jdt.internal.ui.examples.jspeditor.JspTranslatorResultCollector;
 
 /**
  * @author weinand
@@ -27,9 +29,9 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	
 	boolean DEBUG= false;
 
-	StringBuffer fDeclarations= new StringBuffer();
-	StringBuffer fContent= new StringBuffer();
-	StringBuffer fLocalDeclarations= new StringBuffer();
+	private StringBuffer fDeclarations= new StringBuffer();
+	private StringBuffer fContent= new StringBuffer();
+	private StringBuffer fLocalDeclarations= new StringBuffer();
 	
 	private ArrayList fContentLines= new ArrayList();
 	private ArrayList fDeclarationLines= new ArrayList();
@@ -42,12 +44,13 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	private StringBuffer[] fBuffers;
 	private ArrayList[] fLineMappingInfos;
 	
+	private JspTranslatorResultCollector fResultCollector;
+	
 	
 	public JspTranslator() {
 		
 		// Links for passing parameters to the tag handlers 
-		fBuffers= new StringBuffer[]  {fDeclarations, fLocalDeclarations, fContent};
-		fLineMappingInfos= new ArrayList[]  {fDeclarationLines, fLocalDeclarationLines, fContentLines};
+		fResultCollector= new JspTranslatorResultCollector(fDeclarations, fLocalDeclarations, fContent, fDeclarationLines, fLocalDeclarationLines, fContentLines);
 	}
 		
 	protected void startTag(boolean endTag, String name, int startName) {
@@ -65,7 +68,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
 
 		if (fCurrentTagHandler != null)
-			fCurrentTagHandler.addAttribute(attrName, value);
+			fCurrentTagHandler.addAttribute(attrName, value, fLines);
 
 		if (DEBUG)
 			System.out.println("     " + attrName + "=\"" + value + "\"");
@@ -74,7 +77,11 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	protected void endTag(boolean end) {
 
 		if (fCurrentTagHandler != null)
-			fCurrentTagHandler.translate(fBuffers, fLineMappingInfos, fLines, fLines);
+			try  {
+				fCurrentTagHandler.processEndTag(fResultCollector, fLines);
+			} catch (IOException ex)  {
+				ex.printStackTrace();
+			}
 
 		if (DEBUG) {
 			if (end)
@@ -213,5 +220,22 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	 */
 	public void setTagHandlerFactory(ITagHandlerFactory tagHandlerFactory) {
 		fTagHandlerFactor= tagHandlerFactory;
+	}
+
+	/*
+	 * @see ITranslator#backTranslateOffsetInLine(String, String, int)
+	 */
+	public int backTranslateOffsetInLine(String originalLine, String translatedLine, int offsetInTranslatedLine, String tag)  {
+
+		ITagHandler handler;
+		if (tag != null)
+			handler= fTagHandlerFactor.getHandler(tag);
+		else
+			handler= fTagHandlerFactor.findHandler(originalLine);
+
+		if (handler != null)
+			return handler.backTranslateOffsetInLine(originalLine, translatedLine, offsetInTranslatedLine);
+
+		return -1;
 	}
 }

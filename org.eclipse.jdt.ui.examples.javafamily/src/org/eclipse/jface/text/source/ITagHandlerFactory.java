@@ -19,12 +19,21 @@ package org.eclipse.jface.text.source;
  */
 public interface ITagHandlerFactory {
 	
+	/**
+	 * Returns a handler that can handle the
+	 * given tag.
+	 *
+	 * @param tag the tag for which to return the handler 
+	 * @return a tag handler or <code>null</code> if no handler
+	 * 			is available
+	 */
 	public ITagHandler getHandler(String tag);
 	
 	/**
 	 * Finds and returns a handler that can handle
 	 * the given text snippet.
 	 * 
+	 * @param text the text for which to find a handler
 	 * @return a tag handler or <code>null</code> if no handler
 	 * 			is available
 	 */
