@@ -167,11 +167,7 @@ class InstanceMethodMover {
 		private CompilationUnitChange addMovedMethodToMyClass(Method originalMethod, String newMethodName, String originalReceiverParameterName) throws CoreException {
 			List allTypesUsedWithoutQualification= new ArrayList();
 			TextBufferPortion newMethodText= getNewMethodDeclarationText(originalMethod, newMethodName, originalReceiverParameterName, allTypesUsedWithoutQualification);
-			return addNewMethodToMyClass(
-				  newMethodText.getPreferredLineDelimiter()
-				+ newMethodText.getUnindentedContentIgnoreFirstLine(),
-				allTypesUsedWithoutQualification
-			);
+			return addNewMethodToMyClass(newMethodText.getUnindentedContentIgnoreFirstLine(), allTypesUsedWithoutQualification);
 		}
 		
 		private CompilationUnitChange addNewMethodToMyClass(String newMethodText, List allTypesUsedWithoutQualification) throws CoreException {
@@ -624,10 +620,10 @@ class InstanceMethodMover {
 				MethodInvocation[] methodInvocations= fMethod.getImplicitThisMethodInvocations();
 				for(int i= 0; i < methodInvocations.length; i++) {
 					MethodInvocation original= methodInvocations[i];
-					MethodInvocation replacement= original.getAST().newMethodInvocation();
-					replacement.setExpression(original.getAST().newSimpleName(name));
-					replacement.setName(original.getAST().newSimpleName(original.getName().getIdentifier()));
-					fRewrite.markAsReplaced(original, replacement);
+					Expression newExpression= original.getAST().newSimpleName(name);
+					Assert.isTrue(original.getExpression() == null);
+					original.setExpression(newExpression);
+					fRewrite.markAsInserted(newExpression);
 				}
 				return methodInvocations.length != 0;
 			}
@@ -781,7 +777,8 @@ class InstanceMethodMover {
 			public void changeMethodName(String newName) {
 				Assert.isNotNull(newName);
 				SimpleName originalName= fMethod.getNameNode();
-				fRewrite.markAsReplaced(originalName, originalName.getAST().newSimpleName(newName));
+				if (! originalName.getIdentifier().equals(newName))
+					fRewrite.markAsReplaced(originalName, originalName.getAST().newSimpleName(newName));
 			}
 			
 			public void addNewFirstParameter(ITypeBinding parameterType, String parameterName) {
@@ -1715,10 +1712,6 @@ class InstanceMethodMover {
 				"",
 				fBuffer.getLineDelimiter()
 			);
-		}
-		
-		public String getPreferredLineDelimiter() {
-			return fBuffer.getLineDelimiter();	
 		}
 	}
 	
