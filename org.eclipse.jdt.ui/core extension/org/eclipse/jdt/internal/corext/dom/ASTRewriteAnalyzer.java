@@ -299,7 +299,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		ASTNode last= null; 
 		for (int i= 0; i < list.size(); i++) {
 			ASTNode elem = (ASTNode) list.get(i);
-			last= rewriteParagraph(elem, last, insertPos, insertIndent, false);
+			last= rewriteParagraph(elem, last, insertPos, insertIndent, false, true);
 		}
 		if (last != null) {
 			return last.getStartPosition() + last.getLength();
@@ -321,12 +321,12 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	/**
 	 * Rewrite a paragraph (node that is on a new line and has same indent as previous
 	 */
-	private ASTNode rewriteParagraph(ASTNode elem, ASTNode last, int insertPos, int insertIndent, boolean additionalNewLine) {
+	private ASTNode rewriteParagraph(ASTNode elem, ASTNode sibling, int insertPos, int insertIndent, boolean additionalNewLine, boolean useIndentOfSibling) {
 		if (elem == null) {
-			return last;
+			return sibling;
 		} else if (isInserted(elem)) {
-			insertParagraph(elem, last, insertPos, insertIndent, additionalNewLine);
-			return last;
+			insertParagraph(elem, sibling, insertPos, insertIndent, additionalNewLine, useIndentOfSibling);
+			return sibling;
 		} else {
 			if (isReplaced(elem)) {
 				replaceParagraph(elem, getReplacingNode(elem));
@@ -524,9 +524,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 
-	private void insertParagraph(ASTNode elem, ASTNode sibling, int insertPos, int indent, boolean additionalNewLine) {
+	private void insertParagraph(ASTNode elem, ASTNode sibling, int insertPos, int indent, boolean additionalNewLine, boolean useIndentOfSibling) {
 		if (sibling != null) {
-			indent= getIndent(sibling.getStartPosition());
+			if (useIndentOfSibling) {
+				indent= getIndent(sibling.getStartPosition());
+			}
 			insertPos= sibling.getStartPosition() + sibling.getLength();
 		}
 		addInsert(insertPos, fTextBuffer.getLineDelimiter(), "Add new line");
@@ -628,6 +630,27 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			// ignore
 		}		
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
+	 */
+	public void postVisit(ASTNode node) {
+		TextEdit edit= getCopySourceEdit(node);
+		if (edit != null) {
+			fCurrentEdit= fCurrentEdit.getParent();
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
+	 */
+	public void preVisit(ASTNode node) {
+		TextEdit edit= getCopySourceEdit(node);
+		if (edit != null) {
+			fCurrentEdit.add(edit);
+			fCurrentEdit= edit;
+		}
+	}	
 
 
 	/* (non-Javadoc)
@@ -635,7 +658,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 */ 
 	public boolean visit(CompilationUnit node) {
 		PackageDeclaration packageDeclaration= node.getPackage();
-		ASTNode last= rewriteParagraph(packageDeclaration, null, 0, 0, true);
+		ASTNode last= rewriteParagraph(packageDeclaration, null, 0, 0, true, false);
 				
 		List imports= node.imports();
 		int startPos= last != null ? last.getStartPosition() + last.getLength() : 0;
@@ -1492,7 +1515,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 
 		List arguments= node.arguments();
-		
 		if (hasChanges(arguments)) { // eval position after opening parent
 			try {
 				pos= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameLPAREN);
@@ -1510,42 +1532,99 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SuperFieldAccess)
 	 */
 	public boolean visit(SuperFieldAccess node) {
-		return super.visit(node);
+		int pos= node.getStartPosition();
+		Expression optExpression= node.getQualifier();
+		if (optExpression != null) {
+			pos= rewriteOptionalQualifier(optExpression, pos);
+		}
+		
+		rewriteRequiredNode(node.getName());
+		return false;		
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SuperMethodInvocation)
 	 */
 	public boolean visit(SuperMethodInvocation node) {
-		return super.visit(node);
+		int pos= node.getStartPosition();
+		Expression optExpression= node.getQualifier();
+		if (optExpression != null) {
+			pos= rewriteOptionalQualifier(optExpression, pos);
+		}
+		
+		rewriteRequiredNode(node.getName());
+		List arguments= node.arguments();
+		if (hasChanges(arguments)) { // eval position after opening parent
+			try {
+				pos= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameLPAREN);
+				rewriteList(pos, "", arguments, false);
+			} catch (InvalidInputException e) {
+				JavaPlugin.log(e);
+			}
+		} else {
+			visitList(arguments, pos);
+		}		
+		return false;	
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SwitchCase)
 	 */
 	public boolean visit(SwitchCase node) {
-		return super.visit(node);
+		// dont allow switching from case to default or back. New statements should be created.
+		Expression expression= node.getExpression();
+		if (expression != null) {
+			rewriteRequiredNode(expression);
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SwitchStatement)
 	 */
 	public boolean visit(SwitchStatement node) {
-		return super.visit(node);
+		int pos= rewriteRequiredNode(node.getExpression());
+		
+		List statements= node.statements();
+		if (hasChanges(statements)) {
+			try {
+				pos= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameLBRACE);
+				
+				int insertIndent= getIndent(node.getStartPosition()) + 1;
+				ASTNode last= null; 
+				for (int i= 0; i < statements.size(); i++) {
+					ASTNode elem = (ASTNode) statements.get(i);
+					// non-case statements are indented with one extra indent
+					int currIndent= elem.getNodeType() == ASTNode.SWITCH_CASE ? insertIndent : insertIndent + 1;
+					last= rewriteParagraph(elem, last, pos, currIndent, false, false);
+				}
+			} catch (InvalidInputException e) {
+				JavaPlugin.log(e);
+			}
+		} else {
+			visitList(statements, pos);
+		}
+		return false;		
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SynchronizedStatement)
 	 */
 	public boolean visit(SynchronizedStatement node) {
-		return super.visit(node);
+		rewriteRequiredNode(node.getExpression());
+		rewriteRequiredNode(node.getBody());
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ThisExpression)
 	 */
 	public boolean visit(ThisExpression node) {
-		return super.visit(node);
+		Expression optExpression= node.getQualifier();
+		if (optExpression != null) {
+			rewriteOptionalQualifier(optExpression, node.getStartPosition());
+		}
+		return false;		
 	}
 
 	/* (non-Javadoc)
@@ -1617,25 +1696,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return super.visit(node);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
-	 */
-	public void postVisit(ASTNode node) {
-		TextEdit edit= getCopySourceEdit(node);
-		if (edit != null) {
-			fCurrentEdit= fCurrentEdit.getParent();
-		}
-	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
-	 */
-	public void preVisit(ASTNode node) {
-		TextEdit edit= getCopySourceEdit(node);
-		if (edit != null) {
-			fCurrentEdit.add(edit);
-			fCurrentEdit= edit;
-		}
-	}
 
 }

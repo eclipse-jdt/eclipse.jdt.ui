@@ -758,8 +758,13 @@ import org.eclipse.jdt.internal.corext.Assert;
 	 * @see ASTVisitor#visit(SwitchCase)
 	 */
 	public boolean visit(SwitchCase node) {
-		fResult.append("case ");//$NON-NLS-1$
-		node.getExpression().accept(this);
+		Expression expression= node.getExpression();
+		if (expression == null) {
+			fResult.append("default");//$NON-NLS-1$
+		} else {
+			fResult.append("case ");//$NON-NLS-1$
+			expression.accept(this);
+		}
 		fResult.append(": ");//$NON-NLS-1$
 		return false;
 	}
