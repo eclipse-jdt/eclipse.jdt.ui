@@ -3,10 +3,10 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -25,7 +25,6 @@ import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
-import org.eclipse.jdt.internal.ui.text.correction.ReplaceCorrectionProposal;
 
 public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	

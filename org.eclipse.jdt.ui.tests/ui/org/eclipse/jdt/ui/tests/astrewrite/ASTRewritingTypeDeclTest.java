@@ -430,9 +430,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);				
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
-		AST ast= astRoot.getAST();
 		
 		TypeDeclaration type= findTypeDeclaration(astRoot, "T");
 		assertTrue("Outer type not found", type != null);

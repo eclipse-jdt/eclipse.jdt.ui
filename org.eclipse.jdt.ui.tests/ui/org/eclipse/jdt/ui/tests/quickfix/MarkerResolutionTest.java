@@ -8,7 +8,6 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -17,8 +16,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -103,7 +100,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		IMarker marker= createMarker(cu, 0, 0, 7);
+		createMarker(cu, 0, 0, 7);
 		
 		IEditorPart part= EditorUtility.openInEditor(cu);
 		
@@ -145,7 +142,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		int markerPos= 8;
-		IMarker marker= createMarker(cu, 0, markerPos, 5);
+		createMarker(cu, 0, markerPos, 5);
 		
 		IEditorPart part= EditorUtility.openInEditor(cu);
 		try {

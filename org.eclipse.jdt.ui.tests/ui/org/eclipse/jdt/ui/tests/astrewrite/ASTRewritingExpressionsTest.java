@@ -1069,8 +1069,6 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
-		AST ast= astRoot.getAST();
-		
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");

@@ -26,7 +26,6 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewVariableCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
-import org.eclipse.jdt.internal.ui.text.correction.ReplaceCorrectionProposal;
 
 public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	
@@ -322,7 +321,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 6);
 		assertCorrectLabels(proposals);
 
-		boolean doField= true, doParam= true, doLocal= true, doClass= true, doInterface=true, doChange= true;
+		boolean doField= true, doParam= true, doLocal= true, doInterface= false, doClass= false, doChange= true;
 		for (int i= 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
 			if (curr instanceof NewVariableCompletionProposal) {
@@ -382,7 +381,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				assertTrue("Nothing created", newCU.exists());
 
 				if (proposal.isClass()) {
-					assertTrue("2 class proposals", doParam);
+					assertTrue("2 class proposals", doClass);
 					doClass= false;
 
 					buf= new StringBuffer();
@@ -394,7 +393,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 					assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
 					newCU.delete(true, null);
 				} else {
-					assertTrue("2 interface proposals", doParam);
+					assertTrue("2 interface proposals", doInterface);
 					doInterface= false;					
 					
 					buf= new StringBuffer();

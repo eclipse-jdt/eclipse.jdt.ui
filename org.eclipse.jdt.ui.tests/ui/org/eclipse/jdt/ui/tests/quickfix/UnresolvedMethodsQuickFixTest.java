@@ -21,11 +21,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
-import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewMethodCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.NewVariableCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
 
 public class UnresolvedMethodsQuickFixTest extends QuickFixTest {

@@ -1057,7 +1057,6 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
-		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
 		{ 
