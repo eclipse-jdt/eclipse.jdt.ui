@@ -224,6 +224,7 @@
 		name="%NewJavaClass.label"
 		class="org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard"
 		category="org.eclipse.jdt.ui.java"
+		javatype="true"
 		icon="icons/full/ctool16/newclass_wiz.gif">
 		<description>%NewJavaClass.description</description>
 	</wizard>
@@ -232,6 +233,7 @@
 		name="%NewJavaInterface.label"
 		class="org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard"
 		category="org.eclipse.jdt.ui.java"
+		javatype="true"		
 		icon="icons/full/ctool16/newint_wiz.gif">
 		<description>%NewJavaInterface.description</description>
 	</wizard>
@@ -443,24 +445,21 @@
         label="%JavaElementCreationActionSet.label"
 		visible="false"
 		description="%JavaElementCreationActionSet.description">
+		<action id="org.eclipse.jdt.ui.actions.NewTypeDropDown"	
+			toolbarPath="Normal/JavaWizards"			
+			label="%OpenClassWizardAction.label"
+            pulldown="true"
+			tooltip="%OpenClassWizardAction.tooltip"
+			icon="icons/full/etool16/newclass_wiz.gif"
+            disabledIcon="icons/full/dtool16/newclass_wiz.gif"
+            hoverIcon="icons/full/ctool16/newclass_wiz.gif"			
+			class="org.eclipse.jdt.internal.ui.wizards.NewTypeDropDownAction"/>
 		<action id="org.eclipse.jdt.ui.actions.OpenSnippetWizard"	
 			toolbarPath="Normal/JavaWizards"			
 			label="%OpenSnippetWizardAction.label"
 			tooltip="%OpenSnippetWizardAction.tooltip"
 			icon="icons/full/ctool16/newsbook_wiz.gif"
 			class="org.eclipse.jdt.internal.ui.wizards.OpenSnippetWizardAction"/>			
-		<action id="org.eclipse.jdt.ui.actions.OpenInterfaceWizard"	
-			toolbarPath="Normal/JavaWizards"			
-			label="%OpenInterfaceWizardAction.label"
-			tooltip="%OpenInterfaceWizardAction.tooltip"
-			icon="icons/full/ctool16/newint_wiz.gif"
-			class="org.eclipse.jdt.internal.ui.wizards.OpenInterfaceWizardAction"/>
-		<action id="org.eclipse.jdt.ui.actions.OpenClassWizard"	
-			toolbarPath="Normal/JavaWizards"			
-			label="%OpenClassWizardAction.label"
-			tooltip="%OpenClassWizardAction.tooltip"
-			icon="icons/full/ctool16/newclass_wiz.gif"
-			class="org.eclipse.jdt.internal.ui.wizards.OpenClassWizardAction"/>
 		<action id="org.eclipse.jdt.ui.actions.OpenPackageWizard"	
 			toolbarPath="Normal/JavaWizards"			
 			label="%OpenPackageWizardAction.label"

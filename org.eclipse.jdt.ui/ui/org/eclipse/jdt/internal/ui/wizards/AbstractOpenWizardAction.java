@@ -18,6 +18,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -31,6 +32,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public abstract class AbstractOpenWizardAction extends Action implements IWorkbenchWindowActionDelegate {
@@ -112,7 +114,7 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 	 * Creates the specific wizard.
 	 * (to be implemented by a subclass)
 	 */
-	abstract protected Wizard createWizard();
+	abstract protected Wizard createWizard() throws CoreException;
 
 
 	protected IStructuredSelection getCurrentSelection() {
@@ -137,19 +139,25 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		if (!checkWorkspaceNotEmpty()) {
 			return;
 		}
-		
-		Wizard wizard= createWizard();
-		if (wizard instanceof IWorkbenchWizard) {
-			((IWorkbenchWizard)wizard).init(getWorkbench(), getCurrentSelection());
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		try {
+			Wizard wizard= createWizard();
+			if (wizard instanceof IWorkbenchWizard) {
+				((IWorkbenchWizard)wizard).init(getWorkbench(), getCurrentSelection());
+			}
+			
+			WizardDialog dialog= new WizardDialog(shell, wizard);
+			PixelConverter converter= new PixelConverter(JavaPlugin.getActiveWorkbenchShell());
+			
+			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
+			dialog.create();
+			dialog.getShell().setText(NewWizardMessages.getString("AbstractOpenWizardAction.title")); //$NON-NLS-1$
+			dialog.open();
+		} catch (CoreException e) {
+			String title= NewWizardMessages.getString("AbstractOpenWizardAction.createerror.title");
+			String message= NewWizardMessages.getString("AbstractOpenWizardAction.createerror.message");
+			ExceptionHandler.handle(e, shell, title, message);
 		}
-		
-		WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
-		PixelConverter converter= new PixelConverter(JavaPlugin.getActiveWorkbenchShell());
-		
-		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
-		dialog.create();
-		dialog.getShell().setText(NewWizardMessages.getString("AbstractOpenWizardAction.title")); //$NON-NLS-1$
-		dialog.open();
 	}
 	
 	/**

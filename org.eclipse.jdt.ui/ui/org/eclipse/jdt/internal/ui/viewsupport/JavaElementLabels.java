@@ -271,7 +271,7 @@ public class JavaElementLabels {
 	 * Returns the label for a Java element. Flags as defined above.
 	 */
 	public static String getElementLabel(IJavaElement element, int flags) {
-		StringBuffer buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer(60);
 		getElementLabel(element, flags, buf);
 		return buf.toString();
 	}
