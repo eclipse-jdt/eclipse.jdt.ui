@@ -236,7 +236,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				private final RefactoringStatus fStatus;
 				private final Expression fNewLocation;
 				private final ICompilationUnit fNewLocationCU;
-				private final Expression fInitializer3;
+				private final Expression fInitializer3;//use name other than fInitializer to avoid hiding
 				
 				private List fQualifications= new ArrayList();
 				private boolean fCanBePrepared= true;
@@ -433,7 +433,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 // ---- End InlineTargetCompilationUnit.InitializerExpressionRelocationPreparer.InitializerTraversal											
 			
-			private final Expression fInitializer2;
+			private final Expression fInitializer2;//use name other than fInitializer to avoid hiding
 			private final ICompilationUnit fInitializerCU;
 			private final Expression fLocation;
 			private final ICompilationUnit fLocationCU;
