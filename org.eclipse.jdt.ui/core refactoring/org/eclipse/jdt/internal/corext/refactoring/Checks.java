@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.AST;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -66,11 +67,11 @@ public class Checks {
 		if (! newMethodName.equals(newTypeName))
 			return null;
 		else
-			return RefactoringStatus.createWarningStatus("If you proceed, then the method " 
-									+ method.getElementName()
-									+ " in " 
+			return RefactoringStatus.createWarningStatus("If you proceed, the method " 
+									+ JavaElementUtil.createMethodSignature(method)
+									+ " in \'" 
 									+ method.getDeclaringType().getFullyQualifiedName()
-									+ " will have a constructor name.");	
+									+ "\' will have a constructor name.");	
 	}
 		
 	/**
