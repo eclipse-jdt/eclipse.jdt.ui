@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
@@ -422,7 +423,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 		
 		NameConventionInputDialog dialog= new NameConventionInputDialog(getShell(), title, message, entry);
-		if (dialog.open() == TodoTaskInputDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			fNameConventionList.replaceElement(entry, dialog.getResult());
 		}
 	}		
