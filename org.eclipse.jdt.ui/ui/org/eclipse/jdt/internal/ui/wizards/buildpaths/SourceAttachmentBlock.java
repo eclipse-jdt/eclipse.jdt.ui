@@ -305,7 +305,7 @@ public class SourceAttachmentBlock {
 		if (field == fFileNameField) {
 			fNameStatus= updateFileNameStatus();
 		} else if (field == fInternalButtonField) {
-			IPath jarFilePath= chooseInternalJarFile(fFileNameField.getText());
+			IPath jarFilePath= chooseInternalJarFile();
 			if (jarFilePath != null) {
 				fFileNameField.setText(jarFilePath.toString());
 			}
@@ -516,7 +516,9 @@ public class SourceAttachmentBlock {
 	/*
 	 * Opens a dialog to choose an internal jar.
 	 */	
-	private IPath chooseInternalJarFile(String initSelection) {
+	private IPath chooseInternalJarFile() {
+		String initSelection= fFileNameField.getText();
+		
 		Class[] acceptedClasses= new Class[] { IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 	
@@ -525,7 +527,10 @@ public class SourceAttachmentBlock {
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 
-		IResource initSel= fRoot.findMember(new Path(initSelection));
+		IResource initSel= null;
+		if (initSelection.length() > 0) {
+			initSel= fRoot.findMember(new Path(initSelection));
+		}
 		if (initSel == null) {
 			initSel= fRoot.findMember(fJARPath);
 		}
