@@ -30,6 +30,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Formatting strategy for java source code.
@@ -87,26 +88,35 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 		try {
 			//TODO rewrite using the edit API (CodeFormatterUtil.format2)
 			
-			// reshape the partition to get around some peculiarities of the formatter
-			Position toFormat= new Position(partition.offset, partition.length);
-			stripLeadingWS(document, toFormat);
-			stripTrailingWS(document, toFormat, partition);
-			
-			IDocument formattedDoc= new Document(CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, document.get(), toFormat.offset, toFormat.length, indent, positions, TextUtilities.getDefaultLineDelimiter(document), preferences));
-			
-			int leadingEmptyLines= document.getNumberOfLines(partition.offset, toFormat.offset - partition.offset) - 1; // getNumberOfLines is one-based
-			int trailingEmptyLines= document.getNumberOfLines(toFormat.offset + toFormat.length, partition.offset + partition.length - (toFormat.offset + toFormat.length)) - 1;
-			int from= getLeadingWSOffset(leadingEmptyLines, formattedDoc);
-			int to= getTrailingWSOffset(trailingEmptyLines, formattedDoc);
-			String formatted= formattedDoc.get(from, to - from);
-
-			final String raw= document.get(partition.getOffset(), partition.getLength());
-			if (formatted != null && !formatted.equals(raw))
-				document.replace(partition.getOffset(), partition.getLength(), formatted);
-
+			if (CodeFormatterUtil.useOldFormatter()) {
+				
+				final String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, document.get(), partition.getOffset(), partition.getLength(), indent, positions, TextUtilities.getDefaultLineDelimiter(document), preferences);
+				final String raw= document.get(partition.getOffset(), partition.getLength());
+				if (formatted != null && !formatted.equals(raw))
+					document.replace(partition.getOffset(), partition.getLength(), formatted);
+				
+			} else {
+				
+				// reshape the partition to get around some peculiarities of the formatter
+				Position toFormat= new Position(partition.offset, partition.length);
+				stripLeadingWS(document, toFormat);
+				stripTrailingWS(document, toFormat, partition);
+				
+				IDocument formattedDoc= new Document(CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, document.get(), toFormat.offset, toFormat.length, indent, positions, TextUtilities.getDefaultLineDelimiter(document), preferences));
+				
+				int leadingEmptyLines= document.getNumberOfLines(partition.offset, toFormat.offset - partition.offset) - 1; // getNumberOfLines is one-based
+				int trailingEmptyLines= document.getNumberOfLines(toFormat.offset + toFormat.length, partition.offset + partition.length - (toFormat.offset + toFormat.length)) - 1;
+				int from= getLeadingWSOffset(leadingEmptyLines, formattedDoc);
+				int to= getTrailingWSOffset(trailingEmptyLines, formattedDoc);
+				String formatted= formattedDoc.get(from, to - from);
+				
+				final String raw= document.get(partition.getOffset(), partition.getLength());
+				if (formatted != null && !formatted.equals(raw))
+					document.replace(partition.getOffset(), partition.getLength(), formatted);
+			}
 		} catch (BadLocationException exception) {
-			// Can not happen
-			Assert.isTrue(false);
+			// Can only happen on concurrent document modification - log and bail out
+			JavaPlugin.log(exception);
 		}
 	}
 
