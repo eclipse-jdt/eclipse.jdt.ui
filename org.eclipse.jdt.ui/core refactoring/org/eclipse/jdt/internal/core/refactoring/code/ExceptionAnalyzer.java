@@ -3,24 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.code;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
-
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Argument;
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
-import org.eclipse.jdt.internal.compiler.ast.TryStatement;
-import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
-import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
-
+
+import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Stack;import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;import org.eclipse.jdt.internal.compiler.ast.Argument;import org.eclipse.jdt.internal.compiler.ast.MessageSend;import org.eclipse.jdt.internal.compiler.ast.TryStatement;import org.eclipse.jdt.internal.compiler.ast.TypeReference;import org.eclipse.jdt.internal.compiler.lookup.BlockScope;import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;import org.eclipse.jdt.internal.compiler.lookup.Scope;import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 /* package */ class ExceptionAnalyzer {
 
 	private List fCurrentExceptions;

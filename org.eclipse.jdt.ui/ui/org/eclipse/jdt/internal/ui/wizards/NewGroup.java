@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.internal.ui.util.PortingFinder;
 
 public class NewGroup extends ContextMenuGroup {
 	

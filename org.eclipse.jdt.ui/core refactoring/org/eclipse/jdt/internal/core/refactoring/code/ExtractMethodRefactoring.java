@@ -3,7 +3,7 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.code;
-
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -32,10 +32,6 @@ import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
- * [ToDo:
- *   - Exceptions         (waiting for 1GBWRMY)
- *   - break statements   (waiting for 1GBWRMY)
- * ]
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
  * and expected to change significantly before reaching stability. It is being made available at 

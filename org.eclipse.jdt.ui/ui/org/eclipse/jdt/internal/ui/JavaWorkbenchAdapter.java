@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.util.ArrayUtility;
-import org.eclipse.jdt.internal.ui.util.JdtPortingFinder;
 
 /**
  * An imlementation of the IWorkbenchAdapter for IJavaElements.
@@ -34,7 +33,7 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 	}
 
 	public ImageDescriptor getImageDescriptor(Object object) {
-		JdtPortingFinder.toBeDone("1G5XYUD: ITPUI:WIN2000 - DCR - Need a generic way to access the label and image of an element");
+		// XXX: 1G5XYUD: ITPUI:WIN2000 - DCR - Need a generic way to access the label and image of an element
 		return null;
 	}
 
