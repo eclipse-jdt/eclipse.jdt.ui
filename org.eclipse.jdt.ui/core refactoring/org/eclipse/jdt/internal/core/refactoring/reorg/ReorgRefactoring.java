@@ -168,6 +168,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		Assert.isNotNull(fDestination, "destination not specified");
 		pm.beginTask("", fElements.size());
 		try{
 			CompositeChange composite= new CompositeChange("reorganize elements", fElements.size());
@@ -591,7 +592,6 @@ public abstract class ReorgRefactoring extends Refactoring {
 	 */
 	private static IPackageFragmentRoot getDestinationAsPackageFragmentRoot(IJavaProject project) throws JavaModelException {
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		IPackageFragmentRoot result= null;
 		for (int i= 0; i < roots.length; i++) {
 			if (! roots[i].isArchive()) {
 				if (roots[i].getUnderlyingResource() instanceof IProject)
