@@ -117,12 +117,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private final String[][] fAppearanceColorListModel= new String[][] {
-		{PreferencesMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), ExtendedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), ExtendedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColor2"), ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), ExtendedTextEditorPreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), ExtendedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColor2"), ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR, null}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.selectionForegroundColor"), ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.selectionBackgroundColor"), ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR}, //$NON-NLS-1$
 	};
 	
 	private final String[][] fAnnotationColorListModel;
@@ -181,6 +183,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private List fAnnotationList;
 	private ColorEditor fSyntaxForegroundColorEditor;
 	private ColorEditor fAppearanceColorEditor;
+	private Button fAppearanceColorDefault;
 	private ColorEditor fAnnotationForegroundColorEditor;
 	private ColorEditor fContentAssistColorEditor;
 	private ColorEditor fBackgroundColorEditor;
@@ -245,6 +248,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BACKGROUND_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR));
+
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR));
+
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR));
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH));
 		
@@ -402,6 +411,20 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		String key= fAppearanceColorListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
 		fAppearanceColorEditor.setColorValue(rgb);		
+		updateAppearanceColorWidgets(fAppearanceColorListModel[i][2]);
+	}
+
+	private void updateAppearanceColorWidgets(String systemDefaultKey) {
+		if (systemDefaultKey == null) {
+			fAppearanceColorDefault.setSelection(false);
+			fAppearanceColorDefault.setVisible(false);
+			fAppearanceColorEditor.getButton().setEnabled(true);
+		} else {
+			boolean systemDefault= fOverlayStore.getBoolean(systemDefaultKey);
+			fAppearanceColorDefault.setSelection(systemDefault);
+			fAppearanceColorDefault.setVisible(true);
+			fAppearanceColorEditor.getButton().setEnabled(!systemDefault);
+		}
 	}
 
 	private void handleContentAssistColorListSelection() {	
@@ -708,6 +731,28 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		gd.horizontalAlignment= GridData.BEGINNING;
 		foregroundColorButton.setLayoutData(gd);
 
+		SelectionListener colorDefaultSelectionListener= new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean systemDefault= fAppearanceColorDefault.getSelection();
+				fAppearanceColorEditor.getButton().setEnabled(!systemDefault);
+				
+				int i= fAppearanceColorList.getSelectionIndex();
+				String key= fAppearanceColorListModel[i][2];
+				if (key != null)
+					fOverlayStore.setValue(key, systemDefault);
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		};
+		
+		fAppearanceColorDefault= new Button(stylesComposite, SWT.CHECK);
+		fAppearanceColorDefault.setText(PreferencesMessages.getString("JavaEditorPreferencePage.systemDefault")); //$NON-NLS-1$
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		gd.horizontalSpan= 2;
+		fAppearanceColorDefault.setLayoutData(gd);
+		fAppearanceColorDefault.setVisible(false);
+		fAppearanceColorDefault.addSelectionListener(colorDefaultSelectionListener);
+		
 		fAppearanceColorList.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -1473,6 +1518,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			RGB rgb= getControl().getDisplay().getSystemColor(SWT.COLOR_LIST_FOREGROUND).getRGB();
 			PreferenceConverter.setDefault(fOverlayStore, PreferenceConstants.EDITOR_FOREGROUND_COLOR, rgb);
 			PreferenceConverter.setDefault(getPreferenceStore(), PreferenceConstants.EDITOR_FOREGROUND_COLOR, rgb);
+		}
+		if (!getPreferenceStore().contains(ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR)) {
+			RGB rgb= getControl().getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION).getRGB();
+			PreferenceConverter.setDefault(fOverlayStore, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, rgb);
+			PreferenceConverter.setDefault(getPreferenceStore(), ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, rgb);
+		}
+		if (!getPreferenceStore().contains(ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR)) {
+			RGB rgb= getControl().getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION_TEXT).getRGB();
+			PreferenceConverter.setDefault(fOverlayStore, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, rgb);
+			PreferenceConverter.setDefault(getPreferenceStore(), ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, rgb);
 		}
 	}
 	
