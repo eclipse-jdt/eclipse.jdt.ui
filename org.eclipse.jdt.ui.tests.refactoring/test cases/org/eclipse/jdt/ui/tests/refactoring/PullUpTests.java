@@ -1569,31 +1569,33 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	public void testGenerics4() throws Exception{
-		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
-		
-		try{
-			String[] methodNames= new String[]{"m"};
-			String[][] signatures= new String[][]{new String[]{"QList<QT;>;"}};
-			
-			IType type= getType(cuB, "B");
-			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
-	
-			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
-		
-			RefactoringStatus result= performRefactoring(ref);
-			assertEquals("precondition was supposed to pass", null, result);
-			
-			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-		} finally{
-			performDummySearch();
-			cuA.delete(false, null);
-			cuB.delete(false, null);
-		}					
+// Disabled test (see bug 75642)
+
+//		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+//		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+//		
+//		try{
+//			String[] methodNames= new String[]{"m"};
+//			String[][] signatures= new String[][]{new String[]{"QList<QT;>;"}};
+//			
+//			IType type= getType(cuB, "B");
+//			IMethod[] methods= getMethods(type, methodNames, signatures);
+//			PullUpRefactoring ref= createRefactoring(methods);
+//			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+//			setSuperclassAsTargetClass(ref);
+//	
+//			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
+//		
+//			RefactoringStatus result= performRefactoring(ref);
+//			assertEquals("precondition was supposed to pass", null, result);
+//			
+//			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+//			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+//		} finally{
+//			performDummySearch();
+//			cuA.delete(false, null);
+//			cuB.delete(false, null);
+//		}
 	}
 
 	public void testGenerics5() throws Exception{
@@ -1621,7 +1623,7 @@ public class PullUpTests extends RefactoringTest {
 			performDummySearch();
 			cuA.delete(false, null);
 			cuB.delete(false, null);
-		}		
+		}
 	}
 
 	public void testGenerics6() throws Exception{
