@@ -89,7 +89,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 			if (newHitCount != -1) {				
 				try {
 					((IJavaLineBreakpoint)breakpoint).setHitCount(newHitCount);
-					breakpoint.enable();
+					breakpoint.setEnabled(true);
 				} catch (CoreException ce) {
 					DebugUIUtils.logError(ce);
 				}

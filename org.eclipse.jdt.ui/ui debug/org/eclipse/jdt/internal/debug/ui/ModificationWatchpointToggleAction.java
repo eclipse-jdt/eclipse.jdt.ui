@@ -16,7 +16,7 @@ public class ModificationWatchpointToggleAction extends WatchpointAction {
 	 * @see WatchpointAction#doAction(IMarker)
 	 */
 	public void doAction(IJavaWatchpoint watchpoint) throws CoreException {
-		watchpoint.toggleModification();
+		watchpoint.setModification(!watchpoint.isModification());
 	}
 
 }

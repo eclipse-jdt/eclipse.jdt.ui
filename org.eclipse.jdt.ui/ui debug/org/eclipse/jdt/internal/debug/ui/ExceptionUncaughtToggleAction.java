@@ -16,7 +16,7 @@ public class ExceptionUncaughtToggleAction extends ExceptionAction {
 	 * @see ExceptionException
 	 */
 	public void doAction(IJavaExceptionBreakpoint exception) throws CoreException {
-		exception.toggleUncaught();
+		exception.setUncaught(!exception.isUncaught());
 	}
 
 	/**

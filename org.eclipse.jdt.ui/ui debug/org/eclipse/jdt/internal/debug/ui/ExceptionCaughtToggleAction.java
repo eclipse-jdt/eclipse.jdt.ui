@@ -23,7 +23,7 @@ public class ExceptionCaughtToggleAction extends ExceptionAction {
 	 * @see ExceptionAction
 	 */
 	public void doAction(IJavaExceptionBreakpoint exception) throws CoreException {
-		exception.toggleCaught();
+		exception.setCaught(!exception.isCaught());
 	}
 
 }

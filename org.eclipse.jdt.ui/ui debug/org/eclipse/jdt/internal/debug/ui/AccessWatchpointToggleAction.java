@@ -16,7 +16,7 @@ public class AccessWatchpointToggleAction extends WatchpointAction {
 	 * @see WatchpointAction#doAction(IMarker)
 	 */
 	public void doAction(IJavaWatchpoint watchpoint) throws CoreException {
-		watchpoint.toggleAccess();
+		watchpoint.setAccess(!watchpoint.isAccess());
 	}
 
 }
