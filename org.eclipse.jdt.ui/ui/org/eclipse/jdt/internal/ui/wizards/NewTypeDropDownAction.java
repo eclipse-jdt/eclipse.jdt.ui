@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  *         id="xx.MyWizard">
  *         <class class="org.xx.MyWizard">
  *             <parameter name="javatype" value="true"/>
- *         </class> <!-- bug 48164 for wrong pde compiler warnings --> 
+ *         </class> 
  *         <description>
  *             My Type Wizard
  *         </description>
