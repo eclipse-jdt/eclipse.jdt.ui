@@ -505,7 +505,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fNumberOfImportsAdded= 0;
 		
 		fParsingError= null;
-		fASTRoot= AST.parseCompilationUnit(impStructure.getCompilationUnit(), true, null, null);
+		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		parser.setSource(impStructure.getCompilationUnit());
+		parser.setResolveBindings(true);
+		fASTRoot= (CompilationUnit) parser.createAST(null);
 	}
 	
 	public OrganizeImportsOperation(ICompilationUnit cu, String[] importOrder, int importThreshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException {
