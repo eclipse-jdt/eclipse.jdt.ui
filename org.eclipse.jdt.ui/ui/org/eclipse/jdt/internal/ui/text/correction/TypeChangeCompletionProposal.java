@@ -35,7 +35,6 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 		fNewType= newType;
 		fOfferSuperTypeProposals= offerSuperTypeProposals;
 		
-		
 		if (binding.getKind() == IBinding.VARIABLE) {
 			String[] args= { binding.getName(), newType.getName() };
 			if (((IVariableBinding) binding).isField()) {
@@ -75,24 +74,44 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
 				rewrite.set(methodDecl, MethodDeclaration.RETURN_TYPE_PROPERTY, type, null);
+				rewrite.set(methodDecl, MethodDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 			} else if (declNode instanceof VariableDeclarationFragment) {
 				ASTNode parent= declNode.getParent();
 				if (parent instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) parent;
-					rewrite.set(fieldDecl, FieldDeclaration.TYPE_PROPERTY, type, null);
+					if (fieldDecl.fragments().size() > 1 && (fieldDecl.getParent() instanceof TypeDeclaration)) { // split
+						VariableDeclarationFragment placeholder= (VariableDeclarationFragment) rewrite.createMoveTarget(declNode);
+						FieldDeclaration newField= ast.newFieldDeclaration(placeholder);
+						newField.setType(type);
+						rewrite.getListRewrite(fieldDecl.getParent(), TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAfter(newField, parent, null);
+					} else {
+						rewrite.set(fieldDecl, FieldDeclaration.TYPE_PROPERTY, type, null);
+						rewrite.set(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
+					}
 				} else if (parent instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
-					
-					rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, type, null);
+					if (varDecl.fragments().size() > 1 && (varDecl.getParent() instanceof Block)) { // split
+						VariableDeclarationFragment placeholder= (VariableDeclarationFragment) rewrite.createMoveTarget(declNode);
+						VariableDeclarationStatement newStat= ast.newVariableDeclarationStatement(placeholder);
+						newStat.setType(type);
+						rewrite.getListRewrite(varDecl.getParent(), Block.STATEMENTS_PROPERTY).insertAfter(newStat, parent, null);
+					} else {
+						rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, type, null);
+						rewrite.set(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
+					}
 				} else if (parent instanceof VariableDeclarationExpression) {
 					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
 					
 					rewrite.set(varDecl, VariableDeclarationExpression.TYPE_PROPERTY, type, null);
+					rewrite.set(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
 				rewrite.set(variableDeclaration, SingleVariableDeclaration.TYPE_PROPERTY, type, null);
+				rewrite.set(variableDeclaration, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 			}
+			
+			// set up linked mode
 			final String KEY_TYPE= "type"; //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(type), true, KEY_TYPE);
 			if (fOfferSuperTypeProposals) {
