@@ -17,6 +17,7 @@ import org.eclipse.jdt.astview.ASTViewImages;
 import org.eclipse.jdt.astview.ASTViewPlugin;
 import org.eclipse.jdt.astview.EditorUtility;
 import org.eclipse.jdt.astview.NodeFinder;
+import org.eclipse.jdt.astview.TreeInfoCollector;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
@@ -299,10 +300,7 @@ public class ASTView extends ViewPart {
 			if (root == null) {
 				throw new CoreException(getErrorStatus("Could not create AST", null)); //$NON-NLS-1$
 			}
-			String msg= "{0} ({1}). Creation time: {2,number} ms"; //$NON-NLS-1$
-			String version= astLevel == AST.JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
-			Object[] args= { ((IJavaElement) input).getElementName(), version, new Long(endTime - startTime) };
-			setContentDescription(MessageFormat.format(msg, args));
+			updateContentDescription((IJavaElement) input, root, endTime - startTime);
 			
 			fViewer.setInput(root);
 			setASTUptoDate(true);
@@ -320,6 +318,16 @@ public class ASTView extends ViewPart {
 		}
 	}
 	
+	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
+		String version= root.getAST().apiLevel() == AST.JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
+		TreeInfoCollector collector= new TreeInfoCollector(root);
+
+		String msg= "{0} ({1}).  Creation time: {2,number} ms.  Size: {3,number} nodes, {4,number} bytes (bindings not included)."; //$NON-NLS-1$
+		Object[] args= { element.getElementName(), version, new Long(time),  new Integer(collector.getNumberOfNodes()), new Integer(collector.getSize())};
+		setContentDescription(MessageFormat.format(msg, args));
+
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
