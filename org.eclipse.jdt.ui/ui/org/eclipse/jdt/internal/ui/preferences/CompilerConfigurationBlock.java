@@ -93,6 +93,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_DUPLICATE_RESOURCE= JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE;
 	private static final String PREF_PB_INCOMPATIBLE_INTERFACE_METHOD= JavaCore.COMPILER_PB_INCOMPATIBLE_NON_INHERITED_INTERFACE_METHOD;
 
+	private static final String PREF_PB_UNDOCUMENTED_EMPTY_BLOCK= JavaCore.COMPILER_PB_UNDOCUMENTED_EMPTY_BLOCK;
+	private static final String PREF_PB_FINALLY_BLOCK_NOT_COMPLETING= JavaCore.COMPILER_PB_FINALLY_BLOCK_NOT_COMPLETING;
+	private static final String PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION= JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION;
+	private static final String PREF_PB_UNQUALIFIED_FIELD_ACCESS= JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS;
+	
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
 
 	// values
@@ -148,7 +153,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, PREF_PB_LOCAL_VARIABLE_HIDING, PREF_PB_FIELD_HIDING,
 		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_PB_INDIRECT_STATIC_ACCESS,
 		PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
-		PREF_PB_UNNECESSARY_TYPE_CHECK
+		PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
+		PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING
+		
 	};	
 	
 	protected String[] getAllKeys() {
@@ -255,7 +262,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_accidential_assignement.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_finally_block_not_completing.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_undocumented_empty_block.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
 		return composite;
 	}
 
@@ -307,7 +319,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_char_array_in_concat.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_CHAR_ARRAY_IN_CONCAT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-				
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unqualified_field_access.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_UNQUALIFIED_FIELD_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		
 		gd= new GridData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(6);
 		
@@ -377,7 +392,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unnecessary_type_check.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNNECESSARY_TYPE_CHECK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-	
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_throwing_exception.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
 		return composite;
 	}
 
