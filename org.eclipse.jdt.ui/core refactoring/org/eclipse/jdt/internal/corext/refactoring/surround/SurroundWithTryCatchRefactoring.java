@@ -231,7 +231,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			return fStatementsOfSelectedNode;
 			
 		if (fRewriter.isCollapsed(fSelectedNode)) {
-			fStatementsOfSelectedNode= ((Block) fSelectedNode).statements();; 	
+			fStatementsOfSelectedNode= ((Block) fSelectedNode).statements();
 		} else {
 			fStatementsOfSelectedNode= ASTNodes.getContainingList(fSelectedNode);
 			if (fStatementsOfSelectedNode == null) {
