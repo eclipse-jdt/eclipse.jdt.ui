@@ -13,11 +13,22 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -31,16 +42,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -83,6 +84,7 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.ui.editors.text.IStorageDocumentProvider;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
@@ -124,10 +126,11 @@ import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
-import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
+import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
+
+
 
 /**
  * Java specific text editor.
@@ -357,16 +360,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				return false;
 			return super.requestWidgetToken(requester);
 		}
-
 		/*
 		 * @see org.eclipse.jface.text.source.ISourceViewer#configure(org.eclipse.jface.text.source.SourceViewerConfiguration)
 		 */
 		public void configure(SourceViewerConfiguration configuration) {
 			super.configure(configuration);
 			prependAutoEditStrategy(new SmartBracesAutoEditStrategy(this), IDocument.DEFAULT_CONTENT_TYPE);
-		}
-
-	};
+		}	};
 	
 	static class TabConverter implements ITextConverter {
 		
@@ -823,6 +823,15 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	/*
+	 * @see AbstractTextEditor#doSaveAs
+	 */
+	public void doSaveAs() {
+		if (askIfNonWorkbenchEncodingIsOk()) {
+			super.doSaveAs();
+		}
+	}
+
+	/*
 	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor progressMonitor) {
@@ -832,7 +841,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			// editor has been closed
 			return;
 		}
-			
+
+		if (!askIfNonWorkbenchEncodingIsOk()) {
+			progressMonitor.setCanceled(true);
+			return;
+		}
+					
 		if (p.isDeleted(getEditorInput())) {
 			
 			if (isSaveAsAllowed()) {
@@ -868,6 +882,31 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			} else 
 				performSaveOperation(createSaveOperation(false), progressMonitor);
 		}
+	}
+
+	/**
+	 * Asks the user if it is ok to store in non-workbench encoding.
+	 * @return <true> if the user wants to continue
+	 */
+	private boolean askIfNonWorkbenchEncodingIsOk() {
+		IDocumentProvider provider= getDocumentProvider();
+		if (provider instanceof IStorageDocumentProvider) {
+			IEditorInput input= getEditorInput();
+			IStorageDocumentProvider storageProvider= (IStorageDocumentProvider)provider;
+			String encoding= storageProvider.getEncoding(input);
+			String defaultEncoding= storageProvider.getDefaultEncoding();
+			if (encoding != null && !encoding.equals(defaultEncoding)) {
+				Shell shell= getSite().getShell();
+				String title= JavaEditorMessages.getString("CompilationUnitEditor.warning.save.nonWorkbenchEncoding.title"); //$NON-NLS-1$
+				String msg;
+				if (input != null)
+					msg= MessageFormat.format(JavaEditorMessages.getString("CompilationUnitEditor.warning.save.nonWorkbenchEncoding.message1"), new String[] {input.getName(), encoding});//$NON-NLS-1$
+				else
+					msg= MessageFormat.format(JavaEditorMessages.getString("CompilationUnitEditor.warning.save.nonWorkbenchEncoding.message2"), new String[] {encoding});//$NON-NLS-1$
+				return MessageDialog.openQuestion(shell, title, msg);
+			}
+		}
+		return true;
 	}
 	
 	/**
@@ -1550,6 +1589,22 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fCloseStrings= enabled;
 		}
 
+		private boolean hasIdentifierToTheRight(IDocument document, int offset) {
+			try {
+				int end= offset;
+				IRegion endLine= document.getLineInformationOfOffset(end);
+				int maxEnd= endLine.getOffset() + endLine.getLength();
+				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
+					++end;
+
+				return end != maxEnd && Character.isJavaIdentifierPart(document.getChar(end));
+
+			} catch (BadLocationException e) {
+				// be conservative
+				return true;
+			}
+		}
+
 		private boolean hasIdentifierToTheLeft(IDocument document, int offset) {
 			try {
 				int start= offset;
@@ -1561,22 +1616,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				return start != minStart && Character.isJavaIdentifierPart(document.getChar(start - 1));
 
 			} catch (BadLocationException e) {
-				return true;
-			}			
-		}
-
-		private boolean hasIdentifierToTheRight(IDocument document, int offset) {
-			try {
-				int end= offset;
-				IRegion endLine= document.getLineInformationOfOffset(end);
-				int maxEnd= endLine.getOffset() + endLine.getLength();
-				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
-					++end;
-				
-				return end != maxEnd && Character.isJavaIdentifierPart(document.getChar(end));
-
-			} catch (BadLocationException e) {
-				// be conservative
 				return true;
 			}			
 		}
@@ -1620,11 +1659,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				// fall through
 
 			case '[':
-				if (!fCloseBrackets)
-					return;
-				if (hasIdentifierToTheRight(document, offset + length))
-					return;
-
+					if (!fCloseBrackets)
+						return;
+ 					if (hasIdentifierToTheRight(document, offset + length))
+ 						return;
+			
 				// fall through
 			
 			case '"':

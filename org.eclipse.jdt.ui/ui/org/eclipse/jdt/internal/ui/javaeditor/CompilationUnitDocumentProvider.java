@@ -19,13 +19,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -35,6 +28,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
@@ -76,9 +76,9 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -861,6 +861,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				CompilationUnitInfo info= new CompilationUnitInfo(a.getDocument(), m, f, c);
 				info.setModificationStamp(computeModificationStamp(input.getFile()));
 				info.fStatus= a.getStatus();
+				info.fEncoding= getPersistedEncoding(input);
 				
 				if (r instanceof IProblemRequestorExtension) {
 					IProblemRequestorExtension extension= (IProblemRequestorExtension) r;
@@ -1075,7 +1076,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (element instanceof IFileEditorInput) {
 			IFileEditorInput input= (IFileEditorInput) element;
 			try {
-				InputStream stream= new ByteArrayInputStream(document.get().getBytes(ResourcesPlugin.getEncoding()));
+				String encoding= getEncoding(element);
+				if (encoding == null)
+					encoding= ResourcesPlugin.getEncoding();
+				InputStream stream= new ByteArrayInputStream(document.get().getBytes(encoding));
 				IFile file= input.getFile();
 				file.setContents(stream, overwrite, true, monitor);
 			} catch (IOException x)  {

@@ -259,15 +259,18 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			
 			IDocument d= createDocument(input);
 			IAnnotationModel m= createClassFileAnnotationModel(input);
-			
+
 			if (external != null) {
 				ClassFileInfo info= new ClassFileInfo(d, m,  (_FileSynchronizer) null);
 				info.fModificationStamp= computeModificationStamp(external.getFile());
+				((StorageInfo)info).fEncoding= getPersistedEncoding(element);
 				return info;
 			} else if (input instanceof InternalClassFileEditorInput) {
 				ClassFileSynchronizer s= new ClassFileSynchronizer(input);
 				s.install();
-				return new ClassFileInfo(d, m, s);			
+				ClassFileInfo info= new ClassFileInfo(d, m, s);
+				((StorageInfo)info).fEncoding= getPersistedEncoding(element);
+				return info;
 			}
 		}
 		
