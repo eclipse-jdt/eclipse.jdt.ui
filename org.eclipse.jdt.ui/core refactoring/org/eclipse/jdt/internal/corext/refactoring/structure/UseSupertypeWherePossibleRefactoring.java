@@ -39,12 +39,14 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	private IType fSuperTypeToUse;
 	private IType[] fSuperTypes;
 	private boolean fUseSupertypeInInstanceOf;
+    private CodeGenerationSettings fCodeGenerationSettings;
 	
 	private UseSupertypeWherePossibleRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(clazz);
 		Assert.isNotNull(codeGenerationSettings);
 		fInputType= clazz;
 		fUseSupertypeInInstanceOf= false;
+		fCodeGenerationSettings= codeGenerationSettings;
 	}
 	
 	public static UseSupertypeWherePossibleRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
@@ -165,7 +167,9 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	private void updateReferences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			ExtractInterfaceUtil.updateReferences(manager, fInputType, fSuperTypeToUse, new RefactoringWorkingCopyOwner(), true, new SubProgressMonitor(pm, 1), status);
+			ExtractInterfaceUtil.updateReferences(manager, fInputType, fSuperTypeToUse, 
+			        new RefactoringWorkingCopyOwner(), true, new SubProgressMonitor(pm, 1), 
+			        status, fCodeGenerationSettings);
 		} finally {
 			pm.done();
 		}

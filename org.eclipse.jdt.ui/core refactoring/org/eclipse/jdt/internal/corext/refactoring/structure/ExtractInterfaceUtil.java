@@ -12,9 +12,11 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.ReplaceEdit;
@@ -62,9 +64,12 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
@@ -92,6 +97,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -184,7 +190,7 @@ class ExtractInterfaceUtil {
 		return true;
 	}
 
-	public static CompilationUnitRange[] updateReferences(TextChangeManager manager, IType inputType, IType supertypeToUse, WorkingCopyOwner workingCopyOwner, boolean updateInputTypeCu, IProgressMonitor pm, RefactoringStatus status) throws CoreException{
+	public static CompilationUnitRange[] updateReferences(TextChangeManager manager, IType inputType, IType supertypeToUse, WorkingCopyOwner workingCopyOwner, boolean updateInputTypeCu, IProgressMonitor pm, RefactoringStatus status, CodeGenerationSettings settings) throws CoreException{
 		ICompilationUnit typeWorkingCopy= inputType.getCompilationUnit();
 		ExtractInterfaceUtil inst= new ExtractInterfaceUtil(typeWorkingCopy, supertypeToUse.getCompilationUnit(), workingCopyOwner);
 		ITypeBinding inputTypeBinding= getTypeBinding(inputType, workingCopyOwner);
@@ -192,13 +198,26 @@ class ExtractInterfaceUtil {
 		if (status.hasFatalError())
 			return new CompilationUnitRange[0];
 		String typeName= inputType.getElementName();
-		String superTypeName= supertypeToUse.getElementName();
 		CompilationUnitRange[] ranges= inst.getCompilationUnitRanges(updatableVars, inputType, inputTypeBinding);
+		Set cus= new HashSet();
+		Map cuToImportType= new HashMap();
 		for (int i= 0; i < ranges.length; i++) {
 			CompilationUnitRange range= ranges[i];
 			ICompilationUnit cu= range.getCompilationUnit();
 			if (updateInputTypeCu || ! cu.equals(typeWorkingCopy)){
-				getTextChange(manager, cu).addTextEdit("update", createTypeUpdateEdit(range.getSourceRange(), typeName, superTypeName));	 //$NON-NLS-1$
+			    TextChange change= getTextChange(manager, cu);
+			    if (!cus.contains(cu)) {
+			        cus.add(cu);
+			        ImportRewrite importRewrite= new ImportRewrite(cu, settings);
+			        cuToImportType.put(cu, importRewrite.addImport(supertypeToUse.getFullyQualifiedName()));
+			        TextEdit importEdit= importRewrite.createEdit(TextBuffer.create(cu.getSource()));
+			        change.addTextEdit(
+			        	RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_imports"), //$NON-NLS-1$
+						importEdit);
+			    }
+				change.addTextEdit(
+					RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_reference"), //$NON-NLS-1$
+					createTypeUpdateEdit(range.getSourceRange(), typeName, (String)cuToImportType.get(cu)));
 			}
 		}
 		return ranges;
@@ -669,7 +688,7 @@ class ExtractInterfaceUtil {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCreator#create(org.eclipse.jdt.core.dom.ArrayCreation)
 		 */
-		//TODO bogus ?
+		// TODO check implementation
 		public ITypeConstraint[] create(ArrayCreation node) {
 			ConstraintVariable arrayCreationVar= new ExpressionVariable(node);
 			ConstraintVariable typeVar= new TypeVariable(node.getType());
@@ -680,7 +699,7 @@ class ExtractInterfaceUtil {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCreator#create(org.eclipse.jdt.core.dom.ArrayAccess)
 		 */
-		 //TODO bogus ?
+		 // TODO check implementation
 		public ITypeConstraint[] create(ArrayAccess node) {
 			Expression expression= node.getArray();
 			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(new ExpressionVariable(node), new ExpressionVariable(expression));
@@ -690,7 +709,7 @@ class ExtractInterfaceUtil {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCreator#create(org.eclipse.jdt.core.dom.ArrayType)
 		 */
-		//TODO bogus ?
+		// TODO check implementation
 		public ITypeConstraint[] create(ArrayType node) {
 			ConstraintVariable component= new TypeVariable(node.getComponentType());
 			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(new TypeVariable(node), component);
